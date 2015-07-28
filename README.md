@@ -4,7 +4,6 @@ My house is pretty heavily invested in the z-wave using the Vera as the gateway 
 
 Build
 -----
-The server defaults to running on port 8080. If you're already running a server (like openHAB) on 8080, edit ```server.port``` in ```src/main/resources/application.properties``` to your desired port before building the jar. Alternately you can pass in a command line argument to override ```server.port```.
 
 To customize and build it yourself, build a new jar with maven:
 ```
@@ -14,7 +13,9 @@ Then locate the jar and start the server with:
 ```
 java -jar -Dupnp.config.address=192.168.1.Z target/amazon-echo-bridge-compact0.X.Y.jar
 ```
-replace the --upnp.config.address value with the server ipv4 address.
+replace the -Dupnp.config.address value with the server ipv4 address.
+
+The server defaults to running on port 8080. If you're already running a server (like openHAB) on 8080, -Dserver.port=XXXX on the command line.
 
 Then configure by going to the /configurator.html url 
 ```
