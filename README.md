@@ -1,7 +1,5 @@
 # amazon-echo-ha-bridge-compact
-emulates philips hue api to other home automation gateways.  The Amazon echo now supports wemo and philip hue... great news if you own any of those devices!
-My house is pretty heavily invested in the z-wave using the Vera as the gateway and thought it would be nice bridge the Amazon Echo to it.
-
+Emulates philips hue api to other home automation gateways.  The Amazon echo now supports wemo and philip hue.
 Build
 -----
 
@@ -11,19 +9,19 @@ mvn install
 ```
 Then locate the jar and start the server with:
 ```
-java -jar -Dupnp.config.address=192.168.1.Z target/amazon-echo-bridge-compact0.X.Y.jar
+java -jar -Dupnp.config.address=192.168.1.Z amazon-echo-bridge-compact-0.X.Y.jar
 ```
 replace the -Dupnp.config.address value with the server ipv4 address.
 
 The server defaults to running on port 8080. If you're already running a server (like openHAB) on 8080, -Dserver.port=XXXX on the command line.
 
-Then configure by going to the /configurator.html url 
+Then configure by going to the url: 
 ```
 http://192.168.1.240:8080
 ```
 or Register a device, via REST by binding some sort of on/off (vera style) url
 ```
-POST http://host:8080/api/devices
+POST http://host:8080/api/devices/
 {
 "name" : "bedroom light",
 "deviceType" : "switch",
