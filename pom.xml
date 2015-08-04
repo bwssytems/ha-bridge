@@ -43,6 +43,11 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.6.0</version>
         </dependency>
+		<dependency>
+		  <groupId>com.cedarsoftware</groupId>
+		  <artifactId>json-io</artifactId>
+		  <version>4.1.6</version>
+		</dependency>
 	</dependencies>
 	
 	<build>
