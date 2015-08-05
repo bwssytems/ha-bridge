@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssytems.HABridge</groupId>
 	<artifactId>amazon-echo-bridge-compact</artifactId>
-	<version>0.1.0</version>
+	<version>0.2.1</version>
 	<packaging>jar</packaging>
 
 	<name>Amazon Echo Bridge Compact</name>
