@@ -1,7 +1,7 @@
 angular.module('amazonechobridge', [])
     .service('bridgeService', ["$http", function ($http) {
         var self = this;
-        this.state = {base: window.location.origin + "/api/devices/", devices: [], error: ""};
+        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/configaddress", devices: [], error: ""};
 
         this.viewDevices = function () {
             this.state.error = "";
@@ -14,6 +14,24 @@ angular.module('amazonechobridge', [])
                         self.state.error = error.data.message;
                     } else {
                         self.state.error = "If you're not seeing any devices, you may be running into problems with CORS. " +
+                            "You can work around this by running a fresh launch of Chrome with the --disable-web-security flag.";
+                    }
+                    console.log(error);
+                }
+            );
+        };
+
+        this.viewConfigAddress = function () {
+            this.state.error = "";
+            return $http.get(this.state.upnpbase).then(
+                function (response) {
+                    self.state.upnpconfigaddress = response.data;
+                },
+                function (error) {
+                    if (error.data) {
+                        self.state.error = error.data.message;
+                    } else {
+                        self.state.error = "If you're not seeing any address, you may be running into problems with CORS. " +
                             "You can work around this by running a fresh launch of Chrome with the --disable-web-security flag.";
                     }
                     console.log(error);
@@ -87,6 +105,7 @@ angular.module('amazonechobridge', [])
 
     .controller('ViewingController', ["$scope", "bridgeService", function ($scope, bridgeService) {
         bridgeService.viewDevices();
+        bridgeService.viewConfigAddress();
         $scope.bridge = bridgeService.state;
         $scope.deleteDevice = function (device) {
             bridgeService.deleteDevice(device.id);

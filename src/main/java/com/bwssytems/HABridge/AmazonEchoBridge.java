@@ -2,6 +2,9 @@ package com.bwssytems.HABridge;
 
 import static spark.Spark.*;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +28,6 @@ public class AmazonEchoBridge {
 	 * 
 	 * There is a custom upnp listener that is started to handle discovery.
 	 * 
-	 * This application does not store the lights configuration persistently.
-	 * 
 	 * 
 	 */
     public static void main(String[] args) {
@@ -35,25 +36,41 @@ public class AmazonEchoBridge {
         HueMulator theHueMulator;
         UpnpSettingsResource theSettingResponder;
         UpnpListener theUpnpListener;
+        InetAddress address;
+        String addressString;
+        String upnpAddressString;
+        String serverPort;
+        //get ip address for upnp requests
+        try {
+			address = InetAddress.getLocalHost();
+			addressString = address.getHostAddress();
+		} catch (UnknownHostException e) {
+	        log.error("Cannot get ip address of this host, Exiting with message: " + e.getMessage(), e);
+	        return;
+		}
+        
+        upnpAddressString = System.getProperty("upnp.config.address", addressString);
 
         // sparkjava config directive to set ip address for the web server to listen on
-        ipAddress(System.getProperty("upnp.config.address", "0.0.0.0"));
+        // ipAddress("0.0.0.0"); // not used
         // sparkjava config directive to set port for the web server to listen on
-        port(Integer.valueOf(System.getProperty("server.port", "8080")));
+        serverPort = System.getProperty("server.port", "8080");
+        port(Integer.valueOf(serverPort));
         // sparkjava config directive to set html static file location for Jetty
         staticFileLocation("/public");
-        log.debug("Starting setup....");
+        log.info("Starting setup....");
         // setup the class to handle the resource setup rest api
         theResources = new DeviceResource();
         // setup the class to handle the hue emulator rest api
         theHueMulator = new HueMulator(theResources.getDeviceRepository());
         // setup the class to handle the upnp response rest api
-        theSettingResponder = new UpnpSettingsResource();
+        theSettingResponder = new UpnpSettingsResource(upnpAddressString);
         // wait for the sparkjava initialization of the rest api classes to be complete
         awaitInitialization();
+
         // start the upnp ssdp discovery listener
-        theUpnpListener = new UpnpListener();
-        log.debug("Done setup, application to run....");
+        theUpnpListener = new UpnpListener(upnpAddressString, serverPort);
+        log.info("Done setup, application to run....");
         theUpnpListener.startListening();
     }
 }

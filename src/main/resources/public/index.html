@@ -40,17 +40,26 @@
             <div class="panel-body">
 
                 <form class="form-horizontal">
-                    <label class="col-xs-12 col-sm-3 control-label" for="bridge-base">Bridge server</label>
-
-                    <div class="col-xs-8 col-sm-7">
-                        <input id="bridge-base" class="form-control" type="text" ng-model="bridge.base"
-                               placeholder="URL to bridge">
+                    <div class="form-group">
+	                    <label class="col-xs-12 col-sm-3 control-label" for="bridge-base">Bridge server</label>
+	
+	                    <div class="col-xs-8 col-sm-7">
+	                        <input id="bridge-base" class="form-control" type="text" ng-model="bridge.base"
+	                               placeholder="URL to bridge">
+	                    </div>
+	                    <button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
+	                            ng-click="setBridgeUrl(bridge.base)">Load
+	                    </button>
+	                    <button type="submit" class="col-xs-2 col-sm-1 btn btn-primary" ng-click="testUrl(bridge.base)">Go
+	                    </button>
                     </div>
-                    <button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
-                            ng-click="setBridgeUrl(bridge.base)">Load
-                    </button>
-                    <button type="submit" class="col-xs-2 col-sm-1 btn btn-primary" ng-click="testUrl(bridge.base)">Go
-                    </button>
+                    <div class="form-group">
+		                <label class="col-xs-12 col-sm-3 control-label" for="bridge-base">upnp.config.address</label>
+	                    <div class="col-xs-8 col-sm-7">
+	                        <input id="bridge-base" class="form-control" type="text" ng-model="bridge.upnpconfigaddress"
+	                               placeholder="upnp config address setting" readonly>
+	                    </div>
+                    </div>
                 </form>
             </div>
         </div>

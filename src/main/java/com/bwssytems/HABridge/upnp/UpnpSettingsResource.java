@@ -35,22 +35,29 @@ public class UpnpSettingsResource {
 			+ "<depth>24</depth>\n" + "<url>hue_logo_3.png</url>\n" + "</icon>\n" + "</iconList>\n" + "</device>\n"
 			+ "</root>\n";
 
-	public UpnpSettingsResource() {
+	public UpnpSettingsResource(String upnpAddress) {
 		super();
-		setupListener();
+		setupListener(upnpAddress);
 	}
 
-	private void setupListener () {
+	private void setupListener (String hostName) {
 //      http://ip_address:port/upnp/:id/setup.xml which returns the xml configuration for the location of the hue emulator
 		get(UPNP_CONTEXT + "/:id/setup.xml", "application/xml", (request, response) -> {
 			log.info("upnp device settings requested: " + request.params(":id") + " from " + request.ip());
-			String hostName = System.getProperty("upnp.config.address",  "192.168.1.1");
 			String portNumber = Integer.toString(request.port());
 			String filledTemplate = String.format(hueTemplate, hostName, portNumber, hostName);
 			log.debug("upnp device settings response: " + filledTemplate);
             response.status(201);
 
             return filledTemplate;
+        } );
+
+		get(UPNP_CONTEXT + "/configaddress", "application/xml", (request, response) -> {
+			log.info("upnp config address requested: from " + request.ip());
+
+			response.status(201);
+
+            return hostName;
         } );
 	}
 }

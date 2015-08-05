@@ -21,11 +21,11 @@ public class UpnpListener {
 
 	private String responseAddress;
 
-	public UpnpListener() {
+	public UpnpListener(String upnpAddress, String upnpServerPort) {
 		super();
 		upnpResponsePort = Integer.valueOf(System.getProperty("upnp.response.port", "50000"));
-		httpServerPort = Integer.valueOf(System.getProperty("server.port", "8080"));
-		responseAddress = System.getProperty("upnp.config.address", "192.168.14.136");
+		httpServerPort = Integer.valueOf(upnpServerPort);
+		responseAddress = upnpAddress;
 	}
 
 	public void startListening(){

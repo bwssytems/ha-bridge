@@ -1,10 +1,12 @@
 package com.bwssytems.HABridge.dao;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
+
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import com.bwssytems.HABridge.JsonTransformer;
 import com.bwssytems.HABridge.dao.DeviceDescriptor;
-import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
 import java.util.List;
@@ -25,12 +26,13 @@ import java.util.ListIterator;
  */
 public class DeviceRepository {
 	Map<String, DeviceDescriptor> devices;
+    Path repositoryPath;
     final Random random = new Random();
-    final String repositoryPath = "device.db";
     final Logger log = LoggerFactory.getLogger(DeviceRepository.class);
 	
     public DeviceRepository() {
 		super();
+		repositoryPath = Paths.get(System.getProperty("upnp.device.db", "data/device.db"));
 		String jsonContent = repositoryReader(repositoryPath);
 		devices = new HashMap<String, DeviceDescriptor>();
 		if(jsonContent != null)
@@ -85,45 +87,42 @@ public class DeviceRepository {
 
     }
 	
-	private void repositoryWriter(String content, String filePath) {
-		FileWriter writer = null;
+	private void repositoryWriter(String content, Path filePath) {
+		if(Files.exists(filePath) && !Files.isWritable(filePath)){
+			log.error("Error file is not writable: " + filePath);
+			return;
+		}
+		
+		if(Files.notExists(filePath.getParent())) {
+			try {
+				Files.createDirectories(filePath.getParent());
+			} catch (IOException e) {
+				log.error("Error creating the directory: " + filePath + " message: " + e.getMessage(), e);
+			}
+		}
 
 		try {
-			writer = new FileWriter(filePath, false);
-			writer.write(content);
+			Files.write(filePath, content.getBytes(), StandardOpenOption.CREATE);
 		} catch (IOException e) {
 			log.error("Error writing the file: " + filePath + " message: " + e.getMessage(), e);
-		} finally {
-			if (writer != null) {
-				try {
-					writer.close();
-				} catch (IOException e) {
-					log.error("Error closing the file (w): " + filePath + " message: " + e.getMessage(), e);
-				}
-			}
 		}
 	}
 	
-	private String repositoryReader(String filePath) {
-		FileReader reader = null;
-		BufferedReader br = null;
+	private String repositoryReader(Path filePath) {
+
 		String content = null;
+		if(Files.notExists(filePath) || !Files.isReadable(filePath)){
+			log.error("Error reading the file: " + filePath + " - Does not exist or is not readable. ");
+			return null;
+		}
+
+		
 		try {
-			reader = new FileReader(filePath);
-			br = new BufferedReader(reader);
-			content = br.readLine();
+			content = new String(Files.readAllBytes(filePath));
 		} catch (IOException e) {
 			log.error("Error reading the file: " + filePath + " message: " + e.getMessage(), e);
-		} finally {
-			if (reader != null) {
-				try {
-					br.close();
-					reader.close();
-				} catch (IOException e) {
-					log.error("Error closing the file (r): " + filePath + " message: " + e.getMessage(), e);
-				}
-			}
 		}
+		
 		return content;
 	}
 

@@ -38,7 +38,7 @@ public class DeviceResource {
 
     private void setupEndpoints() {
     	log.debug("Setting up endpoints");
-    	post(API_CONTEXT + "/", "application/json", (request, response) -> {
+    	post(API_CONTEXT, "application/json", (request, response) -> {
 	    	log.debug("Create a Device - request body: " + request.body());
     		DeviceDescriptor device = new Gson().fromJson(request.body(), DeviceDescriptor.class);
 	        DeviceDescriptor deviceEntry = new DeviceDescriptor();
@@ -75,7 +75,7 @@ public class DeviceResource {
 	        return deviceEntry;
     	}, new JsonTransformer());
 
-    	get (API_CONTEXT + "/", "application/json", (request, response) -> {
+    	get (API_CONTEXT, "application/json", (request, response) -> {
     		List<DeviceDescriptor> deviceList = deviceRepository.findAll();
 	    	log.debug("Get all devices");
 	    	JsonTransformer aRenderer = new JsonTransformer();

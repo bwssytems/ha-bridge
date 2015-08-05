@@ -9,19 +9,23 @@ mvn install
 ```
 Then locate the jar and start the server with:
 ```
-java -jar -Dupnp.config.address=192.168.1.Z amazon-echo-bridge-compact-0.X.Y.jar
+java -jar amazon-echo-bridge-compact-0.X.Y.jar
 ```
-replace the -Dupnp.config.address value with the server ipv4 address.
+The server defaults to the first available address on the host. Replace the -Dupnp.config.address=<ip address> value with the server ipv4 address you would like to use. 
 
-The server defaults to running on port 8080. If you're already running a server (like openHAB) on 8080, -Dserver.port=XXXX on the command line.
+The server defaults to running on port 8080. If you're already running a server (like openHAB) on 8080, -Dserver.port=<port> on the command line.
 
-Then configure by going to the url: 
+The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify -Dupnp.devices.db=<directory>/<filename> or <filename> if it is the same directory.
+
+The default upnp response port will be 50000 otherwise it can be set with -Dupnp.response.port=<port>.
+
+Then configure by going to the url for the host you are running on or localhost: 
 ```
 http://192.168.1.240:8080
 ```
 or Register a device, via REST by binding some sort of on/off (vera style) url
 ```
-POST http://host:8080/api/devices/
+POST http://host:8080/api/devices
 {
 "name" : "bedroom light",
 "deviceType" : "switch",
