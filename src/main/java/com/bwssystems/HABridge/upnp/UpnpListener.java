@@ -1,7 +1,9 @@
-package com.bwssytems.HABridge.upnp;
+package com.bwssystems.HABridge.upnp;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.bwssystems.HABridge.BridgeSettings;
 
 import java.io.IOException;
 import java.net.*;
@@ -21,11 +23,11 @@ public class UpnpListener {
 
 	private String responseAddress;
 
-	public UpnpListener(String upnpAddress, String upnpServerPort) {
+	public UpnpListener(BridgeSettings theSettings) {
 		super();
-		upnpResponsePort = Integer.valueOf(System.getProperty("upnp.response.port", "50000"));
-		httpServerPort = Integer.valueOf(upnpServerPort);
-		responseAddress = upnpAddress;
+		upnpResponsePort = Integer.valueOf(theSettings.getUpnpResponsePort());
+		httpServerPort = Integer.valueOf(theSettings.getServerPort());
+		responseAddress = theSettings.getUpnpConfigAddress();
 	}
 
 	public void startListening(){

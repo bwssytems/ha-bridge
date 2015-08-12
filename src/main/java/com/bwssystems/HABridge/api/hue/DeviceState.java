@@ -1,4 +1,4 @@
-package com.bwssytems.HABridge.api.hue;
+package com.bwssystems.HABridge.api.hue;
 
 import java.util.List;
 

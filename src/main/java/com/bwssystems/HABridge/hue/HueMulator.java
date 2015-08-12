@@ -1,11 +1,10 @@
-package com.bwssytems.HABridge.hue;
+package com.bwssystems.HABridge.hue;
 
-import com.bwssytems.HABridge.api.hue.DeviceResponse;
-import com.bwssytems.HABridge.api.hue.DeviceState;
-import com.bwssytems.HABridge.api.hue.HueApiResponse;
-import com.bwssytems.HABridge.dao.*;
-import com.bwssytems.HABridge.JsonTransformer;
-
+import com.bwssystems.HABridge.JsonTransformer;
+import com.bwssystems.HABridge.api.hue.DeviceResponse;
+import com.bwssystems.HABridge.api.hue.DeviceState;
+import com.bwssystems.HABridge.api.hue.HueApiResponse;
+import com.bwssystems.HABridge.dao.*;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

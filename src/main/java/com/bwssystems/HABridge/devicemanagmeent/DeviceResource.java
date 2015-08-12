@@ -1,8 +1,4 @@
-package com.bwssytems.HABridge.devicemanagmeent;
-
-import com.bwssytems.HABridge.JsonTransformer;
-import com.bwssytems.HABridge.dao.DeviceDescriptor;
-import com.bwssytems.HABridge.dao.DeviceRepository;
+package com.bwssystems.HABridge.devicemanagmeent;
 
 import static spark.Spark.get;
 import static spark.Spark.post;
@@ -14,6 +10,12 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.bwssystems.HABridge.BridgeSettings;
+import com.bwssystems.HABridge.JsonTransformer;
+import com.bwssystems.HABridge.dao.DeviceDescriptor;
+import com.bwssystems.HABridge.dao.DeviceRepository;
+import com.bwssystems.luupRequests.Sdata;
+import com.bwssystems.vera.VeraInfo;
 import com.google.gson.Gson;
 
 /**
@@ -24,11 +26,13 @@ public class DeviceResource {
     private static final Logger log = LoggerFactory.getLogger(DeviceResource.class);
 
     private DeviceRepository deviceRepository;
+    private VeraInfo veraInfo;
 
 
-	public DeviceResource() {
+	public DeviceResource(BridgeSettings theSettings) {
 		super();
-		deviceRepository = new DeviceRepository();
+		deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
+		veraInfo = new VeraInfo(theSettings.getVeraAddress());
         setupEndpoints();
 	}
 
@@ -102,5 +106,24 @@ public class DeviceResource {
 	        deviceRepository.delete(deleted);
 	        return null;
 	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/vera/devices", "application/json", (request, response) -> {
+	    	log.debug("Get vera devices");
+	        Sdata sData = veraInfo.getSdata();
+	        if(sData == null){
+	            return null;
+	        }
+	        return sData.getDevices();
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/vera/scenes", "application/json", (request, response) -> {
+	    	log.debug("Get vera scenes");
+	        Sdata sData = veraInfo.getSdata();
+	        if(sData == null){
+	            return null;
+	        }
+	        return sData.getScenes();
+	    }, new JsonTransformer());
+
     }
 }

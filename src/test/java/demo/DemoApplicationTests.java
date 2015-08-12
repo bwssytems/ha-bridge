@@ -1,6 +1,6 @@
 package demo;
 
-import com.bwssytems.HABridge.AmazonEchoBridge;
+import com.bwssystems.HABridge.HABridge;
 
 /*
  * Dummy test holder

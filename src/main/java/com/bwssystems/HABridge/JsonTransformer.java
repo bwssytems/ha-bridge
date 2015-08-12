@@ -1,4 +1,4 @@
-package com.bwssytems.HABridge;
+package com.bwssystems.HABridge;
 
 import com.google.gson.Gson;
 import spark.ResponseTransformer;

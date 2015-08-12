@@ -1,4 +1,4 @@
-package com.bwssytems.HABridge;
+package com.bwssystems.HABridge;
 
 import static spark.Spark.*;
 
@@ -8,12 +8,13 @@ import java.net.UnknownHostException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssytems.HABridge.devicemanagmeent.*;
-import com.bwssytems.HABridge.hue.HueMulator;
-import com.bwssytems.HABridge.upnp.UpnpListener;
-import com.bwssytems.HABridge.upnp.UpnpSettingsResource;
+import com.bwssystems.HABridge.devicemanagmeent.*;
+import com.bwssystems.HABridge.hue.HueMulator;
+import com.bwssystems.HABridge.upnp.UpnpListener;
+import com.bwssystems.HABridge.upnp.UpnpSettingsResource;
+import com.bwssystems.vera.VeraInfo;
 
-public class AmazonEchoBridge {
+public class HABridge {
 	
 	/*
 	 * This program is based on the work of armzilla from this github repository:
@@ -31,15 +32,16 @@ public class AmazonEchoBridge {
 	 * 
 	 */
     public static void main(String[] args) {
-        Logger log = LoggerFactory.getLogger(AmazonEchoBridge.class);
+        Logger log = LoggerFactory.getLogger(HABridge.class);
         DeviceResource theResources;
         HueMulator theHueMulator;
         UpnpSettingsResource theSettingResponder;
         UpnpListener theUpnpListener;
+        VeraInfo theVera;
         InetAddress address;
         String addressString;
-        String upnpAddressString;
-        String serverPort;
+        BridgeSettings bridgeSettings;
+
         //get ip address for upnp requests
         try {
 			address = InetAddress.getLocalHost();
@@ -49,27 +51,33 @@ public class AmazonEchoBridge {
 	        return;
 		}
         
-        upnpAddressString = System.getProperty("upnp.config.address", addressString);
+        bridgeSettings = new BridgeSettings();
+        bridgeSettings.setUpnpConfigAddress(System.getProperty("upnp.config.address", addressString));
+        bridgeSettings.setUpnpDeviceDb(System.getProperty("upnp.device.db", "data/device.db"));
+        bridgeSettings.setUpnpResponsePort(System.getProperty("upnp.response.port", "50000"));
+        bridgeSettings.setVeraAddress(System.getProperty("vera.address", "192.168.1.100"));
 
         // sparkjava config directive to set ip address for the web server to listen on
         // ipAddress("0.0.0.0"); // not used
         // sparkjava config directive to set port for the web server to listen on
-        serverPort = System.getProperty("server.port", "8080");
-        port(Integer.valueOf(serverPort));
+        bridgeSettings.setServerPort(System.getProperty("server.port", "8080"));
+        port(Integer.valueOf(bridgeSettings.getServerPort()));
         // sparkjava config directive to set html static file location for Jetty
         staticFileLocation("/public");
         log.info("Starting setup....");
+        theVera = new VeraInfo(bridgeSettings.getVeraAddress());
+        theVera.getSdata();
         // setup the class to handle the resource setup rest api
-        theResources = new DeviceResource();
+        theResources = new DeviceResource(bridgeSettings);
         // setup the class to handle the hue emulator rest api
         theHueMulator = new HueMulator(theResources.getDeviceRepository());
         // setup the class to handle the upnp response rest api
-        theSettingResponder = new UpnpSettingsResource(upnpAddressString);
+        theSettingResponder = new UpnpSettingsResource(bridgeSettings);
         // wait for the sparkjava initialization of the rest api classes to be complete
         awaitInitialization();
 
         // start the upnp ssdp discovery listener
-        theUpnpListener = new UpnpListener(upnpAddressString, serverPort);
+        theUpnpListener = new UpnpListener(bridgeSettings);
         log.info("Done setup, application to run....");
         theUpnpListener.startListening();
     }

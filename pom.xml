@@ -3,13 +3,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.bwssytems.HABridge</groupId>
-	<artifactId>amazon-echo-bridge-compact</artifactId>
-	<version>0.2.1</version>
+	<groupId>com.bwssystems.HABridge</groupId>
+	<artifactId>ha-bridge</artifactId>
+	<version>0.3.0</version>
 	<packaging>jar</packaging>
 
-	<name>Amazon Echo Bridge Compact</name>
-	<description>Emulates a Philips Hue bridge to allow the Amazon Echo to hook up to other HA using lightweight frameworks</description>
+	<name>HA Bridge</name>
+	<description>Emulates a Philips Hue bridge to allow the Amazon Echo to hook up to other HA systems, i.e. Vera, using lightweight frameworks</description>
 
 	<properties>
 		<java.version>1.8</java.version>
@@ -49,43 +49,47 @@
 		  <version>4.1.6</version>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
-	        <plugins>
-	            <plugin>
-	                <groupId>org.apache.maven.plugins</groupId>
-	                <artifactId>maven-shade-plugin</artifactId>
-	                <version>2.3</version>
-	                <configuration>
-	                    <createDependencyReducedPom>true</createDependencyReducedPom>
-	                    <filters>
-	                        <filter>
-	                            <artifact>*:*</artifact>
-	                            <excludes>
-	                                <exclude>META-INF/*.SF</exclude>
-	                                <exclude>META-INF/*.DSA</exclude>
-	                                <exclude>META-INF/*.RSA</exclude>
-	                            </excludes>
-	                        </filter>
-	                    </filters>
-	                </configuration>
-	                <executions>
-	                    <execution>
-	                        <phase>package</phase>
-	                        <goals>
-	                            <goal>shade</goal>
-	                        </goals>
-	                        <configuration>
-	                            <transformers>
-	                                <transformer
-	                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-	                                    <mainClass>com.bwssytems.HABridge.AmazonEchoBridge</mainClass>
-	                                </transformer>
-	                            </transformers>
-	                        </configuration>
-	                    </execution>
-	                </executions>
-	            </plugin>
-	        </plugins>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.3</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<minimizeJar>true</minimizeJar>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+										<exclude>META-INF/*.txt</exclude>
+										<exclude>META-INF/maven/**</exclude>
+										<exclude>META-INF/services/**</exclude>
+										<exclude>META-INF/DEPENDENCIES</exclude>
+										<exclude>about_files/**</exclude>
+										<exclude>*.properties</exclude>
+									</excludes>
+								</filter>
+							</filters>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>com.bwssystems.HABridge.HABridge</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
 </project>

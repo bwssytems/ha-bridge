@@ -1,9 +1,9 @@
-package com.bwssytems.HABridge.dao;
-/*
- * Object to handle the device configuration
+package com.bwssystems.HABridge.api;
+
+/**
+ * Created by arm on 4/13/15.
  */
-public class DeviceDescriptor{
-    private String id;
+public class Device {
     private String name;
     private String deviceType;
     private String offUrl;
@@ -39,13 +39,5 @@ public class DeviceDescriptor{
 
     public void setOnUrl(String onUrl) {
         this.onUrl = onUrl;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 }

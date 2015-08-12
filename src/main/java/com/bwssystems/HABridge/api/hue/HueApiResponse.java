@@ -1,8 +1,8 @@
-package com.bwssytems.HABridge.api.hue;
+package com.bwssystems.HABridge.api.hue;
 
 import java.util.Map;
 
-import com.bwssytems.HABridge.api.hue.DeviceResponse;
+import com.bwssystems.HABridge.api.hue.DeviceResponse;
 
 /**
  * Created by arm on 4/14/15.

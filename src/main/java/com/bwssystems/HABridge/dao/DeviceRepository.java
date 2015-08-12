@@ -1,4 +1,4 @@
-package com.bwssytems.HABridge.dao;
+package com.bwssystems.HABridge.dao;
 
 
 import java.io.IOException;
@@ -14,8 +14,8 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssytems.HABridge.JsonTransformer;
-import com.bwssytems.HABridge.dao.DeviceDescriptor;
+import com.bwssystems.HABridge.JsonTransformer;
+import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.google.gson.stream.JsonReader;
 
 import java.util.List;
@@ -30,9 +30,9 @@ public class DeviceRepository {
     final Random random = new Random();
     final Logger log = LoggerFactory.getLogger(DeviceRepository.class);
 	
-    public DeviceRepository() {
+    public DeviceRepository(String deviceDb) {
 		super();
-		repositoryPath = Paths.get(System.getProperty("upnp.device.db", "data/device.db"));
+		repositoryPath = Paths.get(deviceDb);
 		String jsonContent = repositoryReader(repositoryPath);
 		devices = new HashMap<String, DeviceDescriptor>();
 		if(jsonContent != null)
