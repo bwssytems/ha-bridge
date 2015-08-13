@@ -1,4 +1,4 @@
-# amazon-echo-ha-bridge-compact
+# ha-bridge
 Emulates philips hue api to other home automation gateways.  The Amazon echo now supports wemo and philip hue.
 Build
 -----
@@ -9,8 +9,10 @@ mvn install
 ```
 Then locate the jar and start the server with:
 ```
-java -jar amazon-echo-bridge-compact-0.X.Y.jar
+java -jar -Dvera.address=192.168.X.Y ha-bridge-0.X.Y.jar
 ```
+The argument for the vera address should be given as it the system does nto have a way to find the address. Suppply -Dvera.address=X.Y.Z.A on the command line to provide it.
+
 The server defaults to the first available address on the host. Replace the -Dupnp.config.address=<ip address> value with the server ipv4 address you would like to use. 
 
 The server defaults to running on port 8080. If you're already running a server (like openHAB) on 8080, -Dserver.port=<port> on the command line.
