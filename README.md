@@ -11,7 +11,7 @@ Then locate the jar and start the server with:
 ```
 java -jar -Dvera.address=192.168.X.Y ha-bridge-0.X.Y.jar
 ```
-The argument for the vera address should be given as it the system does nto have a way to find the address. Suppply -Dvera.address=X.Y.Z.A on the command line to provide it.
+The argument for the vera address should be given as it the system does not have a way to find the address. Supply -Dvera.address=X.Y.Z.A on the command line to provide it.
 
 The server defaults to the first available address on the host. Replace the -Dupnp.config.address=<ip address> value with the server ipv4 address you would like to use. 
 

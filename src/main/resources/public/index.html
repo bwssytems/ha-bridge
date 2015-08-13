@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="habridge">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -17,22 +17,16 @@
     <script type="text/javascript" src="js/html5shiv.min.js"></script>
     <script type="text/javascript" src="js/respond.min.js"></script>
     <![endif]-->
-
-    <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
-    <script type="text/javascript" src="js/angular.min.js"></script>
-    <script type="text/javascript" src="js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="scripts/app.js"></script>
 </head>
-<body ng-app="habridge">
+<body>
 
 	<nav class="navbar navbar-inverse navbar-fixed-top">
 		<div class="container">
 			<div class="navbar-header">
-				<button type="button" class="navbar-toggle collapsed"
-					data-toggle="collapse" data-target="#navbar" aria-expanded="false"
-					aria-controls="navbar">
-					<span class="sr-only">Toggle navigation</span> <span
-						class="icon-bar"></span> <span class="icon-bar"></span>
+				<button type="button" class="navbar-toggle">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
 				</button>
 				<a class="navbar-brand" href="#">HA Bridge</a>
 			</div>
@@ -51,264 +45,19 @@
 					</li>
 				</ul>
 			</div>
-			<!--/.nav-collapse -->
 		</div>
 	</nav>
 
-	<div class="container">
-    <div ng-controller="ViewingController">
+	<div class="container" ng-view="">
+	
+	
+	</div>
 
-			<div class="page-header">
-				<h1>Configuration</h1>
-			</div>
-			<div class="panel panel-default bridgeServer">
-            <div class="panel-heading"><h1 class="panel-title">Bridge settings</h1></div>
-				<div class="panel-body">
 
-					<form class="form-horizontal">
-						<div class="form-group">
-							<label class="col-xs-12 col-sm-3 control-label" for="bridge-base">Bridge
-								server</label>
-
-							<div class="col-xs-8 col-sm-7">
-								<input id="bridge-base" class="form-control" type="text"
-									ng-model="bridge.base" placeholder="URL to bridge">
-							</div>
-							<button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
-								ng-click="setBridgeUrl(bridge.base)">Load</button>
-							<button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
-								ng-click="testUrl(bridge.base)">Go</button>
-						</div>
-					</form>
-					<table class="table table-bordered table-striped table-hover">
-						<thead>
-							<tr>
-								<th>Setting</th>
-								<th>Value</th>
-							</tr>
-						</thead>
-						<tr>
-							<td>upnp.config.address</td>
-							<td>{{bridge.upnpconfigaddress}}</td>
-						</tr>
-						<tr>
-							<td>server.port</td>
-							<td>{{bridge.serverport}}</td>
-						</tr>
-						<tr>
-							<td>upnp.devices.db</td>
-							<td>{{bridge.upnpdevicedb}}</td>
-						</tr>
-						<tr>
-							<td>upnp.response.port</td>
-							<td>{{bridge.upnpresponseport}}</td>
-						</tr>
-						<tr>
-							<td>vera.address</td>
-							<td>{{bridge.veraaddress}}</td>
-						</tr>
-					</table>
-				</div>
-			</div>
-
-        <div ng-controller="ErrorsController">
-            <div ng-if="bridge.error" class="alert alert-warning alert-dismissible" role="alert">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-
-                <h2 ng-show='bridge.error != ""'>ERROR</h2>
-
-                <div ng-show='bridge.error != ""'>
-                    {{bridge.error}}
-                </div>
-            </div>
-        </div>
-
-        <div class="panel panel-default">
-            <div class="panel-heading"><h2 class="panel-title">Current devices</h2></div>
-            <table class="table table-bordered table-striped table-hover">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tr ng-repeat="device in bridge.devices">
-                    <td>{{device.id}}</td>
-                    <td>{{device.name}}</td>
-                    <td>{{device.deviceType}}</td>
-                    <td>
-                        <button class="btn btn-info" type="submit" ng-click="testUrl(device.onUrl)">Test ON</button>
-                        <button class="btn btn-info" type="submit" ng-click="testUrl(device.offUrl)">Test OFF</button>
-                        <button class="btn btn-warning" type="submit" ng-click="editDevice(device)">Edit</button>
-                        <button class="btn btn-danger" type="submit" ng-click="deleteDevice(device)">Delete</button>
-                    </td>
-                </tr>
-            </table>
-        </div>
- 
-    <div ng-controller="AddingController">
-			<div class="page-header">
-				<h1>Editor</h1>
-			</div>
-			<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
-				<div class="panel-heading">
-					<h2 class="panel-title">Vera Device List</h2>
-				</div>
-				<ul class="list-group">
-					<li class="list-group-item">
-						<p class="text-muted">You can select a Vera device and
-							generate the add device box selections automatically.</p>
-
-						<table class="table table-bordered table-striped table-hover">
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Id</th>
-									<th>Category</th>
-									<th>Room</th>
-									<th>Actions</th>
-								</tr>
-							</thead>
-							<tr ng-repeat="veradevice in bridge.veradevices">
-								<td>{{veradevice.name}}</td>
-								<td>{{veradevice.id}}</td>
-								<td>{{veradevice.category}}</td>
-								<td>{{veradevice.room}}</td>
-								<td>
-									<button class="btn btn-success" type="submit"
-										ng-click="buildDeviceUrls(veradevice, bridge.veraaddress)">Generate Device URLs</button>
-								</td>
-							</tr>
-						</table>
-					</li>
-				</ul>
-			</div>
-			<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
-				<div class="panel-heading">
-					<h2 class="panel-title">Vera Scene List</h2>
-				</div>
-				<ul class="list-group">
-					<li class="list-group-item">
-						<p class="text-muted">You can select a Vera scene and
-							generate the add device box selections automatically.</p>
-
-						<table class="table table-bordered table-striped table-hover">
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Id</th>
-									<th>Room</th>
-									<th>Actions</th>
-								</tr>
-							</thead>
-							<tr ng-repeat="verascene in bridge.verascenes">
-								<td>{{verascene.name}}</td>
-								<td>{{verascene.id}}</td>
-								<td>{{verascene.room}}</td>
-								<td>
-									<button class="btn btn-success" type="submit"
-										ng-click="buildSceneUrls(verascene, bridge.veraaddress)">Generate Device URLs</button>
-								</td>
-							</tr>
-						</table>
-					</li>
-				</ul>
-			</div>
-			<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
-        	<div class="panel-heading">
-        		<h2 class="panel-title">Generate a new device</h2>
-        	</div>
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <p class="text-muted">You can generate on/off URLs by filling in the Vera server URL, port, and
-                        device ID; or you can fill them out manually in the lower section.</p>
-
-                    <form class="form-horizontal">
-                        <div class="form-group">
-                            <label class="col-xs-12 col-sm-2 control-label" for="vera-base">Vera Server URL </label>
-
-                            <div class="col-xs-8 col-sm-7">
-                                <input type="text" class="form-control" id="vera-base" ng-model="vera.base"
-                                       placeholder="Vera URL (e.g. http://192.168.1.100)">
-                            </div>
-                            <button type="submit" ng-click="setVeraAddress(bridge.veraaddress)"
-                                    class="col-xs-4 col-sm-2 btn btn-success">
-                                Use vera.address
-                            </button>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-xs-2 col-sm-2 control-label" for="vera-port">Vera Request Port </label>
-
-                            <div class="col-xs-10 col-sm-2">
-                                <input type="text" class="form-control" id="vera-port" ng-model="vera.port"
-                                       placeholder="Vera Port (typically 3480)">
-                            </div>
-
-                            <label class="col-xs-2 col-sm-2 control-label" for="vera-id">Device ID </label>
-
-                            <div class="col-xs-10 col-sm-2">
-                                <input type="text" class="form-control" id="vera-id" ng-model="vera.id"
-                                       placeholder="ID">
-                            </div>
-                            <button type="submit" ng-click="buildUrls()"
-                                    class="col-xs-4 col-sm-2 btn btn-success">
-                                Generate Device URLs
-                            </button>
-                        </div>
-                    </form>
-                </li>
-                </ul>
-			</div>
-			<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
-        	<div class="panel-heading">
-        		<h2 class="panel-title">Add a new device</h2>
-        	</div>
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <form class="form-horizontal" ng-submit="addDevice()">
-                        <div class="form-group">
-                            <label class="col-xs-12 col-sm-2 control-label" for="device-name">Name </label>
-
-                            <div class="col-xs-8 col-sm-7">
-                                <input type="text" class="form-control" id="device-name" ng-model="device.name"
-                                       placeholder="Device Name">
-                            </div>
-                            <button type="submit" class="col-xs-4 col-sm-2 btn btn-primary">
-                                {{device.id ? 'Update' : 'Add' }} Device
-                            </button>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On URL </label>
-
-                            <div class="col-xs-8 col-sm-7">
-                                <input type="text" class="form-control" id="device-on-url" ng-model="device.onUrl"
-                                       placeholder="URL to turn device on">
-                            </div>
-                            <button class="col-xs-4 col-sm-2 btn btn-success" type="button"
-                                    ng-click="testUrl(device.onUrl)">Test
-                            </button>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-xs-12 col-sm-2 control-label" for="device-off-url">Off URL </label>
-
-                            <div class="col-xs-8 col-sm-7">
-                                <input type="text" class="form-control" id="device-off-url" ng-model="device.offUrl"
-                                       placeholder="URL to turn device off">
-                            </div>
-                            <button class="col-xs-4 col-sm-2 btn btn-success" type="button"
-                                    ng-click="testUrl(device.offUrl)">Test
-                            </button>
-                        </div>
-                    </form>
-                </li>
-            </ul>
-        </div>
-    </div>
-   </div>
-</div>
-
+    <script src="js/jquery-1.11.3.min.js"></script>
+    <script src="js/angular.min.js"></script>
+    <script src="js/angular-route.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="scripts/app.js"></script>
 </body>
 </html>

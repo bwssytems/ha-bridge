@@ -1,0 +1,163 @@
+<h2>
+	Editor <a class="btn btn-primary pull-right" href="/">
+		Configuration</a>
+</h2>
+
+<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
+	<div class="panel-heading">
+		<h2 class="panel-title">Vera Device List</h2>
+	</div>
+	<ul class="list-group">
+		<li class="list-group-item">
+			<p class="text-muted">You can select a Vera device and generate
+				the add device box selections automatically.</p>
+
+			<table class="table table-bordered table-striped table-hover">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Id</th>
+						<th>Category</th>
+						<th>Room</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tr ng-repeat="veradevice in bridge.veradevices">
+					<td>{{veradevice.name}}</td>
+					<td>{{veradevice.id}}</td>
+					<td>{{veradevice.category}}</td>
+					<td>{{veradevice.room}}</td>
+					<td>
+						<button class="btn btn-success" type="submit"
+							ng-click="buildDeviceUrls(veradevice, bridge.veraaddress)">Generate
+							Device URLs</button>
+					</td>
+				</tr>
+			</table>
+		</li>
+	</ul>
+</div>
+<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
+	<div class="panel-heading">
+		<h2 class="panel-title">Vera Scene List</h2>
+	</div>
+	<ul class="list-group">
+		<li class="list-group-item">
+			<p class="text-muted">You can select a Vera scene and generate
+				the add device box selections automatically.</p>
+
+			<table class="table table-bordered table-striped table-hover">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Id</th>
+						<th>Room</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tr ng-repeat="verascene in bridge.verascenes">
+					<td>{{verascene.name}}</td>
+					<td>{{verascene.id}}</td>
+					<td>{{verascene.room}}</td>
+					<td>
+						<button class="btn btn-success" type="submit"
+							ng-click="buildSceneUrls(verascene, bridge.veraaddress)">Generate
+							Device URLs</button>
+					</td>
+				</tr>
+			</table>
+		</li>
+	</ul>
+</div>
+<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
+	<div class="panel-heading">
+		<h2 class="panel-title">Generate a new device</h2>
+	</div>
+	<ul class="list-group">
+		<li class="list-group-item">
+			<p class="text-muted">You can generate on/off URLs by filling in
+				the Vera server URL, port, and device ID; or you can fill them out
+				manually in the lower section.</p>
+
+			<form class="form-horizontal">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 control-label" for="vera-base">Vera
+						Server URL </label>
+
+					<div class="col-xs-8 col-sm-7">
+						<input type="text" class="form-control" id="vera-base"
+							ng-model="vera.base"
+							placeholder="Vera URL (e.g. http://192.168.1.100)">
+					</div>
+					<button type="submit" ng-click="setVeraAddress(bridge.veraaddress)"
+						class="col-xs-4 col-sm-2 btn btn-success">Use
+						vera.address</button>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-2 col-sm-2 control-label" for="vera-port">Vera
+						Request Port </label>
+
+					<div class="col-xs-10 col-sm-2">
+						<input type="text" class="form-control" id="vera-port"
+							ng-model="vera.port" placeholder="Vera Port (typically 3480)">
+					</div>
+
+					<label class="col-xs-2 col-sm-2 control-label" for="vera-id">Device
+						ID </label>
+
+					<div class="col-xs-10 col-sm-2">
+						<input type="text" class="form-control" id="vera-id"
+							ng-model="vera.id" placeholder="ID">
+					</div>
+					<button type="submit" ng-click="buildUrls()"
+						class="col-xs-4 col-sm-2 btn btn-success">Generate Device
+						URLs</button>
+				</div>
+			</form>
+		</li>
+	</ul>
+</div>
+<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
+	<div class="panel-heading">
+		<h2 class="panel-title">Add a new device</h2>
+	</div>
+	<ul class="list-group">
+		<li class="list-group-item">
+			<form class="form-horizontal" ng-submit="addDevice()">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 control-label" for="device-name">Name
+					</label>
+
+					<div class="col-xs-8 col-sm-7">
+						<input type="text" class="form-control" id="device-name"
+							ng-model="device.name" placeholder="Device Name">
+					</div>
+					<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary">
+						{{device.id ? 'Update' : 'Add' }} Device</button>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On
+						URL </label>
+
+					<div class="col-xs-8 col-sm-7">
+						<input type="text" class="form-control" id="device-on-url"
+							ng-model="device.onUrl" placeholder="URL to turn device on">
+					</div>
+					<button class="col-xs-4 col-sm-2 btn btn-success" type="button"
+						ng-click="testUrl(device.onUrl)">Test</button>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 control-label"
+						for="device-off-url">Off URL </label>
+
+					<div class="col-xs-8 col-sm-7">
+						<input type="text" class="form-control" id="device-off-url"
+							ng-model="device.offUrl" placeholder="URL to turn device off">
+					</div>
+					<button class="col-xs-4 col-sm-2 btn btn-success" type="button"
+						ng-click="testUrl(device.offUrl)">Test</button>
+				</div>
+			</form>
+		</li>
+	</ul>
+</div>

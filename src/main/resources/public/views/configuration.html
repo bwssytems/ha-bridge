@@ -1,0 +1,101 @@
+
+<h2>Configuration <a class="btn btn-primary pull-right" href="#/editor"><i
+		class="icon-plis-sign icon-white"></i> Editor</a>
+	</h2>
+
+	<div class="panel panel-default bridgeServer">
+		<div class="panel-heading">
+			<h1 class="panel-title">Bridge settings</h1>
+		</div>
+		<div class="panel-body">
+
+			<form class="form-horizontal">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-3 control-label" for="bridge-base">Bridge
+						server</label>
+
+					<div class="col-xs-8 col-sm-7">
+						<input id="bridge-base" class="form-control" type="text"
+							ng-model="bridge.base" placeholder="URL to bridge">
+					</div>
+					<button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
+						ng-click="setBridgeUrl(bridge.base)">Load</button>
+					<button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
+						ng-click="testUrl(bridge.base)">Go</button>
+				</div>
+			</form>
+			<table class="table table-bordered table-striped table-hover">
+				<thead>
+					<tr>
+						<th>Setting</th>
+						<th>Value</th>
+					</tr>
+				</thead>
+				<tr>
+					<td>upnp.config.address</td>
+					<td>{{bridge.upnpconfigaddress}}</td>
+				</tr>
+				<tr>
+					<td>server.port</td>
+					<td>{{bridge.serverport}}</td>
+				</tr>
+				<tr>
+					<td>upnp.devices.db</td>
+					<td>{{bridge.upnpdevicedb}}</td>
+				</tr>
+				<tr>
+					<td>upnp.response.port</td>
+					<td>{{bridge.upnpresponseport}}</td>
+				</tr>
+				<tr>
+					<td>vera.address</td>
+					<td>{{bridge.veraaddress}}</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+
+	<div ng-controller="ErrorsController">
+		<div ng-if="bridge.error"
+			class="alert alert-warning alert-dismissible" role="alert">
+			<button type="button" class="close" data-dismiss="alert"
+				aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+
+			<h2 ng-show='bridge.error != ""'>ERROR</h2>
+
+			<div ng-show='bridge.error != ""'>{{bridge.error}}</div>
+		</div>
+	</div>
+
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h2 class="panel-title">Current devices</h2>
+		</div>
+		<table class="table table-bordered table-striped table-hover">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Name</th>
+					<th>Type</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tr ng-repeat="device in bridge.devices">
+				<td>{{device.id}}</td>
+				<td>{{device.name}}</td>
+				<td>{{device.deviceType}}</td>
+				<td>
+					<button class="btn btn-info" type="submit"
+						ng-click="testUrl(device.onUrl)">Test ON</button>
+					<button class="btn btn-info" type="submit"
+						ng-click="testUrl(device.offUrl)">Test OFF</button>
+					<button class="btn btn-warning" type="submit"
+						ng-click="editDevice(device)">Edit</button>
+					<button class="btn btn-danger" type="submit"
+						ng-click="deleteDevice(device)">Delete</button>
+				</td>
+			</tr>
+		</table>
+	</div>

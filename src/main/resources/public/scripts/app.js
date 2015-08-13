@@ -1,5 +1,27 @@
-angular.module('habridge', [])
-    .service('bridgeService', ["$http", function ($http) {
+var app = angular.module('habridge', [
+	'ngRoute'
+]);
+
+app.config(function ($routeProvider) {
+	$routeProvider.when('/#', {
+		templateUrl: 'views/configuration.html',
+		controller: 'ViewingController'
+	}).when('/editor', {
+		templateUrl: 'views/editor.html',
+		controller: 'AddingController'		
+	}).otherwise({
+		templateUrl: 'views/configuration.html',
+		controller: 'ViewingController'
+	})
+});
+
+app.factory('BridgeSettings'), function() {
+    return {
+        name : 'anonymous'
+    };
+});
+
+app.service('bridgeService', function ($http) {
         var self = this;
         this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", devices: [], error: ""};
 
@@ -135,15 +157,15 @@ angular.module('habridge', [])
             );
         };
 
-        this.editDevice = function (id, name, type, onUrl, offUrl) {
+        this.editDevice = function (id, name, onUrl, offUrl) {
             this.device.id = id;
             this.device.name = name;
             this.device.onUrl = onUrl;
             this.device.offUrl = offUrl;
         };
-    }])
+    });
 
-    .controller('ViewingController', ["$scope", "bridgeService", function ($scope, bridgeService) {
+app.controller('ViewingController', function ($scope, bridgeService) {
         bridgeService.viewDevices();
         bridgeService.viewBridgeSettings();
         bridgeService.viewVeraDevices();
@@ -160,11 +182,11 @@ angular.module('habridge', [])
             bridgeService.viewDevices();
         };
         $scope.editDevice = function (device) {
-            bridgeService.editDevice(device.id, device.name, device.type, device.onUrl, device.offUrl);
+            bridgeService.editDevice(device.id, device.name, device.onUrl, device.offUrl);
         };
-    }])
+    });
 
-    .controller('AddingController', ["$scope", "bridgeService", function ($scope, bridgeService) {
+app.controller('AddingController', function ($scope, bridgeService) {
         $scope.device = {id: "", name: "", type: "switch", onUrl: "", offUrl: ""};
         $scope.vera = {base: "", port: "3480", id: ""};
         bridgeService.device = $scope.device;
@@ -228,8 +250,8 @@ angular.module('habridge', [])
             );
         }
         
-    }])
+    });
 
-    .controller('ErrorsController', ["$scope", "bridgeService", function ($scope, bridgeService) {
+app.controller('ErrorsController', function ($scope, bridgeService) {
         $scope.bridge = bridgeService.state;
-    }]);
+    });
