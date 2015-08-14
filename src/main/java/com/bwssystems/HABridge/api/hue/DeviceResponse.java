@@ -106,8 +106,8 @@ public class DeviceResponse {
         deviceState.setCt(313);
 
         List<Double> xv = new LinkedList<>();
-        xv.add(0.4255);
-        xv.add(0.3998);
+        xv.add(Double.valueOf("0.4255"));
+        xv.add(Double.valueOf("0.3998"));
         deviceState.setXy(xv);
         deviceState.setColormode("ct");
         response.setName(name);

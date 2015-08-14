@@ -62,12 +62,15 @@ public class DeviceRepository {
     }
     
 	private void put(int id, DeviceDescriptor aDescriptor) {
-        devices.put(String.valueOf(id),aDescriptor);
+        devices.put(String.valueOf(id), aDescriptor);
     }
     
 	public void save(DeviceDescriptor aDescriptor) {
         int id = random.nextInt(Integer.MAX_VALUE);
-        aDescriptor.setId(String.valueOf(id));
+        if(aDescriptor.getId() != null)
+        	devices.remove(aDescriptor.getId());
+        else
+        	aDescriptor.setId(String.valueOf(id));
         put(id, aDescriptor);
     	JsonTransformer aRenderer = new JsonTransformer();
     	String  jsonValue = aRenderer.render(findAll());
