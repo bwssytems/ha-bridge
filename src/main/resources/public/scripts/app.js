@@ -9,6 +9,15 @@ app.config(function ($routeProvider) {
 	}).when('/editor', {
 		templateUrl: 'views/editor.html',
 		controller: 'AddingController'		
+	}).when('/editdevice', {
+		templateUrl: 'views/editdevice.html',
+		controller: 'AddingController'		
+	}).when('/veradevices', {
+		templateUrl: 'views/veradevice.html',
+		controller: 'AddingController'		
+	}).when('/verascenes', {
+		templateUrl: 'views/verascene.html',
+		controller: 'AddingController'		
 	}).otherwise({
 		templateUrl: 'views/configuration.html',
 		controller: 'ViewingController'
@@ -16,7 +25,7 @@ app.config(function ($routeProvider) {
 });
 
 app.run( function (bridgeService) {
-	bridgeService.viewBridgeSettings();
+	bridgeService.loadBridgeSettings();
 });
 
 app.factory('BridgeSettings', function() {
@@ -74,7 +83,7 @@ app.service('bridgeService', function ($http, BridgeSettings) {
             );
         };
 
-        this.viewBridgeSettings = function () {
+        this.loadBridgeSettings = function () {
             this.state.error = "";
             return $http.get(this.state.upnpbase).then(
                 function (response) {
@@ -88,7 +97,7 @@ app.service('bridgeService', function ($http, BridgeSettings) {
                     if (error.data) {
                         self.state.error = error.data.message;
                     } else {
-                        self.state.error = "If you're not seeing any address, you may be running into problems with CORS. " +
+                        self.state.error = "If you're not seeing any settings, you may be running into problems with CORS. " +
                             "You can work around this by running a fresh launch of Chrome with the --disable-web-security flag.";
                     }
                     console.log(error);
@@ -139,7 +148,7 @@ app.service('bridgeService', function ($http, BridgeSettings) {
                 return $http.put(putUrl, {
                     id: id,
                     name: name,
-                    deviceType: type,
+                    deviceType: "switch",
                     onUrl: onUrl,
                     offUrl: offUrl
                 }).then(
@@ -156,7 +165,7 @@ app.service('bridgeService', function ($http, BridgeSettings) {
             } else {
                 return $http.post(this.state.base, {
                     name: name,
-                    deviceType: type,
+                    deviceType: "switch",
                     onUrl: onUrl,
                     offUrl: offUrl
                 }).then(
@@ -210,7 +219,7 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
         };
         $scope.editDevice = function (device) {
             bridgeService.editDevice(device.id, device.name, device.onUrl, device.offUrl);
-            $location.path('/editor');
+            $location.path('/editdevice');
         };
     });
 
@@ -225,7 +234,7 @@ app.controller('AddingController', function ($scope, bridgeService, BridgeSettin
         $scope.bridge = bridgeService.state;
         $scope.device = bridgeService.state.device;
        
-        $scope.buildUrls = function () {
+        $scope.buildUrlsUsingDevice = function () {
             if ($scope.vera.base.indexOf("http") < 0) {
                 $scope.vera.base = "http://" + $scope.vera.base;
             }
@@ -234,6 +243,18 @@ app.controller('AddingController', function ($scope, bridgeService, BridgeSettin
                 + $scope.vera.id;
             $scope.device.offUrl = $scope.vera.base + ":" + $scope.vera.port
                 + "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum="
+                + $scope.vera.id;
+        };
+
+        $scope.buildUrlsUsingScene = function () {
+            if ($scope.vera.base.indexOf("http") < 0) {
+                $scope.vera.base = "http://" + $scope.vera.base;
+            }
+            $scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
+                + "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
+                + $scope.vera.id;
+            $scope.device.offUrl = $scope.vera.base + ":" + $scope.vera.port
+                + "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
                 + $scope.vera.id;
         };
 
@@ -268,11 +289,12 @@ app.controller('AddingController', function ($scope, bridgeService, BridgeSettin
         };
 
         $scope.addDevice = function () {
-            bridgeService.addDevice($scope.device.id, $scope.device.name, $scope.device.type, $scope.device.onUrl, $scope.device.offUrl).then(
+            bridgeService.addDevice($scope.device.id, $scope.device.name, $scope.device.deviceType, $scope.device.onUrl, $scope.device.offUrl).then(
                 function () {
                     $scope.device.id = "";
                     $scope.device.name = "";
                     $scope.device.onUrl = "";
+                    $scope.device.deviceType = "switch";
                     $scope.device.offUrl = "";
                 },
                 function (error) {

@@ -1,0 +1,49 @@
+<h2>
+	Device Editor <a class="btn btn-primary pull-right" href="/">
+		Configuration</a>
+</h2>
+
+<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
+	<div class="panel-heading">
+		<h2 class="panel-title">Add a new device</h2>
+	</div>
+	<ul class="list-group">
+		<li class="list-group-item">
+			<form class="form-horizontal" ng-submit="addDevice()">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 control-label" for="device-name">Name
+					</label>
+
+					<div class="col-xs-8 col-sm-7">
+						<input type="text" class="form-control" id="device-name"
+							ng-model="device.name" placeholder="Device Name">
+					</div>
+					<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary">
+						Update Device</button>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On
+						URL </label>
+
+					<div class="col-xs-8 col-sm-7">
+						<input type="text" class="form-control" id="device-on-url"
+							ng-model="device.onUrl" placeholder="URL to turn device on">
+					</div>
+					<button class="col-xs-4 col-sm-2 btn btn-success" type="button"
+						ng-click="testUrl(device.onUrl)">Test</button>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 control-label"
+						for="device-off-url">Off URL </label>
+
+					<div class="col-xs-8 col-sm-7">
+						<input type="text" class="form-control" id="device-off-url"
+							ng-model="device.offUrl" placeholder="URL to turn device off">
+					</div>
+					<button class="col-xs-4 col-sm-2 btn btn-success" type="button"
+						ng-click="testUrl(device.offUrl)">Test</button>
+				</div>
+			</form>
+		</li>
+	</ul>
+</div>

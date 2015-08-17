@@ -1,6 +1,9 @@
 package com.bwssystems.vera;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.ListIterator;
+import java.util.Map;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -10,6 +13,10 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.bwssystems.luupRequests.Categorie;
+import com.bwssystems.luupRequests.Device;
+import com.bwssystems.luupRequests.Room;
+import com.bwssystems.luupRequests.Scene;
 import com.bwssystems.luupRequests.Sdata;
 import com.google.gson.Gson;
 
@@ -33,10 +40,36 @@ public class VeraInfo {
     	theData = doHttpGETRequest(theUrl);
     	Sdata theSdata = new Gson().fromJson(theData, Sdata.class);
         log.debug("GET sdata - full: " + theSdata.getFull() + ", version: " + theSdata.getVersion());
+        denormalizeSdata(theSdata);
     	return theSdata;
     }
 	
-//	This function executes the url against the vera
+	private void denormalizeSdata(Sdata theSdata) {
+		Map<String,Room> roomMap = new HashMap<String,Room>();
+		for (Room i : theSdata.getRooms()) roomMap.put(i.getId(),i);
+		Map<String,Categorie> categoryMap = new HashMap<String,Categorie>();
+		for (Categorie i : theSdata.getCategoriess()) categoryMap.put(i.getId(),i);
+		Categorie controllerCat = new Categorie();
+		controllerCat.setName("Controller");
+		controllerCat.setId("0");
+		categoryMap.put(controllerCat.getId(),controllerCat);
+		ListIterator<Device> theIterator = theSdata.getDevices().listIterator();
+		Device theDevice = null;
+		while (theIterator.hasNext()) {
+			theDevice = theIterator.next();
+			theDevice.setRoom(roomMap.get(theDevice.getRoom()).getName());
+			theDevice.setCategory(categoryMap.get(theDevice.getCategory()).getName());
+		}
+
+		ListIterator<Scene> theSecneIter = theSdata.getScenes().listIterator();
+		Scene theScene = null;
+		while (theSecneIter.hasNext()) {
+			theScene = theSecneIter.next();
+			theScene.setRoom(roomMap.get(theScene.getRoom()).getName());
+		}
+	}
+
+	//	This function executes the url against the vera
     protected String doHttpGETRequest(String url) {
         log.info("calling GET on URL: " + url);
         HttpGet httpGet = new HttpGet(url);

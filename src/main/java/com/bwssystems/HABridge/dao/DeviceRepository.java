@@ -35,6 +35,7 @@ public class DeviceRepository {
 		repositoryPath = Paths.get(deviceDb);
 		String jsonContent = repositoryReader(repositoryPath);
 		devices = new HashMap<String, DeviceDescriptor>();
+		
 		if(jsonContent != null)
 		{
 			List<DeviceDescriptor> list = readJsonStream(jsonContent);
