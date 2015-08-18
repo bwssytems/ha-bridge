@@ -37,7 +37,6 @@ public class HABridge {
         HueMulator theHueMulator;
         UpnpSettingsResource theSettingResponder;
         UpnpListener theUpnpListener;
-        VeraInfo theVera;
         InetAddress address;
         String addressString;
         BridgeSettings bridgeSettings;
@@ -65,8 +64,6 @@ public class HABridge {
         // sparkjava config directive to set html static file location for Jetty
         staticFileLocation("/public");
         log.info("Starting setup....");
-        theVera = new VeraInfo(bridgeSettings.getVeraAddress());
-        theVera.getSdata();
         // setup the class to handle the resource setup rest api
         theResources = new DeviceResource(bridgeSettings);
         // setup the class to handle the hue emulator rest api
