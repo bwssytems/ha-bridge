@@ -9,3 +9,4 @@ buildNumber.properties
 data
 .idea
 /target/
+/.settings/
