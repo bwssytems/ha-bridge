@@ -148,7 +148,7 @@ app.service('bridgeService', function ($http, BridgeSettings) {
                 return $http.put(putUrl, {
                     id: id,
                     name: name,
-                    deviceType: "switch",
+                    deviceType: type,
                     onUrl: onUrl,
                     offUrl: offUrl
                 }).then(
@@ -165,7 +165,7 @@ app.service('bridgeService', function ($http, BridgeSettings) {
             } else {
                 return $http.post(this.state.base, {
                     name: name,
-                    deviceType: "switch",
+                    deviceType: type,
                     onUrl: onUrl,
                     offUrl: offUrl
                 }).then(
@@ -225,7 +225,7 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
 
 app.controller('AddingController', function ($scope, bridgeService, BridgeSettings) {
 
-        $scope.device = {id: "", name: "", type: "switch", onUrl: "", offUrl: ""};
+        $scope.device = {id: "", name: "", deviceType: "switch", onUrl: "", offUrl: ""};
         $scope.vera = {base: "", port: "3480", id: ""};
         $scope.vera.base = "http://" + BridgeSettings.veraaddress;
         bridgeService.device = $scope.device;
@@ -250,6 +250,7 @@ app.controller('AddingController', function ($scope, bridgeService, BridgeSettin
             if ($scope.vera.base.indexOf("http") < 0) {
                 $scope.vera.base = "http://" + $scope.vera.base;
             }
+            $scope.device.deviceType = "scene";
             $scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
                 + "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
                 + $scope.vera.id;
@@ -275,6 +276,7 @@ app.controller('AddingController', function ($scope, bridgeService, BridgeSettin
             if ($scope.vera.base.indexOf("http") < 0) {
                 $scope.vera.base = "http://" + $scope.vera.base;
             }
+            $scope.device.deviceType = "scene";
             $scope.device.name = verascene.name;
             $scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
                 + "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
