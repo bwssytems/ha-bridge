@@ -92,7 +92,7 @@ public class UpnpListener {
 	String discoveryTemplate = "HTTP/1.1 200 OK\r\n" +
 			"CACHE-CONTROL: max-age=86400\r\n" +
 			"EXT:\r\n" +
-			"LOCATION: http://%s:%s/upnp/amazon-ha-bridge/setup.xml\r\n" +
+			"LOCATION: http://%s:%s/upnp/ha-bridge/setup.xml\r\n" +
 			"OPT: \"http://schemas.upnp.org/upnp/1/0/\"; ns=01\r\n" +
 			"01-NLS: %s\r\n" +
 			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +

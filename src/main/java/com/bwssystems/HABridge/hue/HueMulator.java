@@ -1,12 +1,14 @@
 package com.bwssystems.HABridge.hue;
 
 import com.bwssystems.HABridge.JsonTransformer;
+import com.bwssystems.HABridge.api.UserCreateRequest;
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.bwssystems.HABridge.api.hue.HueApiResponse;
 import com.bwssystems.HABridge.dao.*;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 import static spark.Spark.get;
 import static spark.Spark.post;
@@ -55,7 +57,7 @@ public class HueMulator {
 	    get(HUE_CONTEXT + "/:userid/lights", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
 	        log.info("hue lights list requested: " + userId + " from " + request.ip());
-	        List<DeviceDescriptor> deviceList = repository.findByDeviceType("switch");
+	        List<DeviceDescriptor> deviceList = repository.findAll();
 	    	JsonTransformer aRenderer = new JsonTransformer();
 	    	String theStream = aRenderer.render(deviceList);
 	    	log.debug("The Device List: " + theStream);
@@ -67,17 +69,24 @@ public class HueMulator {
 	        return deviceResponseMap;
 	    } , new JsonTransformer());
 
-//		http://ip_address:port/api/* returns json object for a test call
-        post(HUE_CONTEXT + "/*", "application/json", (request, response) -> {
-        	response.status(200);
-	        return "[{\"success\":{\"username\":\"lights\"}}]";
+//		http://ip_address:port/api with body of user request returns json object for a success of user add
+        post(HUE_CONTEXT, "application/json", (request, response) -> {
+	        log.debug("hue api user create requested: " + request.body() + " from " + request.ip());
+    		UserCreateRequest aNewUser = new Gson().fromJson(request.body(), UserCreateRequest.class);
+    		String newUser = aNewUser.getUsername();
+    		if(newUser == null)
+    			newUser = "lightssystem";
+    		log.debug("hue api user create requested for device type: " + aNewUser.getDevicetype() + " and username: " + newUser);
+
+    		response.status(200);
+	        return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";
 	    } );
 
 //		http://ip_address:port/api/{userId} returns json objects for the list of names of lights
 	    get(HUE_CONTEXT + "/:userid", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
 	        log.info("hue api root requested: " + userId + " from " + request.ip());
-	        List<DeviceDescriptor> descriptorList = repository.findByDeviceType("switch");
+	        List<DeviceDescriptor> descriptorList = repository.findAll();
 	        if (descriptorList == null) {
 	        	response.status(404);
 	            return null;
@@ -160,10 +169,12 @@ public class HueMulator {
 	        if(url.contains(INTENSITY_BYTE)){
 	            String intensityByte = String.valueOf(state.getBri());
 	            url = url.replace(INTENSITY_BYTE, intensityByte);
+	            responseString = "[{\"success\":{\"/lights/" + lightId + "/state/bri\":"+ String.valueOf(state.getBri()) + "}}]";
 	        }else if(url.contains(INTENSITY_PERCENT)){
 	            int percentBrightness = (int) Math.round(state.getBri()/255.0*100);
 	            String intensityPercent = String.valueOf(percentBrightness);
 	            url = url.replace(INTENSITY_PERCENT, intensityPercent);
+	            responseString = "[{\"success\":{\"/lights/" + lightId + "/state/bri\":"+ String.valueOf(state.getBri()) + "}}]";
 	        }
 	
 	        //make call
