@@ -58,12 +58,10 @@ public class HueMulator {
 	    	String userId = request.params(":userid");
 	        log.info("hue lights list requested: " + userId + " from " + request.ip());
 	        List<DeviceDescriptor> deviceList = repository.findAll();
-	    	JsonTransformer aRenderer = new JsonTransformer();
-	    	String theStream = aRenderer.render(deviceList);
-	    	log.debug("The Device List: " + theStream);
-	        Map<String, String> deviceResponseMap = new HashMap<>();
+	        Map<String, DeviceResponse> deviceResponseMap = new HashMap<>();
 	        for (DeviceDescriptor device : deviceList) {
-	            deviceResponseMap.put(device.getId(), device.getName());
+                DeviceResponse deviceResponse = DeviceResponse.createResponse(device.getName(), device.getId());
+	            deviceResponseMap.put(device.getId(), deviceResponse);
 	        }
 	        response.status(200);
 	        return deviceResponseMap;
@@ -82,10 +80,10 @@ public class HueMulator {
 	        return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";
 	    } );
 
-//		http://ip_address:port/api/{userId} returns json objects for the list of names of lights
+//		http://ip_address:port/api/{userId} returns json objects for the full state
 	    get(HUE_CONTEXT + "/:userid", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
-	        log.info("hue api root requested: " + userId + " from " + request.ip());
+	        log.info("hue api full state requested: " + userId + " from " + request.ip());
 	        List<DeviceDescriptor> descriptorList = repository.findAll();
 	        if (descriptorList == null) {
 	        	response.status(404);

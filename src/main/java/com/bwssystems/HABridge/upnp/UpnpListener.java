@@ -64,6 +64,12 @@ public class UpnpListener {
 				upnpMulticastSocket.receive(packet);
 				String packetString = new String(packet.getData());
 				if(isSSDPDiscovery(packetString)){
+					try {
+						Thread.sleep(3000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						log.error("could not sleep");
+					}
 					log.debug("Got SSDP Discovery packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort());
 					sendUpnpResponse(responseSocket, packet.getAddress(), packet.getPort());
 				}
@@ -83,7 +89,9 @@ public class UpnpListener {
 	 * @return
 	 */
 	protected boolean isSSDPDiscovery(String body){
-		if(body != null && body.startsWith("M-SEARCH * HTTP/1.1") && body.contains("MAN: \"ssdp:discover\"")){
+		// log.debug("Check if this is a MAN ssdp-discover packet for a upnp basic device: " + body);
+		//Only respond to discover request for upnp basic device from echo, the others are for the wemo
+		if(body != null && body.startsWith("M-SEARCH * HTTP/1.1") && body.contains("MAN: \"ssdp:discover\"")&& body.contains("ST: urn:schemas-upnp-org:device:basic:1")){
 			return true;
 		}
 		return false;
@@ -92,11 +100,10 @@ public class UpnpListener {
 	String discoveryTemplate = "HTTP/1.1 200 OK\r\n" +
 			"CACHE-CONTROL: max-age=86400\r\n" +
 			"EXT:\r\n" +
-			"LOCATION: http://%s:%s/upnp/ha-bridge/setup.xml\r\n" +
-			"OPT: \"http://schemas.upnp.org/upnp/1/0/\"; ns=01\r\n" +
-			"01-NLS: %s\r\n" +
+			"LOCATION: http://%s:%s/upnp/ha-bridge/description.xml\r\n" +
+			"SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/0.1\r\n" + 
 			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
-			"USN: uuid:Socket-1_0-221438K0100073::urn:Belkin:device:**\r\n\r\n";
+			"USN: uuid:Socket-1_0-221438K0100073::urn:schemas-upnp-org:device:basic:1\r\n\r\n";
 	protected void sendUpnpResponse(DatagramSocket socket, InetAddress requester, int sourcePort) throws IOException {
 		String discoveryResponse = String.format(discoveryTemplate, responseAddress, httpServerPort, getRandomUUIDString());
 		log.debug("sndUpnpResponse: " + discoveryResponse);

@@ -44,8 +44,8 @@ public class UpnpSettingsResource {
 	}
 
 	private void setupListener (BridgeSettings theSettings) {
-//      http://ip_address:port/upnp/:id/setup.xml which returns the xml configuration for the location of the hue emulator
-		get(UPNP_CONTEXT + "/:id/setup.xml", "application/xml", (request, response) -> {
+//      http://ip_address:port/upnp/:id/description.xml which returns the xml configuration for the location of the hue emulator
+		get(UPNP_CONTEXT + "/:id/description.xml", "application/xml", (request, response) -> {
 			log.info("upnp device settings requested: " + request.params(":id") + " from " + request.ip());
 			String portNumber = Integer.toString(request.port());
 			String filledTemplate = String.format(hueTemplate, theSettings.getUpnpConfigAddress(), portNumber, theSettings.getUpnpConfigAddress());
@@ -56,7 +56,7 @@ public class UpnpSettingsResource {
         } );
 
 //      http://ip_address:port/upnp/settings which returns the bridge configuration settings
-		get(UPNP_CONTEXT + "/settings", "application/xml", (request, response) -> {
+		get(UPNP_CONTEXT + "/settings", "application/json", (request, response) -> {
 			log.debug("bridge settings requested from " + request.ip());
 
 			response.status(201);
