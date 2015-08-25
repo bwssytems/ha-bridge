@@ -129,14 +129,13 @@ public class HueMulator {
 	         */
 	    	String userId = request.params(":userid");
 	    	String lightId = request.params(":id");
-	        log.info("hue state change requested: " + userId + " from " + request.ip());
-	        log.info("hue stage change body: " + request.body() );
+	        log.info("hue state change requested: " + userId + " from " + request.ip() + " body: " + request.body());
 	
 	        DeviceState state = null;
 	        try {
 	            state = mapper.readValue(request.body(), DeviceState.class);
 	        } catch (IOException e) {
-	            log.info("object mapper barfed on input", e);
+	            log.error("Object mapper barfed on input of body.", e);
 	        	response.status(400);
 	            return null;
 	        }
@@ -144,6 +143,7 @@ public class HueMulator {
 	        DeviceDescriptor device = repository.findOne(lightId);
 	        if (device == null) {
 	        	response.status(404);
+	            log.error("Could not find devcie: " + lightId);
 	            return null;
 	        }
 	
@@ -178,6 +178,7 @@ public class HueMulator {
 	        //make call
 	        if(!doHttpGETRequest(url)){
 	        	response.status(503);
+	            log.error("Error on calling url to change device state: " + url);
 	            return null;
 	        }
 	

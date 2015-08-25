@@ -76,6 +76,7 @@ public class DeviceRepository {
     	JsonTransformer aRenderer = new JsonTransformer();
     	String  jsonValue = aRenderer.render(findAll());
         repositoryWriter(jsonValue, repositoryPath);
+        log.debug("Save device: " + aDescriptor.getName());
     }
     
 	public String delete(DeviceDescriptor aDescriptor) {

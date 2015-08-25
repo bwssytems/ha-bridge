@@ -56,22 +56,24 @@ public class DeviceResource {
 	    	log.debug("Create a Device - device json off URL:" + deviceEntry.getOffUrl());
 	
 	        deviceRepository.save(deviceEntry);
-	    	log.debug("Created a Device");
+	    	log.debug("Created a Device: " + request.body());
 	
             response.status(201);
             return deviceEntry;
 	    }, new JsonTransformer());
 
     	put (API_CONTEXT + "/:id", "application/json", (request, response) -> {
-	    	log.debug("Saved a Device");
         	DeviceDescriptor device = new Gson().fromJson(request.body(), DeviceDescriptor.class);
 	        DeviceDescriptor deviceEntry = deviceRepository.findOne(request.params(":id"));
 	        if(deviceEntry == null){
+		    	log.debug("Could not save an edited Device Id: " + request.params(":id"));
 	            return null;
 	        }
+	    	log.debug("Saving an edited Device: " + deviceEntry.getName());
 	
 	        deviceEntry.setName(device.getName());
-	        deviceEntry.setDeviceType(device.getDeviceType());
+	        if(device.getDeviceType() != null)
+	        	deviceEntry.setDeviceType(device.getDeviceType());
 	        deviceEntry.setOnUrl(device.getOnUrl());
 	        deviceEntry.setOffUrl(device.getOffUrl());
 	
