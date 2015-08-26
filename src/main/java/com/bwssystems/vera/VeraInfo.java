@@ -71,13 +71,13 @@ public class VeraInfo {
 
 	//	This function executes the url against the vera
     protected String doHttpGETRequest(String url) {
-        log.info("calling GET on URL: " + url);
+        log.debug("calling GET on URL: " + url);
         HttpGet httpGet = new HttpGet(url);
         try {
             HttpResponse response = httpClient.execute(httpGet);
             String theContent = EntityUtils.toString(response.getEntity()); //read content for data
             EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
-            log.info("GET on URL responded: " + response.getStatusLine().getStatusCode());
+            log.debug("GET on URL responded: " + response.getStatusLine().getStatusCode());
             if(response.getStatusLine().getStatusCode() == 200){
                 return theContent;
             }
