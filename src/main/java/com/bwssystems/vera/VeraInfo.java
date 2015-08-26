@@ -57,8 +57,14 @@ public class VeraInfo {
 		Device theDevice = null;
 		while (theIterator.hasNext()) {
 			theDevice = theIterator.next();
-			theDevice.setRoom(roomMap.get(theDevice.getRoom()).getName());
-			theDevice.setCategory(categoryMap.get(theDevice.getCategory()).getName());
+			if(theDevice.getRoom() != null)
+				theDevice.setRoom(roomMap.get(theDevice.getRoom()).getName());
+			else
+				theDevice.setRoom("<unknown>");
+			if(theDevice.getCategory() != null)
+				theDevice.setCategory(categoryMap.get(theDevice.getCategory()).getName());
+			else
+				theDevice.setCategory("<unknown>");
 		}
 
 		ListIterator<Scene> theSecneIter = theSdata.getScenes().listIterator();
