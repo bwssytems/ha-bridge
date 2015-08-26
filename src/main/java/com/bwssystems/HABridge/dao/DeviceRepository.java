@@ -43,7 +43,7 @@ public class DeviceRepository {
 			DeviceDescriptor theDevice = null;
 			while (theIterator.hasNext()) {
 				theDevice = theIterator.next();
-				put(Integer.parseInt(theDevice.getId()), theDevice);
+				put(theDevice.getId(), theDevice);
 			}
 		}
 	}
@@ -62,17 +62,16 @@ public class DeviceRepository {
     	return devices.get(id);	
     }
     
-	private void put(int id, DeviceDescriptor aDescriptor) {
-        devices.put(String.valueOf(id), aDescriptor);
+	private void put(String id, DeviceDescriptor aDescriptor) {
+        devices.put(id, aDescriptor);
     }
     
 	public void save(DeviceDescriptor aDescriptor) {
-        int id = random.nextInt(Integer.MAX_VALUE);
         if(aDescriptor.getId() != null)
         	devices.remove(aDescriptor.getId());
         else
-        	aDescriptor.setId(String.valueOf(id));
-        put(id, aDescriptor);
+        	aDescriptor.setId(String.valueOf(random.nextInt(Integer.MAX_VALUE)));
+        put(aDescriptor.getId(), aDescriptor);
     	JsonTransformer aRenderer = new JsonTransformer();
     	String  jsonValue = aRenderer.render(findAll());
         repositoryWriter(jsonValue, repositoryPath);

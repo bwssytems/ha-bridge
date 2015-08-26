@@ -75,7 +75,6 @@ public class HABridge {
 
         // start the upnp ssdp discovery listener
         theUpnpListener = new UpnpListener(bridgeSettings);
-        log.info("Done setup, application to run....");
         theUpnpListener.startListening();
     }
 }

@@ -31,7 +31,7 @@ public class UpnpListener {
 	}
 
 	public void startListening(){
-		log.info("Starting UPNP Discovery Listener");
+		log.info("UPNP Discovery Listener started....");
 
 		try (DatagramSocket responseSocket = new DatagramSocket(upnpResponsePort);
 				MulticastSocket upnpMulticastSocket  = new MulticastSocket(UPNP_DISCOVERY_PORT);) {

@@ -53,10 +53,11 @@ public class HueMulator {
 
 //	This function sets up the sparkjava rest calls for the hue api
     private void setupEndpoints() {
+    	log.info("Hue emulator service started....");
 //		http://ip_address:port/api/{userId}/lights  returns json objects of all lights configured
 	    get(HUE_CONTEXT + "/:userid/lights", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
-	        log.info("hue lights list requested: " + userId + " from " + request.ip());
+	        log.debug("hue lights list requested: " + userId + " from " + request.ip());
 	        List<DeviceDescriptor> deviceList = repository.findAll();
 	        Map<String, DeviceResponse> deviceResponseMap = new HashMap<>();
 	        for (DeviceDescriptor device : deviceList) {
@@ -83,7 +84,7 @@ public class HueMulator {
 //		http://ip_address:port/api/{userId} returns json objects for the full state
 	    get(HUE_CONTEXT + "/:userid", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
-	        log.info("hue api full state requested: " + userId + " from " + request.ip());
+	        log.debug("hue api full state requested: " + userId + " from " + request.ip());
 	        List<DeviceDescriptor> descriptorList = repository.findAll();
 	        if (descriptorList == null) {
 	        	response.status(404);
@@ -107,13 +108,13 @@ public class HueMulator {
 	    get(HUE_CONTEXT + "/:userid/lights/:id", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
 	    	String lightId = request.params(":id");
-	        log.info("hue light requested: " + lightId + "for user: " + userId + " from " + request.ip());
+	        log.debug("hue light requested: " + lightId + " for user: " + userId + " from " + request.ip());
 	        DeviceDescriptor device = repository.findOne(lightId);
 	        if (device == null) {
 	        	response.status(404);
 	            return null;
 	        } else {
-	            log.info("found device named: " + device.getName());
+	            log.debug("found device named: " + device.getName());
 	        }
 	        DeviceResponse lightResponse = DeviceResponse.createResponse(device.getName(), device.getId());
 	
@@ -129,7 +130,7 @@ public class HueMulator {
 	         */
 	    	String userId = request.params(":userid");
 	    	String lightId = request.params(":id");
-	        log.info("hue state change requested: " + userId + " from " + request.ip() + " body: " + request.body());
+	        log.debug("hue state change requested: " + userId + " from " + request.ip() + " body: " + request.body());
 	
 	        DeviceState state = null;
 	        try {
@@ -143,7 +144,7 @@ public class HueMulator {
 	        DeviceDescriptor device = repository.findOne(lightId);
 	        if (device == null) {
 	        	response.status(404);
-	            log.error("Could not find devcie: " + lightId);
+	            log.error("Could not find devcie: " + lightId + " for hue state change request: " + userId + " from " + request.ip() + " body: " + request.body());
 	            return null;
 	        }
 	
@@ -189,12 +190,12 @@ public class HueMulator {
 
 //	This function executes the url from the device repository against the vera
     protected boolean doHttpGETRequest(String url) {
-        log.info("calling GET on URL: " + url);
+        log.debug("calling GET on URL: " + url);
         HttpGet httpGet = new HttpGet(url);
         try {
             HttpResponse response = httpClient.execute(httpGet);
             EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
-            log.info("GET on URL responded: " + response.getStatusLine().getStatusCode());
+            log.debug("GET on URL responded: " + response.getStatusLine().getStatusCode());
             if(response.getStatusLine().getStatusCode() == 200){
                 return true;
             }

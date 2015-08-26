@@ -41,7 +41,7 @@ public class DeviceResource {
 	}
 
     private void setupEndpoints() {
-    	log.debug("Setting up endpoints");
+    	log.info("HABridge device management service started.... ");
     	post(API_CONTEXT, "application/json", (request, response) -> {
 	    	log.debug("Create a Device - request body: " + request.body());
     		DeviceDescriptor device = new Gson().fromJson(request.body(), DeviceDescriptor.class);
