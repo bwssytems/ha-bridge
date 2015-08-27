@@ -61,6 +61,7 @@ public class VeraInfo {
 				theDevice.setRoom(roomMap.get(theDevice.getRoom()).getName());
 			else
 				theDevice.setRoom("no room");
+			
 			if(theDevice.getCategory() != null && categoryMap.get(theDevice.getCategory()) != null)
 				theDevice.setCategory(categoryMap.get(theDevice.getCategory()).getName());
 			else
