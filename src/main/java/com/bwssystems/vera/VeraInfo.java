@@ -72,7 +72,10 @@ public class VeraInfo {
 		Scene theScene = null;
 		while (theSecneIter.hasNext()) {
 			theScene = theSecneIter.next();
-			theScene.setRoom(roomMap.get(theScene.getRoom()).getName());
+			if(theScene.getRoom() != null && roomMap.get(theScene.getRoom()) != null)
+				theScene.setRoom(roomMap.get(theScene.getRoom()).getName());
+			else
+				theScene.setRoom("no room");
 		}
 	}
 
