@@ -16,7 +16,7 @@ public class UpnpSettingsResource {
 
     private Logger log = LoggerFactory.getLogger(UpnpSettingsResource.class);
 
-	private String hueTemplate = "<?xml version=\"1.0\"?>\n" + "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">\n"
+	private String hueTemplate = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">\n"
 			+ "<specVersion>\n" + "<major>1</major>\n" + "<minor>0</minor>\n" + "</specVersion>\n"
 			+ "<URLBase>http://%s:%s/</URLBase>\n" + // hostname string
 			"<device>\n" + "<deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>\n"
@@ -26,7 +26,7 @@ public class UpnpSettingsResource {
 			+ "<modelDescription>Hue Emulator for HA bridge</modelDescription>\n"
 			+ "<modelName>Philips hue bridge 2012</modelName>\n" + "<modelNumber>929000226503</modelNumber>\n"
 			+ "<modelURL>http://www.bwssystems.com/apps.html</modelURL>\n"
-			+ "<serialNumber>01189998819991197253</serialNumber>\n"
+			+ "<serialNumber>0017880ae670</serialNumber>\n"
 			+ "<UDN>uuid:88f6698f-2c83-4393-bd03-cd54a9f8595</UDN>\n" + "<serviceList>\n" + "<service>\n"
 			+ "<serviceType>(null)</serviceType>\n" + "<serviceId>(null)</serviceId>\n"
 			+ "<controlURL>(null)</controlURL>\n" + "<eventSubURL>(null)</eventSubURL>\n"
@@ -46,12 +46,23 @@ public class UpnpSettingsResource {
 	private void setupListener (BridgeSettings theSettings) {
 		log.info("Hue description service started....");
 //      http://ip_adress:port/description.xml which returns the xml configuration for the hue emulator
-		get("/description.xml", "application/xml", (request, response) -> {
+		get("/description.xml", "application/xml; charset=utf-8", (request, response) -> {
 			log.debug("upnp device settings requested: " + request.params(":id") + " from " + request.ip());
 			String portNumber = Integer.toString(request.port());
 			String filledTemplate = String.format(hueTemplate, theSettings.getUpnpConfigAddress(), portNumber, theSettings.getUpnpConfigAddress());
 			log.debug("upnp device settings response: " + filledTemplate);
-            response.status(201);
+//			response.header("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
+//			response.header("Pragma", "no-cache");
+//			response.header("Expires", "Mon, 1 Aug 2011 09:00:00 GMT");
+//			response.header("Connection", "close");  // Not sure if the server will actually close the connections by just setting the header
+//			response.header("Access-Control-Max-Age", "0");
+//			response.header("Access-Control-Allow-Origin", "*");
+//			response.header("Access-Control-Allow-Credentials", "true");
+//			response.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE");
+//			response.header("Access-Control-Allow-Headers", "Content-Type");
+//			response.header("Content-Type", "application/xml; charset=utf-8"); 
+			response.type("application/xml; charset=utf-8"); 
+            response.status(200);
 
             return filledTemplate;
         } );
@@ -60,7 +71,7 @@ public class UpnpSettingsResource {
 		get(UPNP_CONTEXT + "/settings", "application/json", (request, response) -> {
 			log.debug("bridge settings requested from " + request.ip());
 
-			response.status(201);
+			response.status(200);
 
             return theSettings;
         }, new JsonTransformer());

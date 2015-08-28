@@ -64,6 +64,7 @@ public class HueMulator {
                 DeviceResponse deviceResponse = DeviceResponse.createResponse(device.getName(), device.getId());
 	            deviceResponseMap.put(device.getId(), deviceResponse);
 	        }
+			response.type("application/json; charset=utf-8"); 
 	        response.status(200);
 	        return deviceResponseMap;
 	    } , new JsonTransformer());
@@ -77,6 +78,7 @@ public class HueMulator {
     			newUser = "lightssystem";
     		log.debug("hue api user create requested for device type: " + aNewUser.getDevicetype() + " and username: " + newUser);
 
+			response.type("application/json; charset=utf-8"); 
     		response.status(200);
 	        return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";
 	    } );
@@ -97,9 +99,10 @@ public class HueMulator {
 	                    deviceList.put(descriptor.getId(), deviceResponse);
 	                }
 	        );
-	        HueApiResponse apiResponse = new HueApiResponse();
+	        HueApiResponse apiResponse = new HueApiResponse("Philips hue", request.ip(), "My App", userId);
 	        apiResponse.setLights(deviceList);
 	
+			response.type("application/json; charset=utf-8"); 
 	        response.status(200);
 	        return apiResponse;
 	    }, new JsonTransformer());
@@ -118,6 +121,7 @@ public class HueMulator {
 	        }
 	        DeviceResponse lightResponse = DeviceResponse.createResponse(device.getName(), device.getId());
 	
+			response.type("application/json; charset=utf-8"); 
 	        response.status(200);
 	        return lightResponse;
 	    }, new JsonTransformer()); 
@@ -183,6 +187,7 @@ public class HueMulator {
 	            return null;
 	        }
 	
+			response.type("application/json; charset=utf-8"); 
 	        response.status(200);
 	        return responseString;
 	    });
