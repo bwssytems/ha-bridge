@@ -44,7 +44,7 @@ public class HueMulator {
 
 
     public HueMulator(DeviceRepository aDeviceRepository){
-        httpClient = HttpClients.createMinimal();
+        httpClient = HttpClients.createDefault();
         mapper = new ObjectMapper(); //armzilla: work around Echo incorrect content type and breaking mapping. Map manually
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         repository = aDeviceRepository;

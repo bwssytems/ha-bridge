@@ -207,6 +207,12 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
 		$scope.BridgeSettings = bridgeService.BridgeSettings;
         bridgeService.viewDevices();
         $scope.bridge = bridgeService.state;
+        $scope.predicate = 'name';
+        $scope.reverse = true;
+        $scope.order = function(predicate) {
+          $scope.reverse = ($scope.predicate === predicate) ? !$scope.reverse : false;
+          $scope.predicate = predicate;
+        };
         $scope.deleteDevice = function (device) {
             bridgeService.deleteDevice(device.id);
         };
@@ -233,7 +239,13 @@ app.controller('AddingController', function ($scope, bridgeService, BridgeSettin
         bridgeService.viewVeraScenes();
         $scope.bridge = bridgeService.state;
         $scope.device = bridgeService.state.device;
-       
+        $scope.predicate = 'name';
+        $scope.reverse = true;
+        $scope.order = function(predicate) {
+          $scope.reverse = ($scope.predicate === predicate) ? !$scope.reverse : false;
+          $scope.predicate = predicate;
+        };
+          
         $scope.buildUrlsUsingDevice = function () {
             if ($scope.vera.base.indexOf("http") < 0) {
                 $scope.vera.base = "http://" + $scope.vera.base;

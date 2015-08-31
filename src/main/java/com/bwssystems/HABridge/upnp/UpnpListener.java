@@ -63,14 +63,8 @@ public class UpnpListener {
 				DatagramPacket packet = new DatagramPacket(buf, buf.length);
 				upnpMulticastSocket.receive(packet);
 				String packetString = new String(packet.getData());
+				log.debug("Got SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " body : " + packetString);
 				if(isSSDPDiscovery(packetString)){
-					try {
-						Thread.sleep(3000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						log.error("could not sleep");
-					}
-					log.debug("Got SSDP Discovery packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort());
 					sendUpnpResponse(responseSocket, packet.getAddress(), packet.getPort());
 				}
 			}
@@ -91,7 +85,8 @@ public class UpnpListener {
 	protected boolean isSSDPDiscovery(String body){
 		// log.debug("Check if this is a MAN ssdp-discover packet for a upnp basic device: " + body);
 		//Only respond to discover request for upnp basic device from echo, the others are for the wemo
-		if(body != null && body.startsWith("M-SEARCH * HTTP/1.1") && body.contains("MAN: \"ssdp:discover\"")&& body.contains("ST: urn:schemas-upnp-org:device:basic:1")){
+		// other check: && body.contains("ST: urn:schemas-upnp-org:device:basic:1")
+		if(body != null && body.startsWith("M-SEARCH * HTTP/1.1") && body.contains("MAN: \"ssdp:discover\"")){
 			return true;
 		}
 		return false;

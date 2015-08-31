@@ -42,11 +42,13 @@
 						<input type="text" class="form-control" id="vera-id"
 							ng-model="vera.id" placeholder="ID">
 					</div>
+				</div>
+				<div class="form-group">
 					<button type="submit" ng-click="buildUrlsUsingDevice()"
-						class="col-xs-4 col-sm-2 btn btn-success">Generate Device
+						class="col-xs-2 col-sm-2 col-xs-offset-2 col-sm-offset-2 btn btn-success">Generate Device
 						URLs</button>
 					<button type="submit" ng-click="buildUrlsUsingScene()"
-						class="col-xs-4 col-sm-2 btn btn-success">Generate Scene
+						class="col-xs-2 col-sm-2 col-xs-offset-2 col-sm-offset-2 btn btn-success">Generate Scene
 						URLs</button>
 				</div>
 			</form>
@@ -61,6 +63,7 @@
 		<li class="list-group-item">
 			<form class="form-horizontal" ng-submit="addDevice()">
 				<div class="form-group">
+					<div class="row">
 					<label class="col-xs-12 col-sm-2 control-label" for="device-name">Name
 					</label>
 
@@ -70,28 +73,35 @@
 					</div>
 					<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary">
 						Add Device</button>
+					</div>
 				</div>
 				<div class="form-group">
+					<div class="row">
 					<label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On
 						URL </label>
 
 					<div class="col-xs-8 col-sm-7">
-						<input type="text" class="form-control" id="device-on-url"
-							ng-model="device.onUrl" placeholder="URL to turn device on">
+						<textarea class="form-control" id="device-on-url"
+							ng-model="device.onUrl" placeholder="URL to turn device on"></textarea>
 					</div>
+			        <div class="clearfix visible-xs"></div>
 					<button class="col-xs-4 col-sm-2 btn btn-success" type="button"
 						ng-click="testUrl(device.onUrl)">Test</button>
+					</div>
 				</div>
 				<div class="form-group">
+					<div class="row">
 					<label class="col-xs-12 col-sm-2 control-label"
 						for="device-off-url">Off URL </label>
 
 					<div class="col-xs-8 col-sm-7">
-						<input type="text" class="form-control" id="device-off-url"
-							ng-model="device.offUrl" placeholder="URL to turn device off">
+						<textarea class="form-control" id="device-off-url"
+							ng-model="device.offUrl" placeholder="URL to turn device off"></textarea>
 					</div>
+			        <div class="clearfix visible-xs"></div>
 					<button class="col-xs-4 col-sm-2 btn btn-success" type="button"
 						ng-click="testUrl(device.offUrl)">Test</button>
+					</div>
 				</div>
 			</form>
 		</li>

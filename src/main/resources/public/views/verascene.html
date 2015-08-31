@@ -9,6 +9,14 @@
 	<div class="panel-heading">
 		<h2 class="panel-title">Vera Scene List</h2>
 	</div>
+	<style type="text/css">
+	  .sortorder:after {
+	    content: '\25b2';
+	  }
+	  .sortorder.reverse:after {
+	    content: '\25bc';
+	  }
+	</style>
 	<ul class="list-group">
 		<li class="list-group-item">
 			<p class="text-muted">You can select a Vera scene and generate
@@ -17,13 +25,22 @@
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
-						<th>Name</th>
-						<th>Id</th>
-						<th>Room</th>
+						<th>
+							<a href="" ng-click="order('name')">Name</a>
+        					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
+        				</th>
+						<th>
+							<a href="" ng-click="order('id')">Id</a>
+        					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
+        				</th>
+						<th>
+							<a href="" ng-click="order('room')">Room</a>
+        					<span class="sortorder" ng-show="predicate === 'room'" ng-class="{reverse:reverse}"></span>
+        				</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="verascene in bridge.verascenes">
+				<tr ng-repeat="verascene in bridge.verascenes | orderBy:predicate:reverse">
 					<td>{{verascene.name}}</td>
 					<td>{{verascene.id}}</td>
 					<td>{{verascene.room}}</td>
@@ -56,26 +73,32 @@
 						Add Scene</button>
 				</div>
 				<div class="form-group">
+					<div class="row">
 					<label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On
 						URL </label>
 
 					<div class="col-xs-8 col-sm-7">
-						<input type="text" class="form-control" id="device-on-url"
-							ng-model="device.onUrl" placeholder="URL to turn device on">
+						<textarea class="form-control" id="device-on-url"
+							ng-model="device.onUrl" placeholder="URL to turn device on"></textarea>
 					</div>
+			        <div class="clearfix visible-xs"></div>
 					<button class="col-xs-4 col-sm-2 btn btn-success" type="button"
 						ng-click="testUrl(device.onUrl)">Test</button>
+					</div>
 				</div>
 				<div class="form-group">
+					<div class="row">
 					<label class="col-xs-12 col-sm-2 control-label"
 						for="device-off-url">Off URL </label>
 
 					<div class="col-xs-8 col-sm-7">
-						<input type="text" class="form-control" id="device-off-url"
-							ng-model="device.offUrl" placeholder="URL to turn device off">
+						<textarea class="form-control" id="device-off-url"
+							ng-model="device.offUrl" placeholder="URL to turn device off"></textarea>
 					</div>
+			        <div class="clearfix visible-xs"></div>
 					<button class="col-xs-4 col-sm-2 btn btn-success" type="button"
 						ng-click="testUrl(device.offUrl)">Test</button>
+					</div>
 				</div>
 			</form>
 		</li>
