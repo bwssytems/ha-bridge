@@ -21,6 +21,8 @@ The default location for the db to contain the devices as they are added is "dat
 
 The default upnp response port will be 50000 otherwise it can be set with -Dupnp.response.port=<port>.
 
+Upnp has been very closed on this platform to try and respond as a hue and there is now a setting to control if it is more open or strict, Add -Dupnp.strict=<true|false> to your command line to have the emulator respond to what it thinks is an echo to a hue or any other device. The default is upnp.strict=true. 
+
 Then configure by going to the url for the host you are running on or localhost: 
 ```
 http://192.168.1.240:8080
@@ -34,6 +36,7 @@ POST http://host:8080/api/devices
   "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
   "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
 }
+```
 Dimming
 ----
 Dimming is also supported by using the expessions ${intensity.percent} or ${intensity.byte} for 0-100 and 0-255 respectively.  
