@@ -1,5 +1,5 @@
 # ha-bridge
-Emulates philips hue api to other home automation gateways.  The Amazon echo now supports wemo and philip hue.
+Emulates philips hue api to other home automation gateways.  The Amazon echo now supports wemo and philips hue.
 Build
 -----
 
@@ -7,6 +7,12 @@ To customize and build it yourself, build a new jar with maven:
 ```
 mvn install
 ```
+
+Otherwise go to http://www.bwssystems.com/apps.html to download the latest jar file.
+
+Run
+----
+
 Then locate the jar and start the server with:
 ```
 java -jar -Dvera.address=192.168.X.Y ha-bridge-0.X.Y.jar
@@ -27,7 +33,10 @@ Then configure by going to the url for the host you are running on or localhost:
 ```
 http://192.168.1.240:8080
 ```
-or Register a device, via REST by binding some sort of on/off (vera style) url
+
+Command line configure
+----
+Register a device via REST by  by using a tool and the url, for example:
 ```
 POST http://host:8080/api/devices
 {
