@@ -6,6 +6,7 @@ public class BridgeSettings {
 	private String upnpresponseport;
 	private String upnpdevicedb;
 	private String veraaddress;
+	private boolean upnpStrict;
 	
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -37,6 +38,11 @@ public class BridgeSettings {
 	public void setVeraAddress(String veraAddress) {
 		this.veraaddress = veraAddress;
 	}
-	
-	
+
+	public boolean isUpnpStrict() {
+		return upnpStrict;
+	}
+	public void setUpnpStrict(boolean upnpStrict) {
+		this.upnpStrict = upnpStrict;
+	}
 }

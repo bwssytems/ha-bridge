@@ -12,7 +12,6 @@ import com.bwssystems.HABridge.devicemanagmeent.*;
 import com.bwssystems.HABridge.hue.HueMulator;
 import com.bwssystems.HABridge.upnp.UpnpListener;
 import com.bwssystems.HABridge.upnp.UpnpSettingsResource;
-import com.bwssystems.vera.VeraInfo;
 
 public class HABridge {
 	
@@ -55,6 +54,7 @@ public class HABridge {
         bridgeSettings.setUpnpDeviceDb(System.getProperty("upnp.device.db", "data/device.db"));
         bridgeSettings.setUpnpResponsePort(System.getProperty("upnp.response.port", "50000"));
         bridgeSettings.setVeraAddress(System.getProperty("vera.address", "192.168.1.100"));
+        bridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
 
         // sparkjava config directive to set ip address for the web server to listen on
         // ipAddress("0.0.0.0"); // not used

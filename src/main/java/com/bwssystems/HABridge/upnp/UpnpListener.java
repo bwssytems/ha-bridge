@@ -22,12 +22,15 @@ public class UpnpListener {
 	private int httpServerPort;
 
 	private String responseAddress;
+	
+	private boolean strict;
 
 	public UpnpListener(BridgeSettings theSettings) {
 		super();
 		upnpResponsePort = Integer.valueOf(theSettings.getUpnpResponsePort());
 		httpServerPort = Integer.valueOf(theSettings.getServerPort());
 		responseAddress = theSettings.getUpnpConfigAddress();
+		strict = theSettings.isUpnpStrict();
 	}
 
 	public void startListening(){
@@ -63,7 +66,8 @@ public class UpnpListener {
 				DatagramPacket packet = new DatagramPacket(buf, buf.length);
 				upnpMulticastSocket.receive(packet);
 				String packetString = new String(packet.getData());
-				log.debug("Got SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " body : " + packetString);
+				if(packetString != null && packetString.startsWith("M-SEARCH * HTTP/1.1"))
+					log.debug("Got SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " body : " + packetString);
 				if(isSSDPDiscovery(packetString)){
 					sendUpnpResponse(responseSocket, packet.getAddress(), packet.getPort());
 				}
@@ -85,9 +89,11 @@ public class UpnpListener {
 	protected boolean isSSDPDiscovery(String body){
 		// log.debug("Check if this is a MAN ssdp-discover packet for a upnp basic device: " + body);
 		//Only respond to discover request for upnp basic device from echo, the others are for the wemo
-		// other check: && body.contains("ST: urn:schemas-upnp-org:device:basic:1")
 		if(body != null && body.startsWith("M-SEARCH * HTTP/1.1") && body.contains("MAN: \"ssdp:discover\"")){
-			return true;
+			if(strict && body.contains("ST: urn:schemas-upnp-org:device:basic:1"))
+				return true;
+			else if (!strict)
+				return true;
 		}
 		return false;
 	}
