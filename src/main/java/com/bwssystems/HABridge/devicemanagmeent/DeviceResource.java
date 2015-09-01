@@ -4,9 +4,13 @@ import static spark.Spark.get;
 import static spark.Spark.post;
 import static spark.Spark.put;
 import static spark.Spark.delete;
- 
-import java.util.List;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +31,7 @@ public class DeviceResource {
 
     private DeviceRepository deviceRepository;
     private VeraInfo veraInfo;
-
+    private static final Set<String> supportedVerbs = new HashSet<>(Arrays.asList("get", "put", "post"));
 
 	public DeviceResource(BridgeSettings theSettings) {
 		super();
@@ -45,39 +49,44 @@ public class DeviceResource {
     	post(API_CONTEXT, "application/json", (request, response) -> {
 	    	log.debug("Create a Device - request body: " + request.body());
     		DeviceDescriptor device = new Gson().fromJson(request.body(), DeviceDescriptor.class);
-	        DeviceDescriptor deviceEntry = new DeviceDescriptor();
-	        deviceEntry.setName(device.getName());
-	    	log.debug("Create a Device - device json name: " + deviceEntry.getName());
-	        deviceEntry.setDeviceType(device.getDeviceType());
-	    	log.debug("Create a Device - device json type:" + deviceEntry.getDeviceType());
-	        deviceEntry.setOnUrl(device.getOnUrl());
-	    	log.debug("Create a Device - device json on URL:" + deviceEntry.getOnUrl());
-	        deviceEntry.setOffUrl(device.getOffUrl());
-	    	log.debug("Create a Device - device json off URL:" + deviceEntry.getOffUrl());
-	
-	        deviceRepository.save(deviceEntry);
-	    	log.debug("Created a Device: " + request.body());
-	
-            response.status(201);
-            return deviceEntry;
+	    	if(device.getContentBody() != null ) {
+	            if (device.getContentType() == null || device.getHttpVerb() == null || !supportedVerbs.contains(device.getHttpVerb().toLowerCase())) {
+	            	device = null;
+	            	response.status(HttpStatus.SC_BAD_REQUEST);
+					log.debug("Created a Device: " + request.body());
+	            }
+	        }
+	    	else
+	    	{
+				deviceRepository.save(device);
+				log.debug("Created a Device: " + request.body());
+
+				response.status(HttpStatus.SC_OK);
+	    	}
+            return device;
 	    }, new JsonTransformer());
 
     	put (API_CONTEXT + "/:id", "application/json", (request, response) -> {
+	    	log.debug("Edit a Device - request body: " + request.body());
         	DeviceDescriptor device = new Gson().fromJson(request.body(), DeviceDescriptor.class);
 	        DeviceDescriptor deviceEntry = deviceRepository.findOne(request.params(":id"));
 	        if(deviceEntry == null){
 		    	log.debug("Could not save an edited Device Id: " + request.params(":id"));
-	            return null;
+		    	response.status(HttpStatus.SC_BAD_REQUEST);
 	        }
-	    	log.debug("Saving an edited Device: " + deviceEntry.getName());
-	
-	        deviceEntry.setName(device.getName());
-	        if(device.getDeviceType() != null)
-	        	deviceEntry.setDeviceType(device.getDeviceType());
-	        deviceEntry.setOnUrl(device.getOnUrl());
-	        deviceEntry.setOffUrl(device.getOffUrl());
-	
-	        deviceRepository.save(deviceEntry);
+	        else
+	        {
+				log.debug("Saving an edited Device: " + deviceEntry.getName());
+
+				deviceEntry.setName(device.getName());
+				if (device.getDeviceType() != null)
+					deviceEntry.setDeviceType(device.getDeviceType());
+				deviceEntry.setOnUrl(device.getOnUrl());
+				deviceEntry.setOffUrl(device.getOffUrl());
+
+				deviceRepository.save(deviceEntry);
+				response.status(HttpStatus.SC_OK);
+	        }
 	        return deviceEntry;
     	}, new JsonTransformer());
 
@@ -87,25 +96,30 @@ public class DeviceResource {
 	    	JsonTransformer aRenderer = new JsonTransformer();
 	    	String theStream = aRenderer.render(deviceList);
 	    	log.debug("The Device List: " + theStream);
+			response.status(HttpStatus.SC_OK);
     		return deviceList;
     	}, new JsonTransformer());
 
     	get (API_CONTEXT + "/:id", "application/json", (request, response) -> {
 	    	log.debug("Get a device");
 	        DeviceDescriptor descriptor = deviceRepository.findOne(request.params(":id"));
-	        if(descriptor == null){
-	            return null;
-	        }
+	        if(descriptor == null)
+				response.status(HttpStatus.SC_NOT_FOUND);
+	        else
+	        	response.status(HttpStatus.SC_OK);
 	        return descriptor;
 	    }, new JsonTransformer());
 
     	delete (API_CONTEXT + "/:id", "application/json", (request, response) -> {
 	    	log.debug("Delete a device");
 	        DeviceDescriptor deleted = deviceRepository.findOne(request.params(":id"));
-	        if(deleted == null){
-	            return null;
+	        if(deleted == null)
+				response.status(HttpStatus.SC_NOT_FOUND);
+	        else
+	        {
+	        	deviceRepository.delete(deleted);
+				response.status(HttpStatus.SC_OK);
 	        }
-	        deviceRepository.delete(deleted);
 	        return null;
 	    }, new JsonTransformer());
 
@@ -113,8 +127,11 @@ public class DeviceResource {
 	    	log.debug("Get vera devices");
 	        Sdata sData = veraInfo.getSdata();
 	        if(sData == null){
-	            return null;
+				response.status(HttpStatus.SC_NOT_FOUND);
+				return null;
 	        }
+
+	      	response.status(HttpStatus.SC_OK);
 	        return sData.getDevices();
 	    }, new JsonTransformer());
 
@@ -122,8 +139,10 @@ public class DeviceResource {
 	    	log.debug("Get vera scenes");
 	        Sdata sData = veraInfo.getSdata();
 	        if(sData == null){
+				response.status(HttpStatus.SC_NOT_FOUND);
 	            return null;
 	        }
+	      	response.status(HttpStatus.SC_OK);
 	        return sData.getScenes();
 	    }, new JsonTransformer());
 

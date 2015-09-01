@@ -17,6 +17,11 @@ import static spark.Spark.put;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
@@ -162,26 +167,11 @@ public class HueMulator {
 	            url = device.getOffUrl();
 	        }
 	
-	        /* light weight templating here, was going to use free marker but it was a bit too
-	        *  heavy for what we were trying to do.
-	        *
-	        *  currently provides only two variables:
-	        *  intensity.byte : 0-255 brightness.  this is raw from the echo
-	        *  intensity.percent : 0-100, adjusted for the vera
-	        */
-	        if(url.contains(INTENSITY_BYTE)){
-	            String intensityByte = String.valueOf(state.getBri());
-	            url = url.replace(INTENSITY_BYTE, intensityByte);
-	            responseString = "[{\"success\":{\"/lights/" + lightId + "/state/bri\":"+ String.valueOf(state.getBri()) + "}}]";
-	        }else if(url.contains(INTENSITY_PERCENT)){
-	            int percentBrightness = (int) Math.round(state.getBri()/255.0*100);
-	            String intensityPercent = String.valueOf(percentBrightness);
-	            url = url.replace(INTENSITY_PERCENT, intensityPercent);
-	            responseString = "[{\"success\":{\"/lights/" + lightId + "/state/bri\":"+ String.valueOf(state.getBri()) + "}}]";
-	        }
-	
+	        //quick template
+	        url = replaceIntensityValue(url, state.getBri());
+	        String body = replaceIntensityValue(device.getContentBody(), state.getBri());
 	        //make call
-	        if(!doHttpGETRequest(url)){
+	        if(!doHttpRequest(url, device.getHttpVerb(), device.getContentType(), body)){
 	        	response.status(503);
 	            log.error("Error on calling url to change device state: " + url);
 	            return null;
@@ -193,14 +183,52 @@ public class HueMulator {
 	    });
     }
 
+    /* light weight templating here, was going to use free marker but it was a bit too
+    *  heavy for what we were trying to do.
+    *
+    *  currently provides only two variables:
+    *  intensity.byte : 0-255 brightness.  this is raw from the echo
+    *  intensity.percent : 0-100, adjusted for the vera
+    */
+    protected String replaceIntensityValue(String request, int intensity){
+        if(request == null){
+            return "";
+        }
+        if(request.contains(INTENSITY_BYTE)){
+            String intensityByte = String.valueOf(intensity);
+            request = request.replace(INTENSITY_BYTE, intensityByte);
+        }else if(request.contains(INTENSITY_PERCENT)){
+            int percentBrightness = (int) Math.round(intensity/255.0*100);
+            String intensityPercent = String.valueOf(percentBrightness);
+            request = request.replace(INTENSITY_PERCENT, intensityPercent);
+        }
+        return request;
+    }
+
+
 //	This function executes the url from the device repository against the vera
-    protected boolean doHttpGETRequest(String url) {
-        log.debug("calling GET on URL: " + url);
-        HttpGet httpGet = new HttpGet(url);
+    protected boolean doHttpRequest(String url, String httpVerb, String contentType, String body) {
+        HttpUriRequest request = null;
+        if(HttpGet.METHOD_NAME.equalsIgnoreCase(httpVerb) || httpVerb == null) {
+            request = new HttpGet(url);
+        }else if(HttpPost.METHOD_NAME.equalsIgnoreCase(httpVerb)){
+            HttpPost postRequest = new HttpPost(url);
+            ContentType parsedContentType = ContentType.parse(contentType);
+            StringEntity requestBody = new StringEntity(body, parsedContentType);
+            postRequest.setEntity(requestBody);
+            request = postRequest;
+        }else if(HttpPut.METHOD_NAME.equalsIgnoreCase(httpVerb)){
+            HttpPut putRequest = new HttpPut(url);
+            ContentType parsedContentType = ContentType.parse(contentType);
+            StringEntity requestBody = new StringEntity(body, parsedContentType);
+            putRequest.setEntity(requestBody);
+            request = putRequest;
+        }
+        log.debug("Making outbound call in doHttpRequest: " + request);
         try {
-            HttpResponse response = httpClient.execute(httpGet);
+            HttpResponse response = httpClient.execute(request);
             EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
-            log.debug("GET on URL responded: " + response.getStatusLine().getStatusCode());
+            log.debug("Execute on URL responded: " + response.getStatusLine().getStatusCode());
             if(response.getStatusLine().getStatusCode() == 200){
                 return true;
             }

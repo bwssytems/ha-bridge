@@ -207,7 +207,7 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
 		$scope.BridgeSettings = bridgeService.BridgeSettings;
         bridgeService.viewDevices();
         $scope.bridge = bridgeService.state;
-        $scope.predicate = 'name';
+        $scope.predicate = '';
         $scope.reverse = true;
         $scope.order = function(predicate) {
           $scope.reverse = ($scope.predicate === predicate) ? !$scope.reverse : false;
@@ -239,7 +239,7 @@ app.controller('AddingController', function ($scope, bridgeService, BridgeSettin
         bridgeService.viewVeraScenes();
         $scope.bridge = bridgeService.state;
         $scope.device = bridgeService.state.device;
-        $scope.predicate = 'name';
+        $scope.predicate = '';
         $scope.reverse = true;
         $scope.order = function(predicate) {
           $scope.reverse = ($scope.predicate === predicate) ? !$scope.reverse : false;

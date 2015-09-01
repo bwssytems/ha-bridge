@@ -179,6 +179,15 @@ public class DeviceRepository {
 		       } else if (name.equals("onUrl")) {
 			        deviceEntry.setOnUrl(reader.nextString());
 			    	log.debug("Read a Device - device json on URL:" + deviceEntry.getOnUrl());
+		       } else if (name.equals("httpVerb")) {
+			        deviceEntry.setHttpVerb(reader.nextString());
+			    	log.debug("Read a Device - device json httpVerb:" + deviceEntry.getHttpVerb());
+		       } else if (name.equals("contentType")) {
+			        deviceEntry.setContentType(reader.nextString());
+			    	log.debug("Read a Device - device json contentType:" + deviceEntry.getContentType());
+		       } else if (name.equals("contentBody")) {
+			        deviceEntry.setContentBody(reader.nextString());
+			    	log.debug("Read a Device - device json contentBody:" + deviceEntry.getContentBody());
 		       } else {
 		         reader.skipValue();
 		       }

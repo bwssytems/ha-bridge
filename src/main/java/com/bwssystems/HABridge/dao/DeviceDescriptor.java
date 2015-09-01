@@ -8,6 +8,9 @@ public class DeviceDescriptor{
     private String deviceType;
     private String offUrl;
     private String onUrl;
+    private String httpVerb;
+    private String contentType;
+    private String contentBody;
 
     public String getName() {
         return name;
@@ -48,4 +51,30 @@ public class DeviceDescriptor{
     public void setId(String id) {
         this.id = id;
     }
+
+	public String getHttpVerb() {
+		return httpVerb;
+	}
+
+	public void setHttpVerb(String httpVerb) {
+		this.httpVerb = httpVerb;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	public String getContentBody() {
+		return contentBody;
+	}
+
+	public void setContentBody(String contentBody) {
+		this.contentBody = contentBody;
+	}
+    
+
 }
