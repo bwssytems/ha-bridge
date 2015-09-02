@@ -36,6 +36,9 @@ app.factory('BridgeSettings', function() {
 	BridgeSettings.upnpdevicedb = "";
 	BridgeSettings.upnpresponseport = "";
 	BridgeSettings.veraaddress = "";
+	BridgeSettings.upnpstrict = "";
+	BridgeSettings.traceupnp = "";
+	BridgeSettings.vtwocompatibility = "";
 	
 	BridgeSettings.setupnpconfigaddress = function(aconfigaddress){
 		BridgeSettings.upnpconfigaddress = aconfigaddress;
@@ -55,6 +58,15 @@ app.factory('BridgeSettings', function() {
 	
 	BridgeSettings.setveraaddress = function(averaaddress){
 		BridgeSettings.veraaddress = averaaddress;
+	};
+	BridgeSettings.setupnpstrict = function(aupnpstrict){
+		BridgeSettings.upnpstrict = aupnpstrict;
+	};
+	BridgeSettings.settraceupnp = function(atraceupnp){
+		BridgeSettings.traceupnp = atraceupnp;
+	};
+	BridgeSettings.setvtwocompatibility = function(avtwocompatibility){
+		BridgeSettings.vtwocompatibility = avtwocompatibility;
 	};
 	
 	return BridgeSettings;
@@ -92,6 +104,9 @@ app.service('bridgeService', function ($http, BridgeSettings) {
                 	self.BridgeSettings.setupnpdevicedb(response.data.upnpdevicedb);
                 	self.BridgeSettings.setupnpresponseport(response.data.upnpresponseport);
                 	self.BridgeSettings.setveraaddress(response.data.veraaddress);
+                	self.BridgeSettings.settraceupnp(response.data.traceupnp);
+                	self.BridgeSettings.setupnpstrict(response.data.upnpstrict);
+                	self.BridgeSettings.setvtwocompatibility(response.data.vtwocompatibility);
                 },
                 function (error) {
                     if (error.data) {
@@ -141,7 +156,7 @@ app.service('bridgeService', function ($http, BridgeSettings) {
             );
         };
 
-        this.addDevice = function (id, name, type, onUrl, offUrl) {
+        this.addDevice = function (id, name, type, onUrl, offUrl, httpVerb, contentType, contentBody) {
             this.state.error = "";
             if (id) {
                 var putUrl = this.state.base + "/" + id;
@@ -150,7 +165,10 @@ app.service('bridgeService', function ($http, BridgeSettings) {
                     name: name,
                     deviceType: type,
                     onUrl: onUrl,
-                    offUrl: offUrl
+                    offUrl: offUrl,
+                    httpVerb: httpVerb,
+                    contentType: contentType,
+                    contentBody: contentBody
                 }).then(
                     function (response) {
                         self.viewDevices();
@@ -167,7 +185,10 @@ app.service('bridgeService', function ($http, BridgeSettings) {
                     name: name,
                     deviceType: type,
                     onUrl: onUrl,
-                    offUrl: offUrl
+                    offUrl: offUrl,
+                    httpVerb: httpVerb,
+                    contentType: contentType,
+                    contentBody: contentBody
                 }).then(
                     function (response) {
                         self.viewDevices();
@@ -197,8 +218,8 @@ app.service('bridgeService', function ($http, BridgeSettings) {
             );
         };
 
-        this.editDevice = function (id, name, onUrl, offUrl) {
-            self.state.device = {id: id, name: name, onUrl: onUrl, offUrl: offUrl};
+        this.editDevice = function (id, name, onUrl, offUrl, httpVerb, contentType, contentBody) {
+            self.state.device = {id: id, name: name, onUrl: onUrl, offUrl: offUrl, httpVerb: httpVerb, contentType: contentType, contentBody: contentBody};
         };
     });
 
@@ -224,7 +245,7 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
             bridgeService.viewDevices();
         };
         $scope.editDevice = function (device) {
-            bridgeService.editDevice(device.id, device.name, device.onUrl, device.offUrl);
+            bridgeService.editDevice(device.id, device.name, device.onUrl, device.offUrl, device.httpVerb, device.contentType, device.contentBody);
             $location.path('/editdevice');
         };
     });
@@ -303,13 +324,16 @@ app.controller('AddingController', function ($scope, bridgeService, BridgeSettin
         };
 
         $scope.addDevice = function () {
-            bridgeService.addDevice($scope.device.id, $scope.device.name, $scope.device.deviceType, $scope.device.onUrl, $scope.device.offUrl).then(
+            bridgeService.addDevice($scope.device.id, $scope.device.name, $scope.device.deviceType, $scope.device.onUrl, $scope.device.offUrl, $scope.device.httpVerb, $scope.device.contentType, $scope.device.contentBody).then(
                 function () {
                     $scope.device.id = "";
                     $scope.device.name = "";
                     $scope.device.onUrl = "";
                     $scope.device.deviceType = "switch";
                     $scope.device.offUrl = "";
+                    $scope.device.httpVerb = "";
+                    $scope.device.contentType = "";
+                    $scope.device.contentBody = "";
                 },
                 function (error) {
                 }

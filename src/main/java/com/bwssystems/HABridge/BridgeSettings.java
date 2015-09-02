@@ -6,7 +6,7 @@ public class BridgeSettings {
 	private String upnpresponseport;
 	private String upnpdevicedb;
 	private String veraaddress;
-	private boolean upnpStrict;
+	private boolean upnpstrict;
 	private boolean traceupnp;
 	private boolean vtwocompatibility;
 	
@@ -42,10 +42,10 @@ public class BridgeSettings {
 	}
 
 	public boolean isUpnpStrict() {
-		return upnpStrict;
+		return upnpstrict;
 	}
 	public void setUpnpStrict(boolean upnpStrict) {
-		this.upnpStrict = upnpStrict;
+		this.upnpstrict = upnpStrict;
 	}
 	public boolean isTraceupnp() {
 		return traceupnp;
