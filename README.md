@@ -12,21 +12,21 @@ Then locate the jar and start the server with:
 java -jar -Dvera.address=192.168.X.Y ha-bridge-0.X.Y.jar
 ```
 ## Available Arguments
-### -Dvera.address=<ip address>
+### -Dvera.address=`<ip address>`
 The argument for the vera address should be given as it the system does not have a way to find the address. Supply -Dvera.address=X.Y.Z.A on the command line to provide it.
-### -Dupnp.config.address=<ip address>
-The server defaults to the first available address on the host. Replace the -Dupnp.config.address=<ip address> value with the server ipv4 address you would like to use. 
-### -Dserver.port=<port>
-The server defaults to running on port 8080. If you're already running a server (like openHAB) on 8080, -Dserver.port=<port> on the command line.
-### -Dupnp.devices.db=<filepath>
-The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify -Dupnp.devices.db=<directory>/<filename> or <filename> if it is the same directory.
-### -Dupnp.resonse.port=<port>
+### -Dupnp.config.address=`<ip address>`
+The server defaults to the first available address on the host. Replace the -Dupnp.config.address=`<ip address>` value with the server ipv4 address you would like to use. 
+### -Dserver.port=`<port>`
+The server defaults to running on port 8080. If you're already running a server (like openHAB) on 8080, -Dserver.port=`<port>` on the command line.
+### -Dupnp.devices.db=`<filepath>`
+The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify -Dupnp.devices.db=`<directory>/<filename> or <filename>` if it is the same directory.
+### -Dupnp.resonse.port=`<port>`
 The upnp response port that will be used. The default is 50000.  
-### -Dupnp.strict=<true|false>
-Upnp has been very closed on this platform to try and respond as a hue and there is now a setting to control if it is more open or strict, Add -Dupnp.strict=<true|false> to your command line to have the emulator respond to what it thinks is an echo to a hue or any other device. The default is upnp.strict=true.
-### -Dtrace.upnp=<true|false>
+### -Dupnp.strict=`<true|false>`
+Upnp has been very closed on this platform to try and respond as a hue and there is now a setting to control if it is more open or strict, Add -Dupnp.strict=`<true|false>` to your command line to have the emulator respond to what it thinks is an echo to a hue or any other device. The default is upnp.strict=true.
+### -Dtrace.upnp=`<true|false>`
 Turn on tracing for upnp discovery messages. The default is false.
-### -Dvtwo.compatibility=<true|false>
+### -Dvtwo.compatibility=`<true|false>`
 Turns on compatibility for upnp detection and response as it was in the original version of amazon-echo-ha-bridge. The default is true. 
 ## Web Config
 Configure by going to the url for the host you are running on or localhost with port you have assigned: 
