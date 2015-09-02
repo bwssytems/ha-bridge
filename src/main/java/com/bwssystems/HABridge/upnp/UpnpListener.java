@@ -24,6 +24,10 @@ public class UpnpListener {
 	private String responseAddress;
 	
 	private boolean strict;
+	
+	private boolean traceupnp;
+	
+	private boolean vTwoCompatibility;
 
 	public UpnpListener(BridgeSettings theSettings) {
 		super();
@@ -31,6 +35,8 @@ public class UpnpListener {
 		httpServerPort = Integer.valueOf(theSettings.getServerPort());
 		responseAddress = theSettings.getUpnpConfigAddress();
 		strict = theSettings.isUpnpStrict();
+		traceupnp = theSettings.isTraceupnp();
+		vTwoCompatibility = theSettings.isVtwocompatibility();
 	}
 
 	public void startListening(){
@@ -66,8 +72,12 @@ public class UpnpListener {
 				DatagramPacket packet = new DatagramPacket(buf, buf.length);
 				upnpMulticastSocket.receive(packet);
 				String packetString = new String(packet.getData());
-				if(packetString != null && packetString.startsWith("M-SEARCH * HTTP/1.1"))
-					log.debug("Got SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " body : " + packetString);
+				if(packetString != null && packetString.startsWith("M-SEARCH * HTTP/1.1")) {
+					if(traceupnp)
+						log.info("Trace SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " body : " + packetString);
+					else
+						log.debug("Got SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " body : " + packetString);
+				}
 				if(isSSDPDiscovery(packetString)){
 					sendUpnpResponse(responseSocket, packet.getAddress(), packet.getPort());
 				}
@@ -92,7 +102,7 @@ public class UpnpListener {
 		if(body != null && body.startsWith("M-SEARCH * HTTP/1.1") && body.contains("MAN: \"ssdp:discover\"")){
 			if(strict && body.contains("ST: urn:schemas-upnp-org:device:basic:1"))
 				return true;
-			else if (!strict)
+			else if (!strict || vTwoCompatibility)
 				return true;
 		}
 		return false;
@@ -105,8 +115,20 @@ public class UpnpListener {
 			"SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/0.1\r\n" + 
 			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
 			"USN: uuid:Socket-1_0-221438K0100073::urn:schemas-upnp-org:device:basic:1\r\n\r\n";
+	String discoveryTemplateVTwo = "HTTP/1.1 200 OK\r\n" +
+			"CACHE-CONTROL: max-age=86400\r\n" +
+			"EXT:\r\n" +
+			"LOCATION: http://%s:%s/description.xml\r\n" +
+			"OPT: \"http://schemas.upnp.org/upnp/1/0/\"; ns=01\r\n" +
+			"01-NLS: %s\r\n" +
+			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
+			"USN: uuid:Socket-1_0-221438K0100073::urn:Belkin:device:**\r\n\r\n";
 	protected void sendUpnpResponse(DatagramSocket socket, InetAddress requester, int sourcePort) throws IOException {
-		String discoveryResponse = String.format(discoveryTemplate, responseAddress, httpServerPort, getRandomUUIDString());
+		String discoveryResponse = null;
+		if(vTwoCompatibility)
+			discoveryResponse = String.format(discoveryTemplateVTwo, responseAddress, httpServerPort, getRandomUUIDString());
+		else
+			discoveryResponse = String.format(discoveryTemplate, responseAddress, httpServerPort, getRandomUUIDString());
 		log.debug("sndUpnpResponse: " + discoveryResponse);
 		DatagramPacket response = new DatagramPacket(discoveryResponse.getBytes(), discoveryResponse.length(), requester, sourcePort);
 		socket.send(response);

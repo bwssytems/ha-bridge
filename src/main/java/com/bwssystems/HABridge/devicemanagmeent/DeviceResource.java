@@ -61,7 +61,7 @@ public class DeviceResource {
 				deviceRepository.save(device);
 				log.debug("Created a Device: " + request.body());
 
-				response.status(HttpStatus.SC_OK);
+				response.status(HttpStatus.SC_CREATED);
 	    	}
             return device;
 	    }, new JsonTransformer());

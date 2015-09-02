@@ -7,6 +7,8 @@ public class BridgeSettings {
 	private String upnpdevicedb;
 	private String veraaddress;
 	private boolean upnpStrict;
+	private boolean traceupnp;
+	private boolean vtwocompatibility;
 	
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -45,4 +47,18 @@ public class BridgeSettings {
 	public void setUpnpStrict(boolean upnpStrict) {
 		this.upnpStrict = upnpStrict;
 	}
+	public boolean isTraceupnp() {
+		return traceupnp;
+	}
+	public void setTraceupnp(boolean traceupnp) {
+		this.traceupnp = traceupnp;
+	}
+	
+	public boolean isVtwocompatibility() {
+		return vtwocompatibility;
+	}
+	public void setVtwocompatibility(boolean vtwocompatibility) {
+		this.vtwocompatibility = vtwocompatibility;
+	}
+	
 }
