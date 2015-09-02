@@ -10,7 +10,7 @@ Otherwise go to http://www.bwssystems.com/apps.html to download the latest jar f
 Then locate the jar and start the server with:  
 ```
 java -jar -Dvera.address=192.168.X.Y ha-bridge-0.X.Y.jar
-``'
+```
 ## Available Arguments
 ### -Dvera.address=<ip address>
 The argument for the vera address should be given as it the system does not have a way to find the address. Supply -Dvera.address=X.Y.Z.A on the command line to provide it.
