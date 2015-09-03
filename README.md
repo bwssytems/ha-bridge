@@ -23,7 +23,7 @@ The default location for the db to contain the devices as they are added is "dat
 ### -Dupnp.resonse.port=`<port>`
 The upnp response port that will be used. The default is 50000.  
 ### -Dupnp.strict=`<true|false>`
-Upnp has been very closed on this platform to try and respond as a hue and there is now a setting to control if it is more open or strict, Add -Dupnp.strict=`<true|false>` to your command line to have the emulator respond to what it thinks is an echo to a hue or any other device. The default is upnp.strict=true.
+Upnp has been very closed on this platform to try and respond as a hue and there is now a setting to control if it is more open or strict, Add -Dupnp.strict=`<true|false>` to your command line to have the emulator respond to what it thinks is an echo to a hue or any other device. The default is upnp.strict=false.
 ### -Dtrace.upnp=`<true|false>`
 Turn on tracing for upnp discovery messages. The default is false.
 ### -Dvtwo.compatibility=`<true|false>`

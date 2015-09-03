@@ -53,16 +53,16 @@ public class DeviceResource {
 	            if (device.getContentType() == null || device.getHttpVerb() == null || !supportedVerbs.contains(device.getHttpVerb().toLowerCase())) {
 	            	device = null;
 	            	response.status(HttpStatus.SC_BAD_REQUEST);
-					log.debug("Created a Device: " + request.body());
+					log.debug("Bad http verb in create a Device: " + request.body());
+					return device;
 	            }
 	        }
-	    	else
-	    	{
-				deviceRepository.save(device);
-				log.debug("Created a Device: " + request.body());
 
-				response.status(HttpStatus.SC_CREATED);
-	    	}
+	    	deviceRepository.save(device);
+			log.debug("Created a Device: " + request.body());
+
+			response.status(HttpStatus.SC_CREATED);
+
             return device;
 	    }, new JsonTransformer());
 
@@ -83,6 +83,9 @@ public class DeviceResource {
 					deviceEntry.setDeviceType(device.getDeviceType());
 				deviceEntry.setOnUrl(device.getOnUrl());
 				deviceEntry.setOffUrl(device.getOffUrl());
+				deviceEntry.setHttpVerb(device.getHttpVerb());
+				deviceEntry.setContentType(device.getContentType());
+				deviceEntry.setContentBody(device.getContentBody());
 
 				deviceRepository.save(deviceEntry);
 				response.status(HttpStatus.SC_OK);

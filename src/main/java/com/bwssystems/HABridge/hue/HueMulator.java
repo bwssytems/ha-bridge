@@ -15,6 +15,7 @@ import static spark.Spark.post;
 import static spark.Spark.put;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -70,21 +71,32 @@ public class HueMulator {
 	            deviceResponseMap.put(device.getId(), deviceResponse);
 	        }
 			response.type("application/json; charset=utf-8"); 
-	        response.status(200);
+	        response.status(HttpStatus.SC_OK);
 	        return deviceResponseMap;
 	    } , new JsonTransformer());
 
 //		http://ip_address:port/api with body of user request returns json object for a success of user add
         post(HUE_CONTEXT, "application/json", (request, response) -> {
-	        log.debug("hue api user create requested: " + request.body() + " from " + request.ip());
-    		UserCreateRequest aNewUser = new Gson().fromJson(request.body(), UserCreateRequest.class);
-    		String newUser = aNewUser.getUsername();
+        	UserCreateRequest aNewUser = null;
+        	String newUser = null;
+        	String aDeviceType = null;
+        	
+        	log.debug("hue api user create requested: " + request.body() + " from " + request.ip());
+	        
+	        if(request.body() != null && !request.body().isEmpty()) {
+	        	aNewUser = new Gson().fromJson(request.body(), UserCreateRequest.class);
+	        	newUser = aNewUser.getUsername();
+	        	aDeviceType = aNewUser.getDevicetype();
+	        }
     		if(newUser == null)
     			newUser = "lightssystem";
-    		log.debug("hue api user create requested for device type: " + aNewUser.getDevicetype() + " and username: " + newUser);
+    		
+    		if(aDeviceType == null)
+    			aDeviceType = "<not given>";
+    		log.debug("hue api user create requested for device type: " + aDeviceType + " and username: " + newUser);
 
 			response.type("application/json; charset=utf-8"); 
-    		response.status(200);
+    		response.status(HttpStatus.SC_OK);
 	        return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";
 	    } );
 
@@ -94,7 +106,7 @@ public class HueMulator {
 	        log.debug("hue api full state requested: " + userId + " from " + request.ip());
 	        List<DeviceDescriptor> descriptorList = repository.findAll();
 	        if (descriptorList == null) {
-	        	response.status(404);
+	        	response.status(HttpStatus.SC_NOT_FOUND);
 	            return null;
 	        }
 	        Map<String, DeviceResponse> deviceList = new HashMap<>();
@@ -108,7 +120,7 @@ public class HueMulator {
 	        apiResponse.setLights(deviceList);
 	
 			response.type("application/json; charset=utf-8"); 
-	        response.status(200);
+	        response.status(HttpStatus.SC_OK);
 	        return apiResponse;
 	    }, new JsonTransformer());
 
@@ -119,7 +131,7 @@ public class HueMulator {
 	        log.debug("hue light requested: " + lightId + " for user: " + userId + " from " + request.ip());
 	        DeviceDescriptor device = repository.findOne(lightId);
 	        if (device == null) {
-	        	response.status(404);
+	        	response.status(HttpStatus.SC_NOT_FOUND);
 	            return null;
 	        } else {
 	            log.debug("found device named: " + device.getName());
@@ -127,7 +139,7 @@ public class HueMulator {
 	        DeviceResponse lightResponse = DeviceResponse.createResponse(device.getName(), device.getId());
 	
 			response.type("application/json; charset=utf-8"); 
-	        response.status(200);
+	        response.status(HttpStatus.SC_OK);
 	        return lightResponse;
 	    }, new JsonTransformer()); 
 
@@ -146,13 +158,13 @@ public class HueMulator {
 	            state = mapper.readValue(request.body(), DeviceState.class);
 	        } catch (IOException e) {
 	            log.error("Object mapper barfed on input of body.", e);
-	        	response.status(400);
+	        	response.status(HttpStatus.SC_BAD_REQUEST);
 	            return null;
 	        }
 	
 	        DeviceDescriptor device = repository.findOne(lightId);
 	        if (device == null) {
-	        	response.status(404);
+	        	response.status(HttpStatus.SC_NOT_FOUND);
 	            log.error("Could not find devcie: " + lightId + " for hue state change request: " + userId + " from " + request.ip() + " body: " + request.body());
 	            return null;
 	        }
@@ -172,13 +184,13 @@ public class HueMulator {
 	        String body = replaceIntensityValue(device.getContentBody(), state.getBri());
 	        //make call
 	        if(!doHttpRequest(url, device.getHttpVerb(), device.getContentType(), body)){
-	        	response.status(503);
+	        	response.status(HttpStatus.SC_SERVICE_UNAVAILABLE);
 	            log.error("Error on calling url to change device state: " + url);
 	            return null;
 	        }
 	
 			response.type("application/json; charset=utf-8"); 
-	        response.status(200);
+	        response.status(HttpStatus.SC_OK);
 	        return responseString;
 	    });
     }

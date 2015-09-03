@@ -54,9 +54,9 @@ public class HABridge {
         bridgeSettings.setUpnpDeviceDb(System.getProperty("upnp.device.db", "data/device.db"));
         bridgeSettings.setUpnpResponsePort(System.getProperty("upnp.response.port", "50000"));
         bridgeSettings.setVeraAddress(System.getProperty("vera.address", "192.168.1.100"));
-        bridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
-        bridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
-        bridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("vtwo.compatibility", "true")));
+        bridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "false")));
+        bridgeSettings.setTraceupnp(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
+        bridgeSettings.setVtwocompatibility(Boolean.parseBoolean(System.getProperty("vtwo.compatibility", "true")));
 
         // sparkjava config directive to set ip address for the web server to listen on
         // ipAddress("0.0.0.0"); // not used
