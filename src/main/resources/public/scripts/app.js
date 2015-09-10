@@ -250,9 +250,9 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
         };
     });
 
-app.controller('AddingController', function ($scope, bridgeService, BridgeSettings) {
+app.controller('AddingController', function ($scope, $location, bridgeService, BridgeSettings) {
 
-        $scope.device = {id: "", name: "", deviceType: "switch", onUrl: "", offUrl: "", httpVerb: "", contentType: "", contentBody: ""};
+        $scope.device = {id: "", name: "", deviceType: "switch", onUrl: "", offUrl: ""};
         $scope.vera = {base: "", port: "3480", id: ""};
         $scope.vera.base = "http://" + BridgeSettings.veraaddress;
         bridgeService.device = $scope.device;
@@ -296,6 +296,7 @@ app.controller('AddingController', function ($scope, bridgeService, BridgeSettin
             if ($scope.vera.base.indexOf("http") < 0) {
                 $scope.vera.base = "http://" + $scope.vera.base;
             }
+            $scope.device.deviceType = "switch";
             $scope.device.name = veradevice.name;
             $scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
                 + "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
@@ -331,10 +332,10 @@ app.controller('AddingController', function ($scope, bridgeService, BridgeSettin
                     $scope.device.onUrl = "";
                     $scope.device.deviceType = "switch";
                     $scope.device.offUrl = "";
-                    $scope.device.httpVerb = "";
-                    $scope.device.contentType = "";
-                    $scope.device.contentBody = "";
-                    $location.path('/');
+                    $scope.device.httpVerb = null;
+                    $scope.device.contentType = null;
+                    $scope.device.contentBody = null;
+                    $location.path('/#');
                 },
                 function (error) {
                 }
