@@ -18,7 +18,7 @@ The argument for the vera address should be given as it the system does not have
 The server defaults to the first available address on the host. Replace the -Dupnp.config.address=`<ip address>` value with the server ipv4 address you would like to use. 
 ### -Dserver.port=`<port>`
 The server defaults to running on port 8080. If you're already running a server (like openHAB) on 8080, -Dserver.port=`<port>` on the command line.
-### -Dupnp.devices.db=`<filepath>`
+### -Dupnp.device.db=`<filepath>`
 The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify -Dupnp.devices.db=`<directory>/<filename> or <filename>` if it is the same directory.
 ### -Dupnp.resonse.port=`<port>`
 The upnp response port that will be used. The default is 50000.  
@@ -91,3 +91,8 @@ After this Tell Alexa: "Alexa, discover my devices"
 Then you can say "Alexa, Turn on the office light" or whatever name you have given your configured devices.  
 
 To view or remove devices that Alexa knows about, you can use the mobile app Menu / Settings / Connected Home  
+## Debugging
+To turn on debugging for the bridge, use the following extra parm in the command line:
+```
+-Dorg.slf4j.simpleLogger.defaultLogLevel=DEBUG
+```

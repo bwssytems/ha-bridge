@@ -252,7 +252,7 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
 
 app.controller('AddingController', function ($scope, bridgeService, BridgeSettings) {
 
-        $scope.device = {id: "", name: "", deviceType: "switch", onUrl: "", offUrl: ""};
+        $scope.device = {id: "", name: "", deviceType: "switch", onUrl: "", offUrl: "", httpVerb: "", contentType: "", contentBody: ""};
         $scope.vera = {base: "", port: "3480", id: ""};
         $scope.vera.base = "http://" + BridgeSettings.veraaddress;
         bridgeService.device = $scope.device;
@@ -334,6 +334,7 @@ app.controller('AddingController', function ($scope, bridgeService, BridgeSettin
                     $scope.device.httpVerb = "";
                     $scope.device.contentType = "";
                     $scope.device.contentBody = "";
+                    $location.path('/');
                 },
                 function (error) {
                 }
