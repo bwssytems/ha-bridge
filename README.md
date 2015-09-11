@@ -20,7 +20,7 @@ The server defaults to the first available address on the host. Replace the -Dup
 The server defaults to running on port 8080. If you're already running a server (like openHAB) on 8080, -Dserver.port=`<port>` on the command line.
 ### -Dupnp.device.db=`<filepath>`
 The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify -Dupnp.devices.db=`<directory>/<filename> or <filename>` if it is the same directory.
-### -Dupnp.resonse.port=`<port>`
+### -Dupnp.response.port=`<port>`
 The upnp response port that will be used. The default is 50000.  
 ### -Dupnp.strict=`<true|false>`
 Upnp has been very closed on this platform to try and respond as a hue and there is now a setting to control if it is more open or strict, Add -Dupnp.strict=`<true|false>` to your command line to have the emulator respond to what it thinks is an echo to a hue or any other device. The default is upnp.strict=false.

@@ -100,6 +100,31 @@ public class HueMulator {
 	        return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";
 	    } );
 
+        //		http://ip_address:port/api/* with body of user request returns json object for a success of user add - This method is for Harmony Hub
+        post(HUE_CONTEXT + "/*", "application/json", (request, response) -> {
+        	UserCreateRequest aNewUser = null;
+        	String newUser = null;
+        	String aDeviceType = null;
+        	
+        	log.info("HH trace: hue api user create requested: " + request.body() + " from " + request.ip());
+	        
+	        if(request.body() != null && !request.body().isEmpty()) {
+	        	aNewUser = new Gson().fromJson(request.body(), UserCreateRequest.class);
+	        	newUser = aNewUser.getUsername();
+	        	aDeviceType = aNewUser.getDevicetype();
+	        }
+    		if(newUser == null)
+    			newUser = "lightssystem";
+    		
+    		if(aDeviceType == null)
+    			aDeviceType = "<not given>";
+    		log.debug("HH trace: hue api user create requested for device type: " + aDeviceType + " and username: " + newUser);
+
+			response.type("application/json; charset=utf-8"); 
+    		response.status(HttpStatus.SC_OK);
+	        return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";        
+        } );
+
 //		http://ip_address:port/api/{userId} returns json objects for the full state
 	    get(HUE_CONTEXT + "/:userid", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");

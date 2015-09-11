@@ -40,7 +40,7 @@ public class UpnpListener {
 	}
 
 	public void startListening(){
-		log.info("UPNP Discovery Listener started....");
+		log.info("UPNP Discovery Listener starting....");
 
 		try (DatagramSocket responseSocket = new DatagramSocket(upnpResponsePort);
 				MulticastSocket upnpMulticastSocket  = new MulticastSocket(UPNP_DISCOVERY_PORT);) {
@@ -55,7 +55,10 @@ public class UpnpListener {
 
 				while (addrs.hasMoreElements()) {
 					InetAddress addr = addrs.nextElement();
-					log.debug(name + " ... has addr " + addr);
+					if(traceupnp)
+						log.info("Traceupnp: " + name + " ... has addr " + addr);
+					else
+						log.debug(name + " ... has addr " + addr);
 					if (InetAddressUtils.isIPv4Address(addr.getHostAddress())) {
 						IPsPerNic++;
 					}
@@ -63,9 +66,14 @@ public class UpnpListener {
 				log.debug("Checking " + name + " to our interface set");
 				if (IPsPerNic > 0) {
 					upnpMulticastSocket.joinGroup(socketAddress, xface);
-					log.debug("Adding " + name + " to our interface set");
+					if(traceupnp)
+						log.info("Traceupnp: Adding " + name + " to our interface set");
+					else
+						log.debug("Adding " + name + " to our interface set");
 				}
 			}
+
+			log.info("UPNP Discovery Listener running and ready....");
 
 			while(true){ //trigger shutdown here
 				byte[] buf = new byte[1024];
@@ -74,9 +82,9 @@ public class UpnpListener {
 				String packetString = new String(packet.getData());
 				if(packetString != null && packetString.contains("M-SEARCH")) {
 					if(traceupnp)
-						log.info("Trace SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " body : " + packetString);
+						log.info("Traceupnp: SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
 					else
-						log.debug("Got SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " body : " + packetString);
+						log.debug("Got SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
 				}
 				if(isSSDPDiscovery(packetString)){
 					sendUpnpResponse(responseSocket, packet.getAddress(), packet.getPort());
@@ -84,7 +92,7 @@ public class UpnpListener {
 			}
 
 		}  catch (IOException e) {
-			log.error("UpnpListener encountered an error. Shutting down", e);
+			log.error("UpnpListener encountered an error opening sockets. Shutting down", e);
 
 		}
 		log.info("UPNP Discovery Listener Stopped");
@@ -100,11 +108,23 @@ public class UpnpListener {
 		// log.debug("Check if this is a MAN ssdp-discover packet for a upnp basic device: " + body);
 		//Only respond to discover request for upnp basic device from echo, the others are for the wemo
 		if(body != null && body.contains("M-SEARCH") && body.contains("\"ssdp:discover\"")){
-			if(strict && body.startsWith("M-SEARCH * HTTP/1.1") && body.contains("MAN: \"ssdp:discover\"") && body.contains("ST: urn:schemas-upnp-org:device:basic:1"))
+			if(traceupnp)
+				log.info("Traceupnp: isSSDPDiscovery found message to be an M-SEARCH message.");
+			if(strict && body.startsWith("M-SEARCH * HTTP/1.1") && body.contains("MAN: \"ssdp:discover\"") && (body.contains("ST: urn:schemas-upnp-org:device:basic:1") || body.contains("ST: upnp:rootdevice") || body.contains("ST: ssdp:all")))
+			{
+				if(traceupnp)
+					log.info("Traceupnp: isSSDPDiscovery found message to be valid under strict rules - strict: " + strict + ", vTwo.Compatibility: " + vTwoCompatibility);
 				return true;
+			}
 			else if (!strict || vTwoCompatibility)
+			{
+				if(traceupnp)
+					log.info("Traceupnp: isSSDPDiscovery found message to be valid under loose rules - strict: " + strict + ", vTwo.Compatibility: " + vTwoCompatibility);
 				return true;
+			}
 		}
+		if(traceupnp)
+			log.info("Traceupnp: isSSDPDiscovery found message to not be valid - strict: " + strict + ", vTwo.Compatibility: " + vTwoCompatibility);
 		return false;
 	}
 
@@ -129,7 +149,10 @@ public class UpnpListener {
 			discoveryResponse = String.format(discoveryTemplateVTwo, responseAddress, httpServerPort, getRandomUUIDString());
 		else
 			discoveryResponse = String.format(discoveryTemplate, responseAddress, httpServerPort, getRandomUUIDString());
-		log.debug("sndUpnpResponse: " + discoveryResponse);
+		if(traceupnp)
+			log.info("Traceupnp: sendUpnpResponse: " + discoveryResponse);
+		else
+			log.debug("sendUpnpResponse: " + discoveryResponse);
 		DatagramPacket response = new DatagramPacket(discoveryResponse.getBytes(), discoveryResponse.length(), requester, sourcePort);
 		socket.send(response);
 	}

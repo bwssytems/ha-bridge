@@ -15,6 +15,8 @@ public class UpnpSettingsResource {
     private static final String UPNP_CONTEXT = "/upnp";
 
     private Logger log = LoggerFactory.getLogger(UpnpSettingsResource.class);
+    
+    private BridgeSettings theSettings;
 
 	private String hueTemplate = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">\n"
 			+ "<specVersion>\n" + "<major>1</major>\n" + "<minor>0</minor>\n" + "</specVersion>\n"
@@ -87,21 +89,28 @@ public class UpnpSettingsResource {
 
 	public UpnpSettingsResource(BridgeSettings theSettings) {
 		super();
-		setupListener(theSettings);
+		this.theSettings = theSettings;
+		setupListener(this.theSettings);
 	}
 
 	private void setupListener (BridgeSettings theSettings) {
 		log.info("Hue description service started....");
 //      http://ip_adress:port/description.xml which returns the xml configuration for the hue emulator
 		get("/description.xml", "application/xml; charset=utf-8", (request, response) -> {
-			log.debug("upnp device settings requested: " + request.params(":id") + " from " + request.ip());
+			if(theSettings.isTraceupnp())
+				log.info("Traceupnp: upnp device settings requested: " + request.params(":id") + " from " + request.ip() + ":" + request.port());
+			else
+				log.debug("upnp device settings requested: " + request.params(":id") + " from " + request.ip() + ":" + request.port());
 			String portNumber = Integer.toString(request.port());
 			String filledTemplate = null;
 			if(theSettings.isVtwocompatibility())
 				filledTemplate = String.format(hueTemplateVTwo, theSettings.getUpnpConfigAddress(), portNumber, theSettings.getUpnpConfigAddress());
 			else
 				filledTemplate = String.format(hueTemplate, theSettings.getUpnpConfigAddress(), portNumber, theSettings.getUpnpConfigAddress());
-			log.debug("upnp device settings response: " + filledTemplate);
+			if(theSettings.isTraceupnp())
+				log.info("Traceupnp: upnp device settings response: " + filledTemplate);
+			else
+				log.debug("upnp device settings response: " + filledTemplate);
 //			response.header("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
 //			response.header("Pragma", "no-cache");
 //			response.header("Expires", "Mon, 1 Aug 2011 09:00:00 GMT");
