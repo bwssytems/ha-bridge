@@ -10,3 +10,5 @@ data
 .idea
 /target/
 /.settings/
+/start.bat
+/.classpath
