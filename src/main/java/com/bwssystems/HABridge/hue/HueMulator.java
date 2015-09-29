@@ -54,11 +54,10 @@ public class HueMulator {
         mapper = new ObjectMapper(); //armzilla: work around Echo incorrect content type and breaking mapping. Map manually
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         repository = aDeviceRepository;
-        setupEndpoints();
     }
 
 //	This function sets up the sparkjava rest calls for the hue api
-    private void setupEndpoints() {
+    public void setupServer() {
     	log.info("Hue emulator service started....");
 //		http://ip_address:port/api/{userId}/lights  returns json objects of all lights configured
 	    get(HUE_CONTEXT + "/:userid/lights", "application/json", (request, response) -> {

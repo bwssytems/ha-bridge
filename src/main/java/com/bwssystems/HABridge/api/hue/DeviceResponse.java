@@ -75,17 +75,20 @@ public class DeviceResponse {
     }
 
     public Map<String, String> getPointsymbol() {
-        Map<String, String> dummyValue = new HashMap<>();
-        dummyValue.put("1", "none");
-        dummyValue.put("2", "none");
-        dummyValue.put("3", "none");
-        dummyValue.put("4", "none");
-        dummyValue.put("5", "none");
-        dummyValue.put("6", "none");
-        dummyValue.put("7", "none");
-        dummyValue.put("8", "none");
+    	if(pointsymbol == null)
+    	{
+    		pointsymbol = new HashMap<>();
+	        pointsymbol.put("1", "none");
+	        pointsymbol.put("2", "none");
+	        pointsymbol.put("3", "none");
+	        pointsymbol.put("4", "none");
+	        pointsymbol.put("5", "none");
+	        pointsymbol.put("6", "none");
+	        pointsymbol.put("7", "none");
+	        pointsymbol.put("8", "none");
+    	}
 
-        return dummyValue;
+        return pointsymbol;
     }
 
     public void setPointsymbol(Map<String, String> pointsymbol) {

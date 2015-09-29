@@ -90,10 +90,9 @@ public class UpnpSettingsResource {
 	public UpnpSettingsResource(BridgeSettings theSettings) {
 		super();
 		this.theSettings = theSettings;
-		setupListener(this.theSettings);
 	}
 
-	private void setupListener (BridgeSettings theSettings) {
+	public void setupServer() {
 		log.info("Hue description service started....");
 //      http://ip_adress:port/description.xml which returns the xml configuration for the hue emulator
 		get("/description.xml", "application/xml; charset=utf-8", (request, response) -> {

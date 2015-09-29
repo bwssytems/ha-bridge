@@ -70,8 +70,10 @@ public class HABridge {
         theResources = new DeviceResource(bridgeSettings);
         // setup the class to handle the hue emulator rest api
         theHueMulator = new HueMulator(theResources.getDeviceRepository());
+        theHueMulator.setupServer();
         // setup the class to handle the upnp response rest api
         theSettingResponder = new UpnpSettingsResource(bridgeSettings);
+        theSettingResponder.setupServer();
         // wait for the sparkjava initialization of the rest api classes to be complete
         awaitInitialization();
 
