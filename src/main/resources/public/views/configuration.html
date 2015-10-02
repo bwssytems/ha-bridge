@@ -107,9 +107,9 @@
 				<td>{{device.deviceType}}</td>
 				<td>
 					<button class="btn btn-info" type="submit"
-						ng-click="testUrl(device.onUrl)">Test ON</button>
+						ng-click="testUrl(device, 'on')">Test ON</button>
 					<button class="btn btn-info" type="submit"
-						ng-click="testUrl(device.offUrl)">Test OFF</button>
+						ng-click="testUrl(device, 'off')">Test OFF</button>
 					<button class="btn btn-warning" type="submit"
 						ng-click="editDevice(device)">Edit</button>
 					<button class="btn btn-danger" type="submit"

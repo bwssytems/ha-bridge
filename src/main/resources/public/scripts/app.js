@@ -156,7 +156,7 @@ app.service('bridgeService', function ($http, BridgeSettings) {
             );
         };
 
-        this.addDevice = function (id, name, type, onUrl, offUrl, httpVerb, contentType, contentBody) {
+        this.addDevice = function (id, name, type, onUrl, offUrl, httpVerb, contentType, contentBody, contentBodyOff) {
             this.state.error = "";
             if (id) {
                 var putUrl = this.state.base + "/" + id;
@@ -168,7 +168,8 @@ app.service('bridgeService', function ($http, BridgeSettings) {
                     offUrl: offUrl,
                     httpVerb: httpVerb,
                     contentType: contentType,
-                    contentBody: contentBody
+                    contentBody: contentBody,
+                    contentBodyOff: contentBodyOff
                 }).then(
                     function (response) {
                         self.viewDevices();
@@ -188,7 +189,8 @@ app.service('bridgeService', function ($http, BridgeSettings) {
                     offUrl: offUrl,
                     httpVerb: httpVerb,
                     contentType: contentType,
-                    contentBody: contentBody
+                    contentBody: contentBody,
+                    contentBodyOff: contentBodyOff
                 }).then(
                     function (response) {
                         self.viewDevices();
@@ -218,12 +220,12 @@ app.service('bridgeService', function ($http, BridgeSettings) {
             );
         };
 
-        this.editDevice = function (id, name, onUrl, offUrl, httpVerb, contentType, contentBody) {
-            self.state.device = {id: id, name: name, onUrl: onUrl, offUrl: offUrl, httpVerb: httpVerb, contentType: contentType, contentBody: contentBody};
+        this.editDevice = function (id, name, onUrl, offUrl, httpVerb, contentType, contentBody, contentBodyOff) {
+            self.state.device = {id: id, name: name, onUrl: onUrl, offUrl: offUrl, httpVerb: httpVerb, contentType: contentType, contentBody: contentBody, contentBodyOff: contentBodyOff};
         };
     });
 
-app.controller('ViewingController', function ($scope, $location, bridgeService, BridgeSettings) {
+app.controller('ViewingController', function ($scope, $location, $http, bridgeService, BridgeSettings) {
 
 		$scope.BridgeSettings = bridgeService.BridgeSettings;
         bridgeService.viewDevices();
@@ -237,20 +239,31 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
         $scope.deleteDevice = function (device) {
             bridgeService.deleteDevice(device.id);
         };
-        $scope.testUrl = function (url) {
-            window.open(url, "_blank");
+        $scope.testUrl = function (device, type) {
+        	if(type == "on") {
+        		if(device.httpVerb == "PUT" || device.httpVerb == "POST")
+        			$http.put(device.onUrl, device.contentBody);
+        		else
+        			window.open(device.onUrl, "_blank");
+        	}
+        	else {
+        		if(device.httpVerb == "PUT" || device.httpVerb == "POST")
+        			$http.put(device.offUrl, device.contentBodyOff);
+        		else
+            		window.open(device.offUrl, "_blank");
+        	}
         };
         $scope.setBridgeUrl = function (url) {
             bridgeService.state.base = url;
             bridgeService.viewDevices();
         };
         $scope.editDevice = function (device) {
-            bridgeService.editDevice(device.id, device.name, device.onUrl, device.offUrl, device.httpVerb, device.contentType, device.contentBody);
+            bridgeService.editDevice(device.id, device.name, device.onUrl, device.offUrl, device.httpVerb, device.contentType, device.contentBody, device.contentBodyOff);
             $location.path('/editdevice');
         };
     });
 
-app.controller('AddingController', function ($scope, $location, bridgeService, BridgeSettings) {
+app.controller('AddingController', function ($scope, $location, $http, bridgeService, BridgeSettings) {
 
         $scope.device = {id: "", name: "", deviceType: "switch", onUrl: "", offUrl: ""};
         $scope.vera = {base: "", port: "3480", id: ""};
@@ -321,11 +334,22 @@ app.controller('AddingController', function ($scope, $location, bridgeService, B
         };
 
         $scope.testUrl = function (url) {
-            window.open(url, "_blank");
+        	if(type == "on") {
+        		if(device.httpVerb == "PUT" || device.httpVerb == "POST")
+        			$http.put(device.onUrl, device.contentBody);
+        		else
+        			window.open(device.onUrl, "_blank");
+        	}
+        	else {
+        		if(device.httpVerb == "PUT" || device.httpVerb == "POST")
+        			$http.put(device.offUrl, device.contentBodyOff);
+        		else
+            		window.open(device.offUrl, "_blank");
+        	}
         };
 
         $scope.addDevice = function () {
-            bridgeService.addDevice($scope.device.id, $scope.device.name, $scope.device.deviceType, $scope.device.onUrl, $scope.device.offUrl, $scope.device.httpVerb, $scope.device.contentType, $scope.device.contentBody).then(
+            bridgeService.addDevice($scope.device.id, $scope.device.name, $scope.device.deviceType, $scope.device.onUrl, $scope.device.offUrl, $scope.device.httpVerb, $scope.device.contentType, $scope.device.contentBody, $scope.device.contentBodyOff).then(
                 function () {
                     $scope.device.id = "";
                     $scope.device.name = "";
@@ -335,6 +359,7 @@ app.controller('AddingController', function ($scope, $location, bridgeService, B
                     $scope.device.httpVerb = null;
                     $scope.device.contentType = null;
                     $scope.device.contentBody = null;
+                    $scope.device.contentBodyOff = null;
                     $location.path('/#');
                 },
                 function (error) {

@@ -204,8 +204,12 @@ public class HueMulator {
 	        }
 	
 	        //quick template
+	        String body;
 	        url = replaceIntensityValue(url, state.getBri());
-	        String body = replaceIntensityValue(device.getContentBody(), state.getBri());
+	        if (state.isOn())
+	        	body = replaceIntensityValue(device.getContentBody(), state.getBri());
+	        else
+	        	body = replaceIntensityValue(device.getContentBodyOff(), state.getBri());
 	        //make call
 	        if(!doHttpRequest(url, device.getHttpVerb(), device.getContentType(), body)){
 	        	response.status(HttpStatus.SC_SERVICE_UNAVAILABLE);

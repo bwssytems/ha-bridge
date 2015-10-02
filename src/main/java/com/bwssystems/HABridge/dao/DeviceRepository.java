@@ -188,6 +188,9 @@ public class DeviceRepository {
 		       } else if (name.equals("contentBody")) {
 			        deviceEntry.setContentBody(reader.nextString());
 			    	log.debug("Read a Device - device json contentBody:" + deviceEntry.getContentBody());
+			   } else if (name.equals("contentBodyOff")) {
+			        deviceEntry.setContentBodyOff(reader.nextString());
+			    	log.debug("Read a Device - device json contentBodyOff:" + deviceEntry.getContentBodyOff());
 		       } else {
 		         reader.skipValue();
 		       }

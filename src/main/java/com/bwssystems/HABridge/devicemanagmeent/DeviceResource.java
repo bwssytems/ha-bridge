@@ -86,6 +86,7 @@ public class DeviceResource {
 				deviceEntry.setHttpVerb(device.getHttpVerb());
 				deviceEntry.setContentType(device.getContentType());
 				deviceEntry.setContentBody(device.getContentBody());
+				deviceEntry.setContentBodyOff(device.getContentBodyOff());
 
 				deviceRepository.save(deviceEntry);
 				response.status(HttpStatus.SC_OK);

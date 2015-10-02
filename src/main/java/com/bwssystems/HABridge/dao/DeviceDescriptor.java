@@ -11,6 +11,7 @@ public class DeviceDescriptor{
     private String httpVerb;
     private String contentType;
     private String contentBody;
+    private String contentBodyOff;
 
     public String getName() {
         return name;
@@ -74,6 +75,14 @@ public class DeviceDescriptor{
 
 	public void setContentBody(String contentBody) {
 		this.contentBody = contentBody;
+	}
+
+	public String getContentBodyOff() {
+		return contentBodyOff;
+	}
+
+	public void setContentBodyOff(String contentBodyOff) {
+		this.contentBodyOff = contentBodyOff;
 	}
     
 
