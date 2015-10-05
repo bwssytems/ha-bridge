@@ -182,6 +182,8 @@ app.service('bridgeService', function ($http, BridgeSettings) {
                     }
                 );
             } else {
+            	if(type == null || type == "")
+            		type = "switch";
                 return $http.post(this.state.base, {
                     name: name,
                     deviceType: type,
@@ -241,14 +243,46 @@ app.controller('ViewingController', function ($scope, $location, $http, bridgeSe
         };
         $scope.testUrl = function (device, type) {
         	if(type == "on") {
-        		if(device.httpVerb == "PUT" || device.httpVerb == "POST")
-        			$http.put(device.onUrl, device.contentBody);
+        		if(device.httpVerb == "PUT")
+        			$http.put(device.onUrl, device.contentBody).then(
+        	                function (response) {
+        	                    $scope.responsedata = response.data;
+        	                },
+        	                function (error) {
+        	                    console.log(error);
+        	                }
+        	            );
+        		else if(device.httpVerb == "POST")
+        			$http.post(device.onUrl, device.contentBody).then(
+        	                function (response) {
+        	                    $scope.responsedata = response.data;
+        	                },
+        	                function (error) {
+        	                    console.log(error);
+        	                }
+        	            );
         		else
         			window.open(device.onUrl, "_blank");
         	}
         	else {
-        		if(device.httpVerb == "PUT" || device.httpVerb == "POST")
-        			$http.put(device.offUrl, device.contentBodyOff);
+        		if(device.httpVerb == "PUT")
+        			$http.put(device.offUrl, device.contentBodyOff).then(
+        	                function (response) {
+        	                    $scope.responsedata = response.data;
+        	                },
+        	                function (error) {
+        	                    console.log(error);
+        	                }
+        	            );
+        		else if(device.httpVerb == "POST")
+        			$http.post(device.offUrl, device.contentBody).then(
+        	                function (response) {
+        	                    $scope.responsedata = response.data;
+        	                },
+        	                function (error) {
+        	                    console.log(error);
+        	                }
+        	            );
         		else
             		window.open(device.offUrl, "_blank");
         	}
@@ -335,14 +369,46 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
 
         $scope.testUrl = function (url) {
         	if(type == "on") {
-        		if(device.httpVerb == "PUT" || device.httpVerb == "POST")
-        			$http.put(device.onUrl, device.contentBody);
+        		if(device.httpVerb == "PUT")
+        			$http.put(device.onUrl, device.contentBody).then(
+        	                function (response) {
+        	                    $scope.responsedata = response.data;
+        	                },
+        	                function (error) {
+        	                    console.log(error);
+        	                }
+        	            );
+        		else if(device.httpVerb == "POST")
+        			$http.post(device.onUrl, device.contentBody).then(
+        	                function (response) {
+        	                    $scope.responsedata = response.data;
+        	                },
+        	                function (error) {
+        	                    console.log(error);
+        	                }
+        	            );
         		else
         			window.open(device.onUrl, "_blank");
         	}
         	else {
-        		if(device.httpVerb == "PUT" || device.httpVerb == "POST")
-        			$http.put(device.offUrl, device.contentBodyOff);
+        		if(device.httpVerb == "PUT")
+        			$http.put(device.offUrl, device.contentBodyOff).then(
+        	                function (response) {
+        	                    $scope.responsedata = response.data;
+        	                },
+        	                function (error) {
+        	                    console.log(error);
+        	                }
+        	            );
+        		else if(device.httpVerb == "POST")
+        			$http.post(device.offUrl, device.contentBody).then(
+        	                function (response) {
+        	                    $scope.responsedata = response.data;
+        	                },
+        	                function (error) {
+        	                    console.log(error);
+        	                }
+        	            );
         		else
             		window.open(device.offUrl, "_blank");
         	}

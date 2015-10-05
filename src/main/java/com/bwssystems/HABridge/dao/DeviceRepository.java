@@ -3,6 +3,8 @@ package com.bwssystems.HABridge.dao;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -106,7 +108,10 @@ public class DeviceRepository {
 		}
 
 		try {
+			Path target = FileSystems.getDefault().getPath("data", "device.db.old");
+			Files.move(filePath, target);
 			Files.write(filePath, content.getBytes(), StandardOpenOption.CREATE);
+			Files.delete(target);
 		} catch (IOException e) {
 			log.error("Error writing the file: " + filePath + " message: " + e.getMessage(), e);
 		}
