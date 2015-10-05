@@ -72,7 +72,7 @@ app.factory('BridgeSettings', function() {
 	return BridgeSettings;
 });
 
-app.service('bridgeService', function ($http, BridgeSettings) {
+app.service('bridgeService', function ($http, $window, BridgeSettings) {
         var self = this;
         self.BridgeSettings = BridgeSettings;
         this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", devices: [], device: [], error: ""};
@@ -110,10 +110,9 @@ app.service('bridgeService', function ($http, BridgeSettings) {
                 },
                 function (error) {
                     if (error.data) {
-                        self.state.error = error.data.message;
+                    	$window.alert("Load Bridge Settings Error: " + error.data.message);
                     } else {
-                        self.state.error = "If you're not seeing any settings, you may be running into problems with CORS. " +
-                            "You can work around this by running a fresh launch of Chrome with the --disable-web-security flag.";
+                    	$window.alert("Load Bridge Settings Error: unknown");
                     }
                     console.log(error);
                 }
@@ -128,12 +127,10 @@ app.service('bridgeService', function ($http, BridgeSettings) {
                 },
                 function (error) {
                     if (error.data) {
-                        self.state.error = error.data.message;
+                    	$window.alert("Get Vera Devices Error: " + error.data.message);
                     } else {
-                        self.state.error = "If you're not seeing any address, you may be running into problems with CORS. " +
-                            "You can work around this by running a fresh launch of Chrome with the --disable-web-security flag.";
+                    	$window.alert("Get Vera Devices Error: unknown");
                     }
-                    console.log(error);
                 }
             );
         };
@@ -146,12 +143,10 @@ app.service('bridgeService', function ($http, BridgeSettings) {
                 },
                 function (error) {
                     if (error.data) {
-                        self.state.error = error.data.message;
+                    	$window.alert("Get Vera Scenes Error: " + error.data.message);
                     } else {
-                        self.state.error = "If you're not seeing any address, you may be running into problems with CORS. " +
-                            "You can work around this by running a fresh launch of Chrome with the --disable-web-security flag.";
+                    	$window.alert("Get Vera Scenes Error: unknown");
                     }
-                    console.log(error);
                 }
             );
         };
@@ -176,9 +171,9 @@ app.service('bridgeService', function ($http, BridgeSettings) {
                     },
                     function (error) {
                         if (error.data) {
-                            self.state.error = error.data.message;
+                        	$window.alert("Edit Device Error: " + error.data.message);
                         }
-                        console.log(error);
+                        $window.alert("Edit Device Error: unknown");
                     }
                 );
             } else {
@@ -199,9 +194,9 @@ app.service('bridgeService', function ($http, BridgeSettings) {
                     },
                     function (error) {
                         if (error.data) {
-                            self.state.error = error.data.message;
+                        	$window.alert("Add new Device Error: " + error.data.message);
                         }
-                        console.log(error);
+                        $window.alert("Add new Device Error: unknown");
                     }
                 );
             }
@@ -217,7 +212,7 @@ app.service('bridgeService', function ($http, BridgeSettings) {
                     if (error.data) {
                         self.state.error = error.data.message;
                     }
-                    console.log(error);
+                    $window.alert("Delete Device Error: unknown");
                 }
             );
         };
@@ -227,7 +222,7 @@ app.service('bridgeService', function ($http, BridgeSettings) {
         };
     });
 
-app.controller('ViewingController', function ($scope, $location, $http, bridgeService, BridgeSettings) {
+app.controller('ViewingController', function ($scope, $location, $http, $window, bridgeService, BridgeSettings) {
 
 		$scope.BridgeSettings = bridgeService.BridgeSettings;
         bridgeService.viewDevices();
@@ -246,19 +241,19 @@ app.controller('ViewingController', function ($scope, $location, $http, bridgeSe
         		if(device.httpVerb == "PUT")
         			$http.put(device.onUrl, device.contentBody).then(
         	                function (response) {
-        	                    $scope.responsedata = response.data;
+        	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    console.log(error);
+        	                    $window.alert("Request Error: " + error.data.message);
         	                }
         	            );
         		else if(device.httpVerb == "POST")
         			$http.post(device.onUrl, device.contentBody).then(
         	                function (response) {
-        	                    $scope.responsedata = response.data;
+        	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    console.log(error);
+        	                    $window.alert("Request Error: " + error.data.message);
         	                }
         	            );
         		else
@@ -268,19 +263,19 @@ app.controller('ViewingController', function ($scope, $location, $http, bridgeSe
         		if(device.httpVerb == "PUT")
         			$http.put(device.offUrl, device.contentBodyOff).then(
         	                function (response) {
-        	                    $scope.responsedata = response.data;
+        	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    console.log(error);
+        	                    $window.alert("Request Error: " + error.data.message);
         	                }
         	            );
         		else if(device.httpVerb == "POST")
         			$http.post(device.offUrl, device.contentBody).then(
         	                function (response) {
-        	                    $scope.responsedata = response.data;
+        	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    console.log(error);
+        	                    $window.alert("Request Error: " + error.data.message);
         	                }
         	            );
         		else
@@ -372,19 +367,19 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         		if(device.httpVerb == "PUT")
         			$http.put(device.onUrl, device.contentBody).then(
         	                function (response) {
-        	                    $scope.responsedata = response.data;
+        	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    console.log(error);
+        	                    $window.alert("Request Error: " + error.data.message);
         	                }
         	            );
         		else if(device.httpVerb == "POST")
         			$http.post(device.onUrl, device.contentBody).then(
         	                function (response) {
-        	                    $scope.responsedata = response.data;
+        	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    console.log(error);
+        	                    $window.alert("Request Error: " + error.data.message);
         	                }
         	            );
         		else
@@ -394,19 +389,19 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         		if(device.httpVerb == "PUT")
         			$http.put(device.offUrl, device.contentBodyOff).then(
         	                function (response) {
-        	                    $scope.responsedata = response.data;
+        	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    console.log(error);
+        	                    $window.alert("Request Error: " + error.data.message);
         	                }
         	            );
         		else if(device.httpVerb == "POST")
         			$http.post(device.offUrl, device.contentBody).then(
         	                function (response) {
-        	                    $scope.responsedata = response.data;
+        	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    console.log(error);
+        	                    $window.alert("Request Error: " + error.data.message);
         	                }
         	            );
         		else
