@@ -44,7 +44,19 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<button type="submit" ng-click="buildUrlsUsingDevice()"
+					<label class="col-xs-2 col-sm-2 control-label" for="device-dim-control">Device Dim Control</label>
+
+					<div class="col-xs-10 col-sm-2">
+					    <select name="device-dim-control" id="device-dim-control" ng-model="device_dim_control">
+					      <option value="">none</option>
+					      <option value="${intensity..byte}">Pass-thru Value</option>
+					      <option value="${intensity.percent}">Percentage</option>
+					      <option value="${intensity.math(X*1)}">Custom Math</option>
+					    </select>
+					</div>
+				</div>
+				<div class="form-group">
+					<button type="submit" ng-click="buildUrlsUsingDevice(device_dim_control)"
 						class="col-xs-2 col-sm-2 col-xs-offset-2 col-sm-offset-2 btn btn-success">Generate Device
 						URLs</button>
 					<button type="submit" ng-click="buildUrlsUsingScene()"

@@ -1,5 +1,5 @@
 # ha-bridge
-Emulates philips hue api to other home automation gateways.  The Amazon echo now supports wemo and philips hue.  
+Emulates Philips Hue api to other home automation gateways such as an Amazon Echo.  The Bridge has helpers to build devices for the gateway  for the Vera, Vera Lite or Vera Edge. Alternatively the Bridge supports custom calls as well. The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol. 
 ## Build
 To customize and build it yourself, build a new jar with maven:  
 ```
@@ -44,8 +44,8 @@ POST http://host:8080/api/devices
   "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
 }
 ```
-## Dimming
-Dimming is also supported by using the expessions ${intensity.percent} or ${intensity.byte} for 0-100 and 0-255 respectively.    
+## Dimming and value passing control
+Dimming is also supported by using the expressions ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 or $intensity{match(<your expression using "X" as the value to operate on>)} i.e. "$intensity.math(X/4)}".    
 e.g.
 ```
 {
@@ -61,9 +61,10 @@ See the echo's documentation for the dimming phrase.
 added optional fields
  * contentType (currently un-validated)
  * httpVerb (POST/PUT/GET only supported)
- * contentBody your post/put body here
+ * contentBody your post/put body for onUrl here
+ * contentBodyOff your post/put body for offUrl here
 
-This will allow control of any other application that may need more then GET.  
+This will allow control of any other application that may need more then GET.  You can also use the dimming and value control commands within the URLs as well.
 e.g: 
 ```
 {
@@ -73,10 +74,12 @@ e.g:
     "onUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}",
   "contentType" : "application/json",
   "httpVerb":"POST",
-  "contentBody" : "{\"fooBar\":\"baz\"}"
+  "contentBody" : "{\"fooBar\":\"baz_on\"}"
+  "contentBodyOff" : "{\"fooBar\":\"baz_off\"}"
 }
 ```
-Anything that takes an action as a result of an HTTP request will probably work - like putting Vera in and out of night mode:  
+## Custom Usage URLs
+Anything that takes an action as a result of an HTTP request will probably work and you can also use the dimming and value control commands within the URLs as well - like putting Vera in and out of night mode:  
 ```
 {
   "name": "night mode",

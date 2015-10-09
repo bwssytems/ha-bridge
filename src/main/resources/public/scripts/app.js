@@ -304,18 +304,26 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         $scope.device = bridgeService.state.device;
         $scope.predicate = '';
         $scope.reverse = true;
+        $scope.device_dim_control = "";
         $scope.order = function(predicate) {
           $scope.reverse = ($scope.predicate === predicate) ? !$scope.reverse : false;
           $scope.predicate = predicate;
         };
           
-        $scope.buildUrlsUsingDevice = function () {
+        $scope.buildUrlsUsingDevice = function (dim_control) {
             if ($scope.vera.base.indexOf("http") < 0) {
                 $scope.vera.base = "http://" + $scope.vera.base;
             }
-            $scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
-                + "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
-                + $scope.vera.id;
+            if(dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)
+            	$scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
+                	+ "/data_request?id=action&output_format=json&DeviceNum="
+                	+ $scope.vera.id
+                	+ "&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget="
+                	+ dim_control;
+            else
+            	$scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
+                	+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
+                	+ $scope.vera.id;
             $scope.device.offUrl = $scope.vera.base + ":" + $scope.vera.port
                 + "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum="
                 + $scope.vera.id;
@@ -334,15 +342,22 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
                 + $scope.vera.id;
         };
 
-        $scope.buildDeviceUrls = function (veradevice) {
+        $scope.buildDeviceUrls = function (veradevice, dim_control) {
             if ($scope.vera.base.indexOf("http") < 0) {
                 $scope.vera.base = "http://" + $scope.vera.base;
             }
             $scope.device.deviceType = "switch";
             $scope.device.name = veradevice.name;
-            $scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
-                + "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
-                + veradevice.id;
+            if(dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)
+            	$scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
+                	+ "/data_request?id=action&output_format=json&DeviceNum="
+                	+ veradevice.id
+                	+ "&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget="
+                	+ dim_control;
+            else
+            	$scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
+                	+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
+                	+ veradevice.id;
             $scope.device.offUrl = $scope.vera.base + ":" + $scope.vera.port
                 + "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum="
                 + veradevice.id;

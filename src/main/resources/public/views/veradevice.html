@@ -12,8 +12,15 @@
 	<ul class="list-group">
 		<li class="list-group-item">
 			<p class="text-muted">You can select a Vera device and generate
-				the add device box selections automatically.</p>
-
+				the add device box selections automatically.</p><p>Also, use this select menu for which type of dim
+				control you would like to be generated: 
+					    <select name="device-dim-control" id="device-dim-control" ng-model="device_dim_control">
+					      <option value="">none</option>
+					      <option value="${intensity..byte}">Pass-thru Value</option>
+					      <option value="${intensity.percent}">Percentage</option>
+					      <option value="${intensity.math(X*1)}">Custom Math</option>
+					    </select>
+			</p>
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
@@ -43,7 +50,7 @@
 					<td>{{veradevice.room}}</td>
 					<td>
 						<button class="btn btn-success" type="submit"
-							ng-click="buildDeviceUrls(veradevice)">Generate
+							ng-click="buildDeviceUrls(veradevice, device_dim_control)">Generate
 							Device URLs</button>
 					</td>
 				</tr>

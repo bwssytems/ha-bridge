@@ -9,7 +9,9 @@ import com.bwssystems.HABridge.dao.*;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.script.ScriptEngine;
 import static spark.Spark.get;
 import static spark.Spark.post;
 import static spark.Spark.put;
@@ -42,6 +44,10 @@ public class HueMulator {
     private static final Logger log = LoggerFactory.getLogger(HueMulator.class);
     private static final String INTENSITY_PERCENT = "${intensity.percent}";
     private static final String INTENSITY_BYTE = "${intensity.byte}";
+    private static final String INTENSITY_MATH = "${intensity.math(";
+    private static final String INTENSITY_MATH_VALUE = "X";
+    private static final String INTENSITY_MATH_CLOSE = ")}";
+    private static final String ENGINE_JAVASCRIPT = "JavaScript";
     private static final String HUE_CONTEXT = "/api";
 
     private DeviceRepository repository;
@@ -241,7 +247,18 @@ public class HueMulator {
             int percentBrightness = (int) Math.round(intensity/255.0*100);
             String intensityPercent = String.valueOf(percentBrightness);
             request = request.replace(INTENSITY_PERCENT, intensityPercent);
-        }
+        } else if(request.contains(INTENSITY_MATH)){
+        	String mathDescriptor = request.substring(request.indexOf(INTENSITY_MATH) + INTENSITY_MATH.length(),request.indexOf(INTENSITY_MATH_CLOSE));
+        	String updatedMath = mathDescriptor.replace(INTENSITY_MATH_VALUE, String.valueOf(intensity));
+        	ScriptEngineManager mgr = new ScriptEngineManager();
+        	ScriptEngine engine = mgr.getEngineByName(ENGINE_JAVASCRIPT);
+        	try {
+        		log.debug("Math eval is: " + updatedMath);
+				Integer endResult = (Integer) engine.eval(updatedMath);
+	            request = request.replace(INTENSITY_MATH + mathDescriptor + INTENSITY_MATH_CLOSE, endResult.toString());
+			} catch (ScriptException e) {
+				log.error("Could not execute Math: " + updatedMath, e);
+			}        }
         return request;
     }
 
