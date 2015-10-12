@@ -36,7 +36,7 @@ public class DeviceResource {
 	public DeviceResource(BridgeSettings theSettings) {
 		super();
 		deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
-		veraInfo = new VeraInfo(theSettings.getVeraAddress());
+		veraInfo = new VeraInfo(theSettings.getVeraAddress(), theSettings.isValidVera());
         setupEndpoints();
 	}
 

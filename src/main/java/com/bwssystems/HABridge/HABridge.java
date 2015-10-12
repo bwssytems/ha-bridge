@@ -51,17 +51,17 @@ public class HABridge {
         
         bridgeSettings = new BridgeSettings();
         bridgeSettings.setUpnpConfigAddress(System.getProperty("upnp.config.address", addressString));
-        bridgeSettings.setUpnpDeviceDb(System.getProperty("upnp.device.db", "data/device.db"));
-        bridgeSettings.setUpnpResponsePort(System.getProperty("upnp.response.port", "50000"));
-        bridgeSettings.setVeraAddress(System.getProperty("vera.address", "192.168.1.100"));
-        bridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "false")));
+        bridgeSettings.setUpnpDeviceDb(System.getProperty("upnp.device.db", Configuration.DEVICE_DB_DIRECTORY));
+        bridgeSettings.setUpnpResponsePort(System.getProperty("upnp.response.port", Configuration.UPNP_RESPONSE_PORT));
+        bridgeSettings.setVeraAddress(System.getProperty("vera.address", Configuration.DEFAULT_VERA_ADDRESS));
+        bridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
         bridgeSettings.setTraceupnp(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
-        bridgeSettings.setVtwocompatibility(Boolean.parseBoolean(System.getProperty("vtwo.compatibility", "true")));
+        bridgeSettings.setVtwocompatibility(Boolean.parseBoolean(System.getProperty("vtwo.compatibility", "false")));
 
         // sparkjava config directive to set ip address for the web server to listen on
         // ipAddress("0.0.0.0"); // not used
         // sparkjava config directive to set port for the web server to listen on
-        bridgeSettings.setServerPort(System.getProperty("server.port", "8080"));
+        bridgeSettings.setServerPort(System.getProperty("server.port", Configuration.DFAULT_WEB_PORT));
         port(Integer.valueOf(bridgeSettings.getServerPort()));
         // sparkjava config directive to set html static file location for Jetty
         staticFileLocation("/public");

@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>0.4.8</version>
+	<version>0.4.9</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
@@ -52,6 +52,11 @@
 		  <groupId>com.cedarsoftware</groupId>
 		  <artifactId>json-io</artifactId>
 		  <version>4.1.6</version>
+		</dependency>
+		<dependency>
+		  <groupId>net.java.dev.eval</groupId>
+		  <artifactId>eval</artifactId>
+		  <version>0.5</version>
 		</dependency>
 	</dependencies>
 

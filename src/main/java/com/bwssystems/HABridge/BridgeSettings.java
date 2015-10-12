@@ -61,4 +61,9 @@ public class BridgeSettings {
 		this.vtwocompatibility = vtwocompatibility;
 	}
 	
+	public Boolean isValidVera() {
+		if(this.veraaddress.contains(Configuration.DEFAULT_VERA_ADDRESS))
+			return false;
+		return true;
+	}
 }

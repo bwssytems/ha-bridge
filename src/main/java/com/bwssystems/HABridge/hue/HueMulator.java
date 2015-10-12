@@ -9,9 +9,9 @@ import com.bwssystems.HABridge.dao.*;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import javax.script.ScriptEngine;
+
+import net.java.dev.eval.Expression;
+
 import static spark.Spark.get;
 import static spark.Spark.post;
 import static spark.Spark.put;
@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,6 @@ public class HueMulator {
     private static final String INTENSITY_MATH = "${intensity.math(";
     private static final String INTENSITY_MATH_VALUE = "X";
     private static final String INTENSITY_MATH_CLOSE = ")}";
-    private static final String ENGINE_JAVASCRIPT = "JavaScript";
     private static final String HUE_CONTEXT = "/api";
 
     private DeviceRepository repository;
@@ -232,9 +232,10 @@ public class HueMulator {
     /* light weight templating here, was going to use free marker but it was a bit too
     *  heavy for what we were trying to do.
     *
-    *  currently provides only two variables:
+    *  currently provides:
     *  intensity.byte : 0-255 brightness.  this is raw from the echo
     *  intensity.percent : 0-100, adjusted for the vera
+    *  intensity.math(X*1) : where X is the value from the interface call and can use net.java.dev.eval math
     */
     protected String replaceIntensityValue(String request, int intensity){
         if(request == null){
@@ -248,16 +249,18 @@ public class HueMulator {
             String intensityPercent = String.valueOf(percentBrightness);
             request = request.replace(INTENSITY_PERCENT, intensityPercent);
         } else if(request.contains(INTENSITY_MATH)){
+        	Map<String, BigDecimal> variables = new HashMap<String, BigDecimal>();
         	String mathDescriptor = request.substring(request.indexOf(INTENSITY_MATH) + INTENSITY_MATH.length(),request.indexOf(INTENSITY_MATH_CLOSE));
-        	String updatedMath = mathDescriptor.replace(INTENSITY_MATH_VALUE, String.valueOf(intensity));
-        	ScriptEngineManager mgr = new ScriptEngineManager();
-        	ScriptEngine engine = mgr.getEngineByName(ENGINE_JAVASCRIPT);
+        	variables.put(INTENSITY_MATH_VALUE, new BigDecimal(intensity));
+        	 
         	try {
-        		log.debug("Math eval is: " + updatedMath);
-				Integer endResult = (Integer) engine.eval(updatedMath);
+        		log.debug("Math eval is: " + mathDescriptor + ", Where " + INTENSITY_MATH_VALUE + " is: " + String.valueOf(intensity));
+            	Expression exp = new Expression(mathDescriptor);
+            	BigDecimal result = exp.eval(variables);
+				Integer endResult = result.intValue();
 	            request = request.replace(INTENSITY_MATH + mathDescriptor + INTENSITY_MATH_CLOSE, endResult.toString());
-			} catch (ScriptException e) {
-				log.error("Could not execute Math: " + updatedMath, e);
+			} catch (Exception e) {
+				log.error("Could not execute Math: " + mathDescriptor, e);
 			}        }
         return request;
     }

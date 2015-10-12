@@ -26,14 +26,19 @@ public class VeraInfo {
     private HttpClient httpClient;
     private static final String SDATA_REQUEST = ":3480/data_request?id=sdata&output_format=json";
     private String veraAddressString;
+    private Boolean validVera;
 
-    public VeraInfo(String addressString) {
+    public VeraInfo(String addressString, Boolean isValidVera) {
 		super();
         httpClient = HttpClients.createMinimal();
         veraAddressString = addressString;
+        validVera = isValidVera;
 	}
     
 	public Sdata getSdata() {
+		if(!validVera)
+			return new Sdata();
+
 		String theUrl = "http://" + veraAddressString + SDATA_REQUEST;
     	String theData;
     	
