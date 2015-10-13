@@ -45,7 +45,7 @@ POST http://host:8080/api/devices
 }
 ```
 ## Dimming and value passing control
-Dimming is also supported by using the expressions ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 or custom values using ${intensity.math(<your expression using "X" as the value to operate on>)} i.e. "{$intensity.math(X/4)}".    
+Dimming is also supported by using the expressions ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 or custom values using ${intensity.math(<your expression using "X" as the value to operate on>)} i.e. "${intensity.math(X/4)}".    
 e.g.
 ```
 {
