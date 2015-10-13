@@ -257,7 +257,7 @@ public class HueMulator {
         		log.debug("Math eval is: " + mathDescriptor + ", Where " + INTENSITY_MATH_VALUE + " is: " + String.valueOf(intensity));
             	Expression exp = new Expression(mathDescriptor);
             	BigDecimal result = exp.eval(variables);
-				Integer endResult = result.intValue();
+				Integer endResult = Math.round(result.floatValue());
 	            request = request.replace(INTENSITY_MATH + mathDescriptor + INTENSITY_MATH_CLOSE, endResult.toString());
 			} catch (Exception e) {
 				log.error("Could not execute Math: " + mathDescriptor, e);

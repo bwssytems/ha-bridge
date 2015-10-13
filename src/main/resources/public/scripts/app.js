@@ -26,6 +26,7 @@ app.config(function ($routeProvider) {
 
 app.run( function (bridgeService) {
 	bridgeService.loadBridgeSettings();
+	bridgeService.updateShowVera();
 });
 
 app.factory('BridgeSettings', function() {
@@ -75,7 +76,7 @@ app.factory('BridgeSettings', function() {
 app.service('bridgeService', function ($http, $window, BridgeSettings) {
         var self = this;
         self.BridgeSettings = BridgeSettings;
-        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", devices: [], device: [], error: ""};
+        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", devices: [], device: [], error: "", showVera: false};
 
         this.viewDevices = function () {
             this.state.error = "";
@@ -107,6 +108,10 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
                 	self.BridgeSettings.settraceupnp(response.data.traceupnp);
                 	self.BridgeSettings.setupnpstrict(response.data.upnpstrict);
                 	self.BridgeSettings.setvtwocompatibility(response.data.vtwocompatibility);
+                    if(self.BridgeSettings.veraaddress == "1.1.1.1" || self.BridgeSettings.veraaddress == "")
+                    	self.state.showVera = false;
+                    else
+                    	self.state.showVera = true;
                 },
                 function (error) {
                     if (error.data) {
@@ -119,6 +124,14 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             );
         };
 
+        this.updateShowVera = function () {
+            if(self.BridgeSettings.veraaddress == "1.1.1.1" || self.BridgeSettings.veraaddress == "")
+            	this.state.showVera = false;
+            else
+            	this.state.showVera = true;
+        	return;
+        }
+        
         this.viewVeraDevices = function () {
             this.state.error = "";
         	if(BridgeSettings.veraaddress == "1.1.1.1" || BridgeSettings.veraaddress == "")
@@ -232,9 +245,7 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 		$scope.BridgeSettings = bridgeService.BridgeSettings;
         bridgeService.viewDevices();
         $scope.bridge = bridgeService.state;
-        $scope.showVera = true;
-        if(BridgeSettings.veraaddress == "1.1.1.1" || BridgeSettings.veraaddress == "")
-        	$scope.showVera = false;
+        bridgeService.updateShowVera();
         $scope.predicate = '';
         $scope.reverse = true;
         $scope.order = function(predicate) {
@@ -306,12 +317,10 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         $scope.vera = {base: "", port: "3480", id: ""};
         $scope.vera.base = "http://" + BridgeSettings.veraaddress;
         bridgeService.device = $scope.device;
-        $scope.showVera = true;
-        if(BridgeSettings.veraaddress == "1.1.1.1" || BridgeSettings.veraaddress == "")
-        	$scope.showVera = false;
         bridgeService.viewVeraDevices();
         bridgeService.viewVeraScenes();
         $scope.bridge = bridgeService.state;
+        bridgeService.updateShowVera();
         $scope.device = bridgeService.state.device;
         $scope.predicate = '';
         $scope.reverse = true;

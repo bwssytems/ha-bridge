@@ -107,10 +107,14 @@ public class DeviceRepository {
 		}
 
 		try {
-			Path target = FileSystems.getDefault().getPath("data", "device.db.old");
-			Files.move(filePath, target);
+			Path target = null;
+			if(Files.exists(filePath)) {
+				target = FileSystems.getDefault().getPath(filePath.getParent().toString(), "device.db.old");
+				Files.move(filePath, target);
+			}
 			Files.write(filePath, content.getBytes(), StandardOpenOption.CREATE);
-			Files.delete(target);
+			if(target != null)
+				Files.delete(target);
 		} catch (IOException e) {
 			log.error("Error writing the file: " + filePath + " message: " + e.getMessage(), e);
 		}
@@ -120,7 +124,7 @@ public class DeviceRepository {
 
 		String content = null;
 		if(Files.notExists(filePath) || !Files.isReadable(filePath)){
-			log.error("Error reading the file: " + filePath + " - Does not exist or is not readable. ");
+			log.warn("Error reading the file: " + filePath + " - Does not exist or is not readable. continuing...");
 			return null;
 		}
 

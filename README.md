@@ -15,7 +15,7 @@ java -jar -Dvera.address=X.Y.Z.A ha-bridge-0.X.Y.jar
 ### -Dvera.address=`<ip address>`
 The argument for the vera address should be given as it the system does not have a way to find the address. Supply -Dvera.address=X.Y.Z.A on the command line to provide it. If a vera is not used, do not set it.
 ### -Dupnp.config.address=`<ip address>`
-The server defaults to the first available address on the host. Replace the -Dupnp.config.address=`<ip address>` value with the server ipv4 address you would like to use. 
+The server defaults to the first available address on the host. Replace the -Dupnp.config.address=`<ip address>` value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery. 
 ### -Dserver.port=`<port>`
 The server defaults to running on port 8080. If you're already running a server (like openHAB) on 8080, -Dserver.port=`<port>` on the command line.
 ### -Dupnp.device.db=`<filepath>`
@@ -45,7 +45,7 @@ POST http://host:8080/api/devices
 }
 ```
 ## Dimming and value passing control
-Dimming is also supported by using the expressions ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 or $intensity{match(<your expression using "X" as the value to operate on>)} i.e. "$intensity.math(X/4)}".    
+Dimming is also supported by using the expressions ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 or custom values using ${intensity.math(<your expression using "X" as the value to operate on>)} i.e. "{$intensity.math(X/4)}".    
 e.g.
 ```
 {
