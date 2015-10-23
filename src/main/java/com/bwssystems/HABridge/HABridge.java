@@ -40,6 +40,7 @@ public class HABridge {
         String addressString;
         BridgeSettings bridgeSettings;
 
+        log.info("HA Bridge (v0.4.10) starting setup....");
         //get ip address for upnp requests
         try {
 			address = InetAddress.getLocalHost();
@@ -65,7 +66,6 @@ public class HABridge {
         port(Integer.valueOf(bridgeSettings.getServerPort()));
         // sparkjava config directive to set html static file location for Jetty
         staticFileLocation("/public");
-        log.info("Starting setup....");
         // setup the class to handle the resource setup rest api
         theResources = new DeviceResource(bridgeSettings);
         // setup the class to handle the hue emulator rest api

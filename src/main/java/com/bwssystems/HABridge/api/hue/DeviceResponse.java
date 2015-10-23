@@ -1,8 +1,6 @@
 package com.bwssystems.HABridge.api.hue;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -104,20 +102,13 @@ public class DeviceResponse {
         deviceState.setEffect("none");
         deviceState.setAlert("none");
         deviceState.setBri(254);
-        deviceState.setHue(15823);
-        deviceState.setSat(88);
-        deviceState.setCt(313);
+        deviceState.setSat(254);
 
-        List<Double> xv = new LinkedList<>();
-        xv.add(Double.valueOf("0.4255"));
-        xv.add(Double.valueOf("0.3998"));
-        deviceState.setXy(xv);
-        deviceState.setColormode("ct");
         response.setName(name);
         response.setUniqueid(id);
         response.setManufacturername("Philips");
-        response.setType("Extended color light");
-        response.setModelid("LCT001");
+        response.setType("Dimmable light");
+        response.setModelid("LWB004");
         response.setSwversion("65003148");
 
         return response;
