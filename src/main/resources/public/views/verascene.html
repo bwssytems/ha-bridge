@@ -2,6 +2,7 @@
         <li role="presentation"><a href="#">Configuration</a></li>
         <li role="presentation"><a href="#/veradevices">Vera Devices</a></li>
         <li role="presentation" class="active"><a href="#/verascenes">Vera Scenes</a></li>
+        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
         <li role="presentation"><a href="#/editor">Manual Add</a></li>
       </ul>
 
@@ -12,7 +13,7 @@
 	<ul class="list-group">
 		<li class="list-group-item">
 			<p class="text-muted">You can select a Vera scene and generate
-				the add device box selections automatically.</p>
+				the add scene box selections automatically.</p>
 
 			<table class="table table-bordered table-striped table-hover">
 				<thead>

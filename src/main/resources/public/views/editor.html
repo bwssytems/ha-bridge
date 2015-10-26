@@ -2,10 +2,11 @@
         <li role="presentation"><a href="#">Configuration</a></li>
         <li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
         <li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
+        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
         <li role="presentation" class="active"><a href="#/editor">Manual Add</a></li>
       </ul>
 
-<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
+<div class="panel panel-default bridgeServer" ng-if="bridge.showVera">
 	<div class="panel-heading">
 		<h2 class="panel-title">Generate a new device/scene/control point</h2>
 	</div>

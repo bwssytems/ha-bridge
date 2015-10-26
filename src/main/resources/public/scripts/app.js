@@ -4,8 +4,11 @@ var app = angular.module('habridge', [
 
 app.config(function ($routeProvider) {
 	$routeProvider.when('/#', {
-		templateUrl: 'views/configuration.html',
+		templateUrl: 'views/nonconfiguration.html',
 		controller: 'ViewingController'
+	}).when('/show', {
+		templateUrl: 'views/configuration.html',
+		controller: 'ViewingController'		
 	}).when('/editor', {
 		templateUrl: 'views/editor.html',
 		controller: 'AddingController'		
@@ -18,8 +21,11 @@ app.config(function ($routeProvider) {
 	}).when('/verascenes', {
 		templateUrl: 'views/verascene.html',
 		controller: 'AddingController'		
+	}).when('/harmonyactivities', {
+		templateUrl: 'views/harmonyactivity.html',
+		controller: 'AddingController'		
 	}).otherwise({
-		templateUrl: 'views/configuration.html',
+		templateUrl: 'views/nonconfiguration.html',
 		controller: 'ViewingController'
 	})
 });
@@ -37,6 +43,7 @@ app.factory('BridgeSettings', function() {
 	BridgeSettings.upnpdevicedb = "";
 	BridgeSettings.upnpresponseport = "";
 	BridgeSettings.veraaddress = "";
+	BridgeSettings.harmonyaddress = "";
 	BridgeSettings.upnpstrict = "";
 	BridgeSettings.traceupnp = "";
 	BridgeSettings.vtwocompatibility = "";
@@ -60,6 +67,9 @@ app.factory('BridgeSettings', function() {
 	BridgeSettings.setveraaddress = function(averaaddress){
 		BridgeSettings.veraaddress = averaaddress;
 	};
+	BridgeSettings.setharmonyaddress = function(aharmonyaddress){
+		BridgeSettings.harmonyaddress = aharmonyaddress;
+	};
 	BridgeSettings.setupnpstrict = function(aupnpstrict){
 		BridgeSettings.upnpstrict = aupnpstrict;
 	};
@@ -76,7 +86,7 @@ app.factory('BridgeSettings', function() {
 app.service('bridgeService', function ($http, $window, BridgeSettings) {
         var self = this;
         self.BridgeSettings = BridgeSettings;
-        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", devices: [], device: [], error: "", showVera: false};
+        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", devices: [], device: [], error: "", showVera: false, showHarmony: false};
 
         this.viewDevices = function () {
             this.state.error = "";
@@ -105,6 +115,7 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
                 	self.BridgeSettings.setupnpdevicedb(response.data.upnpdevicedb);
                 	self.BridgeSettings.setupnpresponseport(response.data.upnpresponseport);
                 	self.BridgeSettings.setveraaddress(response.data.veraaddress);
+                	self.BridgeSettings.setharmonyaddress(response.data.harmonyaddress);
                 	self.BridgeSettings.settraceupnp(response.data.traceupnp);
                 	self.BridgeSettings.setupnpstrict(response.data.upnpstrict);
                 	self.BridgeSettings.setvtwocompatibility(response.data.vtwocompatibility);
@@ -112,6 +123,10 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
                     	self.state.showVera = false;
                     else
                     	self.state.showVera = true;
+                    if(self.BridgeSettings.harmonyaddress == "1.1.1.1" || self.BridgeSettings.harmonyaddress == "")
+                    	self.state.showHarmony = false;
+                    else
+                    	self.state.showHarmony = true;
                 },
                 function (error) {
                     if (error.data) {
@@ -132,6 +147,14 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
         	return;
         }
         
+        this.updateShowHarmony = function () {
+            if(self.BridgeSettings.harmonyaddress == "1.1.1.1" || self.BridgeSettings.harmonyaddress == "")
+            	self.state.showHarmony = false;
+            else
+            	self.state.showHarmony = true;
+        	return;
+        }
+
         this.viewVeraDevices = function () {
             this.state.error = "";
         	if(BridgeSettings.veraaddress == "1.1.1.1" || BridgeSettings.veraaddress == "")
@@ -246,6 +269,7 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
         bridgeService.viewDevices();
         $scope.bridge = bridgeService.state;
         bridgeService.updateShowVera();
+        bridgeService.updateShowHarmony();
         $scope.predicate = '';
         $scope.reverse = true;
         $scope.order = function(predicate) {
@@ -321,6 +345,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         bridgeService.viewVeraScenes();
         $scope.bridge = bridgeService.state;
         bridgeService.updateShowVera();
+        bridgeService.updateShowHarmony();
         $scope.device = bridgeService.state.device;
         $scope.predicate = '';
         $scope.reverse = true;
@@ -384,6 +409,20 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         };
 
         $scope.buildSceneUrls = function (verascene) {
+            if ($scope.vera.base.indexOf("http") < 0) {
+                $scope.vera.base = "http://" + $scope.vera.base;
+            }
+            $scope.device.deviceType = "scene";
+            $scope.device.name = verascene.name;
+            $scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
+                + "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
+                + verascene.id;
+            $scope.device.offUrl = $scope.vera.base + ":" + $scope.vera.port
+                + "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
+                + verascene.id;
+        };
+
+        $scope.buildActivityUrls = function (harmonyactivity) {
             if ($scope.vera.base.indexOf("http") < 0) {
                 $scope.vera.base = "http://" + $scope.vera.base;
             }

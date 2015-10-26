@@ -2,14 +2,49 @@
         <li role="presentation"><a href="#">Configuration</a></li>
         <li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
         <li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
-        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
+        <li role="presentation" class="active"><a href="#/harmonyactivities">Harmony Activities</a></li>
         <li role="presentation"><a href="#/editor">Manual Add</a></li>
-        <li role="presentation" class="active"><a href="#/editdevice">Edit Device</a></li>
       </ul>
 
 <div class="panel panel-default bridgeServer" ng-if="!bridge.error">
 	<div class="panel-heading">
-		<h2 class="panel-title">Add a new device</h2>
+		<h2 class="panel-title">Harmony Activity List</h2>
+	</div>
+	<ul class="list-group">
+		<li class="list-group-item">
+			<p class="text-muted">You can select a Harmony Activity and generate
+				the add activity box selections automatically.</p>
+
+			<table class="table table-bordered table-striped table-hover">
+				<thead>
+					<tr>
+						<th>
+							<a href="" ng-click="order('name')">Name</a>
+        					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
+        				</th>
+						<th>
+							<a href="" ng-click="order('id')">Id</a>
+        					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
+        				</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tr ng-repeat="harmonyactivitye in bridge.harmonyactivities | orderBy:predicate:reverse">
+					<td>{{harmonyactivity.name}}</td>
+					<td>{{harmonyactivity.id}}</td>
+					<td>
+						<button class="btn btn-success" type="submit"
+							ng-click="buildActivityUrls(harmonyactivity)">Generate
+							Activity URLs</button>
+					</td>
+				</tr>
+			</table>
+		</li>
+	</ul>
+</div>
+<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
+	<div class="panel-heading">
+		<h2 class="panel-title">Add a Harmony Activity</h2>
 	</div>
 	<ul class="list-group">
 		<li class="list-group-item">
@@ -23,7 +58,7 @@
 							ng-model="device.name" placeholder="Device Name">
 					</div>
 					<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary">
-						Update Device</button>
+						Add Activity</button>
 				</div>
 				<div class="form-group">
 					<div class="row">
@@ -65,12 +100,12 @@
 					      <option value="PUT">PUT</option>
 					      <option value="POST">POST</option>
 					    </select>
-					</div>
+   					</div>
 					</div>
 				</div>
 				<div class="form-group">
 					<div class="row">
-					<label class="col-xs-12 col-sm-2 control-label" for="device-content-type">Content Type
+					<label class="col-xs-12 col-sm-2 control-label"  for="device-content-type">Content Type
 					</label>
 
 					<div class="col-xs-8 col-sm-7">

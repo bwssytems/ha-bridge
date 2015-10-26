@@ -6,7 +6,6 @@
         <li role="presentation"><a href="#/editor">Manual Add</a></li>
       </ul>
 
-
 	<div ng-controller="ErrorsController">
 		<div ng-if="bridge.error"
 			class="alert alert-warning alert-dismissible" role="alert">
@@ -56,72 +55,9 @@
 			</tr>
 		</table>
 	</div>
-
 	<div class="panel panel-default bridgeServer">
 		<div class="panel-heading">
-  			<a href="#/"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></a>
+  			<a href="#/show"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a>
 			<h1 class="panel-title">Bridge settings</h1>
-		</div>
-		<div class="panel-body">
-
-			<form class="form-horizontal">
-				<div class="form-group">
-					<label class="col-xs-12 col-sm-3 control-label" for="bridge-base">Bridge
-						server</label>
-
-					<div class="col-xs-8 col-sm-7">
-						<input id="bridge-base" class="form-control" type="text"
-							ng-model="bridge.base" placeholder="URL to bridge">
-					</div>
-					<button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
-						ng-click="setBridgeUrl(bridge.base)">Load</button>
-					<button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
-						ng-click="testUrl(bridge.base)">Go</button>
-				</div>
-			</form>
-			<table class="table table-bordered table-striped table-hover">
-				<thead>
-					<tr>
-						<th>Setting</th>
-						<th>Value</th>
-					</tr>
-				</thead>
-				<tr>
-					<td>upnp.config.address</td>
-					<td>{{BridgeSettings.upnpconfigaddress}}</td>
-				</tr>
-				<tr>
-					<td>server.port</td>
-					<td>{{BridgeSettings.serverport}}</td>
-				</tr>
-				<tr>
-					<td>upnp.devices.db</td>
-					<td>{{BridgeSettings.upnpdevicedb}}</td>
-				</tr>
-				<tr>
-					<td>upnp.response.port</td>
-					<td>{{BridgeSettings.upnpresponseport}}</td>
-				</tr>
-				<tr>
-					<td>vera.address</td>
-					<td>{{BridgeSettings.veraaddress}}</td>
-				</tr>
-				<tr>
-					<td>harmony.address</td>
-					<td>{{BridgeSettings.harmonyaddress}}</td>
-				</tr>
-				<tr>
-					<td>upnp.strict</td>
-					<td>{{BridgeSettings.upnpstrict}}</td>
-				</tr>
-				<tr>
-					<td>trace.upnp</td>
-					<td>{{BridgeSettings.traceupnp}}</td>
-				</tr>
-				<tr>
-					<td>vtwo.compatibility</td>
-					<td>{{BridgeSettings.vtwocompatibility}}</td>
-				</tr>
-			</table>
 		</div>
 	</div>

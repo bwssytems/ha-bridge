@@ -5,7 +5,7 @@ To customize and build it yourself, build a new jar with maven:
 ```
 mvn install
 ```
-Otherwise go to http://www.bwssystems.com/apps.html to download the latest jar file.  
+Otherwise, downloads are available at https://github.com/bwssytems/ha-bridge/releases.  
 ## Run
 Then locate the jar and start the server with:  
 ```
@@ -22,6 +22,12 @@ The server defaults to running on port 8080. If you're already running a server 
 The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify -Dupnp.devices.db=`<directory>/<filename> or <filename>` if it is the same directory.
 ### -Dupnp.response.port=`<port>`
 The upnp response port that will be used. The default is 50000.  
+### -Dharmony.address=`<ip address>`
+The argument for the Harmony Hub address should be given as the system does not have a way to find the address. Supply -Dharmony.address=X.Y.Z.A on the command line to provide it. If a Harmony Hub is not used, do not set it.
+### -Dharmony.user=`<username>`
+The user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub Features, provide -Dharmony.user=`<username>` on the command line.
+### -Dharmony.pwd=`<password>`
+The password for the user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub Features, provide -Dharmony.pwd=`<password>` on the command line.
 ### -Dupnp.strict=`<true|false>`
 Upnp has been very closed on this platform to try and respond as a hue and there is now a setting to control if it is more open or strict, Add -Dupnp.strict=`<true|false>` to your command line to have the emulator respond to what it thinks is an echo to a hue or any other device. The default is upnp.strict=true.
 ### -Dtrace.upnp=`<true|false>`

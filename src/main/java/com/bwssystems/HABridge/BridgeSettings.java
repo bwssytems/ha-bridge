@@ -6,6 +6,9 @@ public class BridgeSettings {
 	private String upnpresponseport;
 	private String upnpdevicedb;
 	private String veraaddress;
+	private String harmonyaddress;
+	private String harmonyuser;
+	private String harmonypwd;
 	private boolean upnpstrict;
 	private boolean traceupnp;
 	private boolean vtwocompatibility;
@@ -41,6 +44,24 @@ public class BridgeSettings {
 		this.veraaddress = veraAddress;
 	}
 
+	public String getHarmonyAddress() {
+		return harmonyaddress;
+	}
+	public void setHarmonyAddress(String harmonyaddress) {
+		this.harmonyaddress = harmonyaddress;
+	}
+	public String getHarmonyUser() {
+		return harmonyuser;
+	}
+	public void setHarmonyUser(String harmonyuser) {
+		this.harmonyuser = harmonyuser;
+	}
+	public String getHarmonyPwd() {
+		return harmonypwd;
+	}
+	public void setHarmonyPwd(String harmonypwd) {
+		this.harmonypwd = harmonypwd;
+	}
 	public boolean isUpnpStrict() {
 		return upnpstrict;
 	}
@@ -63,6 +84,11 @@ public class BridgeSettings {
 	
 	public Boolean isValidVera() {
 		if(this.veraaddress.contains(Configuration.DEFAULT_VERA_ADDRESS))
+			return false;
+		return true;
+	}
+	public Boolean isValidHarmony() {
+		if(this.harmonyaddress.contains(Configuration.DEFAULT_HARMONY_ADDRESS))
 			return false;
 		return true;
 	}

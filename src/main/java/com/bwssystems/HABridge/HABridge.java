@@ -40,7 +40,7 @@ public class HABridge {
         String addressString;
         BridgeSettings bridgeSettings;
 
-        log.info("HA Bridge (v0.4.10) starting setup....");
+        log.info("HA Bridge (v1.0.0) starting setup....");
         //get ip address for upnp requests
         try {
 			address = InetAddress.getLocalHost();
@@ -55,6 +55,9 @@ public class HABridge {
         bridgeSettings.setUpnpDeviceDb(System.getProperty("upnp.device.db", Configuration.DEVICE_DB_DIRECTORY));
         bridgeSettings.setUpnpResponsePort(System.getProperty("upnp.response.port", Configuration.UPNP_RESPONSE_PORT));
         bridgeSettings.setVeraAddress(System.getProperty("vera.address", Configuration.DEFAULT_VERA_ADDRESS));
+        bridgeSettings.setHarmonyAddress(System.getProperty("harmony.address", Configuration.DEFAULT_HARMONY_ADDRESS));
+        bridgeSettings.setHarmonyUser(System.getProperty("harmony.user", Configuration.DEFAULT_HARMONY_USER));
+        bridgeSettings.setHarmonyPwd(System.getProperty("harmony.pwd", Configuration.DEFAULT_HARMONY_PWD));
         bridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
         bridgeSettings.setTraceupnp(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
         bridgeSettings.setVtwocompatibility(Boolean.parseBoolean(System.getProperty("vtwo.compatibility", "false")));
