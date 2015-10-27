@@ -12,6 +12,7 @@ import com.bwssystems.HABridge.devicemanagmeent.*;
 import com.bwssystems.HABridge.hue.HueMulator;
 import com.bwssystems.HABridge.upnp.UpnpListener;
 import com.bwssystems.HABridge.upnp.UpnpSettingsResource;
+import com.bwssystems.harmony.HarmonyServer;
 
 public class HABridge {
 	
@@ -33,6 +34,7 @@ public class HABridge {
     public static void main(String[] args) {
         Logger log = LoggerFactory.getLogger(HABridge.class);
         DeviceResource theResources;
+        HarmonyServer myHarmonyServer;
         HueMulator theHueMulator;
         UpnpSettingsResource theSettingResponder;
         UpnpListener theUpnpListener;
@@ -69,10 +71,17 @@ public class HABridge {
         port(Integer.valueOf(bridgeSettings.getServerPort()));
         // sparkjava config directive to set html static file location for Jetty
         staticFileLocation("/public");
+        //setup the harmony connection if available
+      	try {
+      		myHarmonyServer = HarmonyServer.setup(bridgeSettings);
+		} catch (Exception e) {
+	        log.error("Cannot get harmony client setup, Exiting with message: " + e.getMessage(), e);
+	        return;
+		}
         // setup the class to handle the resource setup rest api
-        theResources = new DeviceResource(bridgeSettings);
+        theResources = new DeviceResource(bridgeSettings, myHarmonyServer.getMyHarmony());
         // setup the class to handle the hue emulator rest api
-        theHueMulator = new HueMulator(theResources.getDeviceRepository());
+        theHueMulator = new HueMulator(theResources.getDeviceRepository(), myHarmonyServer.getMyHarmony());
         theHueMulator.setupServer();
         // setup the class to handle the upnp response rest api
         theSettingResponder = new UpnpSettingsResource(bridgeSettings);

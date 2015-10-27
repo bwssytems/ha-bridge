@@ -6,6 +6,7 @@ import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.bwssystems.HABridge.api.hue.HueApiResponse;
 import com.bwssystems.HABridge.dao.*;
+import com.bwssystems.harmony.HarmonyHandler;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -51,15 +52,17 @@ public class HueMulator {
     private static final String HUE_CONTEXT = "/api";
 
     private DeviceRepository repository;
+    private HarmonyHandler myHarmony;
     private HttpClient httpClient;
     private ObjectMapper mapper;
 
 
-    public HueMulator(DeviceRepository aDeviceRepository){
+    public HueMulator(DeviceRepository aDeviceRepository, HarmonyHandler theHandler){
         httpClient = HttpClients.createDefault();
         mapper = new ObjectMapper(); //armzilla: work around Echo incorrect content type and breaking mapping. Map manually
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         repository = aDeviceRepository;
+        myHarmony = theHandler;
     }
 
 //	This function sets up the sparkjava rest calls for the hue api
@@ -208,19 +211,28 @@ public class HueMulator {
 	            responseString = "[{\"success\":{\"/lights/" + lightId + "/state/on\":false}}]";
 	            url = device.getOffUrl();
 	        }
-	
-	        //quick template
-	        String body;
-	        url = replaceIntensityValue(url, state.getBri());
-	        if (state.isOn())
-	        	body = replaceIntensityValue(device.getContentBody(), state.getBri());
+
+	        if(device.getDeviceType() == "activity")
+	        {
+	        	log.debug("executing activity to Harmony: " + url);
+	        	myHarmony.startActivity(url);
+	        }
 	        else
-	        	body = replaceIntensityValue(device.getContentBodyOff(), state.getBri());
-	        //make call
-	        if(!doHttpRequest(url, device.getHttpVerb(), device.getContentType(), body)){
-	        	response.status(HttpStatus.SC_SERVICE_UNAVAILABLE);
-	            log.error("Error on calling url to change device state: " + url);
-	            return null;
+	        {
+	        	log.debug("executing activity to Http: " + url);
+				// quick template
+				String body;
+				url = replaceIntensityValue(url, state.getBri());
+				if (state.isOn())
+					body = replaceIntensityValue(device.getContentBody(), state.getBri());
+				else
+					body = replaceIntensityValue(device.getContentBodyOff(), state.getBri());
+				// make call
+				if (!doHttpRequest(url, device.getHttpVerb(), device.getContentType(), body)) {
+					response.status(HttpStatus.SC_SERVICE_UNAVAILABLE);
+					log.error("Error on calling url to change device state: " + url);
+					return null;
+				}
 	        }
 	
 			response.type("application/json; charset=utf-8"); 

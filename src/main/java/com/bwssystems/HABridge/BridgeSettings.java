@@ -90,6 +90,10 @@ public class BridgeSettings {
 	public Boolean isValidHarmony() {
 		if(this.harmonyaddress.contains(Configuration.DEFAULT_HARMONY_ADDRESS))
 			return false;
+		if(this.harmonypwd == null || this.harmonypwd == "")
+			return false;
+		if(this.harmonyuser == null || this.harmonyuser == "")
+			return false;
 		return true;
 	}
 }

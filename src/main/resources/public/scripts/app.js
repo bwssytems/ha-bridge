@@ -149,15 +149,15 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
         
         this.updateShowHarmony = function () {
             if(self.BridgeSettings.harmonyaddress == "1.1.1.1" || self.BridgeSettings.harmonyaddress == "")
-            	self.state.showHarmony = false;
+            	this.state.showHarmony = false;
             else
-            	self.state.showHarmony = true;
+            	this.state.showHarmony = true;
         	return;
         }
 
         this.viewVeraDevices = function () {
             this.state.error = "";
-        	if(BridgeSettings.veraaddress == "1.1.1.1" || BridgeSettings.veraaddress == "")
+        	if(!this.state.showVera)
         		return;
             this.state.error = "";
             return $http.get(this.state.base + "/vera/devices").then(
@@ -176,7 +176,7 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
 
         this.viewVeraScenes = function () {
             this.state.error = "";
-        	if(BridgeSettings.veraaddress == "1.1.1.1" || BridgeSettings.veraaddress == "")
+        	if(!this.state.showVera)
         		return;
             return $http.get(this.state.base + "/vera/scenes").then(
                 function (response) {
@@ -192,8 +192,28 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             );
         };
 
+        this.viewHarmonyActivities = function () {
+            this.state.error = "";
+        	if(!this.state.showHarmony)
+        		return;
+            return $http.get(this.state.base + "/harmony/activities").then(
+                function (response) {
+                    self.state.harmonyactivities = response.data;
+                },
+                function (error) {
+                    if (error.data) {
+                    	$window.alert("Get Harmony Activities Error: " + error.data.message);
+                    } else {
+                    	$window.alert("Get Harmony Activities Error: unknown");
+                    }
+                }
+            );
+        };
+
         this.addDevice = function (id, name, type, onUrl, offUrl, httpVerb, contentType, contentBody, contentBodyOff) {
             this.state.error = "";
+            if(httpVerb != null && httpVerb != "")
+            	type = "custom";
             if (id) {
                 var putUrl = this.state.base + "/" + id;
                 return $http.put(putUrl, {
@@ -220,6 +240,8 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             } else {
             	if(type == null || type == "")
             		type = "switch";
+                if(httpVerb != null && httpVerb != "")
+                	type = "custom";
                 return $http.post(this.state.base, {
                     name: name,
                     deviceType: type,
@@ -280,6 +302,8 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
             bridgeService.deleteDevice(device.id);
         };
         $scope.testUrl = function (device, type) {
+        	if(device.deviceType == "activity")
+        		return;
         	if(type == "on") {
         		if(device.httpVerb == "PUT")
         			$http.put(device.onUrl, device.contentBody).then(
@@ -343,6 +367,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         bridgeService.device = $scope.device;
         bridgeService.viewVeraDevices();
         bridgeService.viewVeraScenes();
+        bridgeService.viewHarmonyActivities();
         $scope.bridge = bridgeService.state;
         bridgeService.updateShowVera();
         bridgeService.updateShowHarmony();
@@ -423,20 +448,15 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         };
 
         $scope.buildActivityUrls = function (harmonyactivity) {
-            if ($scope.vera.base.indexOf("http") < 0) {
-                $scope.vera.base = "http://" + $scope.vera.base;
-            }
-            $scope.device.deviceType = "scene";
-            $scope.device.name = verascene.name;
-            $scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
-                + "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
-                + verascene.id;
-            $scope.device.offUrl = $scope.vera.base + ":" + $scope.vera.port
-                + "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
-                + verascene.id;
+            $scope.device.deviceType = "activity";
+            $scope.device.name = harmonyactivity.label;
+            $scope.device.onUrl = harmonyactivity.id;
+            $scope.device.offUrl = "-1";
         };
 
-        $scope.testUrl = function (url) {
+        $scope.testUrl = function (device, type) {
+        	if(device.deviceType == "activity")
+        		return;
         	if(type == "on") {
         		if(device.httpVerb == "PUT")
         			$http.put(device.onUrl, device.contentBody).then(

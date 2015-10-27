@@ -17,7 +17,19 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 
+	<repositories>
+		<repository>
+	    	<id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+
 	<dependencies>
+		<dependency>
+		    <groupId>com.github.bwssytems</groupId>
+		    <artifactId>harmony-java-client</artifactId>
+		    <version>1.0.4</version>
+		</dependency>
 		<dependency>
 		    <groupId>com.sparkjava</groupId>
 		    <artifactId>spark-core</artifactId>
@@ -57,6 +69,16 @@
 		  <groupId>net.java.dev.eval</groupId>
 		  <artifactId>eval</artifactId>
 		  <version>0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+			<version>4.0-beta4</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.igniterealtime.smack</groupId>
+		  <artifactId>smack-core</artifactId>
+		  <version>4.0.2</version>
 		</dependency>
 	</dependencies>
 

@@ -18,6 +18,7 @@ import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.JsonTransformer;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
+import com.bwssystems.harmony.HarmonyHandler;
 import com.bwssystems.luupRequests.Sdata;
 import com.bwssystems.vera.VeraInfo;
 import com.google.gson.Gson;
@@ -31,12 +32,14 @@ public class DeviceResource {
 
     private DeviceRepository deviceRepository;
     private VeraInfo veraInfo;
+    private HarmonyHandler myHarmonyHandler;
     private static final Set<String> supportedVerbs = new HashSet<>(Arrays.asList("get", "put", "post"));
 
-	public DeviceResource(BridgeSettings theSettings) {
+	public DeviceResource(BridgeSettings theSettings, HarmonyHandler myHarmony) {
 		super();
 		deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
 		veraInfo = new VeraInfo(theSettings.getVeraAddress(), theSettings.isValidVera());
+		myHarmonyHandler = myHarmony;
         setupEndpoints();
 	}
 
@@ -148,6 +151,14 @@ public class DeviceResource {
 	        }
 	      	response.status(HttpStatus.SC_OK);
 	        return sData.getScenes();
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/harmony/activities", "application/json", (request, response) -> {
+	    	log.debug("Get harmony activities");
+	      	response.status(HttpStatus.SC_OK);
+	      	if(myHarmonyHandler != null)
+	      		return myHarmonyHandler.getActivities();
+	      	return "";
 	    }, new JsonTransformer());
 
     }
