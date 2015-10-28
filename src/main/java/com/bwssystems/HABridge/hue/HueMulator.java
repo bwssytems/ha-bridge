@@ -212,7 +212,7 @@ public class HueMulator {
 	            url = device.getOffUrl();
 	        }
 
-	        if(device.getDeviceType() == "activity")
+	        if(device.getDeviceType().contains("activity"))
 	        {
 	        	log.debug("executing activity to Harmony: " + url);
 	        	myHarmony.startActivity(url);
