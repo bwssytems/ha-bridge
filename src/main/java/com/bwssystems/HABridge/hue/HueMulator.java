@@ -6,7 +6,9 @@ import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.bwssystems.HABridge.api.hue.HueApiResponse;
 import com.bwssystems.HABridge.dao.*;
+import com.bwssystems.harmony.ButtonPress;
 import com.bwssystems.harmony.HarmonyHandler;
+import com.bwssystems.harmony.RunActivity;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -215,7 +217,14 @@ public class HueMulator {
 	        if(device.getDeviceType().contains("activity"))
 	        {
 	        	log.debug("executing activity to Harmony: " + url);
-	        	myHarmony.startActivity(url);
+	        	RunActivity anActivity = new Gson().fromJson(url, RunActivity.class);
+	        	myHarmony.startActivity(anActivity);
+	        }
+	        else if(device.getDeviceType().contains("button"))
+	        {
+	        	log.debug("executing button press to Harmony: " + url);
+	        	ButtonPress aDeviceButton = new Gson().fromJson(url, ButtonPress.class);
+	        	myHarmony.pressButton(aDeviceButton);
 	        }
 	        else
 	        {

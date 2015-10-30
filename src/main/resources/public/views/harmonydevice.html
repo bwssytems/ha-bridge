@@ -2,19 +2,19 @@
         <li role="presentation"><a href="#">Configuration</a></li>
         <li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
         <li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
-        <li role="presentation" class="active"><a href="#/harmonyactivities">Harmony Activities</a></li>
-        <li role="presentation"><a href="#/harmonydevices">Harmony Devices</a></li>
+        <li role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
+        <li role="presentation" class="active"><a href="#/harmonydevices">Harmony Devices</a></li>
         <li role="presentation"><a href="#/editor">Manual Add</a></li>
       </ul>
 
 <div class="panel panel-default bridgeServer" ng-if="!bridge.error">
 	<div class="panel-heading">
-		<h2 class="panel-title">Harmony Activity List</h2>
+		<h2 class="panel-title">Harmony Device List</h2>
 	</div>
 	<ul class="list-group">
 		<li class="list-group-item">
-			<p class="text-muted">You can select a Harmony Activity and generate
-				the add activity box selections automatically.</p>
+			<p class="text-muted">You can select a Harmony Device and Button and generate
+				the add button box selections automatically.</p>
 
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
@@ -27,16 +27,34 @@
 							<a href="" ng-click="order('id')">Id</a>
         					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
         				</th>
+						<th>On Button</th>
+						<th>Off Button</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="harmonyactivity in bridge.harmonyactivities | orderBy:predicate:reverse">
-					<td>{{harmonyactivity.label}}</td>
-					<td>{{harmonyactivity.id}}</td>
+				<tr ng-repeat="harmonydevice in bridge.harmonydevices | orderBy:predicate:reverse">
+					<td>{{harmonydevice.label}}</td>
+					<td>{{harmonydevice.id}}</td>
+					<td>
+						<select name="device-ctrlon" id="device-ctrlon" ng-model="devicectrlon">
+							<option ng-repeat="ctrlon in harmonydevice.controlGroup" value="{{ctrlon.function}}">{{ctrlon.name}}</option>
+						</select>
+						<select name="device-funcon" id="device-funcon" ng-model="devicefuncon">
+							<option ng-repeat="funcon in devicectrlon" value="{{funcon.name}}">{{funcon.name}}</option>
+						</select>
+					</td>
+					<td>
+						<select name="device-ctrloff" id="device-ctrloff" ng-model="devicectrloff">
+							<option ng-repeat="ctrloff in harmonydevice.controlGroup" value="{{ctrloff.function}}">{{ctrloff.name}}</option>
+						</select>
+						<select name="device-funcoff" id="device-funcoff" ng-model="devicefuncoff">
+							<option ng-repeat="funcoff in devicectrloff" value="{{funcoff.label}}">{{funcoff.label}}</option>
+						</select>
+					</td>
 					<td>
 						<button class="btn btn-success" type="submit"
-							ng-click="buildActivityUrls(harmonyactivity)">Generate
-							Activity URLs</button>
+							ng-click="buildButtonUrls(harmonydevice, devicefuncon, devicefuncoff)">Generate
+							Button URLs</button>
 					</td>
 				</tr>
 			</table>
@@ -45,7 +63,7 @@
 </div>
 <div class="panel panel-default bridgeServer" ng-if="!bridge.error">
 	<div class="panel-heading">
-		<h2 class="panel-title">Add a Harmony Activity</h2>
+		<h2 class="panel-title">Add a Harmony Button</h2>
 	</div>
 	<ul class="list-group">
 		<li class="list-group-item">
@@ -59,7 +77,7 @@
 							ng-model="device.name" placeholder="Device Name">
 					</div>
 					<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary">
-						Add Activity</button>
+						Add Button</button>
 				</div>
 				<div class="form-group">
 					<div class="row">

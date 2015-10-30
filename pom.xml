@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
@@ -28,7 +28,7 @@
 		<dependency>
 		    <groupId>com.github.bwssytems</groupId>
 		    <artifactId>harmony-java-client</artifactId>
-		    <version>1.0.5</version>
+		    <version>1.0.8</version>
 		</dependency>
 		<dependency>
 		    <groupId>com.sparkjava</groupId>
@@ -60,11 +60,6 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.6.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.6.0</version>
-        </dependency>
 		<dependency>
 		  <groupId>com.cedarsoftware</groupId>
 		  <artifactId>json-io</artifactId>
@@ -83,6 +78,11 @@
 		<dependency>
 		  <groupId>org.igniterealtime.smack</groupId>
 		  <artifactId>smack-core</artifactId>
+		  <version>4.0.7</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.igniterealtime.smack</groupId>
+		  <artifactId>smack-debug</artifactId>
 		  <version>4.0.7</version>
 		</dependency>
 	</dependencies>

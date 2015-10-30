@@ -41,46 +41,50 @@ public class HarmonyHandler {
 		return harmonyClient.getCurrentActivity();
 	}
 
-	public Boolean startActivity(String anActivity) {
-		log.debug("Harmony api start activity requested for: " + anActivity + " noop mode: " + noopCalls);
-		if (anActivity != null && !anActivity.isEmpty()) {
+	public Boolean startActivity(RunActivity anActivity) {
+		log.debug("Harmony api start activity requested for: " + anActivity.getName() + " noop mode: " + noopCalls);
+		if (anActivity.isValid()) {
 			try {
 				if (!noopCalls)
-					harmonyClient.startActivity(Integer.parseInt(anActivity));
+					harmonyClient.startActivity(Integer.parseInt(anActivity.getName()));
+				else
+					log.info("noop mode: Harmony api start activity requested for: " + anActivity.getName());
 			} catch (IllegalArgumentException e) {
 				try {
 					if (!noopCalls)
-						harmonyClient.startActivityByName(anActivity);
+						harmonyClient.startActivityByName(anActivity.getName());
 				} catch (IllegalArgumentException ei) {
-					log.error("Error in finding activity: " + anActivity);
+					log.error("Error in finding activity: " + anActivity.getName());
 					return false;
 				}
 			}
 		} else {
-			log.error("Error in finding activity: " + anActivity);
+			log.error("Error in finding activity: " + anActivity.getName());
 			return false;
 		}
 
 		return true;
 	}
 
-	public Boolean pressButton(String aDevice, String aDeviceButton) {
-		log.debug("Harmony api press a button requested for device: " + aDevice + " and a for button: " + aDeviceButton + " noop mode: " + noopCalls);
-		if (aDeviceButton != null && !aDeviceButton.isEmpty()) {
+	public Boolean pressButton(ButtonPress aDeviceButton) {
+		log.debug("Harmony api press a button requested for device: " + aDeviceButton.getDevice() + " and a for button: " + aDeviceButton.getButton() + " noop mode: " + noopCalls);
+		if (aDeviceButton.isValid()) {
 			try {
 				if (!noopCalls)
-					harmonyClient.pressButton(Integer.parseInt(aDevice), aDeviceButton);
+					harmonyClient.pressButton(Integer.parseInt(aDeviceButton.getDevice()), aDeviceButton.getButton());
+				else
+					log.info("noop mode: Harmony api press a button requested for device: " + aDeviceButton.getDevice() + " and a for button: " + aDeviceButton.getButton());
 			} catch (IllegalArgumentException e) {
 				try {
 					if (!noopCalls)
-						harmonyClient.pressButton(aDevice, aDeviceButton);
+						harmonyClient.pressButton(aDeviceButton.getDevice(), aDeviceButton.getButton());
 				} catch (IllegalArgumentException ei) {
-					log.error("Error in finding device: " + aDevice +" and a button: " + aDeviceButton);
+					log.error("Error in finding device: " + aDeviceButton.getDevice() +" and a button: " + aDeviceButton.getButton());
 					return false;
 				}
 			}
 		} else {
-			log.error("Error in finding device: " + aDevice +" and a button: " + aDeviceButton);
+			log.error("Error in finding device: " + aDeviceButton.getDevice() +" and a button: " + aDeviceButton.getButton());
 			return false;
 		}
 

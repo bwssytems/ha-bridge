@@ -155,10 +155,32 @@ public class DeviceResource {
 
     	get (API_CONTEXT + "/harmony/activities", "application/json", (request, response) -> {
 	    	log.debug("Get harmony activities");
+	      	if(myHarmonyHandler == null) {
+				response.status(HttpStatus.SC_NOT_FOUND);
+		      	return null;	      		
+	      	}
 	      	response.status(HttpStatus.SC_OK);
-	      	if(myHarmonyHandler != null)
-	      		return myHarmonyHandler.getActivities();
-	      	return "";
+	      	return myHarmonyHandler.getActivities();
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/harmony/show", "application/json", (request, response) -> {
+	    	log.debug("Get harmony current activity");
+	      	if(myHarmonyHandler == null) {
+	      		response.status(HttpStatus.SC_NOT_FOUND);
+	      		return null;
+	      	}
+	      	response.status(HttpStatus.SC_OK);
+      		return myHarmonyHandler.getCurrentActivity();
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/harmony/devices", "application/json", (request, response) -> {
+	    	log.debug("Get harmony devices");
+	      	if(myHarmonyHandler == null) {
+				response.status(HttpStatus.SC_NOT_FOUND);
+		      	return null;	      		
+	      	}
+	      	response.status(HttpStatus.SC_OK);
+	      	return myHarmonyHandler.getDevices();
 	    }, new JsonTransformer());
 
     }

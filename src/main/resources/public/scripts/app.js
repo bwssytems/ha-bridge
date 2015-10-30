@@ -21,6 +21,9 @@ app.config(function ($routeProvider) {
 	}).when('/verascenes', {
 		templateUrl: 'views/verascene.html',
 		controller: 'AddingController'		
+	}).when('/harmonydevices', {
+		templateUrl: 'views/harmonydevice.html',
+		controller: 'AddingController'		
 	}).when('/harmonyactivities', {
 		templateUrl: 'views/harmonyactivity.html',
 		controller: 'AddingController'		
@@ -86,7 +89,7 @@ app.factory('BridgeSettings', function() {
 app.service('bridgeService', function ($http, $window, BridgeSettings) {
         var self = this;
         self.BridgeSettings = BridgeSettings;
-        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", devices: [], device: [], error: "", showVera: false, showHarmony: false};
+        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", huebase: window.location.origin + "/api",  devices: [], device: [], error: "", showVera: false, showHarmony: false};
 
         this.viewDevices = function () {
             this.state.error = "";
@@ -210,6 +213,24 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             );
         };
 
+        this.viewHarmonyDevices = function () {
+            this.state.error = "";
+        	if(!this.state.showHarmony)
+        		return;
+            return $http.get(this.state.base + "/harmony/devices").then(
+                function (response) {
+                    self.state.harmonydevices = response.data;
+                },
+                function (error) {
+                    if (error.data) {
+                    	$window.alert("Get Harmony Devices Error: " + error.data.message);
+                    } else {
+                    	$window.alert("Get Harmony Devices Error: unknown");
+                    }
+                }
+            );
+        };
+
         this.addDevice = function (id, name, type, onUrl, offUrl, httpVerb, contentType, contentBody, contentBodyOff) {
             this.state.error = "";
             if(httpVerb != null && httpVerb != "")
@@ -302,9 +323,19 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
             bridgeService.deleteDevice(device.id);
         };
         $scope.testUrl = function (device, type) {
-        	if(device.deviceType == "activity")
-        		return;
         	if(type == "on") {
+            	if(device.deviceType == "activity" || device.deviceType == "button") {
+        			$http.put($scope.bridge.huebase + "/test/lights/" + device.id + "/state", "{\"on\":true}").then(
+        	                function (response) {
+        	                    $window.alert("Request Exceuted: " + response.statusText);
+        	                },
+        	                function (error) {
+        	                    $window.alert("Request Error: " + error.data.message);
+        	                }
+        	            );
+            		return;        		
+            	}
+
         		if(device.httpVerb == "PUT")
         			$http.put(device.onUrl, device.contentBody).then(
         	                function (response) {
@@ -327,6 +358,18 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
         			window.open(device.onUrl, "_blank");
         	}
         	else {
+            	if(device.deviceType == "activity" || device.deviceType == "button") {
+        			$http.put($scope.bridge.huebase + "/test/lights/" + device.id + "/state", "{\"on\":false}").then(
+        	                function (response) {
+        	                    $window.alert("Request Exceuted: " + response.statusText);
+        	                },
+        	                function (error) {
+        	                    $window.alert("Request Error: " + error.data.message);
+        	                }
+        	            );
+            		return;        		
+            	}
+
         		if(device.httpVerb == "PUT")
         			$http.put(device.offUrl, device.contentBodyOff).then(
         	                function (response) {
@@ -368,6 +411,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         bridgeService.viewVeraDevices();
         bridgeService.viewVeraScenes();
         bridgeService.viewHarmonyActivities();
+        bridgeService.viewHarmonyDevices();
         $scope.bridge = bridgeService.state;
         bridgeService.updateShowVera();
         bridgeService.updateShowHarmony();
@@ -450,14 +494,31 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         $scope.buildActivityUrls = function (harmonyactivity) {
             $scope.device.deviceType = "activity";
             $scope.device.name = harmonyactivity.label;
-            $scope.device.onUrl = harmonyactivity.id;
-            $scope.device.offUrl = "-1";
+            $scope.device.onUrl = "{\"name\":\"" + harmonyactivity.id + "\"}";
+            $scope.device.offUrl = "{\"name\":\"-1\"}";
+        };
+
+        $scope.buildButtonUrls = function (harmonydevice, onbutton, offbutton) {
+            $scope.device.deviceType = "button";
+            $scope.device.name = harmonydevice.label;
+            $scope.device.onUrl = "{\"device\":\"" + harmonydevice.id + "\",\"button\":\"" + onbutton + "\"}";
+            $scope.device.offUrl = "{\"device\":\"" + harmonydevice.id + "\",\"button\":\"" + offbutton + "\"}";
         };
 
         $scope.testUrl = function (device, type) {
-        	if(device.deviceType == "activity")
-        		return;
         	if(type == "on") {
+            	if(device.deviceType == "activity" || device.deviceType == "button") {
+        			$http.put($scope.bridge.huebase + "/test/lights/" + device.id + "/state", "{\"on\":true}").then(
+        	                function (response) {
+        	                    $window.alert("Request Exceuted: " + response.statusText);
+        	                },
+        	                function (error) {
+        	                    $window.alert("Request Error: " + error.data.message);
+        	                }
+        	            );
+            		return;        		
+            	}
+
         		if(device.httpVerb == "PUT")
         			$http.put(device.onUrl, device.contentBody).then(
         	                function (response) {
@@ -480,6 +541,18 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         			window.open(device.onUrl, "_blank");
         	}
         	else {
+            	if(device.deviceType == "activity" || device.deviceType == "button") {
+        			$http.put($scope.bridge.huebase + "/test/lights/" + device.id + "/state", "{\"on\":false}").then(
+        	                function (response) {
+        	                    $window.alert("Request Exceuted: " + response.statusText);
+        	                },
+        	                function (error) {
+        	                    $window.alert("Request Error: " + error.data.message);
+        	                }
+        	            );
+            		return;        		
+            	}
+
         		if(device.httpVerb == "PUT")
         			$http.put(device.offUrl, device.contentBodyOff).then(
         	                function (response) {

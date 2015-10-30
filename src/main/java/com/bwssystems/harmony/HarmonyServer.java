@@ -42,7 +42,7 @@ public class HarmonyServer {
   	}
 
 	private void execute(BridgeSettings mySettings) throws Exception {
-		log.debug("setup initiated....");
+		log.info("setup initiated....");
 		harmonyClient.addListener(new ActivityChangeListener() {
 			@Override
 			public void activityStarted(Activity activity) {

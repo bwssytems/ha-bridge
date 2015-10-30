@@ -42,7 +42,7 @@ public class HABridge {
         String addressString;
         BridgeSettings bridgeSettings;
 
-        log.info("HA Bridge (v1.0.1) starting setup....");
+        log.info("HA Bridge (v1.0.2) starting setup....");
         //get ip address for upnp requests
         try {
 			address = InetAddress.getLocalHost();
