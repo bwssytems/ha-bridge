@@ -21,6 +21,7 @@ public class HarmonyServer {
     private HarmonyClient harmonyClient;
     
     private HarmonyHandler myHarmony;
+    private DevModeResponse devResponse;
     
     private Logger log = LoggerFactory.getLogger(HarmonyServer.class);
 
@@ -42,16 +43,29 @@ public class HarmonyServer {
   	}
 
 	private void execute(BridgeSettings mySettings) throws Exception {
-		log.info("setup initiated....");
-		harmonyClient.addListener(new ActivityChangeListener() {
-			@Override
-			public void activityStarted(Activity activity) {
-				log.info(format("activity changed: [%d] %s", activity.getId(), activity.getLabel()));
-			}
-		});
-		harmonyClient.connect(mySettings.getHarmonyAddress(), mySettings.getHarmonyUser(), mySettings.getHarmonyPwd());
         Boolean noopCalls = Boolean.parseBoolean(System.getProperty("noop.calls", "false"));
-        myHarmony = new HarmonyHandler(harmonyClient, noopCalls);
+        String modeString = "";
+        if(mySettings.isDevMode())
+        	modeString = " (development mode)";
+        if(noopCalls)
+        	modeString = " (no op calls to harmony)";
+		log.info("setup initiated " + modeString + "....");
+        if(mySettings.isDevMode())
+        {
+        	harmonyClient = null;
+        	devResponse = new DevModeResponse();
+        }
+        else {
+        	devResponse = null;
+			harmonyClient.addListener(new ActivityChangeListener() {
+				@Override
+				public void activityStarted(Activity activity) {
+					log.info(format("activity changed: [%d] %s", activity.getId(), activity.getLabel()));
+				}
+			});
+			harmonyClient.connect(mySettings.getHarmonyAddress(), mySettings.getHarmonyUser(), mySettings.getHarmonyPwd());
+        }
+        myHarmony = new HarmonyHandler(harmonyClient, noopCalls, devResponse);
 	}
 
 	public HarmonyHandler getMyHarmony() {

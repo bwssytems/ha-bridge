@@ -12,6 +12,7 @@ public class BridgeSettings {
 	private boolean upnpstrict;
 	private boolean traceupnp;
 	private boolean vtwocompatibility;
+	private boolean devmode;
 	
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -82,6 +83,12 @@ public class BridgeSettings {
 		this.vtwocompatibility = vtwocompatibility;
 	}
 	
+	public boolean isDevMode() {
+		return devmode;
+	}
+	public void setDevMode(boolean devmode) {
+		this.devmode = devmode;
+	}
 	public Boolean isValidVera() {
 		if(this.veraaddress.contains(Configuration.DEFAULT_VERA_ADDRESS))
 			return false;

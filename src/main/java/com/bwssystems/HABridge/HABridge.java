@@ -42,7 +42,7 @@ public class HABridge {
         String addressString;
         BridgeSettings bridgeSettings;
 
-        log.info("HA Bridge (v1.0.2) starting setup....");
+        log.info("HA Bridge (v1.0.3) starting setup....");
         //get ip address for upnp requests
         try {
 			address = InetAddress.getLocalHost();
@@ -63,6 +63,7 @@ public class HABridge {
         bridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
         bridgeSettings.setTraceupnp(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
         bridgeSettings.setVtwocompatibility(Boolean.parseBoolean(System.getProperty("vtwo.compatibility", "false")));
+        bridgeSettings.setDevMode(Boolean.parseBoolean(System.getProperty("dev.mode", "false")));
 
         // sparkjava config directive to set ip address for the web server to listen on
         // ipAddress("0.0.0.0"); // not used

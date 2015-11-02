@@ -37,23 +37,21 @@
 					<td>{{harmonydevice.id}}</td>
 					<td>
 						<select name="device-ctrlon" id="device-ctrlon" ng-model="devicectrlon">
-							<option ng-repeat="ctrlon in harmonydevice.controlGroup" value="{{ctrlon.function}}">{{ctrlon.name}}</option>
-						</select>
-						<select name="device-funcon" id="device-funcon" ng-model="devicefuncon">
-							<option ng-repeat="funcon in devicectrlon" value="{{funcon.name}}">{{funcon.name}}</option>
+							<optgroup ng-repeat="ctrlon in harmonydevice.controlGroup" label="{{ctrlon.name}}">
+								<option ng-repeat="funcon in ctrlon.function">{{funcon.name}}</option>
+							</optgroup >
 						</select>
 					</td>
 					<td>
 						<select name="device-ctrloff" id="device-ctrloff" ng-model="devicectrloff">
-							<option ng-repeat="ctrloff in harmonydevice.controlGroup" value="{{ctrloff.function}}">{{ctrloff.name}}</option>
-						</select>
-						<select name="device-funcoff" id="device-funcoff" ng-model="devicefuncoff">
-							<option ng-repeat="funcoff in devicectrloff" value="{{funcoff.label}}">{{funcoff.label}}</option>
+							<optgroup ng-repeat="ctrloff in harmonydevice.controlGroup" label="{{ctrloff.name}}">
+								<option ng-repeat="funcoff in ctrloff.function">{{funcoff.name}}</option>
+							</optgroup >
 						</select>
 					</td>
 					<td>
 						<button class="btn btn-success" type="submit"
-							ng-click="buildButtonUrls(harmonydevice, devicefuncon, devicefuncoff)">Generate
+							ng-click="buildButtonUrls(harmonydevice, devicectrlon, devicectrloff)">Generate
 							Button URLs</button>
 					</td>
 				</tr>
