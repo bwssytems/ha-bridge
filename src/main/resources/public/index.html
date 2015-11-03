@@ -16,7 +16,7 @@
 <body>
 
 	<nav class="navbar navbar-inverse navbar-fixed-top">
-		<div class="container">
+		<div class="container" ng-controller="VersionController">
 			<div class="navbar-header">
 				<button type="button" class="navbar-toggle">
 					<span class="sr-only">Toggle navigation</span>
@@ -36,7 +36,7 @@
 						<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
 							<li><a href="http://www.bwssystems.com" target="_blank">Developed by BWS Systems</a></li>
 							<li><a href="http://www.amazon.com/echo" target="_blank">Amazon Echo</a></li>
-							<li><a href="">HA Bridge Version 1.0.3</a></li>
+							<li><a href="">HA Bridge Version {{bridge.habridgeversion}}</a></li>
 						</ul>
 					</li>
 				</ul>

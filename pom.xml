@@ -5,11 +5,11 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>1.0.3</version>
+	<version>1.0.5</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
-	<description>Emulates a Philips Hue bridge to allow the Amazon Echo to hook up to other HA systems, i.e. Vera, using lightweight frameworks</description>
+	<description>Emulates a Philips Hue bridge to allow the Amazon Echo to hook up to other HA systems, i.e. Vera or Harmony Hub, using lightweight frameworks</description>
 
 	<properties>
 		<java.version>1.8</java.version>
@@ -88,6 +88,22 @@
 	</dependencies>
 
 	<build>
+	    <resources>
+	      <resource>
+	        <directory>src/main/resources</directory>
+	        <includes>
+	          <include>version.properties</include>
+	        </includes>
+	        <filtering>true</filtering>
+	      </resource>
+	      <resource>
+	        <directory>src/main/resources</directory>
+	        <excludes>
+	          <exclude>version.properties</exclude>
+	        </excludes>
+	        <filtering>false</filtering>
+	      </resource>
+	    </resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -113,21 +129,20 @@
 										<exclude>META-INF/services/**</exclude>
 										<exclude>META-INF/DEPENDENCIES</exclude>
 										<exclude>about_files/**</exclude>
-										<exclude>*.properties</exclude>
 									</excludes>
 								</filter>
-				                <filter>
-				                   <artifact>org.slf4j:*</artifact>
-				                   <includes>
-				                       <include>**</include>
-				                   </includes>
-				                </filter>
-				                <filter>
-				                   <artifact>commons-logging:commons-logging</artifact>
-				                   <includes>
-				                       <include>**</include>
-				                   </includes>
-				                </filter>
+								<filter>
+									<artifact>org.slf4j:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>commons-logging:commons-logging</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
 							</filters>
 							<transformers>
 								<transformer

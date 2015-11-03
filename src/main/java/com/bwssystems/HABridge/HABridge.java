@@ -41,8 +41,11 @@ public class HABridge {
         InetAddress address;
         String addressString;
         BridgeSettings bridgeSettings;
+        Version theVersion;
+        
+        theVersion = new Version();
 
-        log.info("HA Bridge (v1.0.3) starting setup....");
+        log.info("HA Bridge (v" + theVersion.getVersion() + ") starting setup....");
         //get ip address for upnp requests
         try {
 			address = InetAddress.getLocalHost();
@@ -53,6 +56,7 @@ public class HABridge {
 		}
         
         bridgeSettings = new BridgeSettings();
+        bridgeSettings.setServerPort(System.getProperty("server.port", Configuration.DFAULT_WEB_PORT));
         bridgeSettings.setUpnpConfigAddress(System.getProperty("upnp.config.address", addressString));
         bridgeSettings.setUpnpDeviceDb(System.getProperty("upnp.device.db", Configuration.DEVICE_DB_DIRECTORY));
         bridgeSettings.setUpnpResponsePort(System.getProperty("upnp.response.port", Configuration.UPNP_RESPONSE_PORT));
@@ -62,13 +66,11 @@ public class HABridge {
         bridgeSettings.setHarmonyPwd(System.getProperty("harmony.pwd", Configuration.DEFAULT_HARMONY_PWD));
         bridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
         bridgeSettings.setTraceupnp(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
-        bridgeSettings.setVtwocompatibility(Boolean.parseBoolean(System.getProperty("vtwo.compatibility", "false")));
         bridgeSettings.setDevMode(Boolean.parseBoolean(System.getProperty("dev.mode", "false")));
 
         // sparkjava config directive to set ip address for the web server to listen on
         // ipAddress("0.0.0.0"); // not used
         // sparkjava config directive to set port for the web server to listen on
-        bridgeSettings.setServerPort(System.getProperty("server.port", Configuration.DFAULT_WEB_PORT));
         port(Integer.valueOf(bridgeSettings.getServerPort()));
         // sparkjava config directive to set html static file location for Jetty
         staticFileLocation("/public");
@@ -80,7 +82,7 @@ public class HABridge {
 	        return;
 		}
         // setup the class to handle the resource setup rest api
-        theResources = new DeviceResource(bridgeSettings, myHarmonyServer.getMyHarmony());
+        theResources = new DeviceResource(bridgeSettings, theVersion, myHarmonyServer.getMyHarmony());
         // setup the class to handle the hue emulator rest api
         theHueMulator = new HueMulator(theResources.getDeviceRepository(), myHarmonyServer.getMyHarmony());
         theHueMulator.setupServer();

@@ -11,7 +11,6 @@ public class BridgeSettings {
 	private String harmonypwd;
 	private boolean upnpstrict;
 	private boolean traceupnp;
-	private boolean vtwocompatibility;
 	private boolean devmode;
 	
 	public String getUpnpConfigAddress() {
@@ -44,7 +43,6 @@ public class BridgeSettings {
 	public void setVeraAddress(String veraAddress) {
 		this.veraaddress = veraAddress;
 	}
-
 	public String getHarmonyAddress() {
 		return harmonyaddress;
 	}
@@ -75,14 +73,6 @@ public class BridgeSettings {
 	public void setTraceupnp(boolean traceupnp) {
 		this.traceupnp = traceupnp;
 	}
-	
-	public boolean isVtwocompatibility() {
-		return vtwocompatibility;
-	}
-	public void setVtwocompatibility(boolean vtwocompatibility) {
-		this.vtwocompatibility = vtwocompatibility;
-	}
-	
 	public boolean isDevMode() {
 		return devmode;
 	}

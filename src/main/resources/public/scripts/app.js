@@ -36,6 +36,8 @@ app.config(function ($routeProvider) {
 app.run( function (bridgeService) {
 	bridgeService.loadBridgeSettings();
 	bridgeService.updateShowVera();
+	bridgeService.updateShowHarmony();
+	bridgeService.getHABridgeVersion();	
 });
 
 app.factory('BridgeSettings', function() {
@@ -49,7 +51,7 @@ app.factory('BridgeSettings', function() {
 	BridgeSettings.harmonyaddress = "";
 	BridgeSettings.upnpstrict = "";
 	BridgeSettings.traceupnp = "";
-	BridgeSettings.vtwocompatibility = "";
+	BridgeSettings.devmode = "";
 	
 	BridgeSettings.setupnpconfigaddress = function(aconfigaddress){
 		BridgeSettings.upnpconfigaddress = aconfigaddress;
@@ -79,8 +81,8 @@ app.factory('BridgeSettings', function() {
 	BridgeSettings.settraceupnp = function(atraceupnp){
 		BridgeSettings.traceupnp = atraceupnp;
 	};
-	BridgeSettings.setvtwocompatibility = function(avtwocompatibility){
-		BridgeSettings.vtwocompatibility = avtwocompatibility;
+	BridgeSettings.setdevmode = function(adevmode){
+		BridgeSettings.devmode = adevmode;
 	};
 	
 	return BridgeSettings;
@@ -89,7 +91,7 @@ app.factory('BridgeSettings', function() {
 app.service('bridgeService', function ($http, $window, BridgeSettings) {
         var self = this;
         self.BridgeSettings = BridgeSettings;
-        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", huebase: window.location.origin + "/api",  devices: [], device: [], error: "", showVera: false, showHarmony: false};
+        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", huebase: window.location.origin + "/api",  devices: [], device: [], error: "", showVera: false, showHarmony: false, habridgeversion: ""};
 
         this.viewDevices = function () {
             this.state.error = "";
@@ -109,6 +111,23 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             );
         };
 
+        this.getHABridgeVersion = function () {
+            this.state.error = "";
+            return $http.get(this.state.base + "/habridge/version").then(
+                function (response) {
+                    self.state.habridgeversion = response.data.version;
+                },
+                function (error) {
+                    if (error.data) {
+                        self.state.error = error.data.message;
+                    } else {
+                        self.state.error = "cannot get version";
+                    }
+                    console.log(error);
+                }
+            );
+        };
+
         this.loadBridgeSettings = function () {
             this.state.error = "";
             return $http.get(this.state.upnpbase).then(
@@ -121,7 +140,7 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
                 	self.BridgeSettings.setharmonyaddress(response.data.harmonyaddress);
                 	self.BridgeSettings.settraceupnp(response.data.traceupnp);
                 	self.BridgeSettings.setupnpstrict(response.data.upnpstrict);
-                	self.BridgeSettings.setvtwocompatibility(response.data.vtwocompatibility);
+                	self.BridgeSettings.setdevmode(response.data.devmode);
                     if(self.BridgeSettings.veraaddress == "1.1.1.1" || self.BridgeSettings.veraaddress == "")
                     	self.state.showVera = false;
                     else
@@ -600,3 +619,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
 app.controller('ErrorsController', function ($scope, bridgeService) {
         $scope.bridge = bridgeService.state;
     });
+
+app.controller('VersionController', function ($scope, bridgeService) {
+    $scope.bridge = bridgeService.state;
+});

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.JsonTransformer;
+import com.bwssystems.HABridge.Version;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
 import com.bwssystems.harmony.HarmonyHandler;
@@ -32,14 +33,16 @@ public class DeviceResource {
 
     private DeviceRepository deviceRepository;
     private VeraInfo veraInfo;
+    private Version version;
     private HarmonyHandler myHarmonyHandler;
     private static final Set<String> supportedVerbs = new HashSet<>(Arrays.asList("get", "put", "post"));
 
-	public DeviceResource(BridgeSettings theSettings, HarmonyHandler myHarmony) {
+	public DeviceResource(BridgeSettings theSettings, Version theVersion, HarmonyHandler myHarmony) {
 		super();
-		deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
-		veraInfo = new VeraInfo(theSettings.getVeraAddress(), theSettings.isValidVera());
-		myHarmonyHandler = myHarmony;
+		this.deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
+		this.veraInfo = new VeraInfo(theSettings.getVeraAddress(), theSettings.isValidVera());
+		this.myHarmonyHandler = myHarmony;
+		this.version = theVersion;
         setupEndpoints();
 	}
 
@@ -129,6 +132,12 @@ public class DeviceResource {
 	        }
 	        return null;
 	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/habridge/version", "application/json", (request, response) -> {
+	    	log.debug("Get HA Bridge version: v" + version.getVersion());
+			response.status(HttpStatus.SC_OK);
+	        return "{\"version\":\"" + version.getVersion() + "\"}";
+	    });
 
     	get (API_CONTEXT + "/vera/devices", "application/json", (request, response) -> {
 	    	log.debug("Get vera devices");

@@ -35,9 +35,11 @@ public class HarmonyServer {
 			return new HarmonyServer();
 		}
     	Injector injector = null;
-        injector = Guice.createInjector(new HarmonyClientModule());
+    	if(!bridgeSettings.isDevMode())
+    		injector = Guice.createInjector(new HarmonyClientModule());
         HarmonyServer mainObject = new HarmonyServer();
-  		injector.injectMembers(mainObject);
+    	if(!bridgeSettings.isDevMode())
+    		injector.injectMembers(mainObject);
   		mainObject.execute(bridgeSettings);
   		return mainObject;
   	}

@@ -1,5 +1,5 @@
 # ha-bridge
-Emulates Philips Hue api to other home automation gateways such as an Amazon Echo.  The Bridge has helpers to build devices for the gateway for the Vera, Vera Lite or Vera Edge. Alternatively the Bridge supports custom calls as well. The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol. 
+Emulates Philips Hue api to other home automation gateways such as an Amazon Echo.  The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge. Alternatively the Bridge supports custom calls as well. The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol. 
 ## Build
 To customize and build it yourself, build a new jar with maven:  
 ```
@@ -9,7 +9,7 @@ Otherwise, downloads are available at https://github.com/bwssytems/ha-bridge/rel
 ## Run
 Then locate the jar and start the server with:  
 ```
-java -jar -Dvera.address=X.Y.Z.A ha-bridge-0.X.Y.jar
+java -jar -Dvera.address=X.Y.Z.A -Dharmony.address=X.Y.Z.A -Dharmony.user=myself -Dharmony.pwd=passwd ha-bridge-0.X.Y.jar
 ```
 ## Available Arguments
 ### -Dvera.address=`<ip address>`
@@ -32,8 +32,6 @@ The password for the user name of the MyHarmony.com account for the Harmony Hub.
 Upnp has been very closed on this platform to try and respond as a hue and there is now a setting to control if it is more open or strict, Add -Dupnp.strict=`<true|false>` to your command line to have the emulator respond to what it thinks is an echo to a hue or any other device. The default is upnp.strict=true.
 ### -Dtrace.upnp=`<true|false>`
 Turn on tracing for upnp discovery messages. The default is false.
-### -Dvtwo.compatibility=`<true|false>`
-Turns on compatibility for upnp detection and response as it was in the original version of amazon-echo-ha-bridge. The default is false. 
 ## Web Config
 Configure by going to the url for the host you are running on or localhost with port you have assigned: 
 ```
@@ -104,4 +102,9 @@ To view or remove devices that Alexa knows about, you can use the mobile app Men
 To turn on debugging for the bridge, use the following extra parm in the command line:
 ```
 -Dorg.slf4j.simpleLogger.defaultLogLevel=DEBUG
+```
+## Development Mode
+To turn on development mode so that it will not need an Harmony Hub for testing, use the following extra parm in the command line and the harmony ip and login info will not be needed:
+```
+java -jar -Ddev.mode=true ha-bridge-0.X.Y.jar
 ```
