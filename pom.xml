@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>1.0.6</version>
+	<version>1.0.7</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
@@ -80,11 +80,6 @@
 		  <artifactId>smack-core</artifactId>
 		  <version>4.0.7</version>
 		</dependency>
-		<dependency>
-		  <groupId>org.igniterealtime.smack</groupId>
-		  <artifactId>smack-debug</artifactId>
-		  <version>4.0.7</version>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -126,10 +121,11 @@
 										<exclude>META-INF/*.RSA</exclude>
 										<exclude>META-INF/*.txt</exclude>
 										<exclude>META-INF/maven/**</exclude>
-										<exclude>META-INF/services/**</exclude>
-										<exclude>META-INF/DEPENDENCIES</exclude>
 										<exclude>about_files/**</exclude>
 									</excludes>
+								</filter>
+								<filter>
+									<artifact>*:*</artifact>
 								</filter>
 								<filter>
 									<artifact>org.slf4j:*</artifact>
@@ -139,6 +135,24 @@
 								</filter>
 								<filter>
 									<artifact>commons-logging:commons-logging</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>xpp3:xpp3</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>org.igniterealtime.smack:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>com.github.bwssytems:harmony-java-client</artifact>
 									<includes>
 										<include>**</include>
 									</includes>

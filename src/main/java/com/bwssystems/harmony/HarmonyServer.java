@@ -15,6 +15,7 @@ import net.whistlingfish.harmony.ActivityChangeListener;
 import net.whistlingfish.harmony.HarmonyClient;
 import net.whistlingfish.harmony.HarmonyClientModule;
 import net.whistlingfish.harmony.config.Activity;
+import net.whistlingfish.harmony.protocol.OAReplyProvider;
 
 public class HarmonyServer {
     @Inject
@@ -22,12 +23,14 @@ public class HarmonyServer {
     
     private HarmonyHandler myHarmony;
     private DevModeResponse devResponse;
+    private OAReplyProvider dummyProvider;
     
     private Logger log = LoggerFactory.getLogger(HarmonyServer.class);
 
 	public HarmonyServer() {
 		super();
 		myHarmony = null;
+		dummyProvider = null;
 	}
 
 	public static HarmonyServer setup(BridgeSettings bridgeSettings) throws Exception {
@@ -47,6 +50,8 @@ public class HarmonyServer {
 	private void execute(BridgeSettings mySettings) throws Exception {
         Boolean noopCalls = Boolean.parseBoolean(System.getProperty("noop.calls", "false"));
         String modeString = "";
+        if(dummyProvider != null)
+        	log.debug("something is very wrong as dummyProvider is not null...");
         if(mySettings.isDevMode())
         	modeString = " (development mode)";
         if(noopCalls)
