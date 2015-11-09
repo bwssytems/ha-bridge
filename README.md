@@ -37,7 +37,13 @@ Configure by going to the url for the host you are running on or localhost with 
 ```
 http://<ip address>:<port>
 ```
-## Command line configure
+## Command line usage
+This section will describe the REST api available for configuration. The REST examples are all formatted for easy reading, the actual usage should be like this:
+```
+{"var1":"value1","var2":"value2","var3:"value3"}
+```
+As it should be in all one big string and not separated by returns,tabs or spaces.
+### Add a device 
 Register a device via REST by  by using a tool and the url, for example:  
 ```
 POST http://host:8080/api/devices
