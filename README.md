@@ -134,12 +134,12 @@ Get current version of the HA bridge software.
 GET http://host:8080/api/devices/habridge/version
 ```
 ### Get Vera Devices 
-Get the list of devices available from the Vera, VeraLite or VeraEdge if configured. 
+Get the list of devices available from the Vera, VeraLite or VeraEdge if configured. Please refer to the <a href="http://wiki.micasaverde.com/index.php/Luup_Sdata">Luup Sdata Structure</a> for the explanation of the devices list returned.
 ```
 GET http://host:8080/api/devices/vera/devices
 ```
 ### Get Vera Scenes 
-Get the list of scenes available from the Vera, VeraLite or VeraEdge if configured. 
+Get the list of scenes available from the Vera, VeraLite or VeraEdge if configured.  Please refer to the <a href="http://wiki.micasaverde.com/index.php/Luup_Sdata">Luup Sdata Structure</a> for the explanation of the scenes list returned.
 ```
 GET http://host:8080/api/devices/vera/scenes
 ```
