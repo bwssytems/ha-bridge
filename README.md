@@ -169,33 +169,30 @@ GET	http://host:port/api/<username>/lights
 Gets a list of all lights that have been discovered by the bridge.
 
 #### Response
-Returns a list of all lights in the system. As of 1.3 the full light resource is returned from the bridge. As of 1.4 the uniqueid is returned and from 1.7 the manufacturername also.
-
-Note: For bridge versions < 1.3 only the name and light identifier are returned. As from version 1.9 luminaireuniqueid is returned.
+Returns a list of all lights in the system. 
 
 If there are no lights in the system then the bridge will return an empty object, {}.
 
 #### Response example
 ```
 {
-
     "1": {
         "state": {
             "on": true,
             "bri": 144,
-            "hue": 13088,
-            "sat": 212,
-            "xy": [0.5128,0.4147],
-            "ct": 467,
+            "hue": 0,
+            "sat": 254,
+            "xy": [0,0],
+            "ct": 0,
             "alert": "none",
             "effect": "none",
-            "colormode": "xy",
+            "colormode": "",
             "reachable": true
         },
-        "type": "Extended color light",
-        "name": "Hue Lamp 1",
-        "modelid": "LCT001",
-        "swversion": "66009461",
+        "type": "Dimmable light",
+        "name": "Table Lamp 1",
+        "modelid": "LWB004",
+        "swversion": "65003148",
         "pointsymbol": {
             "1": "none",
             "2": "none",
@@ -217,13 +214,13 @@ If there are no lights in the system then the bridge will return an empty object
             "ct": 0,
             "alert": "none",
             "effect": "none",
-            "colormode": "hs",
+            "colormode": "",
             "reachable": true
         },
-        "type": "Extended color light",
-        "name": "Hue Lamp 2",
-        "modelid": "LCT001",
-        "swversion": "66009461",
+        "type": "Dimmable light",
+        "name": "Table Lamp 2",
+        "modelid": "LWB004",
+        "swversion": "65003148",
         "pointsymbol": {
             "1": "none",
             "2": "none",
@@ -247,56 +244,48 @@ Gets the attributes and state of a given light.
 Name |	Type |	Description
 -----|-------|-------------
 state |	state object |	Details the state of the light, see the state table below for more details.
-type |	string |	A fixed name describing the type of light e.g. “Extended color light”.
+type |	string |	A fixed name describing the type of light which will be "Dimmable light".
 name |	string 0, 32 |	A unique, editable name given to the light.
-modelid |	string 6, 6 |	The hardware model of the light.
-uniqueid |	string 6, 32 |	As of 1.4. Unique id of the device. The MAC address of the device with a unique endpoint id in the form: AA:BB:CC:DD:EE:FF:00:11-XX
-manufacturername |	string 6, 32 |	As of 1.7. The manufacturer name.
-luminaireuniqueid |	string 6, 32 |	As of 1.9. Unique ID of the luminaire the light is a part of in the format: AA:BB:CC:DD-XX-YY.  AA:BB:, ... represents the hex of the luminaireid, XX the lightsource position (incremental but may contain gaps) and YY the lightpoint position (index of light in luminaire group).  A gap in the lightpoint position indicates an incomplete luminaire (light search required to discover missing light points in this case).
-swversion |	string 8, 8 |	An identifier for the software version running on the light.
-Pointsymbol |	object |	This parameter is reserved for future functionality.
+modelid |	string 6, 6 |	The hardware model of the light which will be "LWB004".
+uniqueid |	string 6, 32 |	Unique id of the device.
+manufacturername |	string 6, 32 |	The manufacturer name will be "Philips".
+luminaireuniqueid |	string 6, 32 |	This will be empty.
+swversion |	string 8, 8 |	An identifier for the software version running on the light which will be "65003148".
+Pointsymbol |	object |	This parameter is reserved for future functionality and returns a preset hashmap.
+
 The state object contains the following fields
 
 Name |	Type |	Description
 -----|-------|-------------
 on |	bool |	On/Off state of the light. On=true, Off=false
-bri |	uint8 |	Brightness of the light. This is a scale from the minimum brightness the light is capable of, 1, to the maximum capable brightness, 254.
-hue |	uint16 |	Hue of the light. This is a wrapping value between 0 and 65535. Both 0 and 65535 are red, 25500 is green and 46920 is blue.
-sat |	uint8 |	Saturation of the light. 254 is the most saturated (colored) and 0 is the least saturated (white).
-xy |	list 2..2 of float 4 |	The x and y coordinates of a color in CIE color space.
-The first entry is the x coordinate and the second entry is the y coordinate. Both x and y are between 0 and 1.
-
-ct |	uint16 |	The Mired Color temperature of the light. 2012 connected lights are capable of 153 (6500K) to 500 (2000K).
-alert |	string |	The alert effect, which is a temporary change to the bulb’s state. This can take one of the following values:
-“none” – The light is not performing an alert effect.
-“select” – The light is performing one breathe cycle.
-“lselect” – The light is performing breathe cycles for 15 seconds or until an "alert": "none" command is received.
-Note that this contains the last alert sent to the light and not its current state. i.e. After the breathe cycle has finished the bridge does not reset the alert to "none".
-
-effect |	string |	The dynamic effect of the light, can either be “none” or “colorloop”.
-If set to colorloop, the light will cycle through all hues using the current brightness and saturation settings.
-
-colormode |	string 2, 2 |	Indicates the color mode in which the light is working, this is the last command type it received. Values are “hs” for Hue and Saturation, “xy” for XY and “ct” for Color Temperature. This parameter is only present when the light supports at least one of the values.
-reachable |	bool |	Indicates if a light can be reached by the bridge.
+bri |	uint8 |	Brightness of the light. This will be set to 254 as a default.
+hue |	uint16 |	This will be empty.
+sat |	uint8 |	This will be set to 254.
+xy |	list 2..2 of float 4 |	This will be empty.
+ct |	uint16 |	This will be empty.
+alert |	string |	This will be set to "none".
+effect |	string |	This will be set to "none".
+colormode |	string 2, 2 |	This will be empty.
+reachable |	bool |	Indicates if a light can be reached by the bridge and will be set to true.
 #### Response example
 ```
 {
 	"state": {
-		"hue": 50000,
+		"hue": 0,
 		"on": true,
 		"effect": "none",
 		"alert": "none",
-		"bri": 200,
-		"sat": 200,
-		"ct": 500,
-		"xy": [0.5, 0.5],
+		"bri": 254,
+		"sat": 254,
+		"ct": 0,
+		"xy": [0, 0],
 		"reachable": true,
-		"colormode": "hs"
+		"colormode": ""
 	},
-	"type": "Living Colors",
-	"name": "LC 1",
-	"modelid": "LC0015",
-	"swversion": "1.0.3", 	
+	"type": "Dimmable light",
+	"name": "Kitchen Ceiling",
+	"modelid": "LWB004",
+	"swversion": "65003148", 	
 	"pointsymbol": {
 		"1": "none",
 		"2": "none",
@@ -316,6 +305,7 @@ Allows the user to turn the light on and off, modify the hue and effects. Please
 
 #### Body arguments
 Name |	Type |	Description	 
+-----|-------|-------------
 on |	bool |	On/Off state of the light. On=true, Off=false. Optional
 bri |	uint8 |	The brightness value to set the light to. Brightness is a scale from 1 (the minimum the light is capable of) to 254 (the maximum). Note: a brightness of 1 is not off. e.g. “brightness”: 60 will set the light to a specific brightness. Optional
 #### Body example
@@ -326,7 +316,7 @@ bri |	uint8 |	The brightness value to set the light to. Brightness is a scale fr
 }
 ```
 #### Response
-A response to a successful PUT request contains confirmation of the arguments passed in. Note: If the new value is too large to return in the response due to internal memory constraints then a value of “Updated.” is returned.
+A response to a successful PUT request contains confirmation of the arguments passed in. Note: If the new value is too large to return in the response due to internal memory constraints then a value of `“Updated.”` is returned.
 
 #### Response example
 ```
