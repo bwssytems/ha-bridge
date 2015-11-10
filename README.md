@@ -42,7 +42,7 @@ This section will describe the REST api available for configuration. The REST bo
 ```
 {"var1":"value1","var2":"value2","var3:"value3"}
 ```
-The body should be all in one string and not separated by returns, tabs or spaces. FYI, GET items do not require a body element.  If you would like to see example return of data for full hub configuration, which includes activities and devices, take a look at the resource file config.data.
+The body should be all in one string and not separated by returns, tabs or spaces. FYI, GET items do not require a body element.  If you would like to see example return of json data for full Harmony Hub configuration if configured, which includes activities and devices, take a look at the resource file config.data. If you are interested in how the json data looks for the HA bridge configuration, after creating a device, look at the data directory for the device.db.
 These calls can be accomplished with a REST tool using the following URLs and HTTP Verb types:
 ### Add a device 
 Add a new device to the HA Bridge configuration. This is the basic examples and the next 3 headinds describe alternate items to add. 
@@ -94,6 +94,7 @@ POST http://host:8080/api/devices
 ### Custom Usage URLs
 Anything that takes an action as a result of an HTTP request will probably work and you can also use the dimming and value control commands within the URLs as well - like putting Vera in and out of night mode:  
 ```
+POST http://host:8080/api/devices
 {
   "name": "night mode",
   "deviceType": "switch",
