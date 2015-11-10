@@ -37,14 +37,15 @@ Configure by going to the url for the host you are running on or localhost with 
 ```
 http://<ip address>:<port>
 ```
-## Command line usage
-This section will describe the REST api available for configuration. The REST examples are all formatted for easy reading, the actual usage should be like this:
+## Configuration REST API usage
+This section will describe the REST api available for configuration. The REST body examples are all formatted for easy reading, the actual body usage should be like this:
 ```
 {"var1":"value1","var2":"value2","var3:"value3"}
 ```
-As it should be in all one big string and not separated by returns,tabs or spaces.
+The body should be all in one string and not separated by returns, tabs or spaces. FYI, GET items do not require a body element.  If you would like to see example return of data for full hub configuration, which includes activities and devices, take a look at the resource file config.data.
+These calls can be accomplished with a REST tool using the following URLs and HTTP Verb types:
 ### Add a device 
-Register a device via REST by  by using a tool and the url, for example:  
+Add a new device to the HA Bridge configuration. This is the basic examples and the next 3 headinds describe alternate items to add. 
 ```
 POST http://host:8080/api/devices
 {
@@ -54,10 +55,11 @@ POST http://host:8080/api/devices
   "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
 }
 ```
-## Dimming and value passing control
+### Dimming and value passing control
 Dimming is also supported by using the expressions ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 or custom values using ${intensity.math(<your expression using "X" as the value to operate on>)} i.e. "${intensity.math(X/4)}".    
 e.g.
 ```
+POST http://host:8080/api/devices
 {
     "name": "entry light",
     "deviceType": "switch",
@@ -67,7 +69,7 @@ e.g.
 ```
 See the echo's documentation for the dimming phrase.
 
-## POST/PUT support
+### POST/PUT support
 added optional fields
  * contentType (currently un-validated)
  * httpVerb (POST/PUT/GET only supported)
@@ -77,6 +79,7 @@ added optional fields
 This will allow control of any other application that may need more then GET.  You can also use the dimming and value control commands within the URLs as well.
 e.g: 
 ```
+POST http://host:8080/api/devices
 {
     "name": "test device",
     "deviceType": "switch",
@@ -88,7 +91,7 @@ e.g:
   "contentBodyOff" : "{\"fooBar\":\"baz_off\"}"
 }
 ```
-## Custom Usage URLs
+### Custom Usage URLs
 Anything that takes an action as a result of an HTTP request will probably work and you can also use the dimming and value control commands within the URLs as well - like putting Vera in and out of night mode:  
 ```
 {
@@ -97,6 +100,62 @@ Anything that takes an action as a result of an HTTP request will probably work 
   "offUrl": "http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=1",
   "onUrl": "http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=3"
 }
+```
+### Update a device 
+Update an existing device using it's ID that was given when the device was created and the update could contain any of the fields that are used and shown in the previous examples when adding a device. 
+```
+POST http://host:8080/api/devices/`<id>`
+{
+"name" : "bedroom light",
+"deviceType" : "switch",
+  "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
+  "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
+}
+```
+### Get all devices 
+Get all devices saved in the HA bridge configuration. 
+```
+GET http://host:8080/api/devices
+```
+### Get a specific device 
+Get a device by ID assigned from creation and saved in the HA bridge configuration. 
+```
+GET http://host:8080/api/devices/`<id>'
+```
+### Delete a specific device 
+Delete a device by ID assigned from creation and saved in the HA bridge configuration. 
+```
+DELETE http://host:8080/api/devices/`<id>'
+```
+### Get HA Bridge Version 
+Get current version of the HA bridge software. 
+```
+GET http://host:8080/api/devices/habridge/version
+```
+### Get Vera Devices 
+Get the list of devices available from the Vera, VeraLite or VeraEdge if configured. 
+```
+GET http://host:8080/api/devices/vera/devices
+```
+### Get Vera Scenes 
+Get the list of scenes available from the Vera, VeraLite or VeraEdge if configured. 
+```
+GET http://host:8080/api/devices/vera/scenes
+```
+### Get Harmony Activities
+Get the list of activities available from the Harmony Hub if configured. 
+```
+GET http://host:8080/api/devices/harmony/activities
+```
+### Get Harmony Devices
+Get the list of devices available from the Harmony Hub if configured. 
+```
+GET http://host:8080/api/devices/harmony/devices
+```
+### Show Harmony Current Activity
+Show the Harmony Hub's current activity.
+```
+GET http://host:8080/api/devices/harmony/show
 ```
 ## Ask Alexa
 After this Tell Alexa: "Alexa, discover my devices"  
