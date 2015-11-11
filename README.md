@@ -33,10 +33,23 @@ Upnp has been very closed on this platform to try and respond as a hue and there
 ### -Dtrace.upnp=`<true|false>`
 Turn on tracing for upnp discovery messages. The default is false.
 ## Web Config
-Configure by going to the url for the host you are running on or localhost with port you have assigned: 
+Configure by going to the url for the host you are running on or localhost with port you have assigned: and use the helpers for the Vera or Harmony Hub to create devices that the Echo will find.
 ```
 http://<ip address>:<port>
 ```
+## Ask Alexa
+After this Tell Alexa: "Alexa, discover my devices". If there is an issue you can go to the `Menu / Settings / Connected Home` for the echo on the mobile app or your browser and have Alexa forget all devices and then do the discovery again.
+
+Then you can say "Alexa, Turn on the office light" or whatever name you have given your configured devices.  
+
+Here is the table of items to use to tell Alexa what you want to do:
+
+To do this... |	Say this...
+--------------|------------
+Turn on / off your connected home device | "Turn on/off [connected home device name]."
+Set the brightness of compatible lights	| "Set brightness to [##]%." OR "Dim the lights to [##]%."
+
+To view or remove devices that Alexa knows about, you can use the mobile app `Menu / Settings / Connected Home`.
 ## Configuration REST API usage
 This section will describe the REST api available for configuration. The REST body examples are all formatted for easy reading, the actual body usage should be like this:
 ```
@@ -731,12 +744,6 @@ GET http://host:8080/description.xml
 	</device>\n
 </root>\n
 ```
-## Ask Alexa
-After this Tell Alexa: "Alexa, discover my devices"  
-
-Then you can say "Alexa, Turn on the office light" or whatever name you have given your configured devices.  
-
-To view or remove devices that Alexa knows about, you can use the mobile app Menu / Settings / Connected Home  
 ## Debugging
 To turn on debugging for the bridge, use the following extra parm in the command line:
 ```
