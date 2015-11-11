@@ -121,7 +121,7 @@ contentBody | string | This is the content body that you would like to send when
 contentBodyOff | string | This is the content body that you would like to send when executing an "off" request.
 ```
 {
-"id" : 12345,
+"id" : "12345",
 "name" : "bedroom light",
 "deviceType" : "switch",
   "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
@@ -148,8 +148,8 @@ contentBodyOff | string | This is the content body that you would like to send w
 #### Basic Example
 ```
 {
-"id" : 6789,
-"name" : "bedroom light",
+"id" : "6789",
+"name" : "table light",
 "deviceType" : "switch",
   "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
   "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
@@ -158,7 +158,7 @@ contentBodyOff | string | This is the content body that you would like to send w
 #### Response
 ```
 {
-"id" : 6789,
+"id" : "6789",
 "name" : "table light",
 "deviceType" : "switch",
   "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
@@ -174,14 +174,14 @@ GET http://host:8080/api/devices
 Individual entries are the same as a single device but in json list format.
 ```
 [{
-"id" : 12345,
+"id" : "12345",
 "name" : "bedroom light",
 "deviceType" : "switch",
   "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
   "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
 }
 {
-"id" : 6789,
+"id" : "6789",
 "name" : "table light",
 "deviceType" : "switch",
   "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
@@ -197,7 +197,7 @@ GET http://host:8080/api/devices/<id>
 The response is the same layout as defined in the add device response.
 ```
 {
-"id" : 6789,
+"id" : "6789",
 "name" : "table light",
 "deviceType" : "switch",
   "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
@@ -647,6 +647,89 @@ rules |	object |	A collection of all rules and their attributes. This is not giv
 		"portalservices": false
 	},
 }
+```
+## UPNP Emulation of HUE
+This section will discuss the UPNP implementation of this bridge based as much as can be for the HUE.
+### UPNP listening
+The HA Bridge default UPNP listner is started on port 1900 on the upnp multicast address of 239.255.255.250. All ethernet interfaces that are active are bound to and the repsonse port is set to the one given on the command line above or the default of 50000.
+
+The listener will respond to the following body packet that contain the following minimal information:
+
+```
+M-SEARCH * HTTP/1.1\r\n
+MAN: "ssdp:discover"\r\n
+ST: urn:schemas-upnp-org:device:basic:1\r\n
+	OR
+ST: upnp:rootdevice\r\n
+	OR
+ST: ssdp:all\r\n
+```
+
+If this criteria is met, the following response is provided to the calling application:
+
+```
+HTTP/1.1 200 OK\r\n
+CACHE-CONTROL: max-age=86400\r\n
+EXT:\r\n
+LOCATION: http://192.168.1.1:8080/description.xml\r\n
+SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/0.1\r\n 
+ST: urn:schemas-upnp-org:device:basic:1\r\n
+"USN: uuid:Socket-1_0-221438K0100073::urn:schemas-upnp-org:device:basic:1\r\n\r\n
+```
+### UPNP description service
+The bridge provides the description service which is used by the calling app to interogate access details after it has decided the upnp multicast repsonse is the correct device.
+#### Get Description
+```
+GET http://host:8080/description.xml
+```
+#### Response
+```
+<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n
+<root xmlns=\"urn:schemas-upnp-org:device-1-0\">\n
+	<specVersion>\n
+	<major>1</major>\n
+	<minor>0</minor>\n
+	</specVersion>\n
+	<URLBase>http://192.168.1.1:8080/</URLBase>\n
+	<device>\n
+		<deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>\n
+		<friendlyName>HA-Bridge (192.168.1.1)</friendlyName>\n
+		<manufacturer>Royal Philips Electronics</manufacturer>\n
+		<manufacturerURL>http://www.bwssystems.com</manufacturerURL>\n
+		<modelDescription>Hue Emulator for HA bridge</modelDescription>\n
+		<modelName>Philips hue bridge 2012</modelName>\n
+		<modelNumber>929000226503</modelNumber>\n
+		<modelURL>http://www.bwssystems.com/apps.html</modelURL>\n
+		<serialNumber>0017880ae670</serialNumber>\n
+		<UDN>uuid:88f6698f-2c83-4393-bd03-cd54a9f8595</UDN>\n
+		<serviceList>\n
+			<service>\n
+				<serviceType>(null)</serviceType>\n
+				<serviceId>(null)</serviceId>\n
+				<controlURL>(null)</controlURL>\n
+				<eventSubURL>(null)</eventSubURL>\n
+				<SCPDURL>(null)</SCPDURL>\n
+			</service>\n
+		</serviceList>\n
+		<presentationURL>index.html</presentationURL>\n
+		<iconList>\n
+			<icon>\n
+				<mimetype>image/png</mimetype>\n
+				<height>48</height>\n
+				<width>48</width>\n
+				<depth>24</depth>\n
+				<url>hue_logo_0.png</url>\n
+			</icon>\n
+			<icon>\n
+				<mimetype>image/png</mimetype>\n
+				<height>120</height>\n
+				<width>120</width>\n
+				<depth>24</depth>\n
+				<url>hue_logo_3.png</url>\n
+			</icon>\n
+		</iconList>\n
+	</device>\n
+</root>\n
 ```
 ## Ask Alexa
 After this Tell Alexa: "Alexa, discover my devices"  
