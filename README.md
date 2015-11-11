@@ -60,7 +60,7 @@ httpVerb | string | This is used for "custom" calls that the user would like to 
 contentType | string | This is an http type string such as "application/text" or "application/xml" or "application/json". | Optional
 contentBody | string | This is the content body that you would like to send when executing an "on" request. | Optional
 contentBodyOff | string | This is the content body that you would like to send when executing an "off" request. | Optional
-#### Basic Example
+#### Basic example
 ```
 {
 "name" : "bedroom light",
@@ -69,7 +69,7 @@ contentBodyOff | string | This is the content body that you would like to send w
   "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
 }
 ```
-#### Dimming and value passing control Example
+#### Dimming and value passing control example
 Dimming is also supported by using the expressions ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 or custom values using ${intensity.math(<your expression using "X" as the value to operate on>)} i.e. "${intensity.math(X/4)}".    
 e.g.
 ```
@@ -82,7 +82,8 @@ e.g.
 ```
 See the echo's documentation for the dimming phrase.
 
-#### POST/PUT support Example
+#### POST/PUT support example
+```
 This will allow control of any other application that may need more then GET.  You can also use the dimming and value control commands within the URLs as well.
 e.g: 
 {
