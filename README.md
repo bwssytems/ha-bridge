@@ -395,57 +395,27 @@ If there are no lights in the system then the bridge will return an empty object
         "state": {
             "on": true,
             "bri": 144,
-            "hue": 0,
-            "sat": 254,
-            "xy": [0,0],
-            "ct": 0,
             "alert": "none",
             "effect": "none",
-            "colormode": "",
             "reachable": true
         },
         "type": "Dimmable light",
         "name": "Table Lamp 1",
         "modelid": "LWB004",
         "swversion": "65003148",
-        "pointsymbol": {
-            "1": "none",
-            "2": "none",
-            "3": "none",
-            "4": "none",
-            "5": "none",
-            "6": "none",
-            "7": "none",
-            "8": "none"
-        }
     },
     "2": {
         "state": {
             "on": false,
             "bri": 0,
-            "hue": 0,
-            "sat": 0,
-            "xy": [0,0],
-            "ct": 0,
             "alert": "none",
             "effect": "none",
-            "colormode": "",
             "reachable": true
         },
         "type": "Dimmable light",
         "name": "Table Lamp 2",
         "modelid": "LWB004",
         "swversion": "65003148",
-        "pointsymbol": {
-            "1": "none",
-            "2": "none",
-            "3": "none",
-            "4": "none",
-            "5": "none",
-            "6": "none",
-            "7": "none",
-            "8": "none"
-        }
     }
 }
 ```
@@ -465,7 +435,6 @@ uniqueid |	string 6, 32 |	Unique id of the device.
 manufacturername |	string 6, 32 |	The manufacturer name will be "Philips".
 luminaireuniqueid |	string 6, 32 |	This will be empty.
 swversion |	string 8, 8 |	An identifier for the software version running on the light which will be "65003148".
-Pointsymbol |	object |	This parameter is reserved for future functionality and returns a preset hashmap.
 
 The state object contains the following fields
 
@@ -473,42 +442,22 @@ Name |	Type |	Description
 -----|-------|-------------
 on |	bool |	On/Off state of the light. On=true, Off=false
 bri |	uint8 |	Brightness of the light. This will be set to 254 as a default.
-hue |	uint16 |	This will be empty.
-sat |	uint8 |	This will be set to 254.
-xy |	list 2..2 of float 4 |	This will be empty.
-ct |	uint16 |	This will be empty.
 alert |	string |	This will be set to "none".
 effect |	string |	This will be set to "none".
-colormode |	string 2, 2 |	This will be empty.
 reachable |	bool |	Indicates if a light can be reached by the bridge and will be set to true.
 ```
 {
 	"state": {
-		"hue": 0,
 		"on": true,
 		"effect": "none",
 		"alert": "none",
 		"bri": 254,
-		"sat": 254,
-		"ct": 0,
-		"xy": [0, 0],
 		"reachable": true,
-		"colormode": ""
 	},
 	"type": "Dimmable light",
 	"name": "Kitchen Ceiling",
 	"modelid": "LWB004",
 	"swversion": "65003148", 	
-	"pointsymbol": {
-		"1": "none",
-		"2": "none",
-		"3": "none",
-		"4": "none",
-		"5": "none",
-		"6": "none",
-		"7": "none",
-		"8": "none"
-	}
 }
 ```
 ### Set light state
@@ -575,57 +524,27 @@ rules |	object |	A collection of all rules and their attributes. This is not giv
 			"state": {
 				"on": false,
 				"bri": 0,
-				"hue": 0,
-				"sat": 254,
-				"xy": [0.0000, 0.0000],
-				"ct": 0,
 				"alert": "none",
 				"effect": "none",
-				"colormode": "",
 				"reachable": true
 			},
 			"type": "Dimmable light",
 			"name": "Table Lamp 1",
 			"modelid": "LWB004",
 			"swversion": "65003148", 	
-			"pointsymbol": {
-				"1": "none",
-				"2": "none",
-				"3": "none",
-				"4": "none",
-				"5": "none",
-				"6": "none",
-				"7": "none",
-				"8": "none"
-			}
 		},
 		"2": {
 			"state": {
 				"on": true,
 				"bri": 254,
-				"hue": 0,
-				"sat": 254,
-				"xy": [0, 0],
-				"ct": 0,
 				"alert": "none",
 				"effect": "none",
-				"colormode": "",
 				"reachable": true
 			},
 			"type": "Dimmable light",
 			"name": "Table Lamp 2",
 			"modelid": "LWB004",
 			"swversion": "65003148", 	
-			"pointsymbol": {
-				"1": "none",
-				"2": "none",
-				"3": "none",
-				"4": "none",
-				"5": "none",
-				"6": "none",
-				"7": "none",
-				"8": "none"
-			}
 		}
 	},
 	"scenes":{
