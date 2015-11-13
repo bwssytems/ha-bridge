@@ -244,7 +244,7 @@ public class HueMulator {
 	        }
 	        else
 	        {
-	        	log.debug("executing activity to Http: " + url);
+	        	log.debug("executing activity to Http " + (device.getHttpVerb() == null?"GET":device.getHttpVerb()) + ": " + url);
 				// quick template
 				String body;
 				url = replaceIntensityValue(url, state.getBri());
@@ -325,7 +325,7 @@ public class HueMulator {
         try {
             HttpResponse response = httpClient.execute(request);
             EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
-            log.debug("Execute on URL responded: " + response.getStatusLine().getStatusCode());
+            log.debug((httpVerb == null?"GET":httpVerb) + " execute on URL responded: " + response.getStatusLine().getStatusCode());
             if(response.getStatusLine().getStatusCode() == 200){
                 return true;
             }
