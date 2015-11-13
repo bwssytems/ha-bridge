@@ -16,6 +16,7 @@ import com.google.gson.Gson;
 import net.java.dev.eval.Expression;
 
 import static spark.Spark.get;
+import static spark.Spark.options;
 import static spark.Spark.post;
 import static spark.Spark.put;
 
@@ -70,7 +71,7 @@ public class HueMulator {
 //	This function sets up the sparkjava rest calls for the hue api
     public void setupServer() {
     	log.info("Hue emulator service started....");
-//		http://ip_address:port/api/{userId}/lights  returns json objects of all lights configured
+    	// http://ip_address:port/api/{userId}/lights  returns json objects of all lights configured
 	    get(HUE_CONTEXT + "/:userid/lights", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
 	        log.debug("hue lights list requested: " + userId + " from " + request.ip());
@@ -85,7 +86,16 @@ public class HueMulator {
 	        return deviceResponseMap;
 	    } , new JsonTransformer());
 
-//		http://ip_address:port/api with body of user request returns json object for a success of user add
+	    // http://ip_address:port/api CORS request
+	    options(HUE_CONTEXT, "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+	    // http://ip_address:port/api with body of user request returns json object for a success of user add
         post(HUE_CONTEXT, "application/json", (request, response) -> {
         	UserCreateRequest aNewUser = null;
         	String newUser = null;
@@ -105,11 +115,21 @@ public class HueMulator {
     			aDeviceType = "<not given>";
     		log.debug("hue api user create requested for device type: " + aDeviceType + " and username: " + newUser);
 
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json; charset=utf-8"); 
     		response.status(HttpStatus.SC_OK);
 	        return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";
 	    } );
 
+	    // http://ip_address:port/api/* CORS request
+	    options(HUE_CONTEXT + "/*", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
         //		http://ip_address:port/api/* with body of user request returns json object for a success of user add - This method is for Harmony Hub
         post(HUE_CONTEXT + "/*", "application/json", (request, response) -> {
         	UserCreateRequest aNewUser = null;
@@ -130,12 +150,13 @@ public class HueMulator {
     			aDeviceType = "<not given>";
     		log.debug("HH trace: hue api user create requested for device type: " + aDeviceType + " and username: " + newUser);
 
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json; charset=utf-8"); 
     		response.status(HttpStatus.SC_OK);
 	        return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";        
         } );
 
-//		http://ip_address:port/api/{userId} returns json objects for the full state
+        // http://ip_address:port/api/{userId} returns json objects for the full state
 	    get(HUE_CONTEXT + "/:userid", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
 	        log.debug("hue api full state requested: " + userId + " from " + request.ip());
@@ -159,7 +180,7 @@ public class HueMulator {
 	        return apiResponse;
 	    }, new JsonTransformer());
 
-//		http://ip_address:port/api/{userId}/lights/{lightId} returns json object for a given light
+	    // http://ip_address:port/api/{userId}/lights/{lightId} returns json object for a given light
 	    get(HUE_CONTEXT + "/:userid/lights/:id", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
 	    	String lightId = request.params(":id");
@@ -178,7 +199,16 @@ public class HueMulator {
 	        return lightResponse;
 	    }, new JsonTransformer()); 
 
-//		http://ip_address:port/api/{userId}/lights/{lightId}/state uses json object to set the lights state
+	    // http://ip_address:port/api/:userid/lights/:id/state CORS request
+	    options(HUE_CONTEXT + "/:userid/lights/:id/state", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+	    // http://ip_address:port/api/{userId}/lights/{lightId}/state uses json object to set the lights state
 	    put(HUE_CONTEXT + "/:userid/lights/:id/state", "application/json", (request, response) -> {
 	        /**
 	         * strangely enough the Echo sends a content type of application/x-www-form-urlencoded even though
@@ -260,6 +290,7 @@ public class HueMulator {
 				}
 	        }
 	
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json; charset=utf-8"); 
 	        response.status(HttpStatus.SC_OK);
 	        return responseString;

@@ -103,8 +103,7 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
                     if (error.data) {
                         self.state.error = error.data.message;
                     } else {
-                        self.state.error = "If you're not seeing any devices, you may be running into problems with CORS. " +
-                            "You can work around this by running a fresh launch of Chrome with the --disable-web-security flag.";
+                        self.state.error = "Some error occurred.";
                     }
                     console.log(error);
                 }

@@ -1,6 +1,7 @@
 package com.bwssystems.HABridge.devicemanagmeent;
 
 import static spark.Spark.get;
+import static spark.Spark.options;
 import static spark.Spark.post;
 import static spark.Spark.put;
 import static spark.Spark.delete;
@@ -52,6 +53,15 @@ public class DeviceResource {
 
     private void setupEndpoints() {
     	log.info("HABridge device management service started.... ");
+	    // http://ip_address:port/api/devices CORS request
+	    options(API_CONTEXT, "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
     	post(API_CONTEXT, "application/json", (request, response) -> {
 	    	log.debug("Create a Device - request body: " + request.body());
     		DeviceDescriptor device = new Gson().fromJson(request.body(), DeviceDescriptor.class);
@@ -67,11 +77,21 @@ public class DeviceResource {
 	    	deviceRepository.save(device);
 			log.debug("Created a Device: " + request.body());
 
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.status(HttpStatus.SC_CREATED);
 
             return device;
 	    }, new JsonTransformer());
 
+	    // http://ip_address:port/api/devices/:id CORS request
+	    options(API_CONTEXT + "/:id", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
     	put (API_CONTEXT + "/:id", "application/json", (request, response) -> {
 	    	log.debug("Edit a Device - request body: " + request.body());
         	DeviceDescriptor device = new Gson().fromJson(request.body(), DeviceDescriptor.class);
