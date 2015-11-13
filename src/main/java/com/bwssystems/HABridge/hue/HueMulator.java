@@ -204,23 +204,39 @@ public class HueMulator {
 	            return null;
 	        }
 	
-	        String responseString;
-	        String url;
+	        String responseString =null;
+	        String url = null;
 	        if (state.isOn()) {
-	            responseString = "[{\"success\":{\"/lights/" + lightId + "/state/on\":true}}]";
+	            responseString = "[{\"success\":{\"/lights/" + lightId + "/state/on\":true}}";
 	            url = device.getOnUrl();
-	        } else {
-	            responseString = "[{\"success\":{\"/lights/" + lightId + "/state/on\":false}}]";
+	        } else if (request.body().contains("false")) {
+	            responseString = "[{\"success\":{\"/lights/" + lightId + "/state/on\":false}}";
 	            url = device.getOffUrl();
 	        }
 
-	        if(device.getDeviceType().contains("activity"))
+	        if(request.body().contains("bri"))
+	        {
+	        	if(url == null)
+	        	{
+		            url = device.getOnUrl();
+	        		responseString = "[";
+	        	}
+	        	else
+	        		responseString = responseString + ",";
+
+	        	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri() + "}}]";
+	        }
+	        else
+	        	responseString = responseString + "]";
+	        	
+	        
+	        if(device.getDeviceType().toLowerCase().contains("activity"))
 	        {
 	        	log.debug("executing activity to Harmony: " + url);
 	        	RunActivity anActivity = new Gson().fromJson(url, RunActivity.class);
 	        	myHarmony.startActivity(anActivity);
 	        }
-	        else if(device.getDeviceType().contains("button"))
+	        else if(device.getDeviceType().toLowerCase().contains("button"))
 	        {
 	        	log.debug("executing button press to Harmony: " + url);
 	        	ButtonPress aDeviceButton = new Gson().fromJson(url, ButtonPress.class);
