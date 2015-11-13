@@ -156,6 +156,31 @@ public class HueMulator {
 	        return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";        
         } );
 
+        // http://ip_address:port/api/config returns json objects for the config when no user is given
+	    get(HUE_CONTEXT + "/config", "application/json", (request, response) -> {
+	    	String userId = request.params(":userid");
+	        log.debug("hue api config requested: " + userId + " from " + request.ip());
+	        HueApiResponse apiResponse = new HueApiResponse("Philips hue", request.ip(), "My App", userId);
+	
+			response.type("application/json; charset=utf-8"); 
+	        response.status(HttpStatus.SC_OK);
+	        String responseString = null;
+	        responseString = "[{\"swversion\":\"" + apiResponse.getConfig().getSwversion() + "\",\"apiversion\":\"" + apiResponse.getConfig().getApiversion() + "\",\"name\":\"" + apiResponse.getConfig().getName() + "\",\"mac\":\"" + apiResponse.getConfig().getMac() + "\"}]";
+	        return  responseString;
+	    });
+
+        // http://ip_address:port/api/{userId}/config returns json objects for the config
+	    get(HUE_CONTEXT + "/:userid/config", "application/json", (request, response) -> {
+	    	String userId = request.params(":userid");
+	        log.debug("hue api config requested: " + userId + " from " + request.ip());
+	        HueApiResponse apiResponse = new HueApiResponse("Philips hue", request.ip(), "My App", userId);
+	
+			response.type("application/json; charset=utf-8"); 
+	        response.status(HttpStatus.SC_OK);
+	        return apiResponse.getConfig();
+	    }, new JsonTransformer());
+
+
         // http://ip_address:port/api/{userId} returns json objects for the full state
 	    get(HUE_CONTEXT + "/:userid", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");

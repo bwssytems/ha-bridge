@@ -1,7 +1,14 @@
 package com.bwssystems.HABridge.api.hue;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class HueConfig
 {
@@ -26,10 +33,13 @@ public class HueConfig
 
 	public static HueConfig createConfig(String name, String ipaddress, String devicetype, String userid) {
 		HueConfig aConfig = new HueConfig();
+	    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	    SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("UTC"));
+		aConfig.setMac(HueConfig.getMacAddress(ipaddress));
 		aConfig.setApiversion("1.4.0");
 		aConfig.setPortalservices(false);
-		aConfig.setGateway("192.168.1.1");
-		aConfig.setMac("00:00:88:00:bb:ee");
+		aConfig.setGateway(ipaddress);
 		aConfig.setSwversion("01005215");
 		aConfig.setLinkbutton(false);
 		aConfig.setIpaddress(ipaddress);
@@ -38,20 +48,46 @@ public class HueConfig
 		aConfig.setNetmask("255.255.255.0");
 		aConfig.setName(name);
 		aConfig.setDhcp(true);
-		aConfig.setUtc("2014-07-17T09:27:35");
-		aConfig.setProxyaddress("0.0.0.0");
-		aConfig.setLocaltime("2014-07-17T11:27:35");
-		aConfig.setTimezone("America/Chicago");
+		aConfig.setUtc(dateFormatGmt.format(new Date()));
+		aConfig.setProxyaddress("none");
+		aConfig.setLocaltime(dateFormat.format(new Date()));
+		aConfig.setTimezone(TimeZone.getDefault().getID());
 		aConfig.setZigbeechannel("6");
 		Map<String, WhitelistEntry> awhitelist = new HashMap<>();
 		awhitelist.put(userid, WhitelistEntry.createEntry(devicetype));
 		aConfig.setWhitelist(awhitelist);
-		
 
 		return aConfig;
 	}
 
-	 
+	private static String getMacAddress(String addr)
+	{
+		InetAddress ip;
+		StringBuilder sb = new StringBuilder();
+		try {
+				
+			ip = InetAddress.getByName(addr);
+			
+			NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+				
+			byte[] mac = network.getHardwareAddress();
+				
+			for (int i = 0; i < mac.length; i++) {
+				sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));		
+			}
+				
+		} catch (UnknownHostException e) {
+			
+			sb.append("00:00:88:00:bb:ee");
+			
+		} catch (SocketException e){
+				
+			sb.append("00:00:88:00:bb:ee");
+				
+		}
+		    
+		return sb.toString();
+	}
 	public Boolean getPortalservices() {
 		return portalservices;
 	}

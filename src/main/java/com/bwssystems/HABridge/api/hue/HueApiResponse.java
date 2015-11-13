@@ -14,9 +14,9 @@ public class HueApiResponse {
     private Map<String, String> groups;
     private HueConfig config;
 
-    public HueApiResponse(String name, String ipaddress, String username, String userid) {
+    public HueApiResponse(String name, String ipaddress, String devicetype, String userid) {
 		super();
-		this.setConfig(HueConfig.createConfig(name, ipaddress, username, userid));
+		this.setConfig(HueConfig.createConfig(name, ipaddress, devicetype, userid));
 		this.setGroups(new HashMap<>());
 		this.setScenes(new HashMap<>());
 	}
