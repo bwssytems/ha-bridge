@@ -322,6 +322,31 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
         this.editDevice = function (id, name, onUrl, offUrl, httpVerb, contentType, contentBody, contentBodyOff) {
             self.state.device = {id: id, name: name, onUrl: onUrl, offUrl: offUrl, httpVerb: httpVerb, contentType: contentType, contentBody: contentBody, contentBodyOff: contentBodyOff};
         };
+
+        this.testUrl = function (device, type) {
+        	if(type == "on") {
+       			$http.put(this.state.huebase + "/test/lights/" + device.id + "/state", "{\"on\":true}").then(
+       	                function (response) {
+       	                    $window.alert("Request Exceuted: " + response.statusText);
+       	                },
+       	                function (error) {
+       	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
+       	                }
+       	            );
+           		return;        		
+        	}
+        	else {
+       			$http.put(this.state.huebase + "/test/lights/" + device.id + "/state", "{\"on\":false}").then(
+       	                function (response) {
+       	                    $window.alert("Request Exceuted: " + response.statusText);
+       	                },
+       	                function (error) {
+       	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
+       	                }
+       	            );
+           		return;        		
+           	}
+        };
     });
 
 app.controller('ViewingController', function ($scope, $location, $http, $window, bridgeService, BridgeSettings) {
@@ -341,74 +366,7 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
             bridgeService.deleteDevice(device.id);
         };
         $scope.testUrl = function (device, type) {
-        	if(type == "on") {
-            	if(device.deviceType == "activity" || device.deviceType == "button") {
-        			$http.put($scope.bridge.huebase + "/test/lights/" + device.id + "/state", "{\"on\":true}").then(
-        	                function (response) {
-        	                    $window.alert("Request Exceuted: " + response.statusText);
-        	                },
-        	                function (error) {
-        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
-        	                }
-        	            );
-            		return;        		
-            	}
-
-        		if(device.httpVerb == "PUT")
-        			$http.put(device.onUrl, device.contentBody).then(
-        	                function (response) {
-        	                    $window.alert("Request Exceuted: " + response.statusText);
-        	                },
-        	                function (error) {
-        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
-        	                }
-        	            );
-        		else if(device.httpVerb == "POST")
-        			$http.post(device.onUrl, device.contentBody).then(
-        	                function (response) {
-        	                    $window.alert("Request Exceuted: " + response.statusText);
-        	                },
-        	                function (error) {
-        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
-        	                }
-        	            );
-        		else
-        			window.open(device.onUrl, "_blank");
-        	}
-        	else {
-            	if(device.deviceType == "activity" || device.deviceType == "button") {
-        			$http.put($scope.bridge.huebase + "/test/lights/" + device.id + "/state", "{\"on\":false}").then(
-        	                function (response) {
-        	                    $window.alert("Request Exceuted: " + response.statusText);
-        	                },
-        	                function (error) {
-        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
-        	                }
-        	            );
-            		return;        		
-            	}
-
-        		if(device.httpVerb == "PUT")
-        			$http.put(device.offUrl, device.contentBodyOff).then(
-        	                function (response) {
-        	                    $window.alert("Request Exceuted: " + response.statusText);
-        	                },
-        	                function (error) {
-        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
-        	                }
-        	            );
-        		else if(device.httpVerb == "POST")
-        			$http.post(device.offUrl, device.contentBodyOff).then(
-        	                function (response) {
-        	                    $window.alert("Request Exceuted: " + response.statusText);
-        	                },
-        	                function (error) {
-        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
-        	                }
-        	            );
-        		else
-            		window.open(device.offUrl, "_blank");
-        	}
+        	bridgeService.testUrl(device, type);
         };
         $scope.setBridgeUrl = function (url) {
             bridgeService.state.base = url;
@@ -524,74 +482,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         };
 
         $scope.testUrl = function (device, type) {
-        	if(type == "on") {
-            	if(device.deviceType == "activity" || device.deviceType == "button") {
-        			$http.put($scope.bridge.huebase + "/test/lights/" + device.id + "/state", "{\"on\":true}").then(
-        	                function (response) {
-        	                    $window.alert("Request Exceuted: " + response.statusText);
-        	                },
-        	                function (error) {
-        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
-        	                }
-        	            );
-            		return;        		
-            	}
-
-        		if(device.httpVerb == "PUT")
-        			$http.put(device.onUrl, device.contentBody).then(
-        	                function (response) {
-        	                    $window.alert("Request Exceuted: " + response.statusText);
-        	                },
-        	                function (error) {
-        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
-        	                }
-        	            );
-        		else if(device.httpVerb == "POST")
-        			$http.post(device.onUrl, device.contentBody).then(
-        	                function (response) {
-        	                    $window.alert("Request Exceuted: " + response.statusText);
-        	                },
-        	                function (error) {
-        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
-        	                }
-        	            );
-        		else
-        			window.open(device.onUrl, "_blank");
-        	}
-        	else {
-            	if(device.deviceType == "activity" || device.deviceType == "button") {
-        			$http.put($scope.bridge.huebase + "/test/lights/" + device.id + "/state", "{\"on\":false}").then(
-        	                function (response) {
-        	                    $window.alert("Request Exceuted: " + response.statusText);
-        	                },
-        	                function (error) {
-        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
-        	                }
-        	            );
-            		return;        		
-            	}
-
-        		if(device.httpVerb == "PUT")
-        			$http.put(device.offUrl, device.contentBodyOff).then(
-        	                function (response) {
-        	                    $window.alert("Request Exceuted: " + response.statusText);
-        	                },
-        	                function (error) {
-        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
-        	                }
-        	            );
-        		else if(device.httpVerb == "POST")
-        			$http.post(device.offUrl, device.contentBodyOff).then(
-        	                function (response) {
-        	                    $window.alert("Request Exceuted: " + response.statusText);
-        	                },
-        	                function (error) {
-        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
-        	                }
-        	            );
-        		else
-            		window.open(device.offUrl, "_blank");
-        	}
+        	bridgeService.testUrl(device, type);
         };
 
         $scope.addDevice = function () {
