@@ -348,7 +348,7 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
         	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    $window.alert("Request Error: " + error.data.message);
+        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
         	                }
         	            );
             		return;        		
@@ -360,7 +360,7 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
         	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    $window.alert("Request Error: " + error.data.message);
+        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
         	                }
         	            );
         		else if(device.httpVerb == "POST")
@@ -369,7 +369,7 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
         	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    $window.alert("Request Error: " + error.data.message);
+        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
         	                }
         	            );
         		else
@@ -382,7 +382,7 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
         	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    $window.alert("Request Error: " + error.data.message);
+        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
         	                }
         	            );
             		return;        		
@@ -394,16 +394,16 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
         	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    $window.alert("Request Error: " + error.data.message);
+        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
         	                }
         	            );
         		else if(device.httpVerb == "POST")
-        			$http.post(device.offUrl, device.contentBody).then(
+        			$http.post(device.offUrl, device.contentBodyOff).then(
         	                function (response) {
         	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    $window.alert("Request Error: " + error.data.message);
+        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
         	                }
         	            );
         		else
@@ -531,7 +531,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    $window.alert("Request Error: " + error.data.message);
+        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
         	                }
         	            );
             		return;        		
@@ -543,7 +543,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    $window.alert("Request Error: " + error.data.message);
+        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
         	                }
         	            );
         		else if(device.httpVerb == "POST")
@@ -552,7 +552,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    $window.alert("Request Error: " + error.data.message);
+        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
         	                }
         	            );
         		else
@@ -565,7 +565,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    $window.alert("Request Error: " + error.data.message);
+        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
         	                }
         	            );
             		return;        		
@@ -577,16 +577,16 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    $window.alert("Request Error: " + error.data.message);
+        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
         	                }
         	            );
         		else if(device.httpVerb == "POST")
-        			$http.post(device.offUrl, device.contentBody).then(
+        			$http.post(device.offUrl, device.contentBodyOff).then(
         	                function (response) {
         	                    $window.alert("Request Exceuted: " + response.statusText);
         	                },
         	                function (error) {
-        	                    $window.alert("Request Error: " + error.data.message);
+        	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
         	                }
         	            );
         		else
