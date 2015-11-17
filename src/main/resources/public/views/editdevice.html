@@ -10,7 +10,7 @@
 
 <div class="panel panel-default bridgeServer" ng-if="!bridge.error">
 	<div class="panel-heading">
-		<h2 class="panel-title">Add a new device</h2>
+		<h2 class="panel-title">Edit a device</h2>
 	</div>
 	<ul class="list-group">
 		<li class="list-group-item">
@@ -28,12 +28,38 @@
 				</div>
 				<div class="form-group">
 					<div class="row">
+					<label class="col-xs-12 col-sm-2 control-label" for="device-map-type">Map Type
+					</label>
+
+					<div class="col-xs-8 col-sm-7">
+					    <select name="device-map-type" id="device-map-type" ng-model="device.mapType">
+					      <option value="">---Please select---</option> <!-- not selected / blank option -->
+					      <option value="veraDevice">Vera Device</option>
+					      <option value="veraScene">Vera Scene</option>
+					      <option value="harmonyActivity">Harmony Activity</option>
+					      <option value="harmonyButton">Harmony Button</option>
+					    </select>
+					</div>
+					</div>
+				</div>
+				<div ng-if="device.mapType" class="form-group">
+					<label class="col-xs-12 col-sm-2 control-label" for="device-map-id">Map ID
+					</label>
+
+					<div class="col-xs-8 col-sm-7">
+						<input type="text" class="form-control" id="device-map-id"
+							ng-model="device.mapId" placeholder="1111">
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
 					<label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On
 						URL </label>
 
 					<div class="col-xs-8 col-sm-7">
 						<textarea rows="3" class="form-control" id="device-on-url"
 							ng-model="device.onUrl" placeholder="URL to turn device on"></textarea>
+					</div>
 					</div>
 				</div>
 				<div class="form-group">
@@ -44,6 +70,7 @@
 					<div class="col-xs-8 col-sm-7">
 						<textarea rows="3" class="form-control" id="device-off-url"
 							ng-model="device.offUrl" placeholder="URL to turn device off"></textarea>
+					</div>
 					</div>
 				</div>
 				<div class="form-group">
@@ -61,7 +88,7 @@
 					</div>
 					</div>
 				</div>
-				<div class="form-group">
+				<div ng-if="device.httpVerb" class="form-group">
 					<div class="row">
 					<label class="col-xs-12 col-sm-2 control-label" for="device-content-type">Content Type
 					</label>
@@ -86,7 +113,7 @@
 					</div>
 					</div>
 				</div>
-				<div class="form-group">
+				<div ng-if="device.httpVerb" class="form-group">
 					<div class="row">
 					<label class="col-xs-12 col-sm-2 control-label"
 						for="device-content-body">Content Body On</label>
@@ -98,7 +125,7 @@
 			        <div class="clearfix visible-xs"></div>
 					</div>
 				</div>
-				<div class="form-group">
+				<div ng-if="device.httpVerb" class="form-group">
 					<div class="row">
 					<label class="col-xs-12 col-sm-2 control-label"
 						for="device-content-body-off">Content Body Off</label>

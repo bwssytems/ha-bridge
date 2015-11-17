@@ -60,10 +60,9 @@
 
 	<div class="panel panel-default bridgeServer">
 		<div class="panel-heading">
-  			<a href="#/"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></a>
-			<h1 class="panel-title">Bridge settings</h1>
+			<h1 class="panel-title">Bridge settings <a ng-click="toggle()"><span class={{imgUrl}} aria-hidden="true"></a></h1>
 		</div>
-		<div class="panel-body">
+		<div ng-if="visible" class="animate-if" class="panel-body">
 
 			<form class="form-horizontal">
 				<div class="form-group">

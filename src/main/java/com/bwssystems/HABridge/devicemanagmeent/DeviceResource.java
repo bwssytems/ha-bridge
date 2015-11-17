@@ -107,6 +107,8 @@ public class DeviceResource {
 				deviceEntry.setName(device.getName());
 				if (device.getDeviceType() != null)
 					deviceEntry.setDeviceType(device.getDeviceType());
+				deviceEntry.setMapId(device.getMapId());
+				deviceEntry.setMapType(device.getMapType());
 				deviceEntry.setOnUrl(device.getOnUrl());
 				deviceEntry.setOffUrl(device.getOffUrl());
 				deviceEntry.setHttpVerb(device.getHttpVerb());

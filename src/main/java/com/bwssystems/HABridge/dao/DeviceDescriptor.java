@@ -5,6 +5,8 @@ package com.bwssystems.HABridge.dao;
 public class DeviceDescriptor{
     private String id;
     private String name;
+    private String mapId;
+    private String mapType;
     private String deviceType;
     private String offUrl;
     private String onUrl;
@@ -21,7 +23,23 @@ public class DeviceDescriptor{
         this.name = name;
     }
 
-    public String getDeviceType() {
+    public String getMapId() {
+		return mapId;
+	}
+
+	public void setMapId(String mapId) {
+		this.mapId = mapId;
+	}
+
+	public String getMapType() {
+		return mapType;
+	}
+
+	public void setMapType(String mapType) {
+		this.mapType = mapType;
+	}
+
+	public String getDeviceType() {
         return deviceType;
     }
 
