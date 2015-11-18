@@ -178,6 +178,12 @@ public class DeviceRepository {
 		       } else if (name.equals("name")) {
 			        deviceEntry.setName(reader.nextString());
 			    	log.debug("Read a Device - device json name: " + deviceEntry.getName());
+		       } else if (name.equals("mapType")) {
+			        deviceEntry.setMapType(reader.nextString());
+			    	log.debug("Read a Device - device json name: " + deviceEntry.getMapType());
+		       } else if (name.equals("mapId")) {
+			        deviceEntry.setMapId(reader.nextString());
+			    	log.debug("Read a Device - device json name: " + deviceEntry.getMapId());
 		       } else if (name.equals("deviceType")) {
 			        deviceEntry.setDeviceType(reader.nextString());
 			    	log.debug("Read a Device - device json type:" + deviceEntry.getDeviceType());

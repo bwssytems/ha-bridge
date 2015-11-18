@@ -191,7 +191,7 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
                 }
             );
         };
-
+        
         this.viewVeraScenes = function () {
             this.state.error = "";
         	if(!this.state.showVera)
@@ -209,7 +209,7 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
                 }
             );
         };
-
+        
         this.viewHarmonyActivities = function () {
             this.state.error = "";
         	if(!this.state.showHarmony)
@@ -246,11 +246,12 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             );
         };
 
-        this.findHarmonyActivityEntry = function(activityId) {
+        this.findDeviceByMapId = function(id) {
         	for(var i = 0; i < this.state.devices.length; i++) {
-        		if(this.state.devices[i].mapId == activityId)
+        		if(this.state.devices[i].mapId == id)
         			return true;
         	}
+        	return false;
         };
         
         this.addDevice = function (device) {
@@ -325,6 +326,13 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
                     $window.alert("Delete Device Error: unknown");
                 }
             );
+        };
+
+        this.deleteDeviceByMapId = function (id) {
+        	for(var i = 0; i < this.state.devices.length; i++) {
+        		if(this.state.devices[i].mapId == id)
+        			return self.deleteDevice(this.state.devices[i].id);
+        	}
         };
 
         this.editDevice = function (device) {
@@ -410,7 +418,13 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         bridgeService.updateShowHarmony();
         $scope.device = bridgeService.state.device;
         $scope.activitiesVisible = false;
+        $scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+        $scope.buttonsVisible = false;
         $scope.imgActivitiesUrl = "glyphicon glyphicon-plus";
+        $scope.devicesVisible = false;
+        $scope.imgDevicesUrl = "glyphicon glyphicon-plus";
+        $scope.scenesVisible = false;
+        $scope.imgScenesUrl = "glyphicon glyphicon-plus";
         $scope.predicate = '';
         $scope.reverse = true;
         $scope.device_dim_control = "";
@@ -537,6 +551,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
                 }
             );
         }
+
         $scope.toggleActivities = function () {
             $scope.activitiesVisible = !$scope.activitiesVisible;
             if($scope.activitiesVisible)
@@ -545,15 +560,43 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
                 $scope.imgActivitiesUrl = "glyphicon glyphicon-plus";
         };
         
+        $scope.toggleButtons = function () {
+            $scope.buttonsVisible = !$scope.buttonsVisible;
+            if($scope.buttonsVisible)
+                $scope.imgButtonsUrl = "glyphicon glyphicon-minus";
+            else
+                $scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+        };
+        
+        $scope.toggleDevices = function () {
+            $scope.devicesVisible = !$scope.devicesVisible;
+            if($scope.devicesVisible)
+                $scope.imgDevicesUrl = "glyphicon glyphicon-minus";
+            else
+                $scope.imgDevicesUrl = "glyphicon glyphicon-plus";
+        };
+        
+        $scope.toggleScenes = function () {
+            $scope.scenesVisible = !$scope.scenesVisible;
+            if($scope.scenesVisible)
+                $scope.imgScenesUrl = "glyphicon glyphicon-minus";
+            else
+                $scope.imgScenesUrl = "glyphicon glyphicon-plus";
+        };
+        
+        $scope.deleteDeviceByMapId = function (id) {
+        	bridgeService.deleteDeviceByMapId(id);
+        };
+        
     });
 
-app.filter('availableActivity', function(bridgeService) {
+app.filter('availableId', function(bridgeService) {
         return function(input) {
             var out = [];
             if(input == null)
             	return out;
             for (var i = 0; i < input.length; i++) {
-                if(!bridgeService.findHarmonyActivityEntry(input[i].id)){
+                if(!bridgeService.findDeviceByMapId(input[i].id)){
                     out.push(input[i]);
                 }
             }
@@ -561,19 +604,34 @@ app.filter('availableActivity', function(bridgeService) {
         }
     });
 
-app.filter('unavailableActivity', function(bridgeService) {
+app.filter('unavailableId', function(bridgeService) {
     return function(input) {
         var out = [];
         if(input == null)
         	return out;
         for (var i = 0; i < input.length; i++) {
-            if(bridgeService.findHarmonyActivityEntry(input[i].id)){
+            if(bridgeService.findDeviceByMapId(input[i].id)){
                 out.push(input[i]);
             }
         }
         return out;
     }
 });
+
+app.filter('configuredButtons', function() {
+    return function(input) {
+        var out = [];
+        if(input == null)
+        	return out;
+        for (var i = 0; i < input.length; i++) {
+            if(input[i].mapType == "harmonyButton"){
+                out.push(input[i]);
+            }
+        }
+        return out;
+    }
+});
+
 
 app.controller('ErrorsController', function ($scope, bridgeService) {
         $scope.bridge = bridgeService.state;

@@ -54,7 +54,7 @@ public class HarmonyServer {
         	log.debug("something is very wrong as dummyProvider is not null...");
         if(mySettings.isDevMode())
         	modeString = " (development mode)";
-        if(noopCalls)
+        else if(noopCalls)
         	modeString = " (no op calls to harmony)";
 		log.info("setup initiated " + modeString + "....");
         if(mySettings.isDevMode())

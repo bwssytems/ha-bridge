@@ -30,7 +30,7 @@
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="harmonyactivity in bridge.harmonyactivities | availableActivity | orderBy:predicate:reverse">
+				<tr ng-repeat="harmonyactivity in bridge.harmonyactivities | availableId | orderBy:predicate:reverse">
 					<td>{{harmonyactivity.label}}</td>
 					<td>{{harmonyactivity.id}}</td>
 					<td>
@@ -58,11 +58,14 @@
 							<a href="" ng-click="order('id')">Id</a>
         					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
         				</th>
+						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="harmonyactivity in bridge.harmonyactivities | unavailableActivity | orderBy:predicate:reverse">
+				<tr ng-repeat="harmonyactivity in bridge.harmonyactivities | unavailableId | orderBy:predicate:reverse">
 					<td>{{harmonyactivity.label}}</td>
 					<td>{{harmonyactivity.id}}</td>
+					<td><button class="btn btn-danger" type="submit"
+						ng-click="deleteDeviceByMapId(harmonyactivity.id)">Delete</button></td>
 				</tr>
 			</table>
 		</li>

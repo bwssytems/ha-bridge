@@ -143,8 +143,9 @@ public class DeviceResource {
 	    }, new JsonTransformer());
 
     	delete (API_CONTEXT + "/:id", "application/json", (request, response) -> {
-	    	log.debug("Delete a device");
-	        DeviceDescriptor deleted = deviceRepository.findOne(request.params(":id"));
+    		String anId = request.params(":id");
+	    	log.debug("Delete a device: " + anId);
+	        DeviceDescriptor deleted = deviceRepository.findOne(anId);
 	        if(deleted == null)
 				response.status(HttpStatus.SC_NOT_FOUND);
 	        else
