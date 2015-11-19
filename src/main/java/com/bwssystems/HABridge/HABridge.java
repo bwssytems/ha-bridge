@@ -67,6 +67,7 @@ public class HABridge {
         bridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
         bridgeSettings.setTraceupnp(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
         bridgeSettings.setDevMode(Boolean.parseBoolean(System.getProperty("dev.mode", "false")));
+        bridgeSettings.setUpnpResponseDevices(Integer.parseInt(System.getProperty("upnp.response.devices", Configuration.UPNP_RESPONSE_DEVICES)));
 
         // sparkjava config directive to set ip address for the web server to listen on
         // ipAddress("0.0.0.0"); // not used

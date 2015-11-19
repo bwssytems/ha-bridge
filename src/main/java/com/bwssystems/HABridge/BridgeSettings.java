@@ -9,6 +9,7 @@ public class BridgeSettings {
 	private String harmonyaddress;
 	private String harmonyuser;
 	private String harmonypwd;
+	private Integer upnpresponsedevices;
 	private boolean upnpstrict;
 	private boolean traceupnp;
 	private boolean devmode;
@@ -60,6 +61,12 @@ public class BridgeSettings {
 	}
 	public void setHarmonyPwd(String harmonypwd) {
 		this.harmonypwd = harmonypwd;
+	}
+	public Integer getUpnpResponseDevices() {
+		return upnpresponsedevices;
+	}
+	public void setUpnpResponseDevices(Integer upnpresponsedevices) {
+		this.upnpresponsedevices = upnpresponsedevices;
 	}
 	public boolean isUpnpStrict() {
 		return upnpstrict;
