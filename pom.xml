@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>1.1.0a</version>
+	<version>1.1.0b</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
@@ -33,7 +33,7 @@
 		<dependency>
 		    <groupId>com.sparkjava</groupId>
 		    <artifactId>spark-core</artifactId>
-		    <version>2.2</version>
+		    <version>2.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>

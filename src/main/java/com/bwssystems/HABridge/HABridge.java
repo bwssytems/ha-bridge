@@ -85,7 +85,7 @@ public class HABridge {
         // setup the class to handle the resource setup rest api
         theResources = new DeviceResource(bridgeSettings, theVersion, myHarmonyServer.getMyHarmony());
         // setup the class to handle the hue emulator rest api
-        theHueMulator = new HueMulator(theResources.getDeviceRepository(), myHarmonyServer.getMyHarmony());
+        theHueMulator = new HueMulator(bridgeSettings, theResources.getDeviceRepository(), myHarmonyServer.getMyHarmony());
         theHueMulator.setupServer();
         // setup the class to handle the upnp response rest api
         theSettingResponder = new UpnpSettingsResource(bridgeSettings);

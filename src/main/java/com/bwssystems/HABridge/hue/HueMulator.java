@@ -1,5 +1,6 @@
 package com.bwssystems.HABridge.hue;
 
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.JsonTransformer;
 import com.bwssystems.HABridge.api.UserCreateRequest;
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
@@ -58,14 +59,18 @@ public class HueMulator {
     private HarmonyHandler myHarmony;
     private HttpClient httpClient;
     private ObjectMapper mapper;
+    private Integer lastCount;
+    private BridgeSettings bridgeSettings;
 
 
-    public HueMulator(DeviceRepository aDeviceRepository, HarmonyHandler theHandler){
+    public HueMulator(BridgeSettings theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHandler theHandler){
         httpClient = HttpClients.createDefault();
         mapper = new ObjectMapper(); //armzilla: work around Echo incorrect content type and breaking mapping. Map manually
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         repository = aDeviceRepository;
         myHarmony = theHandler;
+        bridgeSettings = theBridgeSettings;
+        lastCount = 0;
     }
 
 //	This function sets up the sparkjava rest calls for the hue api
@@ -77,9 +82,13 @@ public class HueMulator {
 	        log.debug("hue lights list requested: " + userId + " from " + request.ip());
 	        List<DeviceDescriptor> deviceList = repository.findAll();
 	        Map<String, DeviceResponse> deviceResponseMap = new HashMap<>();
-	        for (DeviceDescriptor device : deviceList) {
+	        for (int i = 0; i < bridgeSettings.getUpnpResponseDevices(); i++) {
+	        	if(lastCount == deviceList.size())
+	        		lastCount = 0;
+	        	DeviceDescriptor device = deviceList.get(lastCount);
                 DeviceResponse deviceResponse = DeviceResponse.createResponse(device.getName(), device.getId());
 	            deviceResponseMap.put(device.getId(), deviceResponse);
+	            lastCount++;
 	        }
 			response.type("application/json; charset=utf-8"); 
 	        response.status(HttpStatus.SC_OK);
