@@ -59,7 +59,7 @@ public class HueMulator {
     private HarmonyHandler myHarmony;
     private HttpClient httpClient;
     private ObjectMapper mapper;
-    private Integer lastCount;
+    private Map<String,Integer> lastUserIdCount;
     private BridgeSettings bridgeSettings;
 
 
@@ -70,7 +70,7 @@ public class HueMulator {
         repository = aDeviceRepository;
         myHarmony = theHandler;
         bridgeSettings = theBridgeSettings;
-        lastCount = 0;
+        lastUserIdCount = new HashMap<>();
     }
 
 //	This function sets up the sparkjava rest calls for the hue api
@@ -79,17 +79,29 @@ public class HueMulator {
     	// http://ip_address:port/api/{userId}/lights  returns json objects of all lights configured
 	    get(HUE_CONTEXT + "/:userid/lights", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
+        	if(bridgeSettings.isTraceupnp())
+        		log.info("Traceupnp: hue lights list requested: " + userId + " from " + request.ip());
 	        log.debug("hue lights list requested: " + userId + " from " + request.ip());
 	        List<DeviceDescriptor> deviceList = repository.findAll();
 	        Map<String, DeviceResponse> deviceResponseMap = new HashMap<>();
+	        Integer lastCount = lastUserIdCount.get(userId);
+	        if(lastCount == null)
+	        {
+	        	lastCount = new Integer(0);
+	        	lastUserIdCount.put(userId, lastCount);
+	        }
 	        for (int i = 0; i < bridgeSettings.getUpnpResponseDevices(); i++) {
-	        	if(lastCount == deviceList.size())
+	        	if(lastCount >= deviceList.size())
+	        	{
 	        		lastCount = 0;
+	        		break;
+	        	}
 	        	DeviceDescriptor device = deviceList.get(lastCount);
                 DeviceResponse deviceResponse = DeviceResponse.createResponse(device.getName(), device.getId());
 	            deviceResponseMap.put(device.getId(), deviceResponse);
 	            lastCount++;
 	        }
+        	lastUserIdCount.replace(userId, lastCount);
 			response.type("application/json; charset=utf-8"); 
 	        response.status(HttpStatus.SC_OK);
 	        return deviceResponseMap;
@@ -110,6 +122,8 @@ public class HueMulator {
         	String newUser = null;
         	String aDeviceType = null;
         	
+        	if(bridgeSettings.isTraceupnp())
+        		log.info("Traceupnp: hue api user create requested: " + request.body() + " from " + request.ip());
         	log.debug("hue api user create requested: " + request.body() + " from " + request.ip());
 	        
 	        if(request.body() != null && !request.body().isEmpty()) {
@@ -122,6 +136,8 @@ public class HueMulator {
     		
     		if(aDeviceType == null)
     			aDeviceType = "<not given>";
+        	if(bridgeSettings.isTraceupnp())
+        		log.info("Traceupnp: hue api user create requested for device type: " + aDeviceType + " and username: " + newUser);
     		log.debug("hue api user create requested for device type: " + aDeviceType + " and username: " + newUser);
 
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));

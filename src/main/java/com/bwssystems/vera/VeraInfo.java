@@ -30,7 +30,7 @@ public class VeraInfo {
 
     public VeraInfo(String addressString, Boolean isValidVera) {
 		super();
-        httpClient = HttpClients.createMinimal();
+        httpClient = HttpClients.createDefault();
         veraAddressString = addressString;
         validVera = isValidVera;
 	}
