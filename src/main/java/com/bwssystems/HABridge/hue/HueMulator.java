@@ -84,24 +84,10 @@ public class HueMulator {
 	        log.debug("hue lights list requested: " + userId + " from " + request.ip());
 	        List<DeviceDescriptor> deviceList = repository.findAll();
 	        Map<String, DeviceResponse> deviceResponseMap = new HashMap<>();
-	        Integer lastCount = lastUserIdCount.get(userId);
-	        if(lastCount == null)
-	        {
-	        	lastCount = new Integer(0);
-	        	lastUserIdCount.put(userId, lastCount);
-	        }
-	        for (int i = 0; i < bridgeSettings.getUpnpResponseDevices(); i++) {
-	        	if(lastCount >= deviceList.size())
-	        	{
-	        		lastCount = 0;
-	        		break;
-	        	}
-	        	DeviceDescriptor device = deviceList.get(lastCount);
+	        for (DeviceDescriptor device : deviceList) {
                 DeviceResponse deviceResponse = DeviceResponse.createResponse(device.getName(), device.getId());
 	            deviceResponseMap.put(device.getId(), deviceResponse);
-	            lastCount++;
 	        }
-        	lastUserIdCount.replace(userId, lastCount);
 			response.type("application/json; charset=utf-8"); 
 	        response.status(HttpStatus.SC_OK);
 	        return deviceResponseMap;
