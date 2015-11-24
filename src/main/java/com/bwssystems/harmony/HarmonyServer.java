@@ -70,7 +70,7 @@ public class HarmonyServer {
 					log.info(format("activity changed: [%d] %s", activity.getId(), activity.getLabel()));
 				}
 			});
-			harmonyClient.connect(mySettings.getHarmonyAddress(), mySettings.getHarmonyUser(), mySettings.getHarmonyPwd());
+			harmonyClient.connect(mySettings.getHarmonyAddress().getDevices().get(0).getIp(), mySettings.getHarmonyUser(), mySettings.getHarmonyPwd());
         }
         myHarmony = new HarmonyHandler(harmonyClient, noopCalls, devResponse);
 	}

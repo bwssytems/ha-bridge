@@ -390,6 +390,9 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
             bridgeService.state.base = url;
             bridgeService.viewDevices();
         };
+        $scope.goBridgeUrl = function (url) {
+        	window.open(url, "_blank");
+        };
         $scope.editDevice = function (device) {
             bridgeService.editDevice(device);
             $location.path('/editdevice');

@@ -1,12 +1,14 @@
 package com.bwssystems.HABridge;
 
+import java.util.List;
+
 public class BridgeSettings {
 	private String upnpconfigaddress;
 	private String serverport;
 	private String upnpresponseport;
 	private String upnpdevicedb;
 	private String veraaddress;
-	private String harmonyaddress;
+	private IpList harmonyaddress;
 	private String harmonyuser;
 	private String harmonypwd;
 	private Integer upnpresponsedevices;
@@ -44,10 +46,10 @@ public class BridgeSettings {
 	public void setVeraAddress(String veraAddress) {
 		this.veraaddress = veraAddress;
 	}
-	public String getHarmonyAddress() {
+	public IpList getHarmonyAddress() {
 		return harmonyaddress;
 	}
-	public void setHarmonyAddress(String harmonyaddress) {
+	public void setHarmonyAddress(IpList harmonyaddress) {
 		this.harmonyaddress = harmonyaddress;
 	}
 	public String getHarmonyUser() {
@@ -92,7 +94,8 @@ public class BridgeSettings {
 		return true;
 	}
 	public Boolean isValidHarmony() {
-		if(this.harmonyaddress.contains(Configuration.DEFAULT_HARMONY_ADDRESS))
+		List<NamedIP> devicesList = this.harmonyaddress.getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_HARMONY_ADDRESS))
 			return false;
 		if(this.harmonypwd == null || this.harmonypwd == "")
 			return false;

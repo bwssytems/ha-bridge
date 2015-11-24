@@ -13,6 +13,7 @@ import com.bwssystems.HABridge.hue.HueMulator;
 import com.bwssystems.HABridge.upnp.UpnpListener;
 import com.bwssystems.HABridge.upnp.UpnpSettingsResource;
 import com.bwssystems.harmony.HarmonyServer;
+import com.google.gson.Gson;
 
 public class HABridge {
 	
@@ -61,14 +62,26 @@ public class HABridge {
         bridgeSettings.setUpnpDeviceDb(System.getProperty("upnp.device.db", Configuration.DEVICE_DB_DIRECTORY));
         bridgeSettings.setUpnpResponsePort(System.getProperty("upnp.response.port", Configuration.UPNP_RESPONSE_PORT));
         bridgeSettings.setVeraAddress(System.getProperty("vera.address", Configuration.DEFAULT_VERA_ADDRESS));
-        bridgeSettings.setHarmonyAddress(System.getProperty("harmony.address", Configuration.DEFAULT_HARMONY_ADDRESS));
+        IpList theHarmonyList;
+
+        try {
+        	theHarmonyList = new Gson().fromJson(System.getProperty("harmony.address", Configuration.DEFAULT_HARMONY_ADDRESS_LIST), IpList.class);
+        } catch (Exception e) {
+        	try {
+        		theHarmonyList = new Gson().fromJson("{devices:[{name:default,ip:" + System.getProperty("harmony.address", Configuration.DEFAULT_HARMONY_ADDRESS) + "}]}", IpList.class);
+        	} catch (Exception et) {
+    	        log.error("Cannot parse harmony.address, Exiting with message: " + e.getMessage(), e);
+    	        return;
+        	}
+        }
+        bridgeSettings.setHarmonyAddress(theHarmonyList);
         bridgeSettings.setHarmonyUser(System.getProperty("harmony.user", Configuration.DEFAULT_HARMONY_USER));
         bridgeSettings.setHarmonyPwd(System.getProperty("harmony.pwd", Configuration.DEFAULT_HARMONY_PWD));
         bridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
         bridgeSettings.setTraceupnp(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
         bridgeSettings.setDevMode(Boolean.parseBoolean(System.getProperty("dev.mode", "false")));
         bridgeSettings.setUpnpResponseDevices(Integer.parseInt(System.getProperty("upnp.response.devices", Configuration.UPNP_RESPONSE_DEVICES)));
-
+        
         // sparkjava config directive to set ip address for the web server to listen on
         // ipAddress("0.0.0.0"); // not used
         // sparkjava config directive to set port for the web server to listen on
