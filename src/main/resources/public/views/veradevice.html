@@ -45,7 +45,7 @@
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="veradevice in bridge.veradevices | availableId | orderBy:predicate:reverse">
+				<tr ng-repeat="veradevice in bridge.veradevices | availableVeraDeviceId | orderBy:predicate:reverse">
 					<td>{{veradevice.name}}</td>
 					<td>{{veradevice.id}}</td>
 					<td>{{veradevice.category}}</td>
@@ -86,14 +86,14 @@
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="veradevice in bridge.veradevices | unavailableId | orderBy:predicate:reverse">
+				<tr ng-repeat="veradevice in bridge.veradevices | unavailableVeraDeviceId | orderBy:predicate:reverse">
 					<td>{{veradevice.name}}</td>
 					<td>{{veradevice.id}}</td>
 					<td>{{veradevice.category}}</td>
 					<td>{{veradevice.room}}</td>
 					<td>
 						<button class="btn btn-danger" type="submit"
-						ng-click="deleteDeviceByMapId(harmonyactivity.id)">Delete</button>
+						ng-click="deleteDeviceByMapId(veradevice.id, "veraDevice")">Delete</button>
 					</td>
 				</tr>
 			</table>

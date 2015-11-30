@@ -246,9 +246,9 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             );
         };
 
-        this.findDeviceByMapId = function(id) {
+        this.findDeviceByMapId = function(id, type) {
         	for(var i = 0; i < this.state.devices.length; i++) {
-        		if(this.state.devices[i].mapId == id)
+        		if(this.state.devices[i].mapId == id && this.state.devices[i].mapType == type)
         			return true;
         	}
         	return false;
@@ -328,9 +328,9 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             );
         };
 
-        this.deleteDeviceByMapId = function (id) {
+        this.deleteDeviceByMapId = function (id, type) {
         	for(var i = 0; i < this.state.devices.length; i++) {
-        		if(this.state.devices[i].mapId == id)
+        		if(this.state.devices[i].mapId == id && this.state.devices[i].mapType == type)
         			return self.deleteDevice(this.state.devices[i].id);
         	}
         };
@@ -502,7 +502,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
             }
             $scope.device.deviceType = "scene";
             $scope.device.name = verascene.name;
-            $scope.devoce.mapType = "veraScene";
+            $scope.device.mapType = "veraScene";
             $scope.device.mapId = verascene.id;
             $scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
                 + "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
@@ -593,13 +593,13 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         
     });
 
-app.filter('availableId', function(bridgeService) {
+app.filter('availableHarmonyActivityId', function(bridgeService) {
         return function(input) {
             var out = [];
             if(input == null)
             	return out;
             for (var i = 0; i < input.length; i++) {
-                if(!bridgeService.findDeviceByMapId(input[i].id)){
+                if(!bridgeService.findDeviceByMapId(input[i].id, "harmonyActivity")){
                     out.push(input[i]);
                 }
             }
@@ -607,18 +607,74 @@ app.filter('availableId', function(bridgeService) {
         }
     });
 
-app.filter('unavailableId', function(bridgeService) {
+app.filter('unavailableHarmonyActivityId', function(bridgeService) {
     return function(input) {
         var out = [];
         if(input == null)
         	return out;
         for (var i = 0; i < input.length; i++) {
-            if(bridgeService.findDeviceByMapId(input[i].id)){
+            if(bridgeService.findDeviceByMapId(input[i].id, "harmonyActivity")){
                 out.push(input[i]);
             }
         }
         return out;
     }
+});
+
+app.filter('availableVeraDeviceId', function(bridgeService) {
+    return function(input) {
+        var out = [];
+        if(input == null)
+        	return out;
+        for (var i = 0; i < input.length; i++) {
+            if(!bridgeService.findDeviceByMapId(input[i].id, "veraDevice")){
+                out.push(input[i]);
+            }
+        }
+        return out;
+    }
+});
+
+app.filter('unavailableVeraDeviceId', function(bridgeService) {
+return function(input) {
+    var out = [];
+    if(input == null)
+    	return out;
+    for (var i = 0; i < input.length; i++) {
+        if(bridgeService.findDeviceByMapId(input[i].id, "veraDevice")){
+            out.push(input[i]);
+        }
+    }
+    return out;
+}
+});
+
+app.filter('availableVeraSceneId', function(bridgeService) {
+    return function(input) {
+        var out = [];
+        if(input == null)
+        	return out;
+        for (var i = 0; i < input.length; i++) {
+            if(!bridgeService.findDeviceByMapId(input[i].id, "veraScene")){
+                out.push(input[i]);
+            }
+        }
+        return out;
+    }
+});
+
+app.filter('unavailableVeraSceneId', function(bridgeService) {
+return function(input) {
+    var out = [];
+    if(input == null)
+    	return out;
+    for (var i = 0; i < input.length; i++) {
+        if(bridgeService.findDeviceByMapId(input[i].id, "veraScene")){
+            out.push(input[i]);
+        }
+    }
+    return out;
+}
 });
 
 app.filter('configuredButtons', function() {

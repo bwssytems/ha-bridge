@@ -30,7 +30,7 @@
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="harmonyactivity in bridge.harmonyactivities | availableId | orderBy:predicate:reverse">
+				<tr ng-repeat="harmonyactivity in bridge.harmonyactivities | availableHarmonyActivityId | orderBy:predicate:reverse">
 					<td>{{harmonyactivity.label}}</td>
 					<td>{{harmonyactivity.id}}</td>
 					<td>
@@ -61,11 +61,11 @@
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="harmonyactivity in bridge.harmonyactivities | unavailableId | orderBy:predicate:reverse">
+				<tr ng-repeat="harmonyactivity in bridge.harmonyactivities | unavailableHarmonyActivityId | orderBy:predicate:reverse">
 					<td>{{harmonyactivity.label}}</td>
 					<td>{{harmonyactivity.id}}</td>
 					<td><button class="btn btn-danger" type="submit"
-						ng-click="deleteDeviceByMapId(harmonyactivity.id)">Delete</button></td>
+						ng-click="deleteDeviceByMapId(harmonyactivity.id, harmonyActivity)">Delete</button></td>
 				</tr>
 			</table>
 		</li>

@@ -34,7 +34,7 @@
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="verascene in bridge.verascenes | availableId | orderBy:predicate:reverse">
+				<tr ng-repeat="verascene in bridge.verascenes | availableVeraSceneId | orderBy:predicate:reverse">
 					<td>{{verascene.name}}</td>
 					<td>{{verascene.id}}</td>
 					<td>{{verascene.room}}</td>
@@ -70,13 +70,13 @@
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="verascene in bridge.verascenes | unavailableId | orderBy:predicate:reverse">
+				<tr ng-repeat="verascene in bridge.verascenes | unavailableVeraSceneId | orderBy:predicate:reverse">
 					<td>{{verascene.name}}</td>
 					<td>{{verascene.id}}</td>
 					<td>{{verascene.room}}</td>
 					<td>
 						<button class="btn btn-danger" type="submit"
-						ng-click="deleteDeviceByMapId(harmonyactivity.id)">Delete</button>
+						ng-click="deleteDeviceByMapId(verascene.id, "veraScene")">Delete</button>
 					</td>
 				</tr>
 			</table>
