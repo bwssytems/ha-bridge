@@ -187,6 +187,9 @@ public class DeviceRepository {
 		       } else if (name.equals("deviceType")) {
 			        deviceEntry.setDeviceType(reader.nextString());
 			    	log.debug("Read a Device - device json type:" + deviceEntry.getDeviceType());
+		       } else if (name.equals("targetDevice")) {
+			        deviceEntry.setTargetDevice(reader.nextString());
+			    	log.debug("Read a Device - device json type:" + deviceEntry.getTargetDevice());
 		       } else if (name.equals("offUrl")) {
 			        deviceEntry.setOffUrl(reader.nextString());
 			    	log.debug("Read a Device - device json off URL:" + deviceEntry.getOffUrl());

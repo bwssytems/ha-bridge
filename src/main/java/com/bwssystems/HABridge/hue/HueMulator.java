@@ -9,6 +9,7 @@ import com.bwssystems.HABridge.api.hue.HueApiResponse;
 import com.bwssystems.HABridge.dao.*;
 import com.bwssystems.harmony.ButtonPress;
 import com.bwssystems.harmony.HarmonyHandler;
+import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.harmony.RunActivity;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,21 +57,19 @@ public class HueMulator {
     private static final String HUE_CONTEXT = "/api";
 
     private DeviceRepository repository;
-    private HarmonyHandler myHarmony;
+    private HarmonyHome myHarmonyHome;
     private HttpClient httpClient;
     private ObjectMapper mapper;
-    private Map<String,Integer> lastUserIdCount;
     private BridgeSettings bridgeSettings;
 
 
-    public HueMulator(BridgeSettings theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHandler theHandler){
+    public HueMulator(BridgeSettings theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHome theHarmonyHome){
         httpClient = HttpClients.createDefault();
         mapper = new ObjectMapper(); //armzilla: work around Echo incorrect content type and breaking mapping. Map manually
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         repository = aDeviceRepository;
-        myHarmony = theHandler;
+        myHarmonyHome = theHarmonyHome;
         bridgeSettings = theBridgeSettings;
-        lastUserIdCount = new HashMap<>();
     }
 
 //	This function sets up the sparkjava rest calls for the hue api
@@ -252,26 +251,29 @@ public class HueMulator {
 	         */
 	    	String userId = request.params(":userid");
 	    	String lightId = request.params(":id");
-	        log.debug("hue state change requested: " + userId + " from " + request.ip() + " body: " + request.body());
-	
+	        String responseString = null;
+	        String url = null;
 	        DeviceState state = null;
+	        log.debug("hue state change requested: " + userId + " from " + request.ip() + " body: " + request.body());
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.type("application/json; charset=utf-8"); 
+	        response.status(HttpStatus.SC_OK);
+	
 	        try {
 	            state = mapper.readValue(request.body(), DeviceState.class);
 	        } catch (IOException e) {
 	            log.error("Object mapper barfed on input of body.", e);
-	        	response.status(HttpStatus.SC_BAD_REQUEST);
-	            return null;
+        		responseString = "[{\"error\":{\"type\": 2, \"address\": \"/lights/" + lightId + ",\"description\": \"Object mapper barfed on input of body.\"}}]";
+    	        return responseString;
 	        }
 	
 	        DeviceDescriptor device = repository.findOne(lightId);
 	        if (device == null) {
-	        	response.status(HttpStatus.SC_NOT_FOUND);
-	            log.error("Could not find devcie: " + lightId + " for hue state change request: " + userId + " from " + request.ip() + " body: " + request.body());
-	            return null;
+	            log.error("Could not find device: " + lightId + " for hue state change request: " + userId + " from " + request.ip() + " body: " + request.body());
+        		responseString = "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId + ",\"description\": \"Could not find device\", \"resource\": \"/lights/" + lightId + "\"}}]";
+    	        return responseString;
 	        }
 	
-	        String responseString =null;
-	        String url = null;
 	        if (state.isOn()) {
 	            responseString = "[{\"success\":{\"/lights/" + lightId + "/state/on\":true}}";
 	            url = device.getOnUrl();
@@ -294,19 +296,32 @@ public class HueMulator {
 	        }
 	        else
 	        	responseString = responseString + "]";
-	        	
-	        
+
 	        if(device.getDeviceType().toLowerCase().contains("activity"))
 	        {
 	        	log.debug("executing activity to Harmony: " + url);
 	        	RunActivity anActivity = new Gson().fromJson(url, RunActivity.class);
-	        	myHarmony.startActivity(anActivity);
+	        	HarmonyHandler myHarmony = myHarmonyHome.getHarmonyHandler(device.getTargetDevice());
+	        	if(myHarmony == null)
+	        	{
+	        		log.error("Should not get here, no harmony hub available");
+	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+	        	}
+	        	else
+	        		myHarmony.startActivity(anActivity);
 	        }
 	        else if(device.getDeviceType().toLowerCase().contains("button"))
 	        {
 	        	log.debug("executing button press to Harmony: " + url);
 	        	ButtonPress aDeviceButton = new Gson().fromJson(url, ButtonPress.class);
-	        	myHarmony.pressButton(aDeviceButton);
+	        	HarmonyHandler myHarmony = myHarmonyHome.getHarmonyHandler(device.getTargetDevice());
+	        	if(myHarmony == null)
+	        	{
+	        		log.error("Should not get here, no harmony hub available");
+	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+	        	}
+	        	else
+	        		myHarmony.pressButton(aDeviceButton);
 	        }
 	        else
 	        {
@@ -320,15 +335,11 @@ public class HueMulator {
 					body = replaceIntensityValue(device.getContentBodyOff(), state.getBri());
 				// make call
 				if (!doHttpRequest(url, device.getHttpVerb(), device.getContentType(), body)) {
-					response.status(HttpStatus.SC_SERVICE_UNAVAILABLE);
 					log.error("Error on calling url to change device state: " + url);
-					return null;
+					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 				}
 	        }
 	
-	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
-			response.type("application/json; charset=utf-8"); 
-	        response.status(HttpStatus.SC_OK);
 	        return responseString;
 	    });
     }

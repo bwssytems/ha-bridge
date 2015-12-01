@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.BridgeSettings;
+import com.bwssystems.HABridge.NamedIP;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -24,23 +25,25 @@ public class HarmonyServer {
     private HarmonyHandler myHarmony;
     private DevModeResponse devResponse;
     private OAReplyProvider dummyProvider;
+    private NamedIP myNameAndIP;
     
     private Logger log = LoggerFactory.getLogger(HarmonyServer.class);
 
-	public HarmonyServer() {
+	public HarmonyServer(NamedIP theHarmonyAddress) {
 		super();
 		myHarmony = null;
 		dummyProvider = null;
+		myNameAndIP = theHarmonyAddress;
 	}
 
-	public static HarmonyServer setup(BridgeSettings bridgeSettings) throws Exception {
+	public static HarmonyServer setup(BridgeSettings bridgeSettings, NamedIP theHarmonyAddress) throws Exception {
 		if(!bridgeSettings.isValidHarmony()) {
-			return new HarmonyServer();
+			return new HarmonyServer(theHarmonyAddress);
 		}
     	Injector injector = null;
     	if(!bridgeSettings.isDevMode())
     		injector = Guice.createInjector(new HarmonyClientModule());
-        HarmonyServer mainObject = new HarmonyServer();
+        HarmonyServer mainObject = new HarmonyServer(theHarmonyAddress);
     	if(!bridgeSettings.isDevMode())
     		injector.injectMembers(mainObject);
   		mainObject.execute(bridgeSettings);
@@ -70,7 +73,7 @@ public class HarmonyServer {
 					log.info(format("activity changed: [%d] %s", activity.getId(), activity.getLabel()));
 				}
 			});
-			harmonyClient.connect(mySettings.getHarmonyAddress().getDevices().get(0).getIp(), mySettings.getHarmonyUser(), mySettings.getHarmonyPwd());
+			harmonyClient.connect(myNameAndIP.getIp(), mySettings.getHarmonyUser(), mySettings.getHarmonyPwd());
         }
         myHarmony = new HarmonyHandler(harmonyClient, noopCalls, devResponse);
 	}

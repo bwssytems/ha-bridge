@@ -8,6 +8,7 @@ public class DeviceDescriptor{
     private String mapId;
     private String mapType;
     private String deviceType;
+    private String targetDevice;
     private String offUrl;
     private String onUrl;
     private String httpVerb;
@@ -47,7 +48,15 @@ public class DeviceDescriptor{
         this.deviceType = deviceType;
     }
 
-    public String getOffUrl() {
+    public String getTargetDevice() {
+		return targetDevice;
+	}
+
+	public void setTargetDevice(String targetDevice) {
+		this.targetDevice = targetDevice;
+	}
+
+	public String getOffUrl() {
         return offUrl;
     }
 

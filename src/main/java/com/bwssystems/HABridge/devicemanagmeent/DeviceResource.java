@@ -20,7 +20,7 @@ import com.bwssystems.HABridge.JsonTransformer;
 import com.bwssystems.HABridge.Version;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
-import com.bwssystems.harmony.HarmonyHandler;
+import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.luupRequests.Sdata;
 import com.bwssystems.vera.VeraInfo;
 import com.google.gson.Gson;
@@ -35,14 +35,13 @@ public class DeviceResource {
     private DeviceRepository deviceRepository;
     private VeraInfo veraInfo;
     private Version version;
-    private HarmonyHandler myHarmonyHandler;
+    private HarmonyHome myHarmonyHome;
     private static final Set<String> supportedVerbs = new HashSet<>(Arrays.asList("get", "put", "post"));
 
-	public DeviceResource(BridgeSettings theSettings, Version theVersion, HarmonyHandler myHarmony) {
-		super();
+	public DeviceResource(BridgeSettings theSettings, Version theVersion, HarmonyHome theHarmonyHome) {
 		this.deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
 		this.veraInfo = new VeraInfo(theSettings.getVeraAddress(), theSettings.isValidVera());
-		this.myHarmonyHandler = myHarmony;
+		this.myHarmonyHome = theHarmonyHome;
 		this.version = theVersion;
         setupEndpoints();
 	}
@@ -109,6 +108,7 @@ public class DeviceResource {
 					deviceEntry.setDeviceType(device.getDeviceType());
 				deviceEntry.setMapId(device.getMapId());
 				deviceEntry.setMapType(device.getMapType());
+				deviceEntry.setTargetDevice(device.getTargetDevice());
 				deviceEntry.setOnUrl(device.getOnUrl());
 				deviceEntry.setOffUrl(device.getOffUrl());
 				deviceEntry.setHttpVerb(device.getHttpVerb());
@@ -187,32 +187,32 @@ public class DeviceResource {
 
     	get (API_CONTEXT + "/harmony/activities", "application/json", (request, response) -> {
 	    	log.debug("Get harmony activities");
-	      	if(myHarmonyHandler == null) {
+	      	if(myHarmonyHome == null) {
 				response.status(HttpStatus.SC_NOT_FOUND);
 		      	return null;	      		
 	      	}
 	      	response.status(HttpStatus.SC_OK);
-	      	return myHarmonyHandler.getActivities();
+	      	return myHarmonyHome.getActivities();
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/harmony/show", "application/json", (request, response) -> {
 	    	log.debug("Get harmony current activity");
-	      	if(myHarmonyHandler == null) {
+	      	if(myHarmonyHome == null) {
 	      		response.status(HttpStatus.SC_NOT_FOUND);
 	      		return null;
 	      	}
 	      	response.status(HttpStatus.SC_OK);
-      		return myHarmonyHandler.getCurrentActivity();
+      		return myHarmonyHome.getCurrentActivities();
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/harmony/devices", "application/json", (request, response) -> {
 	    	log.debug("Get harmony devices");
-	      	if(myHarmonyHandler == null) {
+	      	if(myHarmonyHome == null) {
 				response.status(HttpStatus.SC_NOT_FOUND);
 		      	return null;	      		
 	      	}
 	      	response.status(HttpStatus.SC_OK);
-	      	return myHarmonyHandler.getDevices();
+	      	return myHarmonyHome.getDevices();
 	    }, new JsonTransformer());
 
     }
