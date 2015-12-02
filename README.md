@@ -1,5 +1,5 @@
 # ha-bridge
-Emulates Philips Hue api to other home automation gateways such as an Amazon Echo.  The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge. Alternatively the Bridge supports custom calls as well. The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol. 
+Emulates Philips Hue api to other home automation gateways such as an Amazon Echo.  The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge. Alternatively the Bridge supports custom calls as well. The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol. You can provide multiple harmony hubs for control.
 ## Build
 To customize and build it yourself, build a new jar with maven:  
 ```
@@ -22,8 +22,8 @@ The server defaults to running on port 8080. If you're already running a server 
 The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify -Dupnp.devices.db=`<directory>/<filename> or <filename>` if it is the same directory.
 ### -Dupnp.response.port=`<port>`
 The upnp response port that will be used. The default is 50000.  
-### -Dharmony.address=`<ip address>`
-The argument for the Harmony Hub address should be given as the system does not have a way to find the address. Supply -Dharmony.address=X.Y.Z.A on the command line to provide it. If a Harmony Hub is not used, do not set it.
+### -Dharmony.address=`<ip address>` | `<{devices:[{name:ahub,ip:x.y.w.z},{name:anotherhub,ip:a.b.c.d}]}>`
+The argument for the Harmony Hub address should be given as the system does not have a way to find the address. Supply -Dharmony.address=X.Y.Z.A on the command line to provide it. If a Harmony Hub is not used, do not set it. To provide multiple harmony hubs, use the json style notation outlined above to provide the list. This argument is backwards compatible.
 ### -Dharmony.user=`<username>`
 The user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub Features, provide -Dharmony.user=`<username>` on the command line.
 ### -Dharmony.pwd=`<password>`
