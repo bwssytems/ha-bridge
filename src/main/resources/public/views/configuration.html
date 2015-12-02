@@ -37,6 +37,9 @@
 					<th>
 						<a href="" ng-click="order('deviceType')">Type</a>
         				<span class="sortorder" ng-show="predicate === 'deviceType'" ng-class="{reverse:reverse}"></span></th>
+					<th>
+						<a href="" ng-click="order('targetDevice')">Target</a>
+        				<span class="sortorder" ng-show="predicate === 'targetDevice'" ng-class="{reverse:reverse}"></span></th>
 					<th>Actions</th>
 				</tr>
 			</thead>
@@ -44,6 +47,7 @@
 				<td>{{device.id}}</td>
 				<td>{{device.name}}</td>
 				<td>{{device.deviceType}}</td>
+				<td>{{device.targetDevice}}</td>
 				<td>
 					<button class="btn btn-info" type="submit"
 						ng-click="testUrl(device, 'on')">Test ON</button>
@@ -66,7 +70,7 @@
 
 			<form class="form-horizontal">
 				<div class="form-group">
-					<label class="col-xs-12 col-sm-3 control-label" for="bridge-base">Bridge
+					<label class="col-xs-12 col-sm-2 control-label" for="bridge-base">Bridge
 						server</label>
 
 					<div class="col-xs-8 col-sm-7">

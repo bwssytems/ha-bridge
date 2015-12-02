@@ -1,9 +1,9 @@
 package com.bwssystems.harmony;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,6 +14,7 @@ import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.NamedIP;
 
 import net.whistlingfish.harmony.config.Activity;
+import net.whistlingfish.harmony.config.Device;
 
 public class HarmonyHome {
     private static final Logger log = LoggerFactory.getLogger(HarmonyHome.class);
@@ -35,36 +36,67 @@ public class HarmonyHome {
 	}
 
 	public HarmonyHandler getHarmonyHandler(String aName) {
+		HarmonyHandler aHandler = null;
 		if(aName == null || aName.equals("")) {
-			HarmonyHandler aHandler = hubs.get("default").getMyHarmony();
-			if(aHandler == null) {
-				Set<String> keys = hubs.keySet();
-				if(!keys.isEmpty()) {
-					aHandler = hubs.get(keys.toArray()[0]).getMyHarmony();
-				}
-				else
-					aHandler = null;
-			}
-			return aHandler;
+			aName = "default";
 		}
-		return hubs.get(aName).getMyHarmony();
+
+		if(hubs.get(aName) == null) {
+			Set<String> keys = hubs.keySet();
+			if(!keys.isEmpty()) {
+				aHandler = hubs.get(keys.toArray()[0]).getMyHarmony();
+			}
+			else
+				aHandler = null;
+		}
+		else
+			aHandler = hubs.get(aName).getMyHarmony();
+		return aHandler;
 	}
 	
 	public List<HarmonyActivity> getActivities() {
 		Iterator<String> keys = hubs.keySet().iterator();
+		ArrayList<HarmonyActivity> activityList = new ArrayList<HarmonyActivity>();
 		while(keys.hasNext()) {
-			List<Activity> theActivities = hubs.get(keys.next()).getMyHarmony().getActivities();
-			ListIterator<Activity> activities = theActivities.listIterator();
+			String key = keys.next();
+			Iterator<Activity> activities = hubs.get(key).getMyHarmony().getActivities().iterator();
 			while(activities.hasNext()) {
-				
+				HarmonyActivity anActivity = new HarmonyActivity();
+				anActivity.setActivity(activities.next());
+				anActivity.setHub(key);
+				activityList.add(anActivity);
 			}
 		}
-		return null;
+		return activityList;
 	}
-	public List<HarmonyCurrentActivity> getCurrentActivities() {
-		return null;
+	public List<HarmonyActivity> getCurrentActivities() {
+		Iterator<String> keys = hubs.keySet().iterator();
+		ArrayList<HarmonyActivity> activityList = new ArrayList<HarmonyActivity>();
+		while(keys.hasNext()) {
+			String key = keys.next();
+			Iterator<Activity> activities = hubs.get(key).getMyHarmony().getActivities().iterator();
+			while(activities.hasNext()) {
+				HarmonyActivity anActivity = new HarmonyActivity();
+				anActivity.setActivity(activities.next());
+				anActivity.setHub(key);
+				activityList.add(anActivity);
+			}
+		}
+		return activityList;
 	}
 	public List<HarmonyDevice> getDevices() {
-		return null;
+		Iterator<String> keys = hubs.keySet().iterator();
+		ArrayList<HarmonyDevice> deviceList = new ArrayList<HarmonyDevice>();
+		while(keys.hasNext()) {
+			String key = keys.next();
+			Iterator<Device> devices = hubs.get(key).getMyHarmony().getDevices().iterator();
+			while(devices.hasNext()) {
+				HarmonyDevice aDevice = new HarmonyDevice();
+				aDevice.setDevice(devices.next());
+				aDevice.setHub(key);
+				deviceList.add(aDevice);
+			}
+		}
+		return deviceList;
 	}
 }

@@ -246,9 +246,9 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             );
         };
 
-        this.findDeviceByMapId = function(id, type) {
+        this.findDeviceByMapId = function(id, target, type) {
         	for(var i = 0; i < this.state.devices.length; i++) {
-        		if(this.state.devices[i].mapId == id && this.state.devices[i].mapType == type)
+        		if(this.state.devices[i].mapId == id && this.state.devices[i].mapType == type && this.state.devices[i].targetDevice == target)
         			return true;
         	}
         	return false;
@@ -266,6 +266,7 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
                     mapId: device.mapId,
                     mapType: device.mapType,
                     deviceType: device.deviceType,
+                    targetDevice: device.targetDevice,
                     onUrl: device.onUrl,
                     offUrl: device.offUrl,
                     httpVerb: device.httpVerb,
@@ -293,6 +294,7 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
                     mapId: device.mapId,
                     mapType: device.mapType,
                     deviceType: device.deviceType,
+                    targetDevice: device.targetDevice,
                     onUrl: device.onUrl,
                     offUrl: device.offUrl,
                     httpVerb: device.httpVerb,
@@ -514,20 +516,22 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
 
         $scope.buildActivityUrls = function (harmonyactivity) {
             $scope.device.deviceType = "activity";
-            $scope.device.name = harmonyactivity.label;
+            $scope.device.targetDevice = harmonyactivity.hub;
+            $scope.device.name = harmonyactivity.activity.label;
             $scope.device.mapType = "harmonyActivity";
-            $scope.device.mapId = harmonyactivity.id;
-            $scope.device.onUrl = "{\"name\":\"" + harmonyactivity.id + "\"}";
+            $scope.device.mapId = harmonyactivity.activity.id;
+            $scope.device.onUrl = "{\"name\":\"" + harmonyactivity.activity.id + "\"}";
             $scope.device.offUrl = "{\"name\":\"-1\"}";
         };
 
         $scope.buildButtonUrls = function (harmonydevice, onbutton, offbutton) {
             $scope.device.deviceType = "button";
-            $scope.device.name = harmonydevice.label;
+            $scope.device.targetDevice = harmonydevice.hub;
+            $scope.device.name = harmonydevice.device.label;
             $scope.device.mapType = "harmonyButton";
-            $scope.device.mapId = harmonydevice.id + "-" + onbutton + "-" + offbutton;
-            $scope.device.onUrl = "{\"device\":\"" + harmonydevice.id + "\",\"button\":\"" + onbutton + "\"}";
-            $scope.device.offUrl = "{\"device\":\"" + harmonydevice.id + "\",\"button\":\"" + offbutton + "\"}";
+            $scope.device.mapId = harmonydevice.device.id + "-" + onbutton + "-" + offbutton;
+            $scope.device.onUrl = "{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + onbutton + "\"}";
+            $scope.device.offUrl = "{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + offbutton + "\"}";
         };
 
         $scope.testUrl = function (device, type) {
@@ -543,6 +547,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
                     $scope.device.name = "";
                     $scope.device.onUrl = "";
                     $scope.device.deviceType = "switch";
+                    $scope.device.targetDevice = null;
                     $scope.device.offUrl = "";
                     $scope.device.httpVerb = null;
                     $scope.device.contentType = null;
@@ -587,8 +592,8 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
                 $scope.imgScenesUrl = "glyphicon glyphicon-plus";
         };
         
-        $scope.deleteDeviceByMapId = function (id) {
-        	bridgeService.deleteDeviceByMapId(id);
+        $scope.deleteDeviceByMapId = function (id, mapType) {
+        	bridgeService.deleteDeviceByMapId(id, mapType);
         };
         
     });
@@ -599,7 +604,7 @@ app.filter('availableHarmonyActivityId', function(bridgeService) {
             if(input == null)
             	return out;
             for (var i = 0; i < input.length; i++) {
-                if(!bridgeService.findDeviceByMapId(input[i].id, "harmonyActivity")){
+                if(!bridgeService.findDeviceByMapId(input[i].activity.id, input[i].hub, "harmonyActivity")){
                     out.push(input[i]);
                 }
             }
@@ -613,7 +618,7 @@ app.filter('unavailableHarmonyActivityId', function(bridgeService) {
         if(input == null)
         	return out;
         for (var i = 0; i < input.length; i++) {
-            if(bridgeService.findDeviceByMapId(input[i].id, "harmonyActivity")){
+            if(bridgeService.findDeviceByMapId(input[i].activity.id, input[i].hub, "harmonyActivity")){
                 out.push(input[i]);
             }
         }
