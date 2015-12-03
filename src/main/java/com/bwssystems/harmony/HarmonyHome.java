@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.BridgeSettings;
+import com.bwssystems.HABridge.IpList;
 import com.bwssystems.HABridge.NamedIP;
 
 import net.whistlingfish.harmony.config.Activity;
@@ -23,6 +24,18 @@ public class HarmonyHome {
 	public HarmonyHome(BridgeSettings bridgeSettings) {
 		super();
 		hubs = new HashMap<String, HarmonyServer>();
+		if(!bridgeSettings.isValidHarmony() && !bridgeSettings.isDevMode())
+			return;
+		if(bridgeSettings.isDevMode()) {
+			NamedIP devModeIp = new NamedIP();
+			devModeIp.setIp("10.10.10.10");
+			devModeIp.setName("devMode");
+			List<NamedIP> theList = new ArrayList<NamedIP>();
+			theList.add(devModeIp);
+			IpList thedevList = new IpList();
+			thedevList.setDevices(theList);
+			bridgeSettings.setHarmonyAddress(thedevList);
+		}
 		Iterator<NamedIP> theList = bridgeSettings.getHarmonyAddress().getDevices().iterator();
 		while(theList.hasNext()) {
 			NamedIP aHub = theList.next();

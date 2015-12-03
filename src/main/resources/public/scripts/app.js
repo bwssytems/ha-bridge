@@ -124,6 +124,31 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             );
         };
 
+        this.aContainsB = function (a, b) {
+            return a.indexOf(b) >= 0;
+        }
+
+        this.updateShowVera = function () {
+            if(this.aContainsB(self.BridgeSettings.veraaddress, "1.1.1.1") || self.BridgeSettings.veraaddress == "" || self.BridgeSettings.veraaddress == null)
+            	this.state.showVera = false;
+            else
+            	this.state.showVera = true;
+        	return;
+        }
+        
+        this.updateShowHarmony = function () {
+        	if(self.BridgeSettings.harmonyaddress.devices) {
+	            if(this.aContainsB(self.BridgeSettings.harmonyaddress.devices[0].ip, "1.1.1.1") || self.BridgeSettings.harmonyaddress == "" || self.BridgeSettings.harmonyaddress == null)
+	            	this.state.showHarmony = false;
+	            else
+	            	this.state.showHarmony = true;
+        	}
+            else
+            	this.state.showHarmony = false;
+       	return;
+        }
+
+
         this.loadBridgeSettings = function () {
             this.state.error = "";
             return $http.get(this.state.upnpbase).then(
@@ -137,14 +162,6 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
                 	self.BridgeSettings.settraceupnp(response.data.traceupnp);
                 	self.BridgeSettings.setupnpstrict(response.data.upnpstrict);
                 	self.BridgeSettings.setdevmode(response.data.devmode);
-                    if(self.BridgeSettings.veraaddress == "1.1.1.1" || self.BridgeSettings.veraaddress == "")
-                    	self.state.showVera = false;
-                    else
-                    	self.state.showVera = true;
-                    if(self.BridgeSettings.harmonyaddress == "1.1.1.1" || self.BridgeSettings.harmonyaddress == "")
-                    	self.state.showHarmony = false;
-                    else
-                    	self.state.showHarmony = true;
                 },
                 function (error) {
                     if (error.data) {
@@ -156,22 +173,6 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
                 }
             );
         };
-
-        this.updateShowVera = function () {
-            if(self.BridgeSettings.veraaddress == "1.1.1.1" || self.BridgeSettings.veraaddress == "")
-            	this.state.showVera = false;
-            else
-            	this.state.showVera = true;
-        	return;
-        }
-        
-        this.updateShowHarmony = function () {
-            if(self.BridgeSettings.harmonyaddress == "1.1.1.1" || self.BridgeSettings.harmonyaddress == "")
-            	this.state.showHarmony = false;
-            else
-            	this.state.showHarmony = true;
-        	return;
-        }
 
         this.viewVeraDevices = function () {
             this.state.error = "";
@@ -632,7 +633,7 @@ app.filter('availableVeraDeviceId', function(bridgeService) {
         if(input == null)
         	return out;
         for (var i = 0; i < input.length; i++) {
-            if(!bridgeService.findDeviceByMapId(input[i].id, "veraDevice")){
+            if(!bridgeService.findDeviceByMapId(input[i].id, null, "veraDevice")){
                 out.push(input[i]);
             }
         }
@@ -646,7 +647,7 @@ return function(input) {
     if(input == null)
     	return out;
     for (var i = 0; i < input.length; i++) {
-        if(bridgeService.findDeviceByMapId(input[i].id, "veraDevice")){
+        if(bridgeService.findDeviceByMapId(input[i].id, null, "veraDevice")){
             out.push(input[i]);
         }
     }
@@ -660,7 +661,7 @@ app.filter('availableVeraSceneId', function(bridgeService) {
         if(input == null)
         	return out;
         for (var i = 0; i < input.length; i++) {
-            if(!bridgeService.findDeviceByMapId(input[i].id, "veraScene")){
+            if(!bridgeService.findDeviceByMapId(input[i].id, null, "veraScene")){
                 out.push(input[i]);
             }
         }
@@ -674,7 +675,7 @@ return function(input) {
     if(input == null)
     	return out;
     for (var i = 0; i < input.length; i++) {
-        if(bridgeService.findDeviceByMapId(input[i].id, "veraScene")){
+        if(bridgeService.findDeviceByMapId(input[i].id, null, "veraScene")){
             out.push(input[i]);
         }
     }

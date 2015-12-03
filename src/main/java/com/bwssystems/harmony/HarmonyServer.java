@@ -37,7 +37,7 @@ public class HarmonyServer {
 	}
 
 	public static HarmonyServer setup(BridgeSettings bridgeSettings, NamedIP theHarmonyAddress) throws Exception {
-		if(!bridgeSettings.isValidHarmony()) {
+		if(!bridgeSettings.isValidHarmony() && !bridgeSettings.isDevMode()) {
 			return new HarmonyServer(theHarmonyAddress);
 		}
     	Injector injector = null;

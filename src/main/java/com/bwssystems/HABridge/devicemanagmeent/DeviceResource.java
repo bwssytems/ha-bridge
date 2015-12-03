@@ -41,7 +41,10 @@ public class DeviceResource {
 	public DeviceResource(BridgeSettings theSettings, Version theVersion, HarmonyHome theHarmonyHome) {
 		this.deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
 		this.veraInfo = new VeraInfo(theSettings.getVeraAddress(), theSettings.isValidVera());
-		this.myHarmonyHome = theHarmonyHome;
+		if(theSettings.isValidHarmony())
+			this.myHarmonyHome = theHarmonyHome;
+		else
+			this.myHarmonyHome = null;
 		this.version = theVersion;
         setupEndpoints();
 	}

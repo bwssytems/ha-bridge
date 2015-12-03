@@ -68,7 +68,10 @@ public class HueMulator {
         mapper = new ObjectMapper(); //armzilla: work around Echo incorrect content type and breaking mapping. Map manually
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         repository = aDeviceRepository;
-        myHarmonyHome = theHarmonyHome;
+		if(theBridgeSettings.isValidHarmony())
+			this.myHarmonyHome = theHarmonyHome;
+		else
+			this.myHarmonyHome = null;
         bridgeSettings = theBridgeSettings;
     }
 

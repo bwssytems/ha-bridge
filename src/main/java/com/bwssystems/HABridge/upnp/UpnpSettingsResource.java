@@ -40,9 +40,19 @@ public class UpnpSettingsResource {
 			+ "<depth>24</depth>\n" + "<url>hue_logo_3.png</url>\n" + "</icon>\n" + "</iconList>\n" + "</device>\n"
 			+ "</root>\n";
 
-	public UpnpSettingsResource(BridgeSettings theSettings) {
+	public UpnpSettingsResource(BridgeSettings theBridgeSettings) {
 		super();
-		this.theSettings = theSettings;
+		this.theSettings = new BridgeSettings();
+		this.theSettings.setDevMode(theBridgeSettings.isDevMode());
+		this.theSettings.setHarmonyAddress(theBridgeSettings.getHarmonyAddress());
+		this.theSettings.setServerPort(theBridgeSettings.getServerPort());
+		this.theSettings.setTraceupnp(theBridgeSettings.isTraceupnp());
+		this.theSettings.setUpnpConfigAddress(theBridgeSettings.getUpnpConfigAddress());
+		this.theSettings.setUpnpDeviceDb(theBridgeSettings.getUpnpDeviceDb());
+		this.theSettings.setUpnpResponseDevices(theBridgeSettings.getUpnpResponseDevices());
+		this.theSettings.setUpnpResponsePort(theBridgeSettings.getUpnpResponsePort());
+		this.theSettings.setUpnpStrict(theBridgeSettings.isUpnpStrict());
+		this.theSettings.setVeraAddress(theBridgeSettings.getVeraAddress());
 	}
 
 	public void setupServer() {
