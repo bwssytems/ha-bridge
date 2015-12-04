@@ -287,7 +287,7 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
                 );
             } else {
             	if(device.deviceType == null || device.deviceType == "")
-            		device.deviceType = "switch";
+            		device.deviceType = "custom";
                 if(device.httpVerb != null && device.httpVerb != "")
                 	device.deviceType = "custom";
                 return $http.post(this.state.base, {
@@ -411,7 +411,7 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 
 app.controller('AddingController', function ($scope, $location, $http, bridgeService, BridgeSettings) {
 
-        $scope.device = {id: "", name: "", deviceType: "switch", onUrl: "", offUrl: ""};
+        $scope.device = {id: "", name: "", deviceType: "custom", onUrl: "", offUrl: ""};
         $scope.vera = {base: "", port: "3480", id: ""};
         $scope.vera.base = "http://" + BridgeSettings.veraaddress;
         bridgeService.device = $scope.device;
@@ -547,7 +547,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
                     $scope.device.mapId = null;
                     $scope.device.name = "";
                     $scope.device.onUrl = "";
-                    $scope.device.deviceType = "switch";
+                    $scope.device.deviceType = "custom";
                     $scope.device.targetDevice = null;
                     $scope.device.offUrl = "";
                     $scope.device.httpVerb = null;

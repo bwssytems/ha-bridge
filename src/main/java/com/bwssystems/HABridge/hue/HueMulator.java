@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.DatagramSocket;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -300,7 +301,7 @@ public class HueMulator {
 	        else
 	        	responseString = responseString + "]";
 
-	        if(device.getDeviceType().toLowerCase().contains("activity"))
+	        if(device.getDeviceType().toLowerCase().contains("activity") || device.getMapType().equalsIgnoreCase("harmonyActivity"))
 	        {
 	        	log.debug("executing activity to Harmony: " + url);
 	        	RunActivity anActivity = new Gson().fromJson(url, RunActivity.class);
@@ -313,7 +314,7 @@ public class HueMulator {
 	        	else
 	        		myHarmony.startActivity(anActivity);
 	        }
-	        else if(device.getDeviceType().toLowerCase().contains("button"))
+	        else if(device.getDeviceType().toLowerCase().contains("button") || device.getMapType().equalsIgnoreCase("harmonyButton"))
 	        {
 	        	log.debug("executing button press to Harmony: " + url);
 	        	ButtonPress aDeviceButton = new Gson().fromJson(url, ButtonPress.class);
@@ -325,6 +326,20 @@ public class HueMulator {
 	        	}
 	        	else
 	        		myHarmony.pressButton(aDeviceButton);
+	        }
+	        else if(url.startsWith("udp://"))
+	        {
+	        	try {
+	        		DatagramSocket responseSocket = new DatagramSocket(10000);
+	        		String intermediate = url.substring(6);
+	        		String ipAddr = intermediate.substring(0, intermediate.indexOf(':'));
+	        		String port = intermediate.substring(intermediate.indexOf(':'), intermediate.indexOf('/'));
+	        		String theBody = intermediate.substring(intermediate.indexOf('/')+1);
+	        		responseSocket.close();
+	    		}  catch (IOException e) {
+	    			log.error("Could not send UDP Datagram packet for request.", e);
+	    			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+	    		}
 	        }
 	        else
 	        {
