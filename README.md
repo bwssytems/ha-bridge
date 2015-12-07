@@ -1,5 +1,5 @@
 # ha-bridge
-Emulates Philips Hue api to other home automation gateways such as an Amazon Echo.  The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge. Alternatively the Bridge supports custom calls as well. The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol. You can provide multiple harmony hubs for control.
+Emulates Philips Hue api to other home automation gateways such as an Amazon Echo.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API. In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge. Alternatively the Bridge supports custom calls as well.
 ## Build
 To customize and build it yourself, build a new jar with maven:  
 ```
@@ -32,8 +32,16 @@ The password for the user name of the MyHarmony.com account for the Harmony Hub.
 Upnp has been very closed on this platform to try and respond as a hue and there is now a setting to control if it is more open or strict, Add -Dupnp.strict=`<true|false>` to your command line to have the emulator respond to what it thinks is an echo to a hue or any other device. The default is upnp.strict=true.
 ### -Dtrace.upnp=`<true|false>`
 Turn on tracing for upnp discovery messages. The default is false.
-## Web Config
-Configure by going to the url for the host you are running on or localhost with port you have assigned: and use the helpers for the Vera or Harmony Hub to create devices that the Echo will find.
+## HA Bridge Device Configuration
+You must configure devices before you will have any thing for the Echo to receive. The easy way to get devices configures is with the web interface by going to the url for the host you are running on or localhost with port you have assigned: and use the helpers for the Vera or Harmony Hub to create devices that the Echo will find.
+
+Another way to add a device is through the Manual Add Tab. This allows you to manually enter the name, the on and off URLs and select if there are custom handling with the type of call that can be made. This allows for control of anything that has a distinct request that can be executed so you are not limited to the Vera or the Harmony.
+
+The format of these can be the default HTTP request which excecutes the URLs formtted as http://<your stuff here> as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Another option that is detected by the bridge is to use the udp://<ip_address>:<port>/<your stuff here to send a UDP request. If your data for the UDP request is formatted as "0x00F009B9" lexical hex format, the bridge will convert the UDP data into a binary stream to send. Sed the examples inthe Configuration REST API Usage Section to get an idea.
+
+Also, you may want to use the REST API's listed below to configure your devices.
+
+Web Configuration Access
 ```
 http://<ip address>:<port>
 ```
@@ -50,7 +58,7 @@ Turn on / off your connected home device | "Turn on/off [connected home device n
 Set the brightness of compatible lights	| "Set brightness to [##]%." OR "Dim the lights to [##]%."
 
 To view or remove devices that Alexa knows about, you can use the mobile app `Menu / Settings / Connected Home`.
-## Configuration REST API usage
+## Configuration REST API Usage
 This section will describe the REST api available for configuration. The REST body examples are all formatted for easy reading, the actual body usage should be like this:
 ```
 {"var1":"value1","var2":"value2","var3:"value3"}
@@ -62,7 +70,7 @@ Add a new device to the HA Bridge configuration. There is a basic examples and t
 ```
 POST http://host:8080/api/devices
 ```
-#### Body arguments
+#### Body Arguments
 Name |	Type |	Description | Required
 -----|-------|--------------|------------
 name | string | A name for the device. This is also the utterance value that the Echo will use. | Required
@@ -73,7 +81,7 @@ httpVerb | string | This is used for "custom" calls that the user would like to 
 contentType | string | This is an http type string such as "application/text" or "application/xml" or "application/json". | Optional
 contentBody | string | This is the content body that you would like to send when executing an "on" request. | Optional
 contentBodyOff | string | This is the content body that you would like to send when executing an "off" request. | Optional
-#### Basic example
+#### Basic Example
 ```
 {
 "name" : "bedroom light",
@@ -82,8 +90,8 @@ contentBodyOff | string | This is the content body that you would like to send w
   "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
 }
 ```
-#### Dimming and value passing control example
-Dimming is also supported by using the expressions ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 or custom values using ${intensity.math(<your expression using "X" as the value to operate on>)} i.e. "${intensity.math(X/4)}".    
+#### Dimming Control Example
+Dimming is also supported by using the expressions ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 for straight pass trhough of the value.
 e.g.
 ```
 {
@@ -95,13 +103,26 @@ e.g.
 ```
 See the echo's documentation for the dimming phrase.
 
-#### POST/PUT support example
+#### Value Passing Control Example
+You can control items that require special calculated values using ${intensity.math(<your expression using "X" as the value to operate on>)} i.e. "${intensity.math(X/4)}".    
+e.g.
+```
+{
+    "name": "Thermostat,
+    "deviceType": "custom",
+    "offUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=10",
+    "onUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=10&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.math(X/4)}"
+}
+```
+See the echo's documentation for the dimming phrase.
+
+#### POST/PUT Support Example
 ```
 This will allow control of any other application that may need more then GET.  You can also use the dimming and value control commands within the URLs as well.
 e.g: 
 {
     "name": "test device",
-    "deviceType": "switch",
+    "deviceType": "custom",
     "offUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31",
     "onUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}",
   "httpVerb":"POST",
@@ -115,12 +136,20 @@ Anything that takes an action as a result of an HTTP request will probably work 
 ```
 {
   "name": "night mode",
-  "deviceType": "switch",
+  "deviceType": ""custom",
   "offUrl": "http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=1",
   "onUrl": "http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=3"
 }
 ```
-#### Response
+Here is a UDP example that can send binary data.
+```
+{
+  "name": "UDPPacket",
+  "deviceType": "custom",
+  "offUrl": "udp://192.168.1.1:8899/0x460055",
+  "onUrl": "udp://192.168.1.1:8899/0x450055"
+}
+```#### Response
 Name |	Type |	Description
 -----|-------|-------------
 id   | number | This is the ID assigned to the device and used for lookup.
@@ -141,12 +170,12 @@ contentBodyOff | string | This is the content body that you would like to send w
   "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
 }
 ```
-### Update a device 
+### Update a Device 
 Update an existing device using it's ID that was given when the device was created and the update could contain any of the fields that are used and shown in the previous examples when adding a device. 
 ```
 POST http://host:8080/api/devices/<id>
 ```
-#### Body arguments
+#### Body Arguments
 Name |	Type |	Description | Required
 -----|-------|--------------|------------
 id   | number | This is the ID assigned to the device and used for lookup.
@@ -178,7 +207,7 @@ contentBodyOff | string | This is the content body that you would like to send w
   "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
 }
 ```
-### Get all devices 
+### Get All Devices 
 Get all devices saved in the HA bridge configuration. 
 ```
 GET http://host:8080/api/devices
@@ -201,7 +230,7 @@ Individual entries are the same as a single device but in json list format.
   "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
 }]
 ```
-### Get a specific device 
+### Get a Specific Device 
 Get a device by ID assigned from creation and saved in the HA bridge configuration. 
 ```
 GET http://host:8080/api/devices/<id>
@@ -217,7 +246,7 @@ The response is the same layout as defined in the add device response.
   "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
 }
 ```
-### Delete a specific device 
+### Delete a Specific Device 
 Delete a device by ID assigned from creation and saved in the HA bridge configuration. 
 ```
 DELETE http://host:8080/api/devices/<id>

@@ -39,10 +39,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.bind.DatatypeConverter;
 
 /**
  * Based on Armzilla's HueMulator - a Philips Hue emulator using sparkjava rest server
@@ -62,6 +66,7 @@ public class HueMulator {
     private HttpClient httpClient;
     private ObjectMapper mapper;
     private BridgeSettings bridgeSettings;
+    private byte[] sendData;
 
 
     public HueMulator(BridgeSettings theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHome theHarmonyHome){
@@ -266,14 +271,14 @@ public class HueMulator {
 	        try {
 	            state = mapper.readValue(request.body(), DeviceState.class);
 	        } catch (IOException e) {
-	            log.error("Object mapper barfed on input of body.", e);
+	        	log.warn("Object mapper barfed on input of body.", e);
         		responseString = "[{\"error\":{\"type\": 2, \"address\": \"/lights/" + lightId + ",\"description\": \"Object mapper barfed on input of body.\"}}]";
     	        return responseString;
 	        }
 	
 	        DeviceDescriptor device = repository.findOne(lightId);
 	        if (device == null) {
-	            log.error("Could not find device: " + lightId + " for hue state change request: " + userId + " from " + request.ip() + " body: " + request.body());
+	        	log.warn("Could not find device: " + lightId + " for hue state change request: " + userId + " from " + request.ip() + " body: " + request.body());
         		responseString = "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId + ",\"description\": \"Could not find device\", \"resource\": \"/lights/" + lightId + "\"}}]";
     	        return responseString;
 	        }
@@ -301,27 +306,27 @@ public class HueMulator {
 	        else
 	        	responseString = responseString + "]";
 
-	        if(device.getDeviceType().toLowerCase().contains("activity") || device.getMapType().equalsIgnoreCase("harmonyActivity"))
+	        if(device.getDeviceType().toLowerCase().contains("activity") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("harmonyActivity")))
 	        {
 	        	log.debug("executing activity to Harmony: " + url);
 	        	RunActivity anActivity = new Gson().fromJson(url, RunActivity.class);
 	        	HarmonyHandler myHarmony = myHarmonyHome.getHarmonyHandler(device.getTargetDevice());
 	        	if(myHarmony == null)
 	        	{
-	        		log.error("Should not get here, no harmony hub available");
+	        		log.warn("Should not get here, no harmony hub available");
 	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 	        	}
 	        	else
 	        		myHarmony.startActivity(anActivity);
 	        }
-	        else if(device.getDeviceType().toLowerCase().contains("button") || device.getMapType().equalsIgnoreCase("harmonyButton"))
+	        else if(device.getDeviceType().toLowerCase().contains("button") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("harmonyButton")))
 	        {
 	        	log.debug("executing button press to Harmony: " + url);
 	        	ButtonPress aDeviceButton = new Gson().fromJson(url, ButtonPress.class);
 	        	HarmonyHandler myHarmony = myHarmonyHome.getHarmonyHandler(device.getTargetDevice());
 	        	if(myHarmony == null)
 	        	{
-	        		log.error("Should not get here, no harmony hub available");
+	        		log.warn("Should not get here, no harmony hub available");
 	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 	        	}
 	        	else
@@ -330,14 +335,22 @@ public class HueMulator {
 	        else if(url.startsWith("udp://"))
 	        {
 	        	try {
-	        		DatagramSocket responseSocket = new DatagramSocket(10000);
 	        		String intermediate = url.substring(6);
 	        		String ipAddr = intermediate.substring(0, intermediate.indexOf(':'));
-	        		String port = intermediate.substring(intermediate.indexOf(':'), intermediate.indexOf('/'));
+	        		String port = intermediate.substring(intermediate.indexOf(':') + 1, intermediate.indexOf('/'));
 	        		String theBody = intermediate.substring(intermediate.indexOf('/')+1);
+	        		DatagramSocket responseSocket = new DatagramSocket(Integer.parseInt(port));
+	        		if(theBody.startsWith("0x")) {
+	        			sendData = DatatypeConverter.parseHexBinary(theBody.substring(2));
+	        		}
+	        		else
+	        			sendData = theBody.getBytes();
+	        		InetAddress IPAddress = InetAddress.getByName(ipAddr);
+	        		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Integer.parseInt(port));
+	        		responseSocket.send(sendPacket);
 	        		responseSocket.close();
 	    		}  catch (IOException e) {
-	    			log.error("Could not send UDP Datagram packet for request.", e);
+	    			log.warn("Could not send UDP Datagram packet for request.", e);
 	    			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 	    		}
 	        }
@@ -353,7 +366,7 @@ public class HueMulator {
 					body = replaceIntensityValue(device.getContentBodyOff(), state.getBri());
 				// make call
 				if (!doHttpRequest(url, device.getHttpVerb(), device.getContentType(), body)) {
-					log.error("Error on calling url to change device state: " + url);
+					log.warn("Error on calling url to change device state: " + url);
 					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 				}
 	        }
@@ -393,7 +406,7 @@ public class HueMulator {
 				Integer endResult = Math.round(result.floatValue());
 	            request = request.replace(INTENSITY_MATH + mathDescriptor + INTENSITY_MATH_CLOSE, endResult.toString());
 			} catch (Exception e) {
-				log.error("Could not execute Math: " + mathDescriptor, e);
+				log.warn("Could not execute Math: " + mathDescriptor, e);
 			}        }
         return request;
     }
@@ -426,7 +439,7 @@ public class HueMulator {
                 return true;
             }
         } catch (IOException e) {
-            log.error("Error calling out to HA gateway", e);
+        	log.warn("Error calling out to HA gateway", e);
         }
         return false;
     }
