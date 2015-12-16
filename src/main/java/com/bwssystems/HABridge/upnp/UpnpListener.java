@@ -96,30 +96,33 @@ public class UpnpListener {
 		//Only respond to discover request for strict upnp form
 		String packetString = new String(packet.getData());
 		if(packetString != null && packetString.startsWith("M-SEARCH * HTTP/1.1") && packetString.contains("\"ssdp:discover\"")){
-			if(traceupnp) {
-				log.info("Traceupnp: SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
-				log.info("Traceupnp: isSSDPDiscovery found message to be an M-SEARCH message.");
-			}
-			else {
-				log.debug("Got SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
-				log.debug("Found message to be an M-SEARCH message.");
-			}
+			log.debug("isSSDPDiscovery Found message to be an M-SEARCH message.");
+			log.debug("isSSDPDiscovery Got SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
 
 			if(strict && (packetString.contains("ST: urn:schemas-upnp-org:device:basic:1") || packetString.contains("ST: upnp:rootdevice") || packetString.contains("ST: ssdp:all")))
 			{
-				if(traceupnp)
+				if(traceupnp) {
+					log.info("Traceupnp: isSSDPDiscovery found message to be an M-SEARCH message.");
 					log.info("Traceupnp: isSSDPDiscovery found message to be valid under strict rules - strict: " + strict);
+					log.info("Traceupnp: SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
+				}
+				log.debug("isSSDPDiscovery found message to be valid under strict rules - strict: " + strict);
 				return true;
 			}
 			else if (!strict)
 			{
-				if(traceupnp)
+				if(traceupnp) {
+					log.info("Traceupnp: isSSDPDiscovery found message to be an M-SEARCH message.");
 					log.info("Traceupnp: isSSDPDiscovery found message to be valid under loose rules - strict: " + strict);
+					log.info("Traceupnp: SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
+				}
+				log.debug("isSSDPDiscovery found message to be valid under loose rules - strict: " + strict);
 				return true;
 			}
 		}
-		if(traceupnp)
-			log.info("Traceupnp: isSSDPDiscovery found message to not be valid - strict: " + strict);
+		log.debug("isSSDPDiscovery found message to be an M-SEARCH message.");
+		log.debug("isSSDPDiscovery found message to not be valid - strict: " + strict);
+		log.debug("SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
 		return false;
 	}
 

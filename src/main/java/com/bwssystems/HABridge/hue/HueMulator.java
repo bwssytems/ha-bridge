@@ -117,7 +117,7 @@ public class HueMulator {
         	String aDeviceType = null;
         	
         	if(bridgeSettings.isTraceupnp())
-        		log.info("Traceupnp: hue api user create requested: " + request.body() + " from " + request.ip());
+        		log.info("Traceupnp: hue api/ user create requested: " + request.body() + " from " + request.ip());
         	log.debug("hue api user create requested: " + request.body() + " from " + request.ip());
 	        
 	        if(request.body() != null && !request.body().isEmpty()) {
@@ -155,7 +155,8 @@ public class HueMulator {
         	String newUser = null;
         	String aDeviceType = null;
         	
-        	log.info("HH trace: hue api user create requested: " + request.body() + " from " + request.ip());
+        	if(bridgeSettings.isTraceupnp())
+        		log.info("Traceupnp: hue api/* user create requested: " + request.body() + " from " + request.ip());
 	        
 	        if(request.body() != null && !request.body().isEmpty()) {
 	        	aNewUser = new Gson().fromJson(request.body(), UserCreateRequest.class);
@@ -177,22 +178,26 @@ public class HueMulator {
 
         // http://ip_address:port/api/config returns json objects for the config when no user is given
 	    get(HUE_CONTEXT + "/config", "application/json", (request, response) -> {
-	    	String userId = request.params(":userid");
-	        log.debug("hue api config requested: " + userId + " from " + request.ip());
-	        HueApiResponse apiResponse = new HueApiResponse("Philips hue", request.ip(), "My App", userId);
+        	if(bridgeSettings.isTraceupnp())
+    	        log.info("Traceupnp: hue api/config config requested: <no_user> from " + request.ip());
+	        log.debug("hue api config requested: <no_user> from " + request.ip());
+	        HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(), "My App", "none");
 	
 			response.type("application/json; charset=utf-8"); 
 	        response.status(HttpStatus.SC_OK);
-	        String responseString = null;
-	        responseString = "[{\"swversion\":\"" + apiResponse.getConfig().getSwversion() + "\",\"apiversion\":\"" + apiResponse.getConfig().getApiversion() + "\",\"name\":\"" + apiResponse.getConfig().getName() + "\",\"mac\":\"" + apiResponse.getConfig().getMac() + "\"}]";
-	        return  responseString;
-	    });
+//	        String responseString = null;
+//	        responseString = "[{\"swversion\":\"" + apiResponse.getConfig().getSwversion() + "\",\"apiversion\":\"" + apiResponse.getConfig().getApiversion() + "\",\"name\":\"" + apiResponse.getConfig().getName() + "\",\"mac\":\"" + apiResponse.getConfig().getMac() + "\"}]";
+//	        return  responseString;
+	        return apiResponse.getConfig();
+	    }, new JsonTransformer());
 
         // http://ip_address:port/api/{userId}/config returns json objects for the config
 	    get(HUE_CONTEXT + "/:userid/config", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
+        	if(bridgeSettings.isTraceupnp())
+    	        log.info("Traceupnp: hue api/:userid/config config requested: " + userId + " from " + request.ip());
 	        log.debug("hue api config requested: " + userId + " from " + request.ip());
-	        HueApiResponse apiResponse = new HueApiResponse("Philips hue", request.ip(), "My App", userId);
+	        HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(), "My App", userId);
 	
 			response.type("application/json; charset=utf-8"); 
 	        response.status(HttpStatus.SC_OK);
@@ -216,7 +221,7 @@ public class HueMulator {
 	                    deviceList.put(descriptor.getId(), deviceResponse);
 	                }
 	        );
-	        HueApiResponse apiResponse = new HueApiResponse("Philips hue", request.ip(), "My App", userId);
+	        HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(), "My App", userId);
 	        apiResponse.setLights(deviceList);
 	
 			response.type("application/json; charset=utf-8"); 

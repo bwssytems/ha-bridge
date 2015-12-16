@@ -84,6 +84,10 @@ public class HueConfig
 				
 			sb.append("00:00:88:00:bb:ee");
 				
+		} catch (Exception e){
+			
+			sb.append("00:00:88:00:bb:ee");
+			
 		}
 		    
 		return sb.toString();
