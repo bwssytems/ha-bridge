@@ -120,9 +120,10 @@ public class UpnpListener {
 				return true;
 			}
 		}
-		log.debug("isSSDPDiscovery found message to be an M-SEARCH message.");
-		log.debug("isSSDPDiscovery found message to not be valid - strict: " + strict);
-		log.debug("SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
+		else {
+//			log.debug("isSSDPDiscovery found message to not be valid - strict: " + strict);
+//			log.debug("SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
+		}
 		return false;
 	}
 
