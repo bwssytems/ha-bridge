@@ -13,7 +13,7 @@ java -jar  -Dupnp.config.address=A.B.C.D -Dvera.address=E.F.G.H -Dharmony.addres
 ```
 ## Available Arguments
 ### -Dupnp.config.address=`<ip address>`
-The server defaults to the first available address on the host if this is not given. This default may NOT be the correct IP that is your public IP for your host on the network. It is best to set this paramter to not have discovery issues. Replace the -Dupnp.config.address=`<ip address>` value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery. 
+The server defaults to the first available address on the host if this is not given. This default may NOT be the correct IP that is your public IP for your host on the network. It is best to set this parameter to not have discovery issues. Replace the -Dupnp.config.address=`<ip address>` value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery. 
 ### -Dvera.address=`<ip address>`
 The argument for the vera address should be given as it the system does not have a way to find the address. Supply -Dvera.address=X.Y.Z.A on the command line to provide it. If a vera is not used, do not set it.
 ### -Dserver.port=`<port>`
@@ -56,13 +56,13 @@ To do this... |	Say this...
 --------------|------------
 Discover | “Alexa, discover my devices.”
 Turn On | “Alexa, turn on the kitchen light.”
-Turn Off: “Alexa, turn off the kitchen light.”
+Turn Off | “Alexa, turn off the kitchen light.”
 Brighten | “Alexa, brighten the kitchen light.”
 Dim | “Alexa, dim the kitchen light.”
 Dim | "Alexa, Dim the lights to 40%."
 Set | “Alexa, set the kitchen light to 50%.”
 Set | "Alexa, Set brightness to 60%."
-To view or remove devices that Alexa knows about, you can use the mobile app `Menu / Settings / Connected Home`.
+To view or remove devices that Alexa knows about, you can use the mobile app `Menu / Settings / Connected Home` or go to http://echo.amazon.com/#cards.
 ## Configuration REST API Usage
 This section will describe the REST api available for configuration. The REST body examples are all formatted for easy reading, the actual body usage should be like this:
 ```
