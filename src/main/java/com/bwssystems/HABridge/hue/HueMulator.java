@@ -7,10 +7,13 @@ import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.bwssystems.HABridge.api.hue.HueApiResponse;
 import com.bwssystems.HABridge.dao.*;
+import com.bwssystems.NestBridge.HomeAway;
+import com.bwssystems.NestBridge.NestHome;
 import com.bwssystems.harmony.ButtonPress;
 import com.bwssystems.harmony.HarmonyHandler;
 import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.harmony.RunActivity;
+import com.bwssystems.nest.controller.Nest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -63,13 +66,14 @@ public class HueMulator {
 
     private DeviceRepository repository;
     private HarmonyHome myHarmonyHome;
+    private Nest theNest;
     private HttpClient httpClient;
     private ObjectMapper mapper;
     private BridgeSettings bridgeSettings;
     private byte[] sendData;
 
 
-    public HueMulator(BridgeSettings theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHome theHarmonyHome){
+    public HueMulator(BridgeSettings theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHome theHarmonyHome, NestHome aNestHome){
         httpClient = HttpClients.createDefault();
         mapper = new ObjectMapper(); //armzilla: work around Echo incorrect content type and breaking mapping. Map manually
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -78,6 +82,10 @@ public class HueMulator {
 			this.myHarmonyHome = theHarmonyHome;
 		else
 			this.myHarmonyHome = null;
+		if(theBridgeSettings.isValidNest())
+			this.theNest = aNestHome.getTheNest();
+		else
+			this.theNest = null;
         bridgeSettings = theBridgeSettings;
     }
 
@@ -336,6 +344,18 @@ public class HueMulator {
 	        	}
 	        	else
 	        		myHarmony.pressButton(aDeviceButton);
+	        }
+	        else if(device.getDeviceType().toLowerCase().contains("home") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("nestHome")))
+	        {
+	        	log.debug("executing set away for nest home: " + url);
+	        	HomeAway homeAway = new Gson().fromJson(url, HomeAway.class);
+	        	if(theNest == null)
+	        	{
+	        		log.warn("Should not get here, no NEst available");
+	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Should not get here, no Nest available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+	        	}
+	        	else
+	        		theNest.getHome(homeAway.getName()).setAway(homeAway.getAway());
 	        }
 	        else if(url.startsWith("udp://"))
 	        {

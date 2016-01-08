@@ -15,6 +15,8 @@ public class BridgeSettings {
 	private boolean upnpstrict;
 	private boolean traceupnp;
 	private boolean devmode;
+	private String nestuser;
+	private String nestpwd;
 	
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -88,6 +90,18 @@ public class BridgeSettings {
 	public void setDevMode(boolean devmode) {
 		this.devmode = devmode;
 	}
+	public String getNestuser() {
+		return nestuser;
+	}
+	public void setNestuser(String nestuser) {
+		this.nestuser = nestuser;
+	}
+	public String getNestpwd() {
+		return nestpwd;
+	}
+	public void setNestpwd(String nestpwd) {
+		this.nestpwd = nestpwd;
+	}
 	public Boolean isValidVera() {
 		if(this.veraaddress.contains(Configuration.DEFAULT_VERA_ADDRESS))
 			return false;
@@ -100,6 +114,13 @@ public class BridgeSettings {
 		if(this.harmonypwd == null || this.harmonypwd == "")
 			return false;
 		if(this.harmonyuser == null || this.harmonyuser == "")
+			return false;
+		return true;
+	}
+	public Boolean isValidNest() {
+		if(this.nestpwd == null || this.nestpwd == "")
+			return false;
+		if(this.nestuser == null || this.nestuser == "")
 			return false;
 		return true;
 	}

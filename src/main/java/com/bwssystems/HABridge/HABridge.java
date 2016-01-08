@@ -12,6 +12,7 @@ import com.bwssystems.HABridge.devicemanagmeent.*;
 import com.bwssystems.HABridge.hue.HueMulator;
 import com.bwssystems.HABridge.upnp.UpnpListener;
 import com.bwssystems.HABridge.upnp.UpnpSettingsResource;
+import com.bwssystems.NestBridge.NestHome;
 import com.bwssystems.harmony.HarmonyHome;
 import com.google.gson.Gson;
 
@@ -36,6 +37,7 @@ public class HABridge {
         Logger log = LoggerFactory.getLogger(HABridge.class);
         DeviceResource theResources;
         HarmonyHome harmonyHome;
+        NestHome nestHome;
         HueMulator theHueMulator;
         UpnpSettingsResource theSettingResponder;
         UpnpListener theUpnpListener;
@@ -75,12 +77,14 @@ public class HABridge {
         	}
         }
         bridgeSettings.setHarmonyAddress(theHarmonyList);
-        bridgeSettings.setHarmonyUser(System.getProperty("harmony.user", Configuration.DEFAULT_HARMONY_USER));
-        bridgeSettings.setHarmonyPwd(System.getProperty("harmony.pwd", Configuration.DEFAULT_HARMONY_PWD));
+        bridgeSettings.setHarmonyUser(System.getProperty("harmony.user", Configuration.DEFAULT_USER));
+        bridgeSettings.setHarmonyPwd(System.getProperty("harmony.pwd", Configuration.DEFAULT_PWD));
         bridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
         bridgeSettings.setTraceupnp(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
         bridgeSettings.setDevMode(Boolean.parseBoolean(System.getProperty("dev.mode", "false")));
         bridgeSettings.setUpnpResponseDevices(Integer.parseInt(System.getProperty("upnp.response.devices", Configuration.UPNP_RESPONSE_DEVICES)));
+        bridgeSettings.setNestuser(System.getProperty("nest.user", Configuration.DEFAULT_USER));
+        bridgeSettings.setNestpwd(System.getProperty("nest.pwd", Configuration.DEFAULT_PWD));
         
         // sparkjava config directive to set ip address for the web server to listen on
         // ipAddress("0.0.0.0"); // not used
@@ -90,10 +94,12 @@ public class HABridge {
         staticFileLocation("/public");
         //setup the harmony connection if available
         harmonyHome = new HarmonyHome(bridgeSettings);
+        //setup the nest connection if available
+        nestHome = new NestHome(bridgeSettings);
         // setup the class to handle the resource setup rest api
-        theResources = new DeviceResource(bridgeSettings, theVersion, harmonyHome);
+        theResources = new DeviceResource(bridgeSettings, theVersion, harmonyHome, nestHome);
         // setup the class to handle the hue emulator rest api
-        theHueMulator = new HueMulator(bridgeSettings, theResources.getDeviceRepository(), harmonyHome);
+        theHueMulator = new HueMulator(bridgeSettings, theResources.getDeviceRepository(), harmonyHome, nestHome);
         theHueMulator.setupServer();
         // setup the class to handle the upnp response rest api
         theSettingResponder = new UpnpSettingsResource(bridgeSettings);

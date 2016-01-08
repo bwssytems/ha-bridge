@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>1.2.3a</version>
+	<version>1.2.3b</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
@@ -30,6 +30,11 @@
 		    <artifactId>harmony-java-client</artifactId>
 		    <version>1.0.8</version>
 		</dependency>
+        <dependency>
+            <groupId>com.github.bwssytems</groupId>
+            <artifactId>nest-controller</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 		<dependency>
 		    <groupId>com.sparkjava</groupId>
 		    <artifactId>spark-core</artifactId>

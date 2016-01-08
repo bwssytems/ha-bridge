@@ -20,6 +20,7 @@ import com.bwssystems.HABridge.JsonTransformer;
 import com.bwssystems.HABridge.Version;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
+import com.bwssystems.NestBridge.NestHome;
 import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.luupRequests.Sdata;
 import com.bwssystems.vera.VeraInfo;
@@ -36,15 +37,21 @@ public class DeviceResource {
     private VeraInfo veraInfo;
     private Version version;
     private HarmonyHome myHarmonyHome;
+    private NestHome nestHome;
     private static final Set<String> supportedVerbs = new HashSet<>(Arrays.asList("get", "put", "post"));
 
-	public DeviceResource(BridgeSettings theSettings, Version theVersion, HarmonyHome theHarmonyHome) {
+	public DeviceResource(BridgeSettings theSettings, Version theVersion, HarmonyHome theHarmonyHome, NestHome aNestHome) {
 		this.deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
 		this.veraInfo = new VeraInfo(theSettings.getVeraAddress(), theSettings.isValidVera());
 		if(theSettings.isValidHarmony())
 			this.myHarmonyHome = theHarmonyHome;
 		else
 			this.myHarmonyHome = null;
+		
+		if(theSettings.isValidNest())
+			this.nestHome = aNestHome;
+		else
+			this.nestHome = null;
 		this.version = theVersion;
         setupEndpoints();
 	}
@@ -218,5 +225,24 @@ public class DeviceResource {
 	      	return myHarmonyHome.getDevices();
 	    }, new JsonTransformer());
 
+    	get (API_CONTEXT + "/nest/homes", "application/json", (request, response) -> {
+	    	log.debug("Get nest homes");
+	      	if(nestHome == null) {
+				response.status(HttpStatus.SC_NOT_FOUND);
+		      	return null;	      		
+	      	}
+	      	response.status(HttpStatus.SC_OK);
+	      	return nestHome.getHomeNames();
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/nest/thermostats", "application/json", (request, response) -> {
+	    	log.debug("Get nest thermostats");
+	      	if(nestHome == null) {
+				response.status(HttpStatus.SC_NOT_FOUND);
+		      	return null;	      		
+	      	}
+	      	response.status(HttpStatus.SC_OK);
+	      	return nestHome.getThermostatNames();
+	    }, new JsonTransformer());
     }
 }

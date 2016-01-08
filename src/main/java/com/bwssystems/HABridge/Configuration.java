@@ -7,7 +7,7 @@ public class Configuration {
 	public final static String DEFAULT_VERA_ADDRESS = "1.1.1.1";
 	public final static String DEFAULT_HARMONY_ADDRESS = "1.1.1.1";
 	public final static String DEFAULT_HARMONY_ADDRESS_LIST = "{devices:[{name:default,ip:1.1.1.1}]}";
-	public final static String DEFAULT_HARMONY_USER = "";
-	public final static String DEFAULT_HARMONY_PWD = "";
+	public final static String DEFAULT_USER = "";
+	public final static String DEFAULT_PWD = "";
 	public final static String DFAULT_WEB_PORT = "8080";
 }
