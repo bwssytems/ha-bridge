@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>1.2.3b</version>
+	<version>1.2.3c</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>com.github.bwssytems</groupId>
             <artifactId>nest-controller</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </dependency>
 		<dependency>
 		    <groupId>com.sparkjava</groupId>
@@ -43,8 +43,13 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.3.6</version>
+			<version>4.5.1</version>
 		</dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.4.4</version>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>

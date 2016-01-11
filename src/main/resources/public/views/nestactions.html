@@ -1,21 +1,21 @@
       <ul class="nav nav-pills" role="tablist">
         <li role="presentation"><a href="#">Configuration</a></li>
-        <li role="presentation"><a href="#/veradevices">Vera Devices</a></li>
-        <li role="presentation" class="active"><a href="#/verascenes">Vera Scenes</a></li>
-        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
-        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonydevices">Harmony Devices</a></li>
-        <li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
+        <li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
+        <li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
+        <li ng-if="bridge.showHarmony"  role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
+        <li ng-if="bridge.showHarmony"  role="presentation"><a href="#/harmonydevices">Harmony Devices</a></li>
+        <li role="presentation" class="active"><a href="#/nest">Nest</a></li>
         <li role="presentation"><a href="#/editor">Manual Add</a></li>
       </ul>
 
 <div class="panel panel-default bridgeServer" ng-if="!bridge.error">
 	<div class="panel-heading">
-		<h2 class="panel-title">Vera Scene List</h2>
+		<h2 class="panel-title">Nest Items List</h2>
 	</div>
 	<ul class="list-group">
 		<li class="list-group-item">
-			<p class="text-muted">You can select a Vera scene and generate
-				the add scene box selections automatically.</p>
+			<p class="text-muted">You can select a Nest item and generate
+				the add activity box selections automatically.</p>
 
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
@@ -25,39 +25,39 @@
         					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
         				</th>
 						<th>
-							<a href="" ng-click="order('id')">Id</a>
-        					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
+							<a href="" ng-click="order('type')">Type</a>
+        					<span class="sortorder" ng-show="predicate === 'type'" ng-class="{reverse:reverse}"></span>
         				</th>
 						<th>
-							<a href="" ng-click="order('room')">Room</a>
-        					<span class="sortorder" ng-show="predicate === 'room'" ng-class="{reverse:reverse}"></span>
+							<a href="" ng-click="order('location')">Location</a>
+        					<span class="sortorder" ng-show="predicate === 'location'" ng-class="{reverse:reverse}"></span>
         				</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="verascene in bridge.verascenes | availableVeraSceneId | orderBy:predicate:reverse">
-					<td>{{verascene.name}}</td>
-					<td>{{verascene.id}}</td>
-					<td>{{verascene.room}}</td>
+				<tr ng-repeat="nestitem in bridge.nestitems | availableNestItemId | orderBy:predicate:reverse">
+					<td>{{nestitem.name}}</td>
+					<td>{{nestitem.type}}</td>
+					<td>{{nestitem.location}}</td>
 					<td>
 						<button class="btn btn-success" type="submit"
-							ng-click="buildSceneUrls(verascene)">Generate
-							Scene URLs</button>
+							ng-click="buildNestUrls(nestitem)">Generate
+							Activity URLs</button>
 					</td>
 				</tr>
 			</table>
 		</li>
 	</ul>
 	<div class="panel-heading">
-		<h2 class="panel-title">Already Configured Vera Scenes <a ng-click="toggleScenes()"><span class={{imgScenesUrl}} aria-hidden="true"></a></h2>
+		<h2 class="panel-title">Already Configured Activities <a ng-click="toggleActivities()"><span class={{imgActivitiesUrl}} aria-hidden="true"></a></h2>
 	</div>
-	<ul ng-if="scenesVisible" class="list-group">
+	<ul ng-if="activitiesVisible" class="list-group">
 		<li class="list-group-item">
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
 						<th>
-							<a href="" ng-click="order('name')">Name</a>
+							<a href="" ng-click="order('label')">Name</a>
         					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
         				</th>
 						<th>
@@ -65,20 +65,18 @@
         					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
         				</th>
 						<th>
-							<a href="" ng-click="order('room')">Room</a>
-        					<span class="sortorder" ng-show="predicate === 'room'" ng-class="{reverse:reverse}"></span>
+							<a href="" ng-click="order('hub')">Hub</a>
+        					<span class="sortorder" ng-show="predicate === 'hub'" ng-class="{reverse:reverse}"></span>
         				</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="verascene in bridge.verascenes | unavailableVeraSceneId | orderBy:predicate:reverse">
-					<td>{{verascene.name}}</td>
-					<td>{{verascene.id}}</td>
-					<td>{{verascene.room}}</td>
-					<td>
-						<button class="btn btn-danger" type="submit"
-						ng-click="deleteDeviceByMapId(verascene.id, 'veraScene')">Delete</button>
-					</td>
+				<tr ng-repeat="nestitem in bridge.nestitems | unavailableNestItemId | orderBy:predicate:reverse">
+					<td>{{nestitem.name}}</td>
+					<td>{{nestitem.type}}</td>
+					<td>{{nestitem.location}}</td>
+					<td><button class="btn btn-danger" type="submit"
+						ng-click="deleteDeviceByMapId(nestitem.activity.id, 'nestitem')">Delete</button></td>
 				</tr>
 			</table>
 		</li>
@@ -86,7 +84,7 @@
 </div>
 <div class="panel panel-default bridgeServer" ng-if="!bridge.error">
 	<div class="panel-heading">
-		<h2 class="panel-title">Add a Vera scene</h2>
+		<h2 class="panel-title">Add a Harmony Activity</h2>
 	</div>
 	<ul class="list-group">
 		<li class="list-group-item">
@@ -100,7 +98,7 @@
 							ng-model="device.name" placeholder="Device Name">
 					</div>
 					<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary">
-						Add Scene</button>
+						Add Activity</button>
 				</div>
 				<div class="form-group">
 					<div class="row">
@@ -111,6 +109,7 @@
 						<textarea rows="3" class="form-control" id="device-on-url"
 							ng-model="device.onUrl" placeholder="URL to turn device on"></textarea>
 					</div>
+					</div>
 				</div>
 				<div class="form-group">
 					<div class="row">
@@ -120,6 +119,7 @@
 					<div class="col-xs-8 col-sm-7">
 						<textarea rows="3" class="form-control" id="device-off-url"
 							ng-model="device.offUrl" placeholder="URL to turn device off"></textarea>
+					</div>
 					</div>
 				</div>
 			</form>

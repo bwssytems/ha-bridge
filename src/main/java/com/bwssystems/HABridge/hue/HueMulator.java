@@ -345,7 +345,7 @@ public class HueMulator {
 	        	else
 	        		myHarmony.pressButton(aDeviceButton);
 	        }
-	        else if(device.getDeviceType().toLowerCase().contains("home") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("nestHome")))
+	        else if(device.getDeviceType().toLowerCase().contains("home") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("nestHomeAway")))
 	        {
 	        	log.debug("executing set away for nest home: " + url);
 	        	HomeAway homeAway = new Gson().fromJson(url, HomeAway.class);

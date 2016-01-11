@@ -24,6 +24,9 @@ app.config(function ($routeProvider) {
 	}).when('/harmonyactivities', {
 		templateUrl: 'views/harmonyactivity.html',
 		controller: 'AddingController'		
+	}).when('/nest', {
+		templateUrl: 'views/nestactions.html',
+		controller: 'AddingController'		
 	}).otherwise({
 		templateUrl: 'views/configuration.html',
 		controller: 'ViewingController'
@@ -34,6 +37,7 @@ app.run( function (bridgeService) {
 	bridgeService.loadBridgeSettings();
 	bridgeService.updateShowVera();
 	bridgeService.updateShowHarmony();
+	bridgeService.updateShowNest();
 	bridgeService.getHABridgeVersion();	
 });
 
@@ -49,6 +53,7 @@ app.factory('BridgeSettings', function() {
 	BridgeSettings.upnpstrict = "";
 	BridgeSettings.traceupnp = "";
 	BridgeSettings.devmode = "";
+	BridgeSettings.nestconfigured = "";
 	
 	BridgeSettings.setupnpconfigaddress = function(aconfigaddress){
 		BridgeSettings.upnpconfigaddress = aconfigaddress;
@@ -82,13 +87,17 @@ app.factory('BridgeSettings', function() {
 		BridgeSettings.devmode = adevmode;
 	};
 	
+	BridgeSettings.setnestconfigured = function(anestconfigured){
+		BridgeSettings.nestconfigured = anestconfigured;
+	};
+	
 	return BridgeSettings;
 });
 
 app.service('bridgeService', function ($http, $window, BridgeSettings) {
         var self = this;
         self.BridgeSettings = BridgeSettings;
-        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", huebase: window.location.origin + "/api",  devices: [], device: [], error: "", showVera: false, showHarmony: false, habridgeversion: ""};
+        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", huebase: window.location.origin + "/api",  devices: [], device: [], error: "", showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
 
         this.viewDevices = function () {
             this.state.error = "";
@@ -136,6 +145,14 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
         	return;
         }
         
+        this.updateShowNest = function () {
+        	if(self.BridgeSettings.nestconfigured == true)
+        		this.state.showNest = true;
+        	else
+        		this.state.showNest = false;
+        	return;
+        }
+        
         this.updateShowHarmony = function () {
         	if(self.BridgeSettings.harmonyaddress.devices) {
 	            if(this.aContainsB(self.BridgeSettings.harmonyaddress.devices[0].ip, "1.1.1.1") || self.BridgeSettings.harmonyaddress == "" || self.BridgeSettings.harmonyaddress == null)
@@ -162,6 +179,7 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
                 	self.BridgeSettings.settraceupnp(response.data.traceupnp);
                 	self.BridgeSettings.setupnpstrict(response.data.upnpstrict);
                 	self.BridgeSettings.setdevmode(response.data.devmode);
+                	self.BridgeSettings.setnestconfigured(response.data.nestconfigured);                		
                 },
                 function (error) {
                     if (error.data) {
@@ -174,6 +192,25 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             );
         };
 
+        this.viewNestItems = function () {
+            this.state.error = "";
+        	if(!this.state.showNest)
+        		return;
+            this.state.error = "";
+            return $http.get(this.state.base + "/nest/items").then(
+                function (response) {
+                    self.state.nestitems = response.data;
+                },
+                function (error) {
+                    if (error.data) {
+                    	$window.alert("Get Nest Items Error: " + error.data.message);
+                    } else {
+                    	$window.alert("Get Nest Items Error: unknown");
+                    }
+                }
+            );
+        };
+        
         this.viewVeraDevices = function () {
             this.state.error = "";
         	if(!this.state.showVera)
@@ -375,6 +412,7 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
         $scope.bridge = bridgeService.state;
         bridgeService.updateShowVera();
         bridgeService.updateShowHarmony();
+    	bridgeService.updateShowNest();
         $scope.visible = false;
         $scope.imgUrl = "glyphicon glyphicon-plus";
         $scope.predicate = '';
@@ -419,9 +457,11 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         bridgeService.viewVeraScenes();
         bridgeService.viewHarmonyActivities();
         bridgeService.viewHarmonyDevices();
+        bridgeService.viewNestItems();
         $scope.bridge = bridgeService.state;
         bridgeService.updateShowVera();
         bridgeService.updateShowHarmony();
+    	bridgeService.updateShowNest();
         $scope.device = bridgeService.state.device;
         $scope.activitiesVisible = false;
         $scope.imgButtonsUrl = "glyphicon glyphicon-plus";

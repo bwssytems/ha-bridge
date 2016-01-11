@@ -17,6 +17,7 @@ public class BridgeSettings {
 	private boolean devmode;
 	private String nestuser;
 	private String nestpwd;
+	private boolean nestconfigured;
 	
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -101,6 +102,12 @@ public class BridgeSettings {
 	}
 	public void setNestpwd(String nestpwd) {
 		this.nestpwd = nestpwd;
+	}
+	public boolean isNestConfigured() {
+		return nestconfigured;
+	}
+	public void setNestConfigured(boolean isNestConfigured) {
+		this.nestconfigured = isNestConfigured;
 	}
 	public Boolean isValidVera() {
 		if(this.veraaddress.contains(Configuration.DEFAULT_VERA_ADDRESS))
