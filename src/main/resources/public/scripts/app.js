@@ -575,6 +575,15 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
             $scope.device.offUrl = "{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + offbutton + "\"}";
         };
 
+        $scope.buildNestHomeUrls = function (nestitem, onbutton, offbutton) {
+            $scope.device.deviceType = "home";
+            $scope.device.name = nestitem.name;
+            $scope.device.mapType = "nestHomeAway";
+            $scope.device.mapId = nestitem.Id;
+            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"away\":false}";
+            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"away\":true}";
+        };
+
         $scope.testUrl = function (device, type) {
         	bridgeService.testUrl(device, type);
         };
@@ -716,6 +725,34 @@ return function(input) {
     	return out;
     for (var i = 0; i < input.length; i++) {
         if(bridgeService.findDeviceByMapId(input[i].id, null, "veraScene")){
+            out.push(input[i]);
+        }
+    }
+    return out;
+}
+});
+
+app.filter('availableNestItemId', function(bridgeService) {
+    return function(input) {
+        var out = [];
+        if(input == null)
+        	return out;
+        for (var i = 0; i < input.length; i++) {
+            if(!bridgeService.findDeviceByMapId(input[i].Id, null, "nestHomeAway")){
+                out.push(input[i]);
+            }
+        }
+        return out;
+    }
+});
+
+app.filter('unavailableNestItemId', function(bridgeService) {
+return function(input) {
+    var out = [];
+    if(input == null)
+    	return out;
+    for (var i = 0; i < input.length; i++) {
+        if(bridgeService.findDeviceByMapId(input[i].Id, null, "nestHomeAway")){
             out.push(input[i]);
         }
     }

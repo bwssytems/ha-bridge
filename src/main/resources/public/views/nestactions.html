@@ -15,7 +15,7 @@
 	<ul class="list-group">
 		<li class="list-group-item">
 			<p class="text-muted">You can select a Nest item and generate
-				the add activity box selections automatically.</p>
+				the add nest item box selections automatically.</p>
 
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
@@ -41,15 +41,14 @@
 					<td>{{nestitem.location}}</td>
 					<td>
 						<button class="btn btn-success" type="submit"
-							ng-click="buildNestUrls(nestitem)">Generate
-							Activity URLs</button>
+							ng-click="buildNestHomeUrls(nestitem)">Gen Home URLs</button>
 					</td>
 				</tr>
 			</table>
 		</li>
 	</ul>
 	<div class="panel-heading">
-		<h2 class="panel-title">Already Configured Activities <a ng-click="toggleActivities()"><span class={{imgActivitiesUrl}} aria-hidden="true"></a></h2>
+		<h2 class="panel-title">Already Configured Nest Items <a ng-click="toggleActivities()"><span class={{imgActivitiesUrl}} aria-hidden="true"></a></h2>
 	</div>
 	<ul ng-if="activitiesVisible" class="list-group">
 		<li class="list-group-item">
@@ -57,16 +56,16 @@
 				<thead>
 					<tr>
 						<th>
-							<a href="" ng-click="order('label')">Name</a>
+							<a href="" ng-click="order('name')">Name</a>
         					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
         				</th>
 						<th>
-							<a href="" ng-click="order('id')">Id</a>
+							<a href="" ng-click="order('type')">Type</a>
         					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
         				</th>
 						<th>
-							<a href="" ng-click="order('hub')">Hub</a>
-        					<span class="sortorder" ng-show="predicate === 'hub'" ng-class="{reverse:reverse}"></span>
+							<a href="" ng-click="order('location')">Location</a>
+        					<span class="sortorder" ng-show="predicate === 'location'" ng-class="{reverse:reverse}"></span>
         				</th>
 						<th>Actions</th>
 					</tr>
@@ -76,7 +75,7 @@
 					<td>{{nestitem.type}}</td>
 					<td>{{nestitem.location}}</td>
 					<td><button class="btn btn-danger" type="submit"
-						ng-click="deleteDeviceByMapId(nestitem.activity.id, 'nestitem')">Delete</button></td>
+						ng-click="deleteDeviceByMapId(nestitem.Id, 'nestHomeAway')">Delete</button></td>
 				</tr>
 			</table>
 		</li>
@@ -84,7 +83,7 @@
 </div>
 <div class="panel panel-default bridgeServer" ng-if="!bridge.error">
 	<div class="panel-heading">
-		<h2 class="panel-title">Add a Harmony Activity</h2>
+		<h2 class="panel-title">Add a Nest Item</h2>
 	</div>
 	<ul class="list-group">
 		<li class="list-group-item">
@@ -98,7 +97,7 @@
 							ng-model="device.name" placeholder="Device Name">
 					</div>
 					<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary">
-						Add Activity</button>
+						Add Nest Item</button>
 				</div>
 				<div class="form-group">
 					<div class="row">
