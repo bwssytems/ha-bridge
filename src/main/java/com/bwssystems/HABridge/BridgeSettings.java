@@ -110,13 +110,13 @@ public class BridgeSettings {
 		this.nestconfigured = isNestConfigured;
 	}
 	public Boolean isValidVera() {
-		if(this.veraaddress.contains(Configuration.DEFAULT_VERA_ADDRESS))
+		if(this.veraaddress.contains(Configuration.DEFAULT_ADDRESS))
 			return false;
 		return true;
 	}
 	public Boolean isValidHarmony() {
 		List<NamedIP> devicesList = this.harmonyaddress.getDevices();
-		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_HARMONY_ADDRESS))
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
 		if(this.harmonypwd == null || this.harmonypwd == "")
 			return false;
