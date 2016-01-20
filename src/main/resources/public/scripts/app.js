@@ -292,6 +292,14 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
         	return false;
         };
         
+        this.findNestItemByMapId = function(id, type) {
+        	for(var i = 0; i < this.state.devices.length; i++) {
+        		if(this.state.devices[i].mapId == id && this.aContainsB(this.state.devices[i].mapType, type))
+        			return true;
+        	}
+        	return false;
+        };
+        
         this.addDevice = function (device) {
             this.state.error = "";
             if(device.httpVerb != null && device.httpVerb != "")
@@ -370,7 +378,7 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
 
         this.deleteDeviceByMapId = function (id, type) {
         	for(var i = 0; i < this.state.devices.length; i++) {
-        		if(this.state.devices[i].mapId == id && this.state.devices[i].mapType == type)
+        		if(this.state.devices[i].mapId == id && this.aContainsB(this.state.devices[i].mapType, type))
         			return self.deleteDevice(this.state.devices[i].id);
         	}
         };
@@ -575,13 +583,67 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
             $scope.device.offUrl = "{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + offbutton + "\"}";
         };
 
-        $scope.buildNestHomeUrls = function (nestitem, onbutton, offbutton) {
+        $scope.buildNestHomeUrls = function (nestitem) {
             $scope.device.deviceType = "home";
             $scope.device.name = nestitem.name;
             $scope.device.mapType = "nestHomeAway";
             $scope.device.mapId = nestitem.Id;
-            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"away\":false}";
-            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"away\":true}";
+            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"away\":false,\"control\":\"status\"}";
+            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"away\":true,\"control\":\"status\"}";
+        };
+
+        $scope.buildNestTempUrls = function (nestitem) {
+            $scope.device.deviceType = "thermo";
+            $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Temperature";
+            $scope.device.mapType = "nestThermoSet";
+            $scope.device.mapId = nestitem.Id + "-SetTemp";
+            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"temp\",\"temp\":\"${intensity.percent}\"}";
+            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"temp\",\"temp\":\"${intensity.percent}\"}";
+        };
+
+        $scope.buildNestHeatUrls = function (nestitem) {
+            $scope.device.deviceType = "thermo";
+            $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Heat";
+            $scope.device.mapType = "nestThermoSet";
+            $scope.device.mapId = nestitem.Id + "-SetHeat";
+            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"heat\"}";
+            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"off\"}";
+        };
+
+        $scope.buildNestCoolUrls = function (nestitem) {
+            $scope.device.deviceType = "thermo";
+            $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Cool";
+            $scope.device.mapType = "nestThermoSet";
+            $scope.device.mapId = nestitem.Id + "-SetCool";
+            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"cool\"}";
+            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"off\"}";
+        };
+
+        $scope.buildNestRangeUrls = function (nestitem) {
+            $scope.device.deviceType = "thermo";
+            $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Range";
+            $scope.device.mapType = "nestThermoSet";
+            $scope.device.mapId = nestitem.Id + "-SetRange";
+            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"range\"}";
+            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"off\"}";
+        };
+
+        $scope.buildNestOffUrls = function (nestitem) {
+            $scope.device.deviceType = "thermo";
+            $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Thermostat";
+            $scope.device.mapType = "nestThermoSet";
+            $scope.device.mapId = nestitem.Id + "-TurnOff";
+            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"range\"}";
+            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"off\"}";
+        };
+
+        $scope.buildNestFanUrls = function (nestitem) {
+            $scope.device.deviceType = "thermo";
+            $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Fan";
+            $scope.device.mapType = "nestThermoSet";
+            $scope.device.mapId = nestitem.Id + "-SetFan";
+            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"fan-on\"}";
+            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"fan-auto\"}";
         };
 
         $scope.testUrl = function (device, type) {
@@ -738,7 +800,7 @@ app.filter('availableNestItemId', function(bridgeService) {
         if(input == null)
         	return out;
         for (var i = 0; i < input.length; i++) {
-            if(!bridgeService.findDeviceByMapId(input[i].Id, null, "nestHomeAway")){
+            if(!bridgeService.findNestItemByMapId(input[i].Id, "nestHomeAway")){
                 out.push(input[i]);
             }
         }
@@ -752,7 +814,7 @@ return function(input) {
     if(input == null)
     	return out;
     for (var i = 0; i < input.length; i++) {
-        if(bridgeService.findDeviceByMapId(input[i].Id, null, "nestHomeAway")){
+        if(input[i].mapType != null && bridgeService.aContainsB(input[i].mapType, "nest")){
             out.push(input[i]);
         }
     }

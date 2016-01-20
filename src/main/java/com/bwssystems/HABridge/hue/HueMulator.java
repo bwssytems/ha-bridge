@@ -7,7 +7,7 @@ import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.bwssystems.HABridge.api.hue.HueApiResponse;
 import com.bwssystems.HABridge.dao.*;
-import com.bwssystems.NestBridge.HomeAway;
+import com.bwssystems.NestBridge.NestInstruction;
 import com.bwssystems.NestBridge.NestHome;
 import com.bwssystems.harmony.ButtonPress;
 import com.bwssystems.harmony.HarmonyHandler;
@@ -348,14 +348,35 @@ public class HueMulator {
 	        else if(device.getDeviceType().toLowerCase().contains("home") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("nestHomeAway")))
 	        {
 	        	log.debug("executing set away for nest home: " + url);
-	        	HomeAway homeAway = new Gson().fromJson(url, HomeAway.class);
+	        	NestInstruction homeAway = new Gson().fromJson(url, NestInstruction.class);
 	        	if(theNest == null)
 	        	{
-	        		log.warn("Should not get here, no NEst available");
+	        		log.warn("Should not get here, no Nest available");
 	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Should not get here, no Nest available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 	        	}
 	        	else
 	        		theNest.getHome(homeAway.getName()).setAway(homeAway.getAway());
+	        }
+	        else if(device.getDeviceType().toLowerCase().contains("thermo") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("nestThermoSet")))
+	        {
+	        	log.debug("executing set thermostat for nest: " + url);
+	        	NestInstruction thermoSetting = new Gson().fromJson(url, NestInstruction.class);
+	        	if(theNest == null)
+	        	{
+	        		log.warn("Should not get here, no Nest available");
+	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Should not get here, no Nest available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+	        	}
+	        	else {
+	        		if(thermoSetting.getControl().equalsIgnoreCase("temp")) {
+	        			if(request.body().contains("bri")) {
+	        				thermoSetting.setTemp(replaceIntensityValue(thermoSetting.getTemp(), state.getBri()));
+	        				theNest.getThermostat(thermoSetting.getName()).setTargetTemperature(Float.parseFloat(thermoSetting.getTemp()));
+	        			}
+	        		}
+	        		else if (!thermoSetting.getControl().equalsIgnoreCase("status")) {
+        				theNest.getThermostat(thermoSetting.getName()).setTargetType(thermoSetting.getControl());
+	        		}
+	        	}
 	        }
 	        else if(url.startsWith("udp://"))
 	        {
@@ -432,7 +453,8 @@ public class HueMulator {
 	            request = request.replace(INTENSITY_MATH + mathDescriptor + INTENSITY_MATH_CLOSE, endResult.toString());
 			} catch (Exception e) {
 				log.warn("Could not execute Math: " + mathDescriptor, e);
-			}        }
+			}
+        }
         return request;
     }
 

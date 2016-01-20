@@ -14,8 +14,9 @@
 	</div>
 	<ul class="list-group">
 		<li class="list-group-item">
-			<p class="text-muted">You can select a Nest item and generate
-				the add nest item box selections automatically.</p>
+			<p class="text-muted">For any Nest Item, use the action buttons to generate the device addition information below automatically. 
+			Then you can modify the name to anything you want that will be the keyword for Alexa. Click Add device to finish that type selections.
+			The Already configured items list below will show what is already setup for this Nest.</p>
 
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
@@ -40,8 +41,30 @@
 					<td>{{nestitem.type}}</td>
 					<td>{{nestitem.location}}</td>
 					<td>
-						<button class="btn btn-success" type="submit"
-							ng-click="buildNestHomeUrls(nestitem)">Gen Home URLs</button>
+						<ul class="list-group">
+							<li ng-if="nestitem.type ==='Home' " class="list-group-item">
+								<button class="btn btn-success" type="submit"
+										ng-click="buildNestHomeUrls(nestitem)">Home/Away</button>
+							</li>
+							<li ng-if="nestitem.type ==='Thermostat' " class="list-group-item">
+								<p>
+								<button class="btn btn-success" type="submit"
+										ng-click="buildNestTempUrls(nestitem)">Temp</button>
+								<button class="btn btn-success" type="submit"
+										ng-click="buildNestHeatUrls(nestitem)">Heat</button>
+								<button class="btn btn-success" type="submit"
+										ng-click="buildNestCoolUrls(nestitem)">Cool</button>
+								</p>
+								<p>
+								<button class="btn btn-success" type="submit"
+										ng-click="buildNestRangeUrls(nestitem)">Range</button>
+								<button class="btn btn-success" type="submit"
+										ng-click="buildNestOffUrls(nestitem)">Off</button>
+								<button class="btn btn-success" type="submit"
+										ng-click="buildNestFanUrls(nestitem)">Fan</button>
+								</p>
+							</li>
+						</ul>
 					</td>
 				</tr>
 			</table>
@@ -60,22 +83,22 @@
         					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
         				</th>
 						<th>
-							<a href="" ng-click="order('type')">Type</a>
+							<a href="" ng-click="order('id')">Id</a>
         					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
         				</th>
 						<th>
-							<a href="" ng-click="order('location')">Location</a>
-        					<span class="sortorder" ng-show="predicate === 'location'" ng-class="{reverse:reverse}"></span>
+							<a href="" ng-click="order('mapId')">mapId</a>
+        					<span class="sortorder" ng-show="predicate === 'mapId'" ng-class="{reverse:reverse}"></span>
         				</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="nestitem in bridge.nestitems | unavailableNestItemId | orderBy:predicate:reverse">
-					<td>{{nestitem.name}}</td>
-					<td>{{nestitem.type}}</td>
-					<td>{{nestitem.location}}</td>
+				<tr ng-repeat="device in bridge.devices | unavailableNestItemId | orderBy:predicate:reverse">
+					<td>{{device.name}}</td>
+					<td>{{device.id}}</td>
+					<td>{{device.mapId}}</td>
 					<td><button class="btn btn-danger" type="submit"
-						ng-click="deleteDeviceByMapId(nestitem.Id, 'nestHomeAway')">Delete</button></td>
+						ng-click="deleteDeviceByMapId(device.mapId, 'nest')">Delete</button></td>
 				</tr>
 			</table>
 		</li>
@@ -83,7 +106,7 @@
 </div>
 <div class="panel panel-default bridgeServer" ng-if="!bridge.error">
 	<div class="panel-heading">
-		<h2 class="panel-title">Add a Nest Item</h2>
+		<h2 class="panel-title">Add a Bridge Device for a Nest Item</h2>
 	</div>
 	<ul class="list-group">
 		<li class="list-group-item">
