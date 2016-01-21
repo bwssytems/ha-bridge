@@ -74,6 +74,8 @@
 	<div class="panel-heading">
 		<h2 class="panel-title">Add a new device</h2>
 	</div>
+	<p class="text-muted">This area allows you to create any http or udp call to an endpoint. You can use the default GET or select
+	the http verb type below and configure a payload for either on or off methods. Currently, https is not supported.</p>
 	<ul class="list-group">
 		<li class="list-group-item">
 			<form class="form-horizontal" ng-submit="addDevice()">
@@ -87,7 +89,7 @@
 							ng-model="device.name" placeholder="Device Name">
 					</div>
 					<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary">
-						Add Device</button>
+						Add Bridge Device</button>
 					</div>
 				</div>
 				<div class="form-group">

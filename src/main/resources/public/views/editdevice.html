@@ -13,6 +13,8 @@
 	<div class="panel-heading">
 		<h2 class="panel-title">Edit a device</h2>
 	</div>
+	<p class="text-muted">This screen allows the modification of many fields the bridge uses. Please use care when
+	updating these fields as you may break the settings used by the bridge to call a specific end point device.</p>
 	<ul class="list-group">
 		<li class="list-group-item">
 			<form class="form-horizontal" ng-submit="addDevice()">
@@ -25,7 +27,7 @@
 							ng-model="device.name" placeholder="Device Name">
 					</div>
 					<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary">
-						Update Device</button>
+						Update Bridge Device</button>
 				</div>
 				<div class="form-group">
 					<label class="col-xs-12 col-sm-2 control-label" for="device-target">Target

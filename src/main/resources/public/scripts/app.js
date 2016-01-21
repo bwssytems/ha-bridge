@@ -800,7 +800,7 @@ app.filter('availableNestItemId', function(bridgeService) {
         if(input == null)
         	return out;
         for (var i = 0; i < input.length; i++) {
-            if(!bridgeService.findNestItemByMapId(input[i].Id, "nestHomeAway")){
+            if(!bridgeService.findNestItemByMapId(input[i].id, "nestHomeAway")){
                 out.push(input[i]);
             }
         }

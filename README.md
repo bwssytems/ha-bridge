@@ -1,5 +1,5 @@
 # ha-bridge
-Emulates Philips Hue api to other home automation gateways such as an Amazon Echo.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API. In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge. Alternatively the Bridge supports custom calls as well.
+Emulates Philips Hue api to other home automation gateways such as an Amazon Echo.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API. In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge and the Nest. Alternatively the Bridge supports custom calls as well.
 ## Build
 To customize and build it yourself, build a new jar with maven:  
 ```
@@ -25,9 +25,13 @@ The upnp response port that will be used. The default is 50000.
 ### -Dharmony.address=`<ip address>` | `<{devices:[{name:ahub,ip:x.y.w.z},{name:anotherhub,ip:a.b.c.d}]}>`
 The argument for the Harmony Hub address should be given as the system does not have a way to find the address. Supply -Dharmony.address=X.Y.Z.A on the command line to provide it. If a Harmony Hub is not used, do not set it. To provide multiple harmony hubs, use the json style notation outlined above to provide the list. This argument is backwards compatible.
 ### -Dharmony.user=`<username>`
-The user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub Features, provide -Dharmony.user=`<username>` on the command line.
+The user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub features, provide -Dharmony.user=`<username>` on the command line.
 ### -Dharmony.pwd=`<password>`
 The password for the user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub Features, provide -Dharmony.pwd=`<password>` on the command line.
+### -Dnest.user=`<username>`
+The user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features, provide -Dnest.user=`<username>` on the command line. There is no need to give any ip address or host information as this contacts your cloud account.
+### -Dnest.pwd=`<password>`
+The password for the user name of the home.nest.com account for the Nestr user. This needs to be given if you are using the Nest features, provide -Dnest.pwd=`<password>` on the command line.
 ### -Dupnp.strict=`<true|false>`
 Upnp has been very closed on this platform to try and respond as a hue and there is now a setting to control if it is more open or strict, Add -Dupnp.strict=`<true|false>` to your command line to have the emulator respond to what it thinks is an echo to a hue or any other device. The default is upnp.strict=true.
 ### -Dtrace.upnp=`<true|false>`
@@ -154,7 +158,8 @@ Here is a UDP example that can send binary data.
   "offUrl": "udp://192.168.1.1:8899/0x460055",
   "onUrl": "udp://192.168.1.1:8899/0x450055"
 }
-```#### Response
+```
+#### Response
 Name |	Type |	Description
 -----|-------|-------------
 id   | number | This is the ID assigned to the device and used for lookup.
@@ -178,7 +183,7 @@ contentBodyOff | string | This is the content body that you would like to send w
 ### Update a Device 
 Update an existing device using it's ID that was given when the device was created and the update could contain any of the fields that are used and shown in the previous examples when adding a device. 
 ```
-POST http://host:8080/api/devices/<id>
+POST http://host:port/api/devices/<id>
 ```
 #### Body Arguments
 Name |	Type |	Description | Required
@@ -215,7 +220,7 @@ contentBodyOff | string | This is the content body that you would like to send w
 ### Get All Devices 
 Get all devices saved in the HA bridge configuration. 
 ```
-GET http://host:8080/api/devices
+GET http://host:port/api/devices
 ```
 #### Response
 Individual entries are the same as a single device but in json list format.
@@ -238,7 +243,7 @@ Individual entries are the same as a single device but in json list format.
 ### Get a Specific Device 
 Get a device by ID assigned from creation and saved in the HA bridge configuration. 
 ```
-GET http://host:8080/api/devices/<id>
+GET http://host:port/api/devices/<id>
 ```
 #### Response
 The response is the same layout as defined in the add device response.
@@ -254,14 +259,14 @@ The response is the same layout as defined in the add device response.
 ### Delete a Specific Device 
 Delete a device by ID assigned from creation and saved in the HA bridge configuration. 
 ```
-DELETE http://host:8080/api/devices/<id>
+DELETE http://host:port/api/devices/<id>
 ```
 #### Response
 This call returns a null json "{}".
 ### Get HA Bridge Version 
 Get current version of the HA bridge software. 
 ```
-GET http://host:8080/api/devices/habridge/version
+GET http://host:port/api/devices/habridge/version
 ```
 #### Response
 Name |	Type |	Description
@@ -273,7 +278,7 @@ version | string | The version returned by the software.
 ### Get Vera Devices 
 Get the list of devices available from the Vera, VeraLite or VeraEdge if configured. Please refer to the <a href="http://wiki.micasaverde.com/index.php/Luup_Sdata">Luup Sdata Structure</a> for the explanation of the devices list returned.
 ```
-GET http://host:8080/api/devices/vera/devices
+GET http://host:port/api/devices/vera/devices
 ```
 #### Response
 Name |	Type |	Description
@@ -320,7 +325,7 @@ comment | string | Comment configured with device. Not always present.
 ### Get Vera Scenes 
 Get the list of scenes available from the Vera, VeraLite or VeraEdge if configured.  Please refer to the <a href="http://wiki.micasaverde.com/index.php/Luup_Sdata">Luup Sdata Structure</a> for the explanation of the scenes list returned.
 ```
-GET http://host:8080/api/devices/vera/scenes
+GET http://host:port/api/devices/vera/scenes
 ```
 #### Response
 Name |	Type |	Description
@@ -346,7 +351,7 @@ room | string | Room name assigned to scene.
 ### Get Harmony Activities
 Get the list of activities available from the Harmony Hub if configured. 
 ```
-GET http://host:8080/api/devices/harmony/activities
+GET http://host:port/api/devices/harmony/activities
 ```
 #### Response
 Only listing the relevant fields that are needed for control of an activity. The example below is representative of some activities.
@@ -364,7 +369,7 @@ id | integer | The id of the Harmony activity.
 ### Get Harmony Devices
 Get the list of devices available from the Harmony Hub if configured. 
 ```
-GET http://host:8080/api/devices/harmony/devices
+GET http://host:port/api/devices/harmony/devices
 ```
 #### Response
 Only listing the relevant fields that are needed for control of a device. The example below is representative of some devices.
@@ -396,7 +401,7 @@ name | string | The name of a button in the device control area.
 ### Show Harmony Current Activity
 Show the Harmony Hub's current activity.
 ```
-GET http://host:8080/api/devices/harmony/show
+GET http://host:port/api/devices/harmony/show
 ```
 #### Response
 Only listing the relevant fields that are needed for identity of an activity. TThe example below is representative of an activity.
@@ -408,6 +413,25 @@ id | integer | The id of the Harmony activity.
 #### Harmony activity data example
 ```
 {"label":"Watch TV","suggestedDisplay":"Default","id":15823996,"activityTypeDisplayName":"Default","controlGroup":[{"name":"NumericBasic","function":[{"name":"NumberEnter","label":"Number Enter","action":"{\"command\":\"Enter\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Hyphen","label":"-","action":"{\"command\":\"-\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Number0","label":"0","action":"{\"command\":\"0\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Number1","label":"1","action":"{\"command\":\"1\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Number2","label":"2","action":"{\"command\":\"2\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Number3","label":"3","action":"{\"command\":\"3\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Number4","label":"4","action":"{\"command\":\"4\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Number5","label":"5","action":"{\"command\":\"5\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Number6","label":"6","action":"{\"command\":\"6\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Number7","label":"7","action":"{\"command\":\"7\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Number8","label":"8","action":"{\"command\":\"8\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Number9","label":"9","action":"{\"command\":\"9\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"}]},{"name":"Volume","function":[{"name":"Mute","label":"Mute","action":"{\"command\":\"Mute\",\"type\":\"IRCommand\",\"deviceId\":\"29671749\"}"},{"name":"VolumeDown","label":"Volume Down","action":"{\"command\":\"VolumeDown\",\"type\":\"IRCommand\",\"deviceId\":\"29671749\"}"},{"name":"VolumeUp","label":"Volume Up","action":"{\"command\":\"VolumeUp\",\"type\":\"IRCommand\",\"deviceId\":\"29671749\"}"}]},{"name":"Channel","function":[{"name":"PrevChannel","label":"Prev Channel","action":"{\"command\":\"Last\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"ChannelDown","label":"Channel Down","action":"{\"command\":\"ChannelDown\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"ChannelUp","label":"Channel Up","action":"{\"command\":\"ChannelUp\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"}]},{"name":"NavigationBasic","function":[{"name":"DirectionDown","label":"Direction Down","action":"{\"command\":\"DirectionDown\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"DirectionLeft","label":"Direction Left","action":"{\"command\":\"DirectionLeft\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"DirectionRight","label":"Direction Right","action":"{\"command\":\"DirectionRight\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"DirectionUp","label":"Direction Up","action":"{\"command\":\"DirectionUp\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Select","label":"Select","action":"{\"command\":\"Select\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"}]},{"name":"TransportBasic","function":[{"name":"Play","label":"Play","action":"{\"command\":\"Play\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Rewind","label":"Rewind","action":"{\"command\":\"Rewind\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Pause","label":"Pause","action":"{\"command\":\"Pause\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"FastForward","label":"Fast Forward","action":"{\"command\":\"FastForward\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"}]},{"name":"TransportRecording","function":[{"name":"Record","label":"Record","action":"{\"command\":\"Record\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"}]},{"name":"TransportExtended","function":[{"name":"FrameAdvance","label":"Frame Advance","action":"{\"command\":\"Slow\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"SkipBackward","label":"Skip Backward","action":"{\"command\":\"Replay\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"SkipForward","label":"Skip Forward","action":"{\"command\":\"Advance\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"}]},{"name":"NavigationDVD","function":[{"name":"Back","label":"Back","action":"{\"command\":\"Back\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"}]},{"name":"NavigationDSTB","function":[{"name":"C","label":"C","action":"{\"command\":\"C\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"B","label":"B","action":"{\"command\":\"B\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"D","label":"D","action":"{\"command\":\"D\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"A","label":"A","action":"{\"command\":\"A\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"List","label":"List","action":"{\"command\":\"List\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Live","label":"Live","action":"{\"command\":\"LiveTv\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"}]},{"name":"TiVo","function":[{"name":"ThumbsDown","label":"Thumbs Down","action":"{\"command\":\"ThumbsDown\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"ThumbsUp","label":"Thumbs Up","action":"{\"command\":\"ThumbsUp\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"TiVo","label":"TiVo","action":"{\"command\":\"TiVo\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"}]},{"name":"NavigationExtended","function":[{"name":"Guide","label":"Guide","action":"{\"command\":\"Guide\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Info","label":"Info","action":"{\"command\":\"Info\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Clear","label":"Backspace","action":"{\"command\":\"Clear\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"}]},{"name":"ColoredButtons","function":[{"name":"Green","label":"Green","action":"{\"command\":\"Green\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Red","label":"Red","action":"{\"command\":\"Red\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Blue","label":"Blue","action":"{\"command\":\"Blue\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"},{"name":"Yellow","label":"Yellow","action":"{\"command\":\"Yellow\",\"type\":\"IRCommand\",\"deviceId\":\"29671764\"}"}]}],"activityOrder":0,"tuningDefault":true,"fixit":{"29671749":{"id":"29671749","power":"ON","input":"HDMI 4","alwaysOn":false,"relativePower":true},"29695418":{"id":"29695418","power":"OFF","alwaysOn":false,"relativePower":true},"29671742":{"id":"29671742","power":"ON","input":"","alwaysOn":false,"relativePower":false},"29671764":{"id":"29671764","alwaysOn":false,"relativePower":false},"29695438":{"id":"29695438","power":"OFF","alwaysOn":false,"relativePower":true},"29695467":{"id":"29695467","alwaysOn":false,"relativePower":false},"29695485":{"id":"29695485","alwaysOn":false,"relativePower":false}},"type":"VirtualTelevisionN","icon":"userdata: 0x4454e0","baseImageUri":"https://rcbu-test-ssl-amr.s3.amazonaws.com/"},{"label":"PowerOff","suggestedDisplay":"Default","id":-1,"activityTypeDisplayName":"Default","controlGroup":[],"tuningDefault":false,"fixit":{"29671749":{"id":"29671749","power":"OFF","alwaysOn":false,"relativePower":true},"29695418":{"id":"29695418","power":"OFF","alwaysOn":false,"relativePower":true},"29671742":{"id":"29671742","power":"OFF","alwaysOn":false,"relativePower":false},"29671764":{"id":"29671764","alwaysOn":false,"relativePower":false},"29695438":{"id":"29695438","power":"OFF","alwaysOn":false,"relativePower":true},"29695467":{"id":"29695467","alwaysOn":false,"relativePower":false},"29695485":{"id":"29695485","alwaysOn":false,"relativePower":false}},"type":"PowerOff","icon":"Default"}
+```
+### Get Nest Items
+Get the list of Nest Home Structures and Thermostats available for a Nest account if configured. 
+```
+GET http://host:port/api/devices/nest/items
+```
+#### Response
+The example below is representative of some nest accounts.
+
+
+Name |	Type |	Description
+-----|-------|-------------
+name | string | The name of the Nest item.
+id | string | The id of the Nest item.
+type | string | The type of nest item returned. i.e.: Home or Thermostat 
+location | string | Location of the device. For Home type it is the physical location. For the thermostat it is the Room Location and Home name.
+#### Nest items data example
+```
+[{"name":"TestHouse","id":"b999fcb0-9dbb-11e5-acf5-22000aba84ca","type":"Home","location":"Scranton, OH"},{"name":"Bedroom(3658)","id":"fake7890F3EC3658","type":"Thermostat","location":"Bedroom - TestHouse"},{"name":"Basement(A594)","id":"fake7890E4ABA594","type":"Thermostat","location":"Basement - TestHouse"}]
 ```
 ## HUE REST API usage
 This section will describe the REST api available for controlling the bridge based off of the HUE API. This Bridge does not support the full HUE API, only the calls that are supported with the HA Bridge are shown. The REST body examples are all formatted for easy reading, the actual body usage should be like this:

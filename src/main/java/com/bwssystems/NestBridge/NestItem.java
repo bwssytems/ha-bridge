@@ -2,7 +2,7 @@ package com.bwssystems.NestBridge;
 
 public class NestItem {
 	private String name;
-	private String Id;
+	private String id;
 	private String type;
 	private String location;
 	public String getName() {
@@ -12,10 +12,10 @@ public class NestItem {
 		this.name = name;
 	}
 	public String getId() {
-		return Id;
+		return id;
 	}
-	public void setId(String id) {
-		Id = id;
+	public void setId(String anid) {
+		id = anid;
 	}
 	public String getType() {
 		return type;

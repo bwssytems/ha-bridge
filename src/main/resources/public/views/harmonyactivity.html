@@ -14,8 +14,9 @@
 	</div>
 	<ul class="list-group">
 		<li class="list-group-item">
-			<p class="text-muted">You can select a Harmony Activity and generate
-				the add activity box selections automatically.</p>
+			<p class="text-muted">For any Harmony Activity, use the action buttons to generate the device addition information below automatically. 
+			Then you can modify the name to anything you want that will be the keyword for Alexa. Click the 'Add Bridge Device' to finish that selection setup.
+			The 'Already Configured Activities' list below will show what is already setup for your Harmony Hubs.</p>
 
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
@@ -84,7 +85,7 @@
 </div>
 <div class="panel panel-default bridgeServer" ng-if="!bridge.error">
 	<div class="panel-heading">
-		<h2 class="panel-title">Add a Harmony Activity</h2>
+		<h2 class="panel-title">Add a Bridge Device for a Harmony Activity</h2>
 	</div>
 	<ul class="list-group">
 		<li class="list-group-item">
@@ -98,7 +99,7 @@
 							ng-model="device.name" placeholder="Device Name">
 					</div>
 					<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary">
-						Add Activity</button>
+						Add Bridge Device</button>
 				</div>
 				<div class="form-group">
 					<div class="row">
