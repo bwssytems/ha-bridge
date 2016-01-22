@@ -321,7 +321,7 @@ public class HueMulator {
 
 	        if(device.getDeviceType().toLowerCase().contains("activity") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("harmonyActivity")))
 	        {
-	        	log.debug("executing activity to Harmony: " + url);
+	        	log.debug("executing HUE api request to change activity to Harmony: " + url);
 	        	RunActivity anActivity = new Gson().fromJson(url, RunActivity.class);
 	        	HarmonyHandler myHarmony = myHarmonyHome.getHarmonyHandler(device.getTargetDevice());
 	        	if(myHarmony == null)
@@ -334,7 +334,7 @@ public class HueMulator {
 	        }
 	        else if(device.getDeviceType().toLowerCase().contains("button") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("harmonyButton")))
 	        {
-	        	log.debug("executing button press to Harmony: " + url);
+	        	log.debug("executing HUE api request to button press to Harmony: " + url);
 	        	ButtonPress aDeviceButton = new Gson().fromJson(url, ButtonPress.class);
 	        	HarmonyHandler myHarmony = myHarmonyHome.getHarmonyHandler(device.getTargetDevice());
 	        	if(myHarmony == null)
@@ -347,7 +347,7 @@ public class HueMulator {
 	        }
 	        else if(device.getDeviceType().toLowerCase().contains("home") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("nestHomeAway")))
 	        {
-	        	log.debug("executing set away for nest home: " + url);
+	        	log.debug("executing HUE api request to set away for nest home: " + url);
 	        	NestInstruction homeAway = new Gson().fromJson(url, NestInstruction.class);
 	        	if(theNest == null)
 	        	{
@@ -359,7 +359,7 @@ public class HueMulator {
 	        }
 	        else if(device.getDeviceType().toLowerCase().contains("thermo") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("nestThermoSet")))
 	        {
-	        	log.debug("executing set thermostat for nest: " + url);
+	        	log.debug("executing HUE api request to set thermostat for nest: " + url);
 	        	NestInstruction thermoSetting = new Gson().fromJson(url, NestInstruction.class);
 	        	if(theNest == null)
 	        	{
@@ -369,17 +369,28 @@ public class HueMulator {
 	        	else {
 	        		if(thermoSetting.getControl().equalsIgnoreCase("temp")) {
 	        			if(request.body().contains("bri")) {
-	        				thermoSetting.setTemp(replaceIntensityValue(thermoSetting.getTemp(), state.getBri()));
+	        				thermoSetting.setTemp(String.valueOf(Math.round((Integer.parseInt(replaceIntensityValue(thermoSetting.getTemp(), state.getBri())) - 32)/1.8)));
+	        				log.debug("Setting thermostat: " + thermoSetting.getName() + " to " + thermoSetting.getTemp() + "C");
 	        				theNest.getThermostat(thermoSetting.getName()).setTargetTemperature(Float.parseFloat(thermoSetting.getTemp()));
 	        			}
 	        		}
-	        		else if (!thermoSetting.getControl().equalsIgnoreCase("status")) {
+	        		else if (thermoSetting.getControl().contains("range") ||thermoSetting.getControl().contains("heat") ||thermoSetting.getControl().contains("cool") ||thermoSetting.getControl().contains("off")) {
+        				log.debug("Setting thermostat target type: " + thermoSetting.getName() + " to " + thermoSetting.getControl());
         				theNest.getThermostat(thermoSetting.getName()).setTargetType(thermoSetting.getControl());
+	        		}
+	        		else if(thermoSetting.getControl().contains("fan")) {
+        				log.debug("Setting thermostat fan mode: " + thermoSetting.getName() + " to " + thermoSetting.getControl().substring(4));
+	        			theNest.getThermostat(thermoSetting.getName()).setFanMode(thermoSetting.getControl().substring(4));
+	        		}
+	        		else {
+		        		log.warn("no valid Nest control info: " + thermoSetting.getControl());
+		        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"no valid Nest control info\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 	        		}
 	        	}
 	        }
 	        else if(url.startsWith("udp://"))
 	        {
+	        	log.debug("executing HUE api request to UDP: " + url);
 	        	try {
 	        		String intermediate = url.substring(6);
 	        		String ipAddr = intermediate.substring(0, intermediate.indexOf(':'));
@@ -402,7 +413,7 @@ public class HueMulator {
 	        }
 	        else
 	        {
-	        	log.debug("executing activity to Http " + (device.getHttpVerb() == null?"GET":device.getHttpVerb()) + ": " + url);
+	        	log.debug("executing HUE api request to Http " + (device.getHttpVerb() == null?"GET":device.getHttpVerb()) + ": " + url);
 				// quick template
 				String body;
 				url = replaceIntensityValue(url, state.getBri());

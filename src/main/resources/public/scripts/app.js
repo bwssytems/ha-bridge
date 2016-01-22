@@ -587,63 +587,63 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
             $scope.device.deviceType = "home";
             $scope.device.name = nestitem.name;
             $scope.device.mapType = "nestHomeAway";
-            $scope.device.mapId = nestitem.Id;
-            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"away\":false,\"control\":\"status\"}";
-            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"away\":true,\"control\":\"status\"}";
+            $scope.device.mapId = nestitem.id;
+            $scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"away\":false,\"control\":\"status\"}";
+            $scope.device.offUrl = "{\"name\":\"" + nestitem.id + "\",\"away\":true,\"control\":\"status\"}";
         };
 
         $scope.buildNestTempUrls = function (nestitem) {
             $scope.device.deviceType = "thermo";
             $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Temperature";
             $scope.device.mapType = "nestThermoSet";
-            $scope.device.mapId = nestitem.Id + "-SetTemp";
-            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"temp\",\"temp\":\"${intensity.percent}\"}";
-            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"temp\",\"temp\":\"${intensity.percent}\"}";
+            $scope.device.mapId = nestitem.id + "-SetTemp";
+            $scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"temp\",\"temp\":\"${intensity.percent}\"}";
+            $scope.device.offUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"temp\",\"temp\":\"${intensity.percent}\"}";
         };
 
         $scope.buildNestHeatUrls = function (nestitem) {
             $scope.device.deviceType = "thermo";
             $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Heat";
             $scope.device.mapType = "nestThermoSet";
-            $scope.device.mapId = nestitem.Id + "-SetHeat";
-            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"heat\"}";
-            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"off\"}";
+            $scope.device.mapId = nestitem.id + "-SetHeat";
+            $scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"heat\"}";
+            $scope.device.offUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"off\"}";
         };
 
         $scope.buildNestCoolUrls = function (nestitem) {
             $scope.device.deviceType = "thermo";
             $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Cool";
             $scope.device.mapType = "nestThermoSet";
-            $scope.device.mapId = nestitem.Id + "-SetCool";
-            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"cool\"}";
-            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"off\"}";
+            $scope.device.mapId = nestitem.id + "-SetCool";
+            $scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"cool\"}";
+            $scope.device.offUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"off\"}";
         };
 
         $scope.buildNestRangeUrls = function (nestitem) {
             $scope.device.deviceType = "thermo";
             $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Range";
             $scope.device.mapType = "nestThermoSet";
-            $scope.device.mapId = nestitem.Id + "-SetRange";
-            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"range\"}";
-            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"off\"}";
+            $scope.device.mapId = nestitem.id + "-SetRange";
+            $scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"range\"}";
+            $scope.device.offUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"off\"}";
         };
 
         $scope.buildNestOffUrls = function (nestitem) {
             $scope.device.deviceType = "thermo";
             $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Thermostat";
             $scope.device.mapType = "nestThermoSet";
-            $scope.device.mapId = nestitem.Id + "-TurnOff";
-            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"range\"}";
-            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"off\"}";
+            $scope.device.mapId = nestitem.id + "-TurnOff";
+            $scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"range\"}";
+            $scope.device.offUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"off\"}";
         };
 
         $scope.buildNestFanUrls = function (nestitem) {
             $scope.device.deviceType = "thermo";
             $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Fan";
             $scope.device.mapType = "nestThermoSet";
-            $scope.device.mapId = nestitem.Id + "-SetFan";
-            $scope.device.onUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"fan-on\"}";
-            $scope.device.offUrl = "{\"name\":\"" + nestitem.Id + "\",\"control\":\"fan-auto\"}";
+            $scope.device.mapId = nestitem.id + "-SetFan";
+            $scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"fan-on\"}";
+            $scope.device.offUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"fan-auto\"}";
         };
 
         $scope.testUrl = function (device, type) {
