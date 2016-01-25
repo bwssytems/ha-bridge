@@ -334,16 +334,25 @@ public class HueMulator {
 	        }
 	        else if(device.getDeviceType().toLowerCase().contains("button") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("harmonyButton")))
 	        {
-	        	log.debug("executing HUE api request to button press to Harmony: " + url);
-	        	ButtonPress aDeviceButton = new Gson().fromJson(url, ButtonPress.class);
+	        	log.debug("executing HUE api request to button press(es) to Harmony: " + url);
+	        	if(url.substring(0, 1).equalsIgnoreCase("{")) {
+	        		url = "[" + url +"]";
+	        	}
+	        	ButtonPress[] deviceButtons = new Gson().fromJson(url, ButtonPress[].class);
 	        	HarmonyHandler myHarmony = myHarmonyHome.getHarmonyHandler(device.getTargetDevice());
 	        	if(myHarmony == null)
 	        	{
 	        		log.warn("Should not get here, no harmony hub available");
 	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 	        	}
-	        	else
-	        		myHarmony.pressButton(aDeviceButton);
+	        	else {
+	        		for(int i = 0; i < deviceButtons.length; i++) {
+	        			if( i > 0)
+	        				Thread.sleep(500);
+	    	        	log.debug("pressing button: " + deviceButtons[i].getDevice() + " - " + deviceButtons[i].getButton() + " - iteration: " + String.valueOf(i));
+	        			myHarmony.pressButton(deviceButtons[i]);
+	        		}
+	        	}
 	        }
 	        else if(device.getDeviceType().toLowerCase().contains("home") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("nestHomeAway")))
 	        {

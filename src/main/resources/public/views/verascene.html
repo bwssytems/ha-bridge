@@ -50,9 +50,9 @@
 		</li>
 	</ul>
 	<div class="panel-heading">
-		<h2 class="panel-title">Already Configured Vera Scenes <a ng-click="toggleScenes()"><span class={{imgScenesUrl}} aria-hidden="true"></a></h2>
+		<h2 class="panel-title">Already Configured Vera Scenes <a ng-click="toggleButtons()"><span class={{imgButtonsUrl}} aria-hidden="true"></span></a></h2>
 	</div>
-	<ul ng-if="scenesVisible" class="list-group">
+	<ul ng-if="buttonsVisible" class="list-group">
 		<li class="list-group-item">
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
@@ -91,7 +91,7 @@
 	</div>
 	<ul class="list-group">
 		<li class="list-group-item">
-			<form class="form-horizontal" ng-submit="addDevice()">
+			<form class="form-horizontal">
 				<div class="form-group">
 					<label class="col-xs-12 col-sm-2 control-label" for="device-name">Name
 					</label>
@@ -100,7 +100,7 @@
 						<input type="text" class="form-control" id="device-name"
 							ng-model="device.name" placeholder="Device Name">
 					</div>
-					<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary">
+					<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary" ng-click="addDevice()">
 						Add Bridge Device</button>
 				</div>
 				<div class="form-group">
@@ -112,6 +112,8 @@
 						<textarea rows="3" class="form-control" id="device-on-url"
 							ng-model="device.onUrl" placeholder="URL to turn device on"></textarea>
 					</div>
+					<button class="btn btn-danger" ng-click="clearDevice()">
+						Clear Device</button>
 				</div>
 				<div class="form-group">
 					<div class="row">
