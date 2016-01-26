@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.JsonTransformer;
 import com.bwssystems.HABridge.Version;
+import com.bwssystems.HABridge.dao.BackupFilename;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
 import com.bwssystems.NestBridge.NestHome;
@@ -233,6 +234,67 @@ public class DeviceResource {
 	      	}
 	      	response.status(HttpStatus.SC_OK);
 	      	return nestHome.getItems();
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/backup/available", "application/json", (request, response) -> {
+        	log.debug("Get backup filenames");
+          	response.status(HttpStatus.SC_OK);
+          	return deviceRepository.getBackups();
+        }, new JsonTransformer());
+
+	    // http://ip_address:port/api/devices/backup/create CORS request
+	    options(API_CONTEXT + "/backup/create", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+    	put (API_CONTEXT + "/backup/create", "application/json", (request, response) -> {
+	    	log.debug("Create backup: " + request.body());
+        	BackupFilename aFilename = new Gson().fromJson(request.body(), BackupFilename.class);
+        	BackupFilename returnFilename = new BackupFilename();
+        	returnFilename.setFilename(deviceRepository.backup(aFilename.getFilename()));
+	        return returnFilename;
+    	}, new JsonTransformer());
+
+	    // http://ip_address:port/api/devices/backup/delete CORS request
+	    options(API_CONTEXT + "/backup/delete", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "POST");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+    	post (API_CONTEXT + "/backup/delete", "application/json", (request, response) -> {
+	    	log.debug("Delete backup: " + request.body());
+        	BackupFilename aFilename = new Gson().fromJson(request.body(), BackupFilename.class);
+        	if(aFilename != null)
+        		deviceRepository.deleteBackup(aFilename.getFilename());
+        	else
+        		log.warn("No filename given for delete backup.");
+	        return null;
+	    }, new JsonTransformer());
+
+	    // http://ip_address:port/api/devices/backup/restore CORS request
+	    options(API_CONTEXT + "/backup/restore", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "POST");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+    	post (API_CONTEXT + "/backup/restore", "application/json", (request, response) -> {
+	    	log.debug("Restore backup: " + request.body());
+        	BackupFilename aFilename = new Gson().fromJson(request.body(), BackupFilename.class);
+        	if(aFilename != null)
+        		deviceRepository.restoreBackup(aFilename.getFilename());
+        	else
+        		log.warn("No filename given for restore backup.");
+	        return null;
 	    }, new JsonTransformer());
     }
 }

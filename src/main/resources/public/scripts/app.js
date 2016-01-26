@@ -94,7 +94,7 @@ app.factory('BridgeSettings', function() {
 app.service('bridgeService', function ($http, $window, BridgeSettings) {
         var self = this;
         self.BridgeSettings = BridgeSettings;
-        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", huebase: window.location.origin + "/api",  devices: [], device: [], error: "", showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
+        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", huebase: window.location.origin + "/api", backups: [], devices: [], device: [], error: "", showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
 
         this.viewDevices = function () {
             this.state.error = "";
@@ -192,11 +192,26 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             );
         };
 
+        this.viewBackups = function () {
+            this.state.error = "";
+            return $http.get(this.state.base + "/backup/available").then(
+                function (response) {
+                    self.state.backups = response.data;
+                },
+                function (error) {
+                    if (error.data) {
+                    	$window.alert("Get Backups Error: " + error.data.message);
+                    } else {
+                    	$window.alert("Get Backups Error: unknown");
+                    }
+                }
+            );
+        };
+        
         this.viewNestItems = function () {
             this.state.error = "";
         	if(!this.state.showNest)
         		return;
-            this.state.error = "";
             return $http.get(this.state.base + "/nest/items").then(
                 function (response) {
                     self.state.nestitems = response.data;
@@ -215,7 +230,6 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             this.state.error = "";
         	if(!this.state.showVera)
         		return;
-            this.state.error = "";
             return $http.get(this.state.base + "/vera/devices").then(
                 function (response) {
                     self.state.veradevices = response.data;
@@ -361,6 +375,58 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             }
         };
 
+        this.backupDeviceDb = function (afilename) {
+            this.state.error = "";
+            return $http.put(this.state.base + "/backup/create", {
+                filename: afilename
+            }).then(
+                function (response) {
+                    self.viewBackups();
+                },
+                function (error) {
+                    if (error.data) {
+                        self.state.error = error.data.message;
+                    }
+                    $window.alert("Backup Device Db Error: unknown");
+                }
+            );
+        };
+
+        this.restoreBackup = function (afilename) {
+            this.state.error = "";
+            return $http.post(this.state.base + "/backup/restore", {
+                filename: afilename
+            }).then(
+                function (response) {
+                    self.viewBackups();
+                    self.viewDevices();
+                },
+                function (error) {
+                    if (error.data) {
+                        self.state.error = error.data.message;
+                    }
+                    $window.alert("Backup Db Restore Error: unknown");
+                }
+            );
+        };
+
+        this.deleteBackup = function (afilename) {
+            this.state.error = "";
+            return $http.post(this.state.base + "/backup/delete", {
+                filename: afilename
+            }).then(
+                function (response) {
+                    self.viewBackups();
+                },
+                function (error) {
+                    if (error.data) {
+                        self.state.error = error.data.message;
+                    }
+                    $window.alert("Backup Db Frlryr Error: unknown");
+                }
+            );
+        };
+
         this.deleteDevice = function (id) {
             this.state.error = "";
             return $http.delete(this.state.base + "/" + id).then(
@@ -417,9 +483,13 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 
 		$scope.BridgeSettings = bridgeService.BridgeSettings;
         bridgeService.viewDevices();
+        bridgeService.viewBackups();
         $scope.bridge = bridgeService.state;
+        $scope.optionalbackupname = "";
         $scope.visible = false;
         $scope.imgUrl = "glyphicon glyphicon-plus";
+        $scope.visibleBk = false;
+        $scope.imgBkUrl = "glyphicon glyphicon-plus";
         $scope.predicate = '';
         $scope.reverse = true;
         $scope.order = function(predicate) {
@@ -443,12 +513,28 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
             bridgeService.editDevice(device);
             $location.path('/editdevice');
         };
+        $scope.backupDeviceDb = function (optionalbackupname) {
+            bridgeService.backupDeviceDb(optionalbackupname);
+        };
+        $scope.restoreBackup = function (backupname) {
+            bridgeService.restoreBackup(backupname);
+        };
+        $scope.deleteBackup = function (backupname) {
+            bridgeService.deleteBackup(backupname);
+        };
         $scope.toggle = function () {
             $scope.visible = !$scope.visible;
             if($scope.visible)
                 $scope.imgUrl = "glyphicon glyphicon-minus";
             else
                 $scope.imgUrl = "glyphicon glyphicon-plus";
+        };
+        $scope.toggleBk = function () {
+            $scope.visibleBk = !$scope.visibleBk;
+            if($scope.visibleBk)
+                $scope.imgBkUrl = "glyphicon glyphicon-minus";
+            else
+                $scope.imgBkUrl = "glyphicon glyphicon-plus";
         };
     });
 

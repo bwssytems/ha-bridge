@@ -134,3 +134,40 @@
 			</table>
 		</div>
 	</div>
+	<div class="panel panel-default backup">
+		<div class="panel-heading">
+			<h1 class="panel-title">Bridge Device DB Backup <a ng-click="toggleBk()"><span class={{imgBkUrl}} aria-hidden="true"></a></h1>
+		</div>
+		<div ng-if="visibleBk" class="animate-if" class="panel-body">
+			<form class="form-horizontal">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 control-label" for="backup-name">Backup File Name</label>
+
+					<div class="col-xs-8 col-sm-7">
+						<input id="backup-name" class="form-control" type="text"
+							ng-model="optionalbackupname" placeholder="Optional">
+					</div>
+					<button type="submit" class="btn btn-primary"
+						ng-click="backupDeviceDb(optionalbackupname)">Backup Device DB</button>
+				</div>
+			</form>
+			<table class="table table-bordered table-striped table-hover">
+				<thead>
+					<tr>
+						<th>Filename</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tr ng-repeat="backup in bridge.backups">
+					<td>{{backup}}</td>
+					<td>
+						<button class="btn btn-danger" type="submit"
+							ng-click="restoreBackup(backup)">Restore</button>
+						<button class="btn btn-warning" type="submit"
+							ng-click="deleteBackup(backup)">Delete</button>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	
