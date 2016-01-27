@@ -24,11 +24,12 @@
 	</div>
 	<div class="panel panel-default">
 		<div class="panel-heading">
-			<h2 class="panel-title">Current devices</h2>
+			<h2 class="panel-title">Current devices ({{bridge.devices.length}}) </h2>
 		</div>
 		<table class="table table-bordered table-striped table-hover">
 			<thead>
 				<tr>
+					<th>Row</th>
 					<th>
 						<a href="" ng-click="order('id')">ID</a>
         				<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span></th>
@@ -45,6 +46,7 @@
 				</tr>
 			</thead>
 			<tr ng-repeat="device in bridge.devices | orderBy:predicate:reverse">
+				<td>{{$index+1}}</td>
 				<td>{{device.id}}</td>
 				<td>{{device.name}}</td>
 				<td>{{device.deviceType}}</td>

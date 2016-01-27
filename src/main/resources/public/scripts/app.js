@@ -1,6 +1,4 @@
-var app = angular.module('habridge', [
-	'ngRoute'
-]);
+var app = angular.module('habridge', ['ngRoute']);
 
 app.config(function ($routeProvider) {
 	$routeProvider.when('/#', {
@@ -557,7 +555,6 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
 
 
         $scope.clearDevice();
-        bridgeService.device = $scope.device;
         $scope.vera = {base: "", port: "3480", id: ""};
         $scope.vera.base = "http://" + BridgeSettings.veraaddress;
         bridgeService.viewVeraDevices();
@@ -566,12 +563,12 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         bridgeService.viewHarmonyDevices();
         bridgeService.viewNestItems();
         $scope.bridge = bridgeService.state;
-        $scope.device = bridgeService.state.device;
         $scope.imgButtonsUrl = "glyphicon glyphicon-plus";
         $scope.buttonsVisible = false;
         $scope.predicate = '';
         $scope.reverse = true;
         $scope.device_dim_control = "";
+        $scope.bulk = { devices: [] };
         $scope.order = function(predicate) {
           $scope.reverse = ($scope.predicate === predicate) ? !$scope.reverse : false;
           $scope.predicate = predicate;
@@ -743,7 +740,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
             $scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"fan-on\"}";
             $scope.device.offUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"fan-auto\"}";
         };
-
+        
         $scope.testUrl = function (device, type) {
         	bridgeService.testUrl(device, type);
         };
@@ -769,7 +766,34 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
                 function (error) {
                 }
             );
-        }
+
+        };
+        
+        $scope.bulkAddDevices = function(dim_control) {
+        	for(var i = 0; i < $scope.bulk.devices.length; i++) {
+        		for(var x = 0; x < bridgeService.state.veradevices.length; x++) {
+	        		if(bridgeService.state.veradevices[x].id == $scope.bulk.devices[i]) {
+	        			$scope.buildDeviceUrls(bridgeService.state.veradevices[x],dim_control);
+	        			$scope.addDevice();
+	        		}
+        		}
+        	}
+        	$scope.bulk = { devices: [] };
+        };
+        
+        $scope.toggleSelection = function toggleSelection(deviceId) {
+            var idx = $scope.bulk.devices.indexOf(deviceId);
+
+            // is currently selected
+            if (idx > -1) {
+              $scope.bulk.devices.splice(idx, 1);
+            }
+
+            // is newly selected
+            else {
+              $scope.bulk.devices.push(deviceId);
+            }
+          };
 
         $scope.toggleButtons = function () {
             $scope.buttonsVisible = !$scope.buttonsVisible;
