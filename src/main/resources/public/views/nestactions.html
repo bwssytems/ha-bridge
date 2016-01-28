@@ -21,6 +21,7 @@
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
+						<th>Row</th>
 						<th>
 							<a href="" ng-click="order('name')">Name</a>
         					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
@@ -37,6 +38,7 @@
 					</tr>
 				</thead>
 				<tr ng-repeat="nestitem in bridge.nestitems | availableNestItemId | orderBy:predicate:reverse">
+					<td>{{$index+1}}</td>
 					<td>{{nestitem.name}}</td>
 					<td>{{nestitem.type}}</td>
 					<td>{{nestitem.location}}</td>
@@ -78,6 +80,7 @@
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
+						<th>Row</th>
 						<th>
 							<a href="" ng-click="order('name')">Name</a>
         					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
@@ -94,6 +97,7 @@
 					</tr>
 				</thead>
 				<tr ng-repeat="device in bridge.devices | unavailableNestItemId | orderBy:predicate:reverse">
+					<td>{{$index+1}}</td>
 					<td>{{device.name}}</td>
 					<td>{{device.id}}</td>
 					<td>{{device.mapId}}</td>

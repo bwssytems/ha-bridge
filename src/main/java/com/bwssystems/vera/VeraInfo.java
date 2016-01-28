@@ -13,6 +13,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.luupRequests.Categorie;
 import com.bwssystems.luupRequests.Device;
 import com.bwssystems.luupRequests.Room;
@@ -25,13 +26,13 @@ public class VeraInfo {
     private static final Logger log = LoggerFactory.getLogger(VeraInfo.class);
     private HttpClient httpClient;
     private static final String SDATA_REQUEST = ":3480/data_request?id=sdata&output_format=json";
-    private String veraAddressString;
+    private NamedIP veraAddress;
     private Boolean validVera;
 
-    public VeraInfo(String addressString, Boolean isValidVera) {
+    public VeraInfo(NamedIP addressName, Boolean isValidVera) {
 		super();
         httpClient = HttpClients.createDefault();
-        veraAddressString = addressString;
+        veraAddress = addressName;
         validVera = isValidVera;
 	}
     
@@ -39,7 +40,7 @@ public class VeraInfo {
 		if(!validVera)
 			return new Sdata();
 
-		String theUrl = "http://" + veraAddressString + SDATA_REQUEST;
+		String theUrl = "http://" + veraAddress.getIp() + SDATA_REQUEST;
     	String theData;
     	
     	theData = doHttpGETRequest(theUrl);
@@ -71,6 +72,8 @@ public class VeraInfo {
 				theDevice.setCategory(categoryMap.get(theDevice.getCategory()).getName());
 			else
 				theDevice.setCategory("<unknown>");
+			theDevice.setVeraaddress(veraAddress.getIp());
+			theDevice.setVeraname(veraAddress.getName());
 		}
 
 		ListIterator<Scene> theSecneIter = theSdata.getScenes().listIterator();
@@ -81,6 +84,8 @@ public class VeraInfo {
 				theScene.setRoom(roomMap.get(theScene.getRoom()).getName());
 			else
 				theScene.setRoom("no room");
+			theScene.setVeraaddress(veraAddress.getIp());
+			theScene.setVeraname(veraAddress.getName());
 		}
 	}
 

@@ -5,6 +5,8 @@ public class Scene {
 	private String name;
 	private String id;
 	private String room;
+	private String veraname;
+	private String veraaddress;
 	public String getActive() {
 		return active;
 	}
@@ -28,6 +30,18 @@ public class Scene {
 	}
 	public void setRoom(String room) {
 		this.room = room;
+	}
+	public String getVeraname() {
+		return veraname;
+	}
+	public void setVeraname(String veraname) {
+		this.veraname = veraname;
+	}
+	public String getVeraaddress() {
+		return veraaddress;
+	}
+	public void setVeraaddress(String veraaddress) {
+		this.veraaddress = veraaddress;
 	}
 	
 }

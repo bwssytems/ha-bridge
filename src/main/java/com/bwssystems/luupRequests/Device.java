@@ -13,6 +13,8 @@ public class Device {
 	private String level;
 	private String state;
 	private String comment;
+	private String veraname;
+	private String veraaddress;
 	public String getName() {
 		return name;
 	}
@@ -78,6 +80,18 @@ public class Device {
 	}
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+	public String getVeraname() {
+		return veraname;
+	}
+	public void setVeraname(String veraname) {
+		this.veraname = veraname;
+	}
+	public String getVeraaddress() {
+		return veraaddress;
+	}
+	public void setVeraaddress(String veraaddress) {
+		this.veraaddress = veraaddress;
 	}
 	
 }

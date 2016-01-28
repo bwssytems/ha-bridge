@@ -36,63 +36,9 @@ app.run( function (bridgeService) {
 	bridgeService.getHABridgeVersion();	
 });
 
-app.factory('BridgeSettings', function() {
-	var BridgeSettings = {};
-	
-	BridgeSettings.upnpconfigaddress = "";
-	BridgeSettings.serverport = "";
-	BridgeSettings.upnpdevicedb = "";
-	BridgeSettings.upnpresponseport = "";
-	BridgeSettings.veraaddress = "";
-	BridgeSettings.harmonyaddress = "";
-	BridgeSettings.upnpstrict = "";
-	BridgeSettings.traceupnp = "";
-	BridgeSettings.devmode = "";
-	BridgeSettings.nestconfigured = "";
-	
-	BridgeSettings.setupnpconfigaddress = function(aconfigaddress){
-		BridgeSettings.upnpconfigaddress = aconfigaddress;
-	};
-	
-	BridgeSettings.setserverport = function(aserverport){
-		BridgeSettings.serverport = aserverport;
-	};
-	
-	BridgeSettings.setupnpdevicedb = function(aupnpdevicedb){
-		BridgeSettings.upnpdevicedb = aupnpdevicedb;
-	};
-	
-	BridgeSettings.setupnpresponseport = function(aupnpresponseport){
-		BridgeSettings.upnpresponseport = aupnpresponseport;
-	};
-	
-	BridgeSettings.setveraaddress = function(averaaddress){
-		BridgeSettings.veraaddress = averaaddress;
-	};
-	BridgeSettings.setharmonyaddress = function(aharmonyaddress){
-		BridgeSettings.harmonyaddress = aharmonyaddress;
-	};
-	BridgeSettings.setupnpstrict = function(aupnpstrict){
-		BridgeSettings.upnpstrict = aupnpstrict;
-	};
-	BridgeSettings.settraceupnp = function(atraceupnp){
-		BridgeSettings.traceupnp = atraceupnp;
-	};
-	BridgeSettings.setdevmode = function(adevmode){
-		BridgeSettings.devmode = adevmode;
-	};
-	
-	BridgeSettings.setnestconfigured = function(anestconfigured){
-		BridgeSettings.nestconfigured = anestconfigured;
-	};
-	
-	return BridgeSettings;
-});
-
-app.service('bridgeService', function ($http, $window, BridgeSettings) {
+app.service('bridgeService', function ($http, $window) {
         var self = this;
-        self.BridgeSettings = BridgeSettings;
-        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", huebase: window.location.origin + "/api", backups: [], devices: [], device: [], error: "", showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
+        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", huebase: window.location.origin + "/api", backups: [], devices: [], device: [], settings: [], error: "", showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
 
         this.viewDevices = function () {
             this.state.error = "";
@@ -133,7 +79,7 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
         }
 
         this.updateShowVera = function () {
-            if(this.aContainsB(self.BridgeSettings.veraaddress, "1.1.1.1") || self.BridgeSettings.veraaddress == "" || self.BridgeSettings.veraaddress == null)
+            if(this.aContainsB(self.state.settings.veraaddress.devices[0].ip, "1.1.1.1") || self.state.settings.veraaddress == "" || self.state.settings.veraaddress == null)
             	this.state.showVera = false;
             else
             	this.state.showVera = true;
@@ -141,7 +87,7 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
         }
         
         this.updateShowNest = function () {
-        	if(self.BridgeSettings.nestconfigured == true)
+        	if(self.state.settings.nestconfigured == true)
         		this.state.showNest = true;
         	else
         		this.state.showNest = false;
@@ -149,8 +95,8 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
         }
         
         this.updateShowHarmony = function () {
-        	if(self.BridgeSettings.harmonyaddress.devices) {
-	            if(this.aContainsB(self.BridgeSettings.harmonyaddress.devices[0].ip, "1.1.1.1") || self.BridgeSettings.harmonyaddress == "" || self.BridgeSettings.harmonyaddress == null)
+        	if(self.state.settings.harmonyaddress.devices) {
+	            if(this.aContainsB(self.state.settings.harmonyaddress.devices[0].ip, "1.1.1.1") || self.state.settings.harmonyaddress == "" || self.state.settings.harmonyaddress == null)
 	            	this.state.showHarmony = false;
 	            else
 	            	this.state.showHarmony = true;
@@ -165,16 +111,7 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             this.state.error = "";
             return $http.get(this.state.upnpbase).then(
                 function (response) {
-                	self.BridgeSettings.setupnpconfigaddress(response.data.upnpconfigaddress);
-                	self.BridgeSettings.setserverport(response.data.serverport);
-                	self.BridgeSettings.setupnpdevicedb(response.data.upnpdevicedb);
-                	self.BridgeSettings.setupnpresponseport(response.data.upnpresponseport);
-                	self.BridgeSettings.setveraaddress(response.data.veraaddress);
-                	self.BridgeSettings.setharmonyaddress(response.data.harmonyaddress);
-                	self.BridgeSettings.settraceupnp(response.data.traceupnp);
-                	self.BridgeSettings.setupnpstrict(response.data.upnpstrict);
-                	self.BridgeSettings.setdevmode(response.data.devmode);
-                	self.BridgeSettings.setnestconfigured(response.data.nestconfigured);                		
+                	self.state.settings = response.data;
                 	self.updateShowVera();
                 	self.updateShowHarmony();
                 	self.updateShowNest();
@@ -316,6 +253,8 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             this.state.error = "";
             if(device.httpVerb != null && device.httpVerb != "")
             	device.deviceType = "custom";
+            if(device.targetDevice == null || device.targetDevice == "")
+            	device.targetDevice = "Encapsulated";
             if (device.id) {
                 var putUrl = this.state.base + "/" + device.id;
                 return $http.put(putUrl, {
@@ -345,8 +284,6 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
             } else {
             	if(device.deviceType == null || device.deviceType == "")
             		device.deviceType = "custom";
-                if(device.httpVerb != null && device.httpVerb != "")
-                	device.deviceType = "custom";
                 return $http.post(this.state.base, {
                     name: device.name,
                     mapId: device.mapId,
@@ -477,9 +414,8 @@ app.service('bridgeService', function ($http, $window, BridgeSettings) {
         };
     });
 
-app.controller('ViewingController', function ($scope, $location, $http, $window, bridgeService, BridgeSettings) {
+app.controller('ViewingController', function ($scope, $location, $http, $window, bridgeService) {
 
-		$scope.BridgeSettings = bridgeService.BridgeSettings;
         bridgeService.viewDevices();
         bridgeService.viewBackups();
         $scope.bridge = bridgeService.state;
@@ -536,49 +472,48 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
         };
     });
 
-app.controller('AddingController', function ($scope, $location, $http, bridgeService, BridgeSettings) {
-	$scope.device = {id: "", name: "", deviceType: "custom", onUrl: "", offUrl: ""};
-	$scope.clearDevice = function () {
-        $scope.device.id = "";
-        $scope.device.mapType = null;
-        $scope.device.mapId = null;
-        $scope.device.name = "";
-        $scope.device.onUrl = "";
-        $scope.device.deviceType = "custom";
-        $scope.device.targetDevice = null;
-        $scope.device.offUrl = "";
-        $scope.device.httpVerb = null;
-        $scope.device.contentType = null;
-        $scope.device.contentBody = null;
-        $scope.device.contentBodyOff = null;
-    };
-
-
-        $scope.clearDevice();
-        $scope.vera = {base: "", port: "3480", id: ""};
-        $scope.vera.base = "http://" + BridgeSettings.veraaddress;
+app.controller('AddingController', function ($scope, $location, $http, bridgeService) {
+        $scope.bridge = bridgeService.state;
+        $scope.device = $scope.bridge.device;
+        $scope.device_dim_control = "";
+        $scope.bulk = { devices: [] };
+        $scope.vera = {base: "http://" + $scope.bridge.settings.veraaddress, port: "3480", id: ""};
         bridgeService.viewVeraDevices();
         bridgeService.viewVeraScenes();
         bridgeService.viewHarmonyActivities();
         bridgeService.viewHarmonyDevices();
         bridgeService.viewNestItems();
-        $scope.bridge = bridgeService.state;
         $scope.imgButtonsUrl = "glyphicon glyphicon-plus";
         $scope.buttonsVisible = false;
+
         $scope.predicate = '';
         $scope.reverse = true;
-        $scope.device_dim_control = "";
-        $scope.bulk = { devices: [] };
         $scope.order = function(predicate) {
           $scope.reverse = ($scope.predicate === predicate) ? !$scope.reverse : false;
           $scope.predicate = predicate;
         };
           
-        $scope.buildUrlsUsingDevice = function (dim_control) {
+		$scope.clearDevice = function () {
+	        $scope.device.id = "";
+	        $scope.device.mapType = null;
+	        $scope.device.mapId = null;
+	        $scope.device.name = "";
+	        $scope.device.onUrl = "";
+	        $scope.device.deviceType = "custom";
+	        $scope.device.targetDevice = null;
+	        $scope.device.offUrl = "";
+	        $scope.device.httpVerb = null;
+	        $scope.device.contentType = null;
+	        $scope.device.contentBody = null;
+	        $scope.device.contentBodyOff = null;
+	    };
+
+	    $scope.buildUrlsUsingDevice = function (dim_control) {
             if ($scope.vera.base.indexOf("http") < 0) {
                 $scope.vera.base = "http://" + $scope.vera.base;
             }
             $scope.device.deviceType = "switch";
+            $scope.device.targetDevice = $scope.bridge.settings.veraaddress;
             $scope.device.mapType = "veraDevice";
             $scope.device.mapId = $scope.vera.id;
             if(dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)
@@ -601,6 +536,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
                 $scope.vera.base = "http://" + $scope.vera.base;
             }
             $scope.device.deviceType = "scene";
+            $scope.device.targetDevice = $scope.bridge.settings.veraaddress;
             $scope.device.mapType = "veraScene";
             $scope.device.mapId = $scope.vera.id;
             $scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
@@ -617,6 +553,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
             }
             $scope.device.deviceType = "switch";
             $scope.device.name = veradevice.name;
+            $scope.device.targetDevice = veradevice.veraname;
             $scope.device.mapType = "veraDevice";
             $scope.device.mapId = veradevice.id;
             if(dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)
@@ -640,6 +577,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
             }
             $scope.device.deviceType = "scene";
             $scope.device.name = verascene.name;
+            $scope.device.targetDevice = verascene.veraname;
             $scope.device.mapType = "veraScene";
             $scope.device.mapId = verascene.id;
             $scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
@@ -681,6 +619,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         $scope.buildNestHomeUrls = function (nestitem) {
             $scope.device.deviceType = "home";
             $scope.device.name = nestitem.name;
+            $scope.device.targetDevice = nestitem.name;
             $scope.device.mapType = "nestHomeAway";
             $scope.device.mapId = nestitem.id;
             $scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"away\":false,\"control\":\"status\"}";
@@ -690,6 +629,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         $scope.buildNestTempUrls = function (nestitem) {
             $scope.device.deviceType = "thermo";
             $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Temperature";
+            $scope.device.targetDevice = nestitem.location;
             $scope.device.mapType = "nestThermoSet";
             $scope.device.mapId = nestitem.id + "-SetTemp";
             $scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"temp\",\"temp\":\"${intensity.percent}\"}";
@@ -699,6 +639,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         $scope.buildNestHeatUrls = function (nestitem) {
             $scope.device.deviceType = "thermo";
             $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Heat";
+            $scope.device.targetDevice = nestitem.location;
             $scope.device.mapType = "nestThermoSet";
             $scope.device.mapId = nestitem.id + "-SetHeat";
             $scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"heat\"}";
@@ -708,6 +649,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         $scope.buildNestCoolUrls = function (nestitem) {
             $scope.device.deviceType = "thermo";
             $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Cool";
+            $scope.device.targetDevice = nestitem.location;
             $scope.device.mapType = "nestThermoSet";
             $scope.device.mapId = nestitem.id + "-SetCool";
             $scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"cool\"}";
@@ -717,6 +659,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         $scope.buildNestRangeUrls = function (nestitem) {
             $scope.device.deviceType = "thermo";
             $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Range";
+            $scope.device.targetDevice = nestitem.location;
             $scope.device.mapType = "nestThermoSet";
             $scope.device.mapId = nestitem.id + "-SetRange";
             $scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"range\"}";
@@ -726,6 +669,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         $scope.buildNestOffUrls = function (nestitem) {
             $scope.device.deviceType = "thermo";
             $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Thermostat";
+            $scope.device.targetDevice = nestitem.location;
             $scope.device.mapType = "nestThermoSet";
             $scope.device.mapId = nestitem.id + "-TurnOff";
             $scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"range\"}";
@@ -735,6 +679,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         $scope.buildNestFanUrls = function (nestitem) {
             $scope.device.deviceType = "thermo";
             $scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Fan";
+            $scope.device.targetDevice = nestitem.location;
             $scope.device.mapType = "nestThermoSet";
             $scope.device.mapId = nestitem.id + "-SetFan";
             $scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"fan-on\"}";
@@ -750,18 +695,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         		return;
             bridgeService.addDevice($scope.device).then(
                 function () {
-                    $scope.device.id = "";
-                    $scope.device.mapType = null;
-                    $scope.device.mapId = null;
-                    $scope.device.name = "";
-                    $scope.device.onUrl = "";
-                    $scope.device.deviceType = "custom";
-                    $scope.device.targetDevice = null;
-                    $scope.device.offUrl = "";
-                    $scope.device.httpVerb = null;
-                    $scope.device.contentType = null;
-                    $scope.device.contentBody = null;
-                    $scope.device.contentBodyOff = null;
+                    $scope.clearDevice();
                 },
                 function (error) {
                 }
@@ -843,7 +777,7 @@ app.filter('availableVeraDeviceId', function(bridgeService) {
         if(input == null)
         	return out;
         for (var i = 0; i < input.length; i++) {
-            if(!bridgeService.findDeviceByMapId(input[i].id, null, "veraDevice")){
+            if(!bridgeService.findDeviceByMapId(input[i].id, input[i].veraname, "veraDevice")){
                 out.push(input[i]);
             }
         }
@@ -857,7 +791,7 @@ return function(input) {
     if(input == null)
     	return out;
     for (var i = 0; i < input.length; i++) {
-        if(bridgeService.findDeviceByMapId(input[i].id, null, "veraDevice")){
+        if(bridgeService.findDeviceByMapId(input[i].id, input[i].veraname, "veraDevice")){
             out.push(input[i]);
         }
     }
@@ -871,7 +805,7 @@ app.filter('availableVeraSceneId', function(bridgeService) {
         if(input == null)
         	return out;
         for (var i = 0; i < input.length; i++) {
-            if(!bridgeService.findDeviceByMapId(input[i].id, null, "veraScene")){
+            if(!bridgeService.findDeviceByMapId(input[i].id, input[i].veraname, "veraScene")){
                 out.push(input[i]);
             }
         }
@@ -885,7 +819,7 @@ return function(input) {
     if(input == null)
     	return out;
     for (var i = 0; i < input.length; i++) {
-        if(bridgeService.findDeviceByMapId(input[i].id, null, "veraScene")){
+        if(bridgeService.findDeviceByMapId(input[i].id,input[i].veraname, "veraScene")){
             out.push(input[i]);
         }
     }

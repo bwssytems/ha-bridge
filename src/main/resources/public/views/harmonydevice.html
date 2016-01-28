@@ -22,6 +22,7 @@
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
+						<th>Row</th>
 						<th>
 							<a href="" ng-click="order('label')">Name</a>
         					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
@@ -40,6 +41,7 @@
 					</tr>
 				</thead>
 				<tr ng-repeat="harmonydevice in bridge.harmonydevices | orderBy:predicate:reverse">
+					<td>{{$index+1}}</td>
 					<td>{{harmonydevice.device.label}}</td>
 					<td>{{harmonydevice.device.id}}</td>
 					<td>{{harmonydevice.hub}}</td>
@@ -74,6 +76,7 @@
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
+						<th>Row</th>
 						<th>
 							<a href="" ng-click="order('name')">Name</a>
         					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
@@ -94,6 +97,7 @@
 					</tr>
 				</thead>
 				<tr ng-repeat="device in bridge.devices | configuredButtons | orderBy:predicate:reverse">
+					<td>{{$index+1}}</td>
 					<td>{{device.name}}</td>
 					<td>{{device.id}}</td>
 					<td>{{device.targetDevice}}</td>

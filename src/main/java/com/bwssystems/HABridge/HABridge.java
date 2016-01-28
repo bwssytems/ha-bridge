@@ -89,7 +89,19 @@ public class HABridge {
         
         bridgeSettings.setUpnpDeviceDb(System.getProperty("upnp.device.db", Configuration.DEVICE_DB_DIRECTORY));
         bridgeSettings.setUpnpResponsePort(System.getProperty("upnp.response.port", Configuration.UPNP_RESPONSE_PORT));
-        bridgeSettings.setVeraAddress(System.getProperty("vera.address", Configuration.DEFAULT_ADDRESS));
+        IpList theVeraList;
+
+        try {
+        	theVeraList = new Gson().fromJson(System.getProperty("vera.address", Configuration.DEFAULT_HARMONY_ADDRESS_LIST), IpList.class);
+        } catch (Exception e) {
+        	try {
+        		theVeraList = new Gson().fromJson("{devices:[{name:default,ip:" + System.getProperty("vera.address", Configuration.DEFAULT_ADDRESS) + "}]}", IpList.class);
+        	} catch (Exception et) {
+    	        log.error("Cannot parse vera.address, Exiting with message: " + e.getMessage(), e);
+    	        return;
+        	}
+        }
+        bridgeSettings.setVeraAddress(theVeraList);
         IpList theHarmonyList;
 
         try {

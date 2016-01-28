@@ -7,7 +7,7 @@ public class BridgeSettings {
 	private String serverport;
 	private String upnpresponseport;
 	private String upnpdevicedb;
-	private String veraaddress;
+	private IpList veraaddress;
 	private IpList harmonyaddress;
 	private String harmonyuser;
 	private String harmonypwd;
@@ -43,10 +43,10 @@ public class BridgeSettings {
 	public void setUpnpDeviceDb(String upnpDeviceDb) {
 		this.upnpdevicedb = upnpDeviceDb;
 	}
-	public String getVeraAddress() {
+	public IpList getVeraAddress() {
 		return veraaddress;
 	}
-	public void setVeraAddress(String veraAddress) {
+	public void setVeraAddress(IpList veraAddress) {
 		this.veraaddress = veraAddress;
 	}
 	public IpList getHarmonyAddress() {
@@ -110,7 +110,8 @@ public class BridgeSettings {
 		this.nestconfigured = isNestConfigured;
 	}
 	public Boolean isValidVera() {
-		if(this.veraaddress.contains(Configuration.DEFAULT_ADDRESS))
+		List<NamedIP> devicesList = this.veraaddress.getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
 		return true;
 	}

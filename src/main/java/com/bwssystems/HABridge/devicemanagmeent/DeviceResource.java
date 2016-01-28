@@ -24,6 +24,7 @@ import com.bwssystems.HABridge.dao.DeviceRepository;
 import com.bwssystems.NestBridge.NestHome;
 import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.luupRequests.Sdata;
+import com.bwssystems.vera.VeraHome;
 import com.bwssystems.vera.VeraInfo;
 import com.google.gson.Gson;
 
@@ -35,7 +36,7 @@ public class DeviceResource {
     private static final Logger log = LoggerFactory.getLogger(DeviceResource.class);
 
     private DeviceRepository deviceRepository;
-    private VeraInfo veraInfo;
+    private VeraHome veraHome;
     private Version version;
     private HarmonyHome myHarmonyHome;
     private NestHome nestHome;
@@ -43,7 +44,12 @@ public class DeviceResource {
 
 	public DeviceResource(BridgeSettings theSettings, Version theVersion, HarmonyHome theHarmonyHome, NestHome aNestHome) {
 		this.deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
-		this.veraInfo = new VeraInfo(theSettings.getVeraAddress(), theSettings.isValidVera());
+
+		if(theSettings.isValidVera())
+			this.veraHome = new VeraHome(theSettings);
+		else
+			this.veraHome = null;
+		
 		if(theSettings.isValidHarmony())
 			this.myHarmonyHome = theHarmonyHome;
 		else
@@ -53,6 +59,7 @@ public class DeviceResource {
 			this.nestHome = aNestHome;
 		else
 			this.nestHome = null;
+		
 		this.version = theVersion;
         setupEndpoints();
 	}
@@ -175,25 +182,23 @@ public class DeviceResource {
 
     	get (API_CONTEXT + "/vera/devices", "application/json", (request, response) -> {
 	    	log.debug("Get vera devices");
-	        Sdata sData = veraInfo.getSdata();
-	        if(sData == null){
+	        if(veraHome == null){
 				response.status(HttpStatus.SC_NOT_FOUND);
 				return null;
 	        }
 
 	      	response.status(HttpStatus.SC_OK);
-	        return sData.getDevices();
+	        return veraHome.getDevices();
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/vera/scenes", "application/json", (request, response) -> {
 	    	log.debug("Get vera scenes");
-	        Sdata sData = veraInfo.getSdata();
-	        if(sData == null){
+	        if(veraHome == null){
 				response.status(HttpStatus.SC_NOT_FOUND);
 	            return null;
 	        }
 	      	response.status(HttpStatus.SC_OK);
-	        return sData.getScenes();
+	        return veraHome.getScenes();
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/harmony/activities", "application/json", (request, response) -> {

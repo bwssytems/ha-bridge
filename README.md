@@ -14,8 +14,8 @@ java -jar  -Dupnp.config.address=A.B.C.D -Dvera.address=E.F.G.H -Dharmony.addres
 ## Available Arguments
 ### -Dupnp.config.address=`<ip address>`
 The server defaults to the first available address on the host if this is not given. This default may NOT be the correct IP that is your public IP for your host on the network. It is best to set this parameter to not have discovery issues. Replace the -Dupnp.config.address=`<ip address>` value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery. 
-### -Dvera.address=`<ip address>`
-The argument for the vera address should be given as it the system does not have a way to find the address. Supply -Dvera.address=X.Y.Z.A on the command line to provide it. If a vera is not used, do not set it.
+### -Dvera.address=`<ip address>` | `<{devices:[{name:avera,ip:x.y.w.z},{name:anothervera,ip:a.b.c.d}]}>`
+The argument for the vera address should be given as it the system does not have a way to find the address. Supply -Dvera.address=X.Y.Z.A on the command line to provide it. If a vera is not used, do not set it. To provide multiple veras, use the json style notation outlined above to provide the list. This argument is backwards compatible.
 ### -Dserver.port=`<port>`
 The server defaults to running on port 8080. If you're already running a server (like openHAB) on 8080, -Dserver.port=`<port>` on the command line.
 ### -Dupnp.device.db=`<filepath>`
@@ -306,7 +306,9 @@ comment | string | Comment configured with device. Not always present.
 	"status":"0",
 	"level":"0",
 	"state":"-1",
-	"comment":""
+	"comment":"",
+	"veraname":"default",
+	"veraddress":"192.168.1.2"
 },
 {
 	"name":"Couch Right Lamp",
@@ -320,6 +322,8 @@ comment | string | Comment configured with device. Not always present.
 	"level":"0",
 	"state":"-1",
 	"comment":""
+	"veraname":"default",
+	"veraddress":"192.168.1.2"
 }]
 ```
 ### Get Vera Scenes 
@@ -340,12 +344,16 @@ room | string | Room name assigned to scene.
 	"name":"AccentLightsOff",
 	"id":"27",
 	"room":"no room"
+	"veraname":"default",
+	"veraddress":"192.168.1.2"
 },
 {
 	"active":"0",
 	"name":"AccentLightsOn",
 	"id":"26",
 	"room":"no room"
+	"veraname":"default",
+	"veraddress":"192.168.1.2"
 }]
 ```
 ### Get Harmony Activities

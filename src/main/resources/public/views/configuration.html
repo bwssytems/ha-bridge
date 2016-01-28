@@ -67,7 +67,7 @@
 
 	<div class="panel panel-default bridgeServer">
 		<div class="panel-heading">
-			<h1 class="panel-title">Bridge settings <a ng-click="toggle()"><span class={{imgUrl}} aria-hidden="true"></a></h1>
+			<h1 class="panel-title">Bridge Settings <a ng-click="toggle()"><span class={{imgUrl}} aria-hidden="true"></a></h1>
 		</div>
 		<div ng-if="visible" class="animate-if" class="panel-body">
 
@@ -95,43 +95,43 @@
 				</thead>
 				<tr>
 					<td>upnp.config.address</td>
-					<td>{{BridgeSettings.upnpconfigaddress}}</td>
+					<td>{{bridge.settings.upnpconfigaddress}}</td>
 				</tr>
 				<tr>
 					<td>server.port</td>
-					<td>{{BridgeSettings.serverport}}</td>
+					<td>{{bridge.settings.serverport}}</td>
 				</tr>
 				<tr>
 					<td>upnp.devices.db</td>
-					<td>{{BridgeSettings.upnpdevicedb}}</td>
+					<td>{{bridge.settings.upnpdevicedb}}</td>
 				</tr>
 				<tr>
 					<td>upnp.response.port</td>
-					<td>{{BridgeSettings.upnpresponseport}}</td>
+					<td>{{bridge.settings.upnpresponseport}}</td>
 				</tr>
 				<tr>
 					<td>vera.address</td>
-					<td>{{BridgeSettings.veraaddress}}</td>
+					<td>{{bridge.settings.veraaddress}}</td>
 				</tr>
 				<tr>
 					<td>harmony.address</td>
-					<td>{{BridgeSettings.harmonyaddress}}</td>
+					<td>{{bridge.settings.harmonyaddress}}</td>
 				</tr>
 				<tr>
 					<td>upnp.strict</td>
-					<td>{{BridgeSettings.upnpstrict}}</td>
+					<td>{{bridge.settings.upnpstrict}}</td>
 				</tr>
 				<tr>
 					<td>trace.upnp</td>
-					<td>{{BridgeSettings.traceupnp}}</td>
+					<td>{{bridge.settings.traceupnp}}</td>
 				</tr>
 				<tr>
 					<td>dev.mode</td>
-					<td>{{BridgeSettings.devmode}}</td>
+					<td>{{bridge.settings.devmode}}</td>
 				</tr>
 				<tr>
 					<td>nest.configured</td>
-					<td>{{BridgeSettings.nestconfigured}}</td>
+					<td>{{bridge.settings.nestconfigured}}</td>
 				</tr>
 			</table>
 		</div>
