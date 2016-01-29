@@ -378,7 +378,7 @@ public class HueMulator {
 	        	else {
 	        		if(thermoSetting.getControl().equalsIgnoreCase("temp")) {
 	        			if(request.body().contains("bri")) {
-	        				thermoSetting.setTemp(String.valueOf(Math.round((Integer.parseInt(replaceIntensityValue(thermoSetting.getTemp(), state.getBri())) - 32)/1.8)));
+	        				thermoSetting.setTemp(String.valueOf((Double.parseDouble(replaceIntensityValue(thermoSetting.getTemp(), state.getBri())) - 32.0)/1.8));
 	        				log.debug("Setting thermostat: " + thermoSetting.getName() + " to " + thermoSetting.getTemp() + "C");
 	        				theNest.getThermostat(thermoSetting.getName()).setTargetTemperature(Float.parseFloat(thermoSetting.getTemp()));
 	        			}

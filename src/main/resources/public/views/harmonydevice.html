@@ -48,21 +48,20 @@
 					<td>
 						<select name="device-ctrlon" id="device-ctrlon" ng-model="devicectrlon">
 							<optgroup ng-repeat="ctrlon in harmonydevice.device.controlGroup" label="{{ctrlon.name}}">
-								<option ng-repeat="funcon in ctrlon.function" value="{{funcon.label}}">{{funcon.name}}</option>
+								<option ng-repeat="funcon in ctrlon.function" value="{{funcon.action}}">{{funcon.label}}</option>
 							</optgroup >
 						</select>
 					</td>
 					<td>
 						<select name="device-ctrloff" id="device-ctrloff" ng-model="devicectrloff">
 							<optgroup ng-repeat="ctrloff in harmonydevice.device.controlGroup" label="{{ctrloff.name}}">
-								<option ng-repeat="funcoff in ctrloff.function" value="{{funcoff.label}}">{{funcoff.name}}</option>
+								<option ng-repeat="funcoff in ctrloff.function" value="{{funcoff.action}}">{{funcoff.label}}</option>
 							</optgroup >
 						</select>
 					</td>
 					<td>
 						<button class="btn btn-success" type="submit"
-							ng-click="buildButtonUrls(harmonydevice, devicectrlon, devicectrloff)">Build
-							A Button</button>
+							ng-click="buildButtonUrls(harmonydevice, devicectrlon, devicectrloff)">Build A Button</button>
 					</td>
 				</tr>
 			</table>
