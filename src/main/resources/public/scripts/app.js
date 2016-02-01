@@ -477,7 +477,8 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         $scope.device = $scope.bridge.device;
         $scope.device_dim_control = "";
         $scope.bulk = { devices: [] };
-        $scope.vera = {base: "http://" + $scope.bridge.settings.veraaddress, port: "3480", id: ""};
+		var veraList = angular.fromJson($scope.bridge.settings.veraaddress);
+        $scope.vera = {base: "http://" + veraList.devices[0].ip, port: "3480", id: ""};
         bridgeService.viewVeraDevices();
         bridgeService.viewVeraScenes();
         bridgeService.viewHarmonyActivities();
@@ -513,7 +514,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
                 $scope.vera.base = "http://" + $scope.vera.base;
             }
             $scope.device.deviceType = "switch";
-            $scope.device.targetDevice = $scope.bridge.settings.veraaddress;
+            $scope.device.targetDevice = "Encapsulated";
             $scope.device.mapType = "veraDevice";
             $scope.device.mapId = $scope.vera.id;
             if(dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)
@@ -536,7 +537,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
                 $scope.vera.base = "http://" + $scope.vera.base;
             }
             $scope.device.deviceType = "scene";
-            $scope.device.targetDevice = $scope.bridge.settings.veraaddress;
+            $scope.device.targetDevice = "Encapsulated";
             $scope.device.mapType = "veraScene";
             $scope.device.mapId = $scope.vera.id;
             $scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
@@ -548,42 +549,36 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         };
 
         $scope.buildDeviceUrls = function (veradevice, dim_control) {
-            if ($scope.vera.base.indexOf("http") < 0) {
-                $scope.vera.base = "http://" + $scope.vera.base;
-            }
             $scope.device.deviceType = "switch";
             $scope.device.name = veradevice.name;
             $scope.device.targetDevice = veradevice.veraname;
             $scope.device.mapType = "veraDevice";
             $scope.device.mapId = veradevice.id;
             if(dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)
-            	$scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
+            	$scope.device.onUrl = "http://" + veradevice.veraaddress + ":" + $scope.vera.port
                 	+ "/data_request?id=action&output_format=json&DeviceNum="
                 	+ veradevice.id
                 	+ "&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget="
                 	+ dim_control;
             else
-            	$scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
+            	$scope.device.onUrl = "http://" + veradevice.veraaddress + ":" + $scope.vera.port
                 	+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
                 	+ veradevice.id;
-            $scope.device.offUrl = $scope.vera.base + ":" + $scope.vera.port
+            $scope.device.offUrl = "http://" + veradevice.veraaddress + ":" + $scope.vera.port
                 + "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum="
                 + veradevice.id;
         };
 
         $scope.buildSceneUrls = function (verascene) {
-            if ($scope.vera.base.indexOf("http") < 0) {
-                $scope.vera.base = "http://" + $scope.vera.base;
-            }
             $scope.device.deviceType = "scene";
             $scope.device.name = verascene.name;
             $scope.device.targetDevice = verascene.veraname;
             $scope.device.mapType = "veraScene";
             $scope.device.mapId = verascene.id;
-            $scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
+            $scope.device.onUrl = "http://" + verascene.veraaddress + ":" + $scope.vera.port
                 + "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
                 + verascene.id;
-            $scope.device.offUrl = $scope.vera.base + ":" + $scope.vera.port
+            $scope.device.offUrl = "http://" + verascene.veraaddress + + ":" + $scope.vera.port
                 + "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
                 + verascene.id;
         };
