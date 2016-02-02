@@ -38,7 +38,7 @@ app.run( function (bridgeService) {
 
 app.service('bridgeService', function ($http, $window) {
         var self = this;
-        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", huebase: window.location.origin + "/api", backups: [], devices: [], device: [], settings: [], error: "", showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
+        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", huebase: window.location.origin + "/api", backups: [], devices: [], device: [], settings: [], olddevicename: "", error: "", showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
 
         this.viewDevices = function () {
             this.state.error = "";
@@ -386,6 +386,7 @@ app.service('bridgeService', function ($http, $window) {
 
         this.editDevice = function (device) {
             self.state.device = device;
+            self.state.olddevicename = device.name;
         };
 
         this.testUrl = function (device, type) {
@@ -507,6 +508,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
 	        $scope.device.contentType = null;
 	        $scope.device.contentBody = null;
 	        $scope.device.contentBodyOff = null;
+            $scope.bridge.olddevice.name = "";
 	    };
 
 	    $scope.buildUrlsUsingDevice = function (dim_control) {
@@ -690,6 +692,27 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         $scope.addDevice = function () {
         	if($scope.device.name == "" && $scope.device.onUrl == "")
         		return;
+            bridgeService.addDevice($scope.device).then(
+                function () {
+                    $scope.clearDevice();
+                },
+                function (error) {
+                }
+            );
+
+        };
+        
+        $scope.copyDevice = function () {
+        	if($scope.device.name == "" && $scope.device.onUrl == "") {
+        		$scope.clearDevice();
+        		return;
+        	}
+        	
+        	if($scope.device.name == $scope.bridge.olddevicename) {
+        		$scope.clearDevice();
+        		return;
+        	}
+        	$scope.device.id = null;
             bridgeService.addDevice($scope.device).then(
                 function () {
                     $scope.clearDevice();
