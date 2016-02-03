@@ -508,7 +508,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
 	        $scope.device.contentType = null;
 	        $scope.device.contentBody = null;
 	        $scope.device.contentBodyOff = null;
-            $scope.bridge.olddevice.name = "";
+            $scope.bridge.olddevicename = "";
 	    };
 
 	    $scope.buildUrlsUsingDevice = function (dim_control) {
