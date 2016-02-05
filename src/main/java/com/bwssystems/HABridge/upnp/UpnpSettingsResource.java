@@ -49,7 +49,7 @@ public class UpnpSettingsResource {
 		this.theSettings.setTraceupnp(theBridgeSettings.isTraceupnp());
 		this.theSettings.setUpnpConfigAddress(theBridgeSettings.getUpnpConfigAddress());
 		this.theSettings.setUpnpDeviceDb(theBridgeSettings.getUpnpDeviceDb());
-		this.theSettings.setUpnpResponseDevices(theBridgeSettings.getUpnpResponseDevices());
+		this.theSettings.setButtonsleep(theBridgeSettings.getButtonsleep());
 		this.theSettings.setUpnpResponsePort(theBridgeSettings.getUpnpResponsePort());
 		this.theSettings.setUpnpStrict(theBridgeSettings.isUpnpStrict());
 		this.theSettings.setVeraAddress(theBridgeSettings.getVeraAddress());

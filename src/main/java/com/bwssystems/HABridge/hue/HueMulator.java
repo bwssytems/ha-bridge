@@ -348,7 +348,7 @@ public class HueMulator {
 	        	else {
 	        		for(int i = 0; i < deviceButtons.length; i++) {
 	        			if( i > 0)
-	        				Thread.sleep(100);
+	        				Thread.sleep(bridgeSettings.getButtonsleep());
 	    	        	log.debug("pressing button: " + deviceButtons[i].getDevice() + " - " + deviceButtons[i].getButton() + " - iteration: " + String.valueOf(i));
 	        			myHarmony.pressButton(deviceButtons[i]);
 	        		}

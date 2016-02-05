@@ -11,7 +11,7 @@ public class BridgeSettings {
 	private IpList harmonyaddress;
 	private String harmonyuser;
 	private String harmonypwd;
-	private Integer upnpresponsedevices;
+	private Integer buttonsleep;
 	private boolean upnpstrict;
 	private boolean traceupnp;
 	private boolean devmode;
@@ -67,12 +67,6 @@ public class BridgeSettings {
 	public void setHarmonyPwd(String harmonypwd) {
 		this.harmonypwd = harmonypwd;
 	}
-	public Integer getUpnpResponseDevices() {
-		return upnpresponsedevices;
-	}
-	public void setUpnpResponseDevices(Integer upnpresponsedevices) {
-		this.upnpresponsedevices = upnpresponsedevices;
-	}
 	public boolean isUpnpStrict() {
 		return upnpstrict;
 	}
@@ -108,6 +102,12 @@ public class BridgeSettings {
 	}
 	public void setNestConfigured(boolean isNestConfigured) {
 		this.nestconfigured = isNestConfigured;
+	}
+	public Integer getButtonsleep() {
+		return buttonsleep;
+	}
+	public void setButtonsleep(Integer buttonsleep) {
+		this.buttonsleep = buttonsleep;
 	}
 	public Boolean isValidVera() {
 		List<NamedIP> devicesList = this.veraaddress.getDevices();

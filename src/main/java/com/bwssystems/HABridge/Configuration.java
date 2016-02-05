@@ -11,4 +11,5 @@ public class Configuration {
 	public final static String DEFAULT_USER = "";
 	public final static String DEFAULT_PWD = "";
 	public final static String DFAULT_WEB_PORT = "8080";
+	public final static String DFAULT_BUTTON_SLEEP = "100";
 }

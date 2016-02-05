@@ -1,4 +1,4 @@
-var app = angular.module('habridge', ['ngRoute']);
+var app = angular.module('habridge', ['ngRoute','ngToast']);
 
 app.config(function ($routeProvider) {
 	$routeProvider.when('/#', {
@@ -36,7 +36,7 @@ app.run( function (bridgeService) {
 	bridgeService.getHABridgeVersion();	
 });
 
-app.service('bridgeService', function ($http, $window) {
+app.service('bridgeService', function ($http, $window, ngToast) {
         var self = this;
         this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", huebase: window.location.origin + "/api", backups: [], devices: [], device: [], settings: [], olddevicename: "", error: "", showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
 
@@ -304,7 +304,7 @@ app.service('bridgeService', function ($http, $window) {
                         if (error.data) {
                         	$window.alert("Add new Device Error: " + error.data.message);
                         }
-                        $window.alert("Add new Device Error: unknown");
+                        self.state.error = "Add new Device Error: unknown";
                     }
                 );
             }
@@ -322,7 +322,7 @@ app.service('bridgeService', function ($http, $window) {
                     if (error.data) {
                         self.state.error = error.data.message;
                     }
-                    $window.alert("Backup Device Db Error: unknown");
+                    self.state.error = "Backup Device Db Error: unknown";
                 }
             );
         };
@@ -340,7 +340,7 @@ app.service('bridgeService', function ($http, $window) {
                     if (error.data) {
                         self.state.error = error.data.message;
                     }
-                    $window.alert("Backup Db Restore Error: unknown");
+                    self.state.error = "Backup Db Restore Error: unknown";
                 }
             );
         };
@@ -357,7 +357,7 @@ app.service('bridgeService', function ($http, $window) {
                     if (error.data) {
                         self.state.error = error.data.message;
                     }
-                    $window.alert("Backup Db Frlryr Error: unknown");
+                    self.state.error = "Backup Db File Error: unknown";
                 }
             );
         };
@@ -372,7 +372,7 @@ app.service('bridgeService', function ($http, $window) {
                     if (error.data) {
                         self.state.error = error.data.message;
                     }
-                    $window.alert("Delete Device Error: unknown");
+                    self.state.error = "Delete Device Error: unknown";
                 }
             );
         };
@@ -393,10 +393,14 @@ app.service('bridgeService', function ($http, $window) {
         	if(type == "on") {
        			$http.put(this.state.huebase + "/test/lights/" + device.id + "/state", "{\"on\":true}").then(
        	                function (response) {
-       	                    $window.alert("Request Exceuted: " + response.statusText);
+       	                	ngToast.create({
+       	                	  className: "success",
+       	                	  content:"Request Exceuted: " + response.statusText});
        	                },
        	                function (error) {
-       	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
+       	                	ngToast.create({
+       	                	  className: "warning",
+       	                	  content:"Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log."});
        	                }
        	            );
            		return;        		
@@ -404,10 +408,14 @@ app.service('bridgeService', function ($http, $window) {
         	else {
        			$http.put(this.state.huebase + "/test/lights/" + device.id + "/state", "{\"on\":false}").then(
        	                function (response) {
-       	                    $window.alert("Request Exceuted: " + response.statusText);
+       	                	ngToast.create({
+         	                	  className: "success",
+           	                	  content:"Request Exceuted: " + response.statusText});
        	                },
        	                function (error) {
-       	                    $window.alert("Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log.");
+       	                	ngToast.create({
+         	                	  className: "warning",
+           	                	  content:"Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log."});
        	                }
        	            );
            		return;        		
