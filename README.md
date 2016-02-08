@@ -15,19 +15,21 @@ java -jar  -Dupnp.config.address=A.B.C.D -Dvera.address=E.F.G.H -Dharmony.addres
 ### -Dupnp.config.address=`<ip address>`
 The server defaults to the first available address on the host if this is not given. This default may NOT be the correct IP that is your public IP for your host on the network. It is best to set this parameter to not have discovery issues. Replace the -Dupnp.config.address=`<ip address>` value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery. 
 ### -Dvera.address=`<ip address>` | `<{devices:[{name:avera,ip:x.y.w.z},{name:anothervera,ip:a.b.c.d}]}>`
-The argument for the vera address should be given as it the system does not have a way to find the address. Supply -Dvera.address=X.Y.Z.A on the command line to provide it. If a vera is not used, do not set it. To provide multiple veras, use the json style notation outlined above to provide the list. This argument is backwards compatible.
+The argument for the vera address should be given as it the system does not have a way to find the address. Supply -Dvera.address=X.Y.Z.A on the command line to provide it. If a vera is not used, do not set it. To provide multiple veras, use the json style notation outlined above to provide the list. The json notation may need to be surrounded by quotation marks when starting from a shell script. Most service scripts will not need the quotation marks. This argument is backwards compatible.
 ### -Dserver.port=`<port>`
 The server defaults to running on port 8080. If you're already running a server (like openHAB) on 8080, -Dserver.port=`<port>` on the command line.
 ### -Dupnp.device.db=`<filepath>`
-The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify -Dupnp.devices.db=`<directory>/<filename> or <filename>` if it is the same directory.
+The default location for the db to contain the devices as they are added is the relative path from where the bridge is started in "data/device.db". If you would like a different filename or directory, specify -Dupnp.devices.db=`<directory>/<filename>` explicitly.
 ### -Dupnp.response.port=`<port>`
 The upnp response port that will be used. The default is 50000.  
 ### -Dharmony.address=`<ip address>` | `<{devices:[{name:ahub,ip:x.y.w.z},{name:anotherhub,ip:a.b.c.d}]}>`
-The argument for the Harmony Hub address should be given as the system does not have a way to find the address. Supply -Dharmony.address=X.Y.Z.A on the command line to provide it. If a Harmony Hub is not used, do not set it. To provide multiple harmony hubs, use the json style notation outlined above to provide the list. This argument is backwards compatible.
+The argument for the Harmony Hub address should be given as the system does not have a way to find the address. Supply -Dharmony.address=X.Y.Z.A on the command line to provide it. If a Harmony Hub is not used, do not set it. To provide multiple harmony hubs, use the json style notation outlined above to provide the list. The json notation may need to be surrounded by quotation marks when starting from a shell script. Most service scripts will not need the quotation marks. This argument is backwards compatible.
 ### -Dharmony.user=`<username>`
 The user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub features, provide -Dharmony.user=`<username>` on the command line.
 ### -Dharmony.pwd=`<password>`
 The password for the user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub Features, provide -Dharmony.pwd=`<password>` on the command line.
+### -Dbutton.sleep=`<time in milliseconds>`
+The default button press sleep time interval is 100 milliseconds. If you need more time add this parameter. For example 1000 ms is 1 second and you could set -Dbutton.sleep=1000 for the longer interval if you are having issues on your devices not handling button presses fast enough.
 ### -Dnest.user=`<username>`
 The user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features, provide -Dnest.user=`<username>` on the command line. There is no need to give any ip address or host information as this contacts your cloud account.
 ### -Dnest.pwd=`<password>`
