@@ -18,6 +18,9 @@ public class BridgeSettings {
 	private String nestuser;
 	private String nestpwd;
 	private boolean nestconfigured;
+	private String configfile;
+	private boolean restart;
+	private boolean stop;
 	
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -108,6 +111,24 @@ public class BridgeSettings {
 	}
 	public void setButtonsleep(Integer buttonsleep) {
 		this.buttonsleep = buttonsleep;
+	}
+	public boolean isRestart() {
+		return restart;
+	}
+	public void setRestart(boolean restart) {
+		this.restart = restart;
+	}
+	public boolean isStop() {
+		return stop;
+	}
+	public void setStop(boolean stop) {
+		this.stop = stop;
+	}
+	public String getConfigfile() {
+		return configfile;
+	}
+	public void setConfigfile(String configfile) {
+		this.configfile = configfile;
 	}
 	public Boolean isValidVera() {
 		List<NamedIP> devicesList = this.veraaddress.getDevices();

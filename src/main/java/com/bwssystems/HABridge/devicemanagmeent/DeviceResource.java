@@ -23,9 +23,7 @@ import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
 import com.bwssystems.NestBridge.NestHome;
 import com.bwssystems.harmony.HarmonyHome;
-import com.bwssystems.luupRequests.Sdata;
 import com.bwssystems.vera.VeraHome;
-import com.bwssystems.vera.VeraInfo;
 import com.google.gson.Gson;
 
 /**

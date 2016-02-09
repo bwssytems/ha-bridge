@@ -12,4 +12,7 @@ public class Configuration {
 	public final static String DEFAULT_PWD = "";
 	public final static String DFAULT_WEB_PORT = "8080";
 	public final static String DFAULT_BUTTON_SLEEP = "100";
+	public static final int UPNP_DISCOVERY_PORT = 1900;
+	public static final String UPNP_MULTICAST_ADDRESS = "239.255.255.250";
+	public static final String CONFIG_FILE = "data/habridge.config";
 }

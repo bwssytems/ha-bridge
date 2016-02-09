@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.BridgeSettings;
+import com.bwssystems.HABridge.Configuration;
 
 import java.io.IOException;
 import java.net.*;
@@ -14,8 +15,6 @@ import org.apache.http.conn.util.*;
 
 public class UpnpListener {
 	private Logger log = LoggerFactory.getLogger(UpnpListener.class);
-	private static final int UPNP_DISCOVERY_PORT = 1900;
-	private static final String UPNP_MULTICAST_ADDRESS = "239.255.255.250";
 
 	private int upnpResponsePort;
 
@@ -26,6 +25,7 @@ public class UpnpListener {
 	private boolean strict;
 	
 	private boolean traceupnp;
+	private BridgeSettings bridgeSettings;
 	
 	public UpnpListener(BridgeSettings theSettings) {
 		super();
@@ -34,14 +34,15 @@ public class UpnpListener {
 		responseAddress = theSettings.getUpnpConfigAddress();
 		strict = theSettings.isUpnpStrict();
 		traceupnp = theSettings.isTraceupnp();
+		bridgeSettings = theSettings;
 	}
 
-	public void startListening(){
+	public boolean startListening(){
 		log.info("UPNP Discovery Listener starting....");
 
 		try (DatagramSocket responseSocket = new DatagramSocket(upnpResponsePort);
-				MulticastSocket upnpMulticastSocket  = new MulticastSocket(UPNP_DISCOVERY_PORT);) {
-			InetSocketAddress socketAddress = new InetSocketAddress(UPNP_MULTICAST_ADDRESS, UPNP_DISCOVERY_PORT);
+				MulticastSocket upnpMulticastSocket  = new MulticastSocket(Configuration.UPNP_DISCOVERY_PORT);) {
+			InetSocketAddress socketAddress = new InetSocketAddress(Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT);
 			Enumeration<NetworkInterface> ifs =	NetworkInterface.getNetworkInterfaces();
 
 			while (ifs.hasMoreElements()) {
@@ -71,22 +72,29 @@ public class UpnpListener {
 			}
 
 			log.info("UPNP Discovery Listener running and ready....");
-
-			while(true){ //trigger shutdown here
+			boolean loopControl = true;
+			while(loopControl){ //trigger shutdown here
 				byte[] buf = new byte[1024];
 				DatagramPacket packet = new DatagramPacket(buf, buf.length);
 				upnpMulticastSocket.receive(packet);
 				if(isSSDPDiscovery(packet)){
 					sendUpnpResponse(responseSocket, packet.getAddress(), packet.getPort());
 				}
+				if(bridgeSettings.isRestart() || bridgeSettings.isStop())
+					loopControl = false;
 			}
-
+			upnpMulticastSocket.close();
+			responseSocket.close();
 		}  catch (IOException e) {
 			log.error("UpnpListener encountered an error opening sockets. Shutting down", e);
-
 		}
-		log.info("UPNP Discovery Listener Stopped");
-
+		if(bridgeSettings.isRestart())
+			log.info("UPNP Discovery Listener - ended, restart found");
+		if(bridgeSettings.isStop())
+			log.info("UPNP Discovery Listener - ended, stop found");
+		if(!bridgeSettings.isStop()&& !bridgeSettings.isRestart())
+			log.info("UPNP Discovery Listener - ended, error found");
+		return bridgeSettings.isRestart();
 	}
 
 	/**
