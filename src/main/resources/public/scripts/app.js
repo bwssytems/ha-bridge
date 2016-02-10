@@ -79,31 +79,18 @@ app.service('bridgeService', function ($http, $window, ngToast) {
         }
 
         this.updateShowVera = function () {
-            if(this.aContainsB(self.state.settings.veraaddress.devices[0].ip, "1.1.1.1") || self.state.settings.veraaddress == "" || self.state.settings.veraaddress == null)
-            	this.state.showVera = false;
-            else
-            	this.state.showVera = true;
+        	this.state.showVera = self.state.settings.veraconfigured;
         	return;
         }
         
         this.updateShowNest = function () {
-        	if(self.state.settings.nestconfigured == true)
-        		this.state.showNest = true;
-        	else
-        		this.state.showNest = false;
+       		this.state.showNest = self.state.settings.nestconfigured;
         	return;
         }
         
         this.updateShowHarmony = function () {
-        	if(self.state.settings.harmonyaddress.devices) {
-	            if(this.aContainsB(self.state.settings.harmonyaddress.devices[0].ip, "1.1.1.1") || self.state.settings.harmonyaddress == "" || self.state.settings.harmonyaddress == null)
-	            	this.state.showHarmony = false;
-	            else
-	            	this.state.showHarmony = true;
-        	}
-            else
-            	this.state.showHarmony = false;
-       	return;
+           	this.state.showHarmony = self.state.settings.harmonyconfigured;
+           	return;
         }
 
 

@@ -53,6 +53,8 @@ public class UpnpSettingsResource {
 		this.theSettings.setUpnpResponsePort(theBridgeSettings.getUpnpResponsePort());
 		this.theSettings.setUpnpStrict(theBridgeSettings.isUpnpStrict());
 		this.theSettings.setVeraAddress(theBridgeSettings.getVeraAddress());
+		this.theSettings.setVeraconfigured(theBridgeSettings.isValidVera());
+		this.theSettings.setHarmonyconfigured(theBridgeSettings.isValidHarmony());
 		this.theSettings.setNestConfigured(theBridgeSettings.isValidNest());
 	}
 
