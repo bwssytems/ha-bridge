@@ -3,23 +3,19 @@ package com.bwssystems.HABridge.dao;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.bwssystems.HABridge.BackupHandler;
 import com.bwssystems.HABridge.JsonTransformer;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.google.gson.stream.JsonReader;
@@ -30,7 +26,7 @@ import java.util.ListIterator;
  * This is an in memory list to manage the configured devices and saves the list as a JSON string to a file for later  
  * loading.
  */
-public class DeviceRepository {
+public class DeviceRepository extends BackupHandler {
 	Map<String, DeviceDescriptor> devices;
     Path repositoryPath;
     final Random random = new Random();
@@ -38,14 +34,16 @@ public class DeviceRepository {
 	
     public DeviceRepository(String deviceDb) {
 		super();
-		_loadRepository(deviceDb);
+		repositoryPath = null;
+		repositoryPath = Paths.get(deviceDb);
+		setupParams(repositoryPath, ".bk", "device.db-");
+		_loadRepository(repositoryPath);
 	}
     
-    private void _loadRepository(String aFilePath){
-		repositoryPath = Paths.get(aFilePath);
-		_loadRepository(repositoryPath);
+    public void loadRepository() {
+    	if(repositoryPath != null)
+    		_loadRepository(repositoryPath);
     }
-    
 	private void _loadRepository(Path aPath){
 		String jsonContent = repositoryReader(aPath);
 		devices = new HashMap<String, DeviceDescriptor>();
@@ -93,66 +91,6 @@ public class DeviceRepository {
         log.debug("Save device: " + aDescriptor.getName());
     }
     
-	public String backup(String aFilename) {
-        if(aFilename == null || aFilename.equalsIgnoreCase("")) {
-        	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-        	aFilename = "devicedb-" + dateFormat.format(Calendar.getInstance().getTime()) + ".bk"; 
-        }
-        else
-        	aFilename = aFilename + ".bk";
-    	try {
-			Files.copy(repositoryPath, FileSystems.getDefault().getPath(repositoryPath.getParent().toString(), aFilename), StandardCopyOption.COPY_ATTRIBUTES);
-		} catch (IOException e) {
-			log.error("Could not backup to file: " + aFilename + " message: " + e.getMessage(), e);
-		}
-        log.debug("Backup repository: " + aFilename);
-        return aFilename;
-    }
-
-	public String deleteBackup(String aFilename) {
-        log.debug("Delete backup repository: " + aFilename);
-        try {
-			Files.delete(FileSystems.getDefault().getPath(repositoryPath.getParent().toString(), aFilename));
-		} catch (IOException e) {
-			log.error("Could not delete file: " + aFilename + " message: " + e.getMessage(), e);
-		}
-        return aFilename;
-    }
-
-	public String restoreBackup(String aFilename) {
-        log.debug("Restore backup repository: " + aFilename);
-		try {
-			Path target = null;
-			if(Files.exists(repositoryPath)) {
-	        	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-				target = FileSystems.getDefault().getPath(repositoryPath.getParent().toString(), "devicedb-" + dateFormat.format(Calendar.getInstance().getTime()) + ".bk");
-				Files.move(repositoryPath, target);
-			}
-			Files.copy(FileSystems.getDefault().getPath(repositoryPath.getParent().toString(), aFilename), repositoryPath, StandardCopyOption.COPY_ATTRIBUTES);
-		} catch (IOException e) {
-			log.error("Error restoring the file: " + aFilename + " message: " + e.getMessage(), e);
-			return null;
-		}
-		_loadRepository(repositoryPath);
-        return aFilename;
-    }
-
-	public List<String> getBackups() {
-		List<String> theFilenames = new ArrayList<String>();
-		Path dir = repositoryPath.getParent();
-		try (DirectoryStream<Path> stream =
-		     Files.newDirectoryStream(dir, "*.{bk}")) {
-		    for (Path entry: stream) {
-		        theFilenames.add(entry.getFileName().toString());
-		    }
-		} catch (IOException x) {
-		    // IOException can never be thrown by the iteration.
-		    // In this snippet, it can // only be thrown by newDirectoryStream.
-			log.error("Issue getting direcotyr listing for backups - " + x.getMessage());
-		}
-		return theFilenames;
-	}
-	
 	public String delete(DeviceDescriptor aDescriptor) {
         if (aDescriptor != null) {
         	devices.remove(aDescriptor.getId());

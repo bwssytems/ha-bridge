@@ -9,7 +9,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettings;
+import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.luupRequests.Device;
 import com.bwssystems.luupRequests.Scene;
@@ -18,7 +18,7 @@ public class VeraHome {
     private static final Logger log = LoggerFactory.getLogger(VeraHome.class);
 	private Map<String, VeraInfo> veras;
 	
-	public VeraHome(BridgeSettings bridgeSettings) {
+	public VeraHome(BridgeSettingsDescriptor bridgeSettings) {
 		veras = new HashMap<String, VeraInfo>();
 		if(!bridgeSettings.isValidVera())
 			return;

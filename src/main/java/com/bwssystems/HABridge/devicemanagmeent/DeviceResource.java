@@ -16,8 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.BridgeSettings;
+import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.JsonTransformer;
-import com.bwssystems.HABridge.Version;
 import com.bwssystems.HABridge.dao.BackupFilename;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
@@ -35,12 +35,11 @@ public class DeviceResource {
 
     private DeviceRepository deviceRepository;
     private VeraHome veraHome;
-    private Version version;
     private HarmonyHome myHarmonyHome;
     private NestHome nestHome;
     private static final Set<String> supportedVerbs = new HashSet<>(Arrays.asList("get", "put", "post"));
 
-	public DeviceResource(BridgeSettings theSettings, Version theVersion, HarmonyHome theHarmonyHome, NestHome aNestHome) {
+	public DeviceResource(BridgeSettingsDescriptor theSettings, HarmonyHome theHarmonyHome, NestHome aNestHome) {
 		this.deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
 
 		if(theSettings.isValidVera())
@@ -58,7 +57,6 @@ public class DeviceResource {
 		else
 			this.nestHome = null;
 		
-		this.version = theVersion;
         setupEndpoints();
 	}
 
@@ -171,12 +169,6 @@ public class DeviceResource {
 	        }
 	        return null;
 	    }, new JsonTransformer());
-
-    	get (API_CONTEXT + "/habridge/version", "application/json", (request, response) -> {
-	    	log.debug("Get HA Bridge version: v" + version.getVersion());
-			response.status(HttpStatus.SC_OK);
-	        return "{\"version\":\"" + version.getVersion() + "\"}";
-	    });
 
     	get (API_CONTEXT + "/vera/devices", "application/json", (request, response) -> {
 	    	log.debug("Get vera devices");
@@ -293,8 +285,10 @@ public class DeviceResource {
     	post (API_CONTEXT + "/backup/restore", "application/json", (request, response) -> {
 	    	log.debug("Restore backup: " + request.body());
         	BackupFilename aFilename = new Gson().fromJson(request.body(), BackupFilename.class);
-        	if(aFilename != null)
+        	if(aFilename != null) {
         		deviceRepository.restoreBackup(aFilename.getFilename());
+        		deviceRepository.loadRepository();
+        	}
         	else
         		log.warn("No filename given for restore backup.");
 	        return null;

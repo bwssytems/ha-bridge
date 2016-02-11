@@ -80,21 +80,27 @@ public class UpnpListener {
 				if(isSSDPDiscovery(packet)){
 					sendUpnpResponse(responseSocket, packet.getAddress(), packet.getPort());
 				}
-				if(bridgeSettings.isRestart() || bridgeSettings.isStop())
+				if(bridgeSettings.isReinit() || bridgeSettings.isStop()) {
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// noop
+					}
 					loopControl = false;
+				}
 			}
 			upnpMulticastSocket.close();
 			responseSocket.close();
 		}  catch (IOException e) {
 			log.error("UpnpListener encountered an error opening sockets. Shutting down", e);
 		}
-		if(bridgeSettings.isRestart())
+		if(bridgeSettings.isReinit())
 			log.info("UPNP Discovery Listener - ended, restart found");
 		if(bridgeSettings.isStop())
 			log.info("UPNP Discovery Listener - ended, stop found");
-		if(!bridgeSettings.isStop()&& !bridgeSettings.isRestart())
+		if(!bridgeSettings.isStop()&& !bridgeSettings.isReinit())
 			log.info("UPNP Discovery Listener - ended, error found");
-		return bridgeSettings.isRestart();
+		return bridgeSettings.isReinit();
 	}
 
 	/**

@@ -1,5 +1,6 @@
       <ul class="nav nav-pills" role="tablist">
-        <li role="presentation" class="active"><a href="#">Configuration</a></li>
+        <li role="presentation" class="active"><a href="#">Bridge Devices</a></li>
+        <li role="presentation"><a href="#/system">Bridge Control</a></li>
         <li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
         <li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
         <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
@@ -63,82 +64,6 @@
 				</td>
 			</tr>
 		</table>
-	</div>
-
-	<div class="panel panel-default bridgeServer">
-		<div class="panel-heading">
-			<h1 class="panel-title">Bridge Settings <a ng-click="toggle()"><span class={{imgUrl}} aria-hidden="true"></a></h1>
-		</div>
-		<div ng-if="visible" class="animate-if" class="panel-body">
-
-			<form class="form-horizontal">
-				<div class="form-group">
-					<label class="col-xs-12 col-sm-2 control-label" for="bridge-base">Bridge
-						server</label>
-
-					<div class="col-xs-8 col-sm-7">
-						<input id="bridge-base" class="form-control" type="text"
-							ng-model="bridge.base" placeholder="URL to bridge">
-					</div>
-					<button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
-						ng-click="setBridgeUrl(bridge.base)">Load</button>
-					<button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
-						ng-click="goBridgeUrl(bridge.base)">Go</button>
-				</div>
-			</form>
-			<table class="table table-bordered table-striped table-hover">
-				<thead>
-					<tr>
-						<th>Setting</th>
-						<th>Value</th>
-					</tr>
-				</thead>
-				<tr>
-					<td>upnp.config.address</td>
-					<td>{{bridge.settings.upnpconfigaddress}}</td>
-				</tr>
-				<tr>
-					<td>server.port</td>
-					<td>{{bridge.settings.serverport}}</td>
-				</tr>
-				<tr>
-					<td>upnp.devices.db</td>
-					<td>{{bridge.settings.upnpdevicedb}}</td>
-				</tr>
-				<tr>
-					<td>upnp.response.port</td>
-					<td>{{bridge.settings.upnpresponseport}}</td>
-				</tr>
-				<tr>
-					<td>vera.address</td>
-					<td>{{bridge.settings.veraaddress}}</td>
-				</tr>
-				<tr>
-					<td>harmony.address</td>
-					<td>{{bridge.settings.harmonyaddress}}</td>
-				</tr>
-				<tr>
-					<td>upnp.strict</td>
-					<td>{{bridge.settings.upnpstrict}}</td>
-				</tr>
-				<tr>
-					<td>trace.upnp</td>
-					<td>{{bridge.settings.traceupnp}}</td>
-				</tr>
-				<tr>
-					<td>dev.mode</td>
-					<td>{{bridge.settings.devmode}}</td>
-				</tr>
-				<tr>
-					<td>nest.configured</td>
-					<td>{{bridge.settings.nestconfigured}}</td>
-				</tr>
-				<tr>
-					<td>button.sleep</td>
-					<td>{{bridge.settings.buttonsleep}} ms</td>
-				</tr>
-			</table>
-		</div>
 	</div>
 	<div class="panel panel-default backup">
 		<div class="panel-heading">

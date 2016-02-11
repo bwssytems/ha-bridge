@@ -7,9 +7,6 @@ public class Configuration {
 	public final static String DEFAULT_ADDRESS = "1.1.1.1";
 	public final static String LOOP_BACK_ADDRESS = "127.0.0.1";
 	public final static String LOOP_BACK_INTERFACE = "lo";
-	public final static String DEFAULT_HARMONY_ADDRESS_LIST = "{devices:[{name:default,ip:1.1.1.1}]}";
-	public final static String DEFAULT_USER = "";
-	public final static String DEFAULT_PWD = "";
 	public final static String DFAULT_WEB_PORT = "8080";
 	public final static String DFAULT_BUTTON_SLEEP = "100";
 	public static final int UPNP_DISCOVERY_PORT = 1900;

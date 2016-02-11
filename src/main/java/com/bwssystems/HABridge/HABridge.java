@@ -37,6 +37,7 @@ public class HABridge {
         HueMulator theHueMulator;
         UpnpSettingsResource theSettingResponder;
         UpnpListener theUpnpListener;
+        SystemControl theSystem;
         BridgeSettings bridgeSettings;
         Version theVersion;
         
@@ -45,7 +46,7 @@ public class HABridge {
         log.info("HA Bridge (v" + theVersion.getVersion() + ") starting....");
         
         bridgeSettings = new BridgeSettings();
-        bridgeSettings.setRestart(false);
+        bridgeSettings.setReinit(false);
         bridgeSettings.setStop(false);
         while(!bridgeSettings.isStop()) {
         	bridgeSettings.buildSettings();
@@ -56,17 +57,20 @@ public class HABridge {
 	        port(Integer.valueOf(bridgeSettings.getServerPort()));
 	        // sparkjava config directive to set html static file location for Jetty
 	        staticFileLocation("/public");
+	        // setup system control api first
+	        theSystem = new SystemControl(bridgeSettings, theVersion);
+	        theSystem.setupServer();
 	        //setup the harmony connection if available
-	        harmonyHome = new HarmonyHome(bridgeSettings);
+	        harmonyHome = new HarmonyHome(bridgeSettings.getBridgeSettingsDescriptor());
 	        //setup the nest connection if available
-	        nestHome = new NestHome(bridgeSettings);
+	        nestHome = new NestHome(bridgeSettings.getBridgeSettingsDescriptor());
 	        // setup the class to handle the resource setup rest api
-	        theResources = new DeviceResource(bridgeSettings, theVersion, harmonyHome, nestHome);
+	        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), harmonyHome, nestHome);
 	        // setup the class to handle the hue emulator rest api
-	        theHueMulator = new HueMulator(bridgeSettings, theResources.getDeviceRepository(), harmonyHome, nestHome);
+	        theHueMulator = new HueMulator(bridgeSettings.getBridgeSettingsDescriptor(), theResources.getDeviceRepository(), harmonyHome, nestHome);
 	        theHueMulator.setupServer();
 	        // setup the class to handle the upnp response rest api
-	        theSettingResponder = new UpnpSettingsResource(bridgeSettings);
+	        theSettingResponder = new UpnpSettingsResource(bridgeSettings.getBridgeSettingsDescriptor());
 	        theSettingResponder.setupServer();
 	        // wait for the sparkjava initialization of the rest api classes to be complete
 	        awaitInitialization();
@@ -76,7 +80,7 @@ public class HABridge {
 	        if(theUpnpListener.startListening())
 	        	log.info("HA Bridge (v" + theVersion.getVersion() + ") reinitialization requessted....");
 
-	        bridgeSettings.setRestart(false);
+	        bridgeSettings.setReinit(false);
 	        stop();
         }
         log.info("HA Bridge (v" + theVersion.getVersion() + ") exiting....");

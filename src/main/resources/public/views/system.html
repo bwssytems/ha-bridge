@@ -1,0 +1,137 @@
+      <ul class="nav nav-pills" role="tablist">
+        <li role="presentation"><a href="#">Bridge Devices</a></li>
+        <li role="presentation" class="active"><a href="#/system">Bridge Control</a></li>
+        <li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
+        <li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
+        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
+        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonydevices">Harmony Devices</a></li>
+        <li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
+        <li role="presentation"><a href="#/editor">Manual Add</a></li>
+      </ul>
+
+
+	<div ng-controller="ErrorsController">
+		<div ng-if="bridge.error"
+			class="alert alert-warning alert-dismissible" role="alert">
+			<button type="button" class="close" data-dismiss="alert"
+				aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+
+			<h2 ng-show='bridge.error != ""'>ERROR</h2>
+
+			<div ng-show='bridge.error != ""'>{{bridge.error}}</div>
+		</div>
+	</div>
+	<div class="panel panel-default bridgeServer">
+		<div class="panel-heading">
+			<h1 class="panel-title">Bridge Settings</h1>
+		</div>
+		<div class="panel-body">
+
+			<form class="form-horizontal">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 control-label" for="bridge-base">Bridge
+						server</label>
+
+					<div class="col-xs-8 col-sm-7">
+						<input id="bridge-base" class="form-control" type="text"
+							ng-model="bridge.base" placeholder="URL to bridge">
+					</div>
+					<button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
+						ng-click="setBridgeUrl(bridge.base)">Load</button>
+					<button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
+						ng-click="goBridgeUrl(bridge.base)">Go</button>
+				</div>
+			</form>
+			<table class="table table-bordered table-striped table-hover">
+				<thead>
+					<tr>
+						<th>Setting</th>
+						<th>Value</th>
+					</tr>
+				</thead>
+				<tr>
+					<td>upnp.config.address</td>
+					<td>{{bridge.settings.upnpconfigaddress}}</td>
+				</tr>
+				<tr>
+					<td>server.port</td>
+					<td>{{bridge.settings.serverport}}</td>
+				</tr>
+				<tr>
+					<td>upnp.devices.db</td>
+					<td>{{bridge.settings.upnpdevicedb}}</td>
+				</tr>
+				<tr>
+					<td>upnp.response.port</td>
+					<td>{{bridge.settings.upnpresponseport}}</td>
+				</tr>
+				<tr>
+					<td>vera.address</td>
+					<td>{{bridge.settings.veraaddress}}</td>
+				</tr>
+				<tr>
+					<td>harmony.address</td>
+					<td>{{bridge.settings.harmonyaddress}}</td>
+				</tr>
+				<tr>
+					<td>upnp.strict</td>
+					<td>{{bridge.settings.upnpstrict}}</td>
+				</tr>
+				<tr>
+					<td>trace.upnp</td>
+					<td>{{bridge.settings.traceupnp}}</td>
+				</tr>
+				<tr>
+					<td>dev.mode</td>
+					<td>{{bridge.settings.devmode}}</td>
+				</tr>
+				<tr>
+					<td>nest.configured</td>
+					<td>{{bridge.settings.nestconfigured}}</td>
+				</tr>
+				<tr>
+					<td>button.sleep</td>
+					<td>{{bridge.settings.buttonsleep}} ms</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<div class="panel panel-default backup">
+		<div class="panel-heading">
+			<h1 class="panel-title">Bridge Settings Backup <a ng-click="toggleBk()"><span class={{imgBkUrl}} aria-hidden="true"></a></h1>
+		</div>
+		<div ng-if="visibleBk" class="animate-if" class="panel-body">
+			<form class="form-horizontal">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 control-label" for="backup-name">Backup Settings File Name</label>
+
+					<div class="col-xs-8 col-sm-7">
+						<input id="backup-name" class="form-control" type="text"
+							ng-model="optionalbackupname" placeholder="Optional">
+					</div>
+					<button type="submit" class="btn btn-primary"
+						ng-click="backupSettings(optionalbackupname)">Backup Settings</button>
+				</div>
+			</form>
+			<table class="table table-bordered table-striped table-hover">
+				<thead>
+					<tr>
+						<th>Filename</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tr ng-repeat="backup in bridge.configs">
+					<td>{{backup}}</td>
+					<td>
+						<button class="btn btn-danger" type="submit"
+							ng-click="restoreSettings(backup)">Restore</button>
+						<button class="btn btn-warning" type="submit"
+							ng-click="deleteSettingsBackup(backup)">Delete</button>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	

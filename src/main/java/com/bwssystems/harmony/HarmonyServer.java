@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettings;
+import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.NamedIP;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -36,7 +36,7 @@ public class HarmonyServer {
 		myNameAndIP = theHarmonyAddress;
 	}
 
-	public static HarmonyServer setup(BridgeSettings bridgeSettings, NamedIP theHarmonyAddress) throws Exception {
+	public static HarmonyServer setup(BridgeSettingsDescriptor bridgeSettings, NamedIP theHarmonyAddress) throws Exception {
 		if(!bridgeSettings.isValidHarmony() && !bridgeSettings.isDevMode()) {
 			return new HarmonyServer(theHarmonyAddress);
 		}
@@ -50,7 +50,7 @@ public class HarmonyServer {
   		return mainObject;
   	}
 
-	private void execute(BridgeSettings mySettings) throws Exception {
+	private void execute(BridgeSettingsDescriptor mySettings) throws Exception {
         Boolean noopCalls = Boolean.parseBoolean(System.getProperty("noop.calls", "false"));
         String modeString = "";
         if(dummyProvider != null)

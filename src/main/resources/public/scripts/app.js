@@ -4,6 +4,9 @@ app.config(function ($routeProvider) {
 	$routeProvider.when('/#', {
 		templateUrl: 'views/configuration.html',
 		controller: 'ViewingController'
+	}).when('/system', {
+		templateUrl: 'views/system.html',
+		controller: 'SystemController'		
 	}).when('/editor', {
 		templateUrl: 'views/editor.html',
 		controller: 'AddingController'		
@@ -38,7 +41,7 @@ app.run( function (bridgeService) {
 
 app.service('bridgeService', function ($http, $window, ngToast) {
         var self = this;
-        this.state = {base: window.location.origin + "/api/devices", upnpbase: window.location.origin + "/upnp/settings", huebase: window.location.origin + "/api", backups: [], devices: [], device: [], settings: [], olddevicename: "", error: "", showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
+        this.state = {base: window.location.origin + "/api/devices", systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], settings: [], olddevicename: "", error: "", showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
 
         this.viewDevices = function () {
             this.state.error = "";
@@ -59,7 +62,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 
         this.getHABridgeVersion = function () {
             this.state.error = "";
-            return $http.get(this.state.base + "/habridge/version").then(
+            return $http.get(this.state.systemsbase + "/habridge/version").then(
                 function (response) {
                     self.state.habridgeversion = response.data.version;
                 },
@@ -96,7 +99,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 
         this.loadBridgeSettings = function () {
             this.state.error = "";
-            return $http.get(this.state.upnpbase).then(
+            return $http.get(this.state.systemsbase + "/settings").then(
                 function (response) {
                 	self.state.settings = response.data;
                 	self.updateShowVera();
@@ -125,6 +128,22 @@ app.service('bridgeService', function ($http, $window, ngToast) {
                     	$window.alert("Get Backups Error: " + error.data.message);
                     } else {
                     	$window.alert("Get Backups Error: unknown");
+                    }
+                }
+            );
+        };
+        
+        this.viewConfigs = function () {
+            this.state.error = "";
+            return $http.get(this.state.systemsbase + "/backup/available").then(
+                function (response) {
+                    self.state.configs = response.data;
+                },
+                function (error) {
+                    if (error.data) {
+                    	$window.alert("Get Configs Error: " + error.data.message);
+                    } else {
+                    	$window.alert("Get Configs Error: unknown");
                     }
                 }
             );
@@ -344,7 +363,59 @@ app.service('bridgeService', function ($http, $window, ngToast) {
                     if (error.data) {
                         self.state.error = error.data.message;
                     }
-                    self.state.error = "Backup Db File Error: unknown";
+                    self.state.error = "Delete Backup Db File Error: unknown";
+                }
+            );
+        };
+
+        this.backupSettings = function (afilename) {
+            this.state.error = "";
+            return $http.put(this.state.systemsbase + "/backup/create", {
+                filename: afilename
+            }).then(
+                function (response) {
+                    self.viewConfigs();
+                },
+                function (error) {
+                    if (error.data) {
+                        self.state.error = error.data.message;
+                    }
+                    self.state.error = "Backup Settings Error: unknown";
+                }
+            );
+        };
+
+        this.restoreSettings = function (afilename) {
+            this.state.error = "";
+            return $http.post(this.state.systemsbase + "/backup/restore", {
+                filename: afilename
+            }).then(
+                function (response) {
+                    self.viewConfigs();
+                    self.viewDevices();
+                },
+                function (error) {
+                    if (error.data) {
+                        self.state.error = error.data.message;
+                    }
+                    self.state.error = "Backup Settings Restore Error: unknown";
+                }
+            );
+        };
+
+        this.deleteSettingsBackup = function (afilename) {
+            this.state.error = "";
+            return $http.post(this.state.systemsbase + "/backup/delete", {
+                filename: afilename
+            }).then(
+                function (response) {
+                    self.viewConfigs();
+                },
+                function (error) {
+                    if (error.data) {
+                        self.state.error = error.data.message;
+                    }
+                    self.state.error = "Delete Backup Settings File Error: unknown";
                 }
             );
         };
@@ -410,6 +481,46 @@ app.service('bridgeService', function ($http, $window, ngToast) {
         };
     });
 
+app.controller('SystemController', function ($scope, $location, $http, $window, bridgeService) {
+    bridgeService.viewConfigs();
+    $scope.bridge = bridgeService.state;
+    $scope.optionalbackupname = "";
+    $scope.visible = false;
+    $scope.imgUrl = "glyphicon glyphicon-plus";
+    $scope.visibleBk = false;
+    $scope.imgBkUrl = "glyphicon glyphicon-plus";
+    $scope.setBridgeUrl = function (url) {
+        bridgeService.state.base = url;
+        bridgeService.viewDevices();
+    };
+    $scope.goBridgeUrl = function (url) {
+    	window.open(url, "_blank");
+    };
+    $scope.backupSettings = function (optionalbackupname) {
+        bridgeService.backupSettings(optionalbackupname);
+    };
+    $scope.restoreSettings = function (backupname) {
+        bridgeService.restoreSettings(backupname);
+    };
+    $scope.deleteSettingsBackup = function (backupname) {
+        bridgeService.deleteSettingsBackup(backupname);
+    };
+    $scope.toggle = function () {
+        $scope.visible = !$scope.visible;
+        if($scope.visible)
+            $scope.imgUrl = "glyphicon glyphicon-minus";
+        else
+            $scope.imgUrl = "glyphicon glyphicon-plus";
+    };
+    $scope.toggleBk = function () {
+        $scope.visibleBk = !$scope.visibleBk;
+        if($scope.visibleBk)
+            $scope.imgBkUrl = "glyphicon glyphicon-minus";
+        else
+            $scope.imgBkUrl = "glyphicon glyphicon-plus";
+    };
+});
+
 app.controller('ViewingController', function ($scope, $location, $http, $window, bridgeService) {
 
         bridgeService.viewDevices();
@@ -431,13 +542,6 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
         };
         $scope.testUrl = function (device, type) {
         	bridgeService.testUrl(device, type);
-        };
-        $scope.setBridgeUrl = function (url) {
-            bridgeService.state.base = url;
-            bridgeService.viewDevices();
-        };
-        $scope.goBridgeUrl = function (url) {
-        	window.open(url, "_blank");
         };
         $scope.editDevice = function (device) {
             bridgeService.editDevice(device);

@@ -4,19 +4,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Enumeration;
-import java.util.List;
 
 import org.apache.http.conn.util.InetAddressUtils;
 import org.slf4j.Logger;
@@ -24,146 +17,139 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
-public class BridgeSettings {
-	private String upnpconfigaddress;
-	private String serverport;
-	private String upnpresponseport;
-	private String upnpdevicedb;
-	private IpList veraaddress;
-	private IpList harmonyaddress;
-	private String harmonyuser;
-	private String harmonypwd;
-	private Integer buttonsleep;
-	private boolean upnpstrict;
-	private boolean traceupnp;
-	private boolean devmode;
-	private String nestuser;
-	private String nestpwd;
-	private boolean veraconfigured;
-	private boolean harmonyconfigured;
-	private boolean nestconfigured;
-	private String configfile;
-	private boolean restart;
+public class BridgeSettings extends BackupHandler {
+	private BridgeSettingsDescriptor theBridgeSettings;
+	private boolean reinit;
 	private boolean stop;
 	
 	public BridgeSettings() {
 		super();
-		this.upnpstrict = true;
-		this.devmode = false;
-		this.traceupnp = false;
-		this.restart = false;
+		this.reinit = false;
 		this.stop = false;
-		this.nestconfigured = false;
-		this.veraconfigured = false;
-		this.harmonyconfigured = false;
+		theBridgeSettings = new BridgeSettingsDescriptor();
+		theBridgeSettings.setUpnpStrict(true);
+		theBridgeSettings.setDevMode(false);
+		theBridgeSettings.setTraceupnp(false);
+		theBridgeSettings.setNestConfigured(false);
+		theBridgeSettings.setVeraconfigured(false);
+		theBridgeSettings.setHarmonyconfigured(false);
+	}
+	public BridgeSettingsDescriptor getBridgeSettingsDescriptor() {
+		return theBridgeSettings;
 	}
 	public String getUpnpConfigAddress() {
-		return upnpconfigaddress;
+		return theBridgeSettings.getUpnpConfigAddress();
 	}
 	public void setUpnpConfigAddress(String upnpConfigAddress) {
-		this.upnpconfigaddress = upnpConfigAddress;
+		theBridgeSettings.setUpnpConfigAddress(upnpConfigAddress);
 	}
 	public String getServerPort() {
-		return serverport;
+		return theBridgeSettings.getServerPort();
 	}
 	public void setServerPort(String serverPort) {
-		this.serverport = serverPort;
+		theBridgeSettings.setServerPort(serverPort);
 	}
 	public String getUpnpResponsePort() {
-		return upnpresponseport;
+		return theBridgeSettings.getUpnpResponsePort();
 	}
 	public void setUpnpResponsePort(String upnpResponsePort) {
-		this.upnpresponseport = upnpResponsePort;
+		theBridgeSettings.setUpnpResponsePort(upnpResponsePort);
 	}
 	public String getUpnpDeviceDb() {
-		return upnpdevicedb;
+		return theBridgeSettings.getUpnpDeviceDb();
 	}
 	public void setUpnpDeviceDb(String upnpDeviceDb) {
-		this.upnpdevicedb = upnpDeviceDb;
+		theBridgeSettings.setUpnpDeviceDb(upnpDeviceDb);
 	}
 	public IpList getVeraAddress() {
-		return veraaddress;
+		return theBridgeSettings.getVeraAddress();
 	}
 	public void setVeraAddress(IpList veraAddress) {
-		this.veraaddress = veraAddress;
+		theBridgeSettings.setVeraAddress(veraAddress);
 	}
 	public IpList getHarmonyAddress() {
-		return harmonyaddress;
+		return theBridgeSettings.getHarmonyAddress();
 	}
 	public void setHarmonyAddress(IpList harmonyaddress) {
-		this.harmonyaddress = harmonyaddress;
+		theBridgeSettings.setHarmonyAddress(harmonyaddress);
 	}
 	public String getHarmonyUser() {
-		return harmonyuser;
+		return theBridgeSettings.getHarmonyUser();
 	}
 	public void setHarmonyUser(String harmonyuser) {
-		this.harmonyuser = harmonyuser;
+		theBridgeSettings.setHarmonyUser(harmonyuser);
 	}
 	public String getHarmonyPwd() {
-		return harmonypwd;
+		return theBridgeSettings.getHarmonyPwd();
 	}
 	public void setHarmonyPwd(String harmonypwd) {
-		this.harmonypwd = harmonypwd;
+		theBridgeSettings.setHarmonyPwd(harmonypwd);
 	}
 	public boolean isUpnpStrict() {
-		return upnpstrict;
+		return theBridgeSettings.isUpnpStrict();
 	}
 	public void setUpnpStrict(boolean upnpStrict) {
-		this.upnpstrict = upnpStrict;
+		theBridgeSettings.setUpnpStrict(upnpStrict);
 	}
 	public boolean isTraceupnp() {
-		return traceupnp;
+		return theBridgeSettings.isTraceupnp();
 	}
 	public void setTraceupnp(boolean traceupnp) {
-		this.traceupnp = traceupnp;
+		theBridgeSettings.setTraceupnp(traceupnp);
 	}
 	public boolean isDevMode() {
-		return devmode;
+		return theBridgeSettings.isDevMode();
 	}
 	public void setDevMode(boolean devmode) {
-		this.devmode = devmode;
+		theBridgeSettings.setDevMode(devmode);
 	}
 	public String getNestuser() {
-		return nestuser;
+		return theBridgeSettings.getNestuser();
 	}
 	public void setNestuser(String nestuser) {
-		this.nestuser = nestuser;
+		theBridgeSettings.setNestuser(nestuser);
 	}
 	public String getNestpwd() {
-		return nestpwd;
+		return theBridgeSettings.getNestpwd();
 	}
 	public void setNestpwd(String nestpwd) {
-		this.nestpwd = nestpwd;
+		theBridgeSettings.setNestpwd(nestpwd);
 	}
 	public boolean isVeraconfigured() {
-		return veraconfigured;
+		return theBridgeSettings.isVeraconfigured();
 	}
 	public void setVeraconfigured(boolean veraconfigured) {
-		this.veraconfigured = veraconfigured;
+		theBridgeSettings.setVeraconfigured(veraconfigured);
 	}
 	public boolean isHarmonyconfigured() {
-		return harmonyconfigured;
+		return theBridgeSettings.isHarmonyconfigured();
 	}
 	public void setHarmonyconfigured(boolean harmonyconfigured) {
-		this.harmonyconfigured = harmonyconfigured;
+		theBridgeSettings.setHarmonyconfigured(harmonyconfigured);
 	}
 	public boolean isNestConfigured() {
-		return nestconfigured;
+		return theBridgeSettings.isNestConfigured();
 	}
 	public void setNestConfigured(boolean isNestConfigured) {
-		this.nestconfigured = isNestConfigured;
+		theBridgeSettings.setNestConfigured(isNestConfigured);
 	}
 	public Integer getButtonsleep() {
-		return buttonsleep;
+		return theBridgeSettings.getButtonsleep();
 	}
 	public void setButtonsleep(Integer buttonsleep) {
-		this.buttonsleep = buttonsleep;
+		theBridgeSettings.setButtonsleep(buttonsleep);
 	}
-	public boolean isRestart() {
-		return restart;
+	public String getConfigfile() {
+		return theBridgeSettings.getConfigfile();
 	}
-	public void setRestart(boolean restart) {
-		this.restart = restart;
+	public void setConfigfile(String configfile) {
+		theBridgeSettings.setConfigfile(configfile);
+	}
+	public boolean isReinit() {
+		return reinit;
+	}
+	public void setReinit(boolean reinit) {
+		this.reinit = reinit;
 	}
 	public boolean isStop() {
 		return stop;
@@ -171,39 +157,6 @@ public class BridgeSettings {
 	public void setStop(boolean stop) {
 		this.stop = stop;
 	}
-	public String getConfigfile() {
-		return configfile;
-	}
-	public void setConfigfile(String configfile) {
-		this.configfile = configfile;
-	}
-	public Boolean isValidVera() {
-		if(this.veraaddress == null)
-			return false;
-		List<NamedIP> devicesList = this.veraaddress.getDevices();
-		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
-			return false;
-		return true;
-	}
-	public Boolean isValidHarmony() {
-		if(this.harmonyaddress == null)
-			return false;		
-		List<NamedIP> devicesList = this.harmonyaddress.getDevices();
-		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
-			return false;		if(this.harmonypwd == null || this.harmonypwd == "")
-			return false;
-		if(this.harmonyuser == null || this.harmonyuser == "")
-			return false;
-		return true;
-	}
-	public Boolean isValidNest() {
-		if(this.nestpwd == null || this.nestpwd == "")
-			return false;
-		if(this.nestuser == null || this.nestuser == "")
-			return false;
-		return true;
-	}
-	
 	public void buildSettings() {
         Logger log = LoggerFactory.getLogger(BridgeSettings.class);
         InetAddress address = null;
@@ -314,8 +267,17 @@ public class BridgeSettings {
         
         if(this.getButtonsleep() <= 0)
         	this.setButtonsleep(Integer.parseInt(Configuration.DFAULT_BUTTON_SLEEP));
+
+        this.setVeraconfigured(theBridgeSettings.isValidVera());
+		this.setHarmonyconfigured(theBridgeSettings.isValidHarmony());
+		this.setNestConfigured(theBridgeSettings.isValidNest());
+		setupParams(Paths.get(getConfigfile()), ".cfgbk", "habridge.config-");
 	}
 
+	public void loadConfig() {
+		if(getConfigfile() != null)
+			_loadConfig();
+	}
 	private void _loadConfig() {
 		Path configPath = Paths.get(getConfigfile());
 		_loadConfig(configPath);
@@ -323,7 +285,7 @@ public class BridgeSettings {
 
 	private void _loadConfig(Path aPath) {
 		String jsonContent = configReader(aPath);
-		BridgeSettings aBridgeSettings = new Gson().fromJson(jsonContent, BridgeSettings.class);
+		BridgeSettingsDescriptor aBridgeSettings = new Gson().fromJson(jsonContent, BridgeSettingsDescriptor.class);
 		this.setButtonsleep(aBridgeSettings.getButtonsleep());
 		this.setUpnpConfigAddress(aBridgeSettings.getUpnpConfigAddress());
 		this.setServerPort(aBridgeSettings.getServerPort());
@@ -338,18 +300,19 @@ public class BridgeSettings {
 		this.setDevMode(aBridgeSettings.isDevMode());
 		this.setNestuser(aBridgeSettings.getNestuser());
 		this.setNestpwd(aBridgeSettings.getNestpwd());
-		this.setVeraconfigured(aBridgeSettings.isVeraconfigured());
-		this.setHarmonyconfigured(aBridgeSettings.isHarmonyconfigured());
-		this.setNestConfigured(aBridgeSettings.isNestConfigured());
+		this.setVeraconfigured(aBridgeSettings.isValidVera());
+		this.setHarmonyconfigured(aBridgeSettings.isValidHarmony());
+		this.setNestConfigured(aBridgeSettings.isValidNest());
     }
 
-	public void save() {
+	public void save(BridgeSettings newBridgeSettings) {
         Logger log = LoggerFactory.getLogger(BridgeSettings.class);
+        log.debug("Save HA Bridge settings.");
 		Path configPath = Paths.get(getConfigfile());
     	JsonTransformer aRenderer = new JsonTransformer();
-    	String  jsonValue = aRenderer.render(this);
+    	String  jsonValue = aRenderer.render(newBridgeSettings);
     	configWriter(jsonValue, configPath);
-        log.debug("Save HA Bridge settings.");
+    	_loadConfig(configPath);
     }
     
 
@@ -371,7 +334,7 @@ public class BridgeSettings {
 		try {
 			Path target = null;
 			if(Files.exists(filePath)) {
-				target = FileSystems.getDefault().getPath(filePath.getParent().toString(), "device.db.old");
+				target = FileSystems.getDefault().getPath(filePath.getParent().toString(), "habridge.config.old");
 				Files.move(filePath, target);
 			}
 			Files.write(filePath, content.getBytes(), StandardOpenOption.CREATE);
@@ -399,73 +362,5 @@ public class BridgeSettings {
 		}
 		
 		return content;
-	}
-
-	public String backupConfig(String aFilename) {
-        Logger log = LoggerFactory.getLogger(BridgeSettings.class);
-		Path configPath = Paths.get(getConfigfile());
-        if(aFilename == null || aFilename.equalsIgnoreCase("")) {
-        	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-        	aFilename = "habridge.config-" + dateFormat.format(Calendar.getInstance().getTime()) + ".bk"; 
-        }
-        else
-        	aFilename = aFilename + ".bk";
-    	try {
-			Files.copy(configPath, FileSystems.getDefault().getPath(configPath.getParent().toString(), aFilename), StandardCopyOption.COPY_ATTRIBUTES);
-		} catch (IOException e) {
-			log.error("Could not backup to file: " + aFilename + " message: " + e.getMessage(), e);
-		}
-        log.debug("Backup config: " + aFilename);
-        return aFilename;
-    }
-
-	public String deleteConfigBackup(String aFilename) {
-        Logger log = LoggerFactory.getLogger(BridgeSettings.class);
-		Path configPath = Paths.get(getConfigfile());
-        log.debug("Delete backup config: " + aFilename);
-        try {
-			Files.delete(FileSystems.getDefault().getPath(configPath.getParent().toString(), aFilename));
-		} catch (IOException e) {
-			log.error("Could not delete file: " + aFilename + " message: " + e.getMessage(), e);
-		}
-        return aFilename;
-    }
-
-	public String restoreConfigBackup(String aFilename) {
-        Logger log = LoggerFactory.getLogger(BridgeSettings.class);
-		Path configPath = Paths.get(getConfigfile());
-        log.debug("Restore backup config: " + aFilename);
-		try {
-			Path target = null;
-			if(Files.exists(configPath)) {
-	        	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-				target = FileSystems.getDefault().getPath(configPath.getParent().toString(), "habridge.config-" + dateFormat.format(Calendar.getInstance().getTime()) + ".bk");
-				Files.move(configPath, target);
-			}
-			Files.copy(FileSystems.getDefault().getPath(configPath.getParent().toString(), aFilename), configPath, StandardCopyOption.COPY_ATTRIBUTES);
-		} catch (IOException e) {
-			log.error("Error restoring the file: " + aFilename + " message: " + e.getMessage(), e);
-			return null;
-		}
-		_loadConfig(configPath);
-        return aFilename;
-    }
-
-	public List<String> getConfigBackups() {
-        Logger log = LoggerFactory.getLogger(BridgeSettings.class);
-		Path configPath = Paths.get(getConfigfile());
-		List<String> theFilenames = new ArrayList<String>();
-		Path dir = configPath.getParent();
-		try (DirectoryStream<Path> stream =
-		     Files.newDirectoryStream(dir, "*.{bk}")) {
-		    for (Path entry: stream) {
-		        theFilenames.add(entry.getFileName().toString());
-		    }
-		} catch (IOException x) {
-		    // IOException can never be thrown by the iteration.
-		    // In this snippet, it can // only be thrown by newDirectoryStream.
-			log.error("Issue getting directory listing for config backups - " + x.getMessage());
-		}
-		return theFilenames;
 	}
 }

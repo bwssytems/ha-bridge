@@ -3,8 +3,7 @@ package com.bwssystems.HABridge.upnp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettings;
-import com.bwssystems.HABridge.JsonTransformer;
+import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 
 import static spark.Spark.get;
 
@@ -12,11 +11,9 @@ import static spark.Spark.get;
  * 
  */
 public class UpnpSettingsResource {
-    private static final String UPNP_CONTEXT = "/upnp";
-
     private Logger log = LoggerFactory.getLogger(UpnpSettingsResource.class);
     
-    private BridgeSettings theSettings;
+    private BridgeSettingsDescriptor theSettings;
 
 	private String hueTemplate = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">\n"
 			+ "<specVersion>\n" + "<major>1</major>\n" + "<minor>0</minor>\n" + "</specVersion>\n"
@@ -40,22 +37,9 @@ public class UpnpSettingsResource {
 			+ "<depth>24</depth>\n" + "<url>hue_logo_3.png</url>\n" + "</icon>\n" + "</iconList>\n" + "</device>\n"
 			+ "</root>\n";
 
-	public UpnpSettingsResource(BridgeSettings theBridgeSettings) {
+	public UpnpSettingsResource(BridgeSettingsDescriptor theBridgeSettings) {
 		super();
-		this.theSettings = new BridgeSettings();
-		this.theSettings.setDevMode(theBridgeSettings.isDevMode());
-		this.theSettings.setHarmonyAddress(theBridgeSettings.getHarmonyAddress());
-		this.theSettings.setServerPort(theBridgeSettings.getServerPort());
-		this.theSettings.setTraceupnp(theBridgeSettings.isTraceupnp());
-		this.theSettings.setUpnpConfigAddress(theBridgeSettings.getUpnpConfigAddress());
-		this.theSettings.setUpnpDeviceDb(theBridgeSettings.getUpnpDeviceDb());
-		this.theSettings.setButtonsleep(theBridgeSettings.getButtonsleep());
-		this.theSettings.setUpnpResponsePort(theBridgeSettings.getUpnpResponsePort());
-		this.theSettings.setUpnpStrict(theBridgeSettings.isUpnpStrict());
-		this.theSettings.setVeraAddress(theBridgeSettings.getVeraAddress());
-		this.theSettings.setVeraconfigured(theBridgeSettings.isValidVera());
-		this.theSettings.setHarmonyconfigured(theBridgeSettings.isValidHarmony());
-		this.theSettings.setNestConfigured(theBridgeSettings.isValidNest());
+		this.theSettings = theBridgeSettings;
 	}
 
 	public void setupServer() {
@@ -88,14 +72,5 @@ public class UpnpSettingsResource {
 
             return filledTemplate;
         } );
-
-//      http://ip_address:port/upnp/settings which returns the bridge configuration settings
-		get(UPNP_CONTEXT + "/settings", "application/json", (request, response) -> {
-			log.debug("bridge settings requested from " + request.ip());
-
-			response.status(200);
-
-            return theSettings;
-        }, new JsonTransformer());
 	}
 }

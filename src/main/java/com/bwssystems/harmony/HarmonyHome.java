@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.BridgeSettings;
+import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.IpList;
 import com.bwssystems.HABridge.NamedIP;
 
@@ -21,7 +22,7 @@ public class HarmonyHome {
     private static final Logger log = LoggerFactory.getLogger(HarmonyHome.class);
 	private Map<String, HarmonyServer> hubs;
 
-	public HarmonyHome(BridgeSettings bridgeSettings) {
+	public HarmonyHome(BridgeSettingsDescriptor bridgeSettings) {
 		super();
 		hubs = new HashMap<String, HarmonyServer>();
 		if(!bridgeSettings.isValidHarmony() && !bridgeSettings.isDevMode())

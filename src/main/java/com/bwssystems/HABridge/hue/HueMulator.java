@@ -1,7 +1,6 @@
 package com.bwssystems.HABridge.hue;
 
-import com.bwssystems.HABridge.BridgeSettings;
-import com.bwssystems.HABridge.Configuration;
+import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.JsonTransformer;
 import com.bwssystems.HABridge.api.UserCreateRequest;
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
@@ -46,7 +45,6 @@ import java.math.BigDecimal;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,11 +69,11 @@ public class HueMulator {
     private Nest theNest;
     private HttpClient httpClient;
     private ObjectMapper mapper;
-    private BridgeSettings bridgeSettings;
+    private BridgeSettingsDescriptor bridgeSettings;
     private byte[] sendData;
 
 
-    public HueMulator(BridgeSettings theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHome theHarmonyHome, NestHome aNestHome){
+    public HueMulator(BridgeSettingsDescriptor theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHome theHarmonyHome, NestHome aNestHome){
         httpClient = HttpClients.createDefault();
         mapper = new ObjectMapper(); //armzilla: work around Echo incorrect content type and breaking mapping. Map manually
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -441,38 +439,6 @@ public class HueMulator {
 	
 	        return responseString;
 	    });
-
-	    // http://ip_address:port/api/control/restart CORS request
-	    options(HUE_CONTEXT + "/control/restart", "application/json", (request, response) -> {
-	        response.status(HttpStatus.SC_OK);
-	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
-	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
-	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
-	        response.header("Content-Type", "text/html; charset=utf-8");
-	    	return "";
-	    });
-	    // http://ip_address:port/api//control/restart sets the parameter restart the server
-	    put(HUE_CONTEXT + "/control/restart", "application/json", (request, response) -> {
-	    	bridgeSettings.setRestart(true);
-	    	pingListener();
-	    	return "{\"control\":\"restarting\"}";
-	    });
-
-	    // http://ip_address:port/api/control/stop CORS request
-	    options(HUE_CONTEXT + "/control/stop", "application/json", (request, response) -> {
-	        response.status(HttpStatus.SC_OK);
-	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
-	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
-	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
-	        response.header("Content-Type", "text/html; charset=utf-8");
-	    	return "";
-	    });
-	    // http://ip_address:port/api//control/stop sets the parameter stop the server
-	    put(HUE_CONTEXT + "/control/stop", "application/json", (request, response) -> {
-	    	bridgeSettings.setStop(true);
-	    	pingListener();
-	    	return "{\"control\":\"stopping\"}";
-	    });
     }
 
     /* light weight templating here, was going to use free marker but it was a bit too
@@ -543,24 +509,5 @@ public class HueMulator {
         	log.warn("Error calling out to HA gateway", e);
         }
         return false;
-    }
-    
-    protected void pingListener() {
-        try {
-            byte[] buf = new byte[256];
-            String testData = "M-SEARCH * HTTP/1.1\nHOST: " + Configuration.UPNP_MULTICAST_ADDRESS + ":" + Configuration.UPNP_DISCOVERY_PORT + "ST: urn:schemas-upnp-org:device:CloudProxy:1\nMAN: \"ssdp:discover\"\nMX: 3";
-            buf = testData.getBytes();
-            MulticastSocket socket = new MulticastSocket(Configuration.UPNP_DISCOVERY_PORT);
-
-            InetAddress group = InetAddress.getByName(Configuration.UPNP_MULTICAST_ADDRESS);
-            DatagramPacket packet;
-            packet = new DatagramPacket(buf, buf.length, group, Configuration.UPNP_DISCOVERY_PORT);
-            socket.send(packet);
-
-            socket.close();
-        }
-        catch (IOException e) {
-        	log.warn("Error pinging listener.", e);
-        }
     }
 }

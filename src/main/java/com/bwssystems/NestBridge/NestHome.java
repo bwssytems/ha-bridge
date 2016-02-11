@@ -8,7 +8,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettings;
+import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.nest.controller.Home;
 import com.bwssystems.nest.controller.Nest;
 import com.bwssystems.nest.controller.NestSession;
@@ -23,7 +23,7 @@ public class NestHome {
     private Nest theNest;
     private ArrayList<NestItem> nestItems;
     
-	public NestHome(BridgeSettings bridgeSettings) {
+	public NestHome(BridgeSettingsDescriptor bridgeSettings) {
         theSession = null;
         theNest = null;
         nestItems = null;
