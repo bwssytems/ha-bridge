@@ -79,16 +79,20 @@ public class DeviceRepository extends BackupHandler {
         devices.put(id, aDescriptor);
     }
     
-	public void save(DeviceDescriptor aDescriptor) {
-        if(aDescriptor.getId() != null)
-        	devices.remove(aDescriptor.getId());
-        else
-        	aDescriptor.setId(String.valueOf(random.nextInt(Integer.MAX_VALUE)));
-        put(aDescriptor.getId(), aDescriptor);
+	public void save(DeviceDescriptor[] descriptors) {
+		String theNames = "";
+		for(int i = 0; i < descriptors.length; i++) {
+	        if(descriptors[i].getId() != null)
+	        	devices.remove(descriptors[i].getId());
+	        else
+	        	descriptors[i].setId(String.valueOf(random.nextInt(Integer.MAX_VALUE)));
+	        put(descriptors[i].getId(), descriptors[i]);
+	        theNames = theNames + " " + descriptors[i].getName() + ", ";
+		}
     	JsonTransformer aRenderer = new JsonTransformer();
     	String  jsonValue = aRenderer.render(findAll());
         repositoryWriter(jsonValue, repositoryPath);
-        log.debug("Save device: " + aDescriptor.getName());
+        log.debug("Save device(s): " + theNames);
     }
     
 	public String delete(DeviceDescriptor aDescriptor) {

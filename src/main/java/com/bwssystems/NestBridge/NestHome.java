@@ -29,7 +29,7 @@ public class NestHome {
         nestItems = null;
         
         if(!bridgeSettings.isValidNest()) {
-        	log.info("not a valid nest");
+        	log.debug("not a valid nest");
         	return;
         }
 

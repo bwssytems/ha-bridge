@@ -46,15 +46,13 @@ public class HABridge {
         log.info("HA Bridge (v" + theVersion.getVersion() + ") starting....");
         
         bridgeSettings = new BridgeSettings();
-        bridgeSettings.setReinit(false);
-        bridgeSettings.setStop(false);
-        while(!bridgeSettings.isStop()) {
+        while(!bridgeSettings.getBridgeControl().isStop()) {
         	bridgeSettings.buildSettings();
             log.info("HA Bridge (v" + theVersion.getVersion() + ") initializing....");
 	        // sparkjava config directive to set ip address for the web server to listen on
 	        // ipAddress("0.0.0.0"); // not used
 	        // sparkjava config directive to set port for the web server to listen on
-	        port(Integer.valueOf(bridgeSettings.getServerPort()));
+	        port(Integer.valueOf(bridgeSettings.getBridgeSettingsDescriptor().getServerPort()));
 	        // sparkjava config directive to set html static file location for Jetty
 	        staticFileLocation("/public");
 	        // setup system control api first
@@ -76,11 +74,11 @@ public class HABridge {
 	        awaitInitialization();
 	
 	        // start the upnp ssdp discovery listener
-	        theUpnpListener = new UpnpListener(bridgeSettings);
+	        theUpnpListener = new UpnpListener(bridgeSettings.getBridgeSettingsDescriptor(), bridgeSettings.getBridgeControl());
 	        if(theUpnpListener.startListening())
 	        	log.info("HA Bridge (v" + theVersion.getVersion() + ") reinitialization requessted....");
 
-	        bridgeSettings.setReinit(false);
+	        bridgeSettings.getBridgeControl().setReinit(false);
 	        stop();
         }
         log.info("HA Bridge (v" + theVersion.getVersion() + ") exiting....");

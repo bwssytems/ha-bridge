@@ -3,7 +3,8 @@ package com.bwssystems.HABridge.upnp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettings;
+import com.bwssystems.HABridge.BridgeControlDescriptor;
+import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.Configuration;
 
 import java.io.IOException;
@@ -15,26 +16,21 @@ import org.apache.http.conn.util.*;
 
 public class UpnpListener {
 	private Logger log = LoggerFactory.getLogger(UpnpListener.class);
-
 	private int upnpResponsePort;
-
 	private int httpServerPort;
-
 	private String responseAddress;
-	
 	private boolean strict;
-	
 	private boolean traceupnp;
-	private BridgeSettings bridgeSettings;
+	private BridgeControlDescriptor bridgeControl;
 	
-	public UpnpListener(BridgeSettings theSettings) {
+	public UpnpListener(BridgeSettingsDescriptor theSettings, BridgeControlDescriptor theControl) {
 		super();
 		upnpResponsePort = Integer.valueOf(theSettings.getUpnpResponsePort());
 		httpServerPort = Integer.valueOf(theSettings.getServerPort());
 		responseAddress = theSettings.getUpnpConfigAddress();
 		strict = theSettings.isUpnpStrict();
 		traceupnp = theSettings.isTraceupnp();
-		bridgeSettings = theSettings;
+		bridgeControl = theControl;
 	}
 
 	public boolean startListening(){
@@ -80,7 +76,7 @@ public class UpnpListener {
 				if(isSSDPDiscovery(packet)){
 					sendUpnpResponse(responseSocket, packet.getAddress(), packet.getPort());
 				}
-				if(bridgeSettings.isReinit() || bridgeSettings.isStop()) {
+				if(bridgeControl.isReinit() || bridgeControl.isStop()) {
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
@@ -94,13 +90,13 @@ public class UpnpListener {
 		}  catch (IOException e) {
 			log.error("UpnpListener encountered an error opening sockets. Shutting down", e);
 		}
-		if(bridgeSettings.isReinit())
+		if(bridgeControl.isReinit())
 			log.info("UPNP Discovery Listener - ended, restart found");
-		if(bridgeSettings.isStop())
+		if(bridgeControl.isStop())
 			log.info("UPNP Discovery Listener - ended, stop found");
-		if(!bridgeSettings.isStop()&& !bridgeSettings.isReinit())
+		if(!bridgeControl.isStop()&& !bridgeControl.isReinit())
 			log.info("UPNP Discovery Listener - ended, error found");
-		return bridgeSettings.isReinit();
+		return bridgeControl.isReinit();
 	}
 
 	/**

@@ -44,7 +44,26 @@ public class SystemControl {
 
 			response.status(200);
 
-            return bridgeSettings;
+            return bridgeSettings.getBridgeSettingsDescriptor();
+        }, new JsonTransformer());
+		
+//      http://ip_address:port/system/settings CORS request
+	    options(SYSTEM_CONTEXT + "/settings", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+//      http://ip_address:port/system/settings which returns the bridge configuration settings
+		put(SYSTEM_CONTEXT + "/settings", "application/json", (request, response) -> {
+			log.info("save bridge settings requested from " + request.ip() + " with body: " + request.body());
+			BridgeSettingsDescriptor newBridgeSettings = new Gson().fromJson(request.body(), BridgeSettingsDescriptor.class);
+			bridgeSettings.save(newBridgeSettings);
+			response.status(200);
+
+            return bridgeSettings.getBridgeSettingsDescriptor();
         }, new JsonTransformer());
 		
 	    // http://ip_address:port/system/control/reinit CORS request
@@ -160,13 +179,13 @@ public class SystemControl {
     }
     
     public String reinit() {
-    	bridgeSettings.setReinit(true);
+    	bridgeSettings.getBridgeControl().setReinit(true);
     	pingListener();
     	return "{\"control\":\"reiniting\"}";
     }
     
     public String stop() {
-    	bridgeSettings.setStop(true);
+    	bridgeSettings.getBridgeControl().setStop(true);
     	pingListener();
     	return "{\"control\":\"stopping\"}";    	
     }

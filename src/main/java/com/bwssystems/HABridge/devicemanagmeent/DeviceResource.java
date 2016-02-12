@@ -15,7 +15,6 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.JsonTransformer;
 import com.bwssystems.HABridge.dao.BackupFilename;
@@ -76,24 +75,31 @@ public class DeviceResource {
 	    	return "";
 	    });
     	post(API_CONTEXT, "application/json", (request, response) -> {
-	    	log.debug("Create a Device - request body: " + request.body());
-    		DeviceDescriptor device = new Gson().fromJson(request.body(), DeviceDescriptor.class);
-	    	if(device.getContentBody() != null ) {
-	            if (device.getContentType() == null || device.getHttpVerb() == null || !supportedVerbs.contains(device.getHttpVerb().toLowerCase())) {
-	            	device = null;
-	            	response.status(HttpStatus.SC_BAD_REQUEST);
-					log.debug("Bad http verb in create a Device: " + request.body());
-					return device;
-	            }
-	        }
+	    	log.info("Create a Device(s) - request body: " + request.body());
+	    	DeviceDescriptor devices[];
+	    	if(request.body().substring(0,1).equalsIgnoreCase("[") == true) {
+	    		devices = new Gson().fromJson(request.body(), DeviceDescriptor[].class);
+	    	}
+	    	else {
+	    		devices = new Gson().fromJson("[" + request.body() + "]", DeviceDescriptor[].class);
+	    	}
+	    	for(int i = 0; i < devices.length; i++) {
+		    	if(devices[i].getContentBody() != null ) {
+		            if (devices[i].getContentType() == null || devices[i].getHttpVerb() == null || !supportedVerbs.contains(devices[i].getHttpVerb().toLowerCase())) {
+		            	response.status(HttpStatus.SC_BAD_REQUEST);
+						log.debug("Bad http verb in create a Device(s): " + request.body());
+						return devices;
+		            }
+		        }
+	    	}
 
-	    	deviceRepository.save(device);
-			log.debug("Created a Device: " + request.body());
+	    	deviceRepository.save(devices);
+			log.debug("Created a Device(s): " + request.body());
 
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.status(HttpStatus.SC_CREATED);
 
-            return device;
+            return devices;
 	    }, new JsonTransformer());
 
 	    // http://ip_address:port/api/devices/:id CORS request
@@ -130,7 +136,9 @@ public class DeviceResource {
 				deviceEntry.setContentBody(device.getContentBody());
 				deviceEntry.setContentBodyOff(device.getContentBodyOff());
 
-				deviceRepository.save(deviceEntry);
+				DeviceDescriptor[] theDevices = new DeviceDescriptor[1];
+				theDevices[0] = deviceEntry;
+				deviceRepository.save(theDevices);
 				response.status(HttpStatus.SC_OK);
 	        }
 	        return deviceEntry;

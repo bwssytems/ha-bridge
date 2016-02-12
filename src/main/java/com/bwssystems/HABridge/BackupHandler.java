@@ -29,6 +29,8 @@ public abstract class BackupHandler {
 			fileExtension = "." + anExtension;
 		
 		defaultName = adefaultName;
+		
+		log.debug("setupParams has defaultName: " + defaultName + " and file extension as: " + fileExtension);
 	}
 
 	public String backup(String aFilename) {
@@ -78,7 +80,7 @@ public abstract class BackupHandler {
 		List<String> theFilenames = new ArrayList<String>();
 		Path dir = repositoryPath.getParent();
 		try (DirectoryStream<Path> stream =
-		     Files.newDirectoryStream(dir, "*.{"+ fileExtension + "}")) {
+		     Files.newDirectoryStream(dir, "*.{"+ fileExtension.substring(1) + "}")) {
 		    for (Path entry: stream) {
 		        theFilenames.add(entry.getFileName().toString());
 		    }

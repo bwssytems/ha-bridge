@@ -255,6 +255,20 @@ app.service('bridgeService', function ($http, $window, ngToast) {
         	return false;
         };
         
+        this.bulkAddDevice = function (devices) {
+            this.state.error = "";
+            return $http.post(this.state.base, devices).then(
+                function (response) {
+                },
+                function (error) {
+                    if (error.data) {
+                    	$window.alert("Bulk Add new Device Error: " + error.data.message);
+                    }
+                    self.state.error = "Bulk Add new Device Error: unknown";
+                }
+            );
+        };
+        
         this.addDevice = function (device) {
             this.state.error = "";
             if(device.httpVerb != null && device.httpVerb != "")
@@ -278,7 +292,6 @@ app.service('bridgeService', function ($http, $window, ngToast) {
                     contentBodyOff: device.contentBodyOff
                 }).then(
                     function (response) {
-                        self.viewDevices();
                     },
                     function (error) {
                         if (error.data) {
@@ -304,7 +317,6 @@ app.service('bridgeService', function ($http, $window, ngToast) {
                     contentBodyOff: device.contentBodyOff
                 }).then(
                     function (response) {
-                        self.viewDevices();
                     },
                     function (error) {
                         if (error.data) {
@@ -368,6 +380,22 @@ app.service('bridgeService', function ($http, $window, ngToast) {
             );
         };
 
+        this.saveSettings = function () {
+            this.state.error = "";
+            return $http.put(this.state.systemsbase + "/settings", this.state.settings).then(
+                function (response) {
+                    self.viewConfigs();
+                },
+                function (error) {
+                    if (error.data) {
+                        self.state.error = error.data.message;
+                    }
+                    self.state.error = "Save Settings Error: unknown";
+                }
+            );
+        	
+        };
+        
         this.backupSettings = function (afilename) {
             this.state.error = "";
             return $http.put(this.state.systemsbase + "/backup/create", {
@@ -489,6 +517,9 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     $scope.imgUrl = "glyphicon glyphicon-plus";
     $scope.visibleBk = false;
     $scope.imgBkUrl = "glyphicon glyphicon-plus";
+    $scope.saveSettings = function() {
+    	bridgeService.saveSettings();
+    };
     $scope.setBridgeUrl = function (url) {
         bridgeService.state.base = url;
         bridgeService.viewDevices();
@@ -578,7 +609,10 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         $scope.device_dim_control = "";
         $scope.bulk = { devices: [] };
 		var veraList = angular.fromJson($scope.bridge.settings.veraaddress);
-        $scope.vera = {base: "http://" + veraList.devices[0].ip, port: "3480", id: ""};
+		if(veraList != null)
+			$scope.vera = {base: "http://" + veraList.devices[0].ip, port: "3480", id: ""};
+		else
+			$scope.vera = {base: "http://", port: "3480", id: ""};
         bridgeService.viewVeraDevices();
         bridgeService.viewVeraScenes();
         bridgeService.viewHarmonyActivities();
@@ -823,14 +857,29 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
         };
         
         $scope.bulkAddDevices = function(dim_control) {
+        	var devicesList = [];
         	for(var i = 0; i < $scope.bulk.devices.length; i++) {
         		for(var x = 0; x < bridgeService.state.veradevices.length; x++) {
 	        		if(bridgeService.state.veradevices[x].id == $scope.bulk.devices[i]) {
 	        			$scope.buildDeviceUrls(bridgeService.state.veradevices[x],dim_control);
-	        			$scope.addDevice();
+	        			devicesList[i] = {
+	                            name: $scope.device.name,
+	                            mapId: $scope.device.mapId,
+	                            mapType: $scope.device.mapType,
+	                            deviceType: $scope.device.deviceType,
+	                            targetDevice: $scope.device.targetDevice,
+	                            onUrl: $scope.device.onUrl,
+	                            offUrl: $scope.device.offUrl,
+	                            httpVerb: $scope.device.httpVerb,
+	                            contentType: $scope.device.contentType,
+	                            contentBody: $scope.device.contentBody,
+	                            contentBodyOff: $scope.device.contentBodyOff
+	                        };
 	        		}
         		}
         	}
+        	bridgeService.bulkAddDevice(devicesList);
+        	$scope.clearDevice();
         	$scope.bulk = { devices: [] };
         };
         
