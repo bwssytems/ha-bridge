@@ -4,8 +4,8 @@ import java.util.List;
 
 public class BridgeSettingsDescriptor {
 	private String upnpconfigaddress;
-	private String serverport;
-	private String upnpresponseport;
+	private Integer serverport;
+	private Integer upnpresponseport;
 	private String upnpdevicedb;
 	private IpList veraaddress;
 	private IpList harmonyaddress;
@@ -37,17 +37,23 @@ public class BridgeSettingsDescriptor {
 	public void setUpnpConfigAddress(String upnpConfigAddress) {
 		this.upnpconfigaddress = upnpConfigAddress;
 	}
-	public String getServerPort() {
+	public Integer  getServerPort() {
 		return serverport;
 	}
-	public void setServerPort(String serverPort) {
+	public void setServerPort(Integer serverPort) {
 		this.serverport = serverPort;
 	}
-	public String getUpnpResponsePort() {
+	public void setServerPort(String serverPort) {
+		this.serverport = Integer.valueOf(serverPort);
+	}
+	public Integer getUpnpResponsePort() {
 		return upnpresponseport;
 	}
-	public void setUpnpResponsePort(String upnpResponsePort) {
+	public void setUpnpResponsePort(Integer upnpResponsePort) {
 		this.upnpresponseport = upnpResponsePort;
+	}
+	public void setUpnpResponsePort(String upnpResponsePort) {
+		this.upnpresponseport = Integer.valueOf(upnpResponsePort);
 	}
 	public String getUpnpDeviceDb() {
 		return upnpdevicedb;

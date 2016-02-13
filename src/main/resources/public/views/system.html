@@ -52,88 +52,123 @@
 					</tr>
 				</thead>
 				<tr>
-					<td>config.file</td>
-					<td>{{bridge.settings.configfile}}</td>
+					<td>Configuration Path and File</td>
+					<td><input id="bridge-settings-configfile" class="form-control" type="text"
+							ng-model="bridge.settings.configfile" placeholder="data/ha-bridge.config"></td>
 				</tr>
 				<tr>
-					<td>upnp.devices.db</td>
-					<td>{{bridge.settings.upnpdevicedb}}</td>
+					<td>Device DB Path and File</td>
+					<td><input id="bridge-settings-upnpdevicedb" class="form-control" type="text"
+							ng-model="bridge.settings.upnpdevicedb" placeholder="data/device.db"></td>
 				</tr>
 				<tr>
-					<td>upnp.config.address</td>
-					<td>{{bridge.settings.upnpconfigaddress}}</td>
+					<td>UPNP IP Address</td>
+					<td><input id="bridge-settings-upnpconfigaddress" class="form-control" type="text"
+							ng-model="bridge.settings.upnpconfigaddress" placeholder="192.168.1.1"></td>
 				</tr>
 				<tr>
-					<td>server.port</td>
-					<td>{{bridge.settings.serverport}}</td>
+					<td>Web Server Port</td>
+					<td><input id="bridge-settings-serverport" class="form-control" type="number"
+							ng-model="bridge.settings.serverport"  min="1" max="65535"></td>
 				</tr>
 				<tr>
-					<td>upnp.response.port</td>
-					<td>{{bridge.settings.upnpresponseport}}</td>
+					<td>UPNP Response Port</td>
+					<td><input id="bridge-settings-upnpresponseport" class="form-control" type="number"
+							ng-model="bridge.settings.upnpresponseport"  min="1" max="65535"></td>
 				</tr>
 				<tr>
-					<td>vera.address</td>
+					<td>Vera Names and IP Addresses</td>
 						<td><table class="table table-bordered table-striped table-hover">
 							<thead>
 								<tr>
 									<th>Name</th>
 									<th>IP</th>
+									<th>Manage</th>
 								</tr>
 							</thead>
 							<tr ng-repeat="vera in bridge.settings.veraaddress.devices">
 								<td>{{vera.name}}</td>
 								<td>{{vera.ip}}</td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removeVeratoSettings(vera.name, vera.ip)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-next-vera-name" class="form-control" type="text"
+									ng-model="newveraname" placeholder="A Vera"></td>
+								<td><input id="bridge-settings-next-vera-ip" class="form-control" type="text"
+									ng-model="newveraip" placeholder="192.168.1.2"></td>
+									<td><button class="btn btn-success" type="submit"
+										ng-click="addVeratoSettings(newveraname, newveraip)">Add</button></td>
 							</tr>
 						</table>
 					</td>
 				</tr>
 				<tr>
-					<td>harmony.address</td>
+					<td>Harmony Names and IP Addresses</td>
 					<td><table class="table table-bordered table-striped table-hover">
 							<thead>
 								<tr>
 									<th>Name</th>
 									<th>IP</th>
+									<th>Manage</th>
 								</tr>
 							</thead>
 							<tr ng-repeat="harmony in bridge.settings.harmonyaddress.devices">
 								<td>{{harmony.name}}</td>
 								<td>{{harmony.ip}}</td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removeHarmonytoSettings(harmony.name, harmony.ip)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-next-harmony-name" class="form-control" type="text"
+									ng-model="newharmonyname" placeholder="A Harmony"></td>
+								<td><input id="bridge-settings-next-harmony-ip" class="form-control" type="text"
+									ng-model="newharmonyip" placeholder="192.168.1.3"></td>
+									<td><button class="btn btn-success" type="submit"
+										ng-click="addHarmonytoSettings(newharmonyname, newharmonyip)">Add</button></td>
 							</tr>
 						</table>
 					</td>
 				</tr>
 				<tr>
-					<td>harmony.user</td>
-					<td>{{bridge.settings.harmonyuser}}</td>
+					<td>Harmony Username</td>
+					<td><input id="bridge-settings-harmonyuser" class="form-control" type="text"
+							ng-model="bridge.settings.harmonyuser" placeholder="someone@gmail.com"></td>
 				</tr>
 				<tr>
-					<td>harmony.pwd</td>
-					<td>{{bridge.settings.harmonypwd}}</td>
+					<td>Harmony Password</td>
+					<td><input id="bridge-settings-harmonypwd" class="form-control" type="password"
+							ng-model="bridge.settings.harmonypwd" placeholder="thepassword"></td>
 				</tr>
 				<tr>
-					<td>button.sleep</td>
-					<td>{{bridge.settings.buttonsleep}} ms</td>
+					<td>Button Press Sleep Interval (ms)</td>
+					<td><input id="bridge-settings-buttonsleep" class="form-control" type="number" name="input"
+							ng-model="bridge.settings.buttonsleep" min="100" max="9999"></td>
 				</tr>
 				<tr>
-					<td>nest.user</td>
-					<td>{{bridge.settings.nestuser}}</td>
+					<td>Nest Username</td>
+					<td><input id="bridge-settings-nestuser" class="form-control" type="text"
+							ng-model="bridge.settings.nestuser" placeholder="someone@gmail.com"></td>
 				</tr>
 				<tr>
-					<td>nest.pwd</td>
-					<td>{{bridge.settings.nestpwd}}</td>
+					<td>Nest Password</td>
+					<td><input id="bridge-settings-nestpwd" class="form-control" type="password"
+							ng-model="bridge.settings.nestpwd" placeholder="thepassword"></td>
 				</tr>
 				<tr>
-					<td>upnp.strict</td>
-					<td>{{bridge.settings.upnpstrict}}</td>
+					<td>UPNP Strict Handling</td>
+					<td><input type="checkbox" ng-model="bridge.settings.upnpstrict"
+           				ng-true-value=true ng-false-value=false>  {{bridge.settings.upnpstrict}}</td>
 				</tr>
 				<tr>
-					<td>trace.upnp</td>
-					<td>{{bridge.settings.traceupnp}}</td>
+					<td>Trace UPNP Calls</td>
+					<td><input type="checkbox" ng-model="bridge.settings.traceupnp"
+           				ng-true-value=true ng-false-value=false>  {{bridge.settings.traceupnp}}</td>
 				</tr>
 				<tr>
-					<td>dev.mode</td>
-					<td>{{bridge.settings.devmode}}</td>
+					<td>Harmony Development Mode</td>
+					<td><input type="checkbox" ng-model="bridge.settings.devmode"
+           				ng-true-value=true ng-false-value=false>  {{bridge.settings.devmode}}</td>
 				</tr>
 			</table>
 			<p>

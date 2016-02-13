@@ -100,7 +100,7 @@ public class BridgeSettings extends BackupHandler {
 	        theBridgeSettings.setNestpwd(System.getProperty("nest.pwd"));
         }
 
-        if(theBridgeSettings.getUpnpConfigAddress() == null) {
+        if(theBridgeSettings.getUpnpConfigAddress() == null || theBridgeSettings.getUpnpConfigAddress().equals("")) {
 	        try {
 	        	log.info("Getting an IP address for this host....");
 				Enumeration<NetworkInterface> ifs =	NetworkInterface.getNetworkInterfaces();

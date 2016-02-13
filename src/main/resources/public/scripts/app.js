@@ -517,6 +517,13 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     $scope.imgUrl = "glyphicon glyphicon-plus";
     $scope.visibleBk = false;
     $scope.imgBkUrl = "glyphicon glyphicon-plus";
+    $scope.addVeratoSettings = function (newveraname, newveraip) {
+    	if($scope.bridge.settings.veraddress == null) {
+			$scope.bridge.settings.veraddress = { devices: [] };
+		}
+    		
+    	$scope.bridge.settings.veraaddress.devices.push("{" +"\"name\":\"" + newveraname +"\",\"ip\":\"" + newveraip + "\"}");
+    };
     $scope.saveSettings = function() {
     	bridgeService.saveSettings();
     };

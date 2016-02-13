@@ -25,7 +25,7 @@ public class UpnpListener {
 	
 	public UpnpListener(BridgeSettingsDescriptor theSettings, BridgeControlDescriptor theControl) {
 		super();
-		upnpResponsePort = Integer.valueOf(theSettings.getUpnpResponsePort());
+		upnpResponsePort = theSettings.getUpnpResponsePort();
 		httpServerPort = Integer.valueOf(theSettings.getServerPort());
 		responseAddress = theSettings.getUpnpConfigAddress();
 		strict = theSettings.isUpnpStrict();

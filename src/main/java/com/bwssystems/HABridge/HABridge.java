@@ -52,7 +52,7 @@ public class HABridge {
 	        // sparkjava config directive to set ip address for the web server to listen on
 	        // ipAddress("0.0.0.0"); // not used
 	        // sparkjava config directive to set port for the web server to listen on
-	        port(Integer.valueOf(bridgeSettings.getBridgeSettingsDescriptor().getServerPort()));
+	        port(bridgeSettings.getBridgeSettingsDescriptor().getServerPort());
 	        // sparkjava config directive to set html static file location for Jetty
 	        staticFileLocation("/public");
 	        // setup system control api first
