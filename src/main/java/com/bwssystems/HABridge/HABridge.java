@@ -80,6 +80,10 @@ public class HABridge {
 
 	        bridgeSettings.getBridgeControl().setReinit(false);
 	        stop();
+	        nestHome.closeTheNest();
+	        nestHome = null;
+	        harmonyHome.shutdownHarmonyHubs();
+	        harmonyHome = null;
         }
         log.info("HA Bridge (v" + theVersion.getVersion() + ") exiting....");
         System.exit(0);

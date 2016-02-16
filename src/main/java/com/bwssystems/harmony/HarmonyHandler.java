@@ -119,4 +119,14 @@ public class HarmonyHandler {
 
 		return true;
 	}
+
+	public void shutdown() {
+		log.debug("Harmony api shutdown requested.");
+        if(devMode)
+        	return;
+        
+		harmonyClient.disconnect();
+		harmonyClient = null;
+	}
+
 }

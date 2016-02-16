@@ -48,6 +48,14 @@ public class HarmonyHome {
 		}
 	}
 
+	public void shutdownHarmonyHubs() {
+		Iterator<String> keys = hubs.keySet().iterator();
+		while(keys.hasNext()) {
+			String key = keys.next();
+			hubs.get(key).getMyHarmony().shutdown();
+		}
+	}
+
 	public HarmonyHandler getHarmonyHandler(String aName) {
 		HarmonyHandler aHandler = null;
 		if(aName == null || aName.equals("")) {

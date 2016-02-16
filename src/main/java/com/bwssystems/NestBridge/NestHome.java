@@ -97,5 +97,13 @@ public class NestHome {
 	public Nest getTheNest() {
 		return theNest;
 	}
+	
+	public void closeTheNest() {
+		theNest.endNestSession();
+		theNest = null;
+		theSession = null;
+		nestItems = null;
+	}
+	
 }
 
