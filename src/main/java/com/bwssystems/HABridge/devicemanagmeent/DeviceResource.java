@@ -20,8 +20,11 @@ import com.bwssystems.HABridge.JsonTransformer;
 import com.bwssystems.HABridge.dao.BackupFilename;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
+import com.bwssystems.HABridge.dao.ErrorMessage;
 import com.bwssystems.NestBridge.NestHome;
 import com.bwssystems.harmony.HarmonyHome;
+import com.bwssystems.luupRequests.Device;
+import com.bwssystems.luupRequests.Scene;
 import com.bwssystems.vera.VeraHome;
 import com.google.gson.Gson;
 
@@ -88,7 +91,7 @@ public class DeviceResource {
 		            if (devices[i].getContentType() == null || devices[i].getHttpVerb() == null || !supportedVerbs.contains(devices[i].getHttpVerb().toLowerCase())) {
 		            	response.status(HttpStatus.SC_BAD_REQUEST);
 						log.debug("Bad http verb in create a Device(s): " + request.body());
-						return devices;
+						return new ErrorMessage("Bad http verb in create a Device(s): " + request.body() + " ");
 		            }
 		        }
 	    	}
@@ -118,6 +121,7 @@ public class DeviceResource {
 	        if(deviceEntry == null){
 		    	log.debug("Could not save an edited Device Id: " + request.params(":id"));
 		    	response.status(HttpStatus.SC_BAD_REQUEST);
+		    	return new ErrorMessage("Could not save an edited Device Id: " + request.params(":id") + " ");
 	        }
 	        else
 	        {
@@ -157,8 +161,10 @@ public class DeviceResource {
     	get (API_CONTEXT + "/:id", "application/json", (request, response) -> {
 	    	log.debug("Get a device");
 	        DeviceDescriptor descriptor = deviceRepository.findOne(request.params(":id"));
-	        if(descriptor == null)
+	        if(descriptor == null) {
 				response.status(HttpStatus.SC_NOT_FOUND);
+				return new ErrorMessage("Could not find, id: " + request.params(":id") + " ");
+	        }
 	        else
 	        	response.status(HttpStatus.SC_OK);
 	        return descriptor;
@@ -168,8 +174,10 @@ public class DeviceResource {
     		String anId = request.params(":id");
 	    	log.debug("Delete a device: " + anId);
 	        DeviceDescriptor deleted = deviceRepository.findOne(anId);
-	        if(deleted == null)
+	        if(deleted == null) {
 				response.status(HttpStatus.SC_NOT_FOUND);
+				return new ErrorMessage("Could not delete, id: " + anId + " not found. ");
+	        }
 	        else
 	        {
 	        	deviceRepository.delete(deleted);
@@ -182,28 +190,39 @@ public class DeviceResource {
 	    	log.debug("Get vera devices");
 	        if(veraHome == null){
 				response.status(HttpStatus.SC_NOT_FOUND);
-				return null;
+				return new ErrorMessage("A Vera is not available.");
 	        }
-
-	      	response.status(HttpStatus.SC_OK);
-	        return veraHome.getDevices();
+	        List<Device> theDevices = veraHome.getDevices();
+	        if(theDevices == null) {
+	        	response.status(HttpStatus.SC_SERVICE_UNAVAILABLE);
+	        	return new ErrorMessage("A Vera request failed to get devices. Check your Vera IP addresses.");
+	        }
+	        else
+	        	response.status(HttpStatus.SC_OK);
+	        return theDevices;
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/vera/scenes", "application/json", (request, response) -> {
 	    	log.debug("Get vera scenes");
 	        if(veraHome == null){
 				response.status(HttpStatus.SC_NOT_FOUND);
-	            return null;
+				return new ErrorMessage("A Vera is not available.");
 	        }
-	      	response.status(HttpStatus.SC_OK);
-	        return veraHome.getScenes();
+	        List<Scene> theScenes = veraHome.getScenes();
+	        if(theScenes == null) {
+	        	response.status(HttpStatus.SC_SERVICE_UNAVAILABLE);
+	        	return new ErrorMessage("A Vera is not available and failed to get scenes. Check your Vera IP addresses.");
+	        }
+	        else
+	        	response.status(HttpStatus.SC_OK);
+	        return theScenes;
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/harmony/activities", "application/json", (request, response) -> {
 	    	log.debug("Get harmony activities");
 	      	if(myHarmonyHome == null) {
 				response.status(HttpStatus.SC_NOT_FOUND);
-		      	return null;	      		
+				return new ErrorMessage("A Harmony is not available.");	      		
 	      	}
 	      	response.status(HttpStatus.SC_OK);
 	      	return myHarmonyHome.getActivities();
@@ -213,7 +232,7 @@ public class DeviceResource {
 	    	log.debug("Get harmony current activity");
 	      	if(myHarmonyHome == null) {
 	      		response.status(HttpStatus.SC_NOT_FOUND);
-	      		return null;
+	      		return new ErrorMessage("A Harmony is not available.");	
 	      	}
 	      	response.status(HttpStatus.SC_OK);
       		return myHarmonyHome.getCurrentActivities();
@@ -223,7 +242,7 @@ public class DeviceResource {
 	    	log.debug("Get harmony devices");
 	      	if(myHarmonyHome == null) {
 				response.status(HttpStatus.SC_NOT_FOUND);
-		      	return null;	      		
+				return new ErrorMessage("A Harmony is not available.");		      		
 	      	}
 	      	response.status(HttpStatus.SC_OK);
 	      	return myHarmonyHome.getDevices();
@@ -233,7 +252,7 @@ public class DeviceResource {
 	    	log.debug("Get nest items");
 	      	if(nestHome == null) {
 				response.status(HttpStatus.SC_NOT_FOUND);
-		      	return null;	      		
+				return new ErrorMessage("A Nest is not available.");
 	      	}
 	      	response.status(HttpStatus.SC_OK);
 	      	return nestHome.getItems();

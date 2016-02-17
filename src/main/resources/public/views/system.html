@@ -9,20 +9,6 @@
         <li role="presentation"><a href="#/editor">Manual Add</a></li>
       </ul>
 
-
-	<div ng-controller="ErrorsController">
-		<div ng-if="bridge.error"
-			class="alert alert-warning alert-dismissible" role="alert">
-			<button type="button" class="close" data-dismiss="alert"
-				aria-label="Close">
-				<span aria-hidden="true">&times;</span>
-			</button>
-
-			<h2 ng-show='bridge.error != ""'>ERROR</h2>
-
-			<div ng-show='bridge.error != ""'>{{bridge.error}}</div>
-		</div>
-	</div>
 	<div class="panel panel-default bridgeServer">
 		<div class="panel-heading">
 			<h1 class="panel-title">Bridge Settings</h1>

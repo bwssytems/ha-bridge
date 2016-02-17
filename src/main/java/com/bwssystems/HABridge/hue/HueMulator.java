@@ -245,7 +245,7 @@ public class HueMulator {
 	        DeviceDescriptor device = repository.findOne(lightId);
 	        if (device == null) {
 	        	response.status(HttpStatus.SC_NOT_FOUND);
-	            return null;
+	            return "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId + ",\"description\": \"Object not found\"}}]";
 	        } else {
 	            log.debug("found device named: " + device.getName());
 	        }

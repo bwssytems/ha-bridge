@@ -9,20 +9,6 @@
         <li role="presentation"><a href="#/editor">Manual Add</a></li>
       </ul>
 
-
-	<div ng-controller="ErrorsController">
-		<div ng-if="bridge.error"
-			class="alert alert-warning alert-dismissible" role="alert">
-			<button type="button" class="close" data-dismiss="alert"
-				aria-label="Close">
-				<span aria-hidden="true">&times;</span>
-			</button>
-
-			<h2 ng-show='bridge.error != ""'>ERROR</h2>
-
-			<div ng-show='bridge.error != ""'>{{bridge.error}}</div>
-		</div>
-	</div>
 	<div class="panel panel-default">
 		<div class="panel-heading">
 			<h2 class="panel-title">Current devices ({{bridge.devices.length}}) </h2>
@@ -53,6 +39,7 @@
 				<td>{{device.deviceType}}</td>
 				<td>{{device.targetDevice}}</td>
 				<td>
+					<p>
 					<button class="btn btn-info" type="submit"
 						ng-click="testUrl(device, 'on')">Test ON</button>
 					<button class="btn btn-info" type="submit"
@@ -61,6 +48,10 @@
 						ng-click="editDevice(device)">Edit/Copy</button>
 					<button class="btn btn-danger" type="submit"
 						ng-click="deleteDevice(device)">Delete</button>
+					</p>
+					<p>
+					<slider floor="0" ceiling="100" step="1" precision="2" ng-model="devicePercentage"></slider>
+					</p>
 				</td>
 			</tr>
 		</table>

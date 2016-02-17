@@ -1,4 +1,4 @@
-var app = angular.module('habridge', ['ngRoute','ngToast']);
+var app = angular.module('habridge', ['ngRoute','ngToast','ui.slider']);
 
 app.config(function ($routeProvider) {
 	$routeProvider.when('/#', {
@@ -43,15 +43,43 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
 	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], settings: [], myToastMsg: [], olddevicename: "", showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
 
+	this.displayWarn = function(errorTitle, error) {
+		if(error == null) {
+			error = {status: 200, statusText: "OK", data: []};
+			error.data = {message: "success"};
+		}
+		ngToast.create({
+			className: "warning",
+			dismissButton: true,
+			dismissOnTimeout: false,
+			content: errorTitle + error.data.message + " with status: " + error.statusText + " - "  + error.status});
+	};
+	
+	this.displayError = function(errorTitle, error) {
+		if(error == null) {
+			error = {status: 200, statusText: "OK", data: []};
+			error.data = {message: "success"};
+		}
+		ngToast.create({
+			className: "danger",
+			dismissButton: true,
+			dismissOnTimeout: false,
+			content: errorTitle + error.data.message + " with status: " + error.statusText + " - "  + error.status});
+	};
+	
+	this.displaySuccess = function(theTitle) {
+		ngToast.create({
+			className: "success",
+			content: theTitle});
+	};
+	
 	this.viewDevices = function () {
 		return $http.get(this.state.base).then(
 				function (response) {
 					self.state.devices = response.data;
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Cannot get devices from habridge: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayError("Cannot get devices from habridge: ", error);
 				}
 		);
 	};
@@ -62,9 +90,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.state.habridgeversion = response.data.version;
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Cannot get version" + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Cannot get version: ", error);
 				}
 		);
 	};
@@ -97,9 +123,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.updateShowNest();
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Load Bridge Settings Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Load Bridge Settings Error: ", error);
 				}
 		);
 	};
@@ -110,9 +134,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.state.backups = response.data;
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Get Backups Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Get Backups Error: ", error);
 				}
 		);
 	};
@@ -123,9 +145,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.state.configs = response.data;
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Get Configs Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Get Configs Error: ", error);
 				}
 		);
 	};
@@ -138,9 +158,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.state.nestitems = response.data;
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Get Nest Items Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Get Nest Items Error: ", error);
 				}
 		);
 	};
@@ -153,9 +171,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.state.veradevices = response.data;
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Get Vera Devices Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Get Vera Devices Error: ", error);
 				}
 		);
 	};
@@ -168,9 +184,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.state.verascenes = response.data;
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Get Vera Scenes Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Get Vera Scenes Error: ", error);
 				}
 		);
 	};
@@ -183,9 +197,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.state.harmonyactivities = response.data;
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Get Harmony Activities Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Get Harmony Activities Error: ", error);
 				}
 		);
 	};
@@ -198,9 +210,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.state.harmonydevices = response.data;
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Get Harmony Devices Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Get Harmony Devices Error: ", error);
 				}
 		);
 	};
@@ -226,9 +236,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 				function (response) {
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Bulk Add new Device Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Bulk Add new Device Error: ", error);
 				}
 		);
 	};
@@ -257,9 +265,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					function (response) {
 					},
 					function (error) {
-						ngToast.create({
-							className: "warning",
-							content:"Edit Device Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+						self.displayWarn("Edit Device Error: ", error);
 					}
 			);
 		} else {
@@ -281,9 +287,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					function (response) {
 					},
 					function (error) {
-						ngToast.create({
-							className: "warning",
-							content:"Add new Device Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+						self.displayWarn("Add new Device Error: ", error);
 					}
 			);
 		}
@@ -297,9 +301,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.viewBackups();
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Backup Device Db Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Backup Device Db Error: ", error);
 				}
 		);
 	};
@@ -313,9 +315,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.viewDevices();
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Backup Db Restore Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Backup Db Restore Error: ", error);
 				}
 		);
 	};
@@ -328,9 +328,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.viewBackups();
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Delete Backup Db File Error:" + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Delete Backup Db File Error:", error);
 				}
 		);
 	};
@@ -354,16 +352,10 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 	this.stop = function() {
 		return $http.put(this.state.systemsbase + "/control/stop").then(
 				function (response) {
-					ngToast.create({
-						className: "danger",
-						dismissButton: true,
-						dismissOnTimeout: false,
-						content:"HABridge is now stopped. Restart must occur from the server."});
+					self.displayError("HABridge is now stopped. Restart must occur from the server.", null);
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"HABRidge Stop Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayError("HABRidge Stop Error: ", error);
 				}
 		);
 	};
@@ -381,9 +373,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					}, 2000);
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"HABRidge Reinit Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("HABRidge Reinit Error: ", error);
 				}
 		);
 	};
@@ -394,9 +384,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.reinit();
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Save Settings Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Save Settings Error: ", error);
 				}
 		);
 
@@ -410,9 +398,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.viewConfigs();
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Backup Settings Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Backup Settings Error: ", error);
 				}
 		);
 	};
@@ -426,9 +412,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.viewDevices();
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Backup Settings Restore Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Backup Settings Restore Error: ", error);
 				}
 		);
 	};
@@ -441,9 +425,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.viewConfigs();
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Delete Backup Settings File Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					self.displayWarn("Delete Backup Settings File Error: ", error);
 				}
 		);
 	};
@@ -454,9 +436,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.viewDevices();
 				},
 				function (error) {
-					ngToast.create({
-						className: "warning",
-						content:"Delete Device Error: " + "unknown error" || error.data.message + " with status: " + error.status});
+					nself.displayWarn("Delete Device Error: ", error);
 				}
 		);
 	};
@@ -474,17 +454,19 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 	};
 
 	this.testUrl = function (device, type) {
+		var msgDescription = "unknown";
 		if(type == "on") {
 			$http.put(this.state.huebase + "/test/lights/" + device.id + "/state", "{\"on\":true}").then(
 					function (response) {
-						ngToast.create({
-							className: "success",
-							content:"Request Exceuted: " + response.statusText});
+						if(typeof(response.data[0].success) != 'undefined')
+							msgDescription = "success " + angular.toJson(response.data[0].success);
+						if(typeof(response.data[0].error) != 'undefined')
+							msgDescription = "error " + angular.toJson(response.data[0].error);
+							
+						self.displaySuccess("Request Exceuted: " + msgDescription);
 					},
 					function (error) {
-						ngToast.create({
-							className: "warning",
-							content:"Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log."});
+						self.displayWarn("Request Error, Pleae look in your habridge log: ", error);
 					}
 			);
 			return;        		
@@ -492,14 +474,15 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		else {
 			$http.put(this.state.huebase + "/test/lights/" + device.id + "/state", "{\"on\":false}").then(
 					function (response) {
-						ngToast.create({
-							className: "success",
-							content:"Request Exceuted: " + response.statusText});
+						if(typeof(response.data[0].success) != 'undefined')
+							msgDescription = "success " + angular.toJson(response.data[0].success);
+						if(typeof(response.data[0].error) != 'undefined')
+							msgDescription = "error " + angular.toJson(response.data[0].error);
+							
+						self.displaySuccess("Request Exceuted: " + msgDescription);
 					},
 					function (error) {
-						ngToast.create({
-							className: "warning",
-							content:"Request Error: " + error.statusText + ", with status: " + error.status + ", Pleae look in your console log."});
+						self.displayWarn("Request Error, Pleae look in your habridge log: ", error);
 					}
 			);
 			return;        		
@@ -1071,11 +1054,6 @@ app.filter('configuredButtons', function() {
 		}
 		return out;
 	}
-});
-
-
-app.controller('ErrorsController', function ($scope, bridgeService) {
-	$scope.bridge = bridgeService.state;
 });
 
 app.controller('VersionController', function ($scope, bridgeService) {

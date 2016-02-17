@@ -58,7 +58,7 @@ public class SystemControl {
 	    });
 //      http://ip_address:port/system/settings which returns the bridge configuration settings
 		put(SYSTEM_CONTEXT + "/settings", "application/json", (request, response) -> {
-			log.info("save bridge settings requested from " + request.ip() + " with body: " + request.body());
+			log.debug("save bridge settings requested from " + request.ip() + " with body: " + request.body());
 			BridgeSettingsDescriptor newBridgeSettings = new Gson().fromJson(request.body(), BridgeSettingsDescriptor.class);
 			bridgeSettings.save(newBridgeSettings);
 			response.status(200);
@@ -174,7 +174,7 @@ public class SystemControl {
             socket.close();
         }
         catch (IOException e) {
-        	log.warn("Error pinging listener.", e);
+        	log.warn("Error pinging listener. " + e.getMessage());
         }
     }
     

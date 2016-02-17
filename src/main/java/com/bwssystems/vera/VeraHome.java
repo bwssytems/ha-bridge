@@ -13,6 +13,7 @@ import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.luupRequests.Device;
 import com.bwssystems.luupRequests.Scene;
+import com.bwssystems.luupRequests.Sdata;
 
 public class VeraHome {
     private static final Logger log = LoggerFactory.getLogger(VeraHome.class);
@@ -35,9 +36,16 @@ public class VeraHome {
 		ArrayList<Device> deviceList = new ArrayList<Device>();
 		while(keys.hasNext()) {
 			String key = keys.next();
-			Iterator<Device> devices = veras.get(key).getSdata().getDevices().iterator();
-			while(devices.hasNext()) {
-				deviceList.add(devices.next());
+			Sdata theSdata = veras.get(key).getSdata();
+			if(theSdata != null) {
+				Iterator<Device> devices = theSdata.getDevices().iterator();
+				while(devices.hasNext()) {
+					deviceList.add(devices.next());
+				}
+			}
+			else {
+				deviceList = null;
+				break;
 			}
 		}
 		return deviceList;
@@ -48,9 +56,16 @@ public class VeraHome {
 		ArrayList<Scene> sceneList = new ArrayList<Scene>();
 		while(keys.hasNext()) {
 			String key = keys.next();
-			Iterator<Scene> scenes = veras.get(key).getSdata().getScenes().iterator();
-			while(scenes.hasNext()) {
-				sceneList.add(scenes.next());
+			Sdata theSdata = veras.get(key).getSdata();
+			if(theSdata != null) {
+				Iterator<Scene> scenes = theSdata.getScenes().iterator();
+				while(scenes.hasNext()) {
+					sceneList.add(scenes.next());
+				}
+			}
+			else {
+				sceneList = null;
+				break;
 			}
 		}
 		return sceneList;

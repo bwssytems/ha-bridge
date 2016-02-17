@@ -37,16 +37,19 @@ public class VeraInfo {
 	}
     
 	public Sdata getSdata() {
+    	Sdata theSdata = null;
 		if(!validVera)
-			return new Sdata();
+			return theSdata;
 
 		String theUrl = "http://" + veraAddress.getIp() + SDATA_REQUEST;
     	String theData;
     	
     	theData = doHttpGETRequest(theUrl);
-    	Sdata theSdata = new Gson().fromJson(theData, Sdata.class);
-        log.debug("GET sdata - full: " + theSdata.getFull() + ", version: " + theSdata.getVersion());
-        denormalizeSdata(theSdata);
+    	if(theData != null) {
+	    	theSdata = new Gson().fromJson(theData, Sdata.class);
+	        log.debug("GET sdata - full: " + theSdata.getFull() + ", version: " + theSdata.getVersion());
+	        denormalizeSdata(theSdata);
+    	}
     	return theSdata;
     }
 	
@@ -91,19 +94,19 @@ public class VeraInfo {
 
 	//	This function executes the url against the vera
     protected String doHttpGETRequest(String url) {
+    	String theContent = null;
         log.debug("calling GET on URL: " + url);
         HttpGet httpGet = new HttpGet(url);
         try {
             HttpResponse response = httpClient.execute(httpGet);
-            String theContent = EntityUtils.toString(response.getEntity()); //read content for data
-            EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
             log.debug("GET on URL responded: " + response.getStatusLine().getStatusCode());
             if(response.getStatusLine().getStatusCode() == 200){
-                return theContent;
+                theContent = EntityUtils.toString(response.getEntity()); //read content for data
+                EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
             }
         } catch (IOException e) {
-            log.error("Error calling out to HA gateway", e);
+            log.error("doHttpGETRequest: Error calling out to HA gateway: " + e.getMessage());
         }
-        return null;
+        return theContent;
     }
 }
