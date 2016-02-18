@@ -1,4 +1,4 @@
-var app = angular.module('habridge', ['ngRoute','ngToast','ui.slider']);
+var app = angular.module('habridge', ['ngRoute','ngToast','rzModule','ngDialog']);
 
 app.config(function ($routeProvider) {
 	$routeProvider.when('/#', {
@@ -571,7 +571,7 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     };
 });
 
-app.controller('ViewingController', function ($scope, $location, $http, $window, bridgeService) {
+app.controller('ViewingController', function ($scope, $location, $http, $window, bridgeService, ngDialog) {
 
 	bridgeService.viewDevices();
 	bridgeService.viewBackups();
@@ -587,11 +587,19 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 		$scope.reverse = ($scope.predicate === predicate) ? !$scope.reverse : false;
 		$scope.predicate = predicate;
 	};
+	$scope.testUrl = function (device, type) {
+		if(type == "on") {
+
+		}
+		ngDialog.open({
+			template: 'valueDialog',
+			controller: 'ValueDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
+//		bridgeService.testUrl(device, type);
+	};
 	$scope.deleteDevice = function (device) {
 		bridgeService.deleteDevice(device.id);
-	};
-	$scope.testUrl = function (device, type) {
-		bridgeService.testUrl(device, type);
 	};
 	$scope.editDevice = function (device) {
 		bridgeService.editDevice(device);
@@ -619,6 +627,20 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 			$scope.imgBkUrl = "glyphicon glyphicon-minus";
 		else
 			$scope.imgBkUrl = "glyphicon glyphicon-plus";
+	};
+});
+
+app.controller('ValueDialogCtrl', function ($scope, ngDialog) {
+	$scope.slider = {
+		    value: 100,
+		    options: {
+		        floor: 0,
+		        ceil: 100,
+		        showSelectionBar: true
+		    }
+		};
+	$scope.setValue = function () {
+		ngDialog.close('ngdialog1');
 	};
 });
 
@@ -662,7 +684,7 @@ app.controller('AddingController', function ($scope, $location, $http, bridgeSer
 		$scope.device.contentBodyOff = null;
 		$scope.bridge.olddevicename = "";
 	};
-	$scope.clearDevice();
+
 	$scope.buildUrlsUsingDevice = function (dim_control) {
 		if ($scope.vera.base.indexOf("http") < 0) {
 			$scope.vera.base = "http://" + $scope.vera.base;

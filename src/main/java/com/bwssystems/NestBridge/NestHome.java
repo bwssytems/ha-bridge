@@ -99,11 +99,12 @@ public class NestHome {
 	}
 	
 	public void closeTheNest() {
-		theNest.endNestSession();
-		theNest = null;
-		theSession = null;
-		nestItems = null;
+		if(theSession != null) {
+			theNest.endNestSession();
+			theNest = null;
+			theSession = null;
+			nestItems = null;
+		}
 	}
-	
 }
 

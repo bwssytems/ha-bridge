@@ -154,21 +154,21 @@ public class BridgeSettingsDescriptor {
 		return true;
 	}
 	public Boolean isValidHarmony() {
-		if(this.getHarmonyAddress() == null)
+		if(this.getHarmonyAddress() == null || this.getHarmonyAddress().getDevices().size() <= 0)
 			return false;		
 		List<NamedIP> devicesList = this.getHarmonyAddress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
-		if(this.getHarmonyPwd() == null || this.getHarmonyPwd() == "")
+		if(this.getHarmonyPwd() == null || this.getHarmonyPwd().equals(""))
 			return false;
-		if(this.getHarmonyUser() == null || this.getHarmonyUser() == "")
+		if(this.getHarmonyUser() == null || this.getHarmonyUser().equals(""))
 			return false;
 		return true;
 	}
 	public Boolean isValidNest() {
-		if(this.getNestpwd() == null || this.getNestpwd() == "")
+		if(this.getNestpwd() == null || this.getNestpwd().equals(""))
 			return false;
-		if(this.getNestuser() == null || this.getNestuser() == "")
+		if(this.getNestuser() == null || this.getNestuser().equals(""))
 			return false;
 		return true;
 	}

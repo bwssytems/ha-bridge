@@ -49,9 +49,6 @@
 					<button class="btn btn-danger" type="submit"
 						ng-click="deleteDevice(device)">Delete</button>
 					</p>
-					<p>
-					<slider floor="0" ceiling="100" step="1" precision="2" ng-model="devicePercentage"></slider>
-					</p>
 				</td>
 			</tr>
 		</table>
@@ -91,4 +88,17 @@
 				</tr>
 			</table>
 		</div>
-	</div>	
+	</div>
+	
+	<script type="text/ng-template" id="valueDialog">
+		<div class="ngdialog-message">
+			<h2>Select value</h2>
+				<p>
+					<rzslider rz-slider-model="slider.value" rz-slider-options="slider.options"></rzslider>
+				</p>
+		</div>
+		<div class="ngdialog-buttons mt">
+			<button type="button" class="ngdialog-button ngdialog-button-primary" ng-click="setValue()">Set</button>
+		</div>
+	</script>
+	
