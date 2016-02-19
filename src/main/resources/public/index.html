@@ -7,6 +7,7 @@
     <title>HA Bridge</title>
     <link href="css/main.css" rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet">
 	<link href="css/ngToast.min.css" rel="stylesheet">
 	<link href="css/rzslider.min.css" rel="stylesheet">
 	<link href="css/ngDialog.min.css" rel="stylesheet">
@@ -23,8 +24,9 @@
 	<nav class="navbar navbar-inverse navbar-fixed-top">
 		<div class="container" ng-controller="VersionController">
 			<div class="navbar-header">
-				<button type="button" class="navbar-toggle">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
 					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
@@ -36,10 +38,8 @@
 					<li><a href="http://echo.amazon.com/#cards" target="_blank">My Echo</a></li>
 					<li><a href="https://github.com/bwssytems/ha-bridge/blob/master/README.md" target="_blank">Help</a></li>
 					<li class="dropdown">
-						<a id="dropdownMenu1" href="" class="dropdown-toggle"
-						data-toggle="dropdown" role="button" aria-haspopup="true"
-						aria-expanded="false">About <span class="caret"></span></a>
-						<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+						<a id="dLabel" href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">About <span class="caret"></span></a>
+						<ul class="dropdown-menu" aria-labelledby="dLabel">
 							<li><a href="http://www.bwssystems.com" target="_blank">Developed by BWS Systems</a></li>
 							<li><a href="http://www.amazon.com/echo" target="_blank">Amazon Echo</a></li>
 							<li><a href="">HA Bridge Version {{bridge.habridgeversion}}</a></li>

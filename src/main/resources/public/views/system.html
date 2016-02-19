@@ -30,13 +30,21 @@
 						ng-click="goBridgeUrl(bridge.base)">Go</button>
 				</div>
 			</form>
+			<form name="form">
 			<p>
-				<button class="btn btn-success" type="submit"
+				<button ng-disabled="form.$pristine || bridge.isInControl" class="btn btn-success" type="submit"
 					ng-click="saveSettings()">Save</button>
-				<button class="btn btn-warning" type="submit"
+				<button ng-disabled="bridge.isInControl" class="btn btn-warning" type="submit"
 					ng-click="bridgeReinit()">Bridge Reinitialize</button>
-				<button class="btn btn-danger" type="submit"
+				<button ng-disabled="bridge.isInControl" class="btn btn-danger" type="submit"
 					ng-click="bridgeStop()">Bridge Stop</button>
+				<button class="btn btn-primary" type="submit"
+					onclick="myRefresh()">Refresh</button>
+				<script>
+				function myRefresh() {
+				    location.reload();
+				}
+				</script>
 			</p>
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
@@ -159,12 +167,8 @@
 					<td><input type="checkbox" ng-model="bridge.settings.traceupnp"
            				ng-true-value=true ng-false-value=false>  {{bridge.settings.traceupnp}}</td>
 				</tr>
-				<tr>
-					<td>Harmony Development Mode</td>
-					<td><input type="checkbox" ng-model="bridge.settings.devmode"
-           				ng-true-value=true ng-false-value=false>  {{bridge.settings.devmode}}</td>
-				</tr>
 			</table>
+			</form>
 		</div>
 	</div>
 	<div class="panel panel-default backup">

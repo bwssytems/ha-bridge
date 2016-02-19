@@ -94,6 +94,10 @@
 		<div class="ngdialog-message">
 			<h2>Select value</h2>
 				<p>
+					    <input type="radio" ng-model="valueType" value="percentage" ng-change="changeScale()"> Percentage
+					    <input type="radio" ng-model="valueType" value="raw" ng-change="changeScale()"> Raw
+				</p>
+				<p>
 					<rzslider rz-slider-model="slider.value" rz-slider-options="slider.options"></rzslider>
 				</p>
 		</div>

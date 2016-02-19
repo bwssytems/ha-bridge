@@ -14,7 +14,6 @@ public class BridgeSettingsDescriptor {
 	private Integer buttonsleep;
 	private boolean upnpstrict;
 	private boolean traceupnp;
-	private boolean devmode;
 	private String nestuser;
 	private String nestpwd;
 	private boolean veraconfigured;
@@ -25,7 +24,6 @@ public class BridgeSettingsDescriptor {
 	public BridgeSettingsDescriptor() {
 		super();
 		this.upnpstrict = true;
-		this.devmode = false;
 		this.traceupnp = false;
 		this.nestconfigured = false;
 		this.veraconfigured = false;
@@ -96,12 +94,6 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setTraceupnp(boolean traceupnp) {
 		this.traceupnp = traceupnp;
-	}
-	public boolean isDevMode() {
-		return devmode;
-	}
-	public void setDevMode(boolean devmode) {
-		this.devmode = devmode;
 	}
 	public String getNestuser() {
 		return nestuser;

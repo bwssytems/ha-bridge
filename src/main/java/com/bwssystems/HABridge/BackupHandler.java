@@ -87,7 +87,7 @@ public abstract class BackupHandler {
 		} catch (IOException x) {
 		    // IOException can never be thrown by the iteration.
 		    // In this snippet, it can // only be thrown by newDirectoryStream.
-			log.error("Issue getting directory listing for backups - " + x.getMessage());
+			log.warn("Issue getting directory listing for backups in directory: " + x.getMessage());
 		}
 		return theFilenames;
 	}

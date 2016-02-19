@@ -26,7 +26,7 @@ public class HarmonyServer {
     private DevModeResponse devResponse;
     private OAReplyProvider dummyProvider;
     private NamedIP myNameAndIP;
-    
+    private Boolean isDevMode;
     private Logger log = LoggerFactory.getLogger(HarmonyServer.class);
 
 	public HarmonyServer(NamedIP theHarmonyAddress) {
@@ -34,33 +34,35 @@ public class HarmonyServer {
 		myHarmony = null;
 		dummyProvider = null;
 		myNameAndIP = theHarmonyAddress;
+		isDevMode = false;
 	}
 
-	public static HarmonyServer setup(BridgeSettingsDescriptor bridgeSettings, NamedIP theHarmonyAddress) throws Exception {
-		if(!bridgeSettings.isValidHarmony() && !bridgeSettings.isDevMode()) {
+	public static HarmonyServer setup(BridgeSettingsDescriptor bridgeSettings, Boolean harmonyDevMode, NamedIP theHarmonyAddress) throws Exception {
+		if(!bridgeSettings.isValidHarmony() && harmonyDevMode) {
 			return new HarmonyServer(theHarmonyAddress);
 		}
     	Injector injector = null;
-    	if(!bridgeSettings.isDevMode())
+    	if(!harmonyDevMode)
     		injector = Guice.createInjector(new HarmonyClientModule());
         HarmonyServer mainObject = new HarmonyServer(theHarmonyAddress);
-    	if(!bridgeSettings.isDevMode())
+    	if(!harmonyDevMode)
     		injector.injectMembers(mainObject);
-  		mainObject.execute(bridgeSettings);
+  		mainObject.execute(bridgeSettings, harmonyDevMode);
   		return mainObject;
   	}
 
-	private void execute(BridgeSettingsDescriptor mySettings) throws Exception {
+	private void execute(BridgeSettingsDescriptor mySettings, Boolean harmonyDevMode) throws Exception {
         Boolean noopCalls = Boolean.parseBoolean(System.getProperty("noop.calls", "false"));
-        String modeString = "";
+		isDevMode = harmonyDevMode;
+       String modeString = "";
         if(dummyProvider != null)
         	log.debug("something is very wrong as dummyProvider is not null...");
-        if(mySettings.isDevMode())
+        if(isDevMode)
         	modeString = " (development mode)";
         else if(noopCalls)
         	modeString = " (no op calls to harmony)";
 		log.info("setup initiated " + modeString + "....");
-        if(mySettings.isDevMode())
+        if(isDevMode)
         {
         	harmonyClient = null;
         	devResponse = new DevModeResponse();

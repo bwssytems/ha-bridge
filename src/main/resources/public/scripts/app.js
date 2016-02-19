@@ -41,10 +41,10 @@ app.run( function (bridgeService) {
 
 app.service('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], settings: [], myToastMsg: [], olddevicename: "", showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
+	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], type: "", settings: [], myToastMsg: [], olddevicename: "", isInControl: false, showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
 
 	this.displayWarn = function(errorTitle, error) {
-		if(error == null) {
+		if(error == null || typeof(error) != 'undefined') {
 			error = {status: 200, statusText: "OK", data: []};
 			error.data = {message: "success"};
 		}
@@ -56,7 +56,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 	};
 	
 	this.displayError = function(errorTitle, error) {
-		if(error == null) {
+		if(error == null || typeof(error) != 'undefined') {
 			error = {status: 200, statusText: "OK", data: []};
 			error.data = {message: "success"};
 		}
@@ -65,6 +65,14 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 			dismissButton: true,
 			dismissOnTimeout: false,
 			content: errorTitle + error.data.message + " with status: " + error.statusText + " - "  + error.status});
+	};
+	
+	this.displayErrorMessage = function(errorTitle, errorMessage) {
+		ngToast.create({
+			className: "danger",
+			dismissButton: true,
+			dismissOnTimeout: false,
+			content: errorTitle + errorMessage});
 	};
 	
 	this.displaySuccess = function(theTitle) {
@@ -339,6 +347,8 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					ngToast.dismiss(self.state.myToastMsg);
 					self.viewConfigs();
 					self.state.myToastMsg = null;
+					self.state.isInControl = false;
+					window.location.reload();
 				},
 				function (error) {
 					setTimeout(function(){
@@ -350,6 +360,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 	};
 
 	this.stop = function() {
+		self.state.isInControl = true;
 		return $http.put(this.state.systemsbase + "/control/stop").then(
 				function (response) {
 					self.displayError("HABridge is now stopped. Restart must occur from the server.", null);
@@ -361,6 +372,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 	};
 
 	this.reinit = function() {
+		self.state.isInControl = true;
 		return $http.put(this.state.systemsbase + "/control/reinit").then(
 				function (response) {
 					self.state.myToastMsg = ngToast.create({
@@ -453,40 +465,38 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		self.state.olddevicename = device.name;
 	};
 
-	this.testUrl = function (device, type) {
+	this.testUrl = function (device, type, value) {
 		var msgDescription = "unknown";
+		var testUrl = this.state.huebase + "/test/lights/" + device.id + "/state";
+		var testBody = "{\"on\":";
 		if(type == "on") {
-			$http.put(this.state.huebase + "/test/lights/" + device.id + "/state", "{\"on\":true}").then(
-					function (response) {
-						if(typeof(response.data[0].success) != 'undefined')
-							msgDescription = "success " + angular.toJson(response.data[0].success);
-						if(typeof(response.data[0].error) != 'undefined')
-							msgDescription = "error " + angular.toJson(response.data[0].error);
-							
-						self.displaySuccess("Request Exceuted: " + msgDescription);
-					},
-					function (error) {
-						self.displayWarn("Request Error, Pleae look in your habridge log: ", error);
-					}
-			);
-			return;        		
+			testBody = testBody + "true";
 		}
 		else {
-			$http.put(this.state.huebase + "/test/lights/" + device.id + "/state", "{\"on\":false}").then(
-					function (response) {
-						if(typeof(response.data[0].success) != 'undefined')
-							msgDescription = "success " + angular.toJson(response.data[0].success);
-						if(typeof(response.data[0].error) != 'undefined')
-							msgDescription = "error " + angular.toJson(response.data[0].error);
-							
-						self.displaySuccess("Request Exceuted: " + msgDescription);
-					},
-					function (error) {
-						self.displayWarn("Request Error, Pleae look in your habridge log: ", error);
-					}
-			);
-			return;        		
+			testBody = testBody + "false";
 		}
+		if(value) {
+			testBody = testBody + ",\"bri\":" + value;
+		}
+		testBody = testBody + "}";
+		$http.put(testUrl, testBody).then(
+				function (response) {
+					if(typeof(response.data[0].success) != 'undefined') {
+						msgDescription = "success " + angular.toJson(response.data[0].success);
+					}
+					if(typeof(response.data[0].error) != 'undefined') {
+						msgDescription = "error " + angular.toJson(response.data[0].error);
+						self.displayErrorMessage("Request Error, Pleae look in your habridge log: ", msgDescription);
+						return;
+					}
+						
+					self.displaySuccess("Request Exceuted: " + msgDescription);
+				},
+				function (error) {
+					self.displayWarn("Request Error, Pleae look in your habridge log: ", error);
+				}
+		);
+		return;        		
 	};
 });
 
@@ -494,13 +504,14 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     bridgeService.viewConfigs();
     $scope.bridge = bridgeService.state;
     $scope.optionalbackupname = "";
+    $scope.isInControl = false;
     $scope.visible = false;
     $scope.imgUrl = "glyphicon glyphicon-plus";
     $scope.visibleBk = false;
     $scope.imgBkUrl = "glyphicon glyphicon-plus";
     $scope.addVeratoSettings = function (newveraname, newveraip) {
-    	if($scope.bridge.settings.veraddress == null) {
-			$scope.bridge.settings.veraddress = { devices: [] };
+    	if($scope.bridge.settings.veraaddress == null) {
+    		$scope.bridge.settings.veraaddress = { devices: [] };
 		}
     	var newVera = {name: newveraname, ip: newveraip }
     	$scope.bridge.settings.veraaddress.devices.push(newVera);
@@ -531,9 +542,11 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     	}    	
     };
     $scope.bridgeReinit = function () {
+        $scope.isInControl = false;
     	bridgeService.reinit();
     };
     $scope.bridgeStop = function () {
+        $scope.isInControl = false;
     	bridgeService.stop();
     };
     $scope.saveSettings = function() {
@@ -588,15 +601,23 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 		$scope.predicate = predicate;
 	};
 	$scope.testUrl = function (device, type) {
-		if(type == "on") {
-
+		var dialogNeeded = false;
+		if((type == "on" && (bridgeService.aContainsB(device.onUrl, "${intensity..byte}") ||
+				bridgeService.aContainsB(device.onUrl, "${intensity.percent}") ||
+				bridgeService.aContainsB(device.onUrl, "${intensity.math("))) ||
+				(type == "off" && (bridgeService.aContainsB(device.offUrl, "${intensity..byte}") ||
+				bridgeService.aContainsB(device.offUrl, "${intensity.percent}") ||
+				bridgeService.aContainsB(device.offUrl, "${intensity.math(")))) {
+			$scope.bridge.device = device;
+			$scope.bridge.type = type;
+			ngDialog.open({
+				template: 'valueDialog',
+				controller: 'ValueDialogCtrl',
+				className: 'ngdialog-theme-default'
+			});
 		}
-		ngDialog.open({
-			template: 'valueDialog',
-			controller: 'ValueDialogCtrl',
-			className: 'ngdialog-theme-default'
-		});
-//		bridgeService.testUrl(device, type);
+		else
+			bridgeService.testUrl(device, type);
 	};
 	$scope.deleteDevice = function (device) {
 		bridgeService.deleteDevice(device.id);
@@ -630,7 +651,7 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 	};
 });
 
-app.controller('ValueDialogCtrl', function ($scope, ngDialog) {
+app.controller('ValueDialogCtrl', function ($scope, bridgeService, ngDialog) {
 	$scope.slider = {
 		    value: 100,
 		    options: {
@@ -639,8 +660,28 @@ app.controller('ValueDialogCtrl', function ($scope, ngDialog) {
 		        showSelectionBar: true
 		    }
 		};
+	$scope.bridge = bridgeService.state;
+	$scope.valueType = "percentage";
+	$scope.changeScale = function () {
+		if($scope.valueType == "raw") {
+			$scope.slider.options.ceil = 255; 
+			$scope.slider.value = 255;
+		}
+		else {
+			$scope.slider.options.ceil = 100; 
+			$scope.slider.value = 100;			
+		}
+	};
 	$scope.setValue = function () {
 		ngDialog.close('ngdialog1');
+		var theValue = 0;
+		if($scope.valueType == "percentage")
+			theValue = Math.round(($scope.slider.value * .01) * 255);
+		else
+			theValue = $scope.slider.value;
+		bridgeService.testUrl($scope.bridge.device, $scope.bridge.type, theValue);
+		$scope.bridge.device = null;
+		$scope.bridge.type = "";
 	};
 });
 

@@ -20,13 +20,15 @@ import net.whistlingfish.harmony.config.Device;
 public class HarmonyHome {
     private static final Logger log = LoggerFactory.getLogger(HarmonyHome.class);
 	private Map<String, HarmonyServer> hubs;
+	private Boolean isDevMode;
 
 	public HarmonyHome(BridgeSettingsDescriptor bridgeSettings) {
 		super();
+        isDevMode = Boolean.parseBoolean(System.getProperty("dev.mode", "false"));
 		hubs = new HashMap<String, HarmonyServer>();
-		if(!bridgeSettings.isValidHarmony() && !bridgeSettings.isDevMode())
+		if(!bridgeSettings.isValidHarmony() && !isDevMode)
 			return;
-		if(bridgeSettings.isDevMode()) {
+		if(isDevMode) {
 			NamedIP devModeIp = new NamedIP();
 			devModeIp.setIp("10.10.10.10");
 			devModeIp.setName("devMode");
@@ -40,7 +42,7 @@ public class HarmonyHome {
 		while(theList.hasNext()) {
 			NamedIP aHub = theList.next();
 	      	try {
-	      		hubs.put(aHub.getName(), HarmonyServer.setup(bridgeSettings, aHub));
+	      		hubs.put(aHub.getName(), HarmonyServer.setup(bridgeSettings, isDevMode, aHub));
 			} catch (Exception e) {
 		        log.error("Cannot get harmony client (" + aHub.getName() + ") setup, Exiting with message: " + e.getMessage(), e);
 		        return;
@@ -49,6 +51,8 @@ public class HarmonyHome {
 	}
 
 	public void shutdownHarmonyHubs() {
+		if(isDevMode)
+			return;
 		Iterator<String> keys = hubs.keySet().iterator();
 		while(keys.hasNext()) {
 			String key = keys.next();

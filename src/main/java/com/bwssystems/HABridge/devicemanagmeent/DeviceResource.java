@@ -78,7 +78,7 @@ public class DeviceResource {
 	    	return "";
 	    });
     	post(API_CONTEXT, "application/json", (request, response) -> {
-	    	log.info("Create a Device(s) - request body: " + request.body());
+	    	log.debug("Create a Device(s) - request body: " + request.body());
 	    	DeviceDescriptor devices[];
 	    	if(request.body().substring(0,1).equalsIgnoreCase("[") == true) {
 	    		devices = new Gson().fromJson(request.body(), DeviceDescriptor[].class);

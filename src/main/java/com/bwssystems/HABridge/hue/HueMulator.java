@@ -245,7 +245,7 @@ public class HueMulator {
 	        DeviceDescriptor device = repository.findOne(lightId);
 	        if (device == null) {
 	        	response.status(HttpStatus.SC_NOT_FOUND);
-	            return "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId + ",\"description\": \"Object not found\"}}]";
+	            return "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId + "\",\"description\": \"Object not found\"}}]";
 	        } else {
 	            log.debug("found device named: " + device.getName());
 	        }
@@ -285,14 +285,14 @@ public class HueMulator {
 	            state = mapper.readValue(request.body(), DeviceState.class);
 	        } catch (IOException e) {
 	        	log.warn("Object mapper barfed on input of body.", e);
-        		responseString = "[{\"error\":{\"type\": 2, \"address\": \"/lights/" + lightId + ",\"description\": \"Object mapper barfed on input of body.\"}}]";
+        		responseString = "[{\"error\":{\"type\": 2, \"address\": \"/lights/" + lightId + "\",\"description\": \"Object mapper barfed on input of body.\"}}]";
     	        return responseString;
 	        }
 	
 	        DeviceDescriptor device = repository.findOne(lightId);
 	        if (device == null) {
 	        	log.warn("Could not find device: " + lightId + " for hue state change request: " + userId + " from " + request.ip() + " body: " + request.body());
-        		responseString = "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId + ",\"description\": \"Could not find device\", \"resource\": \"/lights/" + lightId + "\"}}]";
+        		responseString = "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId + "\",\"description\": \"Could not find device\", \"resource\": \"/lights/" + lightId + "\"}}]";
     	        return responseString;
 	        }
 	
@@ -322,60 +322,77 @@ public class HueMulator {
 	        if(device.getDeviceType().toLowerCase().contains("activity") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("harmonyActivity")))
 	        {
 	        	log.debug("executing HUE api request to change activity to Harmony: " + url);
-	        	RunActivity anActivity = new Gson().fromJson(url, RunActivity.class);
-	        	HarmonyHandler myHarmony = myHarmonyHome.getHarmonyHandler(device.getTargetDevice());
-	        	if(myHarmony == null)
+	        	if(myHarmonyHome != null)
 	        	{
-	        		log.warn("Should not get here, no harmony hub available");
-	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+		        	RunActivity anActivity = new Gson().fromJson(url, RunActivity.class);
+		        	HarmonyHandler myHarmony = myHarmonyHome.getHarmonyHandler(device.getTargetDevice());
+		        	if(myHarmony == null)
+		        	{
+		        		log.warn("Should not get here, no harmony hub available");
+		        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+		        	}
+		        	else
+		        		myHarmony.startActivity(anActivity);
 	        	}
-	        	else
-	        		myHarmony.startActivity(anActivity);
+	        	else {
+	        		log.warn("Should not get here, no harmony configured");
+	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Should not get here, no harmony configured\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+	        		
+	        	}
 	        }
 	        else if(device.getDeviceType().toLowerCase().contains("button") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("harmonyButton")))
 	        {
 	        	log.debug("executing HUE api request to button press(es) to Harmony: " + url);
-	        	if(url.substring(0, 1).equalsIgnoreCase("{")) {
-	        		url = "[" + url +"]";
-	        	}
-	        	ButtonPress[] deviceButtons = new Gson().fromJson(url, ButtonPress[].class);
-	        	HarmonyHandler myHarmony = myHarmonyHome.getHarmonyHandler(device.getTargetDevice());
-	        	if(myHarmony == null)
+	        	if(myHarmonyHome != null)
 	        	{
-	        		log.warn("Should not get here, no harmony hub available");
-	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+		        	if(url.substring(0, 1).equalsIgnoreCase("{")) {
+		        		url = "[" + url +"]";
+		        	}
+		        	ButtonPress[] deviceButtons = new Gson().fromJson(url, ButtonPress[].class);
+		        	HarmonyHandler myHarmony = myHarmonyHome.getHarmonyHandler(device.getTargetDevice());
+		        	if(myHarmony == null)
+		        	{
+		        		log.warn("Should not get here, no harmony hub available");
+		        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+		        	}
+		        	else {
+		        		for(int i = 0; i < deviceButtons.length; i++) {
+		        			if( i > 0)
+		        				Thread.sleep(bridgeSettings.getButtonsleep());
+		    	        	log.debug("pressing button: " + deviceButtons[i].getDevice() + " - " + deviceButtons[i].getButton() + " - iteration: " + String.valueOf(i));
+		        			myHarmony.pressButton(deviceButtons[i]);
+		        		}
+		        	}
 	        	}
 	        	else {
-	        		for(int i = 0; i < deviceButtons.length; i++) {
-	        			if( i > 0)
-	        				Thread.sleep(bridgeSettings.getButtonsleep());
-	    	        	log.debug("pressing button: " + deviceButtons[i].getDevice() + " - " + deviceButtons[i].getButton() + " - iteration: " + String.valueOf(i));
-	        			myHarmony.pressButton(deviceButtons[i]);
-	        		}
+	        		log.warn("Should not get here, no harmony configured");
+	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Should not get here, no harmony configured\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+	        		
 	        	}
 	        }
 	        else if(device.getDeviceType().toLowerCase().contains("home") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("nestHomeAway")))
 	        {
 	        	log.debug("executing HUE api request to set away for nest home: " + url);
-	        	NestInstruction homeAway = new Gson().fromJson(url, NestInstruction.class);
 	        	if(theNest == null)
 	        	{
 	        		log.warn("Should not get here, no Nest available");
-	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Should not get here, no Nest available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Should not get here, no Nest available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 	        	}
-	        	else
+	        	else {
+		        	NestInstruction homeAway = new Gson().fromJson(url, NestInstruction.class);
 	        		theNest.getHome(homeAway.getName()).setAway(homeAway.getAway());
+	        	}
 	        }
 	        else if(device.getDeviceType().toLowerCase().contains("thermo") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("nestThermoSet")))
 	        {
 	        	log.debug("executing HUE api request to set thermostat for nest: " + url);
-	        	NestInstruction thermoSetting = new Gson().fromJson(url, NestInstruction.class);
 	        	if(theNest == null)
 	        	{
 	        		log.warn("Should not get here, no Nest available");
-	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Should not get here, no Nest available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Should not get here, no Nest available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 	        	}
 	        	else {
+		        	NestInstruction thermoSetting = new Gson().fromJson(url, NestInstruction.class);
 	        		if(thermoSetting.getControl().equalsIgnoreCase("temp")) {
 	        			if(request.body().contains("bri")) {
 	        				thermoSetting.setTemp(String.valueOf((Double.parseDouble(replaceIntensityValue(thermoSetting.getTemp(), state.getBri())) - 32.0)/1.8));
@@ -393,7 +410,7 @@ public class HueMulator {
 	        		}
 	        		else {
 		        		log.warn("no valid Nest control info: " + thermoSetting.getControl());
-		        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"no valid Nest control info\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+		        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"no valid Nest control info\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 	        		}
 	        	}
 	        }
@@ -417,7 +434,7 @@ public class HueMulator {
 	        		responseSocket.close();
 	    		}  catch (IOException e) {
 	    			log.warn("Could not send UDP Datagram packet for request.", e);
-	    			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+	    			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 	    		}
 	        }
 	        else
@@ -433,7 +450,7 @@ public class HueMulator {
 				// make call
 				if (!doHttpRequest(url, device.getHttpVerb(), device.getContentType(), body)) {
 					log.warn("Error on calling url to change device state: " + url);
-					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + ",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 				}
 	        }
 	

@@ -54,10 +54,10 @@ public class BridgeSettings extends BackupHandler {
         {
         	log.info("reading from system properties");
         	theBridgeSettings.setConfigfile(Configuration.CONFIG_FILE);
-        	theBridgeSettings.setServerPort(System.getProperty("server.port"));
+        	theBridgeSettings.setServerPort(System.getProperty("server.port", Configuration.DEFAULT_WEB_PORT));
         	theBridgeSettings.setUpnpConfigAddress(System.getProperty("upnp.config.address"));
         	theBridgeSettings.setUpnpDeviceDb(System.getProperty("upnp.device.db"));
-        	theBridgeSettings.setUpnpResponsePort(System.getProperty("upnp.response.port"));
+        	theBridgeSettings.setUpnpResponsePort(System.getProperty("upnp.response.port", Configuration.UPNP_RESPONSE_PORT));
 	        
 	        theVeraAddress = System.getProperty("vera.address");
         	IpList theVeraList = null;	
@@ -94,8 +94,7 @@ public class BridgeSettings extends BackupHandler {
 	        theBridgeSettings.setHarmonyPwd(System.getProperty("harmony.pwd"));
 	        theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
 	        theBridgeSettings.setTraceupnp(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
-	        theBridgeSettings.setDevMode(Boolean.parseBoolean(System.getProperty("dev.mode", "false")));
-	        theBridgeSettings.setButtonsleep(Integer.parseInt(System.getProperty("button.sleep", Configuration.DFAULT_BUTTON_SLEEP)));
+	        theBridgeSettings.setButtonsleep(Integer.parseInt(System.getProperty("button.sleep", Configuration.DEFAULT_BUTTON_SLEEP)));
 	        theBridgeSettings.setNestuser(System.getProperty("nest.user"));
 	        theBridgeSettings.setNestpwd(System.getProperty("nest.pwd"));
         }
@@ -135,13 +134,13 @@ public class BridgeSettings extends BackupHandler {
         	theBridgeSettings.setUpnpResponsePort(Configuration.UPNP_RESPONSE_PORT);
         
         if(theBridgeSettings.getServerPort() == null)
-        	theBridgeSettings.setServerPort(Configuration.DFAULT_WEB_PORT);
+        	theBridgeSettings.setServerPort(Configuration.DEFAULT_WEB_PORT);
         
         if(theBridgeSettings.getUpnpDeviceDb() == null)
         	theBridgeSettings.setUpnpDeviceDb(Configuration.DEVICE_DB_DIRECTORY);
         
         if(theBridgeSettings.getButtonsleep() <= 0)
-        	theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DFAULT_BUTTON_SLEEP));
+        	theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DEFAULT_BUTTON_SLEEP));
 
         theBridgeSettings.setVeraconfigured(theBridgeSettings.isValidVera());
         theBridgeSettings.setHarmonyconfigured(theBridgeSettings.isValidHarmony());
@@ -172,7 +171,6 @@ public class BridgeSettings extends BackupHandler {
 		theBridgeSettings.setHarmonyPwd(aBridgeSettings.getHarmonyPwd());
 		theBridgeSettings.setUpnpStrict(aBridgeSettings.isUpnpStrict());
 		theBridgeSettings.setTraceupnp(aBridgeSettings.isTraceupnp());
-		theBridgeSettings.setDevMode(aBridgeSettings.isDevMode());
 		theBridgeSettings.setNestuser(aBridgeSettings.getNestuser());
 		theBridgeSettings.setNestpwd(aBridgeSettings.getNestpwd());
 		theBridgeSettings.setVeraconfigured(aBridgeSettings.isValidVera());

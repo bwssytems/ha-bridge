@@ -9,35 +9,12 @@ Otherwise, downloads are available at https://github.com/bwssytems/ha-bridge/rel
 ## Run
 Then locate the jar and start the server with:  
 ```
-java -jar  -Dupnp.config.address=A.B.C.D -Dvera.address=E.F.G.H -Dharmony.address=W.X.Y.Z -Dharmony.user=myself -Dharmony.pwd=passwd ha-bridge-W.X.Y.jar
+java -jar ha-bridge-W.X.Y.jar
 ```
 ## Available Arguments
-### -Dupnp.config.address=`<ip address>`
-The server defaults to the first available address on the host if this is not given. This default may NOT be the correct IP that is your public IP for your host on the network. It is best to set this parameter to not have discovery issues. Replace the -Dupnp.config.address=`<ip address>` value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery. 
-### -Dvera.address=`<ip address>` | `<{devices:[{name:avera,ip:x.y.w.z},{name:anothervera,ip:a.b.c.d}]}>`
-The argument for the vera address should be given as it the system does not have a way to find the address. Supply -Dvera.address=X.Y.Z.A on the command line to provide it. If a vera is not used, do not set it. To provide multiple veras, use the json style notation outlined above to provide the list. The json notation may need to be surrounded by quotation marks when starting from a shell script. Most service scripts will not need the quotation marks. This argument is backwards compatible.
-### -Dserver.port=`<port>`
-The server defaults to running on port 8080. If you're already running a server (like openHAB) on 8080, -Dserver.port=`<port>` on the command line.
-### -Dupnp.device.db=`<filepath>`
-The default location for the db to contain the devices as they are added is the relative path from where the bridge is started in "data/device.db". If you would like a different filename or directory, specify -Dupnp.devices.db=`<directory>/<filename>` explicitly.
-### -Dupnp.response.port=`<port>`
-The upnp response port that will be used. The default is 50000.  
-### -Dharmony.address=`<ip address>` | `<{devices:[{name:ahub,ip:x.y.w.z},{name:anotherhub,ip:a.b.c.d}]}>`
-The argument for the Harmony Hub address should be given as the system does not have a way to find the address. Supply -Dharmony.address=X.Y.Z.A on the command line to provide it. If a Harmony Hub is not used, do not set it. To provide multiple harmony hubs, use the json style notation outlined above to provide the list. The json notation may need to be surrounded by quotation marks when starting from a shell script. Most service scripts will not need the quotation marks. This argument is backwards compatible.
-### -Dharmony.user=`<username>`
-The user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub features, provide -Dharmony.user=`<username>` on the command line.
-### -Dharmony.pwd=`<password>`
-The password for the user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub Features, provide -Dharmony.pwd=`<password>` on the command line.
-### -Dbutton.sleep=`<time in milliseconds>`
-The default button press sleep time interval is 100 milliseconds. If you need more time add this parameter. For example 1000 ms is 1 second and you could set -Dbutton.sleep=1000 for the longer interval if you are having issues on your devices not handling button presses fast enough.
-### -Dnest.user=`<username>`
-The user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features, provide -Dnest.user=`<username>` on the command line. There is no need to give any ip address or host information as this contacts your cloud account.
-### -Dnest.pwd=`<password>`
-The password for the user name of the home.nest.com account for the Nestr user. This needs to be given if you are using the Nest features, provide -Dnest.pwd=`<password>` on the command line.
-### -Dupnp.strict=`<true|false>`
-Upnp has been very closed on this platform to try and respond as a hue and there is now a setting to control if it is more open or strict, Add -Dupnp.strict=`<true|false>` to your command line to have the emulator respond to what it thinks is an echo to a hue or any other device. The default is upnp.strict=true.
-### -Dtrace.upnp=`<true|false>`
-Turn on tracing for upnp discovery messages. The default is false.
+Arguments are now depecated. The ha-bridge will use the old -D arguments and populate the config screen which can now be saved to a file and will not be needed. There is only one optional argument that overides and that is the location of the config file. The default is the relative path "data/habridge.config".
+### -Dconfig.file=`<filepath>`
+The default location for the config fileto contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify -Dconfig.file=`<directory>/<filename>` explicitly.
 ## HA Bridge Device Configuration
 You must configure devices before you will have any thing for the Echo to receive. The easy way to get devices configures is with the web interface by going to the url for the host you are running on or localhost with port you have assigned: and use the helpers for the Vera or Harmony Hub to create devices that the Echo will find.
 
