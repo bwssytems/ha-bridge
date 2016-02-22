@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.List;
 
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -17,8 +18,14 @@ import org.slf4j.LoggerFactory;
 import com.bwssystems.HABridge.dao.BackupFilename;
 import com.google.gson.Gson;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.core.status.Status;
+import ch.qos.logback.core.status.StatusManager;
+
 public class SystemControl {
     private static final Logger log = LoggerFactory.getLogger(SystemControl.class);
+    private LoggerContext lc; 
+    private StatusManager statusManager;
     private static final String SYSTEM_CONTEXT = "/system";
     private BridgeSettings bridgeSettings;
     private Version version;
@@ -26,17 +33,27 @@ public class SystemControl {
 	public SystemControl(BridgeSettings theBridgeSettings, Version theVersion) {
         this.bridgeSettings = theBridgeSettings;
 		this.version = theVersion;
+		this.lc = (LoggerContext) LoggerFactory.getILoggerFactory(); 
+		this.statusManager = lc.getStatusManager();
 	}
 
 //	This function sets up the sparkjava rest calls for the hue api
     public void setupServer() {
-    	log.info("Hue emulator service started....");
+    	log.info("System control service started....");
 	    // http://ip_address:port/system/habridge/version gets the version of this bridge instance
     	get (SYSTEM_CONTEXT + "/habridge/version", "application/json", (request, response) -> {
 	    	log.debug("Get HA Bridge version: v" + version.getVersion());
 			response.status(HttpStatus.SC_OK);
 	        return "{\"version\":\"" + version.getVersion() + "\"}";
 	    });
+
+	    // http://ip_address:port/system/logmsgs gets the version of this bridge instance
+    	get (SYSTEM_CONTEXT + "/logmsgs", "application/json", (request, response) -> {
+	    	log.debug("Get logmsgs.");
+			response.status(HttpStatus.SC_OK);
+			List<Status> theLogMsgs = statusManager.getCopyOfStatusList();
+	        return "{\"message\":\"Service Unavailable\"}";
+	    }, new JsonTransformer());
 
 //      http://ip_address:port/system/settings which returns the bridge configuration settings
 		get(SYSTEM_CONTEXT + "/settings", "application/json", (request, response) -> {

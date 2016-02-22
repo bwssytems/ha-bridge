@@ -34,7 +34,6 @@ import com.google.gson.Gson;
 public class DeviceResource {
     private static final String API_CONTEXT = "/api/devices";
     private static final Logger log = LoggerFactory.getLogger(DeviceResource.class);
-
     private DeviceRepository deviceRepository;
     private VeraHome veraHome;
     private HarmonyHome myHarmonyHome;
@@ -58,7 +57,6 @@ public class DeviceResource {
 			this.nestHome = aNestHome;
 		else
 			this.nestHome = null;
-		
         setupEndpoints();
 	}
 
