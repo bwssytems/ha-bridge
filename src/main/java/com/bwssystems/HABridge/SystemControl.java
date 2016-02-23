@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.List;
 
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -19,22 +18,24 @@ import com.bwssystems.HABridge.dao.BackupFilename;
 import com.google.gson.Gson;
 
 import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.core.status.Status;
-import ch.qos.logback.core.status.StatusManager;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.core.read.CyclicBufferAppender;
 
 public class SystemControl {
     private static final Logger log = LoggerFactory.getLogger(SystemControl.class);
+    public static final String CYCLIC_BUFFER_APPENDER_NAME = "CYCLIC";
     private LoggerContext lc; 
-    private StatusManager statusManager;
     private static final String SYSTEM_CONTEXT = "/system";
     private BridgeSettings bridgeSettings;
     private Version version;
+    private CyclicBufferAppender<ILoggingEvent> cyclicBufferAppender;
 
 	public SystemControl(BridgeSettings theBridgeSettings, Version theVersion) {
         this.bridgeSettings = theBridgeSettings;
 		this.version = theVersion;
 		this.lc = (LoggerContext) LoggerFactory.getILoggerFactory(); 
-		this.statusManager = lc.getStatusManager();
+		reacquireCBA();
 	}
 
 //	This function sets up the sparkjava rest calls for the hue api
@@ -49,11 +50,30 @@ public class SystemControl {
 
 	    // http://ip_address:port/system/logmsgs gets the version of this bridge instance
     	get (SYSTEM_CONTEXT + "/logmsgs", "application/json", (request, response) -> {
-	    	log.debug("Get logmsgs.");
+			log.debug("Get logmsgs.");
 			response.status(HttpStatus.SC_OK);
-			List<Status> theLogMsgs = statusManager.getCopyOfStatusList();
-	        return "{\"message\":\"Service Unavailable\"}";
-	    }, new JsonTransformer());
+			String logMsgs;
+		    int count = -1;
+		    if(cyclicBufferAppender == null)
+		    	reacquireCBA();
+		    if (cyclicBufferAppender != null) {
+		      count = cyclicBufferAppender.getLength();
+		    }
+		    logMsgs = "[";
+		    if (count == -1) {
+		      logMsgs = logMsgs + "{\"message\":\"Failed to locate CyclicBuffer\"}";
+		    } else if (count == 0) {
+		    	logMsgs = logMsgs + "{\"message\":\"No logging events to display\"}";
+		    } else {
+				LoggingEvent le;
+				for (int i = 0; i < count; i++) {
+					le = (LoggingEvent) cyclicBufferAppender.get(i);
+					logMsgs = logMsgs + ( i > 0?",{":"{") + "\"message\":\"" + le.getFormattedMessage() + "\"}";
+				}
+		    }
+		    logMsgs = logMsgs + "]";
+			return logMsgs;
+	    });
 
 //      http://ip_address:port/system/settings which returns the bridge configuration settings
 		get(SYSTEM_CONTEXT + "/settings", "application/json", (request, response) -> {
@@ -175,6 +195,11 @@ public class SystemControl {
 	        return null;
 	    }, new JsonTransformer());
     }
+    
+    void reacquireCBA() {
+        cyclicBufferAppender = (CyclicBufferAppender<ILoggingEvent>) lc.getLogger(
+            Logger.ROOT_LOGGER_NAME).getAppender(CYCLIC_BUFFER_APPENDER_NAME);
+      }
 
     protected void pingListener() {
         try {

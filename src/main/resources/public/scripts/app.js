@@ -7,6 +7,9 @@ app.config(function ($routeProvider) {
 	}).when('/system', {
 		templateUrl: 'views/system.html',
 		controller: 'SystemController'		
+	}).when('/logs', {
+		templateUrl: 'views/logs.html',
+		controller: 'LogsController'		
 	}).when('/editor', {
 		templateUrl: 'views/editor.html',
 		controller: 'AddingController'		
@@ -41,7 +44,7 @@ app.run( function (bridgeService) {
 
 app.service('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], type: "", settings: [], myToastMsg: [], olddevicename: "", isInControl: false, showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
+	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], type: "", settings: [], myToastMsg: [], logMsgs: [], olddevicename: "", isInControl: false, showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
 
 	this.displayWarn = function(errorTitle, error) {
 		if(error == null || typeof(error) != 'undefined') {
@@ -154,6 +157,17 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 				},
 				function (error) {
 					self.displayWarn("Get Configs Error: ", error);
+				}
+		);
+	};
+
+	this.viewLogs = function () {
+		return $http.get(this.state.systemsbase + "/logmsgs").then(
+				function (response) {
+					self.state.logMsgs = response.data;
+				},
+				function (error) {
+					self.displayWarn("Get log messages Error: ", error);
 				}
 		);
 	};
@@ -582,6 +596,17 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
         else
             $scope.imgBkUrl = "glyphicon glyphicon-plus";
     };
+});
+
+app.controller('LogsController', function ($scope, $location, $http, $window, bridgeService) {
+    bridgeService.viewLogs();
+    $scope.bridge = bridgeService.state;
+	$scope.predicate = '';
+	$scope.reverse = true;
+	$scope.order = function(predicate) {
+		$scope.reverse = ($scope.predicate === predicate) ? !$scope.reverse : false;
+		$scope.predicate = predicate;
+	};
 });
 
 app.controller('ViewingController', function ($scope, $location, $http, $window, bridgeService, ngDialog) {

@@ -1,0 +1,42 @@
+      <ul class="nav nav-pills" role="tablist">
+        <li role="presentation"><a href="#">Bridge Devices</a></li>
+        <li role="presentation"><a href="#/system">Bridge Control</a></li>
+        <li role="presentation" class="active"><a href="#/logs">Logs</a></li>
+        <li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
+        <li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
+        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
+        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonydevices">Harmony Devices</a></li>
+        <li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
+        <li role="presentation"><a href="#/editor">Manual Add</a></li>
+      </ul>
+
+	<div class="panel panel-default bridgeServer">
+		<div class="panel-heading">
+			<h1 class="panel-title">Log Messages</h1>
+		</div>
+		<div class="panel-body">
+			<table class="table table-bordered table-striped table-hover">
+				<thead>
+					<tr>
+						<th>Row</th>
+						<th>
+							<a href="" ng-click="order('time')">Time</a>
+	        				<span class="sortorder" ng-show="predicate === 'time'" ng-class="{reverse:reverse}"></span></th>
+						<th>
+							<a href="" ng-click="order('level')">Level</a>
+	        				<span class="sortorder" ng-show="predicate === 'level'" ng-class="{reverse:reverse}"></span></th>
+						<th>
+							<a href="" ng-click="order('message')">Message</a>
+	        				<span class="sortorder" ng-show="predicate === 'message'" ng-class="{reverse:reverse}"></span></th>
+					</tr>
+				</thead>
+				<tr ng-repeat="logMessage in bridge.logMsgs | orderBy:predicate:reverse">
+					<td>{{$index+1}}</td>
+					<td>SomeTime</td>
+					<td>SomeLEvel</td>
+					<td>{{logMessage.message}}</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	
