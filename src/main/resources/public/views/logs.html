@@ -15,26 +15,30 @@
 			<h1 class="panel-title">Log Messages</h1>
 		</div>
 		<div class="panel-body">
-			<table class="table table-bordered table-striped table-hover">
+			<table class="table table-striped table-fixed">
 				<thead>
 					<tr>
-						<th>Row</th>
-						<th>
+						<th class="col-md-1">Row</th>
+						<th class="col-md-1">
 							<a href="" ng-click="order('time')">Time</a>
 	        				<span class="sortorder" ng-show="predicate === 'time'" ng-class="{reverse:reverse}"></span></th>
-						<th>
+						<th class="col-md-1">
 							<a href="" ng-click="order('level')">Level</a>
 	        				<span class="sortorder" ng-show="predicate === 'level'" ng-class="{reverse:reverse}"></span></th>
-						<th>
+						<th class="col-md-6">
 							<a href="" ng-click="order('message')">Message</a>
 	        				<span class="sortorder" ng-show="predicate === 'message'" ng-class="{reverse:reverse}"></span></th>
+						<th class="col-md-3">
+							<a href="" ng-click="order('component')">Component</a>
+	        				<span class="sortorder" ng-show="predicate === 'component'" ng-class="{reverse:reverse}"></span></th>
 					</tr>
 				</thead>
 				<tr ng-repeat="logMessage in bridge.logMsgs | orderBy:predicate:reverse">
-					<td>{{$index+1}}</td>
-					<td>SomeTime</td>
-					<td>SomeLEvel</td>
-					<td>{{logMessage.message}}</td>
+					<td class="col-md-1">{{$index+1}}</td>
+					<td class="col-md-1">{{logMessage.time}}</td>
+					<td class="col-md-1">{{logMessage.level}}</td>
+					<td class="col-md-6">{{logMessage.message}}</td>
+					<td class="col-md-3">{{logMessage.component}}</td>
 				</tr>
 			</table>
 		</div>

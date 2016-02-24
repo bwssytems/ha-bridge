@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -30,11 +32,14 @@ public class SystemControl {
     private BridgeSettings bridgeSettings;
     private Version version;
     private CyclicBufferAppender<ILoggingEvent> cyclicBufferAppender;
+    private DateFormat dateFormat;
+
 
 	public SystemControl(BridgeSettings theBridgeSettings, Version theVersion) {
         this.bridgeSettings = theBridgeSettings;
 		this.version = theVersion;
 		this.lc = (LoggerContext) LoggerFactory.getILoggerFactory(); 
+		this.dateFormat = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS");
 		reacquireCBA();
 	}
 
@@ -68,7 +73,7 @@ public class SystemControl {
 				LoggingEvent le;
 				for (int i = 0; i < count; i++) {
 					le = (LoggingEvent) cyclicBufferAppender.get(i);
-					logMsgs = logMsgs + ( i > 0?",{":"{") + "\"message\":\"" + le.getFormattedMessage() + "\"}";
+					logMsgs = logMsgs + ( i > 0?",{":"{") + "\"time\":\"" + dateFormat.format(le.getTimeStamp()) + "\",\"level\":\"" + le.getLevel().levelStr + "\",\"component\":\"" + le.getLoggerName() + "\",\"message\":\"" + le.getFormattedMessage() + "\"}";
 				}
 		    }
 		    logMsgs = logMsgs + "]";
