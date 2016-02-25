@@ -1,6 +1,7 @@
       <ul class="nav nav-pills" role="tablist">
         <li role="presentation"><a href="#">Bridge Devices</a></li>
         <li role="presentation"><a href="#/system">Bridge Control</a></li>
+        <li role="presentation"><a href="#/logs">Logs</a></li>
         <li role="presentation"><a href="#/veradevices">Vera Devices</a></li>
         <li role="presentation" class="active"><a href="#/verascenes">Vera Scenes</a></li>
         <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
@@ -19,30 +20,19 @@
 			Then you can modify the name to anything you want that will be the keyword for Alexa. Click the 'Add Bridge Device' to finish that selection setup.
 			The 'Already Configured Vera Scenes' list below will show what is already setup for your Vera.</p>
 
+        	<scrollable-table watch="bridge.verascenes">
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
 						<th>Row</th>
-						<th>
-							<a href="" ng-click="order('name')">Name</a>
-        					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('id')">Id</a>
-        					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('room')">Room</a>
-        					<span class="sortorder" ng-show="predicate === 'room'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('vera')">Vera</a>
-        					<span class="sortorder" ng-show="predicate === 'vera'" ng-class="{reverse:reverse}"></span>
-        				</th>
+						<th sortable-header col="name">Name</th>
+						<th sortable-header col="id">Id</th>
+						<th sortable-header col="room">Room</th>
+						<th sortable-header col="veraname">Vera</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="verascene in bridge.verascenes | availableVeraSceneId | orderBy:predicate:reverse">
+				<tr ng-repeat="verascene in bridge.verascenes | availableVeraSceneId">
 					<td>{{$index+1}}</td>
 					<td>{{verascene.name}}</td>
 					<td>{{verascene.id}}</td>
@@ -55,6 +45,7 @@
 					</td>
 				</tr>
 			</table>
+        	</scrollable-table>
 		</li>
 	</ul>
 	<div class="panel-heading">
@@ -62,30 +53,19 @@
 	</div>
 	<ul ng-if="buttonsVisible" class="list-group">
 		<li class="list-group-item">
+        	<scrollable-table watch="bridge.verascenes">
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
 						<th>Row</th>
-						<th>
-							<a href="" ng-click="order('name')">Name</a>
-        					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('id')">Id</a>
-        					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('room')">Room</a>
-        					<span class="sortorder" ng-show="predicate === 'room'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('vera')">Vera</a>
-        					<span class="sortorder" ng-show="predicate === 'vera'" ng-class="{reverse:reverse}"></span>
-        				</th>
+						<th sortable-header col="name">Name</th>
+						<th sortable-header col="id">Id</th>
+						<th sortable-header col="room">Room</th>
+						<th sortable-header col="veraname">Vera</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="verascene in bridge.verascenes | unavailableVeraSceneId | orderBy:predicate:reverse">
+				<tr ng-repeat="verascene in bridge.verascenes | unavailableVeraSceneId">
 					<td>{{$index+1}}</td>
 					<td>{{verascene.name}}</td>
 					<td>{{verascene.id}}</td>
@@ -97,6 +77,7 @@
 					</td>
 				</tr>
 			</table>
+        	</scrollable-table>
 		</li>
 	</ul>
 </div>

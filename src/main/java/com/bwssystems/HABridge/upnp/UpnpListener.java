@@ -104,7 +104,7 @@ public class UpnpListener {
 	 */
 	protected boolean isSSDPDiscovery(DatagramPacket packet){
 		//Only respond to discover request for strict upnp form
-		String packetString = new String(packet.getData());
+		String packetString = new String(packet.getData(), 0, packet.getLength());
 		if(packetString != null && packetString.startsWith("M-SEARCH * HTTP/1.1") && packetString.contains("\"ssdp:discover\"")){
 			log.debug("isSSDPDiscovery Found message to be an M-SEARCH message.");
 			log.debug("isSSDPDiscovery Got SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
@@ -148,9 +148,9 @@ public class UpnpListener {
 		String discoveryResponse = null;
 		discoveryResponse = String.format(discoveryTemplate, responseAddress, httpServerPort);
 		if(traceupnp)
-			log.info("Traceupnp: sendUpnpResponse: " + discoveryResponse);
+			log.info("Traceupnp: sendUpnpResponse discovery template with address: " + responseAddress + " and port: " + httpServerPort);
 		else
-			log.debug("sendUpnpResponse: " + discoveryResponse);
+			log.debug("sendUpnpResponse discovery template with address: " + responseAddress + " and port: " + httpServerPort);
 		DatagramPacket response = new DatagramPacket(discoveryResponse.getBytes(), discoveryResponse.length(), requester, sourcePort);
 		socket.send(response);
 	}

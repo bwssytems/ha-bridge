@@ -54,9 +54,9 @@ public class UpnpSettingsResource {
 			String filledTemplate = null;
 			filledTemplate = String.format(hueTemplate, theSettings.getUpnpConfigAddress(), portNumber, theSettings.getUpnpConfigAddress());
 			if(theSettings.isTraceupnp())
-				log.info("Traceupnp: upnp device settings response: " + filledTemplate);
+				log.info("Traceupnp: upnp device settings template filled with address: " + theSettings.getUpnpConfigAddress() + " and port: " + portNumber);
 			else
-				log.debug("upnp device settings response: " + filledTemplate);
+				log.debug("Traceupnp: upnp device settings template filled with address: " + theSettings.getUpnpConfigAddress() + " and port: " + portNumber);
 //			response.header("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
 //			response.header("Pragma", "no-cache");
 //			response.header("Expires", "Mon, 1 Aug 2011 09:00:00 GMT");

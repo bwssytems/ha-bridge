@@ -1,6 +1,7 @@
       <ul class="nav nav-pills" role="tablist">
         <li role="presentation"><a href="#">Bridge Devices</a></li>
         <li role="presentation"><a href="#/system">Bridge Control</a></li>
+        <li role="presentation"><a href="#/logs">Logs</a></li>
         <li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
         <li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
         <li ng-if="bridge.showHarmony"  role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
@@ -19,22 +20,14 @@
 			Then you can modify the name to anything you want that will be the keyword for Alexa. Click the 'Add Bridge Device' to finish that selection setup.
 			The 'Already Configured Nest Items' list below will show what is already setup for your Nest.</p>
 
+        	<scrollable-table watch="bridge.nestitems">
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
 						<th>Row</th>
-						<th>
-							<a href="" ng-click="order('name')">Name</a>
-        					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('type')">Type</a>
-        					<span class="sortorder" ng-show="predicate === 'type'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('location')">Location</a>
-        					<span class="sortorder" ng-show="predicate === 'location'" ng-class="{reverse:reverse}"></span>
-        				</th>
+						<th sortable-header col="name">Name</th>
+						<th sortable-header col="type">Type</th>
+						<th sortable-header col="location">Location</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
@@ -71,6 +64,7 @@
 					</td>
 				</tr>
 			</table>
+        	</scrollable-table>
 		</li>
 	</ul>
 	<div class="panel-heading">
@@ -78,22 +72,14 @@
 	</div>
 	<ul ng-if="buttonsVisible" class="list-group">
 		<li class="list-group-item">
+        	<scrollable-table watch="bridge.nestitems">
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
 						<th>Row</th>
-						<th>
-							<a href="" ng-click="order('name')">Name</a>
-        					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('id')">Id</a>
-        					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('mapId')">mapId</a>
-        					<span class="sortorder" ng-show="predicate === 'mapId'" ng-class="{reverse:reverse}"></span>
-        				</th>
+						<th sortable-header col="name">Name</th>
+						<th sortable-header col="id">Device Id</th>
+						<th>mapId</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
@@ -106,6 +92,7 @@
 						ng-click="deleteDeviceByMapId(device.mapId, 'nest')">Delete</button></td>
 				</tr>
 			</table>
+        	</scrollable-table>
 		</li>
 	</ul>
 </div>

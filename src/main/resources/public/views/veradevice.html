@@ -1,6 +1,7 @@
       <ul class="nav nav-pills" role="tablist">
         <li role="presentation"><a href="#">Bridge Devices</a></li>
         <li role="presentation"><a href="#/system">Bridge Control</a></li>
+        <li role="presentation"><a href="#/logs">Logs</a></li>
         <li role="presentation" class="active"><a href="#/veradevices">Vera Devices</a></li>
         <li role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
         <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
@@ -30,34 +31,20 @@
 			<p>Use the check boxes by the names to use the bulk addition feature. Select your items and dim control type if wanted, then click bulk add below.
 			Your items will be added with on and off or dim and off if selected with the name of the device from the Vera.
 			</p>
+        	<scrollable-table watch="bridge.veradevices">
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
 						<th>Row</th>
-						<th>
-							<a href="" ng-click="order('name')">Name</a>
-        					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('id')">Id</a>
-        					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('category')">Category</a>
-        					<span class="sortorder" ng-show="predicate === 'category'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('room')">Room</a>
-        					<span class="sortorder" ng-show="predicate === 'room'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('vera')">Vera</a>
-        					<span class="sortorder" ng-show="predicate === 'vera'" ng-class="{reverse:reverse}"></span>
-        				</th>
+						<th sortable-header col="name">Name</th>
+						<th sortable-header col="id">Id</th>
+						<th sortable-header col="category">Category</th>
+						<th sortable-header col="room">Room</th>
+						<th sortable-header col="veraname">Vera</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="veradevice in bridge.veradevices | availableVeraDeviceId | orderBy:predicate:reverse">
+				<tr ng-repeat="veradevice in bridge.veradevices | availableVeraDeviceId">
 					<td>{{$index+1}}</td>
 					<td><input type="checkbox" name="bulk.devices[]" value="{{veradevice.id}}" ng-checked="bulk.devices.indexOf(veradevice.id) > -1" ng-click="toggleSelection(veradevice.id)"> {{veradevice.name}}</td>
 					<td>{{veradevice.id}}</td>
@@ -71,6 +58,7 @@
 					</td>
 				</tr>
 			</table>
+        	</scrollable-table>
 			<p>
 				<button class="btn btn-success" type="submit"
 					ng-click="bulkAddDevices(device_dim_control)">Bulk Add ({{bulk.devices.length}})</button>
@@ -82,34 +70,20 @@
 	</div>
 	<ul ng-if="buttonsVisible" class="list-group">
 		<li class="list-group-item">
+        	<scrollable-table watch="bridge.veradevices">
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
 						<th>Row</th>
-						<th>
-							<a href="" ng-click="order('name')">Name</a>
-        					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('id')">Id</a>
-        					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('category')">Category</a>
-        					<span class="sortorder" ng-show="predicate === 'category'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('room')">Room</a>
-        					<span class="sortorder" ng-show="predicate === 'room'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('vera')">Vera</a>
-        					<span class="sortorder" ng-show="predicate === 'vera'" ng-class="{reverse:reverse}"></span>
-        				</th>
+						<th sortable-header col="name">Name</th>
+						<th sortable-header col="id">Id</th>
+						<th sortable-header col="category">Category</th>
+						<th sortable-header col="room">Room</th>
+						<th sortable-header col="veraname">Vera</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="veradevice in bridge.veradevices | unavailableVeraDeviceId | orderBy:predicate:reverse">
+				<tr ng-repeat="veradevice in bridge.veradevices | unavailableVeraDeviceId">
 					<td>{{$index+1}}</td>
 					<td>{{veradevice.name}}</td>
 					<td>{{veradevice.id}}</td>
@@ -122,6 +96,7 @@
 					</td>
 				</tr>
 			</table>
+        	</scrollable-table>
 		</li>
 	</ul>
 </div>

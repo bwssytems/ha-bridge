@@ -1,6 +1,7 @@
       <ul class="nav nav-pills" role="tablist">
         <li role="presentation"><a href="#">Bridge Devices</a></li>
         <li role="presentation"><a href="#/system">Bridge Control</a></li>
+        <li role="presentation"><a href="#/logs">Logs</a></li>
         <li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
         <li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
         <li role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
@@ -20,28 +21,20 @@
 			Then you can modify the name to anything you want that will be the keyword for Alexa. Click the 'Add Bridge Device' to finish that selection setup.
 			The 'Already Configured Harmony Buttons' list below will show what is already setup for your Harmony Hubs.</p>
 
+        	<scrollable-table watch="bridge.harmonydevices">
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
 						<th>Row</th>
-						<th>
-							<a href="" ng-click="order('label')">Name</a>
-        					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('id')">Id</a>
-        					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('hub')">Hub</a>
-        					<span class="sortorder" ng-show="predicate === 'hub'" ng-class="{reverse:reverse}"></span>
-        				</th>
+						<th sortable-header col="name">Name</th>
+						<th sortable-header col="id">Id</th>
+						<th sortable-header col="hub">Hub</th>
 						<th>On Button</th>
 						<th>Off Button</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="harmonydevice in bridge.harmonydevices | orderBy:predicate:reverse">
+				<tr ng-repeat="harmonydevice in bridge.harmonydevices">
 					<td>{{$index+1}}</td>
 					<td>{{harmonydevice.device.label}}</td>
 					<td>{{harmonydevice.device.id}}</td>
@@ -66,6 +59,7 @@
 					</td>
 				</tr>
 			</table>
+        	</scrollable-table>
 		</li>
 	</ul>
 	<div class="panel-heading">
@@ -73,26 +67,15 @@
 	</div>
 	<ul ng-if="buttonsVisible" class="list-group">
 		<li class="list-group-item">
+        	<scrollable-table watch="bridge.harmonydevices">
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
 						<th>Row</th>
-						<th>
-							<a href="" ng-click="order('name')">Name</a>
-        					<span class="sortorder" ng-show="predicate === 'name'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('id')">Device Id</a>
-        					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('targetDevice')">Hub</a>
-        					<span class="sortorder" ng-show="predicate === 'targetDevice'" ng-class="{reverse:reverse}"></span>
-        				</th>
-						<th>
-							<a href="" ng-click="order('mapId')">Harmony Device-Button On-Button Off</a>
-        					<span class="sortorder" ng-show="predicate === 'id'" ng-class="{reverse:reverse}"></span>
-        				</th>
+						<th sortable-header col="name">Name</th>
+						<th sortable-header col="id">Device Id</th>
+						<th sortable-header col="targetDevice">Hub</th>
+						<th>Harmony Device-Button On-Button Off</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
@@ -108,6 +91,7 @@
 					</td>
 				</tr>
 			</table>
+        	</scrollable-table>
 		</li>
 	</ul>
 </div>

@@ -1,0 +1,127 @@
+.scrollableContainer {
+    height: 800px;
+    position: relative;
+    padding-top: 35px;
+    overflow: hidden;
+}
+.scrollableContainer .headerSpacer {
+    border: 1px solid #d5d5d5;
+    border-bottom-color: #bbb;
+    position: absolute;
+    height: 36px;
+    top: 0;
+    right: 0;
+    left: 0;
+}
+.scrollableContainer th .orderWrapper {
+    position: absolute;
+    top: 0;
+    right: 2px;
+    cursor: pointer;
+}
+.scrollableContainer th .orderWrapper .order {
+    font-size: 8pt;
+    color: #BDBDBD;
+}
+.scrollableContainer th .orderWrapper .active {
+    color: #464646;
+}
+
+.scrollArea {
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    border: 1px solid #d5d5d5;
+    /*  the implementation of this is still quite buggy; specifically, it doesn't like the 
+        absolutely positioned headers within 
+    -webkit-overflow-scrolling: touch;  */
+}
+.scrollArea table {
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin-bottom: 0;
+    width: 100%;
+    border: none;
+    /*border-collapse: separate;*/
+}
+.scrollArea table th {
+    padding: 0 !important;
+    border: none !important;
+    min-width: 60px;
+}
+.scrollArea table .th-inner {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    position: absolute;
+    top: 0;
+    height: 36px;
+    line-height: 36px;
+}
+
+.scrollArea table th .box {
+    padding: 0 8px;
+    padding-right: 11px;    /*  order icon width*/
+    border-left: 1px solid #ddd;
+}
+
+/*  to hack fix firefox border issue    */
+@-moz-document url-prefix() {
+    .scrollArea table th .box{
+        border-right: 1px solid #ddd;
+        border-left: none;
+    }
+}
+
+.scrollArea table .th-inner .ng-scope {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.scrollArea table tr th:first-child th .box {
+    border-left: none;
+}
+.scrollArea table .th-inner.condensed {
+    padding: 0 3px;
+}
+.scrollArea table tbody tr td:first-child {
+    border-left: none;
+}
+.scrollArea table tbody tr td:last-child {
+    border-right: none;
+}
+.scrollArea table tbody tr:first-child td {
+    border-top: none;
+}
+.scrollArea table tbody tr:last-child td {
+    border-bottom: 2px solid #ddd;
+}
+.scrollArea table tbody tr td {
+    border-bottom: 1px solid #ddd;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.scrollableContainer .scaler {
+    position: absolute;
+    top: 0px;
+    width: 2px;
+    height: 100%;
+    background-color: #CFCFCF;
+}
+
+.scrollableContainer th .resize-rod {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: col-resize;
+    width: 4px;
+    height: 100%;
+}
+
+.scrollable-resizing .scrollableContainer {
+    cursor: col-resize;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
