@@ -15,9 +15,9 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BackupHandler;
-import com.bwssystems.HABridge.JsonTransformer;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
+import com.bwssystems.util.BackupHandler;
+import com.bwssystems.util.JsonTransformer;
 import com.google.gson.stream.JsonReader;
 
 import java.util.List;

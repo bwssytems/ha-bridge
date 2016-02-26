@@ -39,4 +39,35 @@
         	</scrollable-table>
 		</div>
 	</div>
+	<div class="panel panel-default logconfig">
+		<div class="panel-heading">
+			<h1 class="panel-title">Logging Configuration <a ng-click="toggle()"><span class={{imgUrl}} aria-hidden="true"></a></h1>
+		</div>
+		<div ng-if="visible" class="animate-if" class="panel-body">
+			<p>
+				<button class="btn btn-primary" type="submit"
+					ng-click="updateLoggers()">Update Log Levels</button>
+			</p>
+        	<scrollable-table watch="bridge.loggerInfo">
+			<table class="table table-bordered table-striped table-hover">
+				<thead>
+					<tr>
+						<th sortable-header col="logLevel">Log Level</th>
+						<th sortable-header col="loggerName">Component</th>
+						<th>New Log Level</th>
+					</tr>
+				</thead>
+				<tr ng-repeat="logInfo in bridge.loggerInfo">
+					<td>{{logInfo.logLevel.substr(0,4)}}</td>
+					<td>{{logInfo.loggerName}}</td>
+					<td>
+						<select name="new-log-level" id="new-log-level" ng-change="addToUpdate(logInfo)" ng-model="logInfo.newLogLevel">
+							<option ng-repeat="alevel in levels" value="{{alevel}}">{{alevel.substr(0,4)}}</option>
+						</select>
+					</td>
+				</tr>
+			</table>
+        	</scrollable-table>
+		</div>
+	</div>
 	

@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
-import com.bwssystems.HABridge.JsonTransformer;
 import com.bwssystems.HABridge.dao.BackupFilename;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
@@ -25,6 +24,7 @@ import com.bwssystems.NestBridge.NestHome;
 import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.luupRequests.Device;
 import com.bwssystems.luupRequests.Scene;
+import com.bwssystems.util.JsonTransformer;
 import com.bwssystems.vera.VeraHome;
 import com.google.gson.Gson;
 

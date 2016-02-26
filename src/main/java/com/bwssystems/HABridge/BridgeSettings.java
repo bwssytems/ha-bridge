@@ -15,6 +15,8 @@ import org.apache.http.conn.util.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.bwssystems.util.BackupHandler;
+import com.bwssystems.util.JsonTransformer;
 import com.google.gson.Gson;
 
 public class BridgeSettings extends BackupHandler {

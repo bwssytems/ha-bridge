@@ -17,6 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.dao.BackupFilename;
+import com.bwssystems.logservices.LoggingManager;
+import com.bwssystems.util.JsonFreeTextStringFormatter;
+import com.bwssystems.util.JsonTransformer;
 import com.google.gson.Gson;
 
 import ch.qos.logback.classic.LoggerContext;
@@ -33,6 +36,7 @@ public class SystemControl {
     private Version version;
     private CyclicBufferAppender<ILoggingEvent> cyclicBufferAppender;
     private DateFormat dateFormat;
+    private LoggingManager theLogServiceMgr;
 
 
 	public SystemControl(BridgeSettings theBridgeSettings, Version theVersion) {
@@ -41,6 +45,9 @@ public class SystemControl {
 		this.lc = (LoggerContext) LoggerFactory.getILoggerFactory(); 
 		this.dateFormat = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS");
 		reacquireCBA();
+		theLogServiceMgr = new LoggingManager();
+		theLogServiceMgr.setShowAll(true);
+		theLogServiceMgr.init();
 	}
 
 //	This function sets up the sparkjava rest calls for the hue api
@@ -53,7 +60,7 @@ public class SystemControl {
 	        return "{\"version\":\"" + version.getVersion() + "\"}";
 	    });
 
-	    // http://ip_address:port/system/logmsgs gets the version of this bridge instance
+	    // http://ip_address:port/system/logmsgs gets the log messages for the bridge
     	get (SYSTEM_CONTEXT + "/logmsgs", "application/json", (request, response) -> {
 			log.debug("Get logmsgs.");
 			response.status(HttpStatus.SC_OK);
@@ -73,14 +80,23 @@ public class SystemControl {
 				LoggingEvent le;
 				for (int i = 0; i < count; i++) {
 					le = (LoggingEvent) cyclicBufferAppender.get(i);
-					logMsgs = logMsgs + ( i > 0?",{":"{") + "\"time\":\"" + dateFormat.format(le.getTimeStamp()) + "\",\"level\":\"" + le.getLevel().levelStr + "\",\"component\":\"" + le.getLoggerName() + "\",\"message\":\"" + le.getFormattedMessage() + "\"}";
+					logMsgs = logMsgs + ( i > 0?",{":"{") + "\"time\":\"" + dateFormat.format(le.getTimeStamp()) + "\",\"level\":\"" + le.getLevel().levelStr + "\",\"component\":\"" + le.getLoggerName() + "\",\"message\":\"" + JsonFreeTextStringFormatter.forJSON(le.getFormattedMessage()) + "\"}";
 				}
 		    }
 		    logMsgs = logMsgs + "]";
+			response.status(200);
 			return logMsgs;
 	    });
 
-//      http://ip_address:port/system/settings which returns the bridge configuration settings
+	    // http://ip_address:port/system/logmgmt/loggers gets the logger info for the bridge
+    	get (SYSTEM_CONTEXT + "/logmgmt/loggers", "application/json", (request, response) -> {
+			log.debug("Get loggers info.");
+			theLogServiceMgr.init();
+			response.status(200);
+			return theLogServiceMgr.getConfiguredLoggers();
+	    }, new JsonTransformer());
+
+    	//      http://ip_address:port/system/settings which returns the bridge configuration settings
 		get(SYSTEM_CONTEXT + "/settings", "application/json", (request, response) -> {
 			log.debug("bridge settings requested from " + request.ip());
 

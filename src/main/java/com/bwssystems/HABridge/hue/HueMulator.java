@@ -1,7 +1,6 @@
 package com.bwssystems.HABridge.hue;
 
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
-import com.bwssystems.HABridge.JsonTransformer;
 import com.bwssystems.HABridge.api.UserCreateRequest;
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.DeviceState;
@@ -14,6 +13,7 @@ import com.bwssystems.harmony.HarmonyHandler;
 import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.harmony.RunActivity;
 import com.bwssystems.nest.controller.Nest;
+import com.bwssystems.util.JsonTransformer;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;

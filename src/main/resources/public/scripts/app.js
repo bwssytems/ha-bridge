@@ -44,7 +44,7 @@ app.run( function (bridgeService) {
 
 app.service('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], type: "", settings: [], myToastMsg: [], logMsgs: [], olddevicename: "", isInControl: false, showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
+	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], olddevicename: "", isInControl: false, showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
 
 	this.displayWarn = function(errorTitle, error) {
 		if(error == null || typeof(error) != 'undefined') {
@@ -188,6 +188,17 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		);
 	};
 
+	this.viewLoggerInfo = function () {
+		return $http.get(this.state.systemsbase + "/logmgmt/loggers").then(
+				function (response) {
+					self.state.loggerInfo = response.data;
+				},
+				function (error) {
+					self.displayWarn("Get logger info Error: ", error);
+				}
+		);
+	};
+
 	this.viewNestItems = function () {
 		if(!this.state.showNest)
 			return;
@@ -253,6 +264,18 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		);
 	};
 
+	this.updateLogLevels = function(logComponents) {
+		return $http.put(this.state.systemsbase + "/logmgmt/update", logComponents ).then(
+				function (response) {
+					self.displaySuccess("Updated " + logComponents.length + " loggers for log levels.")
+				},
+				function (error) {
+					self.displayWarn("Update Log components Error: ", error);
+				}
+		);
+			
+	};
+	
 	this.findDeviceByMapId = function(id, target, type) {
 		for(var i = 0; i < this.state.devices.length; i++) {
 			if(this.state.devices[i].mapId == id && this.state.devices[i].mapType == type && this.state.devices[i].targetDevice == target)
@@ -537,8 +560,6 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     $scope.isInControl = false;
     $scope.visible = false;
     $scope.imgUrl = "glyphicon glyphicon-plus";
-    $scope.visibleBk = false;
-    $scope.imgBkUrl = "glyphicon glyphicon-plus";
     $scope.addVeratoSettings = function (newveraname, newveraip) {
     	if($scope.bridge.settings.veraaddress == null) {
     		$scope.bridge.settings.veraaddress = { devices: [] };
@@ -605,20 +626,43 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
         else
             $scope.imgUrl = "glyphicon glyphicon-plus";
     };
-    $scope.toggleBk = function () {
-        $scope.visibleBk = !$scope.visibleBk;
-        if($scope.visibleBk)
-            $scope.imgBkUrl = "glyphicon glyphicon-minus";
-        else
-            $scope.imgBkUrl = "glyphicon glyphicon-plus";
-    };
 });
 
 app.controller('LogsController', function ($scope, $location, $http, $window, bridgeService) {
     bridgeService.viewLogs();
     $scope.bridge = bridgeService.state;
+    $scope.levels = ["INFO_INT", "WARN_INT", "DEBUG_INT", "TRACE_INT"];
+	$scope.updateComponents = [];
+	$scope.visible = false;
+	$scope.imgUrl = "glyphicon glyphicon-plus";
 	$scope.updateLogs = function() {
 		bridgeService.viewLogs();
+	};
+	$scope.toggle = function () {
+		$scope.visible = !$scope.visible;
+		if($scope.visible) {
+			$scope.imgUrl = "glyphicon glyphicon-minus";
+		    bridgeService.viewLoggerInfo();
+		}
+		else
+			$scope.imgUrl = "glyphicon glyphicon-plus";
+	};
+	$scope.addToUpdate = function (logInfo) {
+		var idx = $scope.updateComponents.indexOf(logInfo);
+
+		// is currently selected
+		if (idx > -1) {
+			$scope.updateComponents.splice(idx, 1);
+		}
+
+		// is newly selected
+		else {
+			$scope.updateComponents.push(logInfo);
+		}
+	};
+	
+	$scope.updateLoggers = function () {
+		bridgeService.updateLogLevels($scope.updateComponents);
 	};
 });
 

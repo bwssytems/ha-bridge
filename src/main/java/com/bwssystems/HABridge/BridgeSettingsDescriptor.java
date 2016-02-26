@@ -20,6 +20,7 @@ public class BridgeSettingsDescriptor {
 	private boolean harmonyconfigured;
 	private boolean nestconfigured;
 	private String configfile;
+	private Integer numberoflogmessages;
 	
 	public BridgeSettingsDescriptor() {
 		super();
@@ -136,6 +137,12 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setConfigfile(String configfile) {
 		this.configfile = configfile;
+	}
+	public Integer getNumberoflogmessages() {
+		return numberoflogmessages;
+	}
+	public void setNumberoflogmessages(Integer numberoflogmessages) {
+		this.numberoflogmessages = numberoflogmessages;
 	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null)
