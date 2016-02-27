@@ -11,12 +11,15 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.dao.BackupFilename;
+import com.bwssystems.logservices.LoggerInfo;
+import com.bwssystems.logservices.LoggingForm;
 import com.bwssystems.logservices.LoggingManager;
 import com.bwssystems.util.JsonFreeTextStringFormatter;
 import com.bwssystems.util.JsonTransformer;
@@ -46,7 +49,6 @@ public class SystemControl {
 		this.dateFormat = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss.SSS");
 		reacquireCBA();
 		theLogServiceMgr = new LoggingManager();
-		theLogServiceMgr.setShowAll(true);
 		theLogServiceMgr.init();
 	}
 
@@ -89,12 +91,36 @@ public class SystemControl {
 	    });
 
 	    // http://ip_address:port/system/logmgmt/loggers gets the logger info for the bridge
-    	get (SYSTEM_CONTEXT + "/logmgmt/loggers", "application/json", (request, response) -> {
-			log.debug("Get loggers info.");
+    	get (SYSTEM_CONTEXT + "/logmgmt/loggers/:all", "application/json", (request, response) -> {
+			log.info("Get loggers info with showAll argument: " + request.params(":all"));
+			Boolean showAll = false;
+			if(request.params(":all").equals("true"))
+				showAll = true;
+			theLogServiceMgr.setShowAll(showAll);
 			theLogServiceMgr.init();
 			response.status(200);
 			return theLogServiceMgr.getConfiguredLoggers();
 	    }, new JsonTransformer());
+
+//      http://ip_address:port/system/logmgmt/update CORS request
+	    options(SYSTEM_CONTEXT + "/logmgmt/update", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+//      http://ip_address:port/system/logmgmt/update which changes logging parameters for the process
+		put(SYSTEM_CONTEXT + "/logmgmt/update", "application/json", (request, response) -> {
+			response.status(200);
+			LoggerInfo updateLoggers[];
+			updateLoggers = new Gson().fromJson(request.body(), LoggerInfo[].class);
+			LoggingForm theModel = theLogServiceMgr.getModel();
+			theModel.setUpdatedLoggers(Arrays.asList(updateLoggers));
+			theLogServiceMgr.updateLogLevels();
+            return theLogServiceMgr.getConfiguredLoggers();
+        }, new JsonTransformer());
 
     	//      http://ip_address:port/system/settings which returns the bridge configuration settings
 		get(SYSTEM_CONTEXT + "/settings", "application/json", (request, response) -> {
@@ -220,6 +246,7 @@ public class SystemControl {
     void reacquireCBA() {
         cyclicBufferAppender = (CyclicBufferAppender<ILoggingEvent>) lc.getLogger(
             Logger.ROOT_LOGGER_NAME).getAppender(CYCLIC_BUFFER_APPENDER_NAME);
+        cyclicBufferAppender.setMaxSize(bridgeSettings.getBridgeSettingsDescriptor().getNumberoflogmessages());
       }
 
     protected void pingListener() {

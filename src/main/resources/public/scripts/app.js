@@ -44,7 +44,7 @@ app.run( function (bridgeService) {
 
 app.service('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], olddevicename: "", isInControl: false, showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
+	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
 
 	this.displayWarn = function(errorTitle, error) {
 		if(error == null || typeof(error) != 'undefined') {
@@ -189,7 +189,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 	};
 
 	this.viewLoggerInfo = function () {
-		return $http.get(this.state.systemsbase + "/logmgmt/loggers").then(
+		return $http.get(this.state.systemsbase + "/logmgmt/loggers/" + self.state.logShowAll).then(
 				function (response) {
 					self.state.loggerInfo = response.data;
 				},
@@ -267,6 +267,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 	this.updateLogLevels = function(logComponents) {
 		return $http.put(this.state.systemsbase + "/logmgmt/update", logComponents ).then(
 				function (response) {
+					self.state.loggerInfo = response.data;
 					self.displaySuccess("Updated " + logComponents.length + " loggers for log levels.")
 				},
 				function (error) {
@@ -664,6 +665,10 @@ app.controller('LogsController', function ($scope, $location, $http, $window, br
 	$scope.updateLoggers = function () {
 		bridgeService.updateLogLevels($scope.updateComponents);
 	};
+	
+	$scope.reloadLoggers = function () {
+		bridgeService.viewLoggerInfo();
+	};
 });
 
 app.controller('ViewingController', function ($scope, $location, $http, $window, bridgeService, ngDialog) {
@@ -821,6 +826,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 		bridgeService.addDevice($scope.device).then(
 				function () {
 					$scope.clearDevice();
+					bridgeService.viewDevices();
 					bridgeService.viewVeraDevices();
 					bridgeService.viewVeraScenes();
 				},
@@ -854,6 +860,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 		}
 		bridgeService.bulkAddDevice(devicesList);
 		$scope.clearDevice();
+		bridgeService.viewDevices();
 		bridgeService.viewVeraDevices();
 		bridgeService.viewVeraScenes();
 		$scope.bulk = { devices: [] };
@@ -883,6 +890,9 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 
 	$scope.deleteDeviceByMapId = function (id, mapType) {
 		bridgeService.deleteDeviceByMapId(id, mapType);
+		bridgeService.viewDevices();
+		bridgeService.viewVeraDevices();
+		bridgeService.viewVeraScenes();
 	};
 
 });
@@ -935,6 +945,7 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 		bridgeService.addDevice($scope.device).then(
 				function () {
 					$scope.clearDevice();
+					bridgeService.viewDevices();
 					bridgeService.viewHarmonyActivities();
 					bridgeService.viewHarmonyDevices();
 				},
@@ -954,6 +965,9 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 
 	$scope.deleteDeviceByMapId = function (id, mapType) {
 		bridgeService.deleteDeviceByMapId(id, mapType);
+		bridgeService.viewDevices();
+		bridgeService.viewHarmonyActivities();
+		bridgeService.viewHarmonyDevices();
 	};
 
 });
@@ -1045,6 +1059,8 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		bridgeService.addDevice($scope.device).then(
 				function () {
 					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewNestItems();
 				},
 				function (error) {
 				}
@@ -1062,6 +1078,8 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 
 	$scope.deleteDeviceByMapId = function (id, mapType) {
 		bridgeService.deleteDeviceByMapId(id, mapType);
+		bridgeService.viewDevices();
+		bridgeService.viewNestItems();
 	};
 
 });

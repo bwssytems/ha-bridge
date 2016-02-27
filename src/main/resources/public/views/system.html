@@ -159,6 +159,11 @@
 							ng-model="bridge.settings.nestpwd" placeholder="thepassword"></td>
 				</tr>
 				<tr>
+					<td>Log Messages to Buffer</td>
+					<td><input id="bridge-settings-numberoflogmessages" class="form-control" type="number"
+							ng-model="bridge.settings.numberoflogmessages"  min="100" max="65535"></td>
+				</tr>
+				<tr>
 					<td>UPNP Strict Handling</td>
 					<td><input type="checkbox" ng-model="bridge.settings.upnpstrict"
            				ng-true-value=true ng-false-value=false>  {{bridge.settings.upnpstrict}}</td>

@@ -55,6 +55,7 @@ public class BridgeSettings extends BackupHandler {
         else
         {
         	log.info("reading from system properties");
+        	theBridgeSettings.setNumberoflogmessages(Configuration.NUMBER_OF_LOG_MESSAGES);
         	theBridgeSettings.setConfigfile(Configuration.CONFIG_FILE);
         	theBridgeSettings.setServerPort(System.getProperty("server.port", Configuration.DEFAULT_WEB_PORT));
         	theBridgeSettings.setUpnpConfigAddress(System.getProperty("upnp.config.address"));

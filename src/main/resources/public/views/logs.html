@@ -47,6 +47,8 @@
 			<p>
 				<button class="btn btn-primary" type="submit"
 					ng-click="updateLoggers()">Update Log Levels</button>
+				  Show All Loggers <input type="checkbox" ng-model="bridge.logShowAll"
+           				ng-change="reloadLoggers()" ng-true-value=true ng-false-value=false>  {{bridge.logShowAll}}
 			</p>
         	<scrollable-table watch="bridge.loggerInfo">
 			<table class="table table-bordered table-striped table-hover">
@@ -58,11 +60,11 @@
 					</tr>
 				</thead>
 				<tr ng-repeat="logInfo in bridge.loggerInfo">
-					<td>{{logInfo.logLevel.substr(0,4)}}</td>
+					<td>{{logInfo.logLevel.substr(0,logInfo.logLevel.indexOf("_"))}}</td>
 					<td>{{logInfo.loggerName}}</td>
 					<td>
 						<select name="new-log-level" id="new-log-level" ng-change="addToUpdate(logInfo)" ng-model="logInfo.newLogLevel">
-							<option ng-repeat="alevel in levels" value="{{alevel}}">{{alevel.substr(0,4)}}</option>
+							<option ng-repeat="alevel in levels" value="{{alevel}}">{{alevel.substr(0,alevel.indexOf("_"))}}</option>
 						</select>
 					</td>
 				</tr>
