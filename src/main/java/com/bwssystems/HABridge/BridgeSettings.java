@@ -142,6 +142,9 @@ public class BridgeSettings extends BackupHandler {
         if(theBridgeSettings.getUpnpDeviceDb() == null)
         	theBridgeSettings.setUpnpDeviceDb(Configuration.DEVICE_DB_DIRECTORY);
         
+        if(theBridgeSettings.getNumberoflogmessages() == null)
+        	theBridgeSettings.setNumberoflogmessages(Configuration.NUMBER_OF_LOG_MESSAGES);
+        
         if(theBridgeSettings.getButtonsleep() <= 0)
         	theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DEFAULT_BUTTON_SLEEP));
 
