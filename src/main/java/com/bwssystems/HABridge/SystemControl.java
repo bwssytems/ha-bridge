@@ -92,7 +92,7 @@ public class SystemControl {
 
 	    // http://ip_address:port/system/logmgmt/loggers gets the logger info for the bridge
     	get (SYSTEM_CONTEXT + "/logmgmt/loggers/:all", "application/json", (request, response) -> {
-			log.info("Get loggers info with showAll argument: " + request.params(":all"));
+			log.debug("Get loggers info with showAll argument: " + request.params(":all"));
 			Boolean showAll = false;
 			if(request.params(":all").equals("true"))
 				showAll = true;
@@ -113,6 +113,7 @@ public class SystemControl {
 	    });
 //      http://ip_address:port/system/logmgmt/update which changes logging parameters for the process
 		put(SYSTEM_CONTEXT + "/logmgmt/update", "application/json", (request, response) -> {
+			log.debug("update loggers: " + request.body());
 			response.status(200);
 			LoggerInfo updateLoggers[];
 			updateLoggers = new Gson().fromJson(request.body(), LoggerInfo[].class);
