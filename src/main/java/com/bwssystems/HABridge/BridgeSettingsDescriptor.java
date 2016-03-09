@@ -145,7 +145,7 @@ public class BridgeSettingsDescriptor {
 		this.numberoflogmessages = numberoflogmessages;
 	}
 	public Boolean isValidVera() {
-		if(this.getVeraAddress() == null)
+		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
 			return false;
 		List<NamedIP> devicesList = this.getVeraAddress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
