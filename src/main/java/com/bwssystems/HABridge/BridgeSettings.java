@@ -40,12 +40,14 @@ public class BridgeSettings extends BackupHandler {
         String addressString = null;
         String theVeraAddress = null;
         String theHarmonyAddress = null;
+
         String configFileProperty = System.getProperty("config.file");
         if(configFileProperty == null) {
         	Path filePath = Paths.get(Configuration.CONFIG_FILE);
         	if(Files.exists(filePath) && Files.isReadable(filePath))
         		configFileProperty = Configuration.CONFIG_FILE;
         }
+
         if(configFileProperty != null)
         {
         	log.info("reading from config file: " + configFileProperty);
@@ -56,6 +58,7 @@ public class BridgeSettings extends BackupHandler {
         {
         	log.info("reading from system properties");
         	theBridgeSettings.setNumberoflogmessages(Configuration.NUMBER_OF_LOG_MESSAGES);
+        	theBridgeSettings.setFarenheit(true);
         	theBridgeSettings.setConfigfile(Configuration.CONFIG_FILE);
         	theBridgeSettings.setServerPort(System.getProperty("server.port", Configuration.DEFAULT_WEB_PORT));
         	theBridgeSettings.setUpnpConfigAddress(System.getProperty("upnp.config.address"));
@@ -182,6 +185,8 @@ public class BridgeSettings extends BackupHandler {
 		theBridgeSettings.setVeraconfigured(aBridgeSettings.isValidVera());
 		theBridgeSettings.setHarmonyconfigured(aBridgeSettings.isValidHarmony());
 		theBridgeSettings.setNestConfigured(aBridgeSettings.isValidNest());
+		theBridgeSettings.setNumberoflogmessages(aBridgeSettings.getNumberoflogmessages());
+		theBridgeSettings.setFarenheit(aBridgeSettings.isFarenheit());
     }
 
 	public void save(BridgeSettingsDescriptor newBridgeSettings) {

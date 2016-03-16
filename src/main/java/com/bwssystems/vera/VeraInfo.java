@@ -1,6 +1,7 @@
 package com.bwssystems.vera;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.ListIterator;
 import java.util.Map;
@@ -101,7 +102,7 @@ public class VeraInfo {
             HttpResponse response = httpClient.execute(httpGet);
             log.debug("GET on URL responded: " + response.getStatusLine().getStatusCode());
             if(response.getStatusLine().getStatusCode() == 200){
-                theContent = EntityUtils.toString(response.getEntity()); //read content for data
+                theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); //read content for data
                 EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
             }
         } catch (IOException e) {

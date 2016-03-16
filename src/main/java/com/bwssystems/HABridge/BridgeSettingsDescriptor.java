@@ -19,6 +19,7 @@ public class BridgeSettingsDescriptor {
 	private boolean veraconfigured;
 	private boolean harmonyconfigured;
 	private boolean nestconfigured;
+	private boolean farenheit;
 	private String configfile;
 	private Integer numberoflogmessages;
 	
@@ -29,6 +30,7 @@ public class BridgeSettingsDescriptor {
 		this.nestconfigured = false;
 		this.veraconfigured = false;
 		this.harmonyconfigured = false;
+		this.farenheit = true;
 	}
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -143,6 +145,12 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setNumberoflogmessages(Integer numberoflogmessages) {
 		this.numberoflogmessages = numberoflogmessages;
+	}
+	public boolean isFarenheit() {
+		return farenheit;
+	}
+	public void setFarenheit(boolean farenheit) {
+		this.farenheit = farenheit;
 	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)

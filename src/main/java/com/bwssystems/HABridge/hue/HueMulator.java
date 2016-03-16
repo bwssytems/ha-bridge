@@ -395,7 +395,10 @@ public class HueMulator {
 		        	NestInstruction thermoSetting = new Gson().fromJson(url, NestInstruction.class);
 	        		if(thermoSetting.getControl().equalsIgnoreCase("temp")) {
 	        			if(request.body().contains("bri")) {
-	        				thermoSetting.setTemp(String.valueOf((Double.parseDouble(replaceIntensityValue(thermoSetting.getTemp(), state.getBri())) - 32.0)/1.8));
+	        				if(bridgeSettings.isFarenheit())
+	        					thermoSetting.setTemp(String.valueOf((Double.parseDouble(replaceIntensityValue(thermoSetting.getTemp(), state.getBri())) - 32.0)/1.8));
+	        				else
+	        					thermoSetting.setTemp(String.valueOf(Double.parseDouble(replaceIntensityValue(thermoSetting.getTemp(), state.getBri()))));
 	        				log.debug("Setting thermostat: " + thermoSetting.getName() + " to " + thermoSetting.getTemp() + "C");
 	        				theNest.getThermostat(thermoSetting.getName()).setTargetTemperature(Float.parseFloat(thermoSetting.getTemp()));
 	        			}
