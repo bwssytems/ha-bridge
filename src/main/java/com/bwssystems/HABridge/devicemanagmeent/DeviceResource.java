@@ -115,35 +115,24 @@ public class DeviceResource {
     	put (API_CONTEXT + "/:id", "application/json", (request, response) -> {
 	    	log.debug("Edit a Device - request body: " + request.body());
         	DeviceDescriptor device = new Gson().fromJson(request.body(), DeviceDescriptor.class);
-	        DeviceDescriptor deviceEntry = deviceRepository.findOne(request.params(":id"));
-	        if(deviceEntry == null){
-		    	log.debug("Could not save an edited Device Id: " + request.params(":id"));
+	        if(deviceRepository.findOne(request.params(":id")) == null){
+		    	log.debug("Could not save an edited device, Device Id not found: " + request.params(":id"));
 		    	response.status(HttpStatus.SC_BAD_REQUEST);
-		    	return new ErrorMessage("Could not save an edited Device Id: " + request.params(":id") + " ");
+		    	return new ErrorMessage("Could not save an edited device, Device Id not found: " + request.params(":id") + " ");
 	        }
 	        else
 	        {
-				log.debug("Saving an edited Device: " + deviceEntry.getName());
+				log.debug("Saving an edited Device: " + device.getName());
 
-				deviceEntry.setName(device.getName());
 				if (device.getDeviceType() != null)
-					deviceEntry.setDeviceType(device.getDeviceType());
-				deviceEntry.setMapId(device.getMapId());
-				deviceEntry.setMapType(device.getMapType());
-				deviceEntry.setTargetDevice(device.getTargetDevice());
-				deviceEntry.setOnUrl(device.getOnUrl());
-				deviceEntry.setOffUrl(device.getOffUrl());
-				deviceEntry.setHttpVerb(device.getHttpVerb());
-				deviceEntry.setContentType(device.getContentType());
-				deviceEntry.setContentBody(device.getContentBody());
-				deviceEntry.setContentBodyOff(device.getContentBodyOff());
+					device.setDeviceType(device.getDeviceType());
 
 				DeviceDescriptor[] theDevices = new DeviceDescriptor[1];
-				theDevices[0] = deviceEntry;
+				theDevices[0] = device;
 				deviceRepository.save(theDevices);
 				response.status(HttpStatus.SC_OK);
 	        }
-	        return deviceEntry;
+	        return device;
     	}, new JsonTransformer());
 
     	get (API_CONTEXT, "application/json", (request, response) -> {

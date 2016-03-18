@@ -1,5 +1,7 @@
 package com.bwssystems.HABridge.api.hue;
 
+import com.bwssystems.HABridge.dao.DeviceDescriptor;
+
 /**
  * Created by arm on 4/14/15.
  */
@@ -68,18 +70,18 @@ public class DeviceResponse {
         this.swversion = swversion;
     }
 
-    public static DeviceResponse createResponse(String name, String id){
+    public static DeviceResponse createResponse(DeviceDescriptor device){
         DeviceState deviceState = new DeviceState();
         DeviceResponse response = new DeviceResponse();
         response.setState(deviceState);
-        deviceState.setOn(false);
+        deviceState.setOn(device.getDeviceState());
         deviceState.setReachable(true);
         deviceState.setEffect("none");
         deviceState.setAlert("none");
-        deviceState.setBri(254);
+        deviceState.setBri(device.getDeviceSetValue());
 
-        response.setName(name);
-        response.setUniqueid(id);
+        response.setName(device.getName());
+        response.setUniqueid(device.getId());
         response.setManufacturername("Philips");
         response.setType("Dimmable light");
         response.setModelid("LWB004");

@@ -1,21 +1,55 @@
 package com.bwssystems.HABridge.dao;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 /*
  * Object to handle the device configuration
  */
 public class DeviceDescriptor{
-    private String id;
+	@SerializedName("id")
+	@Expose
+	private String id;
+	@SerializedName("name")
+	@Expose
     private String name;
+	@SerializedName("mapId")
+	@Expose
     private String mapId;
+	@SerializedName("mapType")
+	@Expose
     private String mapType;
+	@SerializedName("deviceType")
+	@Expose
     private String deviceType;
+	@SerializedName("targetDevice")
+	@Expose
     private String targetDevice;
+	@SerializedName("offUrl")
+	@Expose
     private String offUrl;
+	@SerializedName("dimUrl")
+	@Expose
+    private String dimUrl;
+    @SerializedName("onUrl")
+    @Expose
     private String onUrl;
+    @SerializedName("httpVerb")
+    @Expose
     private String httpVerb;
+    @SerializedName("contentType")
+    @Expose
     private String contentType;
+    @SerializedName("contentBody")
+    @Expose
     private String contentBody;
+    @SerializedName("contentBodyOff")
+    @Expose
     private String contentBodyOff;
 
+    private boolean deviceState;
+    private int deviceSetValue;
+    
     public String getName() {
         return name;
     }
@@ -64,7 +98,15 @@ public class DeviceDescriptor{
         this.offUrl = offUrl;
     }
 
-    public String getOnUrl() {
+    public String getDimUrl() {
+		return dimUrl;
+	}
+
+	public void setDimUrl(String dimUrl) {
+		this.dimUrl = dimUrl;
+	}
+
+	public String getOnUrl() {
         return onUrl;
     }
 
@@ -110,6 +152,22 @@ public class DeviceDescriptor{
 
 	public void setContentBodyOff(String contentBodyOff) {
 		this.contentBodyOff = contentBodyOff;
+	}
+
+	public boolean getDeviceState() {
+		return deviceState;
+	}
+
+	public void setDeviceState(boolean deviceState) {
+		this.deviceState = deviceState;
+	}
+
+	public int getDeviceSetValue() {
+		return deviceSetValue;
+	}
+
+	public void setDeviceSetValue(int deviceSetValue) {
+		this.deviceSetValue = deviceSetValue;
 	}
     
 

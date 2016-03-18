@@ -101,7 +101,7 @@ public class HueMulator {
 	        List<DeviceDescriptor> deviceList = repository.findAll();
 	        Map<String, DeviceResponse> deviceResponseMap = new HashMap<>();
 	        for (DeviceDescriptor device : deviceList) {
-                DeviceResponse deviceResponse = DeviceResponse.createResponse(device.getName(), device.getId());
+                DeviceResponse deviceResponse = DeviceResponse.createResponse(device);
 	            deviceResponseMap.put(device.getId(), deviceResponse);
 	        }
 			response.type("application/json; charset=utf-8"); 
@@ -225,7 +225,7 @@ public class HueMulator {
 	        Map<String, DeviceResponse> deviceList = new HashMap<>();
 	
 	        descriptorList.forEach(descriptor -> {
-	                    DeviceResponse deviceResponse = DeviceResponse.createResponse(descriptor.getName(), descriptor.getId());
+	                    DeviceResponse deviceResponse = DeviceResponse.createResponse(descriptor);
 	                    deviceList.put(descriptor.getId(), deviceResponse);
 	                }
 	        );
@@ -249,7 +249,7 @@ public class HueMulator {
 	        } else {
 	            log.debug("found device named: " + device.getName());
 	        }
-	        DeviceResponse lightResponse = DeviceResponse.createResponse(device.getName(), device.getId());
+	        DeviceResponse lightResponse = DeviceResponse.createResponse(device);
 	
 			response.type("application/json; charset=utf-8"); 
 	        response.status(HttpStatus.SC_OK);
@@ -296,28 +296,34 @@ public class HueMulator {
     	        return responseString;
 	        }
 	
-	        if (state.isOn()) {
-	            responseString = "[{\"success\":{\"/lights/" + lightId + "/state/on\":true}}";
-	            url = device.getOnUrl();
-	        } else if (request.body().contains("false")) {
-	            responseString = "[{\"success\":{\"/lights/" + lightId + "/state/on\":false}}";
-	            url = device.getOffUrl();
-	        }
-
+	        responseString = "[{\"success\":{\"/lights/" + lightId + "/state/on\":";
 	        if(request.body().contains("bri"))
 	        {
-	        	if(url == null)
-	        	{
-		            url = device.getOnUrl();
-	        		responseString = "[";
-	        	}
-	        	else
-	        		responseString = responseString + ",";
+        		url = device.getDimUrl();
 
-	        	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri() + "}}]";
+	        	if(url == null || url.length() == 0)
+		            url = device.getOnUrl();
+
+	        	responseString = responseString + "true}},{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri() + "}}]";
 	        }
 	        else
-	        	responseString = responseString + "]";
+	        {
+		        if (state.isOn()) {
+		            responseString = responseString + "true}}]";
+		            url = device.getOnUrl();
+		            state.setBri(255);
+		        } else if (request.body().contains("false")) {
+		            responseString = responseString + "false}}]";
+		            url = device.getOffUrl();
+		            state.setBri(0);
+		        }
+	        }
+
+	        if (url == null) {
+	        	log.warn("Could not find url: " + lightId + " for hue state change request: " + userId + " from " + request.ip() + " body: " + request.body());
+        		responseString = "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId + "\",\"description\": \"Could not find url\", \"resource\": \"/lights/" + lightId + "\"}}]";
+    	        return responseString;
+	        }
 
 	        if(device.getDeviceType().toLowerCase().contains("activity") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("harmonyActivity")))
 	        {
@@ -337,7 +343,6 @@ public class HueMulator {
 	        	else {
 	        		log.warn("Should not get here, no harmony configured");
 	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Should not get here, no harmony configured\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
-	        		
 	        	}
 	        }
 	        else if(device.getDeviceType().toLowerCase().contains("button") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("harmonyButton")))
@@ -456,7 +461,11 @@ public class HueMulator {
 					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 				}
 	        }
-	
+	        
+	        if(!responseString.contains("[{\"error\":")) {
+	        	device.setDeviceSetValue(state.getBri());
+	        	device.setDeviceState(state.isOn());
+	        }
 	        return responseString;
 	    });
     }

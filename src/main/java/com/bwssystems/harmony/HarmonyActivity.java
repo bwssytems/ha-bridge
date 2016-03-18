@@ -1,5 +1,7 @@
 package com.bwssystems.harmony;
 
+import java.io.UnsupportedEncodingException;
+
 import net.whistlingfish.harmony.config.Activity;
 
 public class HarmonyActivity {
@@ -15,6 +17,14 @@ public class HarmonyActivity {
 		return activity;
 	}
 	public void setActivity(Activity activity) {
+		byte ptext[];
+		String theLabel = activity.getLabel();
+		try {
+			ptext = theLabel.getBytes("ISO-8859-1");
+			activity.setLabel(new String(ptext, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			activity.setLabel(theLabel);
+		} 
 		this.activity = activity;
 	}
 

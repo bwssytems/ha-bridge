@@ -1,5 +1,7 @@
 package com.bwssystems.NestBridge;
 
+import java.io.UnsupportedEncodingException;
+
 public class NestItem {
 	private String name;
 	private String id;
@@ -9,7 +11,14 @@ public class NestItem {
 		return name;
 	}
 	public void setName(String name) {
-		this.name = name;
+		byte ptext[];
+		String theLabel = new String(name);
+		try {
+			ptext = theLabel.getBytes("ISO-8859-1");
+			this.name = new String(ptext, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			this.name = theLabel;
+		}
 	}
 	public String getId() {
 		return id;

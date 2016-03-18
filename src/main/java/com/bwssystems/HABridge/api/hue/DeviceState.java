@@ -6,7 +6,7 @@ package com.bwssystems.HABridge.api.hue;
  */
 public class DeviceState {
     private boolean on;
-    private int bri = 255;
+    private int bri = 0;
     private String effect;
     private String alert;
     private boolean reachable;

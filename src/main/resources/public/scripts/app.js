@@ -47,27 +47,25 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
 
 	this.displayWarn = function(errorTitle, error) {
-		if(error == null || typeof(error) != 'undefined') {
-			error = {status: 200, statusText: "OK", data: []};
-			error.data = {message: "success"};
-		}
+		var toastContent = errorTitle;
+		if(error != null && typeof(error) != 'undefined')
+			toastContent = toastContent + " " + error.data.message + " with status: " + error.statusText + " - "  + error.status;
 		ngToast.create({
 			className: "warning",
 			dismissButton: true,
 			dismissOnTimeout: false,
-			content: errorTitle + error.data.message + " with status: " + error.statusText + " - "  + error.status});
+			content: toastContent});
 	};
 	
 	this.displayError = function(errorTitle, error) {
-		if(error == null || typeof(error) != 'undefined') {
-			error = {status: 200, statusText: "OK", data: []};
-			error.data = {message: "success"};
-		}
+		var toastContent = errorTitle;
+		if(error != null && typeof(error) != 'undefined')
+			toastContent = toastContent + " " + error.data.message + " with status: " + error.statusText + " - "  + error.status;
 		ngToast.create({
 			className: "danger",
 			dismissButton: true,
 			dismissOnTimeout: false,
-			content: errorTitle + error.data.message + " with status: " + error.statusText + " - "  + error.status});
+			content: toastContent});
 	};
 	
 	this.displayErrorMessage = function(errorTitle, errorMessage) {
@@ -101,6 +99,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		self.state.device.mapId = null;
 		self.state.device.name = "";
 		self.state.device.onUrl = "";
+		self.state.device.dimUrl = "";
 		self.state.device.deviceType = "custom";
 		self.state.device.targetDevice = null;
 		self.state.device.offUrl = "";
@@ -108,7 +107,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		self.state.device.contentType = null;
 		self.state.device.contentBody = null;
 		self.state.device.contentBodyOff = null;
-		self.state.bridge.olddevicename = "";
+		self.state.olddevicename = "";
 	};
 
 	this.getHABridgeVersion = function () {
@@ -303,27 +302,16 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		);
 	};
 
-	this.addDevice = function (device) {
+	this.addDevice = function (aDevice) {
+		var device = {};
+		angular.extend(device, aDevice );
 		if(device.httpVerb != null && device.httpVerb != "")
 			device.deviceType = "custom";
 		if(device.targetDevice == null || device.targetDevice == "")
 			device.targetDevice = "Encapsulated";
 		if (device.id) {
 			var putUrl = this.state.base + "/" + device.id;
-			return $http.put(putUrl, {
-				id: device.id,
-				name: device.name,
-				mapId: device.mapId,
-				mapType: device.mapType,
-				deviceType: device.deviceType,
-				targetDevice: device.targetDevice,
-				onUrl: device.onUrl,
-				offUrl: device.offUrl,
-				httpVerb: device.httpVerb,
-				contentType: device.contentType,
-				contentBody: device.contentBody,
-				contentBodyOff: device.contentBodyOff
-			}).then(
+			return $http.put(putUrl, device).then(
 					function (response) {
 					},
 					function (error) {
@@ -333,19 +321,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		} else {
 			if(device.deviceType == null || device.deviceType == "")
 				device.deviceType = "custom";
-			return $http.post(this.state.base, {
-				name: device.name,
-				mapId: device.mapId,
-				mapType: device.mapType,
-				deviceType: device.deviceType,
-				targetDevice: device.targetDevice,
-				onUrl: device.onUrl,
-				offUrl: device.offUrl,
-				httpVerb: device.httpVerb,
-				contentType: device.contentType,
-				contentBody: device.contentBody,
-				contentBodyOff: device.contentBodyOff
-			}).then(
+			return $http.post(this.state.base, device).then(
 					function (response) {
 					},
 					function (error) {
@@ -523,11 +499,11 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		var msgDescription = "unknown";
 		var testUrl = this.state.huebase + "/test/lights/" + device.id + "/state";
 		var testBody = "{\"on\":";
-		if(type == "on") {
-			testBody = testBody + "true";
+		if(type == "off") {
+			testBody = testBody + "false";
 		}
 		else {
-			testBody = testBody + "false";
+			testBody = testBody + "true";
 		}
 		if(value) {
 			testBody = testBody + ",\"bri\":" + value;
@@ -683,12 +659,15 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 	$scope.imgBkUrl = "glyphicon glyphicon-plus";
 	$scope.testUrl = function (device, type) {
 		var dialogNeeded = false;
-		if((type == "on" && (bridgeService.aContainsB(device.onUrl, "${intensity..byte}") ||
+		if((type == "on" && (bridgeService.aContainsB(device.onUrl, "${intensity.byte}") ||
 				bridgeService.aContainsB(device.onUrl, "${intensity.percent}") ||
 				bridgeService.aContainsB(device.onUrl, "${intensity.math("))) ||
-				(type == "off" && (bridgeService.aContainsB(device.offUrl, "${intensity..byte}") ||
+				(type == "off" && (bridgeService.aContainsB(device.offUrl, "${intensity.byte}") ||
 				bridgeService.aContainsB(device.offUrl, "${intensity.percent}") ||
-				bridgeService.aContainsB(device.offUrl, "${intensity.math(")))) {
+				bridgeService.aContainsB(device.offUrl, "${intensity.math(")))   ||
+				(type == "dim" && (bridgeService.aContainsB(device.dimUrl, "${intensity.byte}") ||
+						bridgeService.aContainsB(device.dimUrl, "${intensity.percent}") ||
+						bridgeService.aContainsB(device.dimUrl, "${intensity.math(")))) {
 			$scope.bridge.device = device;
 			$scope.bridge.type = type;
 			ngDialog.open({
@@ -792,15 +771,18 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 		$scope.device.mapType = "veraDevice";
 		$scope.device.mapId = veradevice.id;
 		if(dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)
-			$scope.device.onUrl = "http://" + veradevice.veraaddress + ":" + $scope.vera.port
+			$scope.device.dimUrl = "http://" + veradevice.veraaddress + ":" + $scope.vera.port
 			+ "/data_request?id=action&output_format=json&DeviceNum="
 			+ veradevice.id
 			+ "&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget="
 			+ dim_control;
 		else
-			$scope.device.onUrl = "http://" + veradevice.veraaddress + ":" + $scope.vera.port
+			$scope.device.dimUrl = "http://" + veradevice.veraaddress + ":" + $scope.vera.port
 			+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
 			+ veradevice.id;
+		$scope.device.onUrl = "http://" + veradevice.veraaddress + ":" + $scope.vera.port
+		+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
+		+ veradevice.id;
 		$scope.device.offUrl = "http://" + veradevice.veraaddress + ":" + $scope.vera.port
 		+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum="
 		+ veradevice.id;
@@ -999,8 +981,8 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		$scope.device.targetDevice = nestitem.location;
 		$scope.device.mapType = "nestThermoSet";
 		$scope.device.mapId = nestitem.id + "-SetTemp";
-		$scope.device.onUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"temp\",\"temp\":\"${intensity.percent}\"}";
-		$scope.device.offUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"temp\",\"temp\":\"${intensity.percent}\"}";
+		$scope.device.dimUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"temp\",\"temp\":\"${intensity.percent}\"}";
+		$scope.device.offUrl = "{\"name\":\"" + nestitem.id + "\",\"control\":\"off\"}";
 	};
 
 	$scope.buildNestHeatUrls = function (nestitem) {
@@ -1090,7 +1072,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 	$scope.device_dim_control = "";
 	$scope.bulk = { devices: [] };
 	var veraList = angular.fromJson($scope.bridge.settings.veraaddress);
-	if(veraList != null)
+	if(veraList != null && veraList.length > 0)
 		$scope.vera = {base: "http://" + veraList.devices[0].ip, port: "3480", id: ""};
 	else
 		$scope.vera = {base: "http://", port: "3480", id: ""};
@@ -1110,15 +1092,18 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 		$scope.device.mapType = "veraDevice";
 		$scope.device.mapId = $scope.vera.id;
 		if(dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)
-			$scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
+			$scope.device.dimUrl = $scope.vera.base + ":" + $scope.vera.port
 			+ "/data_request?id=action&output_format=json&DeviceNum="
 			+ $scope.vera.id
 			+ "&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget="
 			+ dim_control;
 		else
-			$scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
+			$scope.device.dimUrl = $scope.vera.base + ":" + $scope.vera.port
 			+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
 			+ $scope.vera.id;
+		$scope.device.onUrl = $scope.vera.base + ":" + $scope.vera.port
+		+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
+		+ $scope.vera.id;
 		$scope.device.offUrl = $scope.vera.base + ":" + $scope.vera.port
 		+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum="
 		+ $scope.vera.id;

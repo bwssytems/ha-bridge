@@ -2,7 +2,6 @@ package com.bwssystems.HABridge.dao;
 
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,22 +17,26 @@ import org.slf4j.LoggerFactory;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.util.BackupHandler;
 import com.bwssystems.util.JsonTransformer;
-import com.google.gson.stream.JsonReader;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.List;
-import java.util.ListIterator;
 /*
  * This is an in memory list to manage the configured devices and saves the list as a JSON string to a file for later  
  * loading.
  */
 public class DeviceRepository extends BackupHandler {
-	Map<String, DeviceDescriptor> devices;
-    Path repositoryPath;
-    final Random random = new Random();
-    final Logger log = LoggerFactory.getLogger(DeviceRepository.class);
+	private Map<String, DeviceDescriptor> devices;
+    private Path repositoryPath;
+	private Gson gson;
+    final private Random random = new Random();
+    private Logger log = LoggerFactory.getLogger(DeviceRepository.class);
 	
     public DeviceRepository(String deviceDb) {
 		super();
+		gson =
+                new GsonBuilder()
+                .create();
 		repositoryPath = null;
 		repositoryPath = Paths.get(deviceDb);
 		setupParams(repositoryPath, ".bk", "device.db-");
@@ -50,15 +53,11 @@ public class DeviceRepository extends BackupHandler {
 		
 		if(jsonContent != null)
 		{
-			List<DeviceDescriptor> list = readJsonStream(jsonContent);
-			ListIterator<DeviceDescriptor> theIterator = list.listIterator();
-			DeviceDescriptor theDevice = null;
-			while (theIterator.hasNext()) {
-				theDevice = theIterator.next();
-				put(theDevice.getId(), theDevice);
+			DeviceDescriptor list[] = gson.fromJson(jsonContent, DeviceDescriptor[].class);
+			for(int i = 0; i < list.length; i++) {
+				put(list[i].getId(), list[i]);
 			}
-		}
-    	
+		}    	
     }
     
 	public List<DeviceDescriptor> findAll() {
@@ -89,8 +88,7 @@ public class DeviceRepository extends BackupHandler {
 	        put(descriptors[i].getId(), descriptors[i]);
 	        theNames = theNames + " " + descriptors[i].getName() + ", ";
 		}
-    	JsonTransformer aRenderer = new JsonTransformer();
-    	String  jsonValue = aRenderer.render(findAll());
+    	String  jsonValue = gson.toJson(findAll());
         repositoryWriter(jsonValue, repositoryPath);
         log.debug("Save device(s): " + theNames);
     }
@@ -152,83 +150,5 @@ public class DeviceRepository extends BackupHandler {
 		}
 		
 		return content;
-	}
-
-	private List<DeviceDescriptor> readJsonStream(String context) {
-		JsonReader reader = new JsonReader(new StringReader(context));
-		List<DeviceDescriptor> theDescriptors = null;
-		try {
-			theDescriptors = readDescriptorArray(reader);
-		} catch (IOException e) {
-			log.error("Error reading json array: " + context + " message: " + e.getMessage(), e);
-		} finally {
-			try {
-				reader.close();
-			} catch  (IOException e) {
-				log.error("Error closing json reader: " + context + " message: " + e.getMessage(), e);
-			}
-		}
-		return theDescriptors;
-	}
-
-	public List<DeviceDescriptor> readDescriptorArray(JsonReader reader) throws IOException {
-		List<DeviceDescriptor> descriptors = new ArrayList<DeviceDescriptor>();
-
-		reader.beginArray();
-		while (reader.hasNext()) {
-			descriptors.add(readDescriptor(reader));
-		}
-		reader.endArray();
-		return descriptors;
-	}
-
-	public DeviceDescriptor readDescriptor(JsonReader reader) throws IOException {
-        DeviceDescriptor deviceEntry = new DeviceDescriptor();
-
-		reader.beginObject();
-		while (reader.hasNext()) {
-		       String name = reader.nextName();
-		       if (name.equals("id")) {
-			        deviceEntry.setId(reader.nextString());
-			    	log.debug("Read a Device - device json id: " + deviceEntry.getId());
-		       } else if (name.equals("name")) {
-			        deviceEntry.setName(reader.nextString());
-			    	log.debug("Read a Device - device json name: " + deviceEntry.getName());
-		       } else if (name.equals("mapType")) {
-			        deviceEntry.setMapType(reader.nextString());
-			    	log.debug("Read a Device - device json name: " + deviceEntry.getMapType());
-		       } else if (name.equals("mapId")) {
-			        deviceEntry.setMapId(reader.nextString());
-			    	log.debug("Read a Device - device json name: " + deviceEntry.getMapId());
-		       } else if (name.equals("deviceType")) {
-			        deviceEntry.setDeviceType(reader.nextString());
-			    	log.debug("Read a Device - device json type:" + deviceEntry.getDeviceType());
-		       } else if (name.equals("targetDevice")) {
-			        deviceEntry.setTargetDevice(reader.nextString());
-			    	log.debug("Read a Device - device json type:" + deviceEntry.getTargetDevice());
-		       } else if (name.equals("offUrl")) {
-			        deviceEntry.setOffUrl(reader.nextString());
-			    	log.debug("Read a Device - device json off URL:" + deviceEntry.getOffUrl());
-		       } else if (name.equals("onUrl")) {
-			        deviceEntry.setOnUrl(reader.nextString());
-			    	log.debug("Read a Device - device json on URL:" + deviceEntry.getOnUrl());
-		       } else if (name.equals("httpVerb")) {
-			        deviceEntry.setHttpVerb(reader.nextString());
-			    	log.debug("Read a Device - device json httpVerb:" + deviceEntry.getHttpVerb());
-		       } else if (name.equals("contentType")) {
-			        deviceEntry.setContentType(reader.nextString());
-			    	log.debug("Read a Device - device json contentType:" + deviceEntry.getContentType());
-		       } else if (name.equals("contentBody")) {
-			        deviceEntry.setContentBody(reader.nextString());
-			    	log.debug("Read a Device - device json contentBody:" + deviceEntry.getContentBody());
-			   } else if (name.equals("contentBodyOff")) {
-			        deviceEntry.setContentBodyOff(reader.nextString());
-			    	log.debug("Read a Device - device json contentBodyOff:" + deviceEntry.getContentBodyOff());
-		       } else {
-		         reader.skipValue();
-		       }
-		}
-		reader.endObject();
-		return deviceEntry;
 	}
 }
