@@ -240,7 +240,7 @@ public class SystemControl {
         	}
         	else
         		log.warn("No filename given for restore backup.");
-	        return null;
+	        return bridgeSettings.getBridgeSettingsDescriptor();
 	    }, new JsonTransformer());
     }
     

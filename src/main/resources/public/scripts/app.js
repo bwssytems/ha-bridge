@@ -450,6 +450,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 			filename: afilename
 		}).then(
 				function (response) {
+					self.state.settings = response.data;
 					self.viewConfigs();
 					self.viewDevices();
 				},
@@ -765,6 +766,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 	};
 
 	$scope.buildDeviceUrls = function (veradevice, dim_control) {
+		bridgeService.clearDevice();
 		$scope.device.deviceType = "switch";
 		$scope.device.name = veradevice.name;
 		$scope.device.targetDevice = veradevice.veraname;
@@ -789,6 +791,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 	};
 
 	$scope.buildSceneUrls = function (verascene) {
+		bridgeService.clearDevice();
 		$scope.device.deviceType = "scene";
 		$scope.device.name = verascene.name;
 		$scope.device.targetDevice = verascene.veraname;
@@ -813,6 +816,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 					bridgeService.viewVeraScenes();
 				},
 				function (error) {
+					bridgeService.displayWarn("Error adding device: " + $scope.device.name, error)
 				}
 		);
 
@@ -892,6 +896,7 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 	};
 
 	$scope.buildActivityUrls = function (harmonyactivity) {
+		bridgeService.clearDevice();
 		$scope.device.deviceType = "activity";
 		$scope.device.targetDevice = harmonyactivity.hub;
 		$scope.device.name = harmonyactivity.activity.label;
@@ -902,6 +907,7 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 	};
 
 	$scope.buildButtonUrls = function (harmonydevice, onbutton, offbutton) {
+		bridgeService.clearDevice();
 		var currentOn = $scope.device.onUrl;
 		var currentOff = $scope.device.offUrl;
 		var actionOn = angular.fromJson(onbutton);
@@ -966,6 +972,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 	};
 
 	$scope.buildNestHomeUrls = function (nestitem) {
+		bridgeService.clearDevice();
 		$scope.device.deviceType = "home";
 		$scope.device.name = nestitem.name;
 		$scope.device.targetDevice = nestitem.name;
@@ -976,6 +983,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 	};
 
 	$scope.buildNestTempUrls = function (nestitem) {
+		bridgeService.clearDevice();
 		$scope.device.deviceType = "thermo";
 		$scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Temperature";
 		$scope.device.targetDevice = nestitem.location;
@@ -986,6 +994,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 	};
 
 	$scope.buildNestHeatUrls = function (nestitem) {
+		bridgeService.clearDevice();
 		$scope.device.deviceType = "thermo";
 		$scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Heat";
 		$scope.device.targetDevice = nestitem.location;
@@ -996,6 +1005,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 	};
 
 	$scope.buildNestCoolUrls = function (nestitem) {
+		bridgeService.clearDevice();
 		$scope.device.deviceType = "thermo";
 		$scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Cool";
 		$scope.device.targetDevice = nestitem.location;
@@ -1006,6 +1016,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 	};
 
 	$scope.buildNestRangeUrls = function (nestitem) {
+		bridgeService.clearDevice();
 		$scope.device.deviceType = "thermo";
 		$scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Range";
 		$scope.device.targetDevice = nestitem.location;
@@ -1016,6 +1027,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 	};
 
 	$scope.buildNestOffUrls = function (nestitem) {
+		bridgeService.clearDevice();
 		$scope.device.deviceType = "thermo";
 		$scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Thermostat";
 		$scope.device.targetDevice = nestitem.location;
@@ -1026,6 +1038,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 	};
 
 	$scope.buildNestFanUrls = function (nestitem) {
+		bridgeService.clearDevice();
 		$scope.device.deviceType = "thermo";
 		$scope.device.name = nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Fan";
 		$scope.device.targetDevice = nestitem.location;
@@ -1072,7 +1085,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 	$scope.device_dim_control = "";
 	$scope.bulk = { devices: [] };
 	var veraList = angular.fromJson($scope.bridge.settings.veraaddress);
-	if(veraList != null && veraList.length > 0)
+	if(veraList != null && veraList.devices.length > 0)
 		$scope.vera = {base: "http://" + veraList.devices[0].ip, port: "3480", id: ""};
 	else
 		$scope.vera = {base: "http://", port: "3480", id: ""};
@@ -1084,9 +1097,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 	};
 
 	$scope.buildUrlsUsingDevice = function (dim_control) {
-		if ($scope.vera.base.indexOf("http") < 0) {
-			$scope.vera.base = "http://" + $scope.vera.base;
-		}
+		bridgeService.clearDevice();
 		$scope.device.deviceType = "switch";
 		$scope.device.targetDevice = "Encapsulated";
 		$scope.device.mapType = "veraDevice";
@@ -1110,9 +1121,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 	};
 
 	$scope.buildUrlsUsingScene = function () {
-		if ($scope.vera.base.indexOf("http") < 0) {
-			$scope.vera.base = "http://" + $scope.vera.base;
-		}
+		bridgeService.clearDevice();
 		$scope.device.deviceType = "scene";
 		$scope.device.targetDevice = "Encapsulated";
 		$scope.device.mapType = "veraScene";

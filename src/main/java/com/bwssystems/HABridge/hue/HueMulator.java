@@ -256,6 +256,61 @@ public class HueMulator {
 	        return lightResponse;
 	    }, new JsonTransformer()); 
 
+	    // http://ip_address:port/api/:userid/lights/:id/bridgeupdatestate CORS request
+	    options(HUE_CONTEXT + "/:userid/lights/:id/bridgeupdatestate", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+	    // http://ip_address:port/api/{userId}/lights/{lightId}/bridgeupdatestate uses json object to update the internal bridge lights state.
+	    // THIS IS NOT A HUE API CALL... It is for state management if so desired.
+	    put(HUE_CONTEXT + "/:userid/lights/:id/bridgeupdatestate", "application/json", (request, response) -> {
+	    	String userId = request.params(":userid");
+	    	String lightId = request.params(":id");
+	        String responseString = null;
+	        DeviceState state = null;
+	        log.debug("Update state requested: " + userId + " from " + request.ip() + " body: " + request.body());
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.type("application/json; charset=utf-8"); 
+	        response.status(HttpStatus.SC_OK);
+	        try {
+	            state = mapper.readValue(request.body(), DeviceState.class);
+	        } catch (IOException e) {
+	        	log.warn("Object mapper barfed on input of body.", e);
+        		responseString = "[{\"error\":{\"type\": 2, \"address\": \"/lights/" + lightId + "\",\"description\": \"Object mapper barfed on input of body.\"}}]";
+    	        return responseString;
+	        }
+	        DeviceDescriptor device = repository.findOne(lightId);
+	        if (device == null) {
+	        	log.warn("Could not find device: " + lightId + " for hue state change request: " + userId + " from " + request.ip() + " body: " + request.body());
+        		responseString = "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId + "\",\"description\": \"Could not find device\", \"resource\": \"/lights/" + lightId + "\"}}]";
+    	        return responseString;
+	        }
+	
+	        responseString = "[{\"success\":{\"/lights/" + lightId + "/state/on\":";
+	        if(request.body().contains("bri"))
+	        {
+	        	responseString = responseString + "true}},{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri() + "}}]";
+	        }
+	        else
+	        {
+		        if (state.isOn()) {
+		            responseString = responseString + "true}}]";
+		            state.setBri(255);
+		        } else if (request.body().contains("false")) {
+		            responseString = responseString + "false}}]";
+		            state.setBri(0);
+		        }
+	        }
+        	device.setDeviceSetValue(state.getBri());
+        	device.setDeviceState(state.isOn());
+	    	
+	        return responseString;
+	    });
+	    
 	    // http://ip_address:port/api/:userid/lights/:id/state CORS request
 	    options(HUE_CONTEXT + "/:userid/lights/:id/state", "application/json", (request, response) -> {
 	        response.status(HttpStatus.SC_OK);

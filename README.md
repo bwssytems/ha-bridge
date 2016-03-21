@@ -531,6 +531,30 @@ A response to a successful PUT request contains confirmation of the arguments pa
 	{"success":{"/lights/1/state/on":true}},
 ]
 ```
+### Update bridge internal light state
+Allows the user to set the internal state of the light on and off, modify the brightness. This is not a HUE API call and is special to the bridge as it keeps track of the state changes to the light from the api. It is intended to allow you to sync the bridge state with your HA system state.
+```
+PUT	http://host:port/api/<username>/lights/<id>/bridgeupdatestate
+```
+#### Body arguments
+Name |	Type |	Description	 
+-----|-------|-------------
+on |	bool |	On/Off state of the light. On=true, Off=false. Optional
+bri |	uint8 |	The brightness value to set the light to. Brightness is a scale from 1 (the minimum the light is capable of) to 254 (the maximum). Note: a brightness of 1 is not off. e.g. "brightness": 60 will set the light to a specific brightness. Optional
+```
+{
+	"on": true,
+	"bri": 200
+}
+```
+#### Response
+A response to a successful PUT request contains confirmation of the arguments passed in. Note: If the new value is too large to return in the response due to internal memory constraints then a value of "Updated." is returned.
+```
+[
+	{"success":{"/lights/1/state/bri":200}},
+	{"success":{"/lights/1/state/on":true}},
+]
+```
 ### Create user
 Emulates creating a new user. The link button state on the HA Bridge is always on for the purpose of responding to this request. No actual user is saved as this is for compatibility.
 ```

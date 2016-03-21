@@ -36,6 +36,7 @@ public class DeviceRepository extends BackupHandler {
 		super();
 		gson =
                 new GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
                 .create();
 		repositoryPath = null;
 		repositoryPath = Paths.get(deviceDb);
@@ -81,7 +82,7 @@ public class DeviceRepository extends BackupHandler {
 	public void save(DeviceDescriptor[] descriptors) {
 		String theNames = "";
 		for(int i = 0; i < descriptors.length; i++) {
-	        if(descriptors[i].getId() != null)
+	        if(descriptors[i].getId() != null && descriptors[i].getId().length() > 0)
 	        	devices.remove(descriptors[i].getId());
 	        else
 	        	descriptors[i].setId(String.valueOf(random.nextInt(Integer.MAX_VALUE)));
