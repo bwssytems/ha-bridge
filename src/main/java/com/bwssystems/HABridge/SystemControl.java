@@ -21,7 +21,7 @@ import com.bwssystems.HABridge.dao.BackupFilename;
 import com.bwssystems.logservices.LoggerInfo;
 import com.bwssystems.logservices.LoggingForm;
 import com.bwssystems.logservices.LoggingManager;
-import com.bwssystems.util.JsonFreeTextStringFormatter;
+import com.bwssystems.util.TextStringFormatter;
 import com.bwssystems.util.JsonTransformer;
 import com.google.gson.Gson;
 
@@ -82,7 +82,7 @@ public class SystemControl {
 				LoggingEvent le;
 				for (int i = 0; i < count; i++) {
 					le = (LoggingEvent) cyclicBufferAppender.get(i);
-					logMsgs = logMsgs + ( i > 0?",{":"{") + "\"time\":\"" + dateFormat.format(le.getTimeStamp()) + "\",\"level\":\"" + le.getLevel().levelStr + "\",\"component\":\"" + le.getLoggerName() + "\",\"message\":\"" + JsonFreeTextStringFormatter.forJSON(le.getFormattedMessage()) + "\"}";
+					logMsgs = logMsgs + ( i > 0?",{":"{") + "\"time\":\"" + dateFormat.format(le.getTimeStamp()) + "\",\"level\":\"" + le.getLevel().levelStr + "\",\"component\":\"" + le.getLoggerName() + "\",\"message\":\"" + TextStringFormatter.forJSON(le.getFormattedMessage()) + "\"}";
 				}
 		    }
 		    logMsgs = logMsgs + "]";

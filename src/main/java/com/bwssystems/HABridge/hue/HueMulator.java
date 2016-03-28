@@ -14,6 +14,7 @@ import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.harmony.RunActivity;
 import com.bwssystems.nest.controller.Nest;
 import com.bwssystems.util.JsonTransformer;
+import com.bwssystems.util.TextStringFormatter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -564,8 +565,9 @@ public class HueMulator {
 
 
 //	This function executes the url from the device repository against the vera
-    protected boolean doHttpRequest(String url, String httpVerb, String contentType, String body) {
+    protected boolean doHttpRequest(String anUrl, String httpVerb, String contentType, String body) {
         HttpUriRequest request = null;
+        String url = TextStringFormatter.forURL(anUrl);
         if(HttpGet.METHOD_NAME.equalsIgnoreCase(httpVerb) || httpVerb == null) {
             request = new HttpGet(url);
         }else if(HttpPost.METHOD_NAME.equalsIgnoreCase(httpVerb)){
@@ -586,7 +588,7 @@ public class HueMulator {
             HttpResponse response = httpClient.execute(request);
             EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
             log.debug((httpVerb == null?"GET":httpVerb) + " execute on URL responded: " + response.getStatusLine().getStatusCode());
-            if(response.getStatusLine().getStatusCode() == 200){
+            if(response.getStatusLine().getStatusCode() >= 200  && response.getStatusLine().getStatusCode() < 300){
                 return true;
             }
         } catch (IOException e) {
