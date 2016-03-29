@@ -218,6 +218,9 @@ public final class TextStringFormatter {
 		return aURL.replace("&", "&amp;");
 	}
 
+	public static String forQuerySpace(String aURL) {
+		return aURL.replace(" ", "\u0020");
+	}
 	/**
 	 * Synonym for <tt>URLEncoder.encode(String, "UTF-8")</tt>.
 	 * 

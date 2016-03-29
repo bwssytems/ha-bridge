@@ -14,7 +14,6 @@ import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.harmony.RunActivity;
 import com.bwssystems.nest.controller.Nest;
 import com.bwssystems.util.JsonTransformer;
-import com.bwssystems.util.TextStringFormatter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -565,23 +564,27 @@ public class HueMulator {
 
 
 //	This function executes the url from the device repository against the vera
-    protected boolean doHttpRequest(String anUrl, String httpVerb, String contentType, String body) {
+    protected boolean doHttpRequest(String url, String httpVerb, String contentType, String body) {
         HttpUriRequest request = null;
-        String url = TextStringFormatter.forURL(anUrl);
-        if(HttpGet.METHOD_NAME.equalsIgnoreCase(httpVerb) || httpVerb == null) {
-            request = new HttpGet(url);
-        }else if(HttpPost.METHOD_NAME.equalsIgnoreCase(httpVerb)){
-            HttpPost postRequest = new HttpPost(url);
-            ContentType parsedContentType = ContentType.parse(contentType);
-            StringEntity requestBody = new StringEntity(body, parsedContentType);
-            postRequest.setEntity(requestBody);
-            request = postRequest;
-        }else if(HttpPut.METHOD_NAME.equalsIgnoreCase(httpVerb)){
-            HttpPut putRequest = new HttpPut(url);
-            ContentType parsedContentType = ContentType.parse(contentType);
-            StringEntity requestBody = new StringEntity(body, parsedContentType);
-            putRequest.setEntity(requestBody);
-            request = putRequest;
+        try {
+	        if(HttpGet.METHOD_NAME.equalsIgnoreCase(httpVerb) || httpVerb == null) {
+	            request = new HttpGet(url);
+	        }else if(HttpPost.METHOD_NAME.equalsIgnoreCase(httpVerb)){
+	            HttpPost postRequest = new HttpPost(url);
+	            ContentType parsedContentType = ContentType.parse(contentType);
+	            StringEntity requestBody = new StringEntity(body, parsedContentType);
+	            postRequest.setEntity(requestBody);
+	            request = postRequest;
+	        }else if(HttpPut.METHOD_NAME.equalsIgnoreCase(httpVerb)){
+	            HttpPut putRequest = new HttpPut(url);
+	            ContentType parsedContentType = ContentType.parse(contentType);
+	            StringEntity requestBody = new StringEntity(body, parsedContentType);
+	            putRequest.setEntity(requestBody);
+	            request = putRequest;
+	        }
+        } catch(IllegalArgumentException e) {
+        	log.warn("Error calling out to HA gateway: IllegalArgumentException in log", e);
+            return false;        	
         }
         log.debug("Making outbound call in doHttpRequest: " + request);
         try {
@@ -592,7 +595,7 @@ public class HueMulator {
                 return true;
             }
         } catch (IOException e) {
-        	log.warn("Error calling out to HA gateway", e);
+        	log.warn("Error calling out to HA gateway: IOException in log", e);
         }
         return false;
     }
