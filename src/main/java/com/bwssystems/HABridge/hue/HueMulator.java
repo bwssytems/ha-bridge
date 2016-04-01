@@ -289,24 +289,9 @@ public class HueMulator {
         		responseString = "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId + "\",\"description\": \"Could not find device\", \"resource\": \"/lights/" + lightId + "\"}}]";
     	        return responseString;
 	        }
-	
-	        responseString = "[{\"success\":{\"/lights/" + lightId + "/state/on\":";
-	        if(request.body().contains("bri"))
-	        {
-	        	responseString = responseString + "true}},{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri() + "}}]";
-	        }
-	        else
-	        {
-		        if (state.isOn()) {
-		            responseString = responseString + "true}}]";
-		            state.setBri(255);
-		        } else if (request.body().contains("false")) {
-		            responseString = responseString + "false}}]";
-		            state.setBri(0);
-		        }
-	        }
-        	device.setDeviceSetValue(state.getBri());
-        	device.setDeviceState(state.isOn());
+	        
+	        responseString = this.formatSuccessHueResponse(state, request.body(), lightId);
+        	device.setDeviceState(state);
 	    	
 	        return responseString;
 	    });
@@ -351,28 +336,6 @@ public class HueMulator {
     	        return responseString;
 	        }
 	
-	        responseString = "[{\"success\":{\"/lights/" + lightId + "/state/on\":";
-	        if(request.body().contains("bri"))
-	        {
-        		url = device.getDimUrl();
-
-	        	if(url == null || url.length() == 0)
-		            url = device.getOnUrl();
-
-	        	responseString = responseString + "true}},{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri() + "}}]";
-	        }
-	        else
-	        {
-		        if (state.isOn()) {
-		            responseString = responseString + "true}}]";
-		            url = device.getOnUrl();
-		            state.setBri(255);
-		        } else if (request.body().contains("false")) {
-		            responseString = responseString + "false}}]";
-		            url = device.getOffUrl();
-		            state.setBri(0);
-		        }
-	        }
 
 	        if (url == null) {
 	        	log.warn("Could not find url: " + lightId + " for hue state change request: " + userId + " from " + request.ip() + " body: " + request.body());
@@ -380,6 +343,8 @@ public class HueMulator {
     	        return responseString;
 	        }
 
+	        responseString = this.formatSuccessHueResponse(state, request.body(), lightId);
+	        
 	        if(device.getDeviceType().toLowerCase().contains("activity") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("harmonyActivity")))
 	        {
 	        	log.debug("executing HUE api request to change activity to Harmony: " + url);
@@ -518,8 +483,7 @@ public class HueMulator {
 	        }
 	        
 	        if(!responseString.contains("[{\"error\":")) {
-	        	device.setDeviceSetValue(state.getBri());
-	        	device.setDeviceState(state.isOn());
+	        	device.setDeviceState(state);
 	        }
 	        return responseString;
 	    });
@@ -598,5 +562,74 @@ public class HueMulator {
         	log.warn("Error calling out to HA gateway: IOException in log", e);
         }
         return false;
+    }
+    
+    private String formatSuccessHueResponse(DeviceState state, String body, String lightId) {
+    	
+        String responseString = "[{\"success\":{\"/lights/" + lightId + "/state/on\":";
+        boolean justState = true;
+        if(body.contains("bri"))
+        {
+        	if(justState)
+        		responseString = responseString + "true}}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri() + "}}";
+        	justState = false;
+        }
+        
+        if(body.contains("ct"))
+        {
+        	if(justState)
+        		responseString = responseString + "true}}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/ct\":" + state.getCt() + "}}";
+        	justState = false;
+        }
+        
+        if(body.contains("xy"))
+        {
+        	if(justState)
+        		responseString = responseString + "true}}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/xy\":" + state.getXy() + "}}";
+        	justState = false;
+        }
+        
+        if(body.contains("hue"))
+        {
+        	if(justState)
+        		responseString = responseString + "true}}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/hue\":" + state.getHue() + "}}";
+        	justState = false;
+        }
+        
+        if(body.contains("sat"))
+        {
+        	if(justState)
+        		responseString = responseString + "true}}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/sat\":" + state.getSat() + "}}";
+        	justState = false;
+        }
+        
+        if(body.contains("colormode"))
+        {
+        	if(justState)
+        		responseString = responseString + "true}}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/colormode\":" + state.getColormode() + "}}";
+        	justState = false;
+        }
+        
+        if(justState)
+        {
+	        if (state.isOn()) {
+	            responseString = responseString + "true}}]";
+	            state.setBri(255);
+	        } else if (body.contains("false")) {
+	            responseString = responseString + "false}}";
+	            state.setBri(0);
+	        }
+        }
+        
+        responseString = responseString + "]";
+        
+        return responseString;
+    	
     }
 }

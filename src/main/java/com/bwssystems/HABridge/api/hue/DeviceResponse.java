@@ -71,14 +71,8 @@ public class DeviceResponse {
     }
 
     public static DeviceResponse createResponse(DeviceDescriptor device){
-        DeviceState deviceState = new DeviceState();
         DeviceResponse response = new DeviceResponse();
-        response.setState(deviceState);
-        deviceState.setOn(device.getDeviceState());
-        deviceState.setReachable(true);
-        deviceState.setEffect("none");
-        deviceState.setAlert("none");
-        deviceState.setBri(device.getDeviceSetValue());
+        response.setState(device.getDeviceState());
 
         response.setName(device.getName());
         response.setUniqueid(device.getId());

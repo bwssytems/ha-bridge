@@ -1,5 +1,6 @@
 package com.bwssystems.HABridge.dao;
 
+import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -47,8 +48,7 @@ public class DeviceDescriptor{
     @Expose
     private String contentBodyOff;
 
-    private boolean deviceState;
-    private int deviceSetValue;
+    private DeviceState deviceState;
     
     public String getName() {
         return name;
@@ -154,21 +154,12 @@ public class DeviceDescriptor{
 		this.contentBodyOff = contentBodyOff;
 	}
 
-	public boolean getDeviceState() {
+	public DeviceState getDeviceState() {
 		return deviceState;
 	}
 
-	public void setDeviceState(boolean deviceState) {
+	public void setDeviceState(DeviceState deviceState) {
 		this.deviceState = deviceState;
 	}
-
-	public int getDeviceSetValue() {
-		return deviceSetValue;
-	}
-
-	public void setDeviceSetValue(int deviceSetValue) {
-		this.deviceSetValue = deviceSetValue;
-	}
-    
 
 }
