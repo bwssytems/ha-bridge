@@ -335,8 +335,25 @@ public class HueMulator {
         		responseString = "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId + "\",\"description\": \"Could not find device\", \"resource\": \"/lights/" + lightId + "\"}}]";
     	        return responseString;
 	        }
-	
 
+	        if(request.body().contains("bri"))
+	        {
+        		url = device.getDimUrl();
+
+	        	if(url == null || url.length() == 0)
+		            url = device.getOnUrl();
+	        }
+	        else
+	        {
+		        if (state.isOn()) {
+		            url = device.getOnUrl();
+		            state.setBri(255);
+		        } else if (request.body().contains("false")) {
+		            url = device.getOffUrl();
+		            state.setBri(0);
+		        }
+	        }
+	
 	        if (url == null) {
 	        	log.warn("Could not find url: " + lightId + " for hue state change request: " + userId + " from " + request.ip() + " body: " + request.body());
         		responseString = "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId + "\",\"description\": \"Could not find url\", \"resource\": \"/lights/" + lightId + "\"}}]";
