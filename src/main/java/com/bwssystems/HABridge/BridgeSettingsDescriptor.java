@@ -22,6 +22,8 @@ public class BridgeSettingsDescriptor {
 	private boolean farenheit;
 	private String configfile;
 	private Integer numberoflogmessages;
+	private IpList hueaddress;
+	private boolean hueconfigured;
 	
 	public BridgeSettingsDescriptor() {
 		super();
@@ -30,6 +32,7 @@ public class BridgeSettingsDescriptor {
 		this.nestconfigured = false;
 		this.veraconfigured = false;
 		this.harmonyconfigured = false;
+		this.hueconfigured = false;
 		this.farenheit = true;
 	}
 	public String getUpnpConfigAddress() {
@@ -152,6 +155,18 @@ public class BridgeSettingsDescriptor {
 	public void setFarenheit(boolean farenheit) {
 		this.farenheit = farenheit;
 	}
+	public IpList getHueaddress() {
+		return hueaddress;
+	}
+	public void setHueaddress(IpList hueaddress) {
+		this.hueaddress = hueaddress;
+	}
+	public boolean isHueconfigured() {
+		return hueconfigured;
+	}
+	public void setHueconfigured(boolean hueconfigured) {
+		this.hueconfigured = hueconfigured;
+	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
 			return false;
@@ -179,5 +194,12 @@ public class BridgeSettingsDescriptor {
 			return false;
 		return true;
 	}
-	
+	public Boolean isValidHue() {
+		if(this.getHueaddress() == null || this.getHueaddress().getDevices().size() <= 0)
+			return false;
+		List<NamedIP> devicesList = this.getHueaddress().getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+		return true;
+	}
 }

@@ -47,7 +47,7 @@ public class BridgeSettings extends BackupHandler {
         	if(Files.exists(filePath) && Files.isReadable(filePath))
         		configFileProperty = Configuration.CONFIG_FILE;
         }
-
+        String serverPortOverride = System.getProperty("server.port");
         if(configFileProperty != null)
         {
         	log.info("reading from config file: " + configFileProperty);
@@ -154,6 +154,8 @@ public class BridgeSettings extends BackupHandler {
         theBridgeSettings.setVeraconfigured(theBridgeSettings.isValidVera());
         theBridgeSettings.setHarmonyconfigured(theBridgeSettings.isValidHarmony());
         theBridgeSettings.setNestConfigured(theBridgeSettings.isValidNest());
+        if(serverPortOverride != null)
+        	theBridgeSettings.setServerPort(serverPortOverride);
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
 	}
 

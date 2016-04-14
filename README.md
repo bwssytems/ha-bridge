@@ -2,12 +2,18 @@
 Emulates Philips Hue api to other home automation gateways such as an Amazon Echo.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API. In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge and the Nest. Alternatively the Bridge supports custom calls as well.
 ## Build
 To customize and build it yourself, build a new jar with maven:  
+
+ATTENTION: This requires JDK 1.8 to build
+
 ```
 mvn install
 ```
 Otherwise, downloads are available at https://github.com/bwssytems/ha-bridge/releases.  
 ## Run
 Then locate the jar and start the server with:  
+
+ATTENTION: This requires JDK 1.8 to run
+
 ```
 java -jar ha-bridge-W.X.Y.jar
 ```
@@ -15,6 +21,8 @@ java -jar ha-bridge-W.X.Y.jar
 Arguments are now depecated. The ha-bridge will use the old -D arguments and populate the config screen which can now be saved to a file and will not be needed. There is only one optional argument that overides and that is the location of the config file. The default is the relative path "data/habridge.config".
 ### -Dconfig.file=`<filepath>`
 The default location for the config fileto contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify -Dconfig.file=`<directory>/<filename>` explicitly.
+### -Dserver.port=`<port number>`
+The default port number for the bridge is 8080. To override what the default or what is in the config file for this parameter, specify -Dserver.port=`<port number>` explicitly. This is especially helpful if you are running the ha-bridge for the first time and have another application on port 8080.
 ## HA Bridge Device Configuration
 You must configure devices before you will have any thing for the Echo to receive. The easy way to get devices configures is with the web interface by going to the url for the host you are running on or localhost with port you have assigned: and use the helpers for the Vera or Harmony Hub to create devices that the Echo will find.
 
