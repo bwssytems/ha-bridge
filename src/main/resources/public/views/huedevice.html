@@ -1,0 +1,120 @@
+      <ul class="nav nav-pills" role="tablist">
+        <li role="presentation"><a href="#">Bridge Devices</a></li>
+        <li role="presentation"><a href="#/system">Bridge Control</a></li>
+        <li role="presentation"><a href="#/logs">Logs</a></li>
+        <li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
+        <li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
+        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
+        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonydevices">Harmony Devices</a></li>
+        <li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
+        <li role="presentation" class="active"><a href="#/huedevices">Hue Devices</a></li>
+        <li role="presentation"><a href="#/editor">Manual Add</a></li>
+      </ul>
+
+<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
+	<div class="panel-heading">
+		<h2 class="panel-title">Hue Device List ({{bridge.huedevices.length}})</h2>
+	</div>
+	<ul class="list-group">
+		<li class="list-group-item">
+			<p class="text-muted">For any Hue Device, use the action buttons to generate the device addition information below automatically. 
+			Then you can modify the name to anything you want that will be the keyword for Alexa. Click the 'Add Bridge Device' to finish that selection setup.
+			The 'Already Configured Hue Devices' list below will show what is already setup for your Hue.</p>
+			<p>Use the check boxes by the names to use the bulk addition feature. Select your items, then click bulk add below.
+			Your items will be added with on and off or dim and off if selected with the name of the device from the Hue.
+			</p>
+        	<scrollable-table watch="bridge.huedevices">
+			<table class="table table-bordered table-striped table-hover">
+				<thead>
+					<tr>
+						<th>Row</th>
+						<th sortable-header col="name">Name</th>
+						<th sortable-header col="id">Id</th>
+						<th sortable-header col="huename">Hue</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tr ng-repeat="huedevice in bridge.huedevices | availableHueDeviceId">
+					<td>{{$index+1}}</td>
+					<td><input type="checkbox" name="bulk.devices[]" value="{{huedevice.id}}" ng-checked="bulk.devices.indexOf(huedevice.id) > -1" ng-click="toggleSelection(huedevice.id)"> {{huedevice.name}}</td>
+					<td>{{huedevice.uniqueid}}</td>
+					<td>{{huedevice.huename}}</td>
+					<td>
+						<button class="btn btn-success" type="submit"
+							ng-click="buildDeviceUrls(huedevice)">Generate
+							Device URLs</button>
+					</td>
+				</tr>
+			</table>
+        	</scrollable-table>
+			<p>
+				<button class="btn btn-success" type="submit"
+					ng-click="bulkHueDevices()">Bulk Add ({{bulk.devices.length}})</button>
+			</p>
+		</li>
+	</ul>
+	<div class="panel-heading">
+		<h2 class="panel-title">Already Configured Hue Devices <a ng-click="toggleButtons()"><span class={{imgButtonsUrl}} aria-hidden="true"></span></a></a></h2>
+	</div>
+	<ul ng-if="buttonsVisible" class="list-group">
+		<li class="list-group-item">
+        	<scrollable-table watch="bridge.huedevices">
+			<table class="table table-bordered table-striped table-hover">
+				<thead>
+					<tr>
+						<th>Row</th>
+						<th sortable-header col="name">Name</th>
+						<th sortable-header col="id">Id</th>
+						<th sortable-header col="huename">hue</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tr ng-repeat="huedevice in bridge.huedevices | unavailableHueDeviceId">
+					<td>{{$index+1}}</td>
+					<td>{{huedevice.name}}</td>
+					<td>{{huedevice.uniqueid}}</td>
+					<td>{{huedevice.huename}}</td>
+					<td>
+						<button class="btn btn-danger" type="submit"
+						ng-click="deleteDeviceByMapId(huedevice.uniqueid, 'hueDevice')">Delete</button>
+					</td>
+				</tr>
+			</table>
+        	</scrollable-table>
+		</li>
+	</ul>
+</div>
+<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
+	<div class="panel-heading">
+		<h2 class="panel-title">Add Bridge Device for a Hue Device</h2>
+	</div>
+	<ul class="list-group">
+		<li class="list-group-item">
+			<form class="form-horizontal">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 control-label" for="device-name">Name
+					</label>
+
+					<div class="col-xs-8 col-sm-7">
+						<input type="text" class="form-control" id="device-name"
+							ng-model="device.name" placeholder="Device Name">
+					</div>
+					<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary" ng-click="addDevice()">
+						 Add Bridge Device</button>
+				</div>
+				<div class="form-group">
+					<div class="row">
+					<label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On
+						URL </label>
+
+					<div class="col-xs-8 col-sm-7">
+						<textarea rows="3" class="form-control" id="device-on-url"
+							ng-model="device.onUrl" placeholder="URL to turn device on"></textarea>
+					</div>
+					<button class="btn btn-danger" ng-click="clearDevice()">
+						Clear Device</button>
+				</div>
+			</form>
+		</li>
+	</ul>
+</div>

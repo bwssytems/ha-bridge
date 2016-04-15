@@ -22,6 +22,7 @@ import com.bwssystems.HABridge.dao.DeviceRepository;
 import com.bwssystems.HABridge.dao.ErrorMessage;
 import com.bwssystems.NestBridge.NestHome;
 import com.bwssystems.harmony.HarmonyHome;
+import com.bwssystems.hue.HueHome;
 import com.bwssystems.luupRequests.Device;
 import com.bwssystems.luupRequests.Scene;
 import com.bwssystems.util.JsonTransformer;
@@ -38,6 +39,7 @@ public class DeviceResource {
     private VeraHome veraHome;
     private HarmonyHome myHarmonyHome;
     private NestHome nestHome;
+    private HueHome hueHome;
     private static final Set<String> supportedVerbs = new HashSet<>(Arrays.asList("get", "put", "post"));
 
 	public DeviceResource(BridgeSettingsDescriptor theSettings, HarmonyHome theHarmonyHome, NestHome aNestHome) {
@@ -57,6 +59,11 @@ public class DeviceResource {
 			this.nestHome = aNestHome;
 		else
 			this.nestHome = null;
+
+		if(theSettings.isValidHue())
+			this.hueHome = new HueHome(theSettings);
+		else
+			this.hueHome = null;
         setupEndpoints();
 	}
 
@@ -243,6 +250,16 @@ public class DeviceResource {
 	      	}
 	      	response.status(HttpStatus.SC_OK);
 	      	return nestHome.getItems();
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/hue/devices", "application/json", (request, response) -> {
+	    	log.debug("Get hue items");
+	      	if(hueHome == null) {
+				response.status(HttpStatus.SC_NOT_FOUND);
+				return new ErrorMessage("A Hue is not available.");
+	      	}
+	      	response.status(HttpStatus.SC_OK);
+	      	return hueHome.getDevices();
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/backup/available", "application/json", (request, response) -> {

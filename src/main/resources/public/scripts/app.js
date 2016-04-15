@@ -44,7 +44,7 @@ app.run( function (bridgeService) {
 
 app.service('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, habridgeversion: ""};
+	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, habridgeversion: ""};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
@@ -140,6 +140,11 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		return;
 	}
 
+	this.updateShowHue = function () {
+		this.state.showHue = self.state.settings.hueconfigured;
+		return;
+	}
+
 	this.loadBridgeSettings = function () {
 		return $http.get(this.state.systemsbase + "/settings").then(
 				function (response) {
@@ -147,6 +152,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.updateShowVera();
 					self.updateShowHarmony();
 					self.updateShowNest();
+					self.updateShowHue();
 				},
 				function (error) {
 					self.displayWarn("Load Bridge Settings Error: ", error);
@@ -207,6 +213,19 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 				},
 				function (error) {
 					self.displayWarn("Get Nest Items Error: ", error);
+				}
+		);
+	};
+
+	this.viewHueDevices = function () {
+		if(!this.state.showHue)
+			return;
+		return $http.get(this.state.base + "/hue/devices").then(
+				function (response) {
+					self.state.huedevices = response.data;
+				},
+				function (error) {
+					self.displayWarn("Get Hue Items Error: ", error);
 				}
 		);
 	};
@@ -1075,6 +1094,105 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		bridgeService.deleteDeviceByMapId(id, mapType);
 		bridgeService.viewDevices();
 		bridgeService.viewNestItems();
+	};
+
+});
+
+app.controller('HueController', function ($scope, $location, $http, bridgeService) {
+	$scope.bridge = bridgeService.state;
+	$scope.device = $scope.bridge.device;
+	$scope.bulk = { devices: [] };
+	bridgeService.viewHueDevices();
+	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	$scope.buttonsVisible = false;
+
+	$scope.clearDevice = function () {
+		bridgeService.clearDevice();
+	};
+
+	$scope.buildDeviceUrls = function (huedevice) {
+		bridgeService.clearDevice();
+		$scope.device.deviceType = "switch";
+		$scope.device.name = huedevice.name;
+		$scope.device.targetDevice = huedevice.huename;
+		$scope.device.mapType = "hueDevice";
+		$scope.device.mapId = huedevice.id;
+		$scope.device.onUrl = "http://" + veradevice.veraaddress + ":" + $scope.vera.port
+		+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
+		+ veradevice.id;
+	};
+
+	$scope.addDevice = function () {
+		if($scope.device.name == "" && $scope.device.onUrl == "")
+			return;
+		bridgeService.addDevice($scope.device).then(
+				function () {
+					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewHueDevices();
+				},
+				function (error) {
+					bridgeService.displayWarn("Error adding device: " + $scope.device.name, error)
+				}
+		);
+
+	};
+
+	$scope.bulkAddDevices = function() {
+		var devicesList = [];
+		for(var i = 0; i < $scope.bulk.devices.length; i++) {
+			for(var x = 0; x < bridgeService.state.huedevices.length; x++) {
+				if(bridgeService.state.huedevices[x].id == $scope.bulk.devices[i]) {
+					$scope.buildDeviceUrls(bridgeService.state.huedevices[x]);
+					devicesList[i] = {
+							name: $scope.device.name,
+							mapId: $scope.device.mapId,
+							mapType: $scope.device.mapType,
+							deviceType: $scope.device.deviceType,
+							targetDevice: $scope.device.targetDevice,
+							onUrl: $scope.device.onUrl,
+							offUrl: $scope.device.offUrl,
+							httpVerb: $scope.device.httpVerb,
+							contentType: $scope.device.contentType,
+							contentBody: $scope.device.contentBody,
+							contentBodyOff: $scope.device.contentBodyOff
+					};
+				}
+			}
+		}
+		bridgeService.bulkAddDevice(devicesList);
+		$scope.clearDevice();
+		bridgeService.viewDevices();
+		bridgeService.viewHueDevices();
+		$scope.bulk = { devices: [] };
+	};
+
+	$scope.toggleSelection = function toggleSelection(deviceId) {
+		var idx = $scope.bulk.devices.indexOf(deviceId);
+
+		// is currently selected
+		if (idx > -1) {
+			$scope.bulk.devices.splice(idx, 1);
+		}
+
+		// is newly selected
+		else {
+			$scope.bulk.devices.push(deviceId);
+		}
+	};
+
+	$scope.toggleButtons = function () {
+		$scope.buttonsVisible = !$scope.buttonsVisible;
+		if($scope.buttonsVisible)
+			$scope.imgButtonsUrl = "glyphicon glyphicon-minus";
+		else
+			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	};
+
+	$scope.deleteDeviceByMapId = function (id, mapType) {
+		bridgeService.deleteDeviceByMapId(id, mapType);
+		bridgeService.viewDevices();
+		bridgeService.viewHueDevices();
 	};
 
 });

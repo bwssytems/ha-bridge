@@ -26,7 +26,7 @@ public class VeraHome {
 		Iterator<NamedIP> theList = bridgeSettings.getVeraAddress().getDevices().iterator();
 		while(theList.hasNext()) {
 			NamedIP aVera = theList.next();
-      		veras.put(aVera.getName(), new VeraInfo(aVera, bridgeSettings.isValidVera()));
+      		veras.put(aVera.getName(), new VeraInfo(aVera));
 		}
 	}
 

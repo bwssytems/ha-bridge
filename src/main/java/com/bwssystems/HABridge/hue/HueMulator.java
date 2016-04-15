@@ -12,6 +12,7 @@ import com.bwssystems.harmony.ButtonPress;
 import com.bwssystems.harmony.HarmonyHandler;
 import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.harmony.RunActivity;
+import com.bwssystems.hue.HueDeviceIdentifier;
 import com.bwssystems.nest.controller.Nest;
 import com.bwssystems.util.JsonTransformer;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -336,6 +337,23 @@ public class HueMulator {
     	        return responseString;
 	        }
 
+	        responseString = this.formatSuccessHueResponse(state, request.body(), lightId);
+
+	        if(device.getDeviceType().toLowerCase().contains("hue") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("hueDevice")))
+	        {
+	        	url = device.getOnUrl();
+	        	HueDeviceIdentifier deviceId = new Gson().fromJson(url, HueDeviceIdentifier.class);
+
+				// make call
+				if (!doHttpRequest("http://"+deviceId.getIpAddress()+"/api/"+userId+"/lights/"+deviceId.getDeviceId(), HttpPut.METHOD_NAME, device.getContentType(), request.body())) {
+					log.warn("Error on calling url to change device state: " + url);
+					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+				}
+				else
+					device.setDeviceState(state);
+				return responseString;
+	        }
+
 	        if(request.body().contains("bri"))
 	        {
         		url = device.getDimUrl();
@@ -360,7 +378,6 @@ public class HueMulator {
     	        return responseString;
 	        }
 
-	        responseString = this.formatSuccessHueResponse(state, request.body(), lightId);
 	        
 	        if(device.getDeviceType().toLowerCase().contains("activity") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("harmonyActivity")))
 	        {

@@ -28,19 +28,15 @@ public class VeraInfo {
     private HttpClient httpClient;
     private static final String SDATA_REQUEST = ":3480/data_request?id=sdata&output_format=json";
     private NamedIP veraAddress;
-    private Boolean validVera;
 
-    public VeraInfo(NamedIP addressName, Boolean isValidVera) {
+    public VeraInfo(NamedIP addressName) {
 		super();
         httpClient = HttpClients.createDefault();
         veraAddress = addressName;
-        validVera = isValidVera;
 	}
     
 	public Sdata getSdata() {
     	Sdata theSdata = null;
-		if(!validVera)
-			return theSdata;
 
 		String theUrl = "http://" + veraAddress.getIp() + SDATA_REQUEST;
     	String theData;
