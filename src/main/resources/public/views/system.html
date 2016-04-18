@@ -144,6 +144,33 @@
 							ng-model="bridge.settings.harmonypwd" placeholder="thepassword"></td>
 				</tr>
 				<tr>
+					<td>Hue Names and IP Addresses</td>
+					<td><table class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>IP</th>
+									<th>Manage</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="hue in bridge.settings.hueaddress.devices">
+								<td>{{hue.name}}</td>
+								<td>{{hue.ip}}</td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removeHuetoSettings(hue.name, hue.ip)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-next-hue-name" class="form-control" type="text"
+									ng-model="newhuename" placeholder="A Hue"></td>
+								<td><input id="bridge-settings-next-hue-ip" class="form-control" type="text"
+									ng-model="newhueip" placeholder="192.168.1.3"></td>
+									<td><button class="btn btn-success" type="submit"
+										ng-click="addHuetoSettings(newhuename, newhueip)">Add</button></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
 					<td>Button Press Sleep Interval (ms)</td>
 					<td><input id="bridge-settings-buttonsleep" class="form-control" type="number" name="input"
 							ng-model="bridge.settings.buttonsleep" min="100" max="9999"></td>

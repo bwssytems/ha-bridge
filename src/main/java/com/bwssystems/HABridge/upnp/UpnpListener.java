@@ -94,8 +94,10 @@ public class UpnpListener {
 			log.info("UPNP Discovery Listener - ended, restart found");
 		if(bridgeControl.isStop())
 			log.info("UPNP Discovery Listener - ended, stop found");
-		if(!bridgeControl.isStop()&& !bridgeControl.isReinit())
+		if(!bridgeControl.isStop()&& !bridgeControl.isReinit()) {
 			log.info("UPNP Discovery Listener - ended, error found");
+			return false;
+		}
 		return bridgeControl.isReinit();
 	}
 

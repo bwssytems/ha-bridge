@@ -345,7 +345,7 @@ public class HueMulator {
 	        	HueDeviceIdentifier deviceId = new Gson().fromJson(url, HueDeviceIdentifier.class);
 
 				// make call
-				if (!doHttpRequest("http://"+deviceId.getIpAddress()+"/api/"+userId+"/lights/"+deviceId.getDeviceId(), HttpPut.METHOD_NAME, device.getContentType(), request.body())) {
+				if (!doHttpRequest("http://"+deviceId.getIpAddress()+"/api/"+userId+"/lights/"+deviceId.getDeviceId()+"/state", HttpPut.METHOD_NAME, device.getContentType(), request.body())) {
 					log.warn("Error on calling url to change device state: " + url);
 					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 				}
@@ -605,63 +605,63 @@ public class HueMulator {
         if(body.contains("bri"))
         {
         	if(justState)
-        		responseString = responseString + "true}}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri() + "}}";
+        		responseString = responseString + "true}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri() + "}";
         	justState = false;
         }
         
         if(body.contains("ct"))
         {
         	if(justState)
-        		responseString = responseString + "true}}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/ct\":" + state.getCt() + "}}";
+        		responseString = responseString + "true}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/ct\":" + state.getCt() + "}";
         	justState = false;
         }
         
         if(body.contains("xy"))
         {
         	if(justState)
-        		responseString = responseString + "true}}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/xy\":" + state.getXy() + "}}";
+        		responseString = responseString + "true}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/xy\":" + state.getXy() + "}";
         	justState = false;
         }
         
         if(body.contains("hue"))
         {
         	if(justState)
-        		responseString = responseString + "true}}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/hue\":" + state.getHue() + "}}";
+        		responseString = responseString + "true}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/hue\":" + state.getHue() + "}";
         	justState = false;
         }
         
         if(body.contains("sat"))
         {
         	if(justState)
-        		responseString = responseString + "true}}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/sat\":" + state.getSat() + "}}";
+        		responseString = responseString + "true}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/sat\":" + state.getSat() + "}";
         	justState = false;
         }
         
         if(body.contains("colormode"))
         {
         	if(justState)
-        		responseString = responseString + "true}}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/colormode\":" + state.getColormode() + "}}";
+        		responseString = responseString + "true}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/colormode\":" + state.getColormode() + "}";
         	justState = false;
         }
         
         if(justState)
         {
 	        if (state.isOn()) {
-	            responseString = responseString + "true}}]";
+	            responseString = responseString + "true}";
 	            state.setBri(255);
 	        } else if (body.contains("false")) {
-	            responseString = responseString + "false}}";
+	            responseString = responseString + "false}";
 	            state.setBri(0);
 	        }
         }
         
-        responseString = responseString + "]";
+        responseString = responseString + "}]";
         
         return responseString;
     	

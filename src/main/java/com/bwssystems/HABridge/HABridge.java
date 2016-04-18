@@ -11,6 +11,7 @@ import com.bwssystems.HABridge.upnp.UpnpListener;
 import com.bwssystems.HABridge.upnp.UpnpSettingsResource;
 import com.bwssystems.NestBridge.NestHome;
 import com.bwssystems.harmony.HarmonyHome;
+import com.bwssystems.hue.HueHome;
 
 public class HABridge {
 	
@@ -34,6 +35,7 @@ public class HABridge {
         DeviceResource theResources;
         HarmonyHome harmonyHome;
         NestHome nestHome;
+        HueHome hueHome;
         HueMulator theHueMulator;
         UpnpSettingsResource theSettingResponder;
         UpnpListener theUpnpListener;
@@ -62,8 +64,10 @@ public class HABridge {
 	        harmonyHome = new HarmonyHome(bridgeSettings.getBridgeSettingsDescriptor());
 	        //setup the nest connection if available
 	        nestHome = new NestHome(bridgeSettings.getBridgeSettingsDescriptor());
+	        //setup the hue passtrhu configuration if available
+	        hueHome = new HueHome(bridgeSettings.getBridgeSettingsDescriptor());
 	        // setup the class to handle the resource setup rest api
-	        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), harmonyHome, nestHome);
+	        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), harmonyHome, nestHome, hueHome);
 	        // setup the class to handle the hue emulator rest api
 	        theHueMulator = new HueMulator(bridgeSettings.getBridgeSettingsDescriptor(), theResources.getDeviceRepository(), harmonyHome, nestHome);
 	        theHueMulator.setupServer();
@@ -77,6 +81,8 @@ public class HABridge {
 	        theUpnpListener = new UpnpListener(bridgeSettings.getBridgeSettingsDescriptor(), bridgeSettings.getBridgeControl());
 	        if(theUpnpListener.startListening())
 	        	log.info("HA Bridge (v" + theVersion.getVersion() + ") reinitialization requessted....");
+	        else
+	        	bridgeSettings.getBridgeControl().setStop(true);
 
 	        bridgeSettings.getBridgeControl().setReinit(false);
 	        stop();

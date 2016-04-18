@@ -18,7 +18,7 @@ import com.google.gson.Gson;
 public class HueInfo {
     private static final Logger log = LoggerFactory.getLogger(HueInfo.class);
     private HttpClient httpClient;
-    private static final String HUE_REQUEST = "/api/habridge/config";
+    private static final String HUE_REQUEST = "/api/habridge";
     private NamedIP hueAddress;
 
     public HueInfo(NamedIP addressName) {
@@ -58,4 +58,12 @@ public class HueInfo {
         }
         return theContent;
     }
+
+	public NamedIP getHueAddress() {
+		return hueAddress;
+	}
+
+	public void setHueAddress(NamedIP hueAddress) {
+		this.hueAddress = hueAddress;
+	}
 }

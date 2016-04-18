@@ -36,8 +36,8 @@
 				</thead>
 				<tr ng-repeat="huedevice in bridge.huedevices | availableHueDeviceId">
 					<td>{{$index+1}}</td>
-					<td><input type="checkbox" name="bulk.devices[]" value="{{huedevice.id}}" ng-checked="bulk.devices.indexOf(huedevice.id) > -1" ng-click="toggleSelection(huedevice.id)"> {{huedevice.name}}</td>
-					<td>{{huedevice.uniqueid}}</td>
+					<td><input type="checkbox" name="bulk.devices[]" value="{{huedevice.id}}" ng-checked="bulk.devices.indexOf(huedevice.id) > -1" ng-click="toggleSelection(huedevice.id)"> {{huedevice.device.name}}</td>
+					<td>{{huedevice.device.uniqueid}}</td>
 					<td>{{huedevice.huename}}</td>
 					<td>
 						<button class="btn btn-success" type="submit"
@@ -71,8 +71,8 @@
 				</thead>
 				<tr ng-repeat="huedevice in bridge.huedevices | unavailableHueDeviceId">
 					<td>{{$index+1}}</td>
-					<td>{{huedevice.name}}</td>
-					<td>{{huedevice.uniqueid}}</td>
+					<td>{{huedevice.device.name}}</td>
+					<td>{{huedevice.device.uniqueid}}</td>
 					<td>{{huedevice.huename}}</td>
 					<td>
 						<button class="btn btn-danger" type="submit"

@@ -31,6 +31,9 @@ app.config(function ($routeProvider) {
 	}).when('/nest', {
 		templateUrl: 'views/nestactions.html',
 		controller: 'NestController'		
+	}).when('/huedevices', {
+		templateUrl: 'views/huedevice.html',
+		controller: 'HueController'		
 	}).otherwise({
 		templateUrl: 'views/configuration.html',
 		controller: 'ViewingController'
@@ -48,8 +51,12 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
-		if(error != null && typeof(error) != 'undefined')
-			toastContent = toastContent + " " + error.data.message + " with status: " + error.statusText + " - "  + error.status;
+		if(error != null && typeof(error) != 'undefined') {
+			if(error.data != null)
+			    toastContent = toastContent + " " + error.data.message + " with status: " + error.statusText + " - "  + error.status;
+			else
+				toastContent = error;
+		}
 		ngToast.create({
 			className: "warning",
 			dismissButton: true,
@@ -589,6 +596,22 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     	    }
     	}    	
     };
+    $scope.addHuetoSettings = function (newhuename, newhueip) {
+    	if($scope.bridge.settings.hueaddress == null) {
+			$scope.bridge.settings.hueaddress = { devices: [] };
+		}
+    	var newhue = {name: newhuename, ip: newhueip }
+    	$scope.bridge.settings.hueaddress.devices.push(newhue);
+    	$scope.newhuename = null;
+    	$scope.newhueip = null;
+    };
+    $scope.removeHuetoSettings = function (huename, hueip) {
+    	for(var i = $scope.bridge.settings.hueaddress.devices.length - 1; i >= 0; i--) {
+    	    if($scope.bridge.settings.hueaddress.devices[i].name === huename && $scope.bridge.settings.hueaddress.devices[i].ip === hueip) {
+    	    	$scope.bridge.settings.hueaddress.devices.splice(i, 1);
+    	    }
+    	}    	
+    };
     $scope.bridgeReinit = function () {
         $scope.isInControl = false;
     	bridgeService.reinit();
@@ -1113,13 +1136,12 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 	$scope.buildDeviceUrls = function (huedevice) {
 		bridgeService.clearDevice();
 		$scope.device.deviceType = "switch";
-		$scope.device.name = huedevice.name;
+		$scope.device.name = huedevice.device.name;
 		$scope.device.targetDevice = huedevice.huename;
+		$scope.device.contentType = "application/json";
 		$scope.device.mapType = "hueDevice";
-		$scope.device.mapId = huedevice.id;
-		$scope.device.onUrl = "http://" + veradevice.veraaddress + ":" + $scope.vera.port
-		+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
-		+ veradevice.id;
+		$scope.device.mapId = huedevice.device.uniqueid;
+		$scope.device.onUrl = "{\"ipAddress\":\"" + huedevice.hueaddress + "\",\"deviceId\":\"" + huedevice.device.uniqueid +"\"}";
 	};
 
 	$scope.addDevice = function () {
@@ -1393,6 +1415,34 @@ app.filter('unavailableNestItemId', function(bridgeService) {
 			return out;
 		for (var i = 0; i < input.length; i++) {
 			if(input[i].mapType != null && bridgeService.aContainsB(input[i].mapType, "nest")){
+				out.push(input[i]);
+			}
+		}
+		return out;
+	}
+});
+
+app.filter('availableHueDeviceId', function(bridgeService) {
+	return function(input) {
+		var out = [];
+		if(input == null)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if(!bridgeService.findDeviceByMapId(input[i].device.uniqueid, input[i].huename, "hueDevice")){
+				out.push(input[i]);
+			}
+		}
+		return out;
+	}
+});
+
+app.filter('unavailableHueDeviceId', function(bridgeService) {
+	return function(input) {
+		var out = [];
+		if(input == null)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if(bridgeService.findDeviceByMapId(input[i].device.uniqueid, input[i].huename, "hueDevice")){
 				out.push(input[i]);
 			}
 		}

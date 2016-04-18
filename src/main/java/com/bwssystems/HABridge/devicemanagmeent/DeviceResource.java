@@ -42,7 +42,7 @@ public class DeviceResource {
     private HueHome hueHome;
     private static final Set<String> supportedVerbs = new HashSet<>(Arrays.asList("get", "put", "post"));
 
-	public DeviceResource(BridgeSettingsDescriptor theSettings, HarmonyHome theHarmonyHome, NestHome aNestHome) {
+	public DeviceResource(BridgeSettingsDescriptor theSettings, HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome) {
 		this.deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
 
 		if(theSettings.isValidVera())
@@ -61,7 +61,7 @@ public class DeviceResource {
 			this.nestHome = null;
 
 		if(theSettings.isValidHue())
-			this.hueHome = new HueHome(theSettings);
+			this.hueHome = aHueHome;
 		else
 			this.hueHome = null;
         setupEndpoints();

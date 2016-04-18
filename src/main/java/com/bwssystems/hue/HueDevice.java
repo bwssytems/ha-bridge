@@ -5,24 +5,24 @@ import com.bwssystems.HABridge.api.hue.DeviceResponse;
 
 public class HueDevice {
 	private DeviceResponse device;
-	private String hubaddress;
-	private String hubname;
+	private String hueaddress;
+	private String huename;
 	public DeviceResponse getDevice() {
 		return device;
 	}
-	public void setDevice(DeviceResponse device) {
-		this.device = device;
+	public void setDevice(DeviceResponse adevice) {
+		this.device = adevice;
 	}
-	public String getHubaddress() {
-		return hubaddress;
+	public String getHueaddress() {
+		return hueaddress;
 	}
-	public void setHubaddress(String hubaddress) {
-		this.hubaddress = hubaddress;
+	public void setHueaddress(String ahueaddress) {
+		this.hueaddress = ahueaddress;
 	}
-	public String getHubname() {
-		return hubname;
+	public String getHuename() {
+		return huename;
 	}
-	public void setHubname(String hubname) {
-		this.hubname = hubname;
+	public void setHuename(String ahuename) {
+		this.huename = ahuename;
 	}
 }

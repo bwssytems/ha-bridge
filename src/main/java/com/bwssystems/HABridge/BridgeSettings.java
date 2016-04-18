@@ -154,6 +154,7 @@ public class BridgeSettings extends BackupHandler {
         theBridgeSettings.setVeraconfigured(theBridgeSettings.isValidVera());
         theBridgeSettings.setHarmonyconfigured(theBridgeSettings.isValidHarmony());
         theBridgeSettings.setNestConfigured(theBridgeSettings.isValidNest());
+        theBridgeSettings.setHueconfigured(theBridgeSettings.isValidHue());
         if(serverPortOverride != null)
         	theBridgeSettings.setServerPort(serverPortOverride);
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
@@ -189,6 +190,8 @@ public class BridgeSettings extends BackupHandler {
 		theBridgeSettings.setNestConfigured(aBridgeSettings.isValidNest());
 		theBridgeSettings.setNumberoflogmessages(aBridgeSettings.getNumberoflogmessages());
 		theBridgeSettings.setFarenheit(aBridgeSettings.isFarenheit());
+		theBridgeSettings.setHueaddress(aBridgeSettings.getHueaddress());
+		theBridgeSettings.setHueconfigured(aBridgeSettings.isValidHue());
     }
 
 	public void save(BridgeSettingsDescriptor newBridgeSettings) {
