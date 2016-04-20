@@ -4,17 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
+import com.google.gson.JsonObject;
 
 /**
  * Created by arm on 4/14/15.
  */
 public class HueApiResponse {
     private Map<String, DeviceResponse> lights;
-    private Map<String, String> scenes;
-    private Map<String, String> groups;
-    private Map<String, String> schedules;
-    private Map<String, String> sensors;
-    private Map<String, String> rules;
+    private Map<String, JsonObject> scenes;
+    private Map<String, JsonObject> groups;
+    private Map<String, JsonObject> schedules;
+    private Map<String, JsonObject> sensors;
+    private Map<String, JsonObject> rules;
     private HueConfig config;
 
     public HueApiResponse(String name, String ipaddress, String devicetype, String userid) {
@@ -35,43 +36,43 @@ public class HueApiResponse {
         this.lights = lights;
     }
 
-	public Map<String, String> getScenes() {
+	public Map<String, JsonObject> getScenes() {
 		return scenes;
 	}
 
-	public void setScenes(Map<String, String> scenes) {
+	public void setScenes(Map<String, JsonObject> scenes) {
 		this.scenes = scenes;
 	}
 
-	public Map<String, String> getGroups() {
+	public Map<String, JsonObject> getGroups() {
 		return groups;
 	}
 
-	public void setGroups(Map<String, String> groups) {
+	public void setGroups(Map<String, JsonObject> groups) {
 		this.groups = groups;
 	}
 
-	public Map<String, String> getSchedules() {
+	public Map<String, JsonObject> getSchedules() {
 		return schedules;
 	}
 
-	public void setSchedules(Map<String, String> schedules) {
+	public void setSchedules(Map<String, JsonObject> schedules) {
 		this.schedules = schedules;
 	}
 
-	public Map<String, String> getSensors() {
+	public Map<String, JsonObject> getSensors() {
 		return sensors;
 	}
 
-	public void setSensors(Map<String, String> sensors) {
+	public void setSensors(Map<String, JsonObject> sensors) {
 		this.sensors = sensors;
 	}
 
-	public Map<String, String> getRules() {
+	public Map<String, JsonObject> getRules() {
 		return rules;
 	}
 
-	public void setRules(Map<String, String> rules) {
+	public void setRules(Map<String, JsonObject> rules) {
 		this.rules = rules;
 	}
 
