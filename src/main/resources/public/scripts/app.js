@@ -101,6 +101,8 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 	};
 
 	this.clearDevice = function () {
+		if(self.state.device == null)
+			self.state.device = [];
 		self.state.device.id = "";
 		self.state.device.mapType = null;
 		self.state.device.mapId = null;
@@ -704,13 +706,15 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 		var dialogNeeded = false;
 		if((type == "on" && (bridgeService.aContainsB(device.onUrl, "${intensity.byte}") ||
 				bridgeService.aContainsB(device.onUrl, "${intensity.percent}") ||
-				bridgeService.aContainsB(device.onUrl, "${intensity.math("))) ||
+				bridgeService.aContainsB(device.onUrl, "${intensity.math(")) ||
 				(type == "off" && (bridgeService.aContainsB(device.offUrl, "${intensity.byte}") ||
 				bridgeService.aContainsB(device.offUrl, "${intensity.percent}") ||
 				bridgeService.aContainsB(device.offUrl, "${intensity.math(")))   ||
 				(type == "dim" && (bridgeService.aContainsB(device.dimUrl, "${intensity.byte}") ||
 						bridgeService.aContainsB(device.dimUrl, "${intensity.percent}") ||
-						bridgeService.aContainsB(device.dimUrl, "${intensity.math(")))) {
+						bridgeService.aContainsB(device.dimUrl, "${intensity.math(") ||
+						bridgeService.aContainsB(device.deviceType, "passthru") ||
+						bridgeService.aContainsB(device.mapType, "hueDevice"))))) {
 			$scope.bridge.device = device;
 			$scope.bridge.type = type;
 			ngDialog.open({
@@ -1135,7 +1139,9 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 
 	$scope.buildDeviceUrls = function (huedevice) {
 		bridgeService.clearDevice();
-		$scope.device.deviceType = "switch";
+		if($scope.device == null)
+			$scope.device = $scope.bridge.device;
+		$scope.device.deviceType = "passthru";
 		$scope.device.name = huedevice.device.name;
 		$scope.device.targetDevice = huedevice.huename;
 		$scope.device.contentType = "application/json";

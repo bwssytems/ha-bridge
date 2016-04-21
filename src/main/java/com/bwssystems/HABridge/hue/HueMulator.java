@@ -13,6 +13,7 @@ import com.bwssystems.harmony.HarmonyHandler;
 import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.harmony.RunActivity;
 import com.bwssystems.hue.HueDeviceIdentifier;
+import com.bwssystems.hue.HueUtil;
 import com.bwssystems.nest.controller.Nest;
 import com.bwssystems.util.JsonTransformer;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -72,6 +73,7 @@ public class HueMulator {
     private ObjectMapper mapper;
     private BridgeSettingsDescriptor bridgeSettings;
     private byte[] sendData;
+    private String hueUser;
 
 
     public HueMulator(BridgeSettingsDescriptor theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHome theHarmonyHome, NestHome aNestHome){
@@ -88,10 +90,12 @@ public class HueMulator {
 		else
 			this.theNest = null;
         bridgeSettings = theBridgeSettings;
+        hueUser = null;
     }
 
 //	This function sets up the sparkjava rest calls for the hue api
     public void setupServer() {
+    	String errorString = null;
     	log.info("Hue emulator service started....");
     	// http://ip_address:port/api/{userId}/lights  returns json objects of all lights configured
 	    get(HUE_CONTEXT + "/:userid/lights", "application/json", (request, response) -> {
@@ -343,9 +347,15 @@ public class HueMulator {
 	        {
 	        	url = device.getOnUrl();
 	        	HueDeviceIdentifier deviceId = new Gson().fromJson(url, HueDeviceIdentifier.class);
+	        	if(hueUser == null) {
+	        		hueUser = userId;
+	        		if((hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(), errorString)) == null) {
+	        			return errorString;
+	        		}
+	        	}
 
 				// make call
-				if (!doHttpRequest("http://"+deviceId.getIpAddress()+"/api/"+userId+"/lights/"+deviceId.getDeviceId()+"/state", HttpPut.METHOD_NAME, device.getContentType(), request.body())) {
+				if (!doHttpRequest("http://"+deviceId.getIpAddress()+"/api/"+hueUser+"/lights/"+deviceId.getDeviceId()+"/state", HttpPut.METHOD_NAME, device.getContentType(), request.body())) {
 					log.warn("Error on calling url to change device state: " + url);
 					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 				}
@@ -605,63 +615,63 @@ public class HueMulator {
         if(body.contains("bri"))
         {
         	if(justState)
-        		responseString = responseString + "true}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri() + "}";
+        		responseString = responseString + "true}}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri() + "}}";
         	justState = false;
         }
         
         if(body.contains("ct"))
         {
         	if(justState)
-        		responseString = responseString + "true}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/ct\":" + state.getCt() + "}";
+        		responseString = responseString + "true}}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/ct\":" + state.getCt() + "}}";
         	justState = false;
         }
         
         if(body.contains("xy"))
         {
         	if(justState)
-        		responseString = responseString + "true}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/xy\":" + state.getXy() + "}";
+        		responseString = responseString + "true}}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/xy\":" + state.getXy() + "}}";
         	justState = false;
         }
         
         if(body.contains("hue"))
         {
         	if(justState)
-        		responseString = responseString + "true}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/hue\":" + state.getHue() + "}";
+        		responseString = responseString + "true}}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/hue\":" + state.getHue() + "}}";
         	justState = false;
         }
         
         if(body.contains("sat"))
         {
         	if(justState)
-        		responseString = responseString + "true}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/sat\":" + state.getSat() + "}";
+        		responseString = responseString + "true}}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/sat\":" + state.getSat() + "}}";
         	justState = false;
         }
         
         if(body.contains("colormode"))
         {
         	if(justState)
-        		responseString = responseString + "true}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/colormode\":" + state.getColormode() + "}";
+        		responseString = responseString + "true}}";
+        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/colormode\":" + state.getColormode() + "}}";
         	justState = false;
         }
         
         if(justState)
         {
 	        if (state.isOn()) {
-	            responseString = responseString + "true}";
+	            responseString = responseString + "true}}";
 	            state.setBri(255);
 	        } else if (body.contains("false")) {
-	            responseString = responseString + "false}";
+	            responseString = responseString + "false}}";
 	            state.setBri(0);
 	        }
         }
         
-        responseString = responseString + "}]";
+        responseString = responseString + "]";
         
         return responseString;
     	
