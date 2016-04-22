@@ -69,7 +69,7 @@ public class HABridge {
 	        // setup the class to handle the resource setup rest api
 	        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), harmonyHome, nestHome, hueHome);
 	        // setup the class to handle the hue emulator rest api
-	        theHueMulator = new HueMulator(bridgeSettings.getBridgeSettingsDescriptor(), theResources.getDeviceRepository(), harmonyHome, nestHome);
+	        theHueMulator = new HueMulator(bridgeSettings.getBridgeSettingsDescriptor(), theResources.getDeviceRepository(), harmonyHome, nestHome, hueHome);
 	        theHueMulator.setupServer();
 	        // setup the class to handle the upnp response rest api
 	        theSettingResponder = new UpnpSettingsResource(bridgeSettings.getBridgeSettingsDescriptor());

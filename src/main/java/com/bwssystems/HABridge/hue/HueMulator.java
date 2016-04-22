@@ -13,6 +13,8 @@ import com.bwssystems.harmony.HarmonyHandler;
 import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.harmony.RunActivity;
 import com.bwssystems.hue.HueDeviceIdentifier;
+import com.bwssystems.hue.HueErrorStringSet;
+import com.bwssystems.hue.HueHome;
 import com.bwssystems.hue.HueUtil;
 import com.bwssystems.nest.controller.Nest;
 import com.bwssystems.util.JsonTransformer;
@@ -47,6 +49,7 @@ import java.math.BigDecimal;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +60,7 @@ import javax.xml.bind.DatatypeConverter;
  * Based on Armzilla's HueMulator - a Philips Hue emulator using sparkjava rest server
  */
 
-public class HueMulator {
+public class HueMulator implements HueErrorStringSet {
     private static final Logger log = LoggerFactory.getLogger(HueMulator.class);
     private static final String INTENSITY_PERCENT = "${intensity.percent}";
     private static final String INTENSITY_BYTE = "${intensity.byte}";
@@ -69,14 +72,16 @@ public class HueMulator {
     private DeviceRepository repository;
     private HarmonyHome myHarmonyHome;
     private Nest theNest;
+    private HueHome myHueHome;
     private HttpClient httpClient;
     private ObjectMapper mapper;
     private BridgeSettingsDescriptor bridgeSettings;
     private byte[] sendData;
     private String hueUser;
+    private String errorString;
 
 
-    public HueMulator(BridgeSettingsDescriptor theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHome theHarmonyHome, NestHome aNestHome){
+    public HueMulator(BridgeSettingsDescriptor theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome){
         httpClient = HttpClients.createDefault();
         mapper = new ObjectMapper(); //armzilla: work around Echo incorrect content type and breaking mapping. Map manually
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -89,13 +94,17 @@ public class HueMulator {
 			this.theNest = aNestHome.getTheNest();
 		else
 			this.theNest = null;
+		if(theBridgeSettings.isValidHue())
+			this.myHueHome = aHueHome;
+		else
+			this.myHueHome = null;
         bridgeSettings = theBridgeSettings;
         hueUser = null;
+        errorString = null;
     }
 
 //	This function sets up the sparkjava rest calls for the hue api
     public void setupServer() {
-    	String errorString = null;
     	log.info("Hue emulator service started....");
     	// http://ip_address:port/api/{userId}/lights  returns json objects of all lights configured
 	    get(HUE_CONTEXT + "/:userid/lights", "application/json", (request, response) -> {
@@ -345,23 +354,38 @@ public class HueMulator {
 
 	        if(device.getDeviceType().toLowerCase().contains("hue") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("hueDevice")))
 	        {
-	        	url = device.getOnUrl();
-	        	HueDeviceIdentifier deviceId = new Gson().fromJson(url, HueDeviceIdentifier.class);
-	        	if(hueUser == null) {
-	        		hueUser = userId;
-	        		if((hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(), errorString)) == null) {
-	        			return errorString;
-	        		}
+	        	if(myHueHome != null) {
+		        	url = device.getOnUrl();
+		        	HueDeviceIdentifier deviceId = new Gson().fromJson(url, HueDeviceIdentifier.class);
+		        	if(myHueHome.getTheHUERegisteredUser() == null) {
+		        		hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(), myHueHome.getTheHUERegisteredUser(), this);
+		        		if(hueUser == null) {
+		        			return errorString;
+		        		}
+		        		myHueHome.setTheHUERegisteredUser(hueUser);
+		        	}
+	
+					// make call
+		        	responseString = doHttpRequest("http://"+deviceId.getIpAddress()+"/api/"+myHueHome.getTheHUERegisteredUser()+"/lights/"+deviceId.getDeviceId()+"/state", HttpPut.METHOD_NAME, device.getContentType(), request.body());
+					if (responseString == null) {
+						log.warn("Error on calling url to change device state: " + url);
+						responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling HUE to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+					}
+					else if(responseString.contains("[{\"error\":") && responseString.contains("unauthorized user")) {
+						myHueHome.setTheHUERegisteredUser(null);
+		        		hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(), myHueHome.getTheHUERegisteredUser(), this);
+		        		if(hueUser == null) {
+		        			return errorString;
+		        		}
+		        		myHueHome.setTheHUERegisteredUser(hueUser);
+					}
+					else if(!responseString.contains("[{\"error\":"))
+						device.setDeviceState(state);
 	        	}
-
-				// make call
-				if (!doHttpRequest("http://"+deviceId.getIpAddress()+"/api/"+hueUser+"/lights/"+deviceId.getDeviceId()+"/state", HttpPut.METHOD_NAME, device.getContentType(), request.body())) {
-					log.warn("Error on calling url to change device state: " + url);
-					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
-				}
-				else
-					device.setDeviceState(state);
-				return responseString;
+	        	else
+					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"No HUE configured\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+	        		
+					return responseString;
 	        }
 
 	        if(request.body().contains("bri"))
@@ -520,7 +544,7 @@ public class HueMulator {
 				else
 					body = replaceIntensityValue(device.getContentBodyOff(), state.getBri());
 				// make call
-				if (!doHttpRequest(url, device.getHttpVerb(), device.getContentType(), body)) {
+				if (doHttpRequest(url, device.getHttpVerb(), device.getContentType(), body) == null) {
 					log.warn("Error on calling url to change device state: " + url);
 					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 				}
@@ -572,8 +596,9 @@ public class HueMulator {
 
 
 //	This function executes the url from the device repository against the vera
-    protected boolean doHttpRequest(String url, String httpVerb, String contentType, String body) {
+    protected String doHttpRequest(String url, String httpVerb, String contentType, String body) {
         HttpUriRequest request = null;
+    	String theContent = null;
         try {
 	        if(HttpGet.METHOD_NAME.equalsIgnoreCase(httpVerb) || httpVerb == null) {
 	            request = new HttpGet(url);
@@ -592,20 +617,20 @@ public class HueMulator {
 	        }
         } catch(IllegalArgumentException e) {
         	log.warn("Error calling out to HA gateway: IllegalArgumentException in log", e);
-            return false;        	
+            return null;        	
         }
         log.debug("Making outbound call in doHttpRequest: " + request);
         try {
             HttpResponse response = httpClient.execute(request);
-            EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
             log.debug((httpVerb == null?"GET":httpVerb) + " execute on URL responded: " + response.getStatusLine().getStatusCode());
             if(response.getStatusLine().getStatusCode() >= 200  && response.getStatusLine().getStatusCode() < 300){
-                return true;
+            	theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); //read content for data
+                EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
             }
         } catch (IOException e) {
         	log.warn("Error calling out to HA gateway: IOException in log", e);
         }
-        return false;
+        return theContent;
     }
     
     private String formatSuccessHueResponse(DeviceState state, String body, String lightId) {
@@ -676,4 +701,9 @@ public class HueMulator {
         return responseString;
     	
     }
+
+	@Override
+	public void setErrorString(String anError) {
+		errorString = anError;
+	}
 }

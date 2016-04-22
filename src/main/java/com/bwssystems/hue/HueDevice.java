@@ -5,6 +5,7 @@ import com.bwssystems.HABridge.api.hue.DeviceResponse;
 
 public class HueDevice {
 	private DeviceResponse device;
+	private String huedeviceid;
 	private String hueaddress;
 	private String huename;
 	public DeviceResponse getDevice() {
@@ -12,6 +13,12 @@ public class HueDevice {
 	}
 	public void setDevice(DeviceResponse adevice) {
 		this.device = adevice;
+	}
+	public String getHuedeviceid() {
+		return huedeviceid;
+	}
+	public void setHuedeviceid(String huedeviceid) {
+		this.huedeviceid = huedeviceid;
 	}
 	public String getHueaddress() {
 		return hueaddress;
