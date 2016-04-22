@@ -543,6 +543,7 @@ public class HueMulator implements HueErrorStringSet {
 		    		}  catch (IOException e) {
 		    			log.warn("Could not send UDP Datagram packet for request.", e);
 		    			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+						i = callItems.length+1;
 		    		}
         		}
 	        }
@@ -568,6 +569,7 @@ public class HueMulator implements HueErrorStringSet {
 					if (doHttpRequest(anUrl, device.getHttpVerb(), device.getContentType(), body) == null) {
 						log.warn("Error on calling url to change device state: " + anUrl);
 						responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+						i = callItems.length+1;
 					}
         		}
 	        }
