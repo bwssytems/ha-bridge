@@ -1147,7 +1147,7 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 		$scope.device.contentType = "application/json";
 		$scope.device.mapType = "hueDevice";
 		$scope.device.mapId = huedevice.device.uniqueid;
-		$scope.device.onUrl = "{\"ipAddress\":\"" + huedevice.hueaddress + "\",\"deviceId\":\"" + huedevice.device.uniqueid +"\"}";
+		$scope.device.onUrl = "{\"ipAddress\":\"" + huedevice.hueaddress + "\",\"deviceId\":\"" + huedevice.huedeviceid +"\"}";
 	};
 
 	$scope.addDevice = function () {

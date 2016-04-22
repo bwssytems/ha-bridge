@@ -1,6 +1,7 @@
 package com.bwssystems.HABridge.hue;
 
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.api.UserCreateRequest;
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.DeviceState;
@@ -510,44 +511,65 @@ public class HueMulator implements HueErrorStringSet {
 	        		}
 	        	}
 	        }
-	        else if(url.startsWith("udp://"))
+	        else if(device.getDeviceType().startsWith("Exec")) {
+	        	Process p = Runtime.getRuntime().exec(url);
+	        }
+	        else if(url.contains("udp://"))
 	        {
+	        	if(!url.substring(0, 1).equalsIgnoreCase("[")) {
+	        		url = "[{\"item\":\"" + url +"\"}]";
+	        	}
+	        	CallItem[] callItems = new Gson().fromJson(url, CallItem[].class);
 	        	log.debug("executing HUE api request to UDP: " + url);
-	        	try {
-	        		String intermediate = url.substring(6);
-	        		String ipAddr = intermediate.substring(0, intermediate.indexOf(':'));
-	        		String port = intermediate.substring(intermediate.indexOf(':') + 1, intermediate.indexOf('/'));
-	        		String theBody = intermediate.substring(intermediate.indexOf('/')+1);
-	        		DatagramSocket responseSocket = new DatagramSocket(Integer.parseInt(port));
-	        		if(theBody.startsWith("0x")) {
-	        			sendData = DatatypeConverter.parseHexBinary(theBody.substring(2));
-	        		}
-	        		else
-	        			sendData = theBody.getBytes();
-	        		InetAddress IPAddress = InetAddress.getByName(ipAddr);
-	        		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Integer.parseInt(port));
-	        		responseSocket.send(sendPacket);
-	        		responseSocket.close();
-	    		}  catch (IOException e) {
-	    			log.warn("Could not send UDP Datagram packet for request.", e);
-	    			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
-	    		}
+        		for(int i = 0; i < callItems.length; i++) {
+        			if( i > 0) {
+        				Thread.sleep(bridgeSettings.getButtonsleep());
+        			}
+		        	try {
+		        		String intermediate = callItems[i].getItem().substring(6);
+		        		String ipAddr = intermediate.substring(0, intermediate.indexOf(':'));
+		        		String port = intermediate.substring(intermediate.indexOf(':') + 1, intermediate.indexOf('/'));
+		        		String theBody = intermediate.substring(intermediate.indexOf('/')+1);
+		        		DatagramSocket responseSocket = new DatagramSocket(Integer.parseInt(port));
+		        		if(theBody.startsWith("0x")) {
+		        			sendData = DatatypeConverter.parseHexBinary(theBody.substring(2));
+		        		}
+		        		else
+		        			sendData = theBody.getBytes();
+		        		InetAddress IPAddress = InetAddress.getByName(ipAddr);
+		        		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Integer.parseInt(port));
+		        		responseSocket.send(sendPacket);
+		        		responseSocket.close();
+		    		}  catch (IOException e) {
+		    			log.warn("Could not send UDP Datagram packet for request.", e);
+		    			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+		    		}
+        		}
 	        }
 	        else
 	        {
+	        	if(!url.substring(0, 1).equalsIgnoreCase("[")) {
+	        		url = "[{\"item\":\"" + url +"\"}]";
+	        	}
+	        	CallItem[] callItems = new Gson().fromJson(url, CallItem[].class);
 	        	log.debug("executing HUE api request to Http " + (device.getHttpVerb() == null?"GET":device.getHttpVerb()) + ": " + url);
-				// quick template
-				String body;
-				url = replaceIntensityValue(url, state.getBri());
-				if (state.isOn())
-					body = replaceIntensityValue(device.getContentBody(), state.getBri());
-				else
-					body = replaceIntensityValue(device.getContentBodyOff(), state.getBri());
-				// make call
-				if (doHttpRequest(url, device.getHttpVerb(), device.getContentType(), body) == null) {
-					log.warn("Error on calling url to change device state: " + url);
-					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
-				}
+        		for(int i = 0; i < callItems.length; i++) {
+        			if( i > 0) {
+        				Thread.sleep(bridgeSettings.getButtonsleep());
+        			}
+					// quick template
+					String body;
+					String anUrl = replaceIntensityValue(callItems[i].getItem(), state.getBri());
+					if (state.isOn())
+						body = replaceIntensityValue(device.getContentBody(), state.getBri());
+					else
+						body = replaceIntensityValue(device.getContentBodyOff(), state.getBri());
+					// make call
+					if (doHttpRequest(anUrl, device.getHttpVerb(), device.getContentType(), body) == null) {
+						log.warn("Error on calling url to change device state: " + anUrl);
+						responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+					}
+        		}
 	        }
 	        
 	        if(!responseString.contains("[{\"error\":")) {
