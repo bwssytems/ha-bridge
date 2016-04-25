@@ -1,13 +1,13 @@
 package com.bwssystems.HABridge.api;
 
 public class CallItem {
-	private String Item;
+	private String item;
 
 	public String getItem() {
-		return Item;
+		return item;
 	}
 
-	public void setItem(String item) {
-		Item = item;
+	public void setItem(String anitem) {
+		item = anitem;
 	}
 }

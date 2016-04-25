@@ -46,6 +46,27 @@
 				</div>
 				<div class="form-group">
 					<div class="row">
+					<label class="col-xs-12 col-sm-2 control-label" for="device-type">Device Type
+					</label>
+
+					<div class="col-xs-8 col-sm-7">
+					    <select name="device-type" id="device-type" ng-model="device.deviceType">
+					      <option value="">---Types if needed---</option> <!-- not selected / blank option -->
+					      <option value="UDP">UDP</option>
+					      <option value="TCP">TCP</option>
+					      <option value="exec">Execute Script/Program</option>
+					      <option value="switch">Switch</option>
+					      <option value="scene">Scene</option>
+					      <option value="activity">Activity</option>
+					      <option value="button">Button</option>
+					      <option value="thermo">Thermo</option>
+					      <option value="passthru">Pass Thru</option>
+					    </select>
+   					</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
 					<label class="col-xs-12 col-sm-2 control-label" for="device-map-type">Map Type
 					</label>
 
@@ -104,6 +125,17 @@
 					<div class="col-xs-8 col-sm-7">
 						<textarea rows="3" class="form-control" id="device-off-url"
 							ng-model="device.offUrl" placeholder="URL to turn device off"></textarea>
+					</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+					<label class="col-xs-12 col-sm-2 control-label"
+						for="device-headers">HTTP Headers </label>
+
+					<div class="col-xs-8 col-sm-7">
+						<textarea rows="3" class="form-control" id="device-headers"
+							ng-model="device.headers" placeholder="format like: [{&quot;name&quot;:&quot;A name&quot;,&quot;value&quot;:&quot;a value&quot;}]"></textarea>
 					</div>
 					</div>
 				</div>

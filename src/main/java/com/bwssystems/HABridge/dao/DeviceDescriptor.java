@@ -35,6 +35,9 @@ public class DeviceDescriptor{
     @SerializedName("onUrl")
     @Expose
     private String onUrl;
+    @SerializedName("headers")
+    @Expose
+    private String headers;
     @SerializedName("httpVerb")
     @Expose
     private String httpVerb;
@@ -121,6 +124,14 @@ public class DeviceDescriptor{
     public void setId(String id) {
         this.id = id;
     }
+
+	public String getHeaders() {
+		return headers;
+	}
+
+	public void setHeaders(String headers) {
+		this.headers = headers;
+	}
 
 	public String getHttpVerb() {
 		return httpVerb;

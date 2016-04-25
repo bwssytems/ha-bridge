@@ -2,6 +2,7 @@ package com.bwssystems.HABridge.hue;
 
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.api.CallItem;
+import com.bwssystems.HABridge.api.NameValue;
 import com.bwssystems.HABridge.api.UserCreateRequest;
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.DeviceState;
@@ -45,11 +46,13 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
@@ -330,6 +333,7 @@ public class HueMulator implements HueErrorStringSet {
 	    	String lightId = request.params(":id");
 	        String responseString = null;
 	        String url = null;
+	        NameValue[] theHeaders = null;
 	        DeviceState state = null;
 	        log.debug("hue state change requested: " + userId + " from " + request.ip() + " body: " + request.body());
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
@@ -351,6 +355,7 @@ public class HueMulator implements HueErrorStringSet {
     	        return responseString;
 	        }
 
+	        theHeaders = new Gson().fromJson(device.getHeaders(), NameValue[].class);
 	        responseString = this.formatSuccessHueResponse(state, request.body(), lightId);
 
 	        if(device.getDeviceType().toLowerCase().contains("hue") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("hueDevice")))
@@ -367,7 +372,7 @@ public class HueMulator implements HueErrorStringSet {
 		        	}
 	
 					// make call
-		        	responseString = doHttpRequest("http://"+deviceId.getIpAddress()+"/api/"+myHueHome.getTheHUERegisteredUser()+"/lights/"+deviceId.getDeviceId()+"/state", HttpPut.METHOD_NAME, device.getContentType(), request.body());
+		        	responseString = doHttpRequest("http://"+deviceId.getIpAddress()+"/api/"+myHueHome.getTheHUERegisteredUser()+"/lights/"+deviceId.getDeviceId()+"/state", HttpPut.METHOD_NAME, device.getContentType(), request.body(), null);
 					if (responseString == null) {
 						log.warn("Error on calling url to change device state: " + url);
 						responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling HUE to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
@@ -511,16 +516,40 @@ public class HueMulator implements HueErrorStringSet {
 	        		}
 	        	}
 	        }
-	        else if(device.getDeviceType().startsWith("Exec")) {
-	        	Process p = Runtime.getRuntime().exec(url);
-	        }
-	        else if(url.contains("udp://"))
-	        {
-	        	if(!url.substring(0, 1).equalsIgnoreCase("[")) {
-	        		url = "[{\"item\":\"" + url +"\"}]";
+	        else if(device.getDeviceType().startsWith("exec")) {
+	        	log.debug("Exec Request called with url: " + url);
+	        	if(!url.startsWith("[")) {
+	        		if(url.startsWith("{\"item"))
+	        			url = "[" + url + "]";
+	        		else
+	        			url = "[{\"item\":\"" + url +"\"}]";
 	        	}
 	        	CallItem[] callItems = new Gson().fromJson(url, CallItem[].class);
-	        	log.debug("executing HUE api request to UDP: " + url);
+	        	for(int i = 0; i < callItems.length; i++) {
+        			if( i > 0) {
+        				Thread.sleep(bridgeSettings.getButtonsleep());
+        			}
+	        		try {
+	        			log.debug("Executing request: " + callItems[i].getItem());
+	        			Process p = Runtime.getRuntime().exec(callItems[i].getItem());
+	        			log.debug("Process running: " + p.isAlive());
+	        		}  catch (IOException e) {
+		    			log.warn("Could not execute request: " + callItems[i].getItem(), e);
+		    			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+						i = callItems.length+1;
+		    		}
+	        	}
+	        }
+	        else if(url.contains("udp://") || url.contains("tcp://"))
+	        {
+	        	log.debug("executing HUE api request for network call: " + url);
+	        	if(!url.startsWith("[")) {
+	        		if(url.startsWith("{\"item"))
+	        			url = "[" + url + "]";
+	        		else
+	        			url = "[{\"item\":\"" + url +"\"}]";
+	        	}
+	        	CallItem[] callItems = new Gson().fromJson(url, CallItem[].class);
         		for(int i = 0; i < callItems.length; i++) {
         			if( i > 0) {
         				Thread.sleep(bridgeSettings.getButtonsleep());
@@ -529,19 +558,28 @@ public class HueMulator implements HueErrorStringSet {
 		        		String intermediate = callItems[i].getItem().substring(6);
 		        		String ipAddr = intermediate.substring(0, intermediate.indexOf(':'));
 		        		String port = intermediate.substring(intermediate.indexOf(':') + 1, intermediate.indexOf('/'));
-		        		String theBody = intermediate.substring(intermediate.indexOf('/')+1);
-		        		DatagramSocket responseSocket = new DatagramSocket(Integer.parseInt(port));
+		        		String theBody = replaceIntensityValue(intermediate.substring(intermediate.indexOf('/')+1), state.getBri());
 		        		if(theBody.startsWith("0x")) {
 		        			sendData = DatatypeConverter.parseHexBinary(theBody.substring(2));
 		        		}
 		        		else
 		        			sendData = theBody.getBytes();
 		        		InetAddress IPAddress = InetAddress.getByName(ipAddr);
-		        		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Integer.parseInt(port));
-		        		responseSocket.send(sendPacket);
-		        		responseSocket.close();
+		        		if(callItems[i].getItem().contains("udp://")) {
+			        		DatagramSocket responseSocket = new DatagramSocket(Integer.parseInt(port));
+			        		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Integer.parseInt(port));
+			        		responseSocket.send(sendPacket);
+			        		responseSocket.close();
+		        		}
+		        		else if(callItems[i].getItem().contains("tcp://"))
+		        		{
+			        		Socket dataSendSocket = new Socket(IPAddress, Integer.parseInt(port));
+			        		DataOutputStream outToClient = new DataOutputStream(dataSendSocket.getOutputStream());
+			        		outToClient.write(sendData);
+			        		dataSendSocket.close();
+		        		}
 		    		}  catch (IOException e) {
-		    			log.warn("Could not send UDP Datagram packet for request.", e);
+		    			log.warn("Could not send data for network request.", e);
 		    			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 						i = callItems.length+1;
 		    		}
@@ -549,8 +587,11 @@ public class HueMulator implements HueErrorStringSet {
 	        }
 	        else
 	        {
-	        	if(!url.substring(0, 1).equalsIgnoreCase("[")) {
-	        		url = "[{\"item\":\"" + url +"\"}]";
+	        	if(!url.startsWith("[")) {
+	        		if(url.startsWith("{\"item"))
+	        			url = "[" + url + "]";
+	        		else
+	        			url = "[{\"item\":\"" + url +"\"}]";
 	        	}
 	        	CallItem[] callItems = new Gson().fromJson(url, CallItem[].class);
 	        	log.debug("executing HUE api request to Http " + (device.getHttpVerb() == null?"GET":device.getHttpVerb()) + ": " + url);
@@ -566,7 +607,7 @@ public class HueMulator implements HueErrorStringSet {
 					else
 						body = replaceIntensityValue(device.getContentBodyOff(), state.getBri());
 					// make call
-					if (doHttpRequest(anUrl, device.getHttpVerb(), device.getContentType(), body) == null) {
+					if (doHttpRequest(anUrl, device.getHttpVerb(), device.getContentType(), body, theHeaders) == null) {
 						log.warn("Error on calling url to change device state: " + anUrl);
 						responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 						i = callItems.length+1;
@@ -620,7 +661,7 @@ public class HueMulator implements HueErrorStringSet {
 
 
 //	This function executes the url from the device repository against the vera
-    protected String doHttpRequest(String url, String httpVerb, String contentType, String body) {
+    protected String doHttpRequest(String url, String httpVerb, String contentType, String body, NameValue[] headers) {
         HttpUriRequest request = null;
     	String theContent = null;
         try {
@@ -645,6 +686,11 @@ public class HueMulator implements HueErrorStringSet {
         }
         log.debug("Making outbound call in doHttpRequest: " + request);
         try {
+        	if(headers != null && headers.length > 0) {
+        		for(int i = 0; i < headers.length; i++) {
+        			request.setHeader(headers[i].getName(), headers[i].getValue());
+        		}
+        	}
             HttpResponse response = httpClient.execute(request);
             log.debug((httpVerb == null?"GET":httpVerb) + " execute on URL responded: " + response.getStatusLine().getStatusCode());
             if(response.getStatusLine().getStatusCode() >= 200  && response.getStatusLine().getStatusCode() < 300){

@@ -112,6 +112,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		self.state.device.deviceType = "custom";
 		self.state.device.targetDevice = null;
 		self.state.device.offUrl = "";
+		self.state.device.headers = null;
 		self.state.device.httpVerb = null;
 		self.state.device.contentType = null;
 		self.state.device.contentBody = null;
@@ -882,6 +883,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 							targetDevice: $scope.device.targetDevice,
 							onUrl: $scope.device.onUrl,
 							offUrl: $scope.device.offUrl,
+							headers: $scope.device.headers,
 							httpVerb: $scope.device.httpVerb,
 							contentType: $scope.device.contentType,
 							contentBody: $scope.device.contentBody,
@@ -1180,6 +1182,7 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 							targetDevice: $scope.device.targetDevice,
 							onUrl: $scope.device.onUrl,
 							offUrl: $scope.device.offUrl,
+							headers: $scope.device.headers,
 							httpVerb: $scope.device.httpVerb,
 							contentType: $scope.device.contentType,
 							contentBody: $scope.device.contentBody,
