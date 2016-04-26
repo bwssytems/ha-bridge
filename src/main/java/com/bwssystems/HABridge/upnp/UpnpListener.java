@@ -33,68 +33,117 @@ public class UpnpListener {
 		bridgeControl = theControl;
 	}
 
+	@SuppressWarnings("resource")
 	public boolean startListening(){
 		log.info("UPNP Discovery Listener starting....");
+		DatagramSocket responseSocket = null;
+		MulticastSocket upnpMulticastSocket = null;
+		Enumeration<NetworkInterface> ifs = null;
 
-		try (DatagramSocket responseSocket = new DatagramSocket(upnpResponsePort);
-				MulticastSocket upnpMulticastSocket  = new MulticastSocket(Configuration.UPNP_DISCOVERY_PORT);) {
-			InetSocketAddress socketAddress = new InetSocketAddress(Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT);
-			Enumeration<NetworkInterface> ifs =	NetworkInterface.getNetworkInterfaces();
-
-			while (ifs.hasMoreElements()) {
-				NetworkInterface xface = ifs.nextElement();
-				Enumeration<InetAddress> addrs = xface.getInetAddresses();
-				String name = xface.getName();
-				int IPsPerNic = 0;
-
-				while (addrs.hasMoreElements()) {
-					InetAddress addr = addrs.nextElement();
-					if(traceupnp)
-						log.info("Traceupnp: " + name + " ... has addr " + addr);
-					else
-						log.debug(name + " ... has addr " + addr);
-					if (InetAddressUtils.isIPv4Address(addr.getHostAddress())) {
-						IPsPerNic++;
-					}
+		boolean portLoopControl = true;
+		int retryCount = 0;
+		while(portLoopControl) {
+			try {
+				responseSocket = new DatagramSocket(upnpResponsePort);
+				if(retryCount > 0)
+					log.error("Upnp Response Port is in use, found port: " + upnpResponsePort);
+				retryCount = 0;
+				portLoopControl = false;
+			} catch(SocketException e) {
+				if(retryCount == 0)
+					log.warn("Upnp Response Port is in use, starting loop to find open port for 20 tries - port is: " + upnpResponsePort);
+				if(retryCount >= 20) {
+					portLoopControl = false;
+					log.error("Upnp Response Port is in use, could not find - last port tried: " + upnpResponsePort + " with message: " + e.getMessage());
+					return false;
 				}
-				log.debug("Checking " + name + " to our interface set");
-				if (IPsPerNic > 0) {
+			}
+			retryCount++;
+			upnpResponsePort++;
+		}
+
+		try {
+			upnpMulticastSocket  = new MulticastSocket(Configuration.UPNP_DISCOVERY_PORT);
+		} catch(IOException e){
+			log.error("Upnp Discovery Port is in use, or restricted by admin (try running with duso or admin privs): " + Configuration.UPNP_DISCOVERY_PORT + " with message: " + e.getMessage());
+			return false;
+		}
+		
+		InetSocketAddress socketAddress = new InetSocketAddress(Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT);
+		try {
+			ifs =	NetworkInterface.getNetworkInterfaces();
+		}  catch (SocketException e) {
+			log.error("Could not get network interfaces for thsi machine: " + e.getMessage());
+			return false;
+		}
+
+		while (ifs.hasMoreElements()) {
+			NetworkInterface xface = ifs.nextElement();
+			Enumeration<InetAddress> addrs = xface.getInetAddresses();
+			String name = xface.getName();
+			int IPsPerNic = 0;
+
+			while (addrs.hasMoreElements()) {
+				InetAddress addr = addrs.nextElement();
+				if (traceupnp)
+					log.info("Traceupnp: " + name + " ... has addr " + addr);
+				else
+					log.debug(name + " ... has addr " + addr);
+				if (InetAddressUtils.isIPv4Address(addr.getHostAddress())) {
+					IPsPerNic++;
+				}
+			}
+			log.debug("Checking " + name + " to our interface set");
+			if (IPsPerNic > 0) {
+				try {
 					upnpMulticastSocket.joinGroup(socketAddress, xface);
-					if(traceupnp)
+					if (traceupnp)
 						log.info("Traceupnp: Adding " + name + " to our interface set");
 					else
 						log.debug("Adding " + name + " to our interface set");
+				} catch (IOException e) {
+					log.warn("Multicast join failed for: " + socketAddress.getHostName() + " to interface: "
+							+ xface.getName() + " with message: " + e.getMessage());
 				}
 			}
-
-			log.info("UPNP Discovery Listener running and ready....");
-			boolean loopControl = true;
-			while(loopControl){ //trigger shutdown here
-				byte[] buf = new byte[1024];
-				DatagramPacket packet = new DatagramPacket(buf, buf.length);
-				upnpMulticastSocket.receive(packet);
-				if(isSSDPDiscovery(packet)){
-					sendUpnpResponse(responseSocket, packet.getAddress(), packet.getPort());
-				}
-				if(bridgeControl.isReinit() || bridgeControl.isStop()) {
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						// noop
-					}
-					loopControl = false;
-				}
-			}
-			upnpMulticastSocket.close();
-			responseSocket.close();
-		}  catch (IOException e) {
-			log.error("UpnpListener encountered an error opening sockets. Shutting down", e);
 		}
-		if(bridgeControl.isReinit())
+
+		log.info("UPNP Discovery Listener running and ready....");
+		boolean loopControl = true;
+		boolean error = false;
+		while (loopControl) { // trigger shutdown here
+			byte[] buf = new byte[1024];
+			DatagramPacket packet = new DatagramPacket(buf, buf.length);
+			try {
+				upnpMulticastSocket.receive(packet);
+				if (isSSDPDiscovery(packet)) {
+					try {
+						sendUpnpResponse(responseSocket, packet.getAddress(), packet.getPort());
+					} catch (IOException e) {
+						log.error("UpnpListener encountered an error sending upnp response packet. Shutting down", e);
+						error = true;
+					}
+				}
+			} catch (IOException e) {
+				log.error("UpnpListener encountered an error reading socket. Shutting down", e);
+				error = true;
+			}
+			if (error || bridgeControl.isReinit() || bridgeControl.isStop()) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// noop
+				}
+				loopControl = false;
+			}
+		}
+		upnpMulticastSocket.close();
+		responseSocket.close();
+		if (bridgeControl.isReinit())
 			log.info("UPNP Discovery Listener - ended, restart found");
-		if(bridgeControl.isStop())
+		if (bridgeControl.isStop())
 			log.info("UPNP Discovery Listener - ended, stop found");
-		if(!bridgeControl.isStop()&& !bridgeControl.isReinit()) {
+		if (!bridgeControl.isStop() && !bridgeControl.isReinit()) {
 			log.info("UPNP Discovery Listener - ended, error found");
 			return false;
 		}

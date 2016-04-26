@@ -34,13 +34,18 @@ import static spark.Spark.put;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 
 import org.slf4j.Logger;
@@ -49,6 +54,7 @@ import org.slf4j.LoggerFactory;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -58,6 +64,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.net.ssl.SSLContext;
 import javax.xml.bind.DatatypeConverter;
 
 /**
@@ -78,6 +85,10 @@ public class HueMulator implements HueErrorStringSet {
     private Nest theNest;
     private HueHome myHueHome;
     private HttpClient httpClient;
+    private CloseableHttpClient httpclientSSL;
+    private SSLContext sslcontext;
+    private SSLConnectionSocketFactory sslsf;
+    private RequestConfig globalConfig;
     private ObjectMapper mapper;
     private BridgeSettingsDescriptor bridgeSettings;
     private byte[] sendData;
@@ -87,6 +98,22 @@ public class HueMulator implements HueErrorStringSet {
 
     public HueMulator(BridgeSettingsDescriptor theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome){
         httpClient = HttpClients.createDefault();
+        // Trust own CA and all self-signed certs
+        sslcontext = SSLContexts.createDefault();
+        // Allow TLSv1 protocol only
+        sslsf = new SSLConnectionSocketFactory(
+                sslcontext,
+                new String[] { "TLSv1" },
+                null,
+                SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+        globalConfig = RequestConfig.custom()
+                .setCookieSpec(CookieSpecs.STANDARD)
+                .build();
+        httpclientSSL = HttpClients.custom()
+                .setSSLSocketFactory(sslsf)
+                .setDefaultRequestConfig(globalConfig)
+                .build();
+
         mapper = new ObjectMapper(); //armzilla: work around Echo incorrect content type and breaking mapping. Map manually
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         repository = aDeviceRepository;
@@ -495,9 +522,9 @@ public class HueMulator implements HueErrorStringSet {
 	        		if(thermoSetting.getControl().equalsIgnoreCase("temp")) {
 	        			if(request.body().contains("bri")) {
 	        				if(bridgeSettings.isFarenheit())
-	        					thermoSetting.setTemp(String.valueOf((Double.parseDouble(replaceIntensityValue(thermoSetting.getTemp(), state.getBri())) - 32.0)/1.8));
+	        					thermoSetting.setTemp(String.valueOf((Double.parseDouble(replaceIntensityValue(thermoSetting.getTemp(), state.getBri(), false)) - 32.0)/1.8));
 	        				else
-	        					thermoSetting.setTemp(String.valueOf(Double.parseDouble(replaceIntensityValue(thermoSetting.getTemp(), state.getBri()))));
+	        					thermoSetting.setTemp(String.valueOf(Double.parseDouble(replaceIntensityValue(thermoSetting.getTemp(), state.getBri(), false))));
 	        				log.debug("Setting thermostat: " + thermoSetting.getName() + " to " + thermoSetting.getTemp() + "C");
 	        				theNest.getThermostat(thermoSetting.getName()).setTargetTemperature(Float.parseFloat(thermoSetting.getTemp()));
 	        			}
@@ -531,7 +558,7 @@ public class HueMulator implements HueErrorStringSet {
         			}
 	        		try {
 	        			log.debug("Executing request: " + callItems[i].getItem());
-	        			Process p = Runtime.getRuntime().exec(callItems[i].getItem());
+	        			Process p = Runtime.getRuntime().exec(replaceIntensityValue(callItems[i].getItem(), state.getBri(), false));
 	        			log.debug("Process running: " + p.isAlive());
 	        		}  catch (IOException e) {
 		    			log.warn("Could not execute request: " + callItems[i].getItem(), e);
@@ -556,15 +583,25 @@ public class HueMulator implements HueErrorStringSet {
         			}
 		        	try {
 		        		String intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
-		        		String ipAddr = intermediate.substring(0, intermediate.indexOf(':'));
-		        		String port = intermediate.substring(intermediate.indexOf(':') + 1, intermediate.indexOf('/'));
-		        		String theBody = replaceIntensityValue(intermediate.substring(intermediate.indexOf('/')+1), state.getBri());
-		        		if(theBody.startsWith("0x")) {
-		        			sendData = DatatypeConverter.parseHexBinary(theBody.substring(2));
+		        		String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
+		        		String theUrlBody = intermediate.substring(intermediate.indexOf('/')+1);
+		        		String hostAddr = null;
+		        		String port = null;
+		        		if(hostPortion.contains(":")) {
+		        			hostAddr = hostPortion.substring(0, intermediate.indexOf(':'));
+		        			port = hostPortion.substring(intermediate.indexOf(':') + 1);
 		        		}
 		        		else
-		        			sendData = theBody.getBytes();
-		        		InetAddress IPAddress = InetAddress.getByName(ipAddr);
+		        			hostAddr = hostPortion;
+		        		InetAddress IPAddress = InetAddress.getByName(hostAddr);;
+		        		if(theUrlBody.startsWith("0x")) {
+		        			theUrlBody = replaceIntensityValue(theUrlBody, state.getBri(), true);
+		        			sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
+		        		}
+		        		else {
+		        			theUrlBody = replaceIntensityValue(theUrlBody, state.getBri(), false);
+		        			sendData = theUrlBody.getBytes();
+		        		}
 		        		if(callItems[i].getItem().contains("udp://")) {
 		    	        	log.debug("executing HUE api request to UDP: " + callItems[i].getItem());
 			        		DatagramSocket responseSocket = new DatagramSocket(Integer.parseInt(port));
@@ -584,12 +621,12 @@ public class HueMulator implements HueErrorStringSet {
 		        		else {
 		    	        	log.debug("executing HUE api request to Http " + (device.getHttpVerb() == null?"GET":device.getHttpVerb()) + ": " + callItems[i].getItem());
 		        			
+							String anUrl = replaceIntensityValue(callItems[i].getItem(), state.getBri(), false);
 							String body;
-							String anUrl = replaceIntensityValue(callItems[i].getItem(), state.getBri());
 							if (state.isOn())
-								body = replaceIntensityValue(device.getContentBody(), state.getBri());
+								body = replaceIntensityValue(device.getContentBody(), state.getBri(), false);
 							else
-								body = replaceIntensityValue(device.getContentBodyOff(), state.getBri());
+								body = replaceIntensityValue(device.getContentBodyOff(), state.getBri(), false);
 							// make call
 							if (doHttpRequest(anUrl, device.getHttpVerb(), device.getContentType(), body, theHeaders) == null) {
 								log.warn("Error on calling url to change device state: " + anUrl);
@@ -620,18 +657,34 @@ public class HueMulator implements HueErrorStringSet {
     *  intensity.percent : 0-100, adjusted for the vera
     *  intensity.math(X*1) : where X is the value from the interface call and can use net.java.dev.eval math
     */
-    protected String replaceIntensityValue(String request, int intensity){
+    protected String replaceIntensityValue(String request, int intensity, boolean isHex){
         if(request == null){
             return "";
         }
-        if(request.contains(INTENSITY_BYTE)){
-            String intensityByte = String.valueOf(intensity);
-            request = request.replace(INTENSITY_BYTE, intensityByte);
-        }else if(request.contains(INTENSITY_PERCENT)){
+        if(request.contains(INTENSITY_BYTE)) {
+            if(isHex) {
+            	BigInteger bigInt = BigInteger.valueOf(intensity);
+            	byte[] theBytes = bigInt.toByteArray();
+            	String hexValue = DatatypeConverter.printHexBinary(theBytes);
+            	request = request.replace(INTENSITY_BYTE, hexValue);
+            }
+            else {
+                String intensityByte = String.valueOf(intensity);
+            	request = request.replace(INTENSITY_BYTE, intensityByte);
+            }
+        } else if(request.contains(INTENSITY_PERCENT)) {
             int percentBrightness = (int) Math.round(intensity/255.0*100);
-            String intensityPercent = String.valueOf(percentBrightness);
-            request = request.replace(INTENSITY_PERCENT, intensityPercent);
-        } else if(request.contains(INTENSITY_MATH)){
+            if(isHex) {
+            	BigInteger bigInt = BigInteger.valueOf(percentBrightness);
+            	byte[] theBytes = bigInt.toByteArray();
+            	String hexValue = DatatypeConverter.printHexBinary(theBytes);
+            	request = request.replace(INTENSITY_PERCENT, hexValue);
+            }
+            else {
+                String intensityPercent = String.valueOf(percentBrightness);
+                request = request.replace(INTENSITY_PERCENT, intensityPercent);
+            }
+        } else if(request.contains(INTENSITY_MATH)) {
         	Map<String, BigDecimal> variables = new HashMap<String, BigDecimal>();
         	String mathDescriptor = request.substring(request.indexOf(INTENSITY_MATH) + INTENSITY_MATH.length(),request.indexOf(INTENSITY_MATH_CLOSE));
         	variables.put(INTENSITY_MATH_VALUE, new BigDecimal(intensity));
@@ -641,7 +694,15 @@ public class HueMulator implements HueErrorStringSet {
             	Expression exp = new Expression(mathDescriptor);
             	BigDecimal result = exp.eval(variables);
 				Integer endResult = Math.round(result.floatValue());
-	            request = request.replace(INTENSITY_MATH + mathDescriptor + INTENSITY_MATH_CLOSE, endResult.toString());
+	            if(isHex) {
+	            	BigInteger bigInt = BigInteger.valueOf(endResult);
+	            	byte[] theBytes = bigInt.toByteArray();
+	            	String hexValue = DatatypeConverter.printHexBinary(theBytes);
+	            	request = request.replace(INTENSITY_MATH + mathDescriptor + INTENSITY_MATH_CLOSE, hexValue);
+	            }
+	            else {
+	            	request = request.replace(INTENSITY_MATH + mathDescriptor + INTENSITY_MATH_CLOSE, endResult.toString());
+	            }
 			} catch (Exception e) {
 				log.warn("Could not execute Math: " + mathDescriptor, e);
 			}
@@ -650,7 +711,7 @@ public class HueMulator implements HueErrorStringSet {
     }
 
 
-//	This function executes the url from the device repository against the vera
+//	This function executes the url from the device repository against the target as http or https as defined
     protected String doHttpRequest(String url, String httpVerb, String contentType, String body, NameValue[] headers) {
         HttpUriRequest request = null;
     	String theContent = null;
@@ -681,7 +742,11 @@ public class HueMulator implements HueErrorStringSet {
         			request.setHeader(headers[i].getName(), headers[i].getValue());
         		}
         	}
-            HttpResponse response = httpClient.execute(request);
+        	HttpResponse response;
+        	if(url.startsWith("https"))
+        		response = httpclientSSL.execute(request);
+        	else
+        		response = httpClient.execute(request);
             log.debug((httpVerb == null?"GET":httpVerb) + " execute on URL responded: " + response.getStatusLine().getStatusCode());
             if(response.getStatusLine().getStatusCode() >= 200  && response.getStatusLine().getStatusCode() < 300){
             	theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); //read content for data
