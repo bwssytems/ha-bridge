@@ -23,12 +23,29 @@ ATTENTION: This requires JDK 1.8 to run
 ```
 java -jar ha-bridge-W.X.Y.jar
 ```
+### Automation on Linux systems
+To have this conigured and running automatically ther eare a few resources to use. One is using Docker and a docker containerahs been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
+
+For next gen Linux systems, here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
+```
+[Unit]
+Description=HA Bridge
+Wants=network.target
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/amazon-echo/data/habridge.config /home/pi/amazon-echo/ha-bridge-2.0.0.jar
+
+[Install]
+WantedBy=multi-user.target
+```
 ## Available Arguments
 Arguments are now deprecated. The ha-bridge will use the old -D arguments and populate the configuration screen, Brisge Control Tab, which can now be saved to a file and will not be needed. There is only one optional argument that overrides and that is the location of the configuration file. The default is the relative path "data/habridge.config".
 ### -Dconfig.file=`<filepath>`
 The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify -Dconfig.file=`<directory>/<filename>` explicitly. The command line example:
 ```
-java -jar -Dconfig.file=/home/me/data ha-bridge-W.X.Y.jar
+java -jar -Dconfig.file=/home/me/data/myhabridge.config ha-bridge-W.X.Y.jar
 ```
 ### -Dserver.port=`<port number>`
 The default port number for the bridge is 8080. To override what the default or what is in the configuration file for this parameter, specify -Dserver.port=`<port number>` explicitly. This is especially helpful if you are running the ha-bridge for the first time and have another application on port 8080. The command line example:
@@ -89,7 +106,7 @@ At the bottom of the screen is the "Bridge Settings Backup" which can be accesse
 This screen displays the last 512 or number of rows defined in the config screen of the log so you don't have to go to the output of your process. The `Update Log` button refreshes the log as this screen does not auto refresh. FYI, when the trace upnp setting is turned on in the configuration, the messages will show here.
 
 The bottom part of the Logs Screen has configuration to change the logging levels as it is running. The ROOT is the basic setting and will turn on only top level logging. To set logging at a lower level, select the `Show All Loggers` checkbox and then you can set the explicit level on each of the processes components. The most helpful logger would be setting DBUG for com.bwssystems.HABridge.hue.HueMulator component. Changing this and then selecting the `Update Log Levels` button applies the new log settings. 
-### Helper Tabs for Device additions
+### Bridge Device Additions
 You must configure devices before you will have any thing for the Echo or other contoller that is connected to the ha-bridge to receive.
 #### Helpers
 The easy way to get devices configured is with the use of the helpers for the Vera or Harmony, Nest and Hue to create devices that the bridge will present.
@@ -100,11 +117,17 @@ The helper tabs will also show you what you have already configured for that tar
 #### The Manual Add Tab
 Another way to add a device is through the Manual Add Tab. This allows you to manually enter the name, the on and off URLs and select if there are custom handling with the type of call that can be made. This allows for control of anything that has a distinct request that can be executed so you are not limited to the Vera, Harmony, Nest or other Hue.
 
-The format of these can be the default HTTP request which executes the URLs formatted as http://<your stuff here> as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use https://<your secure call here>.
+The format of these can be the default HTTP request which executes the URLs formatted as http://<your stuff here> as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use https://<your secure call here>. When using POST and PUT, you have the ability to specify the body that will be sent with the request as well as the application type for the http call.
+
+Headers can be added as well using a Json construct [{"name":"header type name","value":"the header value"}] with the format example:
+```
+[{"name":"Cache-Control","value":"no-store, no-cache, must-revalidate, post-check=0, pre-check=0"},
+{"name":"Pragma","value":"no-cache"}]
+```
 
 Another option that is detected by the bridge is to use UDP or TCP direct calls such as udp://<ip_address>:<port>/<your stuff here> to send a UDP request. TCP calls are handled the same way as tcp://<ip_address>:<port>/<your stuff here>. If your data for the UDP or TCP request is formatted as "0x00F009B9" lexical hex format, the bridge will convert the data into a binary stream to send.
 
-You can also use the value replacement constructs within these statements. Such as ${intensity..byte},${intensity.percent},${intensity.math(X*1)}
+You can also use the value replacement constructs within these statements. Such as using the expressions ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 for straight pass through of the value or items that require special calculated values using ${intensity.math()} i.e. "${intensity.math(X/4)}".
 Examples:
 ```
 GET
@@ -117,6 +140,7 @@ ContentBody: {"someValue":"${intensity..byte}"}
 udp://192.168.1.1:5000/0x45${intensity.percent}55
 ```
 
+#### Multiple Call Construct
 Also available is the ability to specify multiple commands in the On URL, Dim URL and Off URL areas by adding Json constructs listed here.
 Format Example in the URL areas:
 ```
@@ -132,6 +156,25 @@ Format Example in the URL areas:
 {"item":"http://192.168.1.1:8180/do/this/thing"},
 {"item":"tcp://192.168.2.1/sendthisdata"},
 {"item":"https://192.168.12.1/do/this/secure/thing"}]
+```
+#### Script or Command Execution
+The release as of v2.0.0 will no support the execution of a local script or program. This will blindly fire off a process to run and is bound by the privileges of the java process.
+
+To configure this type of manual add, you will need to select the Device type of "Execute Script/Program".
+
+In the URL areas, the format of the execution is just providing what command line you would like to run, or using the multiple call item construct described above.
+```
+notepad.exe
+
+OR
+
+[{"item":"C:\\Users\\John\\Documents\\Applications\\putty.exe 192.168.1.1"},
+{"item":"notepad.exe"}]
+
+OR
+
+/home/me/startsomething.sh
+
 ```
 
 Also, you may want to use the REST API's listed below to configure your devices.
