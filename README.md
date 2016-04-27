@@ -77,30 +77,30 @@ Here is the table of items to use to tell Alexa what you want to do:
 To do this... |	Say this...
 --------------|------------
 ON Commands | 
- | Alexa, turn on <Device Name>
- | Alexa, start <Device Name>
- | Alexa, unlock <Device Name>
- | Alexa, open <Device Name>
- | Alexa, boot up <Device Name>
- | Alexa, run <Device Name>
- | Alexa, arm <Device Name>
+ | Alexa, turn on `<Device Name>`
+ | Alexa, start `<Device Name>`
+ | Alexa, unlock `<Device Name>`
+ | Alexa, open `<Device Name>`
+ | Alexa, boot up `<Device Name>`
+ | Alexa, run `<Device Name>`
+ | Alexa, arm `<Device Name>`
 OFF Commands | 
- | Alexa, turn off <Device Name>
- | Alexa, stop <Device Name> (this one is tricky to get right)
- | Alexa, stop running <Device Name> (also very tricky)
- | Alexa, lock <Device Name>
- | Alexa, close <Device Name>
- | Alexa, shutdown <Device Name>
- | Alexa, shut <Device Name>
- | Alexa, disarm <Device Name>
+ | Alexa, turn off `<Device Name>`
+ | Alexa, stop `<Device Name>` (this one is tricky to get right)
+ | Alexa, stop running `<Device Name>` (also very tricky)
+ | Alexa, lock `<Device Name>`
+ | Alexa, close `<Device Name>`
+ | Alexa, shutdown `<Device Name>`
+ | Alexa, shut `<Device Name>`
+ | Alexa, disarm `<Device Name>`
 DIM Commands | 
- | Alexa, brighten <Device Name> to <Position>
- | Alexa, dim <Device Name> to <Position>
- | Alexa, raise <Device Name> to <Position>
- | Alexa, lower <Device Name> to <Position>
- | Alexa, set <Device Name> to <Position>
- | Alexa, turn up <Device Name> to <Position>
- | Alexa, turn down <Device Name> to <Position>
+ | Alexa, brighten `<Device Name>` to `<Position>`
+ | Alexa, dim `<Device Name> to <Position>`
+ | Alexa, raise `<Device Name>` to `<Position>`
+ | Alexa, lower `<Device Name>` to `<Position>`
+ | Alexa, set `<Device Name>` to `<Position>`
+ | Alexa, turn up `<Device Name>` to `<Position>`
+ | Alexa, turn down `<Device Name>` to `<Position>`
 
 To see what Alexa thinks you said, you can check in the home page for your alexa.
 
