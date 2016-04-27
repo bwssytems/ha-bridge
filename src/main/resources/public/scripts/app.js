@@ -626,10 +626,6 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     $scope.saveSettings = function() {
     	bridgeService.saveSettings();
     };
-    $scope.setBridgeUrl = function (url) {
-        bridgeService.state.base = url;
-        bridgeService.viewDevices();
-    };
     $scope.goBridgeUrl = function (url) {
     	window.open(url, "_blank");
     };

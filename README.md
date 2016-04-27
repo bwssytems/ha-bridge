@@ -1,5 +1,11 @@
 # ha-bridge
-Emulates Philips Hue api to other home automation gateways such as an Amazon Echo.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API. In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest and the ability to proxy all of your real HUE bridges behind this bridge. Alternatively the Bridge supports custom calls as well using http/https/udp and tcp such as the LimitlessLED/MiLight bulbs using the UDP protocol. Binary data is supported with UDP/TCP.
+Emulates Philips Hue api to other home automation gateways such as an Amazon Echo.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
+
+In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest and the ability to proxy all of your real Hue bridges behind this bridge.
+
+Alternatively the Bridge supports custom calls as well using http/https/udp and tcp such as the LimitlessLED/MiLight bulbs using the UDP protocol. Binary data is supported with UDP/TCP.
+
+This bridge was built to help put the Internet of Things together.
 ## Build
 To customize and build it yourself, build a new jar with maven:  
 
@@ -20,53 +26,115 @@ java -jar ha-bridge-W.X.Y.jar
 ## Available Arguments
 Arguments are now deprecated. The ha-bridge will use the old -D arguments and populate the configuration screen, Brisge Control Tab, which can now be saved to a file and will not be needed. There is only one optional argument that overrides and that is the location of the configuration file. The default is the relative path "data/habridge.config".
 ### -Dconfig.file=`<filepath>`
-The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify -Dconfig.file=`<directory>/<filename>` explicitly.
+The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify -Dconfig.file=`<directory>/<filename>` explicitly. The command line example:
+```
+java -jar -Dconfig.file=/home/me/data ha-bridge-W.X.Y.jar
+```
 ### -Dserver.port=`<port number>`
-The default port number for the bridge is 8080. To override what the default or what is in the configuration file for this parameter, specify -Dserver.port=`<port number>` explicitly. This is especially helpful if you are running the ha-bridge for the first time and have another application on port 8080.
-## HA Bridge Configuration
+The default port number for the bridge is 8080. To override what the default or what is in the configuration file for this parameter, specify -Dserver.port=`<port number>` explicitly. This is especially helpful if you are running the ha-bridge for the first time and have another application on port 8080. The command line example:
+```
+java -jar -Dserver.port=80 ha-bridge-W.X.Y.jar
+```
+
+## HA Bridge Usage and Configuration
 This section will cover the basics of configuration and where this configuration can be done. This requires that you have started your bridge process and then have pointed your
-favorite web browser to http://your machine:and port if given.
+favorite web interface by going to the http://<my ip address>:<port> or http://localhost:<port> with port you have assigned. The default quick link is http://localhost:8080 for yoru reference.
+### The Bridge Devices Tab
+This screen allows you to see your devices you have configured for the ha-bridge to present to a controller, such as an Amazon Echo/Dot. It gives you a count of devices as there have been reports that the Echo only supports a limited number, but has been growing as of late, YMMV. You can test each device from this page as this calls the ha-bridge just as a controller would, i.e. the Echo. This is useful to make sure your configuration for each device is correct and for trouble shooting. You can also manages your devices as well by editing and making a new device copy as well as deleting it.
+
+At the bottom of the screen is the "Bridge Device DB Backup" which can be accessed with clicking on the `+` to expand this frame. Here you can backup and restore configurations that you have saved. These configs can be named or by clicking the `Backup Device DB' button will create a backup and name it for you. You can manage these backups by restoring them or deleting them.
 ### The Bridge Control Tab
 This is where all of the configuration occurs for what ports and IP's the bridge runs on. It also contains the configurations for target devices so that Helper Tabs for configuration can be added as well as the connection information to control those devices.
+#### Bridge server
+This field is used to test the bridge server with the UPNP IP Address and to make sure that the bridge is responding.
+#### Bridge Control Buttons
+These buttons are for managing the bridge. The Save button is enabled when there is a change to the configuration. The Bridge Reinitialize button will recycle the internal running of the bridge in the java process. The Stop button will stop the java process. The Refresh button will refresh the page and settings.
 #### Configuration Path and File
-The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify -Dconfig.file=`<directory>/<filename>` explicitly.
+The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify `<directory>/<filename>` explicitly.
 #### Device DB Path and File
-The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify -Dupnp.devices.db=`<directory>/<filename> or <filename>` if it is the same directory.
+The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify `<directory>/<filename>  explicitly.
 #### UPNP IP Address
-The server defaults to the first available address on the host if this is not given. This default may NOT be the correct IP that is your public IP for your host on the network. It is best to set this parameter to not have discovery issues. Replace the -Dupnp.config.address=`<ip address>` value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery. 
+The server defaults to the first available address on the host if this is not given. This default may NOT be the correct IP that is your public IP for your host on the network. It is best to set this parameter to not have discovery issues. Replace this value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery. 
 #### Web Server Port
-The server defaults to running on port 8080. If you're already running a server (like openHAB) on 8080, -Dserver.port=`<port>` on the command line.
+The server defaults to running on port 8080. To override what the default is, specify a different number.
 #### UPNP Response Port
 The upnp response port that will be used. The default is 50000.  
 #### Vera Names and IP Addresses
-The argument for the vera address should be given as it the system does not have a way to find the address. Supply -Dvera.address=X.Y.Z.A on the command line to provide it. If a vera is not used, do not set it. To provide multiple veras, use the json style notation outlined above to provide the list. This argument is backwards compatible.
+Provide IP Addresses of your Veras that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Vera and devce/scene you configure. 
 #### Harmony Names and IP Addresses
-The argument for the Harmony Hub address should be given as the system does not have a way to find the address. Supply -Dharmony.address=X.Y.Z.A on the command line to provide it. If a Harmony Hub is not used, do not set it. To provide multiple harmony hubs, use the json style notation outlined above to provide the list. This argument is backwards compatible.
+Provide IP Addresses of your Harmony Hubs that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the activity or buttons by the call it receives and send it to the target Harmony Hub and activity/button you configure. 
 #### Harmony Username
-The user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub features, provide -Dharmony.user=`<username>` on the command line.
+The user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub features.
 #### Harmony Password
-The password for the user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub Features, provide -Dharmony.pwd=`<password>` on the command line.
+The password for the user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub Features.
+#### Hue Names and IP Addresses
+Provide IP Addresses of your Hue Bridges that you want to proxy through the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will passthru the call it receives to the target Hue and device you configure.
 #### Nest Username
-The user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features, provide -Dnest.user=`<username>` on the command line. There is no need to give any ip address or host information as this contacts your cloud account.
+The user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features. There is no need to give any ip address or host information as this contacts your cloud account.
 #### Nest Password
-The password for the user name of the home.nest.com account for the Nestr user. This needs to be given if you are using the Nest features, provide -Dnest.pwd=`<password>` on the command line.
+The password for the user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features.
+#### Nest Temp Farenheit
+This setting allows the value being sent into the bridge to be interpreted as Farenheit or Celsius. The default is to have Farenheit.
+#### Button Press/Call Item Loop Sleep Interval (ms)
+This setting is the time used in between button presses when there is multple buttons in a button device. It also controls the time between multiple items in a custom device call. This is defaulted to 100ms and the number represnts milliseonds (1000 milliseconds = 1 second).
+#### Log Messages to Buffer
+This controls how many log messages will be kept and displayed on the log tab. This does not affect what is written to the standard output for logging. The default is 512. Changing this will incur more memory usage of the process.
 #### UPNP Strict Handling
-Upnp has been very closed on this platform to try and respond as a hue and there is now a setting to control if it is more open or strict, Add -Dupnp.strict=`<true|false>` to your command line to have the emulator respond to what it thinks is an echo to a hue or any other device. The default is upnp.strict=true.
+Upnp has been set to be very specific as to respond as a Hue. There may be a need to make this response a little more open for other devices that may want to find the ha-bridge. The default is to be strict which is set as true.
 #### Trace UPNP Calls
-Turn on tracing for upnp discovery messages. The default is false.
-## Helper Tabs for Device additions
-You must configure devices before you will have any thing for the Echo to receive. The easy way to get devices configures is with the web interface by going to the url for the host you are running on or localhost with port you have assigned: and use the helpers for the Vera or Harmony Hub to create devices that the Echo will find.
+Turn on tracing for upnp discovery messages to the log. The default is false.
 
-Another way to add a device is through the Manual Add Tab. This allows you to manually enter the name, the on and off URLs and select if there are custom handling with the type of call that can be made. This allows for control of anything that has a distinct request that can be executed so you are not limited to the Vera or the Harmony.
+At the bottom of the screen is the "Bridge Settings Backup" which can be accessed with clicking on the `+` to expand this frame. Here you can backup and restore configurations that you have saved. These configs can be named or by clicking the `Backup Settings' button will create a backup and name it for you. You can manage these backups by restoring them or deleting them.
+### The Logs Tab
+This screen displays the last 512 or number of rows defined in the config screen of the log so you don't have to go to the output of your process. The `Update Log` button refreshes the log as this screen does not auto refresh. FYI, when the trace upnp setting is turned on in the configuration, the messages will show here.
 
-The format of these can be the default HTTP request which excecutes the URLs formtted as http://<your stuff here> as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Another option that is detected by the bridge is to use the udp://<ip_address>:<port>/<your stuff here to send a UDP request. If your data for the UDP request is formatted as "0x00F009B9" lexical hex format, the bridge will convert the UDP data into a binary stream to send. Sed the examples inthe Configuration REST API Usage Section to get an idea.
+The bottom part of the Logs Screen has configuration to change the logging levels as it is running. The ROOT is the basic setting and will turn on only top level logging. To set logging at a lower level, select the `Show All Loggers` checkbox and then you can set the explicit level on each of the processes components. The most helpful logger would be setting DBUG for com.bwssystems.HABridge.hue.HueMulator component. Changing this and then selecting the `Update Log Levels` button applies the new log settings. 
+### Helper Tabs for Device additions
+You must configure devices before you will have any thing for the Echo or other contoller that is connected to the ha-bridge to receive.
+#### Helpers
+The easy way to get devices configured is with the use of the helpers for the Vera or Harmony, Nest and Hue to create devices that the bridge will present.
+
+For the Helpers, each item being presented from the target system has a button such as `Generate Bridge Device`, `Build A Button` or specific tasks such as `Temp` for thermostats that is used to create the specific device parameters and give it a name in the "Add a Bridge Device..." area below. The next thing to check is the name for the bridge device that it is something that makes sense especially if you usign the ha-bridge with an Echo as this is what the Echo will interpret as the device you want. Then select the `Add Bridge Device` button to finalize it.
+
+The helper tabs will also show you what you have already configured for that target type. Click on the `+` and you will see them and be able to delete them.
+#### The Manual Add Tab
+Another way to add a device is through the Manual Add Tab. This allows you to manually enter the name, the on and off URLs and select if there are custom handling with the type of call that can be made. This allows for control of anything that has a distinct request that can be executed so you are not limited to the Vera, Harmony, Nest or other Hue.
+
+The format of these can be the default HTTP request which executes the URLs formatted as http://<your stuff here> as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use https://<your secure call here>.
+
+Another option that is detected by the bridge is to use UDP or TCP direct calls such as udp://<ip_address>:<port>/<your stuff here> to send a UDP request. TCP calls are handled the same way as tcp://<ip_address>:<port>/<your stuff here>. If your data for the UDP or TCP request is formatted as "0x00F009B9" lexical hex format, the bridge will convert the data into a binary stream to send.
+
+You can also use the value replacement constructs within these statements. Such as ${intensity..byte},${intensity.percent},${intensity.math(X*1)}
+Examples:
+```
+GET
+http://192.168.1.1:8180/set/this/value/${intensity.percent}
+
+PUT
+http://192.168.1.1:8280/set/this
+ContentBody: {"someValue":"${intensity..byte}"}
+
+udp://192.168.1.1:5000/0x45${intensity.percent}55
+```
+
+Also available is the ability to specify multiple commands in the On URL, Dim URL and Off URL areas by adding Json constructs listed here.
+Format Example in the URL areas:
+```
+[{"item":"http://192.168.1.1:8180/do/this/thing"},
+{"item":"http://192.168.1.1:8180/do/the/next/thing"},
+"item":"http://192.168.1.1:8180/do/another/thing"}]
+
+
+[{"item":"udp://192.168.1.1:5000/0x450555"},
+{"item":"udp://192.168.1.1:5000/0x45${intensity.percent}55"}]
+
+[{"item":"udp://192.168.1.1:5000/0x450555"},
+{"item":"http://192.168.1.1:8180/do/this/thing"},
+{"item":"tcp://192.168.2.1/sendthisdata"},
+{"item":"https://192.168.12.1/do/this/secure/thing"}]
+```
 
 Also, you may want to use the REST API's listed below to configure your devices.
-
-Web Configuration Access
-```
-http://<ip address>:<port>
-```
 ## Ask Alexa
 After this Tell Alexa: "Alexa, discover my devices". If there is an issue you can go to the `Menu / Settings / Connected Home` for the echo on the mobile app or your browser and have Alexa forget all devices and then do the discovery again.
 

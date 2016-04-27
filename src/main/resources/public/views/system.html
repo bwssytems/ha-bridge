@@ -27,9 +27,7 @@
 							ng-model="bridge.base" placeholder="URL to bridge">
 					</div>
 					<button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
-						ng-click="setBridgeUrl(bridge.base)">Load</button>
-					<button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
-						ng-click="goBridgeUrl(bridge.base)">Go</button>
+						ng-click="goBridgeUrl(bridge.base)">Test</button>
 				</div>
 			</form>
 			<form name="form">
@@ -172,11 +170,6 @@
 					</td>
 				</tr>
 				<tr>
-					<td>Button Press Sleep Interval (ms)</td>
-					<td><input id="bridge-settings-buttonsleep" class="form-control" type="number" name="input"
-							ng-model="bridge.settings.buttonsleep" min="100" max="9999"></td>
-				</tr>
-				<tr>
 					<td>Nest Username</td>
 					<td><input id="bridge-settings-nestuser" class="form-control" type="text"
 							ng-model="bridge.settings.nestuser" placeholder="someone@gmail.com"></td>
@@ -185,6 +178,16 @@
 					<td>Nest Password</td>
 					<td><input id="bridge-settings-nestpwd" class="form-control" type="password"
 							ng-model="bridge.settings.nestpwd" placeholder="thepassword"></td>
+				</tr>
+				<tr>
+					<td>Nest Temp Farenheit</td>
+					<td><input type="checkbox" ng-model="bridge.settings.farenheit"
+           				ng-true-value=true ng-false-value=false>  {{bridge.settings.farenheit}}</td>
+				</tr>
+				<tr>
+					<td>Button Press/Call Item Loop Sleep Interval (ms)</td>
+					<td><input id="bridge-settings-buttonsleep" class="form-control" type="number" name="input"
+							ng-model="bridge.settings.buttonsleep" min="100" max="9999"></td>
 				</tr>
 				<tr>
 					<td>Log Messages to Buffer</td>
@@ -200,11 +203,6 @@
 					<td>Trace UPNP Calls</td>
 					<td><input type="checkbox" ng-model="bridge.settings.traceupnp"
            				ng-true-value=true ng-false-value=false>  {{bridge.settings.traceupnp}}</td>
-				</tr>
-				<tr>
-					<td>Nest Temp Farenheit</td>
-					<td><input type="checkbox" ng-model="bridge.settings.farenheit"
-           				ng-true-value=true ng-false-value=false>  {{bridge.settings.farenheit}}</td>
 				</tr>
 			</table>
 			</form>
