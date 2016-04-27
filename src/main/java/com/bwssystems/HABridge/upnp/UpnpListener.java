@@ -46,26 +46,27 @@ public class UpnpListener {
 			try {
 				responseSocket = new DatagramSocket(upnpResponsePort);
 				if(retryCount > 0)
-					log.error("Upnp Response Port is in use, found port: " + upnpResponsePort);
-				retryCount = 0;
+					log.info("Upnp Response Port issue, found open port: " + upnpResponsePort);
 				portLoopControl = false;
 			} catch(SocketException e) {
 				if(retryCount == 0)
-					log.warn("Upnp Response Port is in use, starting loop to find open port for 20 tries - port is: " + upnpResponsePort);
+					log.warn("Upnp Response Port is in use, starting loop to find open port for 20 tries - configured port is: " + upnpResponsePort);
 				if(retryCount >= 20) {
 					portLoopControl = false;
-					log.error("Upnp Response Port is in use, could not find - last port tried: " + upnpResponsePort + " with message: " + e.getMessage());
+					log.error("Upnp Response Port issue, could not find open port - last port tried: " + upnpResponsePort + " with message: " + e.getMessage());
 					return false;
 				}
 			}
-			retryCount++;
-			upnpResponsePort++;
+			if(portLoopControl) {
+				retryCount++;
+				upnpResponsePort++;
+			}
 		}
 
 		try {
 			upnpMulticastSocket  = new MulticastSocket(Configuration.UPNP_DISCOVERY_PORT);
 		} catch(IOException e){
-			log.error("Upnp Discovery Port is in use, or restricted by admin (try running with duso or admin privs): " + Configuration.UPNP_DISCOVERY_PORT + " with message: " + e.getMessage());
+			log.error("Upnp Discovery Port is in use, or restricted by admin (try running with sudo or admin privs): " + Configuration.UPNP_DISCOVERY_PORT + " with message: " + e.getMessage());
 			return false;
 		}
 		
@@ -73,7 +74,7 @@ public class UpnpListener {
 		try {
 			ifs =	NetworkInterface.getNetworkInterfaces();
 		}  catch (SocketException e) {
-			log.error("Could not get network interfaces for thsi machine: " + e.getMessage());
+			log.error("Could not get network interfaces for this machine: " + e.getMessage());
 			return false;
 		}
 

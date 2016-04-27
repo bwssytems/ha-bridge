@@ -76,14 +76,34 @@ Here is the table of items to use to tell Alexa what you want to do:
 
 To do this... |	Say this...
 --------------|------------
-Discover | “Alexa, discover my devices.”
-Turn On | “Alexa, turn on the kitchen light.”
-Turn Off | “Alexa, turn off the kitchen light.”
-Brighten | “Alexa, brighten the kitchen light.”
-Dim | “Alexa, dim the kitchen light.”
-Dim | "Alexa, Dim the lights to 40%."
-Set | “Alexa, set the kitchen light to 50%.”
-Set | "Alexa, Set brightness to 60%."
+ON Commands | 
+ | Alexa, turn on <Device Name>
+ | Alexa, start <Device Name>
+ | Alexa, unlock <Device Name>
+ | Alexa, open <Device Name>
+ | Alexa, boot up <Device Name>
+ | Alexa, run <Device Name>
+ | Alexa, arm <Device Name>
+OFF Commands | 
+ | Alexa, turn off <Device Name>
+ | Alexa, stop <Device Name> (this one is tricky to get right)
+ | Alexa, stop running <Device Name> (also very tricky)
+ | Alexa, lock <Device Name>
+ | Alexa, close <Device Name>
+ | Alexa, shutdown <Device Name>
+ | Alexa, shut <Device Name>
+ | Alexa, disarm <Device Name>
+DIM Commands | 
+ | Alexa, brighten <Device Name> to <Position>
+ | Alexa, dim <Device Name> to <Position>
+ | Alexa, raise <Device Name> to <Position>
+ | Alexa, lower <Device Name> to <Position>
+ | Alexa, set <Device Name> to <Position>
+ | Alexa, turn up <Device Name> to <Position>
+ | Alexa, turn down <Device Name> to <Position>
+
+To see what Alexa thinks you said, you can check in the home page for your alexa.
+
 To view or remove devices that Alexa knows about, you can use the mobile app `Menu / Settings / Connected Home` or go to http://echo.amazon.com/#cards.
 ## Configuration REST API Usage
 This section will describe the REST api available for configuration. The REST body examples are all formatted for easy reading, the actual body usage should be like this:
