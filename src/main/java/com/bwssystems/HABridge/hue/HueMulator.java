@@ -381,6 +381,7 @@ public class HueMulator implements HueErrorStringSet {
         		responseString = "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId + "\",\"description\": \"Could not find device\", \"resource\": \"/lights/" + lightId + "\"}}]";
     	        return responseString;
 	        }
+	        state.fillIn();
 
 	        theHeaders = new Gson().fromJson(device.getHeaders(), NameValue[].class);
 	        responseString = this.formatSuccessHueResponse(state, request.body(), lightId);

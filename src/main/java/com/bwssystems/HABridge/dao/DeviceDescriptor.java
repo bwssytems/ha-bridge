@@ -166,6 +166,8 @@ public class DeviceDescriptor{
 	}
 
 	public DeviceState getDeviceState() {
+		if(deviceState == null)
+			deviceState = DeviceState.createDeviceState();
 		return deviceState;
 	}
 
