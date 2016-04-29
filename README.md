@@ -117,7 +117,7 @@ The helper tabs will also show you what you have already configured for that tar
 #### The Manual Add Tab
 Another way to add a device is through the Manual Add Tab. This allows you to manually enter the name, the on and off URLs and select if there are custom handling with the type of call that can be made. This allows for control of anything that has a distinct request that can be executed so you are not limited to the Vera, Harmony, Nest or other Hue.
 
-The format of these can be the default HTTP request which executes the URLs formatted as http://<your stuff here> as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use https://<your secure call here>. When using POST and PUT, you have the ability to specify the body that will be sent with the request as well as the application type for the http call.
+The format of these can be the default HTTP request which executes the URLs formatted as `http://<your stuff here>` as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use `https://<your secure call here>`. When using POST and PUT, you have the ability to specify the body that will be sent with the request as well as the application type for the http call.
 
 Headers can be added as well using a Json construct [{"name":"header type name","value":"the header value"}] with the format example:
 ```
@@ -125,7 +125,7 @@ Headers can be added as well using a Json construct [{"name":"header type name",
 {"name":"Pragma","value":"no-cache"}]
 ```
 
-Another option that is detected by the bridge is to use UDP or TCP direct calls such as udp://<ip_address>:<port>/<your stuff here> to send a UDP request. TCP calls are handled the same way as tcp://<ip_address>:<port>/<your stuff here>. If your data for the UDP or TCP request is formatted as "0x00F009B9" lexical hex format, the bridge will convert the data into a binary stream to send.
+Another option that is detected by the bridge is to use UDP or TCP direct calls such as `udp://<ip_address>:<port>/<your stuff here>` to send a UDP request. TCP calls are handled the same way as `tcp://<ip_address>:<port>/<your stuff here>`. If your data for the UDP or TCP request is formatted as "0x00F009B9" lexical hex format, the bridge will convert the data into a binary stream to send.
 
 You can also use the value replacement constructs within these statements. Such as using the expressions ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 for straight pass through of the value or items that require special calculated values using ${intensity.math()} i.e. "${intensity.math(X/4)}".
 Examples:
@@ -138,6 +138,14 @@ http://192.168.1.1:8280/set/this
 ContentBody: {"someValue":"${intensity..byte}"}
 
 udp://192.168.1.1:5000/0x45${intensity.percent}55
+
+udp://192.168.2.2:6000/fireoffthismessage\n
+
+tcp://192.168.3.3:9000/sendthismessage
+
+tcp://192.168.4.4:10000/0x435f12dd${intensity.math((X -4)*50)}438c
+
+tcp://192.168.5.5:110000/0x
 ```
 
 #### Multiple Call Construct

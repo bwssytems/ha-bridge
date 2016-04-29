@@ -583,41 +583,43 @@ public class HueMulator implements HueErrorStringSet {
         				Thread.sleep(bridgeSettings.getButtonsleep());
         			}
 		        	try {
-		        		String intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
-		        		String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
-		        		String theUrlBody = intermediate.substring(intermediate.indexOf('/')+1);
-		        		String hostAddr = null;
-		        		String port = null;
-		        		if(hostPortion.contains(":")) {
-		        			hostAddr = hostPortion.substring(0, intermediate.indexOf(':'));
-		        			port = hostPortion.substring(intermediate.indexOf(':') + 1);
-		        		}
-		        		else
-		        			hostAddr = hostPortion;
-		        		InetAddress IPAddress = InetAddress.getByName(hostAddr);;
-		        		if(theUrlBody.startsWith("0x")) {
-		        			theUrlBody = replaceIntensityValue(theUrlBody, state.getBri(), true);
-		        			sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
-		        		}
-		        		else {
-		        			theUrlBody = replaceIntensityValue(theUrlBody, state.getBri(), false);
-		        			sendData = theUrlBody.getBytes();
-		        		}
-		        		if(callItems[i].getItem().contains("udp://")) {
-		    	        	log.debug("executing HUE api request to UDP: " + callItems[i].getItem());
-			        		DatagramSocket responseSocket = new DatagramSocket(Integer.parseInt(port));
-			        		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Integer.parseInt(port));
-			        		responseSocket.send(sendPacket);
-			        		responseSocket.close();
-		        		}
-		        		else if(callItems[i].getItem().contains("tcp://"))
-		        		{
-		    	        	log.debug("executing HUE api request to TCP: " + callItems[i].getItem());
-			        		Socket dataSendSocket = new Socket(IPAddress, Integer.parseInt(port));
-			        		DataOutputStream outToClient = new DataOutputStream(dataSendSocket.getOutputStream());
-			        		outToClient.write(sendData);
-			        		outToClient.flush();
-			        		dataSendSocket.close();
+		        		if(callItems[i].getItem().contains("udp://") || callItems[i].getItem().contains("tcp://")) {
+			        		String intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
+			        		String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
+			        		String theUrlBody = intermediate.substring(intermediate.indexOf('/')+1);
+			        		String hostAddr = null;
+			        		String port = null;
+			        		if(hostPortion.contains(":")) {
+			        			hostAddr = hostPortion.substring(0, intermediate.indexOf(':'));
+			        			port = hostPortion.substring(intermediate.indexOf(':') + 1);
+			        		}
+			        		else
+			        			hostAddr = hostPortion;
+			        		InetAddress IPAddress = InetAddress.getByName(hostAddr);;
+			        		if(theUrlBody.startsWith("0x")) {
+			        			theUrlBody = replaceIntensityValue(theUrlBody, state.getBri(), true);
+			        			sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
+			        		}
+			        		else {
+			        			theUrlBody = replaceIntensityValue(theUrlBody, state.getBri(), false);
+			        			sendData = theUrlBody.getBytes();
+			        		}
+			        		if(callItems[i].getItem().contains("udp://")) {
+			    	        	log.debug("executing HUE api request to UDP: " + callItems[i].getItem());
+				        		DatagramSocket responseSocket = new DatagramSocket(Integer.parseInt(port));
+				        		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Integer.parseInt(port));
+				        		responseSocket.send(sendPacket);
+				        		responseSocket.close();
+			        		}
+			        		else if(callItems[i].getItem().contains("tcp://"))
+			        		{
+			    	        	log.debug("executing HUE api request to TCP: " + callItems[i].getItem());
+				        		Socket dataSendSocket = new Socket(IPAddress, Integer.parseInt(port));
+				        		DataOutputStream outToClient = new DataOutputStream(dataSendSocket.getOutputStream());
+				        		outToClient.write(sendData);
+				        		outToClient.flush();
+				        		dataSendSocket.close();
+			        		}
 		        		}
 		        		else {
 		    	        	log.debug("executing HUE api request to Http " + (device.getHttpVerb() == null?"GET":device.getHttpVerb()) + ": " + callItems[i].getItem());
