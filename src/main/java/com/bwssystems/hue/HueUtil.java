@@ -21,11 +21,7 @@ public class HueUtil {
 
 	public static final String registerWithHue(HttpClient anHttpClient, String ipAddress, String aName, String theUser, HueErrorStringSet errorStringSet) {
     	UserCreateRequest theLogin = new UserCreateRequest();
-        theLogin.setDevicetype("HA Bridge");
-        if(theUser == null)
-            theLogin.setUsername("habridge");
-        else
-        	theLogin.setUsername(theUser);
+        theLogin.setDevicetype("HABridge#MyMachine");
         HttpPost postRequest = new HttpPost("http://" + ipAddress + HUE_REQUEST);
         ContentType parsedContentType = ContentType.parse("application/json");
         StringEntity requestBody = new StringEntity(new Gson().toJson(theLogin), parsedContentType);
