@@ -86,6 +86,8 @@ The user name of the MyHarmony.com account for the Harmony Hub. This needs to be
 The password for the user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub Features.
 #### Hue Names and IP Addresses
 Provide IP Addresses of your Hue Bridges that you want to proxy through the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will passthru the call it receives to the target Hue and device you configure.
+
+Don't forget - You will need to push the link button when you got to the Hue Tab the first time ater the process comes up.  (The user name is not persistent when the process comes up.)
 #### Nest Username
 The user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features. There is no need to give any ip address or host information as this contacts your cloud account.
 #### Nest Password
