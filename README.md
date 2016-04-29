@@ -166,7 +166,7 @@ Format Example in the URL areas:
 {"item":"https://192.168.12.1/do/this/secure/thing"}]
 ```
 #### Script or Command Execution
-The release as of v2.0.0 will no support the execution of a local script or program. This will blindly fire off a process to run and is bound by the privileges of the java process.
+The release as of v2.0.0 will now support the execution of a local script or program. This will blindly fire off a process to run and is bound by the privileges of the java process.
 
 To configure this type of manual add, you will need to select the Device type of "Execute Script/Program".
 
