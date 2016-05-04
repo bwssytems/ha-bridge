@@ -103,4 +103,14 @@
 			<button type="button" class="ngdialog-button ngdialog-button-primary" ng-click="setValue()">Set</button>
 		</div>
 	</script>
+	<script type="text/ng-template" id="deleteDialog">
+		<div class="ngdialog-message">
+			<h2>Device to Delete?</h2>
+				<p>{{device.name}}</p>
+				<p>Are you Sure?</p>
+		</div>
+		<div class="ngdialog-buttons mt">
+			<button type="button" class="ngdialog-button ngdialog-button-error" ng-click="deleteDevice(device)">Delete</button>
+		</div>
+	</script>
 	

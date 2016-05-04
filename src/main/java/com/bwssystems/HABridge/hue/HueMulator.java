@@ -752,8 +752,10 @@ public class HueMulator implements HueErrorStringSet {
         		response = httpClient.execute(request);
             log.debug((httpVerb == null?"GET":httpVerb) + " execute on URL responded: " + response.getStatusLine().getStatusCode());
             if(response.getStatusLine().getStatusCode() >= 200  && response.getStatusLine().getStatusCode() < 300){
-            	theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); //read content for data
-                EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
+            	if(response.getEntity() != null ) {
+	            	theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); //read content for data
+            		EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
+            	}
             }
         } catch (IOException e) {
         	log.warn("Error calling out to HA gateway: IOException in log", e);

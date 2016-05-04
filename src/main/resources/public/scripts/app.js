@@ -47,7 +47,7 @@ app.run( function (bridgeService) {
 
 app.service('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, habridgeversion: ""};
+	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, habridgeversion: ""};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
@@ -324,6 +324,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 	this.bulkAddDevice = function (devices) {
 		return $http.post(this.state.base, devices).then(
 				function (response) {
+					self.displaySuccess("Bulk device add successful.");
 				},
 				function (error) {
 					self.displayWarn("Bulk Add new Device Error: ", error);
@@ -724,7 +725,12 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 			bridgeService.testUrl(device, type);
 	};
 	$scope.deleteDevice = function (device) {
-		bridgeService.deleteDevice(device.id);
+		$scope.bridge.device = device;
+		ngDialog.open({
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
 	};
 	$scope.editDevice = function (device) {
 		bridgeService.editDevice(device);
@@ -789,7 +795,36 @@ app.controller('ValueDialogCtrl', function ($scope, bridgeService, ngDialog) {
 	};
 });
 
-app.controller('VeraController', function ($scope, $location, $http, bridgeService) {
+app.controller('DeleteDialogCtrl', function ($scope, bridgeService, ngDialog) {
+	$scope.bridge = bridgeService.state;
+	$scope.device = $scope.bridge.device;
+	$scope.deleteDevice = function (device) {
+		ngDialog.close('ngdialog1');
+		bridgeService.deleteDevice(device.id);
+		bridgeService.viewDevices();
+		$scope.bridge.device = null;
+		$scope.bridge.type = "";
+	};
+});
+
+app.controller('DeleteMapandIdDialogCtrl', function ($scope, bridgeService, ngDialog) {
+	$scope.bridge = bridgeService.state;
+	$scope.mapandid = $scope.bridge.mapandid;
+	$scope.deleteMapandId = function (mapandid) {
+		ngDialog.close('ngdialog1');
+		bridgeService.deleteDeviceByMapId(mapandid.id, mapandid.mapType);
+		bridgeService.viewDevices();
+		bridgeService.viewVeraDevices();
+		bridgeService.viewVeraScenes();
+		bridgeService.viewHarmonyActivities();
+		bridgeService.viewHarmonyDevices();
+		bridgeService.viewNestItems();
+		bridgeService.viewHueDevices();
+		$scope.bridge.mapandid = null;
+	};
+});
+
+app.controller('VeraController', function ($scope, $location, $http, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = $scope.bridge.device;
 	$scope.device_dim_control = "";
@@ -919,15 +954,17 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 	};
 
 	$scope.deleteDeviceByMapId = function (id, mapType) {
-		bridgeService.deleteDeviceByMapId(id, mapType);
-		bridgeService.viewDevices();
-		bridgeService.viewVeraDevices();
-		bridgeService.viewVeraScenes();
+		$scope.bridge.mapandid = { id, mapType };
+		ngDialog.open({
+			template: 'deleteMapandIdDialog',
+			controller: 'DeleteMapandIdDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
 	};
 
 });
 
-app.controller('HarmonyController', function ($scope, $location, $http, bridgeService) {
+app.controller('HarmonyController', function ($scope, $location, $http, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = $scope.bridge.device;
 	bridgeService.viewHarmonyActivities();
@@ -996,15 +1033,17 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 	};
 
 	$scope.deleteDeviceByMapId = function (id, mapType) {
-		bridgeService.deleteDeviceByMapId(id, mapType);
-		bridgeService.viewDevices();
-		bridgeService.viewHarmonyActivities();
-		bridgeService.viewHarmonyDevices();
+		$scope.bridge.mapandid = { id, mapType };
+		ngDialog.open({
+			template: 'deleteMapandIdDialog',
+			controller: 'DeleteMapandIdDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
 	};
 
 });
 
-app.controller('NestController', function ($scope, $location, $http, bridgeService) {
+app.controller('NestController', function ($scope, $location, $http, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = $scope.bridge.device;
 	bridgeService.viewNestItems();
@@ -1116,14 +1155,17 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 	};
 
 	$scope.deleteDeviceByMapId = function (id, mapType) {
-		bridgeService.deleteDeviceByMapId(id, mapType);
-		bridgeService.viewDevices();
-		bridgeService.viewNestItems();
+		$scope.bridge.mapandid = { id, mapType };
+		ngDialog.open({
+			template: 'deleteMapandIdDialog',
+			controller: 'DeleteMapandIdDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
 	};
 
 });
 
-app.controller('HueController', function ($scope, $location, $http, bridgeService) {
+app.controller('HueController', function ($scope, $location, $http, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = $scope.bridge.device;
 	$scope.bulk = { devices: [] };
@@ -1168,7 +1210,7 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 		var devicesList = [];
 		for(var i = 0; i < $scope.bulk.devices.length; i++) {
 			for(var x = 0; x < bridgeService.state.huedevices.length; x++) {
-				if(bridgeService.state.huedevices[x].id == $scope.bulk.devices[i]) {
+				if(bridgeService.state.huedevices[x].device.uniqueid == $scope.bulk.devices[i]) {
 					$scope.buildDeviceUrls(bridgeService.state.huedevices[x]);
 					devicesList[i] = {
 							name: $scope.device.name,
@@ -1217,9 +1259,12 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 	};
 
 	$scope.deleteDeviceByMapId = function (id, mapType) {
-		bridgeService.deleteDeviceByMapId(id, mapType);
-		bridgeService.viewDevices();
-		bridgeService.viewHueDevices();
+		$scope.bridge.mapandid = { id, mapType };
+		ngDialog.open({
+			template: 'deleteMapandIdDialog',
+			controller: 'DeleteMapandIdDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
 	};
 
 });

@@ -11,7 +11,7 @@
         <li role="presentation"><a href="#/editor">Manual Add</a></li>
       </ul>
 
-<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
+<div class="panel panel-default bridgeServer">
 	<div class="panel-heading">
 		<h2 class="panel-title">Hue Device List ({{bridge.huedevices.length}})</h2>
 	</div>
@@ -36,7 +36,7 @@
 				</thead>
 				<tr ng-repeat="huedevice in bridge.huedevices | availableHueDeviceId">
 					<td>{{$index+1}}</td>
-					<td><input type="checkbox" name="bulk.devices[]" value="{{huedevice.id}}" ng-checked="bulk.devices.indexOf(huedevice.id) > -1" ng-click="toggleSelection(huedevice.id)"> {{huedevice.device.name}}</td>
+					<td><input type="checkbox" name="bulk.devices[]" value="{{huedevice.device.uniqueid}}" ng-checked="bulk.devices.indexOf(huedevice.device.uniqueid) > -1" ng-click="toggleSelection(huedevice.device.uniqueid)"> {{huedevice.device.name}}</td>
 					<td>{{huedevice.device.uniqueid}}</td>
 					<td>{{huedevice.huename}}</td>
 					<td>
@@ -48,7 +48,7 @@
         	</scrollable-table>
 			<p>
 				<button class="btn btn-success" type="submit"
-					ng-click="bulkHueDevices()">Bulk Add ({{bulk.devices.length}})</button>
+					ng-click="bulkAddDevices()">Bulk Add ({{bulk.devices.length}})</button>
 			</p>
 		</li>
 	</ul>
@@ -75,7 +75,7 @@
 					<td>{{huedevice.huename}}</td>
 					<td>
 						<button class="btn btn-danger" type="submit"
-						ng-click="deleteDeviceByMapId(huedevice.uniqueid, 'hueDevice')">Delete</button>
+						ng-click="deleteDeviceByMapId(huedevice.device.uniqueid, 'hueDevice')">Delete</button>
 					</td>
 				</tr>
 			</table>
@@ -83,7 +83,7 @@
 		</li>
 	</ul>
 </div>
-<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
+<div class="panel panel-default bridgeServer">
 	<div class="panel-heading">
 		<h2 class="panel-title">Add Bridge Device for a Hue Device</h2>
 	</div>
@@ -117,3 +117,13 @@
 		</li>
 	</ul>
 </div>
+	<script type="text/ng-template" id="deleteMapandIdDialog">
+		<div class="ngdialog-message">
+			<h2>Device Map and Id?</h2>
+				<p>{{mapandid.mapType}} with  {{mapandid.id}}</p>
+				<p>Are you Sure?</p>
+		</div>
+		<div class="ngdialog-buttons mt">
+			<button type="button" class="ngdialog-button ngdialog-button-error" ng-click="deleteMapandId(mapandid)">Delete</button>
+		</div>
+	</script>

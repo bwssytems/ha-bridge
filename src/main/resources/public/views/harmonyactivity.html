@@ -11,7 +11,7 @@
         <li role="presentation"><a href="#/editor">Manual Add</a></li>
       </ul>
 
-<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
+<div class="panel panel-default bridgeServer">
 	<div class="panel-heading">
 		<h2 class="panel-title">Harmony Activity List</h2>
 	</div>
@@ -75,7 +75,7 @@
 		</li>
 	</ul>
 </div>
-<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
+<div class="panel panel-default bridgeServer">
 	<div class="panel-heading">
 		<h2 class="panel-title">Add a Bridge Device for a Harmony Activity</h2>
 	</div>
@@ -121,3 +121,13 @@
 		</li>
 	</ul>
 </div>
+	<script type="text/ng-template" id="deleteMapandIdDialog">
+		<div class="ngdialog-message">
+			<h2>Device Map and Id?</h2>
+				<p>{{mapandid.mapType}} with  {{mapandid.id}}</p>
+				<p>Are you Sure?</p>
+		</div>
+		<div class="ngdialog-buttons mt">
+			<button type="button" class="ngdialog-button ngdialog-button-error" ng-click="deleteMapandId(mapandid)">Delete</button>
+		</div>
+	</script>
