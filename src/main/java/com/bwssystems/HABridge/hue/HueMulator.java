@@ -755,6 +755,8 @@ public class HueMulator implements HueErrorStringSet {
             	if(response.getEntity() != null ) {
 	            	theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); //read content for data
             		EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
+            		if(theContent == null)
+            			theContent = "";
             	}
             }
         } catch (IOException e) {
