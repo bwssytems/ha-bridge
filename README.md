@@ -24,7 +24,7 @@ ATTENTION: This requires JDK 1.8 to run
 java -jar ha-bridge-W.X.Y.jar
 ```
 ### Automation on Linux systems
-To have this conigured and running automatically ther eare a few resources to use. One is using Docker and a docker containerahs been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
+To have this conigured and running automatically ther eare a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
 For next gen Linux systems, here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
 ```
@@ -107,7 +107,7 @@ At the bottom of the screen is the "Bridge Settings Backup" which can be accesse
 ### The Logs Tab
 This screen displays the last 512 or number of rows defined in the config screen of the log so you don't have to go to the output of your process. The `Update Log` button refreshes the log as this screen does not auto refresh. FYI, when the trace upnp setting is turned on in the configuration, the messages will show here.
 
-The bottom part of the Logs Screen has configuration to change the logging levels as it is running. The ROOT is the basic setting and will turn on only top level logging. To set logging at a lower level, select the `Show All Loggers` checkbox and then you can set the explicit level on each of the processes components. The most helpful logger would be setting DBUG for com.bwssystems.HABridge.hue.HueMulator component. Changing this and then selecting the `Update Log Levels` button applies the new log settings. 
+The bottom part of the Logs Screen has configuration to change the logging levels as it is running. The ROOT is the basic setting and will turn on only top level logging. To set logging at a lower level, select the `Show All Loggers` checkbox and then you can set the explicit level on each of the processes components. The most helpful logger would be setting DEBUG for com.bwssystems.HABridge.hue.HueMulator component. Changing this and then selecting the `Update Log Levels` button applies the new log settings. 
 ### Bridge Device Additions
 You must configure devices before you will have any thing for the Echo or other contoller that is connected to the ha-bridge to receive.
 #### Helpers
