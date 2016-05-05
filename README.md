@@ -73,7 +73,7 @@ The default location for the db to contain the devices as they are added is "dat
 #### UPNP IP Address
 The server defaults to the first available address on the host if this is not given. This default may NOT be the correct IP that is your public IP for your host on the network. It is best to set this parameter to not have discovery issues. Replace this value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery. 
 #### Web Server Port
-The server defaults to running on port 8080. To override what the default is, specify a different number.
+The server defaults to running on port 8080. To override what the default is, specify a different number. ATTENTION: If you want to use any of the apps made for the Hue to control this bridge, you should set this port to 80.
 #### UPNP Response Port
 The upnp response port that will be used. The default is 50000.  
 #### Vera Names and IP Addresses
