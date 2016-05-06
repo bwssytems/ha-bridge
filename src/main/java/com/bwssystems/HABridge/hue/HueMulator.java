@@ -753,8 +753,12 @@ public class HueMulator implements HueErrorStringSet {
             log.debug((httpVerb == null?"GET":httpVerb) + " execute on URL responded: " + response.getStatusLine().getStatusCode());
             if(response.getStatusLine().getStatusCode() >= 200  && response.getStatusLine().getStatusCode() < 300){
             	if(response.getEntity() != null ) {
-	            	theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); //read content for data
-            		EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
+	            	try {
+	            		theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); //read content for data
+	            		EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
+	            	} catch(Exception e) {
+	            		log.debug("Error ocurred in handling response entity after successful call, still responding success. "+ e.getMessage(), e);
+	            	}
             		if(theContent == null)
             			theContent = "";
             	}
