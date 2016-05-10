@@ -317,12 +317,15 @@ public class HueMulator implements HueErrorStringSet {
 	    	String lightId = request.params(":id");
 	        String responseString = null;
 	        DeviceState state = null;
+	        boolean stateHasOn = false;
 	        log.debug("Update state requested: " + userId + " from " + request.ip() + " body: " + request.body());
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json; charset=utf-8"); 
 	        response.status(HttpStatus.SC_OK);
 	        try {
 	            state = mapper.readValue(request.body(), DeviceState.class);
+		        if(request.body().contains("\"on\""))
+		        	stateHasOn = true;
 	        } catch (IOException e) {
 	        	log.warn("Object mapper barfed on input of body.", e);
         		responseString = "[{\"error\":{\"type\": 2, \"address\": \"/lights/" + lightId + "\",\"description\": \"Object mapper barfed on input of body.\"}}]";
@@ -335,7 +338,7 @@ public class HueMulator implements HueErrorStringSet {
     	        return responseString;
 	        }
 	        
-	        responseString = this.formatSuccessHueResponse(state, request.body(), lightId);
+	        responseString = this.formatSuccessHueResponse(state, request.body(), stateHasOn, lightId);
         	device.setDeviceState(state);
 	    	
 	        return responseString;
@@ -362,6 +365,8 @@ public class HueMulator implements HueErrorStringSet {
 	        String url = null;
 	        NameValue[] theHeaders = null;
 	        DeviceState state = null;
+	        boolean stateHasBri = false;
+	        boolean stateHasOn = false;
 	        log.debug("hue state change requested: " + userId + " from " + request.ip() + " body: " + request.body());
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json; charset=utf-8"); 
@@ -369,6 +374,10 @@ public class HueMulator implements HueErrorStringSet {
 	
 	        try {
 	            state = mapper.readValue(request.body(), DeviceState.class);
+		        if(request.body().contains("\"bri\""))
+		        	stateHasBri = true;
+		        if(request.body().contains("\"on\""))
+		        	stateHasOn = true;
 	        } catch (IOException e) {
 	        	log.warn("Object mapper barfed on input of body.", e);
         		responseString = "[{\"error\":{\"type\": 2, \"address\": \"/lights/" + lightId + "\",\"description\": \"Object mapper barfed on input of body.\"}}]";
@@ -384,7 +393,7 @@ public class HueMulator implements HueErrorStringSet {
 	        state.fillIn();
 
 	        theHeaders = new Gson().fromJson(device.getHeaders(), NameValue[].class);
-	        responseString = this.formatSuccessHueResponse(state, request.body(), lightId);
+	        responseString = this.formatSuccessHueResponse(state, request.body(), stateHasOn, lightId);
 
 	        if(device.getDeviceType().toLowerCase().contains("hue") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("hueDevice")))
 	        {
@@ -422,8 +431,11 @@ public class HueMulator implements HueErrorStringSet {
 					return responseString;
 	        }
 
-	        if(request.body().contains("bri"))
+	        if(stateHasBri)
 	        {
+	        	if(state.getBri() > 0 && !state.isOn())
+	        		state.setOn(true);
+
         		url = device.getDimUrl();
 
 	        	if(url == null || url.length() == 0)
@@ -433,8 +445,9 @@ public class HueMulator implements HueErrorStringSet {
 	        {
 		        if (state.isOn()) {
 		            url = device.getOnUrl();
-		            state.setBri(255);
-		        } else if (request.body().contains("false")) {
+		            if(state.getBri() <= 0)
+		            	state.setBri(255);
+		        } else {
 		            url = device.getOffUrl();
 		            state.setBri(0);
 		        }
@@ -759,9 +772,9 @@ public class HueMulator implements HueErrorStringSet {
 	            	} catch(Exception e) {
 	            		log.debug("Error ocurred in handling response entity after successful call, still responding success. "+ e.getMessage(), e);
 	            	}
-            		if(theContent == null)
-            			theContent = "";
             	}
+        		if(theContent == null)
+        			theContent = "";
             }
         } catch (IOException e) {
         	log.warn("Error calling out to HA gateway: IOException in log", e);
@@ -769,73 +782,75 @@ public class HueMulator implements HueErrorStringSet {
         return theContent;
     }
     
-    private String formatSuccessHueResponse(DeviceState state, String body, String lightId) {
+    private String formatSuccessHueResponse(DeviceState state, String body, boolean stateHasOn, String lightId) {
     	
-        String responseString = "[{\"success\":{\"/lights/" + lightId + "/state/on\":";
-        boolean justState = true;
+        String responseString = "[";
+        boolean justState = false;
+        if(stateHasOn)
+        {
+        	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/on\":";
+	        if (state.isOn()) {
+	            responseString = responseString + "true}}";
+	            if(state.getBri() <= 0)
+	            	state.setBri(255);
+	        } else {
+	            responseString = responseString + "false}}";
+	            state.setBri(0);
+	        }
+	        justState = true;
+        }
+        
         if(body.contains("bri"))
         {
         	if(justState)
-        		responseString = responseString + "true}}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri() + "}}";
-        	justState = false;
+        		responseString = responseString + ",";
+        	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri() + "}}";
+	        justState = true;
         }
         
         if(body.contains("ct"))
         {
         	if(justState)
-        		responseString = responseString + "true}}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/ct\":" + state.getCt() + "}}";
-        	justState = false;
+        		responseString = responseString + ",";
+        	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/ct\":" + state.getCt() + "}}";
+	        justState = true;
         }
         
         if(body.contains("xy"))
         {
         	if(justState)
-        		responseString = responseString + "true}}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/xy\":" + state.getXy() + "}}";
-        	justState = false;
+        		responseString = responseString + ",";
+        	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/xy\":" + state.getXy() + "}}";
+	        justState = true;
         }
         
         if(body.contains("hue"))
         {
         	if(justState)
-        		responseString = responseString + "true}}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/hue\":" + state.getHue() + "}}";
-        	justState = false;
+        		responseString = responseString + ",";
+        	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/hue\":" + state.getHue() + "}}";
+	        justState = true;
         }
         
         if(body.contains("sat"))
         {
         	if(justState)
-        		responseString = responseString + "true}}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/sat\":" + state.getSat() + "}}";
-        	justState = false;
+        		responseString = responseString + ",";
+        	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/sat\":" + state.getSat() + "}}";
+	        justState = true;
         }
         
         if(body.contains("colormode"))
         {
         	if(justState)
-        		responseString = responseString + "true}}";
-        	responseString = responseString + ",{\"success\":{\"/lights/" + lightId + "/state/colormode\":" + state.getColormode() + "}}";
-        	justState = false;
-        }
-        
-        if(justState)
-        {
-	        if (state.isOn()) {
-	            responseString = responseString + "true}}";
-	            state.setBri(255);
-	        } else if (body.contains("false")) {
-	            responseString = responseString + "false}}";
-	            state.setBri(0);
-	        }
+        		responseString = responseString + ",";
+        	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/colormode\":" + state.getColormode() + "}}";
+	        justState = true;
         }
         
         responseString = responseString + "]";
         
         return responseString;
-    	
     }
 
 	@Override

@@ -21,7 +21,7 @@ Then locate the jar and start the server with:
 ATTENTION: This requires JDK 1.8 to run
 
 ```
-java -jar ha-bridge-W.X.Y.jar
+java -jar ha-bridge-2.0.5.jar
 ```
 ### Automation on Linux systems
 To have this conigured and running automatically ther eare a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
@@ -35,7 +35,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/amazon-echo/data/habridge.config /home/pi/amazon-echo/ha-bridge-2.0.4.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/amazon-echo/data/habridge.config /home/pi/amazon-echo/ha-bridge-2.0.5.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -109,7 +109,7 @@ This screen displays the last 512 or number of rows defined in the config screen
 
 The bottom part of the Logs Screen has configuration to change the logging levels as it is running. The ROOT is the basic setting and will turn on only top level logging. To set logging at a lower level, select the `Show All Loggers` checkbox and then you can set the explicit level on each of the processes components. The most helpful logger would be setting DEBUG for com.bwssystems.HABridge.hue.HueMulator component. Changing this and then selecting the `Update Log Levels` button applies the new log settings. 
 ### Bridge Device Additions
-You must configure devices before you will have any thing for the Echo or other contoller that is connected to the ha-bridge to receive.
+You must configure devices before you will have any thing for the Echo or other controller that is connected to the ha-bridge to receive.
 #### Helpers
 The easy way to get devices configured is with the use of the helpers for the Vera or Harmony, Nest and Hue to create devices that the bridge will present.
 
@@ -217,13 +217,15 @@ OFF Commands |
 DIM Commands | 
  | Alexa, brighten `<Device Name>` to `<Position>`
  | Alexa, dim `<Device Name> to <Position>`
+ | Alexa, brighten `<Device Name>`
+ | Alexa, dim `<Device Name>`
  | Alexa, raise `<Device Name>` to `<Position>`
  | Alexa, lower `<Device Name>` to `<Position>`
  | Alexa, set `<Device Name>` to `<Position>`
  | Alexa, turn up `<Device Name>` to `<Position>`
  | Alexa, turn down `<Device Name>` to `<Position>`
 
-To see what Alexa thinks you said, you can check in the home page for your alexa.
+To see what Alexa thinks you said, you can check in the home page for your Alexa.
 
 To view or remove devices that Alexa knows about, you can use the mobile app `Menu / Settings / Connected Home` or go to http://echo.amazon.com/#cards.
 ## Configuration REST API Usage
@@ -264,7 +266,7 @@ contentBodyOff | string | This is the content body that you would like to send w
 }
 ```
 #### Dimming Control Example
-Dimming is also supported by using the expressions ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 for straight pass trhough of the value.
+Dimming is also supported by using the expressions ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 for straight pass through of the value.
 e.g.
 ```
 {
@@ -872,7 +874,7 @@ rules |	object |	A collection of all rules and their attributes. This is not giv
 ## UPNP Emulation of HUE
 This section will discuss the UPNP implementation of this bridge based as much as can be for the HUE.
 ### UPNP listening
-The HA Bridge default UPNP listner is started on port 1900 on the upnp multicast address of 239.255.255.250. All ethernet interfaces that are active are bound to and the repsonse port is set to the one given on the command line above or the default of 50000.
+The HA Bridge default UPNP listener is started on port 1900 on the upnp multicast address of 239.255.255.250. All ethernet interfaces that are active are bound to and the response port is set to the one given on the command line above or the default of 50000.
 
 The listener will respond to the following body packet that contain the following minimal information:
 
@@ -898,7 +900,7 @@ ST: urn:schemas-upnp-org:device:basic:1\r\n
 "USN: uuid:Socket-1_0-221438K0100073::urn:schemas-upnp-org:device:basic:1\r\n\r\n
 ```
 ### UPNP description service
-The bridge provides the description service which is used by the calling app to interogate access details after it has decided the upnp multicast repsonse is the correct device.
+The bridge provides the description service which is used by the calling app to interogate access details after it has decided the upnp multicast response is the correct device.
 #### Get Description
 ```
 GET http://host:8080/description.xml
