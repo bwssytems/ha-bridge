@@ -21,10 +21,10 @@ Then locate the jar and start the server with:
 ATTENTION: This requires JDK 1.8 to run
 
 ```
-java -jar ha-bridge-2.0.5.jar
+java -jar ha-bridge-2.0.6.jar
 ```
 ### Automation on Linux systems
-To have this conigured and running automatically ther eare a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
+To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
 For next gen Linux systems, here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
 ```
@@ -35,10 +35,42 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/amazon-echo/data/habridge.config /home/pi/amazon-echo/ha-bridge-2.0.5.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/amazon-echo/data/habridge.config /home/pi/amazon-echo/ha-bridge-2.0.6.jar
 
 [Install]
 WantedBy=multi-user.target
+```
+
+Basic script setup to run the bridge on a pi.
+
+Create the directory and make sure that ha-bridge-2.0.6.jar is in your /home/pi/habridge directory.
+```
+pi@raspberrypi:~ $ mkdir habridge
+pi@raspberrypi:~ $ cd habridge
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v2.0.6/ha-bridge-2.0.6.jar
+```
+Edit the shell script for starting:
+```
+pi@raspberrypi:~/habridge $ nano starthabridge.sh
+```
+Then cut and past this, modify any locations that are not correct
+```
+cd /home/pi/habridge
+rm /home/pi/habridge/habridge-log.txt
+nohup java -jar /home/pi/habridge/ha-bridge-2.0.6.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+chmod 777 /home/pi/habridge/habridge-log.txt
+```
+Exit and save the file with ctrl-X and follow the prompts and then execute on the command line:
+```
+pi@raspberrypi:~/habridge $ chmod u+x starthabridge.sh
+```
+Then execute the script:
+```
+pi@raspberrypi:~/habridge $ ./starthabridge.sh
+```
+You should now be running the bridge. Check for errors:
+```
+pi@raspberrypi:~/habridge $ tail -f habridge-log.txt
 ```
 ## Available Arguments
 Arguments are now deprecated. The ha-bridge will use the old -D arguments and populate the configuration screen, Brisge Control Tab, which can now be saved to a file and will not be needed. There is only one optional argument that overrides and that is the location of the configuration file. The default is the relative path "data/habridge.config".
