@@ -428,7 +428,7 @@ public class HueMulator implements HueErrorStringSet {
 	        	else
 					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"No HUE configured\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 	        		
-					return responseString;
+				return responseString;
 	        }
 
 	        if(stateHasBri)
@@ -570,18 +570,19 @@ public class HueMulator implements HueErrorStringSet {
         			if( i > 0) {
         				Thread.sleep(bridgeSettings.getButtonsleep());
         			}
-	        		try {
-	        			log.debug("Executing request: " + callItems[i].getItem());
-	        			Process p = Runtime.getRuntime().exec(replaceIntensityValue(callItems[i].getItem(), state.getBri(), false));
-	        			log.debug("Process running: " + p.isAlive());
-	        		}  catch (IOException e) {
-		    			log.warn("Could not execute request: " + callItems[i].getItem(), e);
-		    			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+        			String intermediate;
+        			if(callItems[i].getItem().contains("exec://"))
+		        		intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
+		        	else
+		        		intermediate = callItems[i].getItem();
+        			String anError = doExecRequest(intermediate, state, lightId);
+        			if(anError != null) {
+        				responseString = anError;
 						i = callItems.length+1;
-		    		}
+        			}
 	        	}
 	        }
-	        else // This section allows the usage of http/tcp/udp calls in a given set of items
+	        else // This section allows the usage of http/tcp/udp/exec calls in a given set of items
 	        {
 	        	log.debug("executing HUE api request for network call: " + url);
 	        	if(!url.startsWith("[")) {
@@ -633,6 +634,14 @@ public class HueMulator implements HueErrorStringSet {
 				        		outToClient.flush();
 				        		dataSendSocket.close();
 			        		}
+		        		}
+		        		else if(callItems[i].getItem().contains("exec://")) {
+			        		String intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
+		        			String anError = doExecRequest(intermediate, state, lightId);
+		        			if(anError != null) {
+		        				responseString = anError;
+								i = callItems.length+1;
+		        			}
 		        		}
 		        		else {
 		    	        	log.debug("executing HUE api request to Http " + (device.getHttpVerb() == null?"GET":device.getHttpVerb()) + ": " + callItems[i].getItem());
@@ -780,6 +789,19 @@ public class HueMulator implements HueErrorStringSet {
         	log.warn("Error calling out to HA gateway: IOException in log", e);
         }
         return theContent;
+    }
+
+    private String doExecRequest(String anItem, DeviceState state, String lightId) {
+		log.debug("Executing request: " + anItem);
+    	String responseString = null;
+    		try {
+    			Process p = Runtime.getRuntime().exec(replaceIntensityValue(anItem, state.getBri(), false));
+    			log.debug("Process running: " + p.isAlive());
+    		}  catch (IOException e) {
+    			log.warn("Could not execute request: " + anItem, e);
+    			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+    		}
+    	return responseString;
     }
     
     private String formatSuccessHueResponse(DeviceState state, String body, boolean stateHasOn, String lightId) {

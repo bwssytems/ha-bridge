@@ -994,6 +994,7 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 		var actionOn = angular.fromJson(onbutton);
 		var actionOff = angular.fromJson(offbutton);
 		if( $scope.device.mapType == "harmonyButton") {
+			$scope.device.mapId = $scope.device.mapId + "-" + actionOn.command;
 			$scope.device.onUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOn.command + "\"}]";
 			$scope.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOff.command + "\"}]";        		
 		}
@@ -1002,7 +1003,7 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 			$scope.device.targetDevice = harmonydevice.hub;
 			$scope.device.name = harmonydevice.device.label;
 			$scope.device.mapType = "harmonyButton";
-			$scope.device.mapId = harmonydevice.device.id + "-" + actionOn.command + "-" + actionOff.command;
+			$scope.device.mapId = harmonydevice.device.id + "-" + actionOn.command;
 			$scope.device.onUrl = "[{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOn.command + "\"}]";
 			$scope.device.offUrl = "[{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOff.command + "\"}]";
 		}

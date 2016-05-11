@@ -151,7 +151,7 @@ tcp://192.168.5.5:110000/0x
 ```
 
 #### Multiple Call Construct
-Also available is the ability to specify multiple commands in the On URL, Dim URL and Off URL areas by adding Json constructs listed here.
+Also available is the ability to specify multiple commands in the On URL, Dim URL and Off URL areas by adding Json constructs listed here. This is only for the types of tcp, udp, http, https or a new exec type.
 Format Example in the URL areas:
 ```
 [{"item":"http://192.168.1.1:8180/do/this/thing"},
@@ -165,7 +165,8 @@ Format Example in the URL areas:
 [{"item":"udp://192.168.1.1:5000/0x450555"},
 {"item":"http://192.168.1.1:8180/do/this/thing"},
 {"item":"tcp://192.168.2.1/sendthisdata"},
-{"item":"https://192.168.12.1/do/this/secure/thing"}]
+{"item":"https://192.168.12.1/do/this/secure/thing"},
+{"item":"exec://notepad.exe"}]
 ```
 #### Script or Command Execution
 The release as of v2.0.0 will now support the execution of a local script or program. This will blindly fire off a process to run and is bound by the privileges of the java process.
@@ -184,6 +185,10 @@ OR
 OR
 
 /home/me/startsomething.sh
+
+OR
+
+[{"item":"exec://notepad.exe"}]
 
 ```
 
