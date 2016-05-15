@@ -988,7 +988,6 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 	};
 
 	$scope.buildButtonUrls = function (harmonydevice, onbutton, offbutton) {
-		bridgeService.clearDevice();
 		var currentOn = $scope.device.onUrl;
 		var currentOff = $scope.device.offUrl;
 		var actionOn = angular.fromJson(onbutton);
@@ -999,6 +998,7 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 			$scope.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOff.command + "\"}]";        		
 		}
 		else if ($scope.device.mapType == null || $scope.device.mapType == "") {
+			bridgeService.clearDevice();
 			$scope.device.deviceType = "button";
 			$scope.device.targetDevice = harmonydevice.hub;
 			$scope.device.name = harmonydevice.device.label;
