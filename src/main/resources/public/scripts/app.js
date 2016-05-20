@@ -34,6 +34,9 @@ app.config(function ($routeProvider) {
 	}).when('/huedevices', {
 		templateUrl: 'views/huedevice.html',
 		controller: 'HueController'		
+	}).when('/haldevices', {
+		templateUrl: 'views/haldevice.html',
+		controller: 'HalController'		
 	}).otherwise({
 		templateUrl: 'views/configuration.html',
 		controller: 'ViewingController'
@@ -47,7 +50,7 @@ app.run( function (bridgeService) {
 
 app.service('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, habridgeversion: ""};
+	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, habridgeversion: ""};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
@@ -155,6 +158,11 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		return;
 	}
 
+	this.updateShowHal = function () {
+		this.state.showHal = self.state.settings.halconfigured;
+		return;
+	}
+
 	this.loadBridgeSettings = function () {
 		return $http.get(this.state.systemsbase + "/settings").then(
 				function (response) {
@@ -163,6 +171,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.updateShowHarmony();
 					self.updateShowNest();
 					self.updateShowHue();
+					self.updateShowHal();
 				},
 				function (error) {
 					self.displayWarn("Load Bridge Settings Error: ", error);
@@ -288,6 +297,19 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 				},
 				function (error) {
 					self.displayWarn("Get Harmony Devices Error: ", error);
+				}
+		);
+	};
+
+	this.viewHalDevices = function () {
+		if(!this.state.showHal)
+			return;
+		return $http.get(this.state.base + "/hal/devices").then(
+				function (response) {
+					self.state.haldevices = response.data;
+				},
+				function (error) {
+					self.displayWarn("Get Hal Devices Error: ", error);
 				}
 		);
 	};
@@ -613,6 +635,22 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     	for(var i = $scope.bridge.settings.hueaddress.devices.length - 1; i >= 0; i--) {
     	    if($scope.bridge.settings.hueaddress.devices[i].name === huename && $scope.bridge.settings.hueaddress.devices[i].ip === hueip) {
     	    	$scope.bridge.settings.hueaddress.devices.splice(i, 1);
+    	    }
+    	}    	
+    };
+    $scope.addHaltoSettings = function (newhalname, newhalip) {
+    	if($scope.bridge.settings.haladdress == null) {
+			$scope.bridge.settings.haladdress = { devices: [] };
+		}
+    	var newhal = {name: newhalname, ip: newhalip }
+    	$scope.bridge.settings.haladdress.devices.push(newhal);
+    	$scope.newhalname = null;
+    	$scope.newhalip = null;
+    };
+    $scope.removeHaltoSettings = function (halname, halip) {
+    	for(var i = $scope.bridge.settings.haladdress.devices.length - 1; i >= 0; i--) {
+    	    if($scope.bridge.settings.haladdress.devices[i].name === halname && $scope.bridge.settings.haladdress.devices[i].ip === halip) {
+    	    	$scope.bridge.settings.haladdress.devices.splice(i, 1);
     	    }
     	}    	
     };
@@ -1234,6 +1272,131 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 		$scope.clearDevice();
 		bridgeService.viewDevices();
 		bridgeService.viewHueDevices();
+		$scope.bulk = { devices: [] };
+	};
+
+	$scope.toggleSelection = function toggleSelection(deviceId) {
+		var idx = $scope.bulk.devices.indexOf(deviceId);
+
+		// is currently selected
+		if (idx > -1) {
+			$scope.bulk.devices.splice(idx, 1);
+		}
+
+		// is newly selected
+		else {
+			$scope.bulk.devices.push(deviceId);
+		}
+	};
+
+	$scope.toggleButtons = function () {
+		$scope.buttonsVisible = !$scope.buttonsVisible;
+		if($scope.buttonsVisible)
+			$scope.imgButtonsUrl = "glyphicon glyphicon-minus";
+		else
+			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	};
+
+	$scope.deleteDeviceByMapId = function (id, mapType) {
+		$scope.bridge.mapandid = { id, mapType };
+		ngDialog.open({
+			template: 'deleteMapandIdDialog',
+			controller: 'DeleteMapandIdDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
+	};
+
+});
+
+app.controller('HalController', function ($scope, $location, $http, bridgeService, ngDialog) {
+	$scope.bridge = bridgeService.state;
+	$scope.device = $scope.bridge.device;
+	$scope.device_dim_control = "";
+	$scope.bulk = { devices: [] };
+	bridgeService.viewHalDevices();
+	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	$scope.buttonsVisible = false;
+
+	$scope.clearDevice = function () {
+		bridgeService.clearDevice();
+	};
+
+	$scope.buildDeviceUrls = function (haldevice, dim_control) {
+		bridgeService.clearDevice();
+		$scope.device.deviceType = "switch";
+		$scope.device.name = haldevice.haldevicename;
+		$scope.device.targetDevice = haldevice.halname;
+		$scope.device.mapType = "halDevice";
+		$scope.device.mapId = haldevice.haldevicename + "-" + haldevice.halname;
+		if(dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)
+			$scope.device.dimUrl = "http://" + haldevice.veraaddress
+			+ "/DeviceService!DeviceName="
+			+ haldevice.haldevicename
+			+ "!DeviceCmd=SetDevice!DeviceValue=Dim!DevicePercent="
+			+ dim_control
+			+ "?Token="
+			+ $scope.bridge.settings.haltoken;
+		else
+			$scope.device.dimUrl = "http://" + veradevice.veraaddress
+			+ "/DeviceService!DeviceName="
+			+ haldevice.haldevicename
+			+ "!DeviceCmd=SetDevice!DeviceValue=On?Token="
+			+ $scope.bridge.settings.haltoken;
+		$scope.device.onUrl = "http://" + veradevice.veraaddress
+		+ "/DeviceService!DeviceName="
+		+ haldevice.haldevicename
+		+ "!DeviceCmd=SetDevice!DeviceValue=On?Token="
+		+ $scope.bridge.settings.haltoken;;
+		$scope.device.offUrl = "http://" + veradevice.veraaddress 
+		+ "/DeviceService!DeviceName="
+		+ haldevice.haldevicename
+		+ "!DeviceCmd=SetDevice!DeviceValue=Off?Token="
+		+ $scope.bridge.settings.haltoken;;
+	};
+
+	$scope.addDevice = function () {
+		if($scope.device.name == "" && $scope.device.onUrl == "")
+			return;
+		bridgeService.addDevice($scope.device).then(
+				function () {
+					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewHalDevices();
+				},
+				function (error) {
+					bridgeService.displayWarn("Error adding device: " + $scope.device.name, error)
+				}
+		);
+
+	};
+
+	$scope.bulkAddDevices = function(dim_control) {
+		var devicesList = [];
+		for(var i = 0; i < $scope.bulk.devices.length; i++) {
+			for(var x = 0; x < bridgeService.state.veradevices.length; x++) {
+				if(bridgeService.state.veradevices[x].id == $scope.bulk.devices[i]) {
+					$scope.buildDeviceUrls(bridgeService.state.veradevices[x],dim_control);
+					devicesList[i] = {
+							name: $scope.device.name,
+							mapId: $scope.device.mapId,
+							mapType: $scope.device.mapType,
+							deviceType: $scope.device.deviceType,
+							targetDevice: $scope.device.targetDevice,
+							onUrl: $scope.device.onUrl,
+							offUrl: $scope.device.offUrl,
+							headers: $scope.device.headers,
+							httpVerb: $scope.device.httpVerb,
+							contentType: $scope.device.contentType,
+							contentBody: $scope.device.contentBody,
+							contentBodyOff: $scope.device.contentBodyOff
+					};
+				}
+			}
+		}
+		bridgeService.bulkAddDevice(devicesList);
+		$scope.clearDevice();
+		bridgeService.viewDevices();
+		bridgeService.HalVeraDevices();
 		$scope.bulk = { devices: [] };
 	};
 

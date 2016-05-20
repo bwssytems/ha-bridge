@@ -155,6 +155,7 @@ public class BridgeSettings extends BackupHandler {
         theBridgeSettings.setHarmonyconfigured(theBridgeSettings.isValidHarmony());
         theBridgeSettings.setNestConfigured(theBridgeSettings.isValidNest());
         theBridgeSettings.setHueconfigured(theBridgeSettings.isValidHue());
+        theBridgeSettings.setHalconfigured(theBridgeSettings.isValidHal());
         if(serverPortOverride != null)
         	theBridgeSettings.setServerPort(serverPortOverride);
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
@@ -171,27 +172,7 @@ public class BridgeSettings extends BackupHandler {
 
 	private void _loadConfig(Path aPath) {
 		String jsonContent = configReader(aPath);
-		BridgeSettingsDescriptor aBridgeSettings = new Gson().fromJson(jsonContent, BridgeSettingsDescriptor.class);
-		theBridgeSettings.setButtonsleep(aBridgeSettings.getButtonsleep());
-		theBridgeSettings.setUpnpConfigAddress(aBridgeSettings.getUpnpConfigAddress());
-		theBridgeSettings.setServerPort(aBridgeSettings.getServerPort());
-		theBridgeSettings.setUpnpResponsePort(aBridgeSettings.getUpnpResponsePort());
-		theBridgeSettings.setUpnpDeviceDb(aBridgeSettings.getUpnpDeviceDb());
-		theBridgeSettings.setVeraAddress(aBridgeSettings.getVeraAddress());
-		theBridgeSettings.setHarmonyAddress(aBridgeSettings.getHarmonyAddress());
-		theBridgeSettings.setHarmonyUser(aBridgeSettings.getHarmonyUser());
-		theBridgeSettings.setHarmonyPwd(aBridgeSettings.getHarmonyPwd());
-		theBridgeSettings.setUpnpStrict(aBridgeSettings.isUpnpStrict());
-		theBridgeSettings.setTraceupnp(aBridgeSettings.isTraceupnp());
-		theBridgeSettings.setNestuser(aBridgeSettings.getNestuser());
-		theBridgeSettings.setNestpwd(aBridgeSettings.getNestpwd());
-		theBridgeSettings.setVeraconfigured(aBridgeSettings.isValidVera());
-		theBridgeSettings.setHarmonyconfigured(aBridgeSettings.isValidHarmony());
-		theBridgeSettings.setNestConfigured(aBridgeSettings.isValidNest());
-		theBridgeSettings.setNumberoflogmessages(aBridgeSettings.getNumberoflogmessages());
-		theBridgeSettings.setFarenheit(aBridgeSettings.isFarenheit());
-		theBridgeSettings.setHueaddress(aBridgeSettings.getHueaddress());
-		theBridgeSettings.setHueconfigured(aBridgeSettings.isValidHue());
+		theBridgeSettings = new Gson().fromJson(jsonContent, BridgeSettingsDescriptor.class);
     }
 
 	public void save(BridgeSettingsDescriptor newBridgeSettings) {

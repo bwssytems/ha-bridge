@@ -24,6 +24,9 @@ public class BridgeSettingsDescriptor {
 	private Integer numberoflogmessages;
 	private IpList hueaddress;
 	private boolean hueconfigured;
+	private IpList haladdress;
+	private String haltoken;
+	private boolean halconfigured;
 	
 	public BridgeSettingsDescriptor() {
 		super();
@@ -167,6 +170,24 @@ public class BridgeSettingsDescriptor {
 	public void setHueconfigured(boolean hueconfigured) {
 		this.hueconfigured = hueconfigured;
 	}
+	public IpList getHaladdress() {
+		return haladdress;
+	}
+	public void setHaladdress(IpList haladdress) {
+		this.haladdress = haladdress;
+	}
+	public String getHaltoken() {
+		return haltoken;
+	}
+	public void setHaltoken(String haltoken) {
+		this.haltoken = haltoken;
+	}
+	public boolean isHalconfigured() {
+		return halconfigured;
+	}
+	public void setHalconfigured(boolean halconfigured) {
+		this.halconfigured = halconfigured;
+	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
 			return false;
@@ -199,6 +220,16 @@ public class BridgeSettingsDescriptor {
 			return false;
 		List<NamedIP> devicesList = this.getHueaddress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+		return true;
+	}
+	public Boolean isValidHal() {
+		if(this.getHaladdress() == null || this.getHaladdress().getDevices().size() <= 0)
+			return false;		
+		List<NamedIP> devicesList = this.getHaladdress().getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+		if(this.getHaltoken() == null || this.getHaltoken().equals(""))
 			return false;
 		return true;
 	}

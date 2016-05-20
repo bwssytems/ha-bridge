@@ -170,6 +170,38 @@
 					</td>
 				</tr>
 				<tr>
+					<td>HAL Names and IP Addresses</td>
+					<td><table class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>IP</th>
+									<th>Manage</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="hal in bridge.settings.haladdress.devices">
+								<td>{{hal.name}}</td>
+								<td>{{hal.ip}}</td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removeHaltoSettings(hal.name, hal.ip)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-next-hal-name" class="form-control" type="text"
+									ng-model="newhalname" placeholder="A Hal"></td>
+								<td><input id="bridge-settings-next-hal-ip" class="form-control" type="text"
+									ng-model="newhalip" placeholder="192.168.1.3"></td>
+									<td><button class="btn btn-success" type="submit"
+										ng-click="addHaltoSettings(newhalname, newhalip)">Add</button></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td>HAL Token</td>
+					<td><input id="bridge-settings-haltoken" class="form-control" type="password"
+							ng-model="bridge.settings.halpwd" placeholder="thetoken"></td>
+				</tr>
+				<tr>
 					<td>Nest Username</td>
 					<td><input id="bridge-settings-nestuser" class="form-control" type="text"
 							ng-model="bridge.settings.nestuser" placeholder="someone@gmail.com"></td>

@@ -21,6 +21,7 @@ import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
 import com.bwssystems.HABridge.dao.ErrorMessage;
 import com.bwssystems.NestBridge.NestHome;
+import com.bwssystems.hal.HalHome;
 import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.hue.HueHome;
 import com.bwssystems.luupRequests.Device;
@@ -40,6 +41,7 @@ public class DeviceResource {
     private HarmonyHome myHarmonyHome;
     private NestHome nestHome;
     private HueHome hueHome;
+    private HalHome halHome;
     private static final Set<String> supportedVerbs = new HashSet<>(Arrays.asList("get", "put", "post"));
 
 	public DeviceResource(BridgeSettingsDescriptor theSettings, HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome) {
@@ -64,7 +66,13 @@ public class DeviceResource {
 			this.hueHome = aHueHome;
 		else
 			this.hueHome = null;
-        setupEndpoints();
+
+		if(theSettings.isValidHal())
+			this.hueHome = aHueHome;
+		else
+			this.halHome = null;
+
+		setupEndpoints();
 	}
 
 	public DeviceRepository getDeviceRepository() {
@@ -260,6 +268,16 @@ public class DeviceResource {
 	      	}
 	      	response.status(HttpStatus.SC_OK);
 	      	return hueHome.getDevices();
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/hal/devices", "application/json", (request, response) -> {
+	    	log.debug("Get hal items");
+	      	if(halHome == null) {
+				response.status(HttpStatus.SC_NOT_FOUND);
+				return new ErrorMessage("A Hal is not available.");
+	      	}
+	      	response.status(HttpStatus.SC_OK);
+	      	return halHome.getDevices();
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/backup/available", "application/json", (request, response) -> {
