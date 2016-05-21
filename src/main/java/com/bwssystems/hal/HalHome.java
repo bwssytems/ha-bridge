@@ -21,7 +21,7 @@ public class HalHome {
 		hals = new HashMap<String, HalInfo>();
 		if(!bridgeSettings.isValidHal())
 			return;
-		Iterator<NamedIP> theList = bridgeSettings.getHarmonyAddress().getDevices().iterator();
+		Iterator<NamedIP> theList = bridgeSettings.getHaladdress().getDevices().iterator();
 		while(theList.hasNext()) {
 			NamedIP aHal = theList.next();
 	      	try {

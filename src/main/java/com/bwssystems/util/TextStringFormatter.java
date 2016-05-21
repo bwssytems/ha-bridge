@@ -221,6 +221,9 @@ public final class TextStringFormatter {
 	public static String forQuerySpace(String aURL) {
 		return aURL.replace(" ", "\u0020");
 	}
+	public static String forQuerySpaceUrl(String aURL) {
+		return aURL.replace(" ", "%20");
+	}
 	/**
 	 * Synonym for <tt>URLEncoder.encode(String, "UTF-8")</tt>.
 	 * 
