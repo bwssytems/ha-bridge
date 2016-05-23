@@ -1,123 +1,132 @@
-      <ul class="nav nav-pills" role="tablist">
-        <li role="presentation"><a href="#">Bridge Devices</a></li>
-        <li role="presentation"><a href="#/system">Bridge Control</a></li>
-        <li role="presentation"><a href="#/logs">Logs</a></li>
-        <li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
-        <li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
-        <li ng-if="bridge.showHarmony"  role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
-        <li ng-if="bridge.showHarmony"  role="presentation"><a href="#/harmonydevices">Harmony Devices</a></li>
-        <li role="presentation" class="active"><a href="#/nest">Nest</a></li>
-        <li ng-if="bridge.showHue" role="presentation"><a href="#/huedevices">Hue Devices</a></li>
-        <li ng-if="bridge.showHal" role="presentation"><a href="#/haldevices">HAL Devices</a></li>
-        <li role="presentation"><a href="#/editor">Manual Add</a></li>
-      </ul>
+<ul class="nav nav-pills" role="tablist">
+	<li role="presentation"><a href="#">Bridge Devices</a></li>
+	<li role="presentation"><a href="#/system">Bridge Control</a></li>
+	<li role="presentation"><a href="#/logs">Logs</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a
+		href="#/veradevices">Vera Devices</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a
+		href="#/verascenes">Vera Scenes</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a
+		href="#/harmonyactivities">Harmony Activities</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a
+		href="#/harmonydevices">Harmony Devices</a></li>
+	<li role="presentation" class="active"><a href="#/nest">Nest</a></li>
+	<li ng-if="bridge.showHue" role="presentation"><a
+		href="#/huedevices">Hue Devices</a></li>
+	<li ng-if="bridge.showHal" role="presentation"><a
+		href="#/haldevices">HAL Devices</a></li>
+	<li role="presentation"><a href="#/editor">Manual Add</a></li>
+</ul>
 
-<div class="panel panel-default bridgeServer">
+<div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title">Nest Items List</h2>
 	</div>
-	<ul class="list-group">
-		<li class="list-group-item">
-			<p class="text-muted">For any Nest Item, use the action buttons to generate the device addition information below automatically. 
-			Then you can modify the name to anything you want that will be the keyword for Alexa. Click the 'Add Bridge Device' to finish that selection setup.
-			The 'Already Configured Nest Items' list below will show what is already setup for your Nest.</p>
-
-        	<scrollable-table watch="bridge.nestitems">
-			<table class="table table-bordered table-striped table-hover">
-				<thead>
-					<tr>
-						<th>Row</th>
-						<th sortable-header col="name">Name</th>
-						<th sortable-header col="type">Type</th>
-						<th sortable-header col="location">Location</th>
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tr ng-repeat="nestitem in bridge.nestitems | availableNestItemId | orderBy:predicate:reverse">
-					<td>{{$index+1}}</td>
-					<td>{{nestitem.name}}</td>
-					<td>{{nestitem.type}}</td>
-					<td>{{nestitem.location}}</td>
-					<td>
-						<ul class="list-group">
-							<li ng-if="nestitem.type ==='Home' " class="list-group-item">
-								<button class="btn btn-success" type="submit"
-										ng-click="buildNestHomeUrls(nestitem)">Home/Away</button>
-							</li>
-							<li ng-if="nestitem.type ==='Thermostat' " class="list-group-item">
-								<p>
-								<button class="btn btn-success" type="submit"
-										ng-click="buildNestTempUrls(nestitem)">Temp</button>
-								<button class="btn btn-success" type="submit"
-										ng-click="buildNestHeatUrls(nestitem)">Heat</button>
-								<button class="btn btn-success" type="submit"
-										ng-click="buildNestCoolUrls(nestitem)">Cool</button>
-								</p>
-								<p>
-								<button class="btn btn-success" type="submit"
-										ng-click="buildNestRangeUrls(nestitem)">Range</button>
-								<button class="btn btn-success" type="submit"
-										ng-click="buildNestOffUrls(nestitem)">Off</button>
-								<button class="btn btn-success" type="submit"
-										ng-click="buildNestFanUrls(nestitem)">Fan</button>
-								</p>
-							</li>
-						</ul>
-					</td>
-				</tr>
-			</table>
-        	</scrollable-table>
-		</li>
-	</ul>
-	<div class="panel-heading">
-		<h2 class="panel-title">Already Configured Nest Items <a ng-click="toggleButtons()"><span class={{imgButtonsUrl}} aria-hidden="true"></span></a></h2>
+	<div class="panel-body">
+		<p class="text-muted">For any Nest Item, use the action buttons to
+			generate the device addition information below automatically. Then
+			you can modify the name to anything you want that will be the keyword
+			for Alexa. Click the 'Add Bridge Device' to finish that selection
+			setup. The 'Already Configured Nest Items' list below will show what
+			is already setup for your Nest.</p>
 	</div>
-	<ul ng-if="buttonsVisible" class="list-group">
-		<li class="list-group-item">
-        	<scrollable-table watch="bridge.nestitems">
-			<table class="table table-bordered table-striped table-hover">
-				<thead>
-					<tr>
-						<th>Row</th>
-						<th sortable-header col="name">Name</th>
-						<th sortable-header col="id">Device Id</th>
-						<th>mapId</th>
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tr ng-repeat="device in bridge.devices | unavailableNestItemId | orderBy:predicate:reverse">
-					<td>{{$index+1}}</td>
-					<td>{{device.name}}</td>
-					<td>{{device.id}}</td>
-					<td>{{device.mapId}}</td>
-					<td><button class="btn btn-danger" type="submit"
-						ng-click="deleteDeviceByMapId(device.mapId, 'nest')">Delete</button></td>
-				</tr>
-			</table>
-        	</scrollable-table>
-		</li>
-	</ul>
+
+	<scrollable-table watch="bridge.nestitems">
+	<table class="table table-bordered table-striped table-hover">
+		<thead>
+			<tr>
+				<th>Row</th>
+				<th sortable-header col="name">Name</th>
+				<th sortable-header col="type">Type</th>
+				<th sortable-header col="location">Location</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tr
+			ng-repeat="nestitem in bridge.nestitems | availableNestItemId | orderBy:predicate:reverse">
+			<td>{{$index+1}}</td>
+			<td>{{nestitem.name}}</td>
+			<td>{{nestitem.type}}</td>
+			<td>{{nestitem.location}}</td>
+			<td>
+				<ul class="list-group">
+					<li ng-if="nestitem.type ==='Home' " class="list-group-item">
+						<button class="btn btn-success" type="submit"
+							ng-click="buildNestHomeUrls(nestitem)">Home/Away</button>
+					</li>
+					<li ng-if="nestitem.type ==='Thermostat' " class="list-group-item">
+						<p>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildNestTempUrls(nestitem)">Temp</button>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildNestHeatUrls(nestitem)">Heat</button>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildNestCoolUrls(nestitem)">Cool</button>
+						</p>
+						<p>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildNestRangeUrls(nestitem)">Range</button>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildNestOffUrls(nestitem)">Off</button>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildNestFanUrls(nestitem)">Fan</button>
+						</p>
+					</li>
+				</ul>
+			</td>
+		</tr>
+	</table>
+	</scrollable-table>
 </div>
-<div class="panel panel-default bridgeServer">
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h2 class="panel-title">
+			Already Configured Nest Items <a ng-click="toggleButtons()"><span
+				class={{imgButtonsUrl}} aria-hidden="true"></span></a>
+		</h2>
+	</div>
+	<scrollable-table ng-if="buttonsVisible" watch="bridge.nestitems">
+	<table class="table table-bordered table-striped table-hover">
+		<thead>
+			<tr>
+				<th>Row</th>
+				<th sortable-header col="name">Name</th>
+				<th sortable-header col="id">Device Id</th>
+				<th>mapId</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tr
+			ng-repeat="device in bridge.devices | unavailableNestItemId | orderBy:predicate:reverse">
+			<td>{{$index+1}}</td>
+			<td>{{device.name}}</td>
+			<td>{{device.id}}</td>
+			<td>{{device.mapId}}</td>
+			<td><button class="btn btn-danger" type="submit"
+					ng-click="deleteDeviceByMapId(device.mapId, 'nest')">Delete</button></td>
+		</tr>
+	</table>
+	</scrollable-table>
+</div>
+<div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title">Add a Bridge Device for a Nest Item</h2>
 	</div>
-	<ul class="list-group">
-		<li class="list-group-item">
-			<form class="form-horizontal">
-				<div class="form-group">
-					<label class="col-xs-12 col-sm-2 control-label" for="device-name">Name
-					</label>
+	<div class="panel-body">
+		<form class="form-horizontal">
+			<div class="form-group">
+				<label class="col-xs-12 col-sm-2 control-label" for="device-name">Name
+				</label>
 
-					<div class="col-xs-8 col-sm-7">
-						<input type="text" class="form-control" id="device-name"
-							ng-model="device.name" placeholder="Device Name">
-					</div>
-					<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary" ng-click="addDevice()">
-						Add Bridge Device</button>
+				<div class="col-xs-8 col-sm-7">
+					<input type="text" class="form-control" id="device-name"
+						ng-model="device.name" placeholder="Device Name">
 				</div>
-				<div class="form-group">
-					<div class="row">
+				<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary"
+					ng-click="addDevice()">Add Bridge Device</button>
+			</div>
+			<div class="form-group">
+				<div class="row">
 					<label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On
 						URL </label>
 
@@ -127,10 +136,10 @@
 					</div>
 					<button class="btn btn-danger" ng-click="clearDevice()">
 						Clear Device</button>
-					</div>
 				</div>
-				<div class="form-group">
-					<div class="row">
+			</div>
+			<div class="form-group">
+				<div class="row">
 					<label class="col-xs-12 col-sm-2 control-label"
 						for="device-off-url">Off URL </label>
 
@@ -138,13 +147,12 @@
 						<textarea rows="3" class="form-control" id="device-off-url"
 							ng-model="device.offUrl" placeholder="URL to turn device off"></textarea>
 					</div>
-					</div>
 				</div>
-			</form>
-		</li>
-	</ul>
+			</div>
+		</form>
+	</div>
 </div>
-	<script type="text/ng-template" id="deleteMapandIdDialog">
+<script type="text/ng-template" id="deleteMapandIdDialog">
 		<div class="ngdialog-message">
 			<h2>Device Map and Id?</h2>
 				<p>{{mapandid.mapType}} with  {{mapandid.id}}</p>

@@ -1,50 +1,57 @@
-      <ul class="nav nav-pills" role="tablist">
-        <li role="presentation"><a href="#">Bridge Devices</a></li>
-        <li role="presentation" class="active"><a href="#/system">Bridge Control</a></li>
-        <li role="presentation"><a href="#/logs">Logs</a></li>
-        <li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
-        <li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
-        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
-        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonydevices">Harmony Devices</a></li>
-        <li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
-        <li ng-if="bridge.showHue" role="presentation"><a href="#/huedevices">Hue Devices</a></li>
-        <li ng-if="bridge.showHal" role="presentation"><a href="#/haldevices">HAL Devices</a></li>
-        <li role="presentation"><a href="#/editor">Manual Add</a></li>
-      </ul>
+<ul class="nav nav-pills" role="tablist">
+	<li role="presentation"><a href="#">Bridge Devices</a></li>
+	<li role="presentation" class="active"><a href="#/system">Bridge
+			Control</a></li>
+	<li role="presentation"><a href="#/logs">Logs</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a
+		href="#/veradevices">Vera Devices</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a
+		href="#/verascenes">Vera Scenes</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a
+		href="#/harmonyactivities">Harmony Activities</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a
+		href="#/harmonydevices">Harmony Devices</a></li>
+	<li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
+	<li ng-if="bridge.showHue" role="presentation"><a
+		href="#/huedevices">Hue Devices</a></li>
+	<li ng-if="bridge.showHal" role="presentation"><a
+		href="#/haldevices">HAL Devices</a></li>
+	<li role="presentation"><a href="#/editor">Manual Add</a></li>
+</ul>
 
-	<div class="panel panel-default bridgeServer">
-		<div class="panel-heading">
-			<h1 class="panel-title">Bridge Settings</h1>
-		</div>
-		<div class="panel-body">
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h1 class="panel-title">Bridge Settings</h1>
+	</div>
+	<div class="panel-body">
 
-			<form class="form-horizontal">
-				<div class="form-group">
-					<label class="col-xs-12 col-sm-2 control-label" for="bridge-base">Bridge
-						server</label>
+		<form class="form-horizontal">
+			<div class="form-group">
+				<label class="col-xs-12 col-sm-2 control-label" for="bridge-base">Bridge
+					server</label>
 
-					<div class="col-xs-8 col-sm-7">
-						<input id="bridge-base" class="form-control" type="text"
-							ng-model="bridge.base" placeholder="URL to bridge">
-					</div>
-					<button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
-						ng-click="goBridgeUrl(bridge.base)">Test</button>
+				<div class="col-xs-8 col-sm-7">
+					<input id="bridge-base" class="form-control" type="text"
+						ng-model="bridge.base" placeholder="URL to bridge">
 				</div>
-			</form>
-			<form name="form">
+				<button type="submit" class="col-xs-2 col-sm-1 btn btn-primary"
+					ng-click="goBridgeUrl(bridge.base)">Test</button>
+			</div>
+		</form>
+		<form name="form">
 			<p>
-				<button ng-disabled="form.$pristine || bridge.isInControl" class="btn btn-success" type="submit"
-					ng-click="saveSettings()">Save</button>
-				<button ng-disabled="bridge.isInControl" class="btn btn-warning" type="submit"
-					ng-click="bridgeReinit()">Bridge Reinitialize</button>
-				<button ng-disabled="bridge.isInControl" class="btn btn-danger" type="submit"
-					ng-click="bridgeStop()">Bridge Stop</button>
-				<button class="btn btn-primary" type="submit"
-					onclick="myRefresh()">Refresh</button>
+				<button ng-disabled="form.$pristine || bridge.isInControl"
+					class="btn btn-success" type="submit" ng-click="saveSettings()">Save</button>
+				<button ng-disabled="bridge.isInControl" class="btn btn-warning"
+					type="submit" ng-click="bridgeReinit()">Bridge
+					Reinitialize</button>
+				<button ng-disabled="bridge.isInControl" class="btn btn-danger"
+					type="submit" ng-click="bridgeStop()">Bridge Stop</button>
+				<button class="btn btn-primary" type="submit" onclick="myRefresh()">Refresh</button>
 				<script>
-				function myRefresh() {
-				    location.reload();
-				}
+					function myRefresh() {
+						location.reload();
+					}
 				</script>
 			</p>
 			<table class="table table-bordered table-striped table-hover">
@@ -56,32 +63,41 @@
 				</thead>
 				<tr>
 					<td>Configuration Path and File</td>
-					<td><input id="bridge-settings-configfile" class="form-control" type="text"
-							ng-model="bridge.settings.configfile" placeholder="data/ha-bridge.config"></td>
+					<td><input id="bridge-settings-configfile"
+						class="form-control" type="text"
+						ng-model="bridge.settings.configfile"
+						placeholder="data/ha-bridge.config"></td>
 				</tr>
 				<tr>
 					<td>Device DB Path and File</td>
-					<td><input id="bridge-settings-upnpdevicedb" class="form-control" type="text"
-							ng-model="bridge.settings.upnpdevicedb" placeholder="data/device.db"></td>
+					<td><input id="bridge-settings-upnpdevicedb"
+						class="form-control" type="text"
+						ng-model="bridge.settings.upnpdevicedb"
+						placeholder="data/device.db"></td>
 				</tr>
 				<tr>
 					<td>UPNP IP Address</td>
-					<td><input id="bridge-settings-upnpconfigaddress" class="form-control" type="text"
-							ng-model="bridge.settings.upnpconfigaddress" placeholder="192.168.1.1"></td>
+					<td><input id="bridge-settings-upnpconfigaddress"
+						class="form-control" type="text"
+						ng-model="bridge.settings.upnpconfigaddress"
+						placeholder="192.168.1.1"></td>
 				</tr>
 				<tr>
 					<td>Web Server Port</td>
-					<td><input id="bridge-settings-serverport" class="form-control" type="number"
-							ng-model="bridge.settings.serverport"  min="1" max="65535"></td>
+					<td><input id="bridge-settings-serverport"
+						class="form-control" type="number"
+						ng-model="bridge.settings.serverport" min="1" max="65535"></td>
 				</tr>
 				<tr>
 					<td>UPNP Response Port</td>
-					<td><input id="bridge-settings-upnpresponseport" class="form-control" type="number"
-							ng-model="bridge.settings.upnpresponseport"  min="1" max="65535"></td>
+					<td><input id="bridge-settings-upnpresponseport"
+						class="form-control" type="number"
+						ng-model="bridge.settings.upnpresponseport" min="1" max="65535"></td>
 				</tr>
 				<tr>
 					<td>Vera Names and IP Addresses</td>
-						<td><table class="table table-bordered table-striped table-hover">
+					<td><table
+							class="table table-bordered table-striped table-hover">
 							<thead>
 								<tr>
 									<th>Name</th>
@@ -96,19 +112,21 @@
 										ng-click="removeVeratoSettings(vera.name, vera.ip)">Del</button></td>
 							</tr>
 							<tr>
-								<td><input id="bridge-settings-next-vera-name" class="form-control" type="text"
-									ng-model="newveraname" placeholder="A Vera"></td>
-								<td><input id="bridge-settings-next-vera-ip" class="form-control" type="text"
-									ng-model="newveraip" placeholder="192.168.1.2"></td>
-									<td><button class="btn btn-success" type="submit"
+								<td><input id="bridge-settings-next-vera-name"
+									class="form-control" type="text" ng-model="newveraname"
+									placeholder="A Vera"></td>
+								<td><input id="bridge-settings-next-vera-ip"
+									class="form-control" type="text" ng-model="newveraip"
+									placeholder="192.168.1.2"></td>
+								<td><button class="btn btn-success" type="submit"
 										ng-click="addVeratoSettings(newveraname, newveraip)">Add</button></td>
 							</tr>
-						</table>
-					</td>
+						</table></td>
 				</tr>
 				<tr>
 					<td>Harmony Names and IP Addresses</td>
-					<td><table class="table table-bordered table-striped table-hover">
+					<td><table
+							class="table table-bordered table-striped table-hover">
 							<thead>
 								<tr>
 									<th>Name</th>
@@ -123,29 +141,34 @@
 										ng-click="removeHarmonytoSettings(harmony.name, harmony.ip)">Del</button></td>
 							</tr>
 							<tr>
-								<td><input id="bridge-settings-next-harmony-name" class="form-control" type="text"
-									ng-model="newharmonyname" placeholder="A Harmony"></td>
-								<td><input id="bridge-settings-next-harmony-ip" class="form-control" type="text"
-									ng-model="newharmonyip" placeholder="192.168.1.3"></td>
-									<td><button class="btn btn-success" type="submit"
+								<td><input id="bridge-settings-next-harmony-name"
+									class="form-control" type="text" ng-model="newharmonyname"
+									placeholder="A Harmony"></td>
+								<td><input id="bridge-settings-next-harmony-ip"
+									class="form-control" type="text" ng-model="newharmonyip"
+									placeholder="192.168.1.3"></td>
+								<td><button class="btn btn-success" type="submit"
 										ng-click="addHarmonytoSettings(newharmonyname, newharmonyip)">Add</button></td>
 							</tr>
-						</table>
-					</td>
+						</table></td>
 				</tr>
 				<tr>
 					<td>Harmony Username</td>
-					<td><input id="bridge-settings-harmonyuser" class="form-control" type="text"
-							ng-model="bridge.settings.harmonyuser" placeholder="someone@gmail.com"></td>
+					<td><input id="bridge-settings-harmonyuser"
+						class="form-control" type="text"
+						ng-model="bridge.settings.harmonyuser"
+						placeholder="someone@gmail.com"></td>
 				</tr>
 				<tr>
 					<td>Harmony Password</td>
-					<td><input id="bridge-settings-harmonypwd" class="form-control" type="password"
-							ng-model="bridge.settings.harmonypwd" placeholder="thepassword"></td>
+					<td><input id="bridge-settings-harmonypwd"
+						class="form-control" type="password"
+						ng-model="bridge.settings.harmonypwd" placeholder="thepassword"></td>
 				</tr>
 				<tr>
 					<td>Hue Names and IP Addresses</td>
-					<td><table class="table table-bordered table-striped table-hover">
+					<td><table
+							class="table table-bordered table-striped table-hover">
 							<thead>
 								<tr>
 									<th>Name</th>
@@ -160,19 +183,21 @@
 										ng-click="removeHuetoSettings(hue.name, hue.ip)">Del</button></td>
 							</tr>
 							<tr>
-								<td><input id="bridge-settings-next-hue-name" class="form-control" type="text"
-									ng-model="newhuename" placeholder="A Hue"></td>
-								<td><input id="bridge-settings-next-hue-ip" class="form-control" type="text"
-									ng-model="newhueip" placeholder="192.168.1.3"></td>
-									<td><button class="btn btn-success" type="submit"
+								<td><input id="bridge-settings-next-hue-name"
+									class="form-control" type="text" ng-model="newhuename"
+									placeholder="A Hue"></td>
+								<td><input id="bridge-settings-next-hue-ip"
+									class="form-control" type="text" ng-model="newhueip"
+									placeholder="192.168.1.3"></td>
+								<td><button class="btn btn-success" type="submit"
 										ng-click="addHuetoSettings(newhuename, newhueip)">Add</button></td>
 							</tr>
-						</table>
-					</td>
+						</table></td>
 				</tr>
 				<tr>
 					<td>HAL Names and IP Addresses</td>
-					<td><table class="table table-bordered table-striped table-hover">
+					<td><table
+							class="table table-bordered table-striped table-hover">
 							<thead>
 								<tr>
 									<th>Name</th>
@@ -187,94 +212,108 @@
 										ng-click="removeHaltoSettings(hal.name, hal.ip)">Del</button></td>
 							</tr>
 							<tr>
-								<td><input id="bridge-settings-next-hal-name" class="form-control" type="text"
-									ng-model="newhalname" placeholder="A Hal"></td>
-								<td><input id="bridge-settings-next-hal-ip" class="form-control" type="text"
-									ng-model="newhalip" placeholder="192.168.1.3"></td>
-									<td><button class="btn btn-success" type="submit"
+								<td><input id="bridge-settings-next-hal-name"
+									class="form-control" type="text" ng-model="newhalname"
+									placeholder="A Hal"></td>
+								<td><input id="bridge-settings-next-hal-ip"
+									class="form-control" type="text" ng-model="newhalip"
+									placeholder="192.168.1.3:82"></td>
+								<td><button class="btn btn-success" type="submit"
 										ng-click="addHaltoSettings(newhalname, newhalip)">Add</button></td>
 							</tr>
-						</table>
-					</td>
+						</table></td>
 				</tr>
 				<tr>
 					<td>HAL Token</td>
-					<td><input id="bridge-settings-haltoken" class="form-control" type="password"
-							ng-model="bridge.settings.haltoken" placeholder="thetoken"></td>
+					<td><input id="bridge-settings-haltoken" class="form-control"
+						type="password" ng-model="bridge.settings.haltoken"
+						placeholder="thetoken"></td>
 				</tr>
 				<tr>
 					<td>Nest Username</td>
-					<td><input id="bridge-settings-nestuser" class="form-control" type="text"
-							ng-model="bridge.settings.nestuser" placeholder="someone@gmail.com"></td>
+					<td><input id="bridge-settings-nestuser" class="form-control"
+						type="text" ng-model="bridge.settings.nestuser"
+						placeholder="someone@gmail.com"></td>
 				</tr>
 				<tr>
 					<td>Nest Password</td>
-					<td><input id="bridge-settings-nestpwd" class="form-control" type="password"
-							ng-model="bridge.settings.nestpwd" placeholder="thepassword"></td>
+					<td><input id="bridge-settings-nestpwd" class="form-control"
+						type="password" ng-model="bridge.settings.nestpwd"
+						placeholder="thepassword"></td>
 				</tr>
 				<tr>
 					<td>Nest Temp Farenheit</td>
-					<td><input type="checkbox" ng-model="bridge.settings.farenheit"
-           				ng-true-value=true ng-false-value=false>  {{bridge.settings.farenheit}}</td>
+					<td><input type="checkbox"
+						ng-model="bridge.settings.farenheit" ng-true-value=true
+						ng-false-value=false> {{bridge.settings.farenheit}}</td>
 				</tr>
 				<tr>
 					<td>Button Press/Call Item Loop Sleep Interval (ms)</td>
-					<td><input id="bridge-settings-buttonsleep" class="form-control" type="number" name="input"
-							ng-model="bridge.settings.buttonsleep" min="100" max="9999"></td>
+					<td><input id="bridge-settings-buttonsleep"
+						class="form-control" type="number" name="input"
+						ng-model="bridge.settings.buttonsleep" min="100" max="9999"></td>
 				</tr>
 				<tr>
 					<td>Log Messages to Buffer</td>
-					<td><input id="bridge-settings-numberoflogmessages" class="form-control" type="number"
-							ng-model="bridge.settings.numberoflogmessages"  min="100" max="65535"></td>
+					<td><input id="bridge-settings-numberoflogmessages"
+						class="form-control" type="number"
+						ng-model="bridge.settings.numberoflogmessages" min="100"
+						max="65535"></td>
 				</tr>
 				<tr>
 					<td>UPNP Strict Handling</td>
-					<td><input type="checkbox" ng-model="bridge.settings.upnpstrict"
-           				ng-true-value=true ng-false-value=false>  {{bridge.settings.upnpstrict}}</td>
+					<td><input type="checkbox"
+						ng-model="bridge.settings.upnpstrict" ng-true-value=true
+						ng-false-value=false> {{bridge.settings.upnpstrict}}</td>
 				</tr>
 				<tr>
 					<td>Trace UPNP Calls</td>
-					<td><input type="checkbox" ng-model="bridge.settings.traceupnp"
-           				ng-true-value=true ng-false-value=false>  {{bridge.settings.traceupnp}}</td>
+					<td><input type="checkbox"
+						ng-model="bridge.settings.traceupnp" ng-true-value=true
+						ng-false-value=false> {{bridge.settings.traceupnp}}</td>
 				</tr>
 			</table>
-			</form>
-		</div>
+		</form>
 	</div>
-	<div class="panel panel-default backup">
-		<div class="panel-heading">
-			<h1 class="panel-title">Bridge Settings Backup <a ng-click="toggle()"><span class={{imgUrl}} aria-hidden="true"></a></h1>
-		</div>
-		<div ng-if="visible" class="animate-if" class="panel-body">
-			<form class="form-horizontal">
-				<div class="form-group">
-					<label class="col-xs-12 col-sm-2 control-label" for="backup-name">Backup Settings File Name</label>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h1 class="panel-title">
+			Bridge Settings Backup <a ng-click="toggle()"><span
+				class={{imgUrl}} aria-hidden="true"></a>
+		</h1>
+	</div>
+	<div ng-if="visible" class="animate-if" class="panel-body">
+		<form class="form-horizontal">
+			<div class="form-group">
+				<label class="col-xs-12 col-sm-2 control-label" for="backup-name">Backup
+					Settings File Name</label>
 
-					<div class="col-xs-8 col-sm-7">
-						<input id="backup-name" class="form-control" type="text"
-							ng-model="optionalbackupname" placeholder="Optional">
-					</div>
-					<button type="submit" class="btn btn-primary"
-						ng-click="backupSettings(optionalbackupname)">Backup Settings</button>
+				<div class="col-xs-8 col-sm-7">
+					<input id="backup-name" class="form-control" type="text"
+						ng-model="optionalbackupname" placeholder="Optional">
 				</div>
-			</form>
-			<table class="table table-bordered table-striped table-hover">
-				<thead>
-					<tr>
-						<th>Filename</th>
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tr ng-repeat="backup in bridge.configs">
-					<td>{{backup}}</td>
-					<td>
-						<button class="btn btn-danger" type="submit"
-							ng-click="restoreSettings(backup)">Restore</button>
-						<button class="btn btn-warning" type="submit"
-							ng-click="deleteSettingsBackup(backup)">Delete</button>
-					</td>
+				<button type="submit" class="btn btn-primary"
+					ng-click="backupSettings(optionalbackupname)">Backup
+					Settings</button>
+			</div>
+		</form>
+		<table class="table table-bordered table-striped table-hover">
+			<thead>
+				<tr>
+					<th>Filename</th>
+					<th>Actions</th>
 				</tr>
-			</table>
-		</div>
+			</thead>
+			<tr ng-repeat="backup in bridge.configs">
+				<td>{{backup}}</td>
+				<td>
+					<button class="btn btn-danger" type="submit"
+						ng-click="restoreSettings(backup)">Restore</button>
+					<button class="btn btn-warning" type="submit"
+						ng-click="deleteSettingsBackup(backup)">Delete</button>
+				</td>
+			</tr>
+		</table>
 	</div>
-	
+</div>

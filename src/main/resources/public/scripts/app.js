@@ -973,11 +973,17 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 				}
 			}
 		}
-		bridgeService.bulkAddDevice(devicesList);
-		$scope.clearDevice();
-		bridgeService.viewDevices();
-		bridgeService.viewVeraDevices();
-		bridgeService.viewVeraScenes();
+		bridgeService.bulkAddDevice(devicesList).then(
+				function () {
+					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewVeraDevices();
+					bridgeService.viewVeraScenes();
+				},
+				function (error) {
+					bridgeService.displayWarn("Error adding Vera devices in bulk.", error)
+				}
+			);
 		$scope.bulk = { devices: [] };
 	};
 
@@ -1280,10 +1286,17 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 				}
 			}
 		}
-		bridgeService.bulkAddDevice(devicesList);
-		$scope.clearDevice();
-		bridgeService.viewDevices();
-		bridgeService.viewHueDevices();
+		bridgeService.bulkAddDevice(devicesList).then(
+				function () {
+					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewHueDevices();
+				},
+				function (error) {
+					bridgeService.displayWarn("Error adding Hue devices in bulk.", error)
+				}
+			);
+
 		$scope.bulk = { devices: [] };
 	};
 
@@ -1389,7 +1402,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		var devicesList = [];
 		for(var i = 0; i < $scope.bulk.devices.length; i++) {
 			for(var x = 0; x < bridgeService.state.haldevices.length; x++) {
-				if(bridgeService.state.haldevices[x].id == $scope.bulk.devices[i]) {
+				if(bridgeService.state.haldevices[x].haldevicename == $scope.bulk.devices[i]) {
 					$scope.buildDeviceUrls(bridgeService.state.haldevices[x],dim_control);
 					devicesList[i] = {
 							name: $scope.device.name,
@@ -1408,10 +1421,16 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 				}
 			}
 		}
-		bridgeService.bulkAddDevice(devicesList);
-		$scope.clearDevice();
-		bridgeService.viewDevices();
-		bridgeService.viewHalDevices();
+		bridgeService.bulkAddDevice(devicesList).then(
+				function () {
+					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewHalDevices();
+				},
+				function (error) {
+					bridgeService.displayWarn("Error adding HAL devices in bulk.", error)
+				}
+			);
 		$scope.bulk = { devices: [] };
 	};
 
@@ -1437,7 +1456,8 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	};
 
-	$scope.deleteDeviceByMapId = function (id, mapType) {
+	$scope.deleteDeviceByMapId = function (haldevicename, halname, mapType) {
+		var id = haldevicename + "-" + halname;
 		$scope.bridge.mapandid = { id, mapType };
 		ngDialog.open({
 			template: 'deleteMapandIdDialog',
@@ -1685,7 +1705,7 @@ app.filter('availableHalDeviceId', function(bridgeService) {
 		if(input == null)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(!bridgeService.findDeviceByMapId(input[i].id, input[i].haldevicename, "halDevice")){
+			if(!bridgeService.findDeviceByMapId(input[i].haldevicename + "-" +  input[i].halname, input[i].halname, "halDevice")){
 				out.push(input[i]);
 			}
 		}
@@ -1699,7 +1719,7 @@ app.filter('unavailableHalDeviceId', function(bridgeService) {
 		if(input == null)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(bridgeService.findDeviceByMapId(input[i].id, input[i].haldevicename, "halDevice")){
+			if(bridgeService.findDeviceByMapId(input[i].haldevicename + "-" +  input[i].halname, input[i].halname, "halDevice")){
 				out.push(input[i]);
 			}
 		}

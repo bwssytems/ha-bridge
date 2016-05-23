@@ -1,77 +1,85 @@
-      <ul class="nav nav-pills" role="tablist">
-        <li role="presentation"><a href="#">Bridge Devices</a></li>
-        <li role="presentation"><a href="#/system">Bridge Control</a></li>
-        <li role="presentation" class="active"><a href="#/logs">Logs</a></li>
-        <li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
-        <li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
-        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
-        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonydevices">Harmony Devices</a></li>
-        <li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
-        <li ng-if="bridge.showHue" role="presentation"><a href="#/huedevices">Hue Devices</a></li>
-        <li ng-if="bridge.showHal" role="presentation"><a href="#/haldevices">HAL Devices</a></li>
-        <li role="presentation"><a href="#/editor">Manual Add</a></li>
-      </ul>
+<ul class="nav nav-pills" role="tablist">
+	<li role="presentation"><a href="#">Bridge Devices</a></li>
+	<li role="presentation"><a href="#/system">Bridge Control</a></li>
+	<li role="presentation" class="active"><a href="#/logs">Logs</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a
+		href="#/veradevices">Vera Devices</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a
+		href="#/verascenes">Vera Scenes</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a
+		href="#/harmonyactivities">Harmony Activities</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a
+		href="#/harmonydevices">Harmony Devices</a></li>
+	<li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
+	<li ng-if="bridge.showHue" role="presentation"><a
+		href="#/huedevices">Hue Devices</a></li>
+	<li ng-if="bridge.showHal" role="presentation"><a
+		href="#/haldevices">HAL Devices</a></li>
+	<li role="presentation"><a href="#/editor">Manual Add</a></li>
+</ul>
 
-	<div class="panel panel-default bridgeServer">
-		<div class="panel-heading">
-			<h1 class="panel-title">Log Messages</h1>
-		</div>
-		<div class="panel-body">
-			<p>
-				<button class="btn btn-primary" type="submit"
-					ng-click="updateLogs()">Update Log</button>
-			</p>
-        	<scrollable-table watch="bridge.logMsgs">
-			<table class="table table-striped table-bordered table-hover">
-				<thead>
-					<tr>
-						<th sortable-header col="time">Time</th>
-						<th sortable-header col="level">Level</th>
-						<th sortable-header col="message">Message</th>
-						<th sortable-header col="component">Component</th>
-					</tr>
-				</thead>
-				<tr ng-repeat="logMessage in bridge.logMsgs">
-					<td>{{logMessage.time}}</td>
-					<td>{{logMessage.level}}</td>
-					<td>{{logMessage.message}}</td>
-					<td>{{logMessage.component}}</td>
-				</tr>
-			</table>
-        	</scrollable-table>
-		</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h1 class="panel-title">Log Messages</h1>
 	</div>
-	<div class="panel panel-default logconfig">
-		<div class="panel-heading">
-			<h1 class="panel-title">Logging Configuration <a ng-click="toggle()"><span class={{imgUrl}} aria-hidden="true"></a></h1>
-		</div>
-		<div ng-if="visible" class="animate-if" class="panel-body">
-			<p>
-				<button class="btn btn-primary" type="submit"
-					ng-click="updateLoggers()">Update Log Levels</button>
-				  Show All Loggers <input type="checkbox" ng-model="bridge.logShowAll"
-           				ng-change="reloadLoggers()" ng-true-value=true ng-false-value=false>  {{bridge.logShowAll}}
-			</p>
-        	<scrollable-table watch="bridge.loggerInfo">
-			<table class="table table-bordered table-striped table-hover">
-				<thead>
-					<tr>
-						<th sortable-header col="logLevel">Log Level</th>
-						<th sortable-header col="loggerName">Component</th>
-						<th>New Log Level</th>
-					</tr>
-				</thead>
-				<tr ng-repeat="logInfo in bridge.loggerInfo">
-					<td>{{logInfo.logLevel.substr(0,logInfo.logLevel.indexOf("_"))}}</td>
-					<td>{{logInfo.loggerName}}</td>
-					<td>
-						<select name="new-log-level" id="new-log-level" ng-change="addToUpdate(logInfo)" ng-model="logInfo.newLogLevel">
-							<option ng-repeat="alevel in levels" value="{{alevel}}">{{alevel.substr(0,alevel.indexOf("_"))}}</option>
-						</select>
-					</td>
-				</tr>
-			</table>
-        	</scrollable-table>
-		</div>
+	<div class="panel-body">
+		<p>
+			<button class="btn btn-primary" type="submit" ng-click="updateLogs()">Update
+				Log</button>
+		</p>
 	</div>
-	
+	<scrollable-table watch="bridge.logMsgs">
+	<table class="table table-striped table-bordered table-hover">
+		<thead>
+			<tr>
+				<th sortable-header col="time">Time</th>
+				<th sortable-header col="level">Level</th>
+				<th sortable-header col="message">Message</th>
+				<th sortable-header col="component">Component</th>
+			</tr>
+		</thead>
+		<tr ng-repeat="logMessage in bridge.logMsgs">
+			<td>{{logMessage.time}}</td>
+			<td>{{logMessage.level}}</td>
+			<td>{{logMessage.message}}</td>
+			<td>{{logMessage.component}}</td>
+		</tr>
+	</table>
+	</scrollable-table>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h1 class="panel-title">
+			Logging Configuration <a ng-click="toggle()"><span
+				class={{imgUrl}} aria-hidden="true"></a>
+		</h1>
+	</div>
+	<div ng-if="visible" class="animate-if" class="panel-body">
+		<p>
+			<button class="btn btn-primary" type="submit"
+				ng-click="updateLoggers()">Update Log Levels</button>
+			Show All Loggers <input type="checkbox" ng-model="bridge.logShowAll"
+				ng-change="reloadLoggers()" ng-true-value=true ng-false-value=false>
+			{{bridge.logShowAll}}
+		</p>
+		<scrollable-table watch="bridge.loggerInfo">
+		<table class="table table-bordered table-striped table-hover">
+			<thead>
+				<tr>
+					<th sortable-header col="logLevel">Log Level</th>
+					<th sortable-header col="loggerName">Component</th>
+					<th>New Log Level</th>
+				</tr>
+			</thead>
+			<tr ng-repeat="logInfo in bridge.loggerInfo">
+				<td>{{logInfo.logLevel.substr(0,logInfo.logLevel.indexOf("_"))}}</td>
+				<td>{{logInfo.loggerName}}</td>
+				<td><select name="new-log-level" id="new-log-level"
+					ng-change="addToUpdate(logInfo)" ng-model="logInfo.newLogLevel">
+						<option ng-repeat="alevel in levels" value="{{alevel}}">{{alevel.substr(0,alevel.indexOf("_"))}}</option>
+				</select></td>
+			</tr>
+		</table>
+		</scrollable-table>
+	</div>
+</div>
