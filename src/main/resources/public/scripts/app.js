@@ -864,12 +864,20 @@ app.controller('DeleteMapandIdDialogCtrl', function ($scope, bridgeService, ngDi
 		ngDialog.close('ngdialog1');
 		bridgeService.deleteDeviceByMapId(mapandid.id, mapandid.mapType);
 		bridgeService.viewDevices();
-		bridgeService.viewVeraDevices();
-		bridgeService.viewVeraScenes();
-		bridgeService.viewHarmonyActivities();
-		bridgeService.viewHarmonyDevices();
-		bridgeService.viewNestItems();
-		bridgeService.viewHueDevices();
+		if(mapandid.mapType == "veraDevice")
+			bridgeService.viewVeraDevices();
+		if(mapandid.mapType == "veraScene")
+			bridgeService.viewVeraScenes();
+		if(mapandid.mapType == "harmonyActivity")
+			bridgeService.viewHarmonyActivities();
+		if(mapandid.mapType == "harmonyButton")
+			bridgeService.viewHarmonyDevices();
+		if(mapandid.mapType == "nestThermoSet" || mapandid.mapType == "nestHomeAway")
+			bridgeService.viewNestItems();
+		if(mapandid.mapType == "hueDevice")
+			bridgeService.viewHueDevices();
+		if(mapandid.mapType == "halDevice")
+			bridgeService.viewHalDevices();
 		$scope.bridge.mapandid = null;
 	};
 });
@@ -879,6 +887,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 	$scope.device = $scope.bridge.device;
 	$scope.device_dim_control = "";
 	$scope.bulk = { devices: [] };
+	$scope.selectAll = false;
 	var veraList = angular.fromJson($scope.bridge.settings.veraaddress);
 	if(veraList != null)
 		$scope.vera = {base: "http://" + veraList.devices[0].ip, port: "3480", id: ""};
@@ -985,6 +994,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 				}
 			);
 		$scope.bulk = { devices: [] };
+		$scope.selectAll = false;
 	};
 
 	$scope.toggleSelection = function toggleSelection(deviceId) {
@@ -993,11 +1003,28 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 		// is currently selected
 		if (idx > -1) {
 			$scope.bulk.devices.splice(idx, 1);
+			if($scope.bulk.devices.length == 0 && $scope.selectAll)
+				$scope.selectAll = false;
 		}
 
 		// is newly selected
 		else {
 			$scope.bulk.devices.push(deviceId);
+			$scope.selectAll = true;
+		}
+	};
+
+	$scope.toggleSelectAll = function toggleSelectAll() {
+		if($scope.selectAll) {
+			$scope.selectAll = false;
+			$scope.bulk = { devices: [] };
+		}
+		else {
+			$scope.selectAll = true;
+			for(var x = 0; x < bridgeService.state.veradevices.length; x++) {
+				if($scope.bulk.devices.indexOf(bridgeService.state.veradevices[x]) < 0 && !bridgeService.findDeviceByMapId(bridgeService.state.veradevices[x].id, bridgeService.state.veradevices[x].veraname, "veraDevice"))
+					$scope.bulk.devices.push(bridgeService.state.veradevices[x].id);
+			}
 		}
 	};
 
@@ -1226,6 +1253,7 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 	$scope.bridge = bridgeService.state;
 	$scope.device = $scope.bridge.device;
 	$scope.bulk = { devices: [] };
+	$scope.selectAll = false;
 	bridgeService.viewHueDevices();
 	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	$scope.buttonsVisible = false;
@@ -1298,6 +1326,7 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 			);
 
 		$scope.bulk = { devices: [] };
+		$scope.selectAll = false;
 	};
 
 	$scope.toggleSelection = function toggleSelection(deviceId) {
@@ -1306,11 +1335,28 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 		// is currently selected
 		if (idx > -1) {
 			$scope.bulk.devices.splice(idx, 1);
+			if($scope.bulk.devices.length == 0 && $scope.selectAll)
+				$scope.selectAll = false;
 		}
 
 		// is newly selected
 		else {
 			$scope.bulk.devices.push(deviceId);
+			$scope.selectAll = true;
+		}
+	};
+
+	$scope.toggleSelectAll = function toggleSelectAll() {
+		if($scope.selectAll) {
+			$scope.selectAll = false;
+			$scope.bulk = { devices: [] };
+		}
+		else {
+			$scope.selectAll = true;
+			for(var x = 0; x < bridgeService.state.huedevices.length; x++) {
+				if($scope.bulk.devices.indexOf(bridgeService.state.huedevices[x]) < 0 && !bridgeService.findDeviceByMapId(bridgeService.state.huedevices[x].device.uniqueid, bridgeService.state.huedevices[x].huename, "hueDevice"))
+					$scope.bulk.devices.push(bridgeService.state.huedevices[x].device.uniqueid);
+			}
 		}
 	};
 
@@ -1338,6 +1384,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 	$scope.device = $scope.bridge.device;
 	$scope.device_dim_control = "";
 	$scope.bulk = { devices: [] };
+	$scope.selectAll = false;
 	bridgeService.viewHalDevices();
 	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	$scope.buttonsVisible = false;
@@ -1432,6 +1479,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 				}
 			);
 		$scope.bulk = { devices: [] };
+		$scope.selectAll = false;
 	};
 
 	$scope.toggleSelection = function toggleSelection(deviceId) {
@@ -1440,11 +1488,28 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		// is currently selected
 		if (idx > -1) {
 			$scope.bulk.devices.splice(idx, 1);
+			if($scope.bulk.devices.length == 0 && $scope.selectAll)
+				$scope.selectAll = false;
 		}
 
 		// is newly selected
 		else {
 			$scope.bulk.devices.push(deviceId);
+			$scope.selectAll = true;
+		}
+	};
+
+	$scope.toggleSelectAll = function toggleSelectAll() {
+		if($scope.selectAll) {
+			$scope.selectAll = false;
+			$scope.bulk = { devices: [] };
+		}
+		else {
+			$scope.selectAll = true;
+			for(var x = 0; x < bridgeService.state.haldevices.length; x++) {
+				if($scope.bulk.devices.indexOf(bridgeService.state.haldevices[x]) < 0 && !bridgeService.findDeviceByMapId(bridgeService.state.haldevices[x].haldevicename + "-" +  bridgeService.state.haldevices[x].halname, bridgeService.state.haldevices[x].halname, "halDevice"))
+					$scope.bulk.devices.push(bridgeService.state.haldevices[x].haldevicename);
+			}
 		}
 	};
 

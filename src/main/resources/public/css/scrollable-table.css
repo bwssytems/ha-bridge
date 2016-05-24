@@ -1,5 +1,5 @@
 .scrollableContainer {
-    height: 600px;
+    max-height: 436px; /* sets max-height value for all standards-compliant browsers */
     position: relative;
     padding-top: 35px;
     overflow: hidden;
@@ -28,7 +28,8 @@
 }
 
 .scrollArea {
-    height: 100%;
+ 	_height: expression( this.scrollHeight > 599 ? "600px" : "auto" ); /* sets max-height for IE6 */
+    max-height: 400px; /* sets max-height value for all standards-compliant browsers */
     overflow-x: auto;
     overflow-y: auto;
     border: 1px solid #d5d5d5;

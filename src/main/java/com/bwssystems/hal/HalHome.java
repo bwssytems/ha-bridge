@@ -35,26 +35,46 @@ public class HalHome {
 
 	public List<HalDevice> getDevices() {
 		log.debug("consolidating devices for hues");
+		List<HalDevice> theResponse = null;
 		Iterator<String> keys = hals.keySet().iterator();
 		List<HalDevice> deviceList = new ArrayList<HalDevice>();
 		while(keys.hasNext()) {
 			String key = keys.next();
-			List<HalDevice> theResponse = hals.get(key).getLights();
-			if(theResponse != null) {
-					Iterator<HalDevice> devices = theResponse.iterator();
-					while(devices.hasNext()) {
-						HalDevice theDevice = devices.next();
-						HalDevice aNewHalDevice = new HalDevice();
-						aNewHalDevice.setHaldevicetype(theDevice.getHaldevicetype());
-						aNewHalDevice.setHaldevicename(theDevice.getHaldevicename());
-						aNewHalDevice.setHaladdress(hals.get(key).getHalAddress().getIp());
-						aNewHalDevice.setHalname(key);
-						deviceList.add(aNewHalDevice);
-					}
-			}
+			theResponse = hals.get(key).getLights();
+			if(theResponse != null)
+				addHalDevices(deviceList, theResponse, key);
 			else
 				log.warn("Cannot get lights for Hal with name: " + key);
+			theResponse = hals.get(key).getAppliances();
+			if(theResponse != null)
+				addHalDevices(deviceList, theResponse, key);
+			else
+				log.warn("Cannot get appliances for Hal with name: " + key);
+			theResponse = hals.get(key).getTheatre();
+			if(theResponse != null)
+				addHalDevices(deviceList, theResponse, key);
+			else
+				log.warn("Cannot get theatre for Hal with name: " + key);
+			theResponse = hals.get(key).getCustom();
+			if(theResponse != null)
+				addHalDevices(deviceList, theResponse, key);
+			else
+				log.warn("Cannot get custom for Hal with name: " + key);
 		}
 		return deviceList;
+	}
+	
+	private Boolean addHalDevices(List<HalDevice> theDeviceList, List<HalDevice> theSourceList, String theKey) {
+		Iterator<HalDevice> devices = theSourceList.iterator();
+		while(devices.hasNext()) {
+			HalDevice theDevice = devices.next();
+			HalDevice aNewHalDevice = new HalDevice();
+			aNewHalDevice.setHaldevicetype(theDevice.getHaldevicetype());
+			aNewHalDevice.setHaldevicename(theDevice.getHaldevicename());
+			aNewHalDevice.setHaladdress(hals.get(theKey).getHalAddress().getIp());
+			aNewHalDevice.setHalname(theKey);
+			theDeviceList.add(aNewHalDevice);
+		}
+		return true;
 	}
 }

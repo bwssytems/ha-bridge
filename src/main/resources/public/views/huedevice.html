@@ -40,7 +40,10 @@
 		<thead>
 			<tr>
 				<th>Row</th>
-				<th sortable-header col="name">Name</th>
+				<th sortable-header col="name"><span><input type="checkbox" name="selectAll"
+					value="{{selectAll}}"
+					ng-checked="selectAll"
+					ng-click="toggleSelectAll()"> Name</span></th>
 				<th sortable-header col="id">Id</th>
 				<th sortable-header col="huename">Hue</th>
 				<th>Actions</th>

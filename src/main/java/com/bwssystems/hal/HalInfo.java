@@ -19,7 +19,13 @@ import com.google.gson.Gson;
 
 public class HalInfo {
     private static final Logger log = LoggerFactory.getLogger(HalInfo.class);
-    private static final String LIGHTS_REQUEST = "/DeviceData!DeviceCmd=GetNames!DeviceType=Light?Token=";
+    private static final String DEVICE_REQUEST = "/DeviceData!DeviceCmd=GetNames!DeviceType=";
+    private static final String TOKEN_REQUEST = "?Token=";
+    private static final String LIGHT_REQUEST = "Light";
+    private static final String APPL_REQUEST = "Appl";
+    private static final String VIDEO_REQUEST = "Video";
+    private static final String THEATRE_REQUEST = "Theatre";
+    private static final String CUSTOM_REQUEST = "Custom";
     private HttpClient httpClient;
     private NamedIP halAddress;
 	private String theToken;
@@ -32,30 +38,56 @@ public class HalInfo {
 	}
 
 	public List<HalDevice> getLights() {
+    	return getHalDevices(DEVICE_REQUEST + LIGHT_REQUEST + TOKEN_REQUEST, LIGHT_REQUEST);
+    }
+
+	public List<HalDevice> getAppliances() {
+    	return getHalDevices(DEVICE_REQUEST + APPL_REQUEST + TOKEN_REQUEST, APPL_REQUEST);
+    }
+
+	public List<HalDevice> getTheatre() {
+    	return getHalDevices(DEVICE_REQUEST + THEATRE_REQUEST + TOKEN_REQUEST, THEATRE_REQUEST);
+    }
+
+	public List<HalDevice> getCustom() {
+    	return getHalDevices(DEVICE_REQUEST + CUSTOM_REQUEST + TOKEN_REQUEST, CUSTOM_REQUEST);
+    }
+
+	private List<HalDevice> getHalDevices(String apiType, String deviceType) {
 		DeviceElements theHalApiResponse = null;
 		List<HalDevice> deviceList = null;
 
 		String theUrl = null;
     	String theData;
-   		theUrl = "http://" + halAddress.getIp() + LIGHTS_REQUEST + theToken;
+   		theUrl = "http://" + halAddress.getIp() + apiType + theToken;
    		theData = doHttpGETRequest(theUrl);
     	if(theData != null) {
     		log.debug("GET HalApiResponse - data: " + theData);
 	    	theHalApiResponse = new Gson().fromJson(theData, DeviceElements.class);
+	    	if(theHalApiResponse.getDeviceElements() == null) {
+	    		StatusDescription theStatus = new Gson().fromJson(theData, StatusDescription.class);
+	    		if(theStatus.getStatus() == null) {
+	    			log.warn("Cannot get an devices for type " + deviceType + " for hal " + halAddress.getName() + " as response is not parsable.");
+	    		}
+	    		else {
+	    			log.warn("Cannot get an devices for type " + deviceType + " for hal " + halAddress.getName() + ". Status: " + theStatus.getStatus() + ", with description: " + theStatus.getDescription());
+	    		}
+	        	return deviceList;
+	    	}
 	    	deviceList = new ArrayList<HalDevice>();
 	    	
 	    	Iterator<DeviceName> theDeviceNames = theHalApiResponse.getDeviceElements().iterator();
 	    	while(theDeviceNames.hasNext()) {
 	    		DeviceName theDevice = theDeviceNames.next();
 				HalDevice aNewHalDevice = new HalDevice();
-				aNewHalDevice.setHaldevicetype("lights");
+				aNewHalDevice.setHaldevicetype(deviceType);
 				aNewHalDevice.setHaldevicename(theDevice.getDeviceName());
 				deviceList.add(aNewHalDevice);
 	    		
 	    	}
     	}
     	else {
-    		log.warn("GET HalApiResponse for " + halAddress.getName() + " - returned null, no data.");
+    		log.warn("Get Hal device types " + deviceType + " for " + halAddress.getName() + " - returned null, no data.");
     	}
     	return deviceList;
     }
