@@ -10,7 +10,7 @@
 		href="#/harmonyactivities">Harmony Activities</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
 		href="#/harmonydevices">Harmony Devices</a></li>
-	<li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
+	<li ng-if="bridge.showHAL" role="presentation"><a href="#/HAL">HAL</a></li>
 	<li ng-if="bridge.showHue" role="presentation"><a
 		href="#/huedevices">Hue Devices</a></li>
 	<li role="presentation" class="active"><a href="#/haldevices">HAL
@@ -70,9 +70,29 @@
 			<td>{{haldevice.haldevicetype}}</td>
 			<td>{{haldevice.halname}}</td>
 			<td>
-				<button class="btn btn-success" type="submit"
+				<button ng-if="haldevice.haldevicetype === 'Light' || haldevice.haldevicetype === 'Appl' || haldevice.haldevicetype === 'Theatre' || haldevice.haldevicetype === 'Custom'" class="btn btn-success" type="submit"
 					ng-click="buildDeviceUrls(haldevice, device_dim_control)">Generate
 					Bridge Device</button>
+				<button ng-if="haldevice.haldevicetype === 'HOME'" class="btn btn-success" type="submit"
+					ng-click="buildHALHomeUrls(haldevice)">Home/Away</button>
+				<ul ng-if="haldevice.haldevicetype === 'HVAC'" class="list-group">
+					<li class="list-group-item">
+						<p>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildHALHeatUrls(haldevice)">Heat</button>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildHALCoolUrls(haldevice)">Cool</button>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildHALAutoUrls(haldevice)">Auto</button>
+						</p>
+						<p>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildHALOffUrls(haldevice)">Off</button>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildHALFanUrls(haldevice)">Fan</button>
+						</p>
+					</li>
+				</ul>
 			</td>
 		</tr>
 	</table>
@@ -109,7 +129,7 @@
 			<td>{{haldevice.halname}}</td>
 			<td>
 				<button class="btn btn-danger" type="submit"
-					ng-click="deleteDeviceByMapId(haldevice.haldevicename, haldevice.halname, 'halDevice')">Delete</button>
+					ng-click="deleteDeviceByMapId(haldevice.haldevicename, haldevice.halname, haldevice.haldevicetype)">Delete</button>
 			</td>
 		</tr>
 	</table>

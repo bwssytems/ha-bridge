@@ -395,7 +395,7 @@ public class HueMulator implements HueErrorStringSet {
 	        theHeaders = new Gson().fromJson(device.getHeaders(), NameValue[].class);
 	        responseString = this.formatSuccessHueResponse(state, request.body(), stateHasOn, lightId);
 
-	        if(device.getDeviceType().toLowerCase().contains("hue") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("hueDevice")))
+	        if((device.getMapType() != null && device.getMapType().equalsIgnoreCase("hueDevice")))
 	        {
 	        	if(myHueHome != null) {
 		        	url = device.getOnUrl();
@@ -460,7 +460,7 @@ public class HueMulator implements HueErrorStringSet {
 	        }
 
 	        
-	        if(device.getDeviceType().toLowerCase().contains("activity") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("harmonyActivity")))
+	        if((device.getMapType() != null && device.getMapType().equalsIgnoreCase("harmonyActivity")))
 	        {
 	        	log.debug("executing HUE api request to change activity to Harmony: " + url);
 	        	if(myHarmonyHome != null)
@@ -480,7 +480,7 @@ public class HueMulator implements HueErrorStringSet {
 	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Should not get here, no harmony configured\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 	        	}
 	        }
-	        else if(device.getDeviceType().toLowerCase().contains("button") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("harmonyButton")))
+	        else if((device.getMapType() != null && device.getMapType().equalsIgnoreCase("harmonyButton")))
 	        {
 	        	log.debug("executing HUE api request to button press(es) to Harmony: " + url);
 	        	if(myHarmonyHome != null)
@@ -510,7 +510,7 @@ public class HueMulator implements HueErrorStringSet {
 	        		
 	        	}
 	        }
-	        else if(device.getDeviceType().toLowerCase().contains("home") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("nestHomeAway")))
+	        else if((device.getMapType() != null && device.getMapType().equalsIgnoreCase("nestHomeAway")))
 	        {
 	        	log.debug("executing HUE api request to set away for nest home: " + url);
 	        	if(theNest == null)
@@ -523,7 +523,7 @@ public class HueMulator implements HueErrorStringSet {
 	        		theNest.getHome(homeAway.getName()).setAway(homeAway.getAway());
 	        	}
 	        }
-	        else if(device.getDeviceType().toLowerCase().contains("thermo") || (device.getMapType() != null && device.getMapType().equalsIgnoreCase("nestThermoSet")))
+	        else if((device.getMapType() != null && device.getMapType().equalsIgnoreCase("nestThermoSet")))
 	        {
 	        	log.debug("executing HUE api request to set thermostat for nest: " + url);
 	        	if(theNest == null)

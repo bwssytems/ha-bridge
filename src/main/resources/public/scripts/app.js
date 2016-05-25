@@ -1429,6 +1429,118 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		
 	};
 
+	$scope.buildHALHomeUrls = function (haldevice) {
+		bridgeService.clearDevice();
+		$scope.device.deviceType = "home";
+		$scope.device.name = haldevice.haldevicename;
+		$scope.device.targetDevice = haldevice.halname;
+		$scope.device.mapType = "halHome";
+		$scope.device.mapId = haldevice.haldevicename + "-" + haldevice.halname + "-HomeAway";
+		$scope.device.onUrl = "http://" + haldevice.haladdress + "/ModeService!ModeCmd=Set!ModeName=Home?Token=" + $scope.bridge.settings.haltoken;
+		$scope.device.offUrl = "http://" + haldevice.haladdress	+ "/ModeService!ModeCmd=Set!ModeName=Away?Token=" + $scope.bridge.settings.haltoken;
+	};
+
+	$scope.buildHALHeatUrls = function (haldevice) {
+		bridgeService.clearDevice();
+		$scope.device.deviceType = "thermo";
+		$scope.device.name = haldevice.haldevicename + " Heat";
+		$scope.device.targetDevice = haldevice.halname;
+		$scope.device.mapType = "HALThermoSet";
+		$scope.device.mapId = haldevice.haldevicename + "-" + haldevice.halname + "-SetHeat";
+		$scope.device.onUrl = "http://" + haldevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ haldevice.haldevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Heat?Token="
+		+ $scope.bridge.settings.haltoken;
+		$scope.device.dimUrl = "http://" + haldevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ haldevice.haldevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Heat!HeatSpValue=${intensity.percent}?Token="
+		+ $scope.bridge.settings.haltoken;
+		$scope.device.offUrl = "http://" + haldevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ haldevice.haldevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Off?Token="
+	};
+
+	$scope.buildHALCoolUrls = function (haldevice) {
+		bridgeService.clearDevice();
+		$scope.device.deviceType = "thermo";
+		$scope.device.name = haldevice.haldevicename + " Cool";
+		$scope.device.targetDevice = haldevice.halname;
+		$scope.device.mapType = "HALThermoSet";
+		$scope.device.mapId = haldevice.haldevicename + "-" + haldevice.halname + "-SetCool";
+		$scope.device.onUrl = "http://" + haldevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ haldevice.haldevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Cool?Token="
+		+ $scope.bridge.settings.haltoken;
+		$scope.device.dimUrl = "http://" + haldevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ haldevice.haldevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Cool!CoolSpValue=${intensity.percent}?Token="
+		+ $scope.bridge.settings.haltoken;
+		$scope.device.offUrl = "http://" + haldevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ haldevice.haldevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Off?Token="
+	};
+
+	$scope.buildHALAutoUrls = function (haldevice) {
+		bridgeService.clearDevice();
+		$scope.device.deviceType = "thermo";
+		$scope.device.name = haldevice.haldevicename + " Auto";
+		$scope.device.targetDevice = haldevice.halname;
+		$scope.device.mapType = "HALThermoSet";
+		$scope.device.mapId = haldevice.haldevicename + "-" + haldevice.halname + "-SetAuto";
+		$scope.device.onUrl = "http://" + haldevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ haldevice.haldevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Auto?Token="
+		+ $scope.bridge.settings.haltoken;
+		$scope.device.offUrl = "http://" + haldevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ haldevice.haldevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Off?Token="
+	};
+
+	$scope.buildHALOffUrls = function (haldevice) {
+		bridgeService.clearDevice();
+		$scope.device.deviceType = "thermo";
+		$scope.device.name = haldevice.haldevicename + " Thermostat";
+		$scope.device.targetDevice = haldevice.halname;
+		$scope.device.mapType = "HALThermoSet";
+		$scope.device.mapId = haldevice.haldevicename + "-" + haldevice.halname + "-TurnOff";
+		$scope.device.onUrl = "http://" + haldevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ haldevice.haldevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Auto?Token="
+		+ $scope.bridge.settings.haltoken;
+		$scope.device.offUrl = "http://" + haldevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ haldevice.haldevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Off?Token="
+	};
+
+	$scope.buildHALFanUrls = function (haldevice) {
+		bridgeService.clearDevice();
+		$scope.device.deviceType = "thermo";
+		$scope.device.name = haldevice.haldevicename + " Fan";
+		$scope.device.targetDevice = haldevice.halname;
+		$scope.device.mapType = "HALThermoSet";
+		$scope.device.mapId = haldevice.haldevicename + "-" + haldevice.halname + "-SetFan";
+		$scope.device.onUrl = "http://" + haldevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ haldevice.haldevicename.replaceAll(" ", "%20") 
+		+ "!FanMode=On?Token="
+		+ $scope.bridge.settings.haltoken;
+		$scope.device.offUrl = "http://" + haldevice.haladdress 
+			+ "/HVACService!HVACCmd=Set!HVACName=" 
+			+ haldevice.haldevicename.replaceAll(" ", "%20") 
+			+ "!FanMode=Auto?Token="
+			+ $scope.bridge.settings.haltoken;
+	};
+
 	$scope.addDevice = function () {
 		if($scope.device.name == "" && $scope.device.onUrl == "")
 			return;
@@ -1450,7 +1562,12 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		for(var i = 0; i < $scope.bulk.devices.length; i++) {
 			for(var x = 0; x < bridgeService.state.haldevices.length; x++) {
 				if(bridgeService.state.haldevices[x].haldevicename == $scope.bulk.devices[i]) {
-					$scope.buildDeviceUrls(bridgeService.state.haldevices[x],dim_control);
+					if(bridgeService.state.haldevices[x].haldevicetype == "HVAC")
+						$scope.buildHALAutoUrls(bridgeService.state.haldevices[x]);
+					else if(bridgeService.state.haldevices[x].haldevicetype == "HOME")
+						$scope.buildHALHomeUrls(bridgeService.state.haldevices[x]);
+					else
+						$scope.buildDeviceUrls(bridgeService.state.haldevices[x],dim_control);
 					devicesList[i] = {
 							name: $scope.device.name,
 							mapId: $scope.device.mapId,
@@ -1523,6 +1640,10 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 
 	$scope.deleteDeviceByMapId = function (haldevicename, halname, mapType) {
 		var id = haldevicename + "-" + halname;
+		if(mapType == "HOME")
+			id = id + "-HomeAway";
+		if(mapType == "HALThermoSet")
+			id = id + "-SetAuto";
 		$scope.bridge.mapandid = { id, mapType };
 		ngDialog.open({
 			template: 'deleteMapandIdDialog',
@@ -1770,7 +1891,8 @@ app.filter('availableHalDeviceId', function(bridgeService) {
 		if(input == null)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(!bridgeService.findDeviceByMapId(input[i].haldevicename + "-" +  input[i].halname, input[i].halname, "halDevice")){
+			if(!bridgeService.findDeviceByMapId(input[i].haldevicename + "-" +  input[i].halname, input[i].halname, "halDevice") &&
+					!bridgeService.findDeviceByMapId(input[i].haldevicename + "-" +  input[i].halname + "-HomeAway", input[i].halname, "halHome") ){
 				out.push(input[i]);
 			}
 		}
@@ -1785,6 +1907,16 @@ app.filter('unavailableHalDeviceId', function(bridgeService) {
 			return out;
 		for (var i = 0; i < input.length; i++) {
 			if(bridgeService.findDeviceByMapId(input[i].haldevicename + "-" +  input[i].halname, input[i].halname, "halDevice")){
+				out.push(input[i]);
+			}
+		}
+		for (var i = 0; i < input.length; i++) {
+			if(bridgeService.findDeviceByMapId(input[i].haldevicename + "-" +  input[i].halname + "-HomeAway", input[i].halname, "halHome")){
+				out.push(input[i]);
+			}
+		}
+		for (var i = 0; i < input.length; i++) {
+			if(input[i].mapType == "HALThermoSet"){
 				out.push(input[i]);
 			}
 		}

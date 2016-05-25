@@ -60,6 +60,16 @@ public class HalHome {
 				addHalDevices(deviceList, theResponse, key);
 			else
 				log.warn("Cannot get custom for Hal with name: " + key);
+			theResponse = hals.get(key).getHVAC();
+			if(theResponse != null)
+				addHalDevices(deviceList, theResponse, key);
+			else
+				log.warn("Cannot get HVAC for Hal with name: " + key);
+			theResponse = hals.get(key).getHome(key);
+			if(theResponse != null)
+				addHalDevices(deviceList, theResponse, key);
+			else
+				log.warn("Cannot get HVAC for Hal with name: " + key);
 		}
 		return deviceList;
 	}
