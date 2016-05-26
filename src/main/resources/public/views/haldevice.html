@@ -57,6 +57,8 @@
 					ng-click="toggleSelectAll()"> Name</span></th>
 				<th sortable-header col="category">Category</th>
 				<th sortable-header col="halname">HAL</th>
+				<th>On Button</th>
+				<th>Off Button</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
@@ -70,12 +72,27 @@
 			<td>{{haldevice.haldevicetype}}</td>
 			<td>{{haldevice.halname}}</td>
 			<td>
-				<button ng-if="haldevice.haldevicetype === 'Light' || haldevice.haldevicetype === 'Appl' || haldevice.haldevicetype === 'Theatre' || haldevice.haldevicetype === 'Custom'" class="btn btn-success" type="submit"
+				<select name="button-on" id="button-on"	ng-model="button_on">
+						<option ng-repeat="aButtonOn in haldevice.buttons.DeviceElements"
+							value="{{aButtonOn}}">{{aButtonOn.DeviceName}}</option>
+				</select>
+			</td>
+			<td>
+				<select name="button-off" id="button-off" ng-model="button_off">
+						<option ng-repeat="aButtonOff in haldevice.buttons.DeviceElements"
+							value="{{aButtonOff}}">{{aButtonOff.DeviceName}}</option>
+				</select>
+			</td>
+			<td>
+				<button ng-if="haldevice.haldevicetype != 'Home' && haldevice.haldevicetype != 'HVAC' && haldevice.haldevicetype != 'IrData'" class="btn btn-success" type="submit"
 					ng-click="buildDeviceUrls(haldevice, device_dim_control)">Generate
 					Bridge Device</button>
-				<button ng-if="haldevice.haldevicetype === 'HOME'" class="btn btn-success" type="submit"
+				<button ng-if="haldevice.haldevicetype == 'Home'" class="btn btn-success" type="submit"
 					ng-click="buildHALHomeUrls(haldevice)">Home/Away</button>
-				<ul ng-if="haldevice.haldevicetype === 'HVAC'" class="list-group">
+				<button ng-if="haldevice.haldevicetype == 'IrData'" class="btn btn-success" type="submit"
+					ng-click="buildButtonUrls(haldevice, button_on, button_off)">Build
+					A Button</button>
+				<ul ng-if="haldevice.haldevicetype == 'HVAC'" class="list-group">
 					<li class="list-group-item">
 						<p>
 							<button class="btn btn-success" type="submit"
@@ -122,14 +139,14 @@
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="haldevice in bridge.haldevices | unavailableHalDeviceId">
+			ng-repeat="device in bridge.devices | unavailableHalDeviceId">
 			<td>{{$index+1}}</td>
-			<td>{{haldevice.haldevicename}}</td>
-			<td>{{haldevice.haldevicetype}}</td>
-			<td>{{haldevice.halname}}</td>
+			<td>{{device.name}}</td>
+			<td>{{device.deviceType}}</td>
+			<td>{{device.targetDevice}}</td>
 			<td>
 				<button class="btn btn-danger" type="submit"
-					ng-click="deleteDeviceByMapId(haldevice.haldevicename, haldevice.halname, haldevice.haldevicetype)">Delete</button>
+					ng-click="deleteDeviceByMapId(device.mapId, device.mapType)">Delete</button>
 			</td>
 		</tr>
 	</table>

@@ -15,12 +15,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.NamedIP;
+import com.bwssystems.util.TextStringFormatter;
 import com.google.gson.Gson;
 
 public class HalInfo {
     private static final Logger log = LoggerFactory.getLogger(HalInfo.class);
     private static final String DEVICE_REQUEST = "/DeviceData!DeviceCmd=GetNames!DeviceType=";
     private static final String HVAC_REQUEST = "/HVACData!HVACCmd=GetNames";
+    private static final String GROUP_REQUEST = "/GroupData!GroupCmd=GetNames";
+    private static final String MACRO_REQUEST = "/MacroData!MacroCmd=GetNames";
+    private static final String SCENE_REQUEST = "/SceneData!SceneCmd=GetNames";
+    private static final String IRDATA_REQUEST = "/IrData!IRCmd=GetNames";
+    private static final String IRBUTTON_REQUEST = "/IrData!IRCmd=GetButtons!IrDevice=";
     private static final String TOKEN_REQUEST = "?Token=";
     private static final String LIGHT_REQUEST = "Light";
     private static final String APPL_REQUEST = "Appl";
@@ -28,7 +34,11 @@ public class HalInfo {
     private static final String THEATRE_REQUEST = "Theatre";
     private static final String CUSTOM_REQUEST = "Custom";
     private static final String HVAC_TYPE = "HVAC";
-    private static final String HOME_TYPE = "HOME";
+    private static final String HOME_TYPE = "Home";
+    private static final String GROUP_TYPE = "Group";
+    private static final String MACRO_TYPE = "Macro";
+    private static final String SCENE_TYPE = "Scene";
+    private static final String IRDATA_TYPE = "IrData";
     private HttpClient httpClient;
     private NamedIP halAddress;
 	private String theToken;
@@ -57,7 +67,25 @@ public class HalInfo {
     }
 
 	public List<HalDevice> getHVAC() {
-    	return getHalHVAC(HVAC_REQUEST + TOKEN_REQUEST, HVAC_TYPE);
+    	return getHalDevices(HVAC_REQUEST + TOKEN_REQUEST, HVAC_TYPE);
+    }
+
+	public List<HalDevice> getGroups() {
+    	return getHalDevices(GROUP_REQUEST + TOKEN_REQUEST, GROUP_TYPE);
+    }
+
+	public List<HalDevice> getMacros() {
+    	return getHalDevices(MACRO_REQUEST + TOKEN_REQUEST, MACRO_TYPE);
+    }
+
+	public List<HalDevice> getScenes() {
+    	return getHalDevices(SCENE_REQUEST + TOKEN_REQUEST, SCENE_TYPE);
+    }
+
+	public List<HalDevice> getButtons() {
+		 List<HalDevice> irDataDevices = getHalDevices(IRDATA_REQUEST + TOKEN_REQUEST, IRDATA_TYPE);
+		 
+		 return getDeviceButtons(irDataDevices);
     }
 
 	public List<HalDevice> getHome(String theDeviceName) {
@@ -79,7 +107,7 @@ public class HalInfo {
    		theUrl = "http://" + halAddress.getIp() + apiType + theToken;
    		theData = doHttpGETRequest(theUrl);
     	if(theData != null) {
-    		log.debug("GET HalApiResponse - data: " + theData);
+    		log.debug("GET " + deviceType + " HalApiResponse - data: " + theData);
 	    	theHalApiResponse = new Gson().fromJson(theData, DeviceElements.class);
 	    	if(theHalApiResponse.getDeviceElements() == null) {
 	    		StatusDescription theStatus = new Gson().fromJson(theData, StatusDescription.class);
@@ -109,44 +137,43 @@ public class HalInfo {
     	return deviceList;
     }
 
-	private List<HalDevice> getHalHVAC(String apiType, String deviceType) {
-		HVACElements theHalApiResponse = null;
+	private List<HalDevice> getDeviceButtons(List<HalDevice> theIrDevices) {
+		DeviceElements theHalApiResponse = null;
 		List<HalDevice> deviceList = null;
 
 		String theUrl = null;
-    	String theData;
-   		theUrl = "http://" + halAddress.getIp() + apiType + theToken;
-   		theData = doHttpGETRequest(theUrl);
-    	if(theData != null) {
-    		log.debug("GET HalApiResponse - data: " + theData);
-	    	theHalApiResponse = new Gson().fromJson(theData, HVACElements.class);
-	    	if(theHalApiResponse.getHVACElements() == null) {
-	    		StatusDescription theStatus = new Gson().fromJson(theData, StatusDescription.class);
-	    		if(theStatus.getStatus() == null) {
-	    			log.warn("Cannot get an devices for type " + deviceType + " for hal " + halAddress.getName() + " as response is not parsable.");
-	    		}
-	    		else {
-	    			log.warn("Cannot get an devices for type " + deviceType + " for hal " + halAddress.getName() + ". Status: " + theStatus.getStatus() + ", with description: " + theStatus.getDescription());
-	    		}
-	        	return deviceList;
-	    	}
-	    	deviceList = new ArrayList<HalDevice>();
-	    	
-	    	Iterator<HVACName> theDeviceNames = theHalApiResponse.getHVACElements().iterator();
-	    	while(theDeviceNames.hasNext()) {
-	    		HVACName theDevice = theDeviceNames.next();
-				HalDevice aNewHalDevice = new HalDevice();
-				aNewHalDevice.setHaldevicetype(deviceType);
-				aNewHalDevice.setHaldevicename(theDevice.getHVACName());
-				deviceList.add(aNewHalDevice);
-	    		
-	    	}
-    	}
-    	else {
-    		log.warn("Get Hal device types " + deviceType + " for " + halAddress.getName() + " - returned null, no data.");
-    	}
-    	return deviceList;
-    }
+		String theData;
+		Iterator<HalDevice> theHalDevices = theIrDevices.iterator();
+		deviceList = new ArrayList<HalDevice>();
+		while (theHalDevices.hasNext()) {
+			HalDevice theHalDevice = theHalDevices.next();
+			theUrl = "http://" + halAddress.getIp() + IRBUTTON_REQUEST + TextStringFormatter.forQuerySpaceUrl(theHalDevice.getHaldevicename()) + TOKEN_REQUEST + theToken;
+			theData = doHttpGETRequest(theUrl);
+			if (theData != null) {
+				log.debug("GET IrData for IR Device " + theHalDevice.getHaldevicename() + " HalApiResponse - data: " + theData);
+				theHalApiResponse = new Gson().fromJson(theData, DeviceElements.class);
+				if (theHalApiResponse.getDeviceElements() == null) {
+					StatusDescription theStatus = new Gson().fromJson(theData, StatusDescription.class);
+					if (theStatus.getStatus() == null) {
+						log.warn("Cannot get buttons for IR Device " + theHalDevice.getHaldevicename() + " for hal "
+								+ halAddress.getName() + " as response is not parsable.");
+					} else {
+						log.warn("Cannot get buttons for IR Device " + theHalDevice.getHaldevicename() + " for hal "
+								+ halAddress.getName() + ". Status: " + theStatus.getStatus() + ", with description: "
+								+ theStatus.getDescription());
+					}
+					return deviceList;
+				}
+				theHalDevice.setButtons(theHalApiResponse);
+				deviceList.add(theHalDevice);
+
+			} else {
+				log.warn("Get Hal buttons for IR Device " + theHalDevice.getHaldevicename() + " for "
+						+ halAddress.getName() + " - returned null, no data.");
+			}
+		}
+		return deviceList;
+	}
 
 	//	This function executes the url against the hal
     protected String doHttpGETRequest(String url) {

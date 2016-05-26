@@ -69,7 +69,27 @@ public class HalHome {
 			if(theResponse != null)
 				addHalDevices(deviceList, theResponse, key);
 			else
-				log.warn("Cannot get HVAC for Hal with name: " + key);
+				log.warn("Cannot get Homes for Hal with name: " + key);
+			theResponse = hals.get(key).getGroups();
+			if(theResponse != null)
+				addHalDevices(deviceList, theResponse, key);
+			else
+				log.warn("Cannot get Groups for Hal with name: " + key);
+			theResponse = hals.get(key).getMacros();
+			if(theResponse != null)
+				addHalDevices(deviceList, theResponse, key);
+			else
+				log.warn("Cannot get Macros for Hal with name: " + key);
+			theResponse = hals.get(key).getScenes();
+			if(theResponse != null)
+				addHalDevices(deviceList, theResponse, key);
+			else
+				log.warn("Cannot get Scenes for Hal with name: " + key);
+			theResponse = hals.get(key).getButtons();
+			if(theResponse != null)
+				addHalDevices(deviceList, theResponse, key);
+			else
+				log.warn("Cannot get Buttons for Hal with name: " + key);
 		}
 		return deviceList;
 	}
@@ -81,6 +101,7 @@ public class HalHome {
 			HalDevice aNewHalDevice = new HalDevice();
 			aNewHalDevice.setHaldevicetype(theDevice.getHaldevicetype());
 			aNewHalDevice.setHaldevicename(theDevice.getHaldevicename());
+			aNewHalDevice.setButtons(theDevice.getButtons());
 			aNewHalDevice.setHaladdress(hals.get(theKey).getHalAddress().getIp());
 			aNewHalDevice.setHalname(theKey);
 			theDeviceList.add(aNewHalDevice);

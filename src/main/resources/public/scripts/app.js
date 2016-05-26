@@ -1396,37 +1396,83 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 	$scope.buildDeviceUrls = function (haldevice, dim_control) {
 		bridgeService.clearDevice();
 		$scope.device = $scope.bridge.device;
-		$scope.device.deviceType = "switch";
+		var preOnCmd = "";
+		var preDimCmd = "";
+		var preOffCmd = "";
+		var nameCmd = ""
+		var postCmd = "?Token=" + $scope.bridge.settings.haltoken;
+		if(haldevice.haldevicetype == "Group") {
+			$scope.device.deviceType = "group";
+			preOnCmd = "/GroupService!GroupCmd=On";
+			preOffCmd = "/GroupService!GroupCmd=Off";
+			nameCmd = "!GroupName=";
+		}
+		else if(haldevice.haldevicetype == "Macro") {
+			$scope.device.deviceType = "macro";
+			preOnCmd = "/MacroService!MacroCmd=Set!MacroName=";
+			preOffCmd = preOnCmd;
+		}
+		else if(haldevice.haldevicetype == "Scene") {
+			$scope.device.deviceType = "scene";
+			preOnCmd = "/SceneService!SceneCmd=Set!SceneName=";
+			preOffCmd = preOnCmd;
+		}
+		else {
+			$scope.device.deviceType = "switch";
+			preOnCmd = "/DeviceService!DeviceCmd=SetDevice!DeviceValue=On";
+			preDimCmd = "/DeviceService!DeviceCmd=SetDevice!DeviceValue=Dim!DevicePercent=";
+			preOffCmd = "/DeviceService!DeviceCmd=SetDevice!DeviceValue=Off";
+			nameCmd = "!DeviceName=";
+		}
 		$scope.device.name = haldevice.haldevicename;
 		$scope.device.targetDevice = haldevice.halname;
 		$scope.device.mapType = "halDevice";
 		$scope.device.mapId = haldevice.haldevicename + "-" + haldevice.halname;
-		if(dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)
+		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0) && $scope.device.deviceType == "switch")
 			$scope.device.dimUrl = "http://" + haldevice.haladdress
-			+ "/DeviceService!DeviceName="
-			+ haldevice.haldevicename.replaceAll(" ", "%20")
-			+ "!DeviceCmd=SetDevice!DeviceValue=Dim!DevicePercent="
+			+ preDimCmd
 			+ dim_control
-			+ "?Token="
-			+ $scope.bridge.settings.haltoken;
+			+ nameCmd
+			+ haldevice.haldevicename.replaceAll(" ", "%20")
+			+ postCmd;
 		else
 			$scope.device.dimUrl = "http://" + haldevice.haladdress
-			+ "/DeviceService!DeviceName="
+			+ preOnCmd
+			+ nameCmd
 			+ haldevice.haldevicename.replaceAll(" ", "%20")
-			+ "!DeviceCmd=SetDevice!DeviceValue=On?Token="
-			+ $scope.bridge.settings.haltoken;
+			+ postCmd;
 		$scope.device.onUrl = "http://" + haldevice.haladdress
-		+ "/DeviceService!DeviceName="
+		+ preOnCmd
+		+ nameCmd
 		+ haldevice.haldevicename.replaceAll(" ", "%20")
-		+ "!DeviceCmd=SetDevice!DeviceValue=On?Token="
-		+ $scope.bridge.settings.haltoken;
+		+ postCmd;
 		$scope.device.offUrl = "http://" + haldevice.haladdress 
-		+ "/DeviceService!DeviceName="
+		+ preOffCmd
+		+ nameCmd
 		+ haldevice.haldevicename.replaceAll(" ", "%20")
-		+ "!DeviceCmd=SetDevice!DeviceValue=Off?Token="
-		+ $scope.bridge.settings.haltoken;
-		
-		
+		+ postCmd;
+	};
+
+	$scope.buildButtonUrls = function (haldevice, onbutton, offbutton) {
+		var currentOn = $scope.device.onUrl;
+		var currentOff = $scope.device.offUrl;
+		var actionOn = angular.fromJson(onbutton);
+		var actionOff = angular.fromJson(offbutton);
+		if( $scope.device.mapType == "halButton") {
+			$scope.device.mapId = $scope.device.mapId + "-" + actionOn.DeviceName;
+			$scope.device.onUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"item\":\"http://" + haldevice.haladdress + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOn.DeviceName.replaceAll(" ", "%20") + "?Token=" + $scope.bridge.settings.haltoken +"\"}]";
+			$scope.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"item\":\"http://" + haldevice.haladdress + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOff.DeviceName.replaceAll(" ", "%20") + "?Token=" + $scope.bridge.settings.haltoken + "\"}]";        		
+		}
+		else if ($scope.device.mapType == null || $scope.device.mapType == "") {
+			bridgeService.clearDevice();
+			$scope.device.deviceType = "button";
+			$scope.device.targetDevice = haldevice.halname;
+			$scope.device.name = haldevice.haldevicename;
+			$scope.device.mapType = "halButton";
+			$scope.device.mapId = haldevice.haldevicename + "-" + haldevice.halname + "-" + actionOn.DeviceName;
+			$scope.device.onUrl = "[{\"item\":\"http://" + haldevice.haladdress + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOn.DeviceName.replaceAll(" ", "%20") + "?Token=" + $scope.bridge.settings.haltoken + "\"}]";
+			$scope.device.offUrl = "[{\"item\":\"http://" + haldevice.haladdress + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOff.DeviceName.replaceAll(" ", "%20") + "?Token=" + $scope.bridge.settings.haltoken + "\"}]";
+		}
 	};
 
 	$scope.buildHALHomeUrls = function (haldevice) {
@@ -1445,7 +1491,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		$scope.device.deviceType = "thermo";
 		$scope.device.name = haldevice.haldevicename + " Heat";
 		$scope.device.targetDevice = haldevice.halname;
-		$scope.device.mapType = "HALThermoSet";
+		$scope.device.mapType = "halThermoSet";
 		$scope.device.mapId = haldevice.haldevicename + "-" + haldevice.halname + "-SetHeat";
 		$scope.device.onUrl = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
@@ -1468,7 +1514,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		$scope.device.deviceType = "thermo";
 		$scope.device.name = haldevice.haldevicename + " Cool";
 		$scope.device.targetDevice = haldevice.halname;
-		$scope.device.mapType = "HALThermoSet";
+		$scope.device.mapType = "halThermoSet";
 		$scope.device.mapId = haldevice.haldevicename + "-" + haldevice.halname + "-SetCool";
 		$scope.device.onUrl = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
@@ -1491,7 +1537,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		$scope.device.deviceType = "thermo";
 		$scope.device.name = haldevice.haldevicename + " Auto";
 		$scope.device.targetDevice = haldevice.halname;
-		$scope.device.mapType = "HALThermoSet";
+		$scope.device.mapType = "halThermoSet";
 		$scope.device.mapId = haldevice.haldevicename + "-" + haldevice.halname + "-SetAuto";
 		$scope.device.onUrl = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
@@ -1509,7 +1555,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		$scope.device.deviceType = "thermo";
 		$scope.device.name = haldevice.haldevicename + " Thermostat";
 		$scope.device.targetDevice = haldevice.halname;
-		$scope.device.mapType = "HALThermoSet";
+		$scope.device.mapType = "halThermoSet";
 		$scope.device.mapId = haldevice.haldevicename + "-" + haldevice.halname + "-TurnOff";
 		$scope.device.onUrl = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
@@ -1527,7 +1573,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		$scope.device.deviceType = "thermo";
 		$scope.device.name = haldevice.haldevicename + " Fan";
 		$scope.device.targetDevice = haldevice.halname;
-		$scope.device.mapType = "HALThermoSet";
+		$scope.device.mapType = "halThermoSet";
 		$scope.device.mapId = haldevice.haldevicename + "-" + haldevice.halname + "-SetFan";
 		$scope.device.onUrl = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
@@ -1638,12 +1684,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	};
 
-	$scope.deleteDeviceByMapId = function (haldevicename, halname, mapType) {
-		var id = haldevicename + "-" + halname;
-		if(mapType == "HOME")
-			id = id + "-HomeAway";
-		if(mapType == "HALThermoSet")
-			id = id + "-SetAuto";
+	$scope.deleteDeviceByMapId = function (id, mapType) {
 		$scope.bridge.mapandid = { id, mapType };
 		ngDialog.open({
 			template: 'deleteMapandIdDialog',
@@ -1906,17 +1947,7 @@ app.filter('unavailableHalDeviceId', function(bridgeService) {
 		if(input == null)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(bridgeService.findDeviceByMapId(input[i].haldevicename + "-" +  input[i].halname, input[i].halname, "halDevice")){
-				out.push(input[i]);
-			}
-		}
-		for (var i = 0; i < input.length; i++) {
-			if(bridgeService.findDeviceByMapId(input[i].haldevicename + "-" +  input[i].halname + "-HomeAway", input[i].halname, "halHome")){
-				out.push(input[i]);
-			}
-		}
-		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType == "HALThermoSet"){
+			if(input[i].mapType != null && bridgeService.aContainsB(input[i].mapType, "hal")){
 				out.push(input[i]);
 			}
 		}

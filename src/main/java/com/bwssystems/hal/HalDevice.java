@@ -5,6 +5,7 @@ public class HalDevice {
 	private String haldevicename;
 	private String haladdress;
 	private String halname;
+	private DeviceElements buttons;
 	public String getHaldevicetype() {
 		return haldevicetype;
 	}
@@ -28,5 +29,11 @@ public class HalDevice {
 	}
 	public void setHalname(String halname) {
 		this.halname = halname;
+	}
+	public DeviceElements getButtons() {
+		return buttons;
+	}
+	public void setButtons(DeviceElements buttons) {
+		this.buttons = buttons;
 	}
 }
