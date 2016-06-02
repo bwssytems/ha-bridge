@@ -7,6 +7,7 @@ import com.bwssystems.HABridge.api.UserCreateRequest;
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.bwssystems.HABridge.api.hue.HueApiResponse;
+import com.bwssystems.HABridge.api.hue.StateChangeBody;
 import com.bwssystems.HABridge.dao.*;
 import com.bwssystems.NestBridge.NestInstruction;
 import com.bwssystems.NestBridge.NestHome;
@@ -364,32 +365,41 @@ public class HueMulator implements HueErrorStringSet {
 	        String responseString = null;
 	        String url = null;
 	        NameValue[] theHeaders = null;
+	        StateChangeBody theStateChanges = null;
 	        DeviceState state = null;
 	        boolean stateHasBri = false;
+	        boolean stateHasBriInc = false;
 	        boolean stateHasOn = false;
 	        log.debug("hue state change requested: " + userId + " from " + request.ip() + " body: " + request.body());
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json; charset=utf-8"); 
 	        response.status(HttpStatus.SC_OK);
 	
-	        try {
-	            state = mapper.readValue(request.body(), DeviceState.class);
-		        if(request.body().contains("\"bri\""))
-		        	stateHasBri = true;
-		        if(request.body().contains("\"on\""))
-		        	stateHasOn = true;
-	        } catch (IOException e) {
-	        	log.warn("Object mapper barfed on input of body.", e);
-        		responseString = "[{\"error\":{\"type\": 2, \"address\": \"/lights/" + lightId + "\",\"description\": \"Object mapper barfed on input of body.\"}}]";
-    	        return responseString;
-	        }
-	
-	        DeviceDescriptor device = repository.findOne(lightId);
+			theStateChanges = new Gson().fromJson(request.body(), StateChangeBody.class);
+			if (theStateChanges == null) {
+				log.warn("Could not parse state change body. Light state not changed.");
+				responseString = "[{\"error\":{\"type\": 2, \"address\": \"/lights/" + lightId
+						+ "\",\"description\": \"Could not parse state change body.\"}}]";
+				return responseString;
+			}
+
+			if (request.body().contains("\"bri\""))
+				stateHasBri = true;
+			if (request.body().contains("\"bri_inc\""))
+				stateHasBriInc = true;
+			if (request.body().contains("\"on\""))
+				stateHasOn = true;
+
+			DeviceDescriptor device = repository.findOne(lightId);
 	        if (device == null) {
 	        	log.warn("Could not find device: " + lightId + " for hue state change request: " + userId + " from " + request.ip() + " body: " + request.body());
         		responseString = "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId + "\",\"description\": \"Could not find device\", \"resource\": \"/lights/" + lightId + "\"}}]";
     	        return responseString;
 	        }
+	        
+	        state = device.getDeviceState();
+	        if(state == null)
+	        	state = DeviceState.createDeviceState();
 	        state.fillIn();
 
 	        theHeaders = new Gson().fromJson(device.getHeaders(), NameValue[].class);
@@ -433,7 +443,7 @@ public class HueMulator implements HueErrorStringSet {
 
 	        if(stateHasBri)
 	        {
-	        	if(state.getBri() > 0 && !state.isOn())
+	        	if(theStateChanges.getBri() > 0 && !theStateChanges.isOn())
 	        		state.setOn(true);
 
         		url = device.getDimUrl();
@@ -441,9 +451,12 @@ public class HueMulator implements HueErrorStringSet {
 	        	if(url == null || url.length() == 0)
 		            url = device.getOnUrl();
 	        }
+	        else if(stateHasBriInc) {
+	        	
+	        }
 	        else
 	        {
-		        if (state.isOn()) {
+		        if (theStateChanges.isOn()) {
 		            url = device.getOnUrl();
 		            if(state.getBri() <= 0)
 		            	state.setBri(255);
@@ -536,9 +549,9 @@ public class HueMulator implements HueErrorStringSet {
 	        		if(thermoSetting.getControl().equalsIgnoreCase("temp")) {
 	        			if(request.body().contains("bri")) {
 	        				if(bridgeSettings.isFarenheit())
-	        					thermoSetting.setTemp(String.valueOf((Double.parseDouble(replaceIntensityValue(thermoSetting.getTemp(), state.getBri(), false)) - 32.0)/1.8));
+	        					thermoSetting.setTemp(String.valueOf((Double.parseDouble(replaceIntensityValue(thermoSetting.getTemp(), theStateChanges.getBri(), false)) - 32.0)/1.8));
 	        				else
-	        					thermoSetting.setTemp(String.valueOf(Double.parseDouble(replaceIntensityValue(thermoSetting.getTemp(), state.getBri(), false))));
+	        					thermoSetting.setTemp(String.valueOf(Double.parseDouble(replaceIntensityValue(thermoSetting.getTemp(), theStateChanges.getBri(), false))));
 	        				log.debug("Setting thermostat: " + thermoSetting.getName() + " to " + thermoSetting.getTemp() + "C");
 	        				theNest.getThermostat(thermoSetting.getName()).setTargetTemperature(Float.parseFloat(thermoSetting.getTemp()));
 	        			}
@@ -575,7 +588,7 @@ public class HueMulator implements HueErrorStringSet {
 		        		intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
 		        	else
 		        		intermediate = callItems[i].getItem();
-        			String anError = doExecRequest(intermediate, state, lightId);
+        			String anError = doExecRequest(intermediate, theStateChanges, lightId);
         			if(anError != null) {
         				responseString = anError;
 						i = callItems.length+1;
@@ -611,11 +624,11 @@ public class HueMulator implements HueErrorStringSet {
 			        			hostAddr = hostPortion;
 			        		InetAddress IPAddress = InetAddress.getByName(hostAddr);;
 			        		if(theUrlBody.startsWith("0x")) {
-			        			theUrlBody = replaceIntensityValue(theUrlBody, state.getBri(), true);
+			        			theUrlBody = replaceIntensityValue(theUrlBody, theStateChanges.getBri(), true);
 			        			sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
 			        		}
 			        		else {
-			        			theUrlBody = replaceIntensityValue(theUrlBody, state.getBri(), false);
+			        			theUrlBody = replaceIntensityValue(theUrlBody, theStateChanges.getBri(), false);
 			        			sendData = theUrlBody.getBytes();
 			        		}
 			        		if(callItems[i].getItem().contains("udp://")) {
@@ -637,7 +650,7 @@ public class HueMulator implements HueErrorStringSet {
 		        		}
 		        		else if(callItems[i].getItem().contains("exec://")) {
 			        		String intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
-		        			String anError = doExecRequest(intermediate, state, lightId);
+		        			String anError = doExecRequest(intermediate, theStateChanges, lightId);
 		        			if(anError != null) {
 		        				responseString = anError;
 								i = callItems.length+1;
@@ -646,12 +659,12 @@ public class HueMulator implements HueErrorStringSet {
 		        		else {
 		    	        	log.debug("executing HUE api request to Http " + (device.getHttpVerb() == null?"GET":device.getHttpVerb()) + ": " + callItems[i].getItem());
 		        			
-							String anUrl = replaceIntensityValue(callItems[i].getItem(), state.getBri(), false);
+							String anUrl = replaceIntensityValue(callItems[i].getItem(), theStateChanges.getBri(), false);
 							String body;
-							if (state.isOn())
-								body = replaceIntensityValue(device.getContentBody(), state.getBri(), false);
+							if (theStateChanges.isOn())
+								body = replaceIntensityValue(device.getContentBody(), theStateChanges.getBri(), false);
 							else
-								body = replaceIntensityValue(device.getContentBodyOff(), state.getBri(), false);
+								body = replaceIntensityValue(device.getContentBodyOff(), theStateChanges.getBri(), false);
 							// make call
 							if (doHttpRequest(anUrl, device.getHttpVerb(), device.getContentType(), body, theHeaders) == null) {
 								log.warn("Error on calling url to change device state: " + anUrl);
@@ -668,6 +681,7 @@ public class HueMulator implements HueErrorStringSet {
 	        }
 	        
 	        if(!responseString.contains("[{\"error\":")) {
+	        	// FIXME update state with theStateChanges
 	        	device.setDeviceState(state);
 	        }
 	        return responseString;
@@ -791,7 +805,7 @@ public class HueMulator implements HueErrorStringSet {
         return theContent;
     }
 
-    private String doExecRequest(String anItem, DeviceState state, String lightId) {
+    private String doExecRequest(String anItem, StateChangeBody state, String lightId) {
 		log.debug("Executing request: " + anItem);
     	String responseString = null;
     		try {
@@ -827,6 +841,14 @@ public class HueMulator implements HueErrorStringSet {
         	if(justState)
         		responseString = responseString + ",";
         	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri() + "}}";
+	        justState = true;
+        }
+        
+        if(body.contains("bri_inc"))
+        {
+        	if(justState)
+        		responseString = responseString + ",";
+        	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/bri_inc\":" + state.getBri() + "}}";
 	        justState = true;
         }
         

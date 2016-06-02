@@ -29,6 +29,10 @@ public class HueConfig
 	private String localtime;
 	private String timezone;
 	private String zigbeechannel;
+	private String modelid;
+	private String bridgeid;
+	private Boolean factorynew;
+	private String replacesbridgeid;
 	private Map<String, WhitelistEntry> whitelist;
 
 	public static HueConfig createConfig(String name, String ipaddress, String devicetype, String userid) {
@@ -37,7 +41,7 @@ public class HueConfig
 	    SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("UTC"));
 		aConfig.setMac(HueConfig.getMacAddress(ipaddress));
-		aConfig.setApiversion("1.4.0");
+		aConfig.setApiversion("1.10.0");
 		aConfig.setPortalservices(false);
 		aConfig.setGateway(ipaddress);
 		aConfig.setSwversion("01005215");
@@ -53,6 +57,10 @@ public class HueConfig
 		aConfig.setLocaltime(dateFormat.format(new Date()));
 		aConfig.setTimezone(TimeZone.getDefault().getID());
 		aConfig.setZigbeechannel("6");
+		aConfig.setBridgeid("001788FFFE09A206");
+		aConfig.setModelid("BSB002");
+		aConfig.setFactorynew(false);
+		aConfig.setReplacesbridgeid(null);
 		Map<String, WhitelistEntry> awhitelist = new HashMap<>();
 		awhitelist.put(userid, WhitelistEntry.createEntry(devicetype));
 		aConfig.setWhitelist(awhitelist);
@@ -234,5 +242,37 @@ public class HueConfig
 
 	public void setZigbeechannel(String zigbeechannel) {
 		this.zigbeechannel = zigbeechannel;
+	}
+
+	public String getModelid() {
+		return modelid;
+	}
+
+	public void setModelid(String modelid) {
+		this.modelid = modelid;
+	}
+
+	public String getBridgeid() {
+		return bridgeid;
+	}
+
+	public void setBridgeid(String bridgeid) {
+		this.bridgeid = bridgeid;
+	}
+
+	public Boolean getFactorynew() {
+		return factorynew;
+	}
+
+	public void setFactorynew(Boolean factorynew) {
+		this.factorynew = factorynew;
+	}
+
+	public String getReplacesbridgeid() {
+		return replacesbridgeid;
+	}
+
+	public void setReplacesbridgeid(String replacesbridgeid) {
+		this.replacesbridgeid = replacesbridgeid;
 	}
 }

@@ -22,6 +22,22 @@ public class UpnpListener {
 	private boolean strict;
 	private boolean traceupnp;
 	private BridgeControlDescriptor bridgeControl;
+	private String discoveryTemplate = "HTTP/1.1 200 OK\r\n" +
+			"CACHE-CONTROL: max-age=86400\r\n" +
+			"EXT:\r\n" +
+			"LOCATION: http://%s:%s/description.xml\r\n" +
+			"SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/0.1\r\n" + 
+			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
+			"USN: uuid:Socket-1_0-221438K0100073::urn:schemas-upnp-org:device:basic:1\r\n\r\n";
+	private String discoveryTemplateNew = "HTTP/1.1 200 OK\r\n" +
+			"HOST: %s:%s\r\n" +
+			"EXT:\r\n" +
+			"CACHE-CONTROL: max-age=100\r\n" +
+			"LOCATION: http://%s:%s/description.xml\r\n" +
+			"SERVER: FreeRTOS/7.4.2 UPnP/1.0 IpBridge/1.10.0\r\n" + 
+			"ST: upnp:rootdevice\r\n" +
+			"hue-bridgeid: 001788FFFE09A206\r\n" +
+			"USN: uuid:88f6698f-2c83-4393-bd03-cd54a9f8595:upnp:rootdevice\r\n\r\n";
 	
 	public UpnpListener(BridgeSettingsDescriptor theSettings, BridgeControlDescriptor theControl) {
 		super();
@@ -189,16 +205,12 @@ public class UpnpListener {
 		return false;
 	}
 
-	String discoveryTemplate = "HTTP/1.1 200 OK\r\n" +
-			"CACHE-CONTROL: max-age=86400\r\n" +
-			"EXT:\r\n" +
-			"LOCATION: http://%s:%s/description.xml\r\n" +
-			"SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/0.1\r\n" + 
-			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
-			"USN: uuid:Socket-1_0-221438K0100073::urn:schemas-upnp-org:device:basic:1\r\n\r\n";
 	protected void sendUpnpResponse(DatagramSocket socket, InetAddress requester, int sourcePort) throws IOException {
 		String discoveryResponse = null;
-		discoveryResponse = String.format(discoveryTemplate, responseAddress, httpServerPort);
+		if(false)
+			discoveryResponse = String.format(discoveryTemplate, responseAddress, httpServerPort);
+		else
+			discoveryResponse = String.format(discoveryTemplateNew, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort);
 		if(traceupnp)
 			log.info("Traceupnp: sendUpnpResponse discovery template with address: " + responseAddress + " and port: " + httpServerPort);
 		else
