@@ -23,7 +23,7 @@ public class UpnpSettingsResource {
 			+ "<manufacturer>Royal Philips Electronics</manufacturer>\n"
 			+ "<manufacturerURL>http://www.bwssystems.com</manufacturerURL>\n"
 			+ "<modelDescription>Hue Emulator for HA bridge</modelDescription>\n"
-			+ "<modelName>Philips hue bridge 2012</modelName>\n" + "<modelNumber>929000226503</modelNumber>\n"
+			+ "<modelName>Philips hue bridge 2015</modelName>\n" + "<modelNumber>BSB002</modelNumber>\n"
 			+ "<modelURL>http://www.bwssystems.com/apps.html</modelURL>\n"
 			+ "<serialNumber>0017880ae670</serialNumber>\n"
 			+ "<UDN>uuid:88f6698f-2c83-4393-bd03-cd54a9f8595</UDN>\n" + "<serviceList>\n" + "<service>\n"
