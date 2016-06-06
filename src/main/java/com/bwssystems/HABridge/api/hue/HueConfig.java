@@ -44,7 +44,7 @@ public class HueConfig
 		aConfig.setApiversion("1.10.0");
 		aConfig.setPortalservices(false);
 		aConfig.setGateway(ipaddress);
-		aConfig.setSwversion("01005215");
+		aConfig.setSwversion("01028090");
 		aConfig.setLinkbutton(false);
 		aConfig.setIpaddress(ipaddress);
 		aConfig.setProxyport(0);
