@@ -97,5 +97,17 @@ public class UpnpSettingsResource {
 
             return filledTemplate;
         } );
+//      http://ip_adress:port/favicon.ico
+		get("/favicon.ico", "application/xml; charset=utf-8", (request, response) -> {
+			return "";
+        } );
+//      http://ip_adress:port/hue_logo_0.png 
+		get("/hue_logo_0.png", "application/xml; charset=utf-8", (request, response) -> {
+			return "";
+        } );
+//      http://ip_adress:port/hue_logo_3.png 
+		get("/hue_logo_3.png", "application/xml; charset=utf-8", (request, response) -> {
+			return "";
+        } );
 	}
 }

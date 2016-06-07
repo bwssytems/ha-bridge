@@ -133,7 +133,34 @@ public class HueMulator implements HueErrorStringSet {
 //	This function sets up the sparkjava rest calls for the hue api
     public void setupServer() {
     	log.info("Hue emulator service started....");
-    	// http://ip_address:port/api/{userId}/lights  returns json objects of all lights configured
+    	// http://ip_address:port/api/{userId}/groups  returns json objects of all groups configured
+	    get(HUE_CONTEXT + "/:userid/groups", "application/json", (request, response) -> {
+	    	String userId = request.params(":userid");
+	        log.debug("hue groups list requested: " + userId + " from " + request.ip());
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        return "";
+	    } , new JsonTransformer());
+    	// http://ip_address:port/api/{userId}/groups/0  returns json objects of all groups configured
+	    get(HUE_CONTEXT + "/:userid/groups/0", "application/json", (request, response) -> {
+	    	String userId = request.params(":userid");
+	        log.debug("hue group 0 list requested: " + userId + " from " + request.ip());
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        return "";
+	    } , new JsonTransformer());
+    	// http://ip_address:port/api/{userId}/scenes  returns json objects of all scenes configured
+	    get(HUE_CONTEXT + "/:userid/scenes", "application/json", (request, response) -> {
+	    	String userId = request.params(":userid");
+	        log.debug("hue scenes list requested: " + userId + " from " + request.ip());
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        return "";
+	    } , new JsonTransformer());
+    	// http://ip_address:port/api/{userId}/schedules  returns json objects of all schedules configured
+	    get(HUE_CONTEXT + "/:userid/schedules", "application/json", (request, response) -> {
+	    	String userId = request.params(":userid");
+	        log.debug("hue schedules list requested: " + userId + " from " + request.ip());
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        return "";
+	    } , new JsonTransformer());
 	    get(HUE_CONTEXT + "/:userid/lights", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
         	if(bridgeSettings.isTraceupnp())
@@ -146,6 +173,7 @@ public class HueMulator implements HueErrorStringSet {
 	            deviceResponseMap.put(device.getId(), deviceResponse);
 	        }
 			response.type("application/json; charset=utf-8"); 
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 	        response.status(HttpStatus.SC_OK);
 	        return deviceResponseMap;
 	    } , new JsonTransformer());
@@ -219,7 +247,6 @@ public class HueMulator implements HueErrorStringSet {
     			aDeviceType = "<not given>";
     		log.debug("HH trace: hue api user create requested for device type: " + aDeviceType + " and username: " + newUser);
 
-	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json; charset=utf-8"); 
     		response.status(HttpStatus.SC_OK);
 	        return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";        
@@ -233,6 +260,7 @@ public class HueMulator implements HueErrorStringSet {
 	        HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(), "My App", "none");
 	
 			response.type("application/json; charset=utf-8"); 
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 	        response.status(HttpStatus.SC_OK);
 //	        String responseString = null;
 //	        responseString = "[{\"swversion\":\"" + apiResponse.getConfig().getSwversion() + "\",\"apiversion\":\"" + apiResponse.getConfig().getApiversion() + "\",\"name\":\"" + apiResponse.getConfig().getName() + "\",\"mac\":\"" + apiResponse.getConfig().getMac() + "\"}]";
@@ -249,6 +277,7 @@ public class HueMulator implements HueErrorStringSet {
 	        HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(), "My App", userId);
 	
 			response.type("application/json; charset=utf-8"); 
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 	        response.status(HttpStatus.SC_OK);
 	        return apiResponse.getConfig();
 	    }, new JsonTransformer());
@@ -258,6 +287,9 @@ public class HueMulator implements HueErrorStringSet {
 	    get(HUE_CONTEXT + "/:userid", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
 	        log.debug("hue api full state requested: " + userId + " from " + request.ip());
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	    	if(userId.equalsIgnoreCase("undefined"))
+	    		return "[{\"error\":{\"address\":\"/\",\"description\":\"unauthorized user\",\"type\":\"1\"}}]";
 	        List<DeviceDescriptor> descriptorList = repository.findAll();
 	        if (descriptorList == null) {
 	        	response.status(HttpStatus.SC_NOT_FOUND);
@@ -282,6 +314,7 @@ public class HueMulator implements HueErrorStringSet {
 	    get(HUE_CONTEXT + "/:userid/lights/:id", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
 	    	String lightId = request.params(":id");
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 	        log.debug("hue light requested: " + lightId + " for user: " + userId + " from " + request.ip());
 	        DeviceDescriptor device = repository.findOne(lightId);
 	        if (device == null) {
