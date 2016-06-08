@@ -35,7 +35,7 @@ public class HueConfig
 	private String replacesbridgeid;
 	private Map<String, WhitelistEntry> whitelist;
 
-	public static HueConfig createConfig(String name, String ipaddress, String devicetype, String userid) {
+	public static HueConfig createConfig(String name, String ipaddress, Map<String, WhitelistEntry> awhitelist) {
 		HueConfig aConfig = new HueConfig();
 	    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	    SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -57,12 +57,10 @@ public class HueConfig
 		aConfig.setLocaltime(dateFormat.format(new Date()));
 		aConfig.setTimezone(TimeZone.getDefault().getID());
 		aConfig.setZigbeechannel("6");
-		aConfig.setBridgeid("001788FFFE09A206");
+		aConfig.setBridgeid(HuePublicConfig.getBridgeIdFromMac(aConfig.getMac(), ipaddress));
 		aConfig.setModelid("BSB002");
 		aConfig.setFactorynew(false);
 		aConfig.setReplacesbridgeid(null);
-		Map<String, WhitelistEntry> awhitelist = new HashMap<>();
-		awhitelist.put(userid, WhitelistEntry.createEntry(devicetype));
 		aConfig.setWhitelist(awhitelist);
 
 		return aConfig;

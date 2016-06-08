@@ -18,9 +18,9 @@ public class HueApiResponse {
     private Map<String, JsonObject> rules;
     private HueConfig config;
 
-    public HueApiResponse(String name, String ipaddress, String devicetype, String userid) {
+    public HueApiResponse(String name, String ipaddress, Map<String, WhitelistEntry> awhitelist) {
 		super();
-		this.setConfig(HueConfig.createConfig(name, ipaddress, devicetype, userid));
+		this.setConfig(HueConfig.createConfig(name, ipaddress, awhitelist));
 		this.setRules(new HashMap<>());
 		this.setSensors(new HashMap<>());
 		this.setSchedules(new HashMap<>());

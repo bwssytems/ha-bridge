@@ -1,6 +1,9 @@
 package com.bwssystems.HABridge;
 
 import java.util.List;
+import java.util.Map;
+
+import com.bwssystems.HABridge.api.hue.WhitelistEntry;
 
 public class BridgeSettingsDescriptor {
 	private String upnpconfigaddress;
@@ -27,6 +30,7 @@ public class BridgeSettingsDescriptor {
 	private IpList haladdress;
 	private String haltoken;
 	private boolean halconfigured;
+	private Map<String, WhitelistEntry> whitelist;
 	
 	public BridgeSettingsDescriptor() {
 		super();
@@ -187,6 +191,12 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setHalconfigured(boolean halconfigured) {
 		this.halconfigured = halconfigured;
+	}
+	public Map<String, WhitelistEntry> getWhitelist() {
+		return whitelist;
+	}
+	public void setWhitelist(Map<String, WhitelistEntry> whitelist) {
+		this.whitelist = whitelist;
 	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
