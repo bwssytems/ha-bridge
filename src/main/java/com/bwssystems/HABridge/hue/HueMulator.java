@@ -65,8 +65,10 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
 
@@ -146,6 +148,13 @@ public class HueMulator implements HueErrorStringSet {
 	        log.debug("hue groups list requested: " + userId + " from " + request.ip());
 	        response.status(HttpStatus.SC_OK);
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	    	if(validateWhitelistUser(userId, false) == null) {
+	    		log.debug("Valudate user, No User supplied");
+	        	HueErrorResponse theErrorResp = new HueErrorResponse();
+	        	theErrorResp.addError(new HueError(new HueErrorDetails("1", "/api/" + userId, "unauthorized user", null, null, null)));
+	    		return new Gson().toJson(theErrorResp.getTheErrors());
+	    	}
+
 	        return "{}";
 	    });
     	// http://ip_address:port/api/{userId}/groups/0  returns json objects of all groups configured
@@ -154,6 +163,13 @@ public class HueMulator implements HueErrorStringSet {
 	        log.debug("hue group 0 list requested: " + userId + " from " + request.ip());
 	        response.status(HttpStatus.SC_OK);
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	    	if(validateWhitelistUser(userId, false) == null) {
+	    		log.debug("Valudate user, No User supplied");
+	        	HueErrorResponse theErrorResp = new HueErrorResponse();
+	        	theErrorResp.addError(new HueError(new HueErrorDetails("1", "/api/" + userId, "unauthorized user", null, null, null)));
+	    		return new Gson().toJson(theErrorResp.getTheErrors());
+	    	}
+
 	        return "[{\"error\":{\"type\":\"3\", \"address\": \"/api/" + userId + "/groups/" + "0" + "\",\"description\": \"Object not found\"}}]";
 	    });
     	// http://ip_address:port/api/{userId}/scenes  returns json objects of all scenes configured
@@ -162,6 +178,13 @@ public class HueMulator implements HueErrorStringSet {
 	        log.debug("hue scenes list requested: " + userId + " from " + request.ip());
 	        response.status(HttpStatus.SC_OK);
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	    	if(validateWhitelistUser(userId, false) == null) {
+	    		log.debug("Valudate user, No User supplied");
+	        	HueErrorResponse theErrorResp = new HueErrorResponse();
+	        	theErrorResp.addError(new HueError(new HueErrorDetails("1", "/api/" + userId, "unauthorized user", null, null, null)));
+	    		return new Gson().toJson(theErrorResp.getTheErrors());
+	    	}
+
 	        return "{}";
 	    });
     	// http://ip_address:port/api/{userId}/schedules  returns json objects of all schedules configured
@@ -170,6 +193,13 @@ public class HueMulator implements HueErrorStringSet {
 	        log.debug("hue schedules list requested: " + userId + " from " + request.ip());
 	        response.status(HttpStatus.SC_OK);
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	    	if(validateWhitelistUser(userId, false) == null) {
+	    		log.debug("Valudate user, No User supplied");
+	        	HueErrorResponse theErrorResp = new HueErrorResponse();
+	        	theErrorResp.addError(new HueError(new HueErrorDetails("1", "/api/" + userId, "unauthorized user", null, null, null)));
+	    		return new Gson().toJson(theErrorResp.getTheErrors());
+	    	}
+
 	        return "{}";
 	    });
     	// http://ip_address:port/api/{userId}/sensors  returns json objects of all sensors configured
@@ -178,6 +208,13 @@ public class HueMulator implements HueErrorStringSet {
 	        log.debug("hue sensors list requested: " + userId + " from " + request.ip());
 	        response.status(HttpStatus.SC_OK);
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	    	if(validateWhitelistUser(userId, false) == null) {
+	    		log.debug("Valudate user, No User supplied");
+	        	HueErrorResponse theErrorResp = new HueErrorResponse();
+	        	theErrorResp.addError(new HueError(new HueErrorDetails("1", "/api/" + userId, "unauthorized user", null, null, null)));
+	    		return new Gson().toJson(theErrorResp.getTheErrors());
+	    	}
+
 	        return "{}";
 	    });
     	// http://ip_address:port/api/{userId}/rules  returns json objects of all rules configured
@@ -186,6 +223,13 @@ public class HueMulator implements HueErrorStringSet {
 	        log.debug("hue rules list requested: " + userId + " from " + request.ip());
 	        response.status(HttpStatus.SC_OK);
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	    	if(validateWhitelistUser(userId, false) == null) {
+	    		log.debug("Valudate user, No User supplied");
+	        	HueErrorResponse theErrorResp = new HueErrorResponse();
+	        	theErrorResp.addError(new HueError(new HueErrorDetails("1", "/api/" + userId, "unauthorized user", null, null, null)));
+	    		return new Gson().toJson(theErrorResp.getTheErrors());
+	    	}
+
 	        return "{}";
 	    });
     	// http://ip_address:port/api/{userId}/resourcelinks  returns json objects of all resourcelinks configured
@@ -194,6 +238,13 @@ public class HueMulator implements HueErrorStringSet {
 	        log.debug("hue resourcelinks list requested: " + userId + " from " + request.ip());
 	        response.status(HttpStatus.SC_OK);
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	    	if(validateWhitelistUser(userId, false) == null) {
+	    		log.debug("Valudate user, No User supplied");
+	        	HueErrorResponse theErrorResp = new HueErrorResponse();
+	        	theErrorResp.addError(new HueError(new HueErrorDetails("1", "/api/" + userId, "unauthorized user", null, null, null)));
+	    		return new Gson().toJson(theErrorResp.getTheErrors());
+	    	}
+
 	        return "{}";
 	    });
 	    get(HUE_CONTEXT + "/:userid/lights", "application/json", (request, response) -> {
@@ -201,15 +252,22 @@ public class HueMulator implements HueErrorStringSet {
         	if(bridgeSettings.isTraceupnp())
         		log.info("Traceupnp: hue lights list requested: " + userId + " from " + request.ip());
 	        log.debug("hue lights list requested: " + userId + " from " + request.ip());
+			response.type("application/json; charset=utf-8"); 
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.status(HttpStatus.SC_OK);
+	    	if(validateWhitelistUser(userId, false) == null) {
+	    		log.debug("Valudate user, No User supplied");
+	        	HueErrorResponse theErrorResp = new HueErrorResponse();
+	        	theErrorResp.addError(new HueError(new HueErrorDetails("1", "/api/" + userId, "unauthorized user", null, null, null)));
+	    		return theErrorResp.getTheErrors();
+	    	}
+
 	        List<DeviceDescriptor> deviceList = repository.findAll();
 	        Map<String, DeviceResponse> deviceResponseMap = new HashMap<>();
 	        for (DeviceDescriptor device : deviceList) {
                 DeviceResponse deviceResponse = DeviceResponse.createResponse(device);
 	            deviceResponseMap.put(device.getId(), deviceResponse);
 	        }
-			response.type("application/json; charset=utf-8"); 
-	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
-	        response.status(HttpStatus.SC_OK);
 	        return deviceResponseMap;
 	    } , new JsonTransformer());
 
@@ -238,8 +296,9 @@ public class HueMulator implements HueErrorStringSet {
 	        	aDeviceType = aNewUser.getDevicetype();
 	        }
     		if(newUser == null)
-    			newUser = getNewUserID(request.ip());
+    			newUser = getNewUserID();
     		
+    		validateWhitelistUser(newUser, false);
     		if(aDeviceType == null)
     			aDeviceType = "<not given>";
         	if(bridgeSettings.isTraceupnp())
@@ -276,8 +335,8 @@ public class HueMulator implements HueErrorStringSet {
 	        	aDeviceType = aNewUser.getDevicetype();
 	        }
     		if(newUser == null)
-    			newUser = getNewUserID(request.ip());
-    		
+    			newUser = getNewUserID();
+    		validateWhitelistUser(newUser, false);
     		if(aDeviceType == null)
     			aDeviceType = "<not given>";
     		log.debug("HH trace: hue api user create requested for device type: " + aDeviceType + " and username: " + newUser);
@@ -303,14 +362,20 @@ public class HueMulator implements HueErrorStringSet {
         // http://ip_address:port/api/{userId}/config returns json objects for the config
 	    get(HUE_CONTEXT + "/:userid/config", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
-        	if(bridgeSettings.isTraceupnp())
-    	        log.info("Traceupnp: hue api/:userid/config config requested: " + userId + " from " + request.ip());
-	        log.debug("hue api config requested: " + userId + " from " + request.ip());
-	        HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(), bridgeSettings.getWhitelist());
-	
 			response.type("application/json; charset=utf-8"); 
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 	        response.status(HttpStatus.SC_OK);
+        	if(bridgeSettings.isTraceupnp())
+    	        log.info("Traceupnp: hue api/:userid/config config requested: " + userId + " from " + request.ip());
+    		log.debug("hue api config requested: " + userId + " from " + request.ip());
+	    	if(validateWhitelistUser(userId, true) == null) {
+	    		log.debug("Valudate user, No User supplied, returning public config");
+		        HuePublicConfig apiResponse = HuePublicConfig.createConfig("Philips hue", bridgeSettings.getUpnpConfigAddress());
+	    		return apiResponse;
+	    	}
+
+	        HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(), bridgeSettings.getWhitelist());
+	
 	        return apiResponse.getConfig();
 	    }, new JsonTransformer());
 
@@ -321,28 +386,25 @@ public class HueMulator implements HueErrorStringSet {
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json; charset=utf-8"); 
 	        response.status(HttpStatus.SC_OK);
-	    	if(userId == null || userId.equalsIgnoreCase("undefined") || userId.equalsIgnoreCase("null") || userId.equalsIgnoreCase("")) {
-	    		log.debug("hue api full state requested: " + userId + " from " + request.ip() + ". No User supplied");
+	        log.debug("hue api full state requested: " + userId + " from " + request.ip());
+	    	if(validateWhitelistUser(userId, false) == null) {
+	    		log.debug("Valudate user, No User supplied");
 	        	HueErrorResponse theErrorResp = new HueErrorResponse();
 	        	theErrorResp.addError(new HueError(new HueErrorDetails("1", "/api/" + userId, "unauthorized user", null, null, null)));
 	    		return theErrorResp.getTheErrors();
 	    	}
-	    	else
-		        log.debug("hue api full state requested: " + userId + " from " + request.ip());
-	        List<DeviceDescriptor> descriptorList = repository.findAll();
-	        if (descriptorList == null) {
-	        	response.status(HttpStatus.SC_NOT_FOUND);
-	            return null;
-	        }
+
+	    	HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(), bridgeSettings.getWhitelist());
 	        Map<String, DeviceResponse> deviceList = new HashMap<>();
-	
-	        descriptorList.forEach(descriptor -> {
-	                    DeviceResponse deviceResponse = DeviceResponse.createResponse(descriptor);
-	                    deviceList.put(descriptor.getId(), deviceResponse);
-	                }
-	        );
-	        HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(), bridgeSettings.getWhitelist());
-	        apiResponse.setLights(deviceList);
+	        List<DeviceDescriptor> descriptorList = repository.findAll();
+	        if (descriptorList != null) {
+		        descriptorList.forEach(descriptor -> {
+                    DeviceResponse deviceResponse = DeviceResponse.createResponse(descriptor);
+                    deviceList.put(descriptor.getId(), deviceResponse);
+                	}
+		        );
+		        apiResponse.setLights(deviceList);    	
+	        }
 	
 	        return apiResponse;
 	    }, new JsonTransformer());
@@ -355,7 +417,14 @@ public class HueMulator implements HueErrorStringSet {
 			response.type("application/json; charset=utf-8"); 
 	        response.status(HttpStatus.SC_OK);
 	        log.debug("hue light requested: " + lightId + " for user: " + userId + " from " + request.ip());
-	        DeviceDescriptor device = repository.findOne(lightId);
+	    	if(validateWhitelistUser(userId, false) == null) {
+	    		log.debug("Valudate user, No User supplied");
+	        	HueErrorResponse theErrorResp = new HueErrorResponse();
+	        	theErrorResp.addError(new HueError(new HueErrorDetails("1", "/api/" + userId, "unauthorized user", null, null, null)));
+	    		return theErrorResp.getTheErrors();
+	    	}
+
+	    	DeviceDescriptor device = repository.findOne(lightId);
 	        if (device == null) {
 	        	response.status(HttpStatus.SC_NOT_FOUND);
 	        	HueErrorResponse theErrorResp = new HueErrorResponse();
@@ -392,6 +461,12 @@ public class HueMulator implements HueErrorStringSet {
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json; charset=utf-8"); 
 	        response.status(HttpStatus.SC_OK);
+	    	if(validateWhitelistUser(userId, false) == null) {
+	    		log.debug("Valudate user, No User supplied");
+	        	HueErrorResponse theErrorResp = new HueErrorResponse();
+	        	theErrorResp.addError(new HueError(new HueErrorDetails("1", "/api/" + userId, "unauthorized user", null, null, null)));
+	    		return new Gson().toJson(theErrorResp.getTheErrors());
+	    	}
 			theStateChanges = new Gson().fromJson(request.body(), StateChangeBody.class);
 			if (theStateChanges == null) {
 				log.warn("Could not parse state change body. Light state not changed.");
@@ -469,6 +544,12 @@ public class HueMulator implements HueErrorStringSet {
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json; charset=utf-8"); 
 	        response.status(HttpStatus.SC_OK);
+	    	if(validateWhitelistUser(userId, false) == null) {
+	    		log.debug("Valudate user, No User supplied");
+	        	HueErrorResponse theErrorResp = new HueErrorResponse();
+	        	theErrorResp.addError(new HueError(new HueErrorDetails("1", "/api/" + userId, "unauthorized user", null, null, null)));
+	    		return new Gson().toJson(theErrorResp.getTheErrors());
+	    	}
 	
 			theStateChanges = new Gson().fromJson(request.body(), StateChangeBody.class);
 			if (theStateChanges == null) {
@@ -1064,8 +1145,8 @@ public class HueMulator implements HueErrorStringSet {
         return responseString;
     }
 
-    private String getNewUserID(String seed) {
-    	UUID uid = UUID.fromString(seed);
+    private String getNewUserID() {
+    	UUID uid = UUID.randomUUID();
     	StringTokenizer st = new StringTokenizer(uid.toString(), "-");
     	String newUser = "";
     	while(st.hasMoreTokens()) {
@@ -1074,8 +1155,35 @@ public class HueMulator implements HueErrorStringSet {
     	
     	return newUser;
     }
-    private String lookupWhitelistUser() {
-    	
+    private String validateWhitelistUser(String aUser, boolean strict) {
+    	if(aUser == null ||aUser.equalsIgnoreCase("undefined") || aUser.equalsIgnoreCase("null") || aUser.equalsIgnoreCase(""))
+    		return null;
+
+    	String validUser = null;
+    	boolean found = false;
+		if(bridgeSettings.getWhitelist() != null) {
+	    	Set<String> theUserIds = bridgeSettings.getWhitelist().keySet();
+	    	Iterator<String> userIterator = theUserIds.iterator();
+	    	while(userIterator.hasNext()) {
+	    		validUser = userIterator.next();
+	    		if(validUser.equals(aUser))
+	    			found = true;
+	    	}
+		}
+		
+		if(!found && strict)
+			return null;
+		
+    	if(!found) {
+    		if(bridgeSettings.getWhitelist() == null) {
+    			Map<String, WhitelistEntry> awhitelist = new HashMap<>();
+    			bridgeSettings.setWhitelist(awhitelist);
+    		}
+    		bridgeSettings.getWhitelist().put(aUser, WhitelistEntry.createEntry("auto insert user"));
+    		bridgeSettings.setSettingsChanged(true);
+    		
+    	}
+    	return aUser;
     }
 	@Override
 	public void setErrorString(String anError) {

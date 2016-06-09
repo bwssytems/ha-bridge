@@ -43,8 +43,10 @@ public class HalHome {
 			theResponse = hals.get(key).getLights();
 			if(theResponse != null)
 				addHalDevices(deviceList, theResponse, key);
-			else
-				log.warn("Cannot get lights for Hal with name: " + key);
+			else {
+				log.warn("Cannot get lights for Hal with name: " + key + ", skipping this HAL.");
+				continue;
+			}
 			theResponse = hals.get(key).getAppliances();
 			if(theResponse != null)
 				addHalDevices(deviceList, theResponse, key);

@@ -87,7 +87,8 @@ public class HABridge {
 	        	log.info("HA Bridge (v" + theVersion.getVersion() + ") reinitialization requessted....");
 	        else
 	        	bridgeSettings.getBridgeControl().setStop(true);
-
+	        if(bridgeSettings.getBridgeSettingsDescriptor().isSettingsChanged())
+	        	bridgeSettings.save(bridgeSettings.getBridgeSettingsDescriptor());
 	        bridgeSettings.getBridgeControl().setReinit(false);
 	        stop();
 	        nestHome.closeTheNest();

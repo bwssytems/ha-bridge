@@ -31,6 +31,7 @@ public class BridgeSettingsDescriptor {
 	private String haltoken;
 	private boolean halconfigured;
 	private Map<String, WhitelistEntry> whitelist;
+	private boolean settingsChanged;
 	
 	public BridgeSettingsDescriptor() {
 		super();
@@ -40,7 +41,10 @@ public class BridgeSettingsDescriptor {
 		this.veraconfigured = false;
 		this.harmonyconfigured = false;
 		this.hueconfigured = false;
+		this.halconfigured = false;
 		this.farenheit = true;
+		this.whitelist = null;
+		this.settingsChanged = false;
 	}
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -197,6 +201,12 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setWhitelist(Map<String, WhitelistEntry> whitelist) {
 		this.whitelist = whitelist;
+	}
+	public boolean isSettingsChanged() {
+		return settingsChanged;
+	}
+	public void setSettingsChanged(boolean settingsChanged) {
+		this.settingsChanged = settingsChanged;
 	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)

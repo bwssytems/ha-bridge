@@ -143,6 +143,8 @@ public class HalInfo {
 
 		String theUrl = null;
 		String theData;
+		if(theIrDevices == null)
+			return null;
 		Iterator<HalDevice> theHalDevices = theIrDevices.iterator();
 		deviceList = new ArrayList<HalDevice>();
 		while (theHalDevices.hasNext()) {
