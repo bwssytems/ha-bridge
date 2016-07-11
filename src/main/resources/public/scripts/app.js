@@ -599,7 +599,7 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     bridgeService.viewConfigs();
     $scope.bridge = bridgeService.state;
     $scope.optionalbackupname = "";
-    $scope.isInControl = false;
+    $scope.bridge.isInControl = false;
     $scope.visible = false;
     $scope.imgUrl = "glyphicon glyphicon-plus";
     $scope.addVeratoSettings = function (newveraname, newveraip) {
@@ -667,11 +667,9 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     	}    	
     };
     $scope.bridgeReinit = function () {
-        $scope.isInControl = false;
     	bridgeService.reinit();
     };
     $scope.bridgeStop = function () {
-        $scope.isInControl = false;
     	bridgeService.stop();
     };
     $scope.saveSettings = function() {
