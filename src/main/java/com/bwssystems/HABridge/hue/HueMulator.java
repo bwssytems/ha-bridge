@@ -247,6 +247,7 @@ public class HueMulator implements HueErrorStringSet {
 
 	        return "{}";
 	    });
+    	// http://ip_address:port/api/{userId}/lights  returns json objects of all lights configured
 	    get(HUE_CONTEXT + "/:userid/lights", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
         	if(bridgeSettings.isTraceupnp())
