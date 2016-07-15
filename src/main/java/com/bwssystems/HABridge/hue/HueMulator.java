@@ -6,6 +6,7 @@ import com.bwssystems.HABridge.api.NameValue;
 import com.bwssystems.HABridge.api.UserCreateRequest;
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.DeviceState;
+import com.bwssystems.HABridge.api.hue.GroupResponse;
 import com.bwssystems.HABridge.api.hue.HueApiResponse;
 import com.bwssystems.HABridge.api.hue.HueError;
 import com.bwssystems.HABridge.api.hue.HueErrorDetails;
@@ -157,9 +158,10 @@ public class HueMulator implements HueErrorStringSet {
 
 	        return "{}";
 	    });
-    	// http://ip_address:port/api/{userId}/groups/0  returns json objects of all groups configured
-	    get(HUE_CONTEXT + "/:userid/groups/0", "application/json", (request, response) -> {
+    	// http://ip_address:port/api/{userId}/groups/{groupId}  returns json object for specified group. Only 0 is supported
+	    get(HUE_CONTEXT + "/:userid/groups/:groupid", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
+	    	String groupId = request.params(":groupid");
 	        log.debug("hue group 0 list requested: " + userId + " from " + request.ip());
 	        response.status(HttpStatus.SC_OK);
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
@@ -169,8 +171,20 @@ public class HueMulator implements HueErrorStringSet {
 	        	theErrorResp.addError(new HueError(new HueErrorDetails("1", "/api/" + userId, "unauthorized user", null, null, null)));
 	    		return new Gson().toJson(theErrorResp.getTheErrors());
 	    	}
+	    	
+	    	if(groupId.equalsIgnoreCase("0")) {
+		        List<DeviceDescriptor> deviceList = repository.findAll();
+		        String[] theList = new String[deviceList.size()];
+		        int i = 0;
+		        for (DeviceDescriptor device : deviceList) {
+	                theList[i] = device.getId();
+	                i++;
+		        }
+	    		GroupResponse theResponse = GroupResponse.createGroupResponse(theList);
+	    		return new Gson().toJson(theResponse, GroupResponse.class);
+	    	}
 
-	        return "[{\"error\":{\"type\":\"3\", \"address\": \"/api/" + userId + "/groups/" + "0" + "\",\"description\": \"Object not found\"}}]";
+    		return "[{\"error\":{\"type\":\"3\", \"address\": \"/api/" + userId + "/groups/" + "0" + "\",\"description\": \"Object not found\"}}]";
 	    });
     	// http://ip_address:port/api/{userId}/scenes  returns json objects of all scenes configured
 	    get(HUE_CONTEXT + "/:userid/scenes", "application/json", (request, response) -> {
