@@ -11,6 +11,7 @@ public class DeviceResponse {
     private String name;
     private String modelid;
     private String manufacturername;
+    private String luminaireuniqueid;
     private String uniqueid;
     private String swversion;
 
@@ -70,7 +71,15 @@ public class DeviceResponse {
         this.swversion = swversion;
     }
 
-    public static DeviceResponse createResponse(DeviceDescriptor device){
+    public String getLuminaireuniqueid() {
+		return luminaireuniqueid;
+	}
+
+	public void setLuminaireuniqueid(String luminaireuniqueid) {
+		this.luminaireuniqueid = luminaireuniqueid;
+	}
+
+	public static DeviceResponse createResponse(DeviceDescriptor device){
         DeviceResponse response = new DeviceResponse();
         response.setState(device.getDeviceState());
 
@@ -80,6 +89,7 @@ public class DeviceResponse {
         response.setType("Dimmable light");
         response.setModelid("LWB004");
         response.setSwversion("66012040");
+        response.setLuminaireuniqueid(null);
 
         return response;
     }

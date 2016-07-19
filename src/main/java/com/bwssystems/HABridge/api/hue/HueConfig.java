@@ -6,7 +6,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -29,18 +28,22 @@ public class HueConfig
 	private String localtime;
 	private String timezone;
 	private String zigbeechannel;
+	private String modelid;
+	private String bridgeid;
+	private Boolean factorynew;
+	private String replacesbridgeid;
 	private Map<String, WhitelistEntry> whitelist;
 
-	public static HueConfig createConfig(String name, String ipaddress, String devicetype, String userid) {
+	public static HueConfig createConfig(String name, String ipaddress, Map<String, WhitelistEntry> awhitelist) {
 		HueConfig aConfig = new HueConfig();
 	    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	    SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("UTC"));
 		aConfig.setMac(HueConfig.getMacAddress(ipaddress));
-		aConfig.setApiversion("1.4.0");
+		aConfig.setApiversion("1.10.0");
 		aConfig.setPortalservices(false);
 		aConfig.setGateway(ipaddress);
-		aConfig.setSwversion("01005215");
+		aConfig.setSwversion("01028090");
 		aConfig.setLinkbutton(false);
 		aConfig.setIpaddress(ipaddress);
 		aConfig.setProxyport(0);
@@ -53,8 +56,10 @@ public class HueConfig
 		aConfig.setLocaltime(dateFormat.format(new Date()));
 		aConfig.setTimezone(TimeZone.getDefault().getID());
 		aConfig.setZigbeechannel("6");
-		Map<String, WhitelistEntry> awhitelist = new HashMap<>();
-		awhitelist.put(userid, WhitelistEntry.createEntry(devicetype));
+		aConfig.setBridgeid(HuePublicConfig.getBridgeIdFromMac(aConfig.getMac(), ipaddress));
+		aConfig.setModelid("BSB002");
+		aConfig.setFactorynew(false);
+		aConfig.setReplacesbridgeid(null);
 		aConfig.setWhitelist(awhitelist);
 
 		return aConfig;
@@ -234,5 +239,37 @@ public class HueConfig
 
 	public void setZigbeechannel(String zigbeechannel) {
 		this.zigbeechannel = zigbeechannel;
+	}
+
+	public String getModelid() {
+		return modelid;
+	}
+
+	public void setModelid(String modelid) {
+		this.modelid = modelid;
+	}
+
+	public String getBridgeid() {
+		return bridgeid;
+	}
+
+	public void setBridgeid(String bridgeid) {
+		this.bridgeid = bridgeid;
+	}
+
+	public Boolean getFactorynew() {
+		return factorynew;
+	}
+
+	public void setFactorynew(Boolean factorynew) {
+		this.factorynew = factorynew;
+	}
+
+	public String getReplacesbridgeid() {
+		return replacesbridgeid;
+	}
+
+	public void setReplacesbridgeid(String replacesbridgeid) {
+		this.replacesbridgeid = replacesbridgeid;
 	}
 }

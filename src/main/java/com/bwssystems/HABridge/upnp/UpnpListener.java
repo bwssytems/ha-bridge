@@ -22,6 +22,21 @@ public class UpnpListener {
 	private boolean strict;
 	private boolean traceupnp;
 	private BridgeControlDescriptor bridgeControl;
+	private boolean discoveryTemplateLatest;
+	private String discoveryTemplate = "HTTP/1.1 200 OK\r\n" +
+			"CACHE-CONTROL: max-age=86400\r\n" +
+			"EXT:\r\n" +
+			"LOCATION: http://%s:%s/description.xml\r\n" +
+			"SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/1.10.0\r\n" + 
+			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
+			"USN: uuid:Socket-1_0-221438K0100073::urn:schemas-upnp-org:device:basic:1\r\n\r\n";
+	private String discoveryTemplateOld = "HTTP/1.1 200 OK\r\n" +
+			"CACHE-CONTROL: max-age=86400\r\n" +
+			"EXT:\r\n" +
+			"LOCATION: http://%s:%s/description.xml\r\n" +
+			"SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/0.1\r\n" + 
+			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
+			"USN: uuid:Socket-1_0-221438K0100073::urn:schemas-upnp-org:device:basic:1\r\n\r\n";
 	
 	public UpnpListener(BridgeSettingsDescriptor theSettings, BridgeControlDescriptor theControl) {
 		super();
@@ -31,6 +46,7 @@ public class UpnpListener {
 		strict = theSettings.isUpnpStrict();
 		traceupnp = theSettings.isTraceupnp();
 		bridgeControl = theControl;
+		discoveryTemplateLatest = true;
 	}
 
 	@SuppressWarnings("resource")
@@ -189,16 +205,12 @@ public class UpnpListener {
 		return false;
 	}
 
-	String discoveryTemplate = "HTTP/1.1 200 OK\r\n" +
-			"CACHE-CONTROL: max-age=86400\r\n" +
-			"EXT:\r\n" +
-			"LOCATION: http://%s:%s/description.xml\r\n" +
-			"SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/0.1\r\n" + 
-			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
-			"USN: uuid:Socket-1_0-221438K0100073::urn:schemas-upnp-org:device:basic:1\r\n\r\n";
 	protected void sendUpnpResponse(DatagramSocket socket, InetAddress requester, int sourcePort) throws IOException {
 		String discoveryResponse = null;
-		discoveryResponse = String.format(discoveryTemplate, responseAddress, httpServerPort);
+		if(discoveryTemplateLatest)
+			discoveryResponse = String.format(discoveryTemplate, responseAddress, httpServerPort);
+		else
+			discoveryResponse = String.format(discoveryTemplateOld, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort);
 		if(traceupnp)
 			log.info("Traceupnp: sendUpnpResponse discovery template with address: " + responseAddress + " and port: " + httpServerPort);
 		else

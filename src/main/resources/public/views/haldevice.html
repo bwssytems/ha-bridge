@@ -2,33 +2,34 @@
 	<li role="presentation"><a href="#">Bridge Devices</a></li>
 	<li role="presentation"><a href="#/system">Bridge Control</a></li>
 	<li role="presentation"><a href="#/logs">Logs</a></li>
-	<li role="presentation" class="active"><a href="#/veradevices">Vera
-			Devices</a></li>
-	<li role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a
+		href="#/veradevices">Vera Devices</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a
+		href="#/verascenes">Vera Scenes</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
 		href="#/harmonyactivities">Harmony Activities</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
 		href="#/harmonydevices">Harmony Devices</a></li>
-	<li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
+	<li ng-if="bridge.showHAL" role="presentation"><a href="#/HAL">HAL</a></li>
 	<li ng-if="bridge.showHue" role="presentation"><a
 		href="#/huedevices">Hue Devices</a></li>
-	<li ng-if="bridge.showHal" role="presentation"><a
-		href="#/haldevices">HAL Devices</a></li>
+	<li role="presentation" class="active"><a href="#/haldevices">HAL
+			Devices</a></li>
 	<li role="presentation"><a href="#/editor">Manual Add</a></li>
 </ul>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">Vera Device List
-			({{bridge.veradevices.length}})</h2>
+		<h2 class="panel-title">HAL Device List
+			({{bridge.haldevices.length}})</h2>
 	</div>
 	<div class="panel-body">
-		<p class="text-muted">For any Vera Device, use the action buttons
+		<p class="text-muted">For any HAL Device, use the action buttons
 			to generate the device addition information below automatically. Then
 			you can modify the name to anything you want that will be the keyword
 			for Alexa. Click the 'Add Bridge Device' to finish that selection
-			setup. The 'Already Configured Vera Devices' list below will show
-			what is already setup for your Vera.</p>
+			setup. The 'Already Configured HAL Devices' list below will show what
+			is already setup for your HAL.</p>
 		<p>
 			Also, use this select menu for which type of dim control you would
 			like to be generated: <select name="device-dim-control"
@@ -42,40 +43,73 @@
 		<p>Use the check boxes by the names to use the bulk addition
 			feature. Select your items and dim control type if wanted, then click
 			bulk add below. Your items will be added with on and off or dim and
-			off if selected with the name of the device from the Vera.</p>
+			off if selected with the name of the device from the HAL.</p>
 	</div>
-	<scrollable-table watch="bridge.veradevices">
+	<scrollable-table watch="bridge.haldevices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<th>Row</th>
-				<th sortable-header col="name"><span><input type="checkbox" name="selectAll"
+				<th sortable-header col="name">
+					<span><input type="checkbox" name="selectAll"
 					value="{{selectAll}}"
 					ng-checked="selectAll"
 					ng-click="toggleSelectAll()"> Name</span></th>
-				<th sortable-header col="id">Id</th>
 				<th sortable-header col="category">Category</th>
-				<th sortable-header col="room">Room</th>
-				<th sortable-header col="veraname">Vera</th>
+				<th sortable-header col="halname">HAL</th>
+				<th>On Button</th>
+				<th>Off Button</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
-		<tr
-			ng-repeat="veradevice in bridge.veradevices | availableVeraDeviceId">
+		<tr ng-repeat="haldevice in bridge.haldevices | availableHalDeviceId">
 			<td>{{$index+1}}</td>
 			<td><input type="checkbox" name="bulk.devices[]"
-				value="{{veradevice.id}}"
-				ng-checked="bulk.devices.indexOf(veradevice.id) > -1"
-				ng-click="toggleSelection(veradevice.id)">
-				{{veradevice.name}}</td>
-			<td>{{veradevice.id}}</td>
-			<td>{{veradevice.category}}</td>
-			<td>{{veradevice.room}}</td>
-			<td>{{veradevice.veraname}}</td>
+				value="{{haldevice.haldevicename}}"
+				ng-checked="bulk.devices.indexOf(haldevice.haldevicename) > -1"
+				ng-click="toggleSelection(haldevice.haldevicename)">
+				{{haldevice.haldevicename}}</td>
+			<td>{{haldevice.haldevicetype}}</td>
+			<td>{{haldevice.halname}}</td>
 			<td>
-				<button class="btn btn-success" type="submit"
-					ng-click="buildDeviceUrls(veradevice, device_dim_control)">Generate
+				<select name="button-on" id="button-on"	ng-model="button_on">
+						<option ng-repeat="aButtonOn in haldevice.buttons.DeviceElements"
+							value="{{aButtonOn}}">{{aButtonOn.DeviceName}}</option>
+				</select>
+			</td>
+			<td>
+				<select name="button-off" id="button-off" ng-model="button_off">
+						<option ng-repeat="aButtonOff in haldevice.buttons.DeviceElements"
+							value="{{aButtonOff}}">{{aButtonOff.DeviceName}}</option>
+				</select>
+			</td>
+			<td>
+				<button ng-if="haldevice.haldevicetype != 'Home' && haldevice.haldevicetype != 'HVAC' && haldevice.haldevicetype != 'IrData'" class="btn btn-success" type="submit"
+					ng-click="buildDeviceUrls(haldevice, device_dim_control)">Generate
 					Bridge Device</button>
+				<button ng-if="haldevice.haldevicetype == 'Home'" class="btn btn-success" type="submit"
+					ng-click="buildHALHomeUrls(haldevice)">Home/Away</button>
+				<button ng-if="haldevice.haldevicetype == 'IrData'" class="btn btn-success" type="submit"
+					ng-click="buildButtonUrls(haldevice, button_on, button_off)">Build
+					A Button</button>
+				<ul ng-if="haldevice.haldevicetype == 'HVAC'" class="list-group">
+					<li class="list-group-item">
+						<p>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildHALHeatUrls(haldevice)">Heat</button>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildHALCoolUrls(haldevice)">Cool</button>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildHALAutoUrls(haldevice)">Auto</button>
+						</p>
+						<p>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildHALOffUrls(haldevice)">Off</button>
+							<button class="btn btn-success" type="submit"
+								ng-click="buildHALFanUrls(haldevice)">Fan</button>
+						</p>
+					</li>
+				</ul>
 			</td>
 		</tr>
 	</table>
@@ -89,34 +123,30 @@
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title">
-			Already Configured Vera Devices <a ng-click="toggleButtons()"><span
+			Already Configured HAL Devices <a ng-click="toggleButtons()"><span
 				class={{imgButtonsUrl}} aria-hidden="true"></span></a></a>
 		</h2>
 	</div>
-	<scrollable-table ng-if="buttonsVisible" watch="bridge.veradevices">
+	<scrollable-table ng-if="buttonsVisible" watch="bridge.haldevices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<th>Row</th>
 				<th sortable-header col="name">Name</th>
-				<th sortable-header col="id">Id</th>
 				<th sortable-header col="category">Category</th>
-				<th sortable-header col="room">Room</th>
-				<th sortable-header col="veraname">Vera</th>
+				<th sortable-header col="halname">HAL</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="veradevice in bridge.veradevices | unavailableVeraDeviceId">
+			ng-repeat="device in bridge.devices | unavailableHalDeviceId">
 			<td>{{$index+1}}</td>
-			<td>{{veradevice.name}}</td>
-			<td>{{veradevice.id}}</td>
-			<td>{{veradevice.category}}</td>
-			<td>{{veradevice.room}}</td>
-			<td>{{veradevice.veraname}}</td>
+			<td>{{device.name}}</td>
+			<td>{{device.deviceType}}</td>
+			<td>{{device.targetDevice}}</td>
 			<td>
 				<button class="btn btn-danger" type="submit"
-					ng-click="deleteDeviceByMapId(veradevice.id, 'veraDevice')">Delete</button>
+					ng-click="deleteDeviceByMapId(device.mapId, device.mapType)">Delete</button>
 			</td>
 		</tr>
 	</table>
@@ -124,7 +154,7 @@
 </div>
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">Add Bridge Device for a Vera Device</h2>
+		<h2 class="panel-title">Add Bridge Device for a HAL Device</h2>
 	</div>
 	<div class="panel-body">
 		<form class="form-horizontal">

@@ -10,6 +10,7 @@ import com.bwssystems.HABridge.hue.HueMulator;
 import com.bwssystems.HABridge.upnp.UpnpListener;
 import com.bwssystems.HABridge.upnp.UpnpSettingsResource;
 import com.bwssystems.NestBridge.NestHome;
+import com.bwssystems.hal.HalHome;
 import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.hue.HueHome;
 
@@ -36,6 +37,7 @@ public class HABridge {
         HarmonyHome harmonyHome;
         NestHome nestHome;
         HueHome hueHome;
+        HalHome halHome;
         HueMulator theHueMulator;
         UpnpSettingsResource theSettingResponder;
         UpnpListener theUpnpListener;
@@ -66,8 +68,10 @@ public class HABridge {
 	        nestHome = new NestHome(bridgeSettings.getBridgeSettingsDescriptor());
 	        //setup the hue passtrhu configuration if available
 	        hueHome = new HueHome(bridgeSettings.getBridgeSettingsDescriptor());
+	        //setup the hal configuration if available
+	        halHome = new HalHome(bridgeSettings.getBridgeSettingsDescriptor());
 	        // setup the class to handle the resource setup rest api
-	        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), harmonyHome, nestHome, hueHome);
+	        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), harmonyHome, nestHome, hueHome, halHome);
 	        // setup the class to handle the hue emulator rest api
 	        theHueMulator = new HueMulator(bridgeSettings.getBridgeSettingsDescriptor(), theResources.getDeviceRepository(), harmonyHome, nestHome, hueHome);
 	        theHueMulator.setupServer();
@@ -83,7 +87,8 @@ public class HABridge {
 	        	log.info("HA Bridge (v" + theVersion.getVersion() + ") reinitialization requessted....");
 	        else
 	        	bridgeSettings.getBridgeControl().setStop(true);
-
+	        if(bridgeSettings.getBridgeSettingsDescriptor().isSettingsChanged())
+	        	bridgeSettings.save(bridgeSettings.getBridgeSettingsDescriptor());
 	        bridgeSettings.getBridgeControl().setReinit(false);
 	        stop();
 	        nestHome.closeTheNest();

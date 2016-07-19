@@ -1,210 +1,235 @@
-      <ul class="nav nav-pills" role="tablist">
-        <li role="presentation"><a href="#">Bridge Devices</a></li>
-        <li role="presentation"><a href="#/system">Bridge Control</a></li>
-        <li role="presentation"><a href="#/logs">Logs</a></li>
-        <li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
-        <li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
-        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
-        <li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonydevices">Harmony Devices</a></li>
-        <li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
-        <li ng-if="bridge.showHue" role="presentation"><a href="#/huedevices">Hue Devices</a></li>
-        <li role="presentation"><a href="#/editor">Manual Add</a></li>
-        <li role="presentation" class="active"><a href="#/editdevice">Edit Device</a></li>
-      </ul>
+<ul class="nav nav-pills" role="tablist">
+	<li role="presentation"><a href="#">Bridge Devices</a></li>
+	<li role="presentation"><a href="#/system">Bridge Control</a></li>
+	<li role="presentation"><a href="#/logs">Logs</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a
+		href="#/veradevices">Vera Devices</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a
+		href="#/verascenes">Vera Scenes</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a
+		href="#/harmonyactivities">Harmony Activities</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a
+		href="#/harmonydevices">Harmony Devices</a></li>
+	<li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
+	<li ng-if="bridge.showHue" role="presentation"><a
+		href="#/huedevices">Hue Devices</a></li>
+	<li role="presentation"><a href="#/editor">Manual Add</a></li>
+	<li ng-if="bridge.showHal" role="presentation"><a
+		href="#/haldevices">HAL Devices</a></li>
+	<li role="presentation" class="active"><a href="#/editdevice">Edit
+			Device</a></li>
+</ul>
 
-<div class="panel panel-default bridgeServer" ng-if="!bridge.error">
+<div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title">Edit/Copy a device</h2>
 	</div>
-	<p class="text-muted">This screen allows the modification of many fields the bridge uses. Please use care when
-	updating these fields as you may break the settings used by the bridge to call a specific end point device.</p>
-	<p>When copying, update the name and select the "Add Bridge Device" Button.</p>
-	<ul class="list-group">
-		<li class="list-group-item">
-			<form class="form-horizontal">
-				<div class="form-group">
-					<label class="col-xs-12 col-sm-2 control-label" for="device-name">Name
-					</label>
+	<div class="panel-body">
+		<p class="text-muted">This screen allows the modification of many
+			fields the bridge uses. Please use care when updating these fields as
+			you may break the settings used by the bridge to call a specific end
+			point device.</p>
+		<p>When copying, update the name and select the "Add Bridge
+			Device" Button.</p>
+	</div>
+	<form class="form-horizontal">
+		<div class="form-group">
+			<label class="col-xs-12 col-sm-2 control-label" for="device-name">Name
+			</label>
 
-					<div class="col-xs-8 col-sm-7">
-						<input type="text" class="form-control" id="device-name"
-							ng-model="device.name" placeholder="Device Name">
-					</div>
-					<button type="submit" class="col-xs-4 col-sm-2 btn btn-success" ng-click="addDevice()">
-						Update Bridge Device</button>
-				</div>
-				<div class="form-group">
-					<label class="col-xs-12 col-sm-2 control-label" for="device-target">Target
-					</label>
+			<div class="col-xs-8 col-sm-7">
+				<input type="text" class="form-control" id="device-name"
+					ng-model="device.name" placeholder="Device Name">
+			</div>
+			<button type="submit" class="col-xs-4 col-sm-2 btn btn-success"
+				ng-click="addDevice()">Update Bridge Device</button>
+		</div>
+		<div class="form-group">
+			<label class="col-xs-12 col-sm-2 control-label" for="device-target">Target
+			</label>
 
-					<div class="col-xs-8 col-sm-7">
-						<input type="text" class="form-control" id="device-target"
-							ng-model="device.targetDevice" placeholder="default">
-					</div>
-					<button class="btn btn-primary" ng-click="copyDevice()">
-						Add Bridge Device</button>
-				</div>
-				<div class="form-group">
-					<div class="row">
-					<label class="col-xs-12 col-sm-2 control-label" for="device-type">Device Type
-					</label>
+			<div class="col-xs-8 col-sm-7">
+				<input type="text" class="form-control" id="device-target"
+					ng-model="device.targetDevice" placeholder="default">
+			</div>
+			<button class="btn btn-primary" ng-click="copyDevice()">Add
+				Bridge Device</button>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<label class="col-xs-12 col-sm-2 control-label" for="device-type">Device
+					Type </label>
 
-					<div class="col-xs-8 col-sm-7">
-					    <select name="device-type" id="device-type" ng-model="device.deviceType">
-					      <option value="">---Types if needed---</option> <!-- not selected / blank option -->
-					      <option value="custom">Custom</option>
-					      <option value="UDP">UDP</option>
-					      <option value="TCP">TCP</option>
-					      <option value="exec">Execute Script/Program</option>
-					      <option value="switch">Switch</option>
-					      <option value="scene">Scene</option>
-					      <option value="activity">Activity</option>
-					      <option value="button">Button</option>
-					      <option value="thermo">Thermo</option>
-					      <option value="passthru">Pass Thru</option>
-					    </select>
-   					</div>
-					</div>
+				<div class="col-xs-8 col-sm-7">
+					<select name="device-type" id="device-type"
+						ng-model="device.deviceType">
+						<option value="">---Types if needed---</option>
+						<!-- not selected / blank option -->
+						<option value="custom">Custom</option>
+						<option value="UDP">UDP</option>
+						<option value="TCP">TCP</option>
+						<option value="exec">Execute Script/Program</option>
+						<option value="switch">Switch</option>
+						<option value="scene">Scene</option>
+						<option value="macro">Macro</option>
+						<option value="group">Group</option>
+						<option value="activity">Activity</option>
+						<option value="button">Button</option>
+						<option value="thermo">Thermo</option>
+						<option value="passthru">Pass Thru</option>
+					</select>
 				</div>
-				<div class="form-group">
-					<div class="row">
-					<label class="col-xs-12 col-sm-2 control-label" for="device-map-type">Map Type
-					</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<label class="col-xs-12 col-sm-2 control-label"
+					for="device-map-type">Map Type </label>
 
-					<div class="col-xs-8 col-sm-7">
-					    <select name="device-map-type" id="device-map-type" ng-model="device.mapType">
-					      <option value="">---Please select---</option> <!-- not selected / blank option -->
-					      <option value="veraDevice">Vera Device</option>
-					      <option value="veraScene">Vera Scene</option>
-					      <option value="harmonyActivity">Harmony Activity</option>
-					      <option value="harmonyButton">Harmony Button</option>
-					      <option value="nestHomeAway">Nest Home Status</option>
-					      <option value="nestThermoSet">Nest Thermostat</option>
-					      <option value="hueDevice">Hue Device</option>
-					    </select>
-					</div>
-					<button class="btn btn-danger" ng-click="clearDevice()">
-						Clear Device</button>
-					</div>
+				<div class="col-xs-8 col-sm-7">
+					<select name="device-map-type" id="device-map-type"
+						ng-model="device.mapType">
+						<option value="">---Please select---</option>
+						<!-- not selected / blank option -->
+						<option value="veraDevice">Vera Device</option>
+						<option value="veraScene">Vera Scene</option>
+						<option value="harmonyActivity">Harmony Activity</option>
+						<option value="harmonyButton">Harmony Button</option>
+						<option value="nestHomeAway">Nest Home Status</option>
+						<option value="nestThermoSet">Nest Thermostat</option>
+						<option value="hueDevice">Hue Device</option>
+						<option value="halDevice">HAL Device</option>
+						<option value="halHome">HAL Home Status</option>
+						<option value="halThermoSet">HAL Thermostat</option>
+					</select>
 				</div>
-				<div ng-if="device.mapType" class="form-group">
-					<label class="col-xs-12 col-sm-2 control-label" for="device-map-id">Map ID
-					</label>
+				<button class="btn btn-danger" ng-click="clearDevice()">
+					Clear Device</button>
+			</div>
+		</div>
+		<div ng-if="device.mapType" class="form-group">
+			<label class="col-xs-12 col-sm-2 control-label" for="device-map-id">Map
+				ID </label>
 
-					<div class="col-xs-8 col-sm-7">
-						<input type="text" class="form-control" id="device-map-id"
-							ng-model="device.mapId" placeholder="1111">
-					</div>
-				</div>
-				<div class="form-group">
-					<div class="row">
-					<label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On
-						URL </label>
+			<div class="col-xs-8 col-sm-7">
+				<input type="text" class="form-control" id="device-map-id"
+					ng-model="device.mapId" placeholder="1111">
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On
+					URL </label>
 
-					<div class="col-xs-8 col-sm-7">
-						<textarea rows="3" class="form-control" id="device-on-url"
-							ng-model="device.onUrl" placeholder="URL to turn device on"></textarea>
-					</div>
-					</div>
+				<div class="col-xs-8 col-sm-7">
+					<textarea rows="3" class="form-control" id="device-on-url"
+						ng-model="device.onUrl" placeholder="URL to turn device on"></textarea>
 				</div>
-				<div class="form-group">
-					<div class="row">
-					<label class="col-xs-12 col-sm-2 control-label" for="device-dim-url">Dim
-						URL </label>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<label class="col-xs-12 col-sm-2 control-label" for="device-dim-url">Dim
+					URL </label>
 
-					<div class="col-xs-8 col-sm-7">
-						<textarea rows="3" class="form-control" id="device-dim-url"
-							ng-model="device.dimUrl" placeholder="URL to dim device"></textarea>
-					</div>
-					</div>
+				<div class="col-xs-8 col-sm-7">
+					<textarea rows="3" class="form-control" id="device-dim-url"
+						ng-model="device.dimUrl" placeholder="URL to dim device"></textarea>
 				</div>
-				<div class="form-group">
-					<div class="row">
-					<label class="col-xs-12 col-sm-2 control-label"
-						for="device-off-url">Off URL </label>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<label class="col-xs-12 col-sm-2 control-label" for="device-off-url">Off
+					URL </label>
 
-					<div class="col-xs-8 col-sm-7">
-						<textarea rows="3" class="form-control" id="device-off-url"
-							ng-model="device.offUrl" placeholder="URL to turn device off"></textarea>
-					</div>
-					</div>
+				<div class="col-xs-8 col-sm-7">
+					<textarea rows="3" class="form-control" id="device-off-url"
+						ng-model="device.offUrl" placeholder="URL to turn device off"></textarea>
 				</div>
-				<div class="form-group">
-					<div class="row">
-					<label class="col-xs-12 col-sm-2 control-label"
-						for="device-headers">HTTP Headers </label>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<label class="col-xs-12 col-sm-2 control-label" for="device-headers">HTTP
+					Headers </label>
 
-					<div class="col-xs-8 col-sm-7">
-						<textarea rows="3" class="form-control" id="device-headers"
-							ng-model="device.headers" placeholder="format like: [{&quot;name&quot;:&quot;A name&quot;,&quot;value&quot;:&quot;a value&quot;}]"></textarea>
-					</div>
-					</div>
+				<div class="col-xs-8 col-sm-7">
+					<textarea rows="3" class="form-control" id="device-headers"
+						ng-model="device.headers"
+						placeholder="format like: [{&quot;name&quot;:&quot;A name&quot;,&quot;value&quot;:&quot;a value&quot;}]"></textarea>
 				</div>
-				<div class="form-group">
-					<div class="row">
-					<label class="col-xs-12 col-sm-2 control-label" for="device-http-verb">Http Verb
-					</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<label class="col-xs-12 col-sm-2 control-label"
+					for="device-http-verb">Http Verb </label>
 
-					<div class="col-xs-8 col-sm-7">
-					    <select name="device-http-verb" id="device-http-verb" ng-model="device.httpVerb">
-					      <option value="">---Please select---</option> <!-- not selected / blank option -->
-					      <option value="GET">GET</option>
-					      <option value="PUT">PUT</option>
-					      <option value="POST">POST</option>
-					    </select>
-					</div>
-					</div>
+				<div class="col-xs-8 col-sm-7">
+					<select name="device-http-verb" id="device-http-verb"
+						ng-model="device.httpVerb">
+						<option value="">---Please select---</option>
+						<!-- not selected / blank option -->
+						<option value="GET">GET</option>
+						<option value="PUT">PUT</option>
+						<option value="POST">POST</option>
+					</select>
 				</div>
-				<div ng-if="device.httpVerb" class="form-group">
-					<div class="row">
-					<label class="col-xs-12 col-sm-2 control-label" for="device-content-type">Content Type
-					</label>
+			</div>
+		</div>
+		<div ng-if="device.httpVerb" class="form-group">
+			<div class="row">
+				<label class="col-xs-12 col-sm-2 control-label"
+					for="device-content-type">Content Type </label>
 
-					<div class="col-xs-8 col-sm-7">
-					    <select name="device-content-type" id="device-content-type" ng-model="device.contentType">
-					      <option value="">---Please select---</option> <!-- not selected / blank option -->
-					      <option value="application/atom+xml">application/atom+xml</option>
-					      <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
-					      <option value="application/json">application/json</option>
-					      <option value="application/octet-stream">application/octet-stream</option>
-					      <option value="application/svg+xml">application/svg+xml</option>
-					      <option value="application/xhtml+xml">application/xhtml+xml</option>
-					      <option value="application/xml">application/xml</option>
-					      <option value="*">*</option>
-					      <option value="multipart/form-data">multipart/form-data</option>
-					      <option value="text/html">text/html</option>
-					      <option value="text/plain">text/plain</option>
-					      <option value="text/xml">text/xml</option>
-					      <option value="*/*">*/*</option>
-					    </select>
-					</div>
-					</div>
+				<div class="col-xs-8 col-sm-7">
+					<select name="device-content-type" id="device-content-type"
+						ng-model="device.contentType">
+						<option value="">---Please select---</option>
+						<!-- not selected / blank option -->
+						<option value="application/atom+xml">application/atom+xml</option>
+						<option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+						<option value="application/json">application/json</option>
+						<option value="application/octet-stream">application/octet-stream</option>
+						<option value="application/svg+xml">application/svg+xml</option>
+						<option value="application/xhtml+xml">application/xhtml+xml</option>
+						<option value="application/xml">application/xml</option>
+						<option value="*">*</option>
+						<option value="multipart/form-data">multipart/form-data</option>
+						<option value="text/html">text/html</option>
+						<option value="text/plain">text/plain</option>
+						<option value="text/xml">text/xml</option>
+						<option value="*/*">*/*</option>
+					</select>
 				</div>
-				<div ng-if="device.httpVerb" class="form-group">
-					<div class="row">
-					<label class="col-xs-12 col-sm-2 control-label"
-						for="device-content-body">Content Body On</label>
+			</div>
+		</div>
+		<div ng-if="device.httpVerb" class="form-group">
+			<div class="row">
+				<label class="col-xs-12 col-sm-2 control-label"
+					for="device-content-body">Content Body On</label>
 
-					<div class="col-xs-8 col-sm-7">
-						<textarea rows="3" class="form-control" id="device-content-body"
-							ng-model="device.contentBody" placeholder="Content Body On for specific GET/PUT/POST type"></textarea>
-					</div>
-			        <div class="clearfix visible-xs"></div>
-					</div>
+				<div class="col-xs-8 col-sm-7">
+					<textarea rows="3" class="form-control" id="device-content-body"
+						ng-model="device.contentBody"
+						placeholder="Content Body On for specific GET/PUT/POST type"></textarea>
 				</div>
-				<div ng-if="device.httpVerb" class="form-group">
-					<div class="row">
-					<label class="col-xs-12 col-sm-2 control-label"
-						for="device-content-body-off">Content Body Off</label>
+				<div class="clearfix visible-xs"></div>
+			</div>
+		</div>
+		<div ng-if="device.httpVerb" class="form-group">
+			<div class="row">
+				<label class="col-xs-12 col-sm-2 control-label"
+					for="device-content-body-off">Content Body Off</label>
 
-					<div class="col-xs-8 col-sm-7">
-						<textarea rows="3" class="form-control" id="device-content-body-off"
-							ng-model="device.contentBodyOff" placeholder="Content Body Off for specific GET/PUT/POST type"></textarea>
-					</div>
-			        <div class="clearfix visible-xs"></div>
-					</div>
+				<div class="col-xs-8 col-sm-7">
+					<textarea rows="3" class="form-control"
+						id="device-content-body-off" ng-model="device.contentBodyOff"
+						placeholder="Content Body Off for specific GET/PUT/POST type"></textarea>
 				</div>
-			</form>
-		</li>
-	</ul>
+				<div class="clearfix visible-xs"></div>
+			</div>
+		</div>
+	</form>
 </div>

@@ -20,6 +20,7 @@ import com.bwssystems.util.JsonTransformer;
 import com.google.gson.Gson;
 
 public class BridgeSettings extends BackupHandler {
+	private static final Logger log = LoggerFactory.getLogger(BridgeSettings.class);
 	private BridgeSettingsDescriptor theBridgeSettings;
 	private BridgeControlDescriptor bridgeControl;
 	
@@ -35,7 +36,6 @@ public class BridgeSettings extends BackupHandler {
 		return theBridgeSettings;
 	}
 	public void buildSettings() {
-        Logger log = LoggerFactory.getLogger(BridgeSettings.class);
         InetAddress address = null;
         String addressString = null;
         String theVeraAddress = null;
@@ -146,15 +146,22 @@ public class BridgeSettings extends BackupHandler {
         	theBridgeSettings.setUpnpDeviceDb(Configuration.DEVICE_DB_DIRECTORY);
         
         if(theBridgeSettings.getNumberoflogmessages() == null)
-        	theBridgeSettings.setNumberoflogmessages(Configuration.NUMBER_OF_LOG_MESSAGES);
+        	theBridgeSettings.setNumberoflogmessages(new Integer(Configuration.NUMBER_OF_LOG_MESSAGES));
+
+        if(theBridgeSettings.getNumberoflogmessages() <= 0)
+        	theBridgeSettings.setNumberoflogmessages(new Integer(Configuration.NUMBER_OF_LOG_MESSAGES));
+
+        if(theBridgeSettings.getButtonsleep() == null)
+        	theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DEFAULT_BUTTON_SLEEP));
         
-        if(theBridgeSettings.getButtonsleep() <= 0)
+        if(theBridgeSettings.getButtonsleep() < 0)
         	theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DEFAULT_BUTTON_SLEEP));
 
         theBridgeSettings.setVeraconfigured(theBridgeSettings.isValidVera());
         theBridgeSettings.setHarmonyconfigured(theBridgeSettings.isValidHarmony());
         theBridgeSettings.setNestConfigured(theBridgeSettings.isValidNest());
         theBridgeSettings.setHueconfigured(theBridgeSettings.isValidHue());
+        theBridgeSettings.setHalconfigured(theBridgeSettings.isValidHal());
         if(serverPortOverride != null)
         	theBridgeSettings.setServerPort(serverPortOverride);
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
@@ -171,31 +178,17 @@ public class BridgeSettings extends BackupHandler {
 
 	private void _loadConfig(Path aPath) {
 		String jsonContent = configReader(aPath);
-		BridgeSettingsDescriptor aBridgeSettings = new Gson().fromJson(jsonContent, BridgeSettingsDescriptor.class);
-		theBridgeSettings.setButtonsleep(aBridgeSettings.getButtonsleep());
-		theBridgeSettings.setUpnpConfigAddress(aBridgeSettings.getUpnpConfigAddress());
-		theBridgeSettings.setServerPort(aBridgeSettings.getServerPort());
-		theBridgeSettings.setUpnpResponsePort(aBridgeSettings.getUpnpResponsePort());
-		theBridgeSettings.setUpnpDeviceDb(aBridgeSettings.getUpnpDeviceDb());
-		theBridgeSettings.setVeraAddress(aBridgeSettings.getVeraAddress());
-		theBridgeSettings.setHarmonyAddress(aBridgeSettings.getHarmonyAddress());
-		theBridgeSettings.setHarmonyUser(aBridgeSettings.getHarmonyUser());
-		theBridgeSettings.setHarmonyPwd(aBridgeSettings.getHarmonyPwd());
-		theBridgeSettings.setUpnpStrict(aBridgeSettings.isUpnpStrict());
-		theBridgeSettings.setTraceupnp(aBridgeSettings.isTraceupnp());
-		theBridgeSettings.setNestuser(aBridgeSettings.getNestuser());
-		theBridgeSettings.setNestpwd(aBridgeSettings.getNestpwd());
-		theBridgeSettings.setVeraconfigured(aBridgeSettings.isValidVera());
-		theBridgeSettings.setHarmonyconfigured(aBridgeSettings.isValidHarmony());
-		theBridgeSettings.setNestConfigured(aBridgeSettings.isValidNest());
-		theBridgeSettings.setNumberoflogmessages(aBridgeSettings.getNumberoflogmessages());
-		theBridgeSettings.setFarenheit(aBridgeSettings.isFarenheit());
-		theBridgeSettings.setHueaddress(aBridgeSettings.getHueaddress());
-		theBridgeSettings.setHueconfigured(aBridgeSettings.isValidHue());
+		try {
+		theBridgeSettings = new Gson().fromJson(jsonContent, BridgeSettingsDescriptor.class);
+		} catch (Exception e) {
+			log.warn("Issue loading values from file: " + aPath.toUri().toString() + ", Gson convert failed.");
+			theBridgeSettings = new BridgeSettingsDescriptor();
+			theBridgeSettings.setConfigfile(aPath.toString());
+		}
+		
     }
 
 	public void save(BridgeSettingsDescriptor newBridgeSettings) {
-        Logger log = LoggerFactory.getLogger(BridgeSettings.class);
         log.debug("Save HA Bridge settings.");
 		Path configPath = Paths.get(theBridgeSettings.getConfigfile());
     	JsonTransformer aRenderer = new JsonTransformer();
@@ -206,7 +199,6 @@ public class BridgeSettings extends BackupHandler {
     
 
 	private void configWriter(String content, Path filePath) {
-        Logger log = LoggerFactory.getLogger(BridgeSettings.class);
 		if(Files.exists(filePath) && !Files.isWritable(filePath)){
 			log.error("Error file is not writable: " + filePath);
 			return;
@@ -235,8 +227,6 @@ public class BridgeSettings extends BackupHandler {
 	}
 	
 	private String configReader(Path filePath) {
-        Logger log = LoggerFactory.getLogger(BridgeSettings.class);
-
 		String content = null;
 		if(Files.notExists(filePath) || !Files.isReadable(filePath)){
 			log.warn("Error reading the file: " + filePath + " - Does not exist or is not readable. continuing...");

@@ -21,7 +21,7 @@ Then locate the jar and start the server with:
 ATTENTION: This requires JDK 1.8 to run
 
 ```
-java -jar ha-bridge-2.0.6.jar
+java -jar ha-bridge-2.5.0.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
@@ -35,7 +35,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/amazon-echo/data/habridge.config /home/pi/amazon-echo/ha-bridge-2.0.6.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/amazon-echo/data/habridge.config /home/pi/amazon-echo/ha-bridge-2.5.0.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -43,11 +43,11 @@ WantedBy=multi-user.target
 
 Basic script setup to run the bridge on a pi.
 
-Create the directory and make sure that ha-bridge-2.0.6.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-2.5.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v2.0.6/ha-bridge-2.0.6.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v2.0.6/ha-bridge-2.5.0.jar
 ```
 Edit the shell script for starting:
 ```
@@ -57,7 +57,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar /home/pi/habridge/ha-bridge-2.0.6.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar /home/pi/habridge/ha-bridge-2.5.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
 Exit and save the file with ctrl-X and follow the prompts and then execute on the command line:
@@ -109,7 +109,7 @@ The server defaults to running on port 8080. To override what the default is, sp
 #### UPNP Response Port
 The upnp response port that will be used. The default is 50000.  
 #### Vera Names and IP Addresses
-Provide IP Addresses of your Veras that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Vera and devce/scene you configure. 
+Provide IP Addresses of your Veras that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Vera and device/scene you configure. 
 #### Harmony Names and IP Addresses
 Provide IP Addresses of your Harmony Hubs that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the activity or buttons by the call it receives and send it to the target Harmony Hub and activity/button you configure. 
 #### Harmony Username
@@ -120,6 +120,10 @@ The password for the user name of the MyHarmony.com account for the Harmony Hub.
 Provide IP Addresses of your Hue Bridges that you want to proxy through the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will passthru the call it receives to the target Hue and device you configure.
 
 Don't forget - You will need to push the link button when you got to the Hue Tab the first time ater the process comes up.  (The user name is not persistent when the process comes up.)
+#### HAL Names and IP Addresses
+Provide IP Addresses of your HAL Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target HAL and device/scene you configure. 
+#### HAL Token
+The token you generate or give to a HAL and must be the same for all HAL's you have identified. This needs to be given if you are using the HAL features.
 #### Nest Username
 The user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features. There is no need to give any ip address or host information as this contacts your cloud account.
 #### Nest Password
