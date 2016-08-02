@@ -26,7 +26,10 @@ java -jar ha-bridge-2.5.0.jar
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
-For next gen Linux systems, here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
+For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
+
+*NOTE ON RC.LOCAL*: Due to the way network subsystem is brought up on the pi, it uses the new systemctl to start services. The old style runlevel setup, which rc.local is part of does not get the benefit of knowing if the network has been fully realized. Starting ha-bridge from rc.local on next gen systems will cause unexpected results and issues with discovering registered devices. 
+
 ```
 [Unit]
 Description=HA Bridge
