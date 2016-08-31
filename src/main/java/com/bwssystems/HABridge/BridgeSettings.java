@@ -9,6 +9,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.AclEntry;
+import java.nio.file.attribute.AclEntryPermission;
+import java.nio.file.attribute.AclEntryType;
+import java.nio.file.attribute.AclFileAttributeView;
+import java.nio.file.attribute.UserPrincipal;
+import java.nio.file.attribute.UserPrincipalLookupService;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Enumeration;
 
 import org.apache.http.conn.util.InetAddressUtils;
@@ -178,14 +186,15 @@ public class BridgeSettings extends BackupHandler {
 
 	private void _loadConfig(Path aPath) {
 		String jsonContent = configReader(aPath);
+		if(jsonContent == null)
+			return;
 		try {
-		theBridgeSettings = new Gson().fromJson(jsonContent, BridgeSettingsDescriptor.class);
+			theBridgeSettings = new Gson().fromJson(jsonContent, BridgeSettingsDescriptor.class);
 		} catch (Exception e) {
 			log.warn("Issue loading values from file: " + aPath.toUri().toString() + ", Gson convert failed.");
 			theBridgeSettings = new BridgeSettingsDescriptor();
 			theBridgeSettings.setConfigfile(aPath.toString());
 		}
-		
     }
 
 	public void save(BridgeSettingsDescriptor newBridgeSettings) {
@@ -219,6 +228,19 @@ public class BridgeSettings extends BackupHandler {
 				Files.move(filePath, target);
 			}
 			Files.write(filePath, content.getBytes(), StandardOpenOption.CREATE);
+
+			// set attributes to be for user only
+			UserPrincipalLookupService upls = filePath.getFileSystem().getUserPrincipalLookupService();
+		    UserPrincipal user = upls.lookupPrincipalByName(System.getProperty("user.name"));
+		    AclEntry.Builder builder = AclEntry.newBuilder();       
+		    builder.setPermissions( EnumSet.of(AclEntryPermission.READ_DATA, AclEntryPermission.EXECUTE, 
+		            AclEntryPermission.READ_ACL, AclEntryPermission.READ_ATTRIBUTES, AclEntryPermission.READ_NAMED_ATTRS,
+		            AclEntryPermission.WRITE_ACL, AclEntryPermission.DELETE
+		    ));
+		    builder.setPrincipal(user);
+		    builder.setType(AclEntryType.ALLOW);
+		    AclFileAttributeView aclAttr = Files.getFileAttributeView(filePath, AclFileAttributeView.class);
+		    aclAttr.setAcl(Collections.singletonList(builder.build()));
 			if(target != null)
 				Files.delete(target);
 		} catch (IOException e) {
@@ -233,7 +255,6 @@ public class BridgeSettings extends BackupHandler {
 			return null;
 		}
 
-		
 		try {
 			content = new String(Files.readAllBytes(filePath));
 		} catch (IOException e) {
