@@ -13,11 +13,14 @@ import java.nio.file.attribute.AclEntry;
 import java.nio.file.attribute.AclEntryPermission;
 import java.nio.file.attribute.AclEntryType;
 import java.nio.file.attribute.AclFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.UserPrincipal;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.http.conn.util.InetAddressUtils;
 import org.slf4j.Logger;
@@ -230,17 +233,17 @@ public class BridgeSettings extends BackupHandler {
 			Files.write(filePath, content.getBytes(), StandardOpenOption.CREATE);
 
 			// set attributes to be for user only
-			UserPrincipalLookupService upls = filePath.getFileSystem().getUserPrincipalLookupService();
-		    UserPrincipal user = upls.lookupPrincipalByName(System.getProperty("user.name"));
-		    AclEntry.Builder builder = AclEntry.newBuilder();       
-		    builder.setPermissions( EnumSet.of(AclEntryPermission.READ_DATA, AclEntryPermission.EXECUTE, 
-		            AclEntryPermission.READ_ACL, AclEntryPermission.READ_ATTRIBUTES, AclEntryPermission.READ_NAMED_ATTRS,
-		            AclEntryPermission.WRITE_ACL, AclEntryPermission.DELETE
-		    ));
-		    builder.setPrincipal(user);
-		    builder.setType(AclEntryType.ALLOW);
-		    AclFileAttributeView aclAttr = Files.getFileAttributeView(filePath, AclFileAttributeView.class);
-		    aclAttr.setAcl(Collections.singletonList(builder.build()));
+	        // using PosixFilePermission to set file permissions
+	        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+	        // add owners permission 
+	        perms.add(PosixFilePermission.OWNER_READ);
+	        perms.add(PosixFilePermission.OWNER_WRITE);
+	        
+	        try {
+	        	Files.setPosixFilePermissions(filePath, perms);
+	        } catch(UnsupportedOperationException e) {
+	        	log.info("Cannot set permissions for config file on this system as it is not supported. Continuing");
+	        }
 			if(target != null)
 				Files.delete(target);
 		} catch (IOException e) {
