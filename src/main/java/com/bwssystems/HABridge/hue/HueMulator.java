@@ -519,14 +519,16 @@ public class HueMulator implements HueErrorStringSet {
 	        else
 	        {
 		        if (theStateChanges.isOn()) {
+		        	state.setOn(true);
 		            if(state.getBri() <= 0)
 		            	state.setBri(255);
 		        } else {
+		        	state.setOn(false);
 		            state.setBri(0);
 		        }
 	        }
+	        responseString = this.formatSuccessHueResponse(theStateChanges, request.body(), lightId, device.getDeviceState());
 	        device.getDeviceState().setBri(calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc));
-	        responseString = this.formatSuccessHueResponse(theStateChanges, request.body(), lightId);
 	    	
 	        return responseString;
 	    });
@@ -625,9 +627,9 @@ public class HueMulator implements HueErrorStringSet {
 					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"No HUE configured\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 	        		
 		        if(responseString == null || !responseString.contains("[{\"error\":")) {
+			        responseString = this.formatSuccessHueResponse(theStateChanges, request.body(), lightId, state);
 		        	state.setBri(calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc));
 		        	device.setDeviceState(state);
-			        responseString = this.formatSuccessHueResponse(theStateChanges, request.body(), lightId);
 		        }
 				return responseString;
 	        }
@@ -882,9 +884,9 @@ public class HueMulator implements HueErrorStringSet {
 	        }
 	        
 	        if(responseString == null || !responseString.contains("[{\"error\":")) {
+		        responseString = this.formatSuccessHueResponse(theStateChanges, request.body(), lightId, state);
 	        	state.setBri(calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc));
 	        	device.setDeviceState(state);
-		        responseString = this.formatSuccessHueResponse(theStateChanges, request.body(), lightId);
 	        }
 	        return responseString;
 	    });
@@ -1036,7 +1038,7 @@ public class HueMulator implements HueErrorStringSet {
     	return responseString;
     }
     
-    private String formatSuccessHueResponse(StateChangeBody state, String body, String lightId) {
+    private String formatSuccessHueResponse(StateChangeBody state, String body, String lightId, DeviceState deviceState) {
     	
         String responseString = "[";
         boolean notFirstChange = false;
@@ -1048,6 +1050,8 @@ public class HueMulator implements HueErrorStringSet {
 	        } else {
 	            responseString = responseString + "false}}";
 	        }
+            if(deviceState != null)
+            	deviceState.setOn(state.isOn());
 	        notFirstChange = true;
         }
         
@@ -1056,6 +1060,8 @@ public class HueMulator implements HueErrorStringSet {
         	if(notFirstChange)
         		responseString = responseString + ",";
         	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri() + "}}";
+            if(deviceState != null)
+            	deviceState.setBri(state.getBri());
 	        notFirstChange = true;
         }
         
@@ -1064,7 +1070,8 @@ public class HueMulator implements HueErrorStringSet {
         	if(notFirstChange)
         		responseString = responseString + ",";
         	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/bri_inc\":" + state.getBri_inc() + "}}";
-	        notFirstChange = true;
+        	//INFO: Bright inc check for deviceState needs to be outside of this method
+            notFirstChange = true;
         }
         
         if(body.contains("\"ct\""))
@@ -1072,6 +1079,8 @@ public class HueMulator implements HueErrorStringSet {
         	if(notFirstChange)
         		responseString = responseString + ",";
         	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/ct\":" + state.getCt() + "}}";
+            if(deviceState != null)
+            	deviceState.setCt(state.getCt());
 	        notFirstChange = true;
         }
         
@@ -1080,6 +1089,8 @@ public class HueMulator implements HueErrorStringSet {
         	if(notFirstChange)
         		responseString = responseString + ",";
         	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/xy\":" + state.getXy() + "}}";
+            if(deviceState != null)
+            	deviceState.setXy(state.getXy());
 	        notFirstChange = true;
         }
         
@@ -1088,6 +1099,8 @@ public class HueMulator implements HueErrorStringSet {
         	if(notFirstChange)
         		responseString = responseString + ",";
         	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/hue\":" + state.getHue() + "}}";
+            if(deviceState != null)
+            	deviceState.setHue(state.getHue());
 	        notFirstChange = true;
         }
         
@@ -1096,6 +1109,8 @@ public class HueMulator implements HueErrorStringSet {
         	if(notFirstChange)
         		responseString = responseString + ",";
         	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/sat\":" + state.getSat() + "}}";
+            if(deviceState != null)
+            	deviceState.setSat(state.getSat());
 	        notFirstChange = true;
         }
         
@@ -1104,6 +1119,8 @@ public class HueMulator implements HueErrorStringSet {
         	if(notFirstChange)
         		responseString = responseString + ",";
         	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/ct_inc\":" + state.getCt_inc() + "}}";
+            if(deviceState != null)
+            	deviceState.setCt(deviceState.getCt() + state.getCt_inc());
 	        notFirstChange = true;
         }
         
@@ -1112,6 +1129,8 @@ public class HueMulator implements HueErrorStringSet {
         	if(notFirstChange)
         		responseString = responseString + ",";
         	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/xy_inc\":" + state.getXy_inc() + "}}";
+            if(deviceState != null)
+            	deviceState.setXy(state.getXy());
 	        notFirstChange = true;
         }
         
@@ -1120,6 +1139,8 @@ public class HueMulator implements HueErrorStringSet {
         	if(notFirstChange)
         		responseString = responseString + ",";
         	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/hue_inc\":" + state.getHue_inc() + "}}";
+            if(deviceState != null)
+            	deviceState.setHue(deviceState.getHue() + state.getHue_inc());
 	        notFirstChange = true;
         }
         
@@ -1128,6 +1149,8 @@ public class HueMulator implements HueErrorStringSet {
         	if(notFirstChange)
         		responseString = responseString + ",";
         	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/sat_inc\":" + state.getSat_inc() + "}}";
+            if(deviceState != null)
+            	deviceState.setSat(deviceState.getSat() + state.getSat_inc());
 	        notFirstChange = true;
         }
         
@@ -1136,6 +1159,8 @@ public class HueMulator implements HueErrorStringSet {
         	if(notFirstChange)
         		responseString = responseString + ",";
         	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/effect\":" + state.getEffect() + "}}";
+            if(deviceState != null)
+            	deviceState.setEffect(state.getEffect());
 	        notFirstChange = true;
         }
         
@@ -1144,6 +1169,8 @@ public class HueMulator implements HueErrorStringSet {
         	if(notFirstChange)
         		responseString = responseString + ",";
         	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/transitiontime\":" + state.getTransitiontime() + "}}";
+            if(deviceState != null)
+            	deviceState.setTransitiontime(state.getTransitiontime());
 	        notFirstChange = true;
         }
 
@@ -1152,6 +1179,8 @@ public class HueMulator implements HueErrorStringSet {
         	if(notFirstChange)
         		responseString = responseString + ",";
         	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/alert\":" + state.getAlert() + "}}";
+            if(deviceState != null)
+            	deviceState.setAlert(state.getAlert());
 	        notFirstChange = true;
         }
 

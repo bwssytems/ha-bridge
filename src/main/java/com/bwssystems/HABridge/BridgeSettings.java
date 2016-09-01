@@ -9,7 +9,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.http.conn.util.InetAddressUtils;
 import org.slf4j.Logger;
@@ -178,14 +181,15 @@ public class BridgeSettings extends BackupHandler {
 
 	private void _loadConfig(Path aPath) {
 		String jsonContent = configReader(aPath);
+		if(jsonContent == null)
+			return;
 		try {
-		theBridgeSettings = new Gson().fromJson(jsonContent, BridgeSettingsDescriptor.class);
+			theBridgeSettings = new Gson().fromJson(jsonContent, BridgeSettingsDescriptor.class);
 		} catch (Exception e) {
 			log.warn("Issue loading values from file: " + aPath.toUri().toString() + ", Gson convert failed.");
 			theBridgeSettings = new BridgeSettingsDescriptor();
 			theBridgeSettings.setConfigfile(aPath.toString());
 		}
-		
     }
 
 	public void save(BridgeSettingsDescriptor newBridgeSettings) {
@@ -219,6 +223,19 @@ public class BridgeSettings extends BackupHandler {
 				Files.move(filePath, target);
 			}
 			Files.write(filePath, content.getBytes(), StandardOpenOption.CREATE);
+
+			// set attributes to be for user only
+	        // using PosixFilePermission to set file permissions
+	        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+	        // add owners permission 
+	        perms.add(PosixFilePermission.OWNER_READ);
+	        perms.add(PosixFilePermission.OWNER_WRITE);
+	        
+	        try {
+	        	Files.setPosixFilePermissions(filePath, perms);
+	        } catch(UnsupportedOperationException e) {
+	        	log.info("Cannot set permissions for config file on this system as it is not supported. Continuing");
+	        }
 			if(target != null)
 				Files.delete(target);
 		} catch (IOException e) {
@@ -233,7 +250,6 @@ public class BridgeSettings extends BackupHandler {
 			return null;
 		}
 
-		
 		try {
 			content = new String(Files.readAllBytes(filePath));
 		} catch (IOException e) {
