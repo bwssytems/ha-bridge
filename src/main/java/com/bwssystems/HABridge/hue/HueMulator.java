@@ -490,8 +490,12 @@ public class HueMulator implements HueErrorStringSet {
 				return responseString;
 			}
 
-			if (request.body().contains("\"bri\""))
-				stateHasBri = true;
+			if (request.body().contains("\"bri\"")) {
+				if(theStateChanges.isOn() && theStateChanges.getBri() == 0)
+					stateHasBri = false;
+				else
+					stateHasBri = true;
+			}
 			if (request.body().contains("\"bri_inc\""))
 				stateHasBriInc = true;
 
@@ -576,8 +580,12 @@ public class HueMulator implements HueErrorStringSet {
 				return responseString;
 			}
 
-			if (request.body().contains("\"bri\""))
-				stateHasBri = true;
+			if (request.body().contains("\"bri\"")) {
+				if(theStateChanges.isOn() && theStateChanges.getBri() == 0)
+					stateHasBri = false;
+				else
+					stateHasBri = true;
+			}
 			if (request.body().contains("\"bri_inc\""))
 				stateHasBriInc = true;
 
@@ -1025,19 +1033,30 @@ public class HueMulator implements HueErrorStringSet {
         return theContent;
     }
 
-    private String doExecRequest(String anItem, int intensity, String lightId) {
+	private String doExecRequest(String anItem, int intensity, String lightId) {
 		log.debug("Executing request: " + anItem);
-    	String responseString = null;
-    		try {
-    			Process p = Runtime.getRuntime().exec(replaceIntensityValue(anItem, intensity, false));
-    			log.debug("Process running: " + p.isAlive());
-    		}  catch (IOException e) {
-    			log.warn("Could not execute request: " + anItem, e);
-    			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
-    		}
-    	return responseString;
-    }
-    
+		String responseString = null;
+		if(anItem != null && !anItem.equalsIgnoreCase("")) {
+			try {
+				Process p = Runtime.getRuntime().exec(replaceIntensityValue(anItem, intensity, false));
+				log.debug("Process running: " + p.isAlive());
+			} catch (IOException e) {
+				log.warn("Could not execute request: " + anItem, e);
+				responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+						+ "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId
+						+ "state\"}}]";
+			}
+		}
+		else {
+			log.warn("Could not execute request. Request is empty.");
+			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+			+ "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId
+			+ "state\"}}]";
+		}
+			
+		return responseString;
+	}
+
     private String formatSuccessHueResponse(StateChangeBody state, String body, String lightId, DeviceState deviceState) {
     	
         String responseString = "[";
