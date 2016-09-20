@@ -21,7 +21,7 @@ Then locate the jar and start the server with:
 ATTENTION: This requires JDK 1.8 to run
 
 ```
-java -jar ha-bridge-2.5.0.jar
+java -jar ha-bridge-3.1.0.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
@@ -38,7 +38,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/amazon-echo/data/habridge.config /home/pi/amazon-echo/ha-bridge-2.5.0.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/amazon-echo/data/habridge.config /home/pi/amazon-echo/ha-bridge-3.1.0.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -46,11 +46,11 @@ WantedBy=multi-user.target
 
 Basic script setup to run the bridge on a pi.
 
-Create the directory and make sure that ha-bridge-2.5.0.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-3.1.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v2.0.6/ha-bridge-2.5.0.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v2.0.6/ha-bridge-3.1.0.jar
 ```
 Edit the shell script for starting:
 ```
@@ -60,7 +60,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar /home/pi/habridge/ha-bridge-2.5.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar /home/pi/habridge/ha-bridge-3.1.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
 Exit and save the file with ctrl-X and follow the prompts and then execute on the command line:
