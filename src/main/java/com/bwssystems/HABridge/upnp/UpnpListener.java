@@ -148,8 +148,12 @@ public class UpnpListener {
 					try {
 						sendUpnpResponse(responseSocket, packet.getAddress(), packet.getPort());
 					} catch (IOException e) {
-						log.error("UpnpListener encountered an error sending upnp response packet. Shutting down", e);
-						error = true;
+						if(e.getMessage().equalsIgnoreCase("Host is down"))
+							log.warn("UpnpListener encountered an error sending upnp response packet as requesting host is now not available. IP: " + packet.getAddress().getHostAddress());
+						else {
+							log.error("UpnpListener encountered an error sending upnp response packet. Shutting down", e);
+							error = true;
+						}
 					}
 				}
 			} catch (IOException e) {
