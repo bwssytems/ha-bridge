@@ -50,7 +50,7 @@ Create the directory and make sure that ha-bridge-3.1.0.jar is in your /home/pi/
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v2.0.6/ha-bridge-3.1.0.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v3.1.0/ha-bridge-3.1.0.jar
 ```
 Edit the shell script for starting:
 ```
