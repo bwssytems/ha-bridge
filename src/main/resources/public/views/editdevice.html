@@ -221,6 +221,19 @@
 		<div ng-if="device.httpVerb" class="form-group">
 			<div class="row">
 				<label class="col-xs-12 col-sm-2 control-label"
+					for="device-content-body-dim">Content Body Dim</label>
+
+				<div class="col-xs-8 col-sm-7">
+					<textarea rows="3" class="form-control" id="device-content-body-dim"
+						ng-model="device.contentBodyDim"
+						placeholder="Content Body Dim for specific GET/PUT/POST type"></textarea>
+				</div>
+				<div class="clearfix visible-xs"></div>
+			</div>
+		</div>
+		<div ng-if="device.httpVerb" class="form-group">
+			<div class="row">
+				<label class="col-xs-12 col-sm-2 control-label"
 					for="device-content-body-off">Content Body Off</label>
 
 				<div class="col-xs-8 col-sm-7">

@@ -131,6 +131,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		self.state.device.httpVerb = null;
 		self.state.device.contentType = null;
 		self.state.device.contentBody = null;
+		self.state.device.contentBodyDim = null;
 		self.state.device.contentBodyOff = null;
 		self.state.olddevicename = "";
 	};
@@ -976,6 +977,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 							httpVerb: $scope.device.httpVerb,
 							contentType: $scope.device.contentType,
 							contentBody: $scope.device.contentBody,
+							contentBodyDim: $scope.device.contentBodyDim,
 							contentBodyOff: $scope.device.contentBodyOff
 					};
 				}
@@ -1309,6 +1311,7 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 							httpVerb: $scope.device.httpVerb,
 							contentType: $scope.device.contentType,
 							contentBody: $scope.device.contentBody,
+							contentBodyDim: $scope.device.contentBodyDim,
 							contentBodyOff: $scope.device.contentBodyOff
 					};
 				}
@@ -1627,6 +1630,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 							httpVerb: $scope.device.httpVerb,
 							contentType: $scope.device.contentType,
 							contentBody: $scope.device.contentBody,
+							contentBodyDim: $scope.device.contentBodyDim,
 							contentBodyOff: $scope.device.contentBodyOff
 					};
 				}

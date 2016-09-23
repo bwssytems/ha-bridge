@@ -280,7 +280,41 @@ public class HueMulator implements HueErrorStringSet {
 	        List<DeviceDescriptor> deviceList = repository.findAll();
 	        Map<String, DeviceResponse> deviceResponseMap = new HashMap<>();
 	        for (DeviceDescriptor device : deviceList) {
-                DeviceResponse deviceResponse = DeviceResponse.createResponse(device);
+	        	DeviceResponse deviceResponse = null;
+	        	String responseString;
+	        	if((device.getMapType() != null && device.getMapType().equalsIgnoreCase("hueDevice"))) {
+		        	HueDeviceIdentifier deviceId = new Gson().fromJson(device.getOnUrl(), HueDeviceIdentifier.class);
+		        	if(myHueHome.getTheHUERegisteredUser() == null) {
+		        		hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(), myHueHome.getTheHUERegisteredUser(), this);
+		        		if(hueUser == null) {
+		        			return errorString;
+		        		}
+		        		myHueHome.setTheHUERegisteredUser(hueUser);
+		        	}
+					// make call
+		        	responseString = doHttpRequest("http://"+deviceId.getIpAddress()+"/api/"+myHueHome.getTheHUERegisteredUser()+"/lights/"+deviceId.getDeviceId(), HttpGet.METHOD_NAME, device.getContentType(), null, null);
+					if (responseString == null) {
+						log.warn("Error on calling hue device to get state: " + device.getName());
+		        		deviceResponse = DeviceResponse.createResponse(device);
+					}
+					else if(responseString.contains("[{\"error\":") && responseString.contains("unauthorized user")) {
+						myHueHome.setTheHUERegisteredUser(null);
+		        		hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(), myHueHome.getTheHUERegisteredUser(), this);
+		        		if(hueUser == null) {
+		        			return errorString;
+		        		}
+		        		myHueHome.setTheHUERegisteredUser(hueUser);
+		        		deviceResponse = DeviceResponse.createResponse(device);
+					}
+					else {
+						deviceResponse = new Gson().fromJson(responseString, DeviceResponse.class);
+						if(deviceResponse == null)
+							deviceResponse = DeviceResponse.createResponse(device);
+					}
+						
+	        	}
+	        	else
+	        		deviceResponse = DeviceResponse.createResponse(device);
 	            deviceResponseMap.put(device.getId(), deviceResponse);
 	        }
 	        return deviceResponseMap;
@@ -448,7 +482,41 @@ public class HueMulator implements HueErrorStringSet {
 	        } else {
 	            log.debug("found device named: " + device.getName());
 	        }
-	        DeviceResponse lightResponse = DeviceResponse.createResponse(device);
+	        DeviceResponse lightResponse = null;
+        	String responseString;
+        	if((device.getMapType() != null && device.getMapType().equalsIgnoreCase("hueDevice"))) {
+	        	HueDeviceIdentifier deviceId = new Gson().fromJson(device.getOnUrl(), HueDeviceIdentifier.class);
+	        	if(myHueHome.getTheHUERegisteredUser() == null) {
+	        		hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(), myHueHome.getTheHUERegisteredUser(), this);
+	        		if(hueUser == null) {
+	        			return errorString;
+	        		}
+	        		myHueHome.setTheHUERegisteredUser(hueUser);
+	        	}
+				// make call
+	        	responseString = doHttpRequest("http://"+deviceId.getIpAddress()+"/api/"+myHueHome.getTheHUERegisteredUser()+"/lights/"+deviceId.getDeviceId(), HttpGet.METHOD_NAME, device.getContentType(), null, null);
+				if (responseString == null) {
+					log.warn("Error on calling hue device to get state: " + device.getName());
+					lightResponse = DeviceResponse.createResponse(device);
+				}
+				else if(responseString.contains("[{\"error\":") && responseString.contains("unauthorized user")) {
+					myHueHome.setTheHUERegisteredUser(null);
+	        		hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(), myHueHome.getTheHUERegisteredUser(), this);
+	        		if(hueUser == null) {
+	        			return errorString;
+	        		}
+	        		myHueHome.setTheHUERegisteredUser(hueUser);
+	        		lightResponse = DeviceResponse.createResponse(device);
+				}
+				else {
+					lightResponse = new Gson().fromJson(responseString, DeviceResponse.class);
+					if(lightResponse == null)
+						lightResponse = DeviceResponse.createResponse(device);
+				}
+					
+        	}
+        	else
+        		lightResponse = DeviceResponse.createResponse(device);
 	
 	        return lightResponse;
 	    }, new JsonTransformer()); 

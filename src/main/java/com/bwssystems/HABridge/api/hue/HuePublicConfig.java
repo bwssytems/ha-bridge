@@ -23,8 +23,8 @@ public class HuePublicConfig
 	public static HuePublicConfig createConfig(String name, String ipaddress) {
 		HuePublicConfig aConfig = new HuePublicConfig();
 		aConfig.setMac(HuePublicConfig.getMacAddress(ipaddress));
-		aConfig.setApiversion("1.10.0");
-		aConfig.setSwversion("01028090");
+		aConfig.setApiversion("1.14.0");
+		aConfig.setSwversion("01033989");
 		aConfig.setName(name);
 		aConfig.setBridgeid(HuePublicConfig.getBridgeIdFromMac(aConfig.getMac(), ipaddress));
 		aConfig.setModelid("BSB002");

@@ -40,10 +40,10 @@ public class HueConfig
 	    SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("UTC"));
 		aConfig.setMac(HueConfig.getMacAddress(ipaddress));
-		aConfig.setApiversion("1.10.0");
+		aConfig.setApiversion("1.14.0");
 		aConfig.setPortalservices(false);
 		aConfig.setGateway(ipaddress);
-		aConfig.setSwversion("01028090");
+		aConfig.setSwversion("01033989");
 		aConfig.setLinkbutton(false);
 		aConfig.setIpaddress(ipaddress);
 		aConfig.setProxyport(0);

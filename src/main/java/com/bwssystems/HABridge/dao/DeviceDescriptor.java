@@ -50,6 +50,9 @@ public class DeviceDescriptor{
     @SerializedName("contentBodyOff")
     @Expose
     private String contentBodyOff;
+    @SerializedName("contentBodyDim")
+    @Expose
+    private String contentBodyDim;
 
     private DeviceState deviceState;
     
@@ -163,6 +166,14 @@ public class DeviceDescriptor{
 
 	public void setContentBodyOff(String contentBodyOff) {
 		this.contentBodyOff = contentBodyOff;
+	}
+
+	public String getContentBodyDim() {
+		return contentBodyDim;
+	}
+
+	public void setContentBodyDim(String contentBodyDim) {
+		this.contentBodyDim = contentBodyDim;
 	}
 
 	public DeviceState getDeviceState() {
