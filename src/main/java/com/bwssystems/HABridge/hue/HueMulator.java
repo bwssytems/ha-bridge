@@ -173,14 +173,7 @@ public class HueMulator implements HueErrorStringSet {
 	    	}
 	    	
 	    	if(groupId.equalsIgnoreCase("0")) {
-		        List<DeviceDescriptor> deviceList = repository.findAll();
-		        String[] theList = new String[deviceList.size()];
-		        int i = 0;
-		        for (DeviceDescriptor device : deviceList) {
-	                theList[i] = device.getId();
-	                i++;
-		        }
-	    		GroupResponse theResponse = GroupResponse.createGroupResponse(theList);
+	    		GroupResponse theResponse = GroupResponse.createGroupResponse(repository.findAll());
 	    		return new Gson().toJson(theResponse, GroupResponse.class);
 	    	}
 
@@ -443,9 +436,9 @@ public class HueMulator implements HueErrorStringSet {
 	    		return theErrorResp.getTheErrors();
 	    	}
 
+	        List<DeviceDescriptor> descriptorList = repository.findAll();
 	    	HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(), bridgeSettings.getWhitelist());
 	        Map<String, DeviceResponse> deviceList = new HashMap<>();
-	        List<DeviceDescriptor> descriptorList = repository.findAll();
 	        if (descriptorList != null) {
 		        descriptorList.forEach(descriptor -> {
                     DeviceResponse deviceResponse = DeviceResponse.createResponse(descriptor);
@@ -1256,8 +1249,8 @@ public class HueMulator implements HueErrorStringSet {
         	if(notFirstChange)
         		responseString = responseString + ",";
         	responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/transitiontime\":" + state.getTransitiontime() + "}}";
-            if(deviceState != null)
-            	deviceState.setTransitiontime(state.getTransitiontime());
+//            if(deviceState != null)
+//            	deviceState.setTransitiontime(state.getTransitiontime());
 	        notFirstChange = true;
         }
 
@@ -1289,7 +1282,7 @@ public class HueMulator implements HueErrorStringSet {
     private String validateWhitelistUser(String aUser, boolean strict) {
     	if(aUser == null ||aUser.equalsIgnoreCase("undefined") || aUser.equalsIgnoreCase("null") || aUser.equalsIgnoreCase(""))
     		return null;
-
+  
     	String validUser = null;
     	boolean found = false;
 		if(bridgeSettings.getWhitelist() != null) {

@@ -71,18 +71,18 @@ public class HuePublicConfig
 	{
     	StringTokenizer st = new StringTokenizer(macAddr, ":");
     	String bridgeId = "";
-    	String port = null;
+//    	String port = null;
     	while(st.hasMoreTokens()) {
     		bridgeId = bridgeId + st.nextToken();
     	}
-    	if(ipAddr.contains(":")) {
-    		port = ipAddr.substring(ipAddr.indexOf(":"));
-        	BigInteger bigInt = BigInteger.valueOf(Integer.getInteger(port).intValue());
-        	byte[] theBytes = bigInt.toByteArray();
-        	bridgeId = bridgeId + DatatypeConverter.printHexBinary(theBytes);
-    	}
-    	else
-    		bridgeId = bridgeId + "0800";
+//    	if(ipAddr.contains(":")) {
+//    		port = ipAddr.substring(ipAddr.indexOf(":"));
+//        	BigInteger bigInt = BigInteger.valueOf(Integer.getInteger(port).intValue());
+//        	byte[] theBytes = bigInt.toByteArray();
+//        	bridgeId = bridgeId + DatatypeConverter.printHexBinary(theBytes);
+//    	}
+//    	else
+//    		bridgeId = bridgeId + "0800";
 		return bridgeId;
 	}
 	

@@ -17,7 +17,7 @@ public class DeviceState {
     private String colormode;
     private boolean reachable;
     private List<Double> xy;
-    private int transitiontime;
+//    private int transitiontime;
 
     public boolean isOn() {
         return on;
@@ -98,13 +98,13 @@ public class DeviceState {
     public void setXy(List<Double> xy) {
         this.xy = xy;
     }
-    public int getTransitiontime() {
-		return transitiontime;
-	}
+//    public int getTransitiontime() {
+//		return transitiontime;
+//	}
 
-	public void setTransitiontime(int transitiontime) {
-		this.transitiontime = transitiontime;
-	}
+//	public void setTransitiontime(int transitiontime) {
+//		this.transitiontime = transitiontime;
+//	}
 
 	public static DeviceState createDeviceState() {
     	DeviceState newDeviceState = new DeviceState();

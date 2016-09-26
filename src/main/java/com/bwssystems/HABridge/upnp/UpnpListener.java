@@ -25,14 +25,14 @@ public class UpnpListener {
 	private BridgeControlDescriptor bridgeControl;
 	private boolean discoveryTemplateLatest;
 	private String discoveryTemplate = "HTTP/1.1 200 OK\r\n" +
-			"HOST: %s:%s" +
+			"HOST: %s:%s\r\n" +
 			"CACHE-CONTROL: max-age=86400\r\n" +
 			"EXT:\r\n" +
 			"LOCATION: http://%s:%s/description.xml\r\n" +
 			"SERVER: FreeRTOS/7.4.2 UPnP/1.0 IpBridge/1.10.0\r\n" + 
 			"hue-bridgeid: %s\r\n" +
 			"ST: upnp:rootdevice\r\n" +
-			"USN: uuid:2f402f80-da50-11e1-9b23-001788102201::upnp:rootdevice\r\n\r\n";
+			"USN: uuid:2f402f80-da50-11e1-9b23-001788102201\r\n\r\n";
 	private String discoveryTemplate091516 = "HTTP/1.1 200 OK\r\n" +
 			"CACHE-CONTROL: max-age=86400\r\n" +
 			"EXT:\r\n" +
@@ -199,7 +199,8 @@ public class UpnpListener {
 					log.info("Traceupnp: isSSDPDiscovery found message to be valid under strict rules - strict: " + strict);
 					log.info("Traceupnp: SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
 				}
-				log.debug("isSSDPDiscovery found message to be valid under strict rules - strict: " + strict);
+				else
+					log.debug("isSSDPDiscovery found message to be valid under strict rules - strict: " + strict);
 				return true;
 			}
 			else if (!strict)
@@ -209,7 +210,8 @@ public class UpnpListener {
 					log.info("Traceupnp: isSSDPDiscovery found message to be valid under loose rules - strict: " + strict);
 					log.info("Traceupnp: SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
 				}
-				log.debug("isSSDPDiscovery found message to be valid under loose rules - strict: " + strict);
+				else
+					log.debug("isSSDPDiscovery found message to be valid under loose rules - strict: " + strict);
 				return true;
 			}
 		}
@@ -226,8 +228,10 @@ public class UpnpListener {
 			discoveryResponse = String.format(discoveryTemplate, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, HuePublicConfig.createConfig("temp", responseAddress).getBridgeid());
 		else
 			discoveryResponse = String.format(discoveryTemplate091516, responseAddress, httpServerPort);
-		if(traceupnp)
+		if(traceupnp) {
 			log.info("Traceupnp: sendUpnpResponse discovery template with address: " + responseAddress + " and port: " + httpServerPort);
+			log.info("Traceupnp: discoveryResponse is <<<" + discoveryResponse + ">>>");
+		}
 		else
 			log.debug("sendUpnpResponse discovery template with address: " + responseAddress + " and port: " + httpServerPort);
 		DatagramPacket response = new DatagramPacket(discoveryResponse.getBytes(), discoveryResponse.length(), requester, sourcePort);
