@@ -11,6 +11,9 @@ public class DeviceDescriptor{
 	@SerializedName("id")
 	@Expose
 	private String id;
+	@SerializedName("uniqueid")
+	@Expose
+	private String uniqueid;
 	@SerializedName("name")
 	@Expose
     private String name;
@@ -127,6 +130,14 @@ public class DeviceDescriptor{
     public void setId(String id) {
         this.id = id;
     }
+
+	public String getUniqueid() {
+		return uniqueid;
+	}
+
+	public void setUniqueid(String uniqueid) {
+		this.uniqueid = uniqueid;
+	}
 
 	public String getHeaders() {
 		return headers;

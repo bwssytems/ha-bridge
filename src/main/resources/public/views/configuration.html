@@ -25,6 +25,11 @@
 		<h2 class="panel-title">Current devices
 			({{bridge.devices.length}})</h2>
 	</div>
+	<form name="form">
+		<p>
+			<button class="btn btn-primary" type="submit" ng-click="renumberDevices()">Renumber Devices</button>
+		</p>
+	</form>
 	<scrollable-table watch="bridge.devices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>

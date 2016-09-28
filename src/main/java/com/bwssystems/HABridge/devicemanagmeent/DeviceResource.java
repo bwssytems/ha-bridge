@@ -8,6 +8,7 @@ import static spark.Spark.delete;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -278,6 +279,21 @@ public class DeviceResource {
 	      	}
 	      	response.status(HttpStatus.SC_OK);
 	      	return halHome.getDevices();
+	    }, new JsonTransformer());
+
+	    // http://ip_address:port/api/devices/exec/renumber CORS request
+	    options(API_CONTEXT + "/exec/renumber", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "POST");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+    	post (API_CONTEXT + "/exec/renumber", "application/json", (request, response) -> {
+	    	log.debug("Renumber devices.");
+	    	deviceRepository.renumber();
+	        return null;
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/backup/available", "application/json", (request, response) -> {

@@ -107,6 +107,14 @@
 					Clear Device</button>
 			</div>
 		</div>
+		<div class="form-group">
+			<label class="col-xs-12 col-sm-2 control-label" for="device-unique-id">Unique Id (used for Hue responses) </label>
+
+			<div class="col-xs-8 col-sm-7">
+				<input type="text" class="form-control" id="device-unique-id"
+					ng-model="device.uniqueid" placeholder="AA:BB:CC:DD:EE:FF-XX" readonly>
+			</div>
+		</div>
 		<div ng-if="device.mapType" class="form-group">
 			<label class="col-xs-12 col-sm-2 control-label" for="device-map-id">Map
 				ID </label>

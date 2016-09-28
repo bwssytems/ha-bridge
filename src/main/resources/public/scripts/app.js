@@ -115,12 +115,24 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		);
 	};
 
+	this.renumberDevices = function () {
+		return $http.post(this.state.base + "/exec/renumber").then(
+				function (response) {
+					self.viewDevices();
+				},
+				function (error) {
+					self.displayError("Cannot renumber devices from habridge: ", error);
+				}
+		);
+	};
+
 	this.clearDevice = function () {
 		if(self.state.device == null)
 			self.state.device = [];
 		self.state.device.id = "";
 		self.state.device.mapType = null;
 		self.state.device.mapId = null;
+		self.state.device.uniqueid = null;
 		self.state.device.name = "";
 		self.state.device.onUrl = "";
 		self.state.device.dimUrl = "";
@@ -784,6 +796,9 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 	$scope.editDevice = function (device) {
 		bridgeService.editDevice(device);
 		$location.path('/editdevice');
+	};
+	$scope.renumberDevices = function() {
+		bridgeService.renumberDevices();
 	};
 	$scope.backupDeviceDb = function (optionalbackupname) {
 		bridgeService.backupDeviceDb(optionalbackupname);

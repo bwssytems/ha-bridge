@@ -84,7 +84,7 @@ public class DeviceResponse {
         response.setState(device.getDeviceState());
 
         response.setName(device.getName());
-        response.setUniqueid(device.getId());
+        response.setUniqueid(device.getUniqueid());
         response.setManufacturername("Philips");
         response.setType("Dimmable light");
         response.setModelid("LWB004");
