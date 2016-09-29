@@ -29,8 +29,17 @@ public class UpnpListener {
 			"EXT:\r\n" +
 			"LOCATION: http://%s:%s/description.xml\r\n" +
 			"SERVER: FreeRTOS/7.4.2 UPnP/1.0 IpBridge/1.10.0\r\n" + 
+			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
+			"USN: uuid:2f402f80-da50-11e1-9b23-001788102201::urn:schemas-upnp-org:device:basic:1\r\n\r\n";
+/*
+	private String discoveryTemplate = "HTTP/1.1 200 OK\r\n" +
+			"CACHE-CONTROL: max-age=86400\r\n" +
+			"EXT:\r\n" +
+			"LOCATION: http://%s:%s/description.xml\r\n" +
+			"SERVER: FreeRTOS/7.4.2 UPnP/1.0 IpBridge/1.10.0\r\n" + 
 			"ST: upnp:rootdevice\r\n" +
 			"USN: uuid:2f402f80-da50-11e1-9b23-001788102201\r\n\r\n";
+*/
 /*
 	private String discoveryTemplate = "HTTP/1.1 200 OK\r\n" +
 			"HOST: %s:%s\r\n" +

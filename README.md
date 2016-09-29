@@ -21,7 +21,7 @@ Then locate the jar and start the server with:
 ATTENTION: This requires JDK 1.8 to run
 
 ```
-java -jar ha-bridge-3.1.0.jar
+java -jar ha-bridge-3.2.0.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
@@ -38,7 +38,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/amazon-echo/data/habridge.config /home/pi/amazon-echo/ha-bridge-3.1.0.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/amazon-echo/data/habridge.config /home/pi/amazon-echo/ha-bridge-3.2.0.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -46,11 +46,11 @@ WantedBy=multi-user.target
 
 Basic script setup to run the bridge on a pi.
 
-Create the directory and make sure that ha-bridge-3.1.0.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-3.2.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v3.1.0/ha-bridge-3.1.0.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v3.2.0/ha-bridge-3.2.0.jar
 ```
 Edit the shell script for starting:
 ```
@@ -60,7 +60,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar /home/pi/habridge/ha-bridge-3.1.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar /home/pi/habridge/ha-bridge-3.2.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
 Exit and save the file with ctrl-X and follow the prompts and then execute on the command line:
@@ -83,14 +83,14 @@ The default location for the configuration file to contain the settings for the 
 java -jar -Dconfig.file=/home/me/data/myhabridge.config ha-bridge-W.X.Y.jar
 ```
 ### -Dserver.port=`<port number>`
-The default port number for the bridge is 8080. To override what the default or what is in the configuration file for this parameter, specify -Dserver.port=`<port number>` explicitly. This is especially helpful if you are running the ha-bridge for the first time and have another application on port 8080. The command line example:
+The default port number for the bridge is 80. To override what the default or what is in the configuration file for this parameter, specify -Dserver.port=`<port number>` explicitly. This is especially helpful if you are running the ha-bridge for the first time and have another application on port 80. The command line example:
 ```
 java -jar -Dserver.port=80 ha-bridge-W.X.Y.jar
 ```
 
 ## HA Bridge Usage and Configuration
 This section will cover the basics of configuration and where this configuration can be done. This requires that you have started your bridge process and then have pointed your
-favorite web interface by going to the http://<my ip address>:<port> or http://localhost:<port> with port you have assigned. The default quick link is http://localhost:8080 for yoru reference.
+favorite web interface by going to the http://<my ip address>:<port> or http://localhost:<port> with port you have assigned. The default quick link is http://localhost for yoru reference.
 ### The Bridge Devices Tab
 This screen allows you to see your devices you have configured for the ha-bridge to present to a controller, such as an Amazon Echo/Dot. It gives you a count of devices as there have been reports that the Echo only supports a limited number, but has been growing as of late, YMMV. You can test each device from this page as this calls the ha-bridge just as a controller would, i.e. the Echo. This is useful to make sure your configuration for each device is correct and for trouble shooting. You can also manages your devices as well by editing and making a new device copy as well as deleting it.
 
@@ -108,7 +108,7 @@ The default location for the db to contain the devices as they are added is "dat
 #### UPNP IP Address
 The server defaults to the first available address on the host if this is not given. This default may NOT be the correct IP that is your public IP for your host on the network. It is best to set this parameter to not have discovery issues. Replace this value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery. 
 #### Web Server Port
-The server defaults to running on port 8080. To override what the default is, specify a different number. ATTENTION: If you want to use any of the apps made for the Hue to control this bridge, you should set this port to 80.
+The server defaults to running on port 80. To override what the default is, specify a different number. ATTENTION: If you want to use any of the apps made for the Hue to control this bridge, you should keep this port set to 80.
 #### UPNP Response Port
 The upnp response port that will be used. The default is 50000.  
 #### Vera Names and IP Addresses
@@ -282,7 +282,7 @@ These calls can be accomplished with a REST tool using the following URLs and HT
 ### Add a device 
 Add a new device to the HA Bridge configuration. There is a basic examples and then three alternate examples for the add. Please note that dimming is supported as well as custom value based on the dimming number given from the echo. This is under the Dimming and Value example.
 ```
-POST http://host:8080/api/devices
+POST http://host/api/devices
 ```
 #### Body Arguments
 Name |	Type |	Description | Required
@@ -938,16 +938,16 @@ If this criteria is met, the following response is provided to the calling appli
 HTTP/1.1 200 OK\r\n
 CACHE-CONTROL: max-age=86400\r\n
 EXT:\r\n
-LOCATION: http://192.168.1.1:8080/description.xml\r\n
-SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/0.1\r\n 
+LOCATION: http://192.168.1.1:80/description.xml\r\n
+SERVER: FreeRTOS/7.4.2 UPnP/1.0 IpBridge/1.10.0\r\n 
 ST: urn:schemas-upnp-org:device:basic:1\r\n
-"USN: uuid:Socket-1_0-221438K0100073::urn:schemas-upnp-org:device:basic:1\r\n\r\n
+"USN: uuid:2f402f80-da50-11e1-9b23-001788102201::urn:schemas-upnp-org:device:basic:1\r\n\r\n
 ```
 ### UPNP description service
 The bridge provides the description service which is used by the calling app to interogate access details after it has decided the upnp multicast response is the correct device.
 #### Get Description
 ```
-GET http://host:8080/description.xml
+GET http://host:80/description.xml
 ```
 #### Response
 ```
@@ -957,18 +957,18 @@ GET http://host:8080/description.xml
 	<major>1</major>\n
 	<minor>0</minor>\n
 	</specVersion>\n
-	<URLBase>http://192.168.1.1:8080/</URLBase>\n
+	<URLBase>http://192.168.1.1:80/</URLBase>\n
 	<device>\n
 		<deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>\n
-		<friendlyName>HA-Bridge (192.168.1.1)</friendlyName>\n
+		<friendlyName>Philips hue (192.168.1.1)</friendlyName>\n
 		<manufacturer>Royal Philips Electronics</manufacturer>\n
-		<manufacturerURL>http://www.bwssystems.com</manufacturerURL>\n
-		<modelDescription>Hue Emulator for HA bridge</modelDescription>\n
-		<modelName>Philips hue bridge 2012</modelName>\n
-		<modelNumber>929000226503</modelNumber>\n
-		<modelURL>http://www.bwssystems.com/apps.html</modelURL>\n
+		<manufacturerURL>http://www.philips.com</manufacturerURL>\n
+		<modelDescription>Philips hue Personal Wireless Lighting</modelDescription>\n"
+		<modelName>Philips hue bridge 2015</modelName>\n
+		<modelNumber>BSB002</modelNumber>\n
+		<modelURL>http://www.meethue.com</modelURL>\n
 		<serialNumber>0017880ae670</serialNumber>\n
-		<UDN>uuid:88f6698f-2c83-4393-bd03-cd54a9f8595</UDN>\n
+		<UDN>uuid:2f402f80-da50-11e1-9b23-001788102201</UDN>\n
 		<serviceList>\n
 			<service>\n
 				<serviceType>(null)</serviceType>\n
