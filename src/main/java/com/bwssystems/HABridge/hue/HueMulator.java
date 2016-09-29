@@ -1043,33 +1043,39 @@ public class HueMulator implements HueErrorStringSet {
     protected String doHttpRequest(String url, String httpVerb, String contentType, String body, NameValue[] headers) {
         HttpUriRequest request = null;
     	String theContent = null;
+    	ContentType parsedContentType = null;
+    	StringEntity requestBody = null;
+        if(contentType != null && contentType.length() > 0) {
+        	parsedContentType = ContentType.parse(contentType);
+	        if(body != null && body.length() > 0)
+	        	requestBody = new StringEntity(body, parsedContentType);
+        }
+        
         try {
 	        if(HttpGet.METHOD_NAME.equalsIgnoreCase(httpVerb) || httpVerb == null) {
 	            request = new HttpGet(url);
 	        }else if(HttpPost.METHOD_NAME.equalsIgnoreCase(httpVerb)){
 	            HttpPost postRequest = new HttpPost(url);
-	            ContentType parsedContentType = ContentType.parse(contentType);
-	            StringEntity requestBody = new StringEntity(body, parsedContentType);
-	            postRequest.setEntity(requestBody);
+	            if(requestBody != null)
+	            	postRequest.setEntity(requestBody);
 	            request = postRequest;
 	        }else if(HttpPut.METHOD_NAME.equalsIgnoreCase(httpVerb)){
 	            HttpPut putRequest = new HttpPut(url);
-	            ContentType parsedContentType = ContentType.parse(contentType);
-	            StringEntity requestBody = new StringEntity(body, parsedContentType);
-	            putRequest.setEntity(requestBody);
+	            if(requestBody != null)
+	            	putRequest.setEntity(requestBody);
 	            request = putRequest;
 	        }
         } catch(IllegalArgumentException e) {
-        	log.warn("Error calling out to HA gateway: IllegalArgumentException in log", e);
+        	log.warn("Error creating outbound http request: IllegalArgumentException in log", e);
             return null;        	
         }
         log.debug("Making outbound call in doHttpRequest: " + request);
+    	if(headers != null && headers.length > 0) {
+    		for(int i = 0; i < headers.length; i++) {
+    			request.setHeader(headers[i].getName(), headers[i].getValue());
+    		}
+    	}
         try {
-        	if(headers != null && headers.length > 0) {
-        		for(int i = 0; i < headers.length; i++) {
-        			request.setHeader(headers[i].getName(), headers[i].getValue());
-        		}
-        	}
         	HttpResponse response;
         	if(url.startsWith("https"))
         		response = httpclientSSL.execute(request);
