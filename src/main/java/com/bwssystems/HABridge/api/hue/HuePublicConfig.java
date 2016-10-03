@@ -83,6 +83,7 @@ public class HuePublicConfig
 //    	}
 //    	else
 //    		bridgeId = bridgeId + "0800";
+    	bridgeId = bridgeId.toLowerCase();
 		return bridgeId;
 	}
 	
