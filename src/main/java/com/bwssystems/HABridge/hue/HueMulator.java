@@ -260,7 +260,7 @@ public class HueMulator implements HueErrorStringSet {
         	if(bridgeSettings.isTraceupnp())
         		log.info("Traceupnp: hue lights list requested: " + userId + " from " + request.ip());
 	        log.debug("hue lights list requested: " + userId + " from " + request.ip());
-			response.type("application/json; charset=utf-8"); 
+			response.type("application/json"); 
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 	        response.status(HttpStatus.SC_OK);
 	    	if(validateWhitelistUser(userId, false) == null) {
@@ -319,7 +319,7 @@ public class HueMulator implements HueErrorStringSet {
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
 	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
-	        response.header("Content-Type", "text/html; charset=utf-8");
+	        response.header("Content-Type", "text/html");
 	    	return "";
 	    });
 	    // http://ip_address:port/api with body of user request returns json object for a success of user add
@@ -348,7 +348,7 @@ public class HueMulator implements HueErrorStringSet {
     		log.debug("hue api user create requested for device type: " + aDeviceType + " and username: " + newUser);
 
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
-			response.type("application/json; charset=utf-8"); 
+			response.type("application/json"); 
     		response.status(HttpStatus.SC_OK);
 	        return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";
 	    } );
@@ -359,7 +359,7 @@ public class HueMulator implements HueErrorStringSet {
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
 	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
-	        response.header("Content-Type", "text/html; charset=utf-8");
+	        response.header("Content-Type", "text/html");
 	    	return "";
 	    });
         //		http://ip_address:port/api/* with body of user request returns json object for a success of user add - This method is for Harmony Hub
@@ -383,7 +383,7 @@ public class HueMulator implements HueErrorStringSet {
     			aDeviceType = "<not given>";
     		log.debug("HH trace: hue api user create requested for device type: " + aDeviceType + " and username: " + newUser);
 
-			response.type("application/json; charset=utf-8"); 
+			response.type("application/json"); 
     		response.status(HttpStatus.SC_OK);
 	        return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";        
         } );
@@ -395,7 +395,7 @@ public class HueMulator implements HueErrorStringSet {
 	        log.debug("hue api public config requested, from " + request.ip());
 	        HuePublicConfig apiResponse = HuePublicConfig.createConfig("Philips hue", bridgeSettings.getUpnpConfigAddress());
 	
-			response.type("application/json; charset=utf-8"); 
+			response.type("application/json"); 
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 	        response.status(HttpStatus.SC_OK);
 	        return apiResponse;
@@ -404,7 +404,7 @@ public class HueMulator implements HueErrorStringSet {
         // http://ip_address:port/api/{userId}/config returns json objects for the config
 	    get(HUE_CONTEXT + "/:userid/config", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
-			response.type("application/json; charset=utf-8"); 
+			response.type("application/json"); 
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 	        response.status(HttpStatus.SC_OK);
         	if(bridgeSettings.isTraceupnp())
@@ -426,7 +426,7 @@ public class HueMulator implements HueErrorStringSet {
 	    get(HUE_CONTEXT + "/:userid", "application/json", (request, response) -> {
 	    	String userId = request.params(":userid");
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
-			response.type("application/json; charset=utf-8"); 
+			response.type("application/json"); 
 	        response.status(HttpStatus.SC_OK);
 	        log.debug("hue api full state requested: " + userId + " from " + request.ip());
 	    	if(validateWhitelistUser(userId, false) == null) {
@@ -456,7 +456,7 @@ public class HueMulator implements HueErrorStringSet {
 	    	String userId = request.params(":userid");
 	    	String lightId = request.params(":id");
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
-			response.type("application/json; charset=utf-8"); 
+			response.type("application/json"); 
 	        response.status(HttpStatus.SC_OK);
 	        log.debug("hue light requested: " + lightId + " for user: " + userId + " from " + request.ip());
 	    	if(validateWhitelistUser(userId, false) == null) {
@@ -520,7 +520,7 @@ public class HueMulator implements HueErrorStringSet {
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
 	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
-	        response.header("Content-Type", "text/html; charset=utf-8");
+	        response.header("Content-Type", "text/html");
 	    	return "";
 	    });
 	    // http://ip_address:port/api/{userId}/lights/{lightId}/bridgeupdatestate uses json object to update the internal bridge lights state.
@@ -535,7 +535,7 @@ public class HueMulator implements HueErrorStringSet {
 	        boolean stateHasBriInc = false;
 	        log.debug("Update state requested: " + userId + " from " + request.ip() + " body: " + request.body());
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
-			response.type("application/json; charset=utf-8"); 
+			response.type("application/json"); 
 	        response.status(HttpStatus.SC_OK);
 	    	if(validateWhitelistUser(userId, false) == null) {
 	    		log.debug("Valudate user, No User supplied");
@@ -604,7 +604,7 @@ public class HueMulator implements HueErrorStringSet {
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
 	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
-	        response.header("Content-Type", "text/html; charset=utf-8");
+	        response.header("Content-Type", "text/html");
 	    	return "";
 	    });
 	    // http://ip_address:port/api/{userId}/lights/{lightId}/state uses json object to set the lights state
@@ -624,7 +624,7 @@ public class HueMulator implements HueErrorStringSet {
 	        boolean stateHasBriInc = false;
 	        log.debug("hue state change requested: " + userId + " from " + request.ip() + " body: " + request.body());
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
-			response.type("application/json; charset=utf-8"); 
+			response.type("application/json"); 
 	        response.status(HttpStatus.SC_OK);
 	    	if(validateWhitelistUser(userId, false) == null) {
 	    		log.debug("Valudate user, No User supplied");
