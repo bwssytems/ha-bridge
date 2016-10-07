@@ -7,6 +7,7 @@ import com.bwssystems.HABridge.BridgeControlDescriptor;
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.Configuration;
 import com.bwssystems.HABridge.api.hue.HuePublicConfig;
+import com.bwssystems.util.UDPDatagramSender;
 
 import java.io.IOException;
 import java.net.*;
@@ -17,7 +18,7 @@ import org.apache.http.conn.util.*;
 
 public class UpnpListener {
 	private Logger log = LoggerFactory.getLogger(UpnpListener.class);
-	private int upnpResponsePort;
+	private UDPDatagramSender theUDPDatagramSender;
 	private int httpServerPort;
 	private String responseAddress;
 	private boolean strict;
@@ -92,9 +93,9 @@ public class UpnpListener {
 			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
 			"USN: uuid:Socket-1_0-221438K0100073::urn:Belkin:device:**\r\n\r\n";
 */	
-	public UpnpListener(BridgeSettingsDescriptor theSettings, BridgeControlDescriptor theControl) {
+	public UpnpListener(BridgeSettingsDescriptor theSettings, BridgeControlDescriptor theControl, UDPDatagramSender aUdpDatagramSender) {
 		super();
-		upnpResponsePort = theSettings.getUpnpResponsePort();
+		theUDPDatagramSender = aUdpDatagramSender;
 		httpServerPort = Integer.valueOf(theSettings.getServerPort());
 		responseAddress = theSettings.getUpnpConfigAddress();
 		strict = theSettings.isUpnpStrict();
@@ -106,32 +107,8 @@ public class UpnpListener {
 	@SuppressWarnings("resource")
 	public boolean startListening(){
 		log.info("UPNP Discovery Listener starting....");
-		DatagramSocket responseSocket = null;
 		MulticastSocket upnpMulticastSocket = null;
 		Enumeration<NetworkInterface> ifs = null;
-
-		boolean portLoopControl = true;
-		int retryCount = 0;
-		while(portLoopControl) {
-			try {
-				responseSocket = new DatagramSocket(upnpResponsePort);
-				if(retryCount > 0)
-					log.info("Upnp Response Port issue, found open port: " + upnpResponsePort);
-				portLoopControl = false;
-			} catch(SocketException e) {
-				if(retryCount == 0)
-					log.warn("Upnp Response Port is in use, starting loop to find open port for 20 tries - configured port is: " + upnpResponsePort);
-				if(retryCount >= 20) {
-					portLoopControl = false;
-					log.error("Upnp Response Port issue, could not find open port - last port tried: " + upnpResponsePort + " with message: " + e.getMessage());
-					return false;
-				}
-			}
-			if(portLoopControl) {
-				retryCount++;
-				upnpResponsePort++;
-			}
-		}
 
 		try {
 			upnpMulticastSocket  = new MulticastSocket(Configuration.UPNP_DISCOVERY_PORT);
@@ -189,7 +166,7 @@ public class UpnpListener {
 				upnpMulticastSocket.receive(packet);
 				if (isSSDPDiscovery(packet)) {
 					try {
-						sendUpnpResponse(responseSocket, packet.getAddress(), packet.getPort());
+						sendUpnpResponse(packet.getAddress(), packet.getPort());
 					} catch (IOException e) {
 						if(e.getMessage().equalsIgnoreCase("Host is down"))
 							log.warn("UpnpListener encountered an error sending upnp response packet as requesting host is now not available. IP: " + packet.getAddress().getHostAddress());
@@ -213,7 +190,6 @@ public class UpnpListener {
 			}
 		}
 		upnpMulticastSocket.close();
-		responseSocket.close();
 		if (bridgeControl.isReinit())
 			log.info("UPNP Discovery Listener - ended, restart found");
 		if (bridgeControl.isStop())
@@ -265,7 +241,7 @@ public class UpnpListener {
 		return false;
 	}
 
-	protected void sendUpnpResponse(DatagramSocket socket, InetAddress requester, int sourcePort) throws IOException {
+	protected void sendUpnpResponse(InetAddress requester, int sourcePort) throws IOException {
 		String discoveryResponse = null;
 		String bridgeIdMac = null;
 		if(discoveryTemplateLatest) {
@@ -280,7 +256,6 @@ public class UpnpListener {
 		}
 		else
 			log.debug("sendUpnpResponse discovery template with address: " + responseAddress + " and port: " + httpServerPort);
-		DatagramPacket response = new DatagramPacket(discoveryResponse.getBytes(), discoveryResponse.length(), requester, sourcePort);
-		socket.send(response);
+		theUDPDatagramSender.sendUDPResponse(discoveryResponse, requester, sourcePort);
 	}
 }

@@ -27,6 +27,7 @@ import com.bwssystems.hue.HueHome;
 import com.bwssystems.hue.HueUtil;
 import com.bwssystems.nest.controller.Nest;
 import com.bwssystems.util.JsonTransformer;
+import com.bwssystems.util.UDPDatagramSender;
 import com.google.gson.Gson;
 
 import net.java.dev.eval.Expression;
@@ -60,8 +61,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.charset.Charset;
@@ -99,12 +98,13 @@ public class HueMulator implements HueErrorStringSet {
     private SSLConnectionSocketFactory sslsf;
     private RequestConfig globalConfig;
     private BridgeSettingsDescriptor bridgeSettings;
+    private UDPDatagramSender theUDPDatagramSender;
     private byte[] sendData;
     private String hueUser;
     private String errorString;
 
 
-    public HueMulator(BridgeSettingsDescriptor theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome){
+    public HueMulator(BridgeSettingsDescriptor theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome, UDPDatagramSender aUdpDatagramSender) {
         httpClient = HttpClients.createDefault();
         // Trust own CA and all self-signed certs
         sslcontext = SSLContexts.createDefault();
@@ -136,6 +136,7 @@ public class HueMulator implements HueErrorStringSet {
 		else
 			this.myHueHome = null;
         bridgeSettings = theBridgeSettings;
+        theUDPDatagramSender = aUdpDatagramSender;
         hueUser = null;
         errorString = null;
     }
@@ -905,10 +906,7 @@ public class HueMulator implements HueErrorStringSet {
 			        		}
 			        		if(callItems[i].getItem().contains("udp://")) {
 			    	        	log.debug("executing HUE api request to UDP: " + callItems[i].getItem());
-				        		DatagramSocket responseSocket = new DatagramSocket(Integer.parseInt(port));
-				        		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Integer.parseInt(port));
-				        		responseSocket.send(sendPacket);
-				        		responseSocket.close();
+				        		theUDPDatagramSender.sendUDPResponse(new String(sendData), IPAddress, Integer.parseInt(port));
 			        		}
 			        		else if(callItems[i].getItem().contains("tcp://"))
 			        		{
