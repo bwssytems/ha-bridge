@@ -24,75 +24,34 @@ public class UpnpListener {
 	private boolean strict;
 	private boolean traceupnp;
 	private BridgeControlDescriptor bridgeControl;
-	private boolean discoveryTemplateLatest;
-	private String discoveryTemplate = "HTTP/1.1 200 OK\r\n" +
-			"CACHE-CONTROL: max-age=86400\r\n" +
-			"EXT:\r\n" +
-			"LOCATION: http://%s:%s/description.xml\r\n" +
-			"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/1.14.0\r\n" + 
-			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
-			"USN: uuid:2f402f80-da50-11e1-9b23-%s\r\n\r\n";
-/*
-	private String discoveryTemplate = "NOTIFY * HTTP/1.1\r\n" +
+	private String responseTemplate1 = "HTTP/1.1 200 OK\r\n" +
 			"HOST: %s:%s\r\n" +
 			"CACHE-CONTROL: max-age=100\r\n" +
+			"EXT:\r\n" +
 			"LOCATION: http://%s:%s/description.xml\r\n" +
-			"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/1.14.0\r\n" +
-			"NTS: ssdp:alive\r\n" +
+			"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/1.15.0\r\n" + 
 			"hue-bridgeid: %s\r\n" +
-			"NT: uuid:2f402f80-da50-11e1-9b23-%s\r\n" +
-			"USN: uuid:2f402f80-da50-11e1-9b23-%s\r\n\r\n";
-			discoveryResponse = String.format(discoveryTemplate, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeIdMac, bridgeIdMac, bridgeIdMac);
-*/
-/*
-	private String discoveryTemplate = "HTTP/1.1 200 OK\r\n" +
-			"CACHE-CONTROL: max-age=86400\r\n" +
-			"EXT:\r\n" +
-			"LOCATION: http://%s:%s/description.xml\r\n" +
-			"SERVER: FreeRTOS/7.4.2 UPnP/1.0 IpBridge/1.10.0\r\n" + 
-			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
-			"USN: uuid:2f402f80-da50-11e1-9b23-001788102201::urn:schemas-upnp-org:device:basic:1\r\n\r\n";
-			discoveryResponse = String.format(discoveryTemplate, responseAddress, httpServerPort);
-*/
-/*
-	private String discoveryTemplate = "HTTP/1.1 200 OK\r\n" +
-			"CACHE-CONTROL: max-age=86400\r\n" +
-			"EXT:\r\n" +
-			"LOCATION: http://%s:%s/description.xml\r\n" +
-			"SERVER: FreeRTOS/7.4.2 UPnP/1.0 IpBridge/1.10.0\r\n" + 
 			"ST: upnp:rootdevice\r\n" +
-			"USN: uuid:2f402f80-da50-11e1-9b23-001788102201\r\n\r\n";
-*/
-/*
-	private String discoveryTemplate = "HTTP/1.1 200 OK\r\n" +
+			"USN: uuid:2f402f80-da50-11e1-9b23-%s::upnp:rootdevice\r\n\r\n";
+	private String responseTemplate2 = "HTTP/1.1 200 OK\r\n" +
 			"HOST: %s:%s\r\n" +
-			"CACHE-CONTROL: max-age=86400\r\n" +
+			"CACHE-CONTROL: max-age=100\r\n" +
 			"EXT:\r\n" +
 			"LOCATION: http://%s:%s/description.xml\r\n" +
-			"SERVER: FreeRTOS/7.4.2 UPnP/1.0 IpBridge/1.10.0\r\n" + 
+			"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/1.15.0\r\n" + 
 			"hue-bridgeid: %s\r\n" +
-			"ST: upnp:rootdevice\r\n" +
-			"USN: uuid:2f402f80-da50-11e1-9b23-001788102201\r\n\r\n";
-
-			discoveryResponse = String.format(discoveryTemplate, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, HuePublicConfig.createConfig("temp", responseAddress).getBridgeid());
-*/
-	private String discoveryTemplate091516 = "HTTP/1.1 200 OK\r\n" +
-			"CACHE-CONTROL: max-age=86400\r\n" +
+			"ST: uuid:2f402f80-da50-11e1-9b23-%s\r\n" +
+			"USN: uuid:2f402f80-da50-11e1-9b23-%s\r\n\r\n";
+	private String responseTemplate3 = "HTTP/1.1 200 OK\r\n" +
+			"HOST: %s:%s\r\n" +
+			"CACHE-CONTROL: max-age=100\r\n" +
 			"EXT:\r\n" +
 			"LOCATION: http://%s:%s/description.xml\r\n" +
-			"SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/1.10.0\r\n" + 
+			"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/1.15.0\r\n" + 
+			"hue-bridgeid: %s\r\n" +
 			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
-			"USN: uuid:Socket-1_0-221438K0100073::urn:schemas-upnp-org:device:basic:1\r\n\r\n";
-/*
-	private String discoveryTemplateOld = "HTTP/1.1 200 OK\r\n" +
-			"CACHE-CONTROL: max-age=86400\r\n" +
-			"EXT:\r\n" +
-			"LOCATION: http://%s:%s/upnp/amazon-ha-bridge/setup.xml\r\n" +
-			"OPT: \"http://schemas.upnp.org/upnp/1/0/\"; ns=01\r\n" +
-			"01-NLS: %s\r\n" +
-			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
-			"USN: uuid:Socket-1_0-221438K0100073::urn:Belkin:device:**\r\n\r\n";
-*/	
+			"USN: uuid:2f402f80-da50-11e1-9b23-%s\r\n\r\n";
+
 	public UpnpListener(BridgeSettingsDescriptor theSettings, BridgeControlDescriptor theControl, UDPDatagramSender aUdpDatagramSender) {
 		super();
 		theUDPDatagramSender = aUdpDatagramSender;
@@ -101,7 +60,6 @@ public class UpnpListener {
 		strict = theSettings.isUpnpStrict();
 		traceupnp = theSettings.isTraceupnp();
 		bridgeControl = theControl;
-		discoveryTemplateLatest = true;
 	}
 
 	@SuppressWarnings("resource")
@@ -243,19 +201,33 @@ public class UpnpListener {
 
 	protected void sendUpnpResponse(InetAddress requester, int sourcePort) throws IOException {
 		String discoveryResponse = null;
-		String bridgeIdMac = null;
-		if(discoveryTemplateLatest) {
-			bridgeIdMac = HuePublicConfig.createConfig("temp", responseAddress).getBridgeid();
-			discoveryResponse = String.format(discoveryTemplate, responseAddress, httpServerPort, bridgeIdMac);
-		}
-		else
-			discoveryResponse = String.format(discoveryTemplate091516, responseAddress, httpServerPort);
+		String bridgeId = null;
+		String bridgeSNUUID = null;
+		HuePublicConfig aHueConfig = HuePublicConfig.createConfig("temp", responseAddress);
+		bridgeId = aHueConfig.getBridgeid();
+		bridgeSNUUID = aHueConfig.getSNUUIDFromMac();
+		discoveryResponse = String.format(responseTemplate1, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID);
 		if(traceupnp) {
-			log.info("Traceupnp: sendUpnpResponse discovery template with address: " + responseAddress + " and port: " + httpServerPort);
-			log.info("Traceupnp: discoveryResponse is <<<" + discoveryResponse + ">>>");
+			log.info("Traceupnp: sendUpnpResponse discovery responseTemplate1 is <<<" + discoveryResponse + ">>>");
 		}
 		else
-			log.debug("sendUpnpResponse discovery template with address: " + responseAddress + " and port: " + httpServerPort);
+			log.debug("sendUpnpResponse discovery responseTemplate1 is <<<" + discoveryResponse + ">>>");
+		theUDPDatagramSender.sendUDPResponse(discoveryResponse, requester, sourcePort);
+
+		discoveryResponse = String.format(responseTemplate2, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
+		if(traceupnp) {
+			log.info("Traceupnp: sendUpnpResponse discovery responseTemplate2 is <<<" + discoveryResponse + ">>>");
+		}
+		else
+			log.debug("sendUpnpResponse discovery responseTemplate2 is <<<" + discoveryResponse + ">>>");
+		theUDPDatagramSender.sendUDPResponse(discoveryResponse, requester, sourcePort);
+
+		discoveryResponse = String.format(responseTemplate3, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID);
+		if(traceupnp) {
+			log.info("Traceupnp: sendUpnpResponse discovery responseTemplate3 is <<<" + discoveryResponse + ">>>");
+		}
+		else
+			log.debug("sendUpnpResponse discovery responseTemplate3 is <<<" + discoveryResponse + ">>>");
 		theUDPDatagramSender.sendUDPResponse(discoveryResponse, requester, sourcePort);
 	}
 }

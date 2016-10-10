@@ -78,7 +78,7 @@ public class UpnpSettingsResource {
 				log.debug("upnp device settings requested: " + " from " + request.ip() + ":" + request.port());
 			String portNumber = Integer.toString(request.port());
 			String filledTemplate = null;
-			String bridgeIdMac = HuePublicConfig.createConfig("temp", theSettings.getUpnpConfigAddress()).getBridgeid();
+			String bridgeIdMac = HuePublicConfig.createConfig("temp", theSettings.getUpnpConfigAddress()).getSNUUIDFromMac();
 			filledTemplate = String.format(hueTemplate, theSettings.getUpnpConfigAddress(), portNumber, theSettings.getUpnpConfigAddress(), bridgeIdMac, bridgeIdMac);
 			if(theSettings.isTraceupnp())
 				log.info("Traceupnp: upnp device settings template filled with address: " + theSettings.getUpnpConfigAddress() + " and port: " + portNumber);
