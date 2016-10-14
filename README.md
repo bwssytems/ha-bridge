@@ -176,7 +176,7 @@ http://192.168.1.1:8180/set/this/value/${intensity.percent}
 
 PUT
 http://192.168.1.1:8280/set/this
-ContentBody: {"someValue":"${intensity..byte}"}
+ContentBody: {"someValue":"${intensity.byte}"}
 
 udp://192.168.1.1:5000/0x45${intensity.percent}55
 
