@@ -1,13 +1,11 @@
 package com.bwssystems.HABridge.api.hue;
 
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.StringTokenizer;
 
-import javax.xml.bind.DatatypeConverter;
 
 public class HuePublicConfig
 {
@@ -23,10 +21,10 @@ public class HuePublicConfig
 	public static HuePublicConfig createConfig(String name, String ipaddress) {
 		HuePublicConfig aConfig = new HuePublicConfig();
 		aConfig.setMac(HuePublicConfig.getMacAddress(ipaddress));
-		aConfig.setApiversion("1.10.0");
-		aConfig.setSwversion("01028090");
+		aConfig.setApiversion("1.15.0");
+		aConfig.setSwversion("01035934");
 		aConfig.setName(name);
-		aConfig.setBridgeid(HuePublicConfig.getBridgeIdFromMac(aConfig.getMac(), ipaddress));
+		aConfig.setBridgeid(aConfig.getHueBridgeIdFromMac());
 		aConfig.setModelid("BSB002");
 		aConfig.setFactorynew(false);
 		aConfig.setReplacesbridgeid(null);
@@ -67,23 +65,22 @@ public class HuePublicConfig
 		return sb.toString();
 	}
 
-	protected static String getBridgeIdFromMac(String macAddr, String ipAddr)
+	public String getSNUUIDFromMac()
 	{
-    	StringTokenizer st = new StringTokenizer(macAddr, ":");
-    	String bridgeId = "";
-    	String port = null;
+    	StringTokenizer st = new StringTokenizer(this.getMac(), ":");
+    	String bridgeUUID = "";
     	while(st.hasMoreTokens()) {
-    		bridgeId = bridgeId + st.nextToken();
+    		bridgeUUID = bridgeUUID + st.nextToken();
     	}
-    	if(ipAddr.contains(":")) {
-    		port = ipAddr.substring(ipAddr.indexOf(":"));
-        	BigInteger bigInt = BigInteger.valueOf(Integer.getInteger(port).intValue());
-        	byte[] theBytes = bigInt.toByteArray();
-        	bridgeId = bridgeId + DatatypeConverter.printHexBinary(theBytes);
-    	}
-    	else
-    		bridgeId = bridgeId + "0800";
-		return bridgeId;
+    	bridgeUUID = bridgeUUID.toLowerCase();
+		return bridgeUUID.toLowerCase();
+	}
+
+	protected String getHueBridgeIdFromMac()
+	{
+		String cleanMac = this.getSNUUIDFromMac();
+    	String bridgeId = cleanMac.substring(0, 6) + "FFFE" + cleanMac.substring(6);
+		return bridgeId.toUpperCase();
 	}
 	
 	public String getMac() {

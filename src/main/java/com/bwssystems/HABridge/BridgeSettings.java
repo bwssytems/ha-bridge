@@ -39,7 +39,6 @@ public class BridgeSettings extends BackupHandler {
 		return theBridgeSettings;
 	}
 	public void buildSettings() {
-        InetAddress address = null;
         String addressString = null;
         String theVeraAddress = null;
         String theHarmonyAddress = null;
@@ -109,34 +108,18 @@ public class BridgeSettings extends BackupHandler {
         }
 
         if(theBridgeSettings.getUpnpConfigAddress() == null || theBridgeSettings.getUpnpConfigAddress().equals("")) {
-	        try {
-	        	log.info("Getting an IP address for this host....");
-				Enumeration<NetworkInterface> ifs =	NetworkInterface.getNetworkInterfaces();
-	
-				while (ifs.hasMoreElements() && addressString == null) {
-					NetworkInterface xface = ifs.nextElement();
-					Enumeration<InetAddress> addrs = xface.getInetAddresses();
-					String name = xface.getName();
-					int IPsPerNic = 0;
-	
-					while (addrs.hasMoreElements() && IPsPerNic == 0) {
-						address = addrs.nextElement();
-						if (InetAddressUtils.isIPv4Address(address.getHostAddress())) {
-							log.debug(name + " ... has IPV4 addr " + address);
-							if(!name.equalsIgnoreCase(Configuration.LOOP_BACK_INTERFACE)|| !address.getHostAddress().equalsIgnoreCase(Configuration.LOOP_BACK_ADDRESS)) {
-								IPsPerNic++;
-								addressString = address.getHostAddress();
-								log.info("Adding " + addressString + " from interface " + name + " as our default upnp config address.");
-							}
-						}
-					} 
-				}
-			} catch (SocketException e) {
-		        log.error("Cannot get ip address of this host, Exiting with message: " + e.getMessage(), e);
-		        return;
-			}
-	        
-	        theBridgeSettings.setUpnpConfigAddress(addressString);
+        	addressString = checkIpAddress(null, true);
+        	if(addressString != null) {
+        		theBridgeSettings.setUpnpConfigAddress(addressString);
+        		log.info("Adding " + addressString + " as our default upnp config address.");
+        	}
+        	else
+		        log.error("Cannot get ip address of this host.");
+        }
+        else {
+        	addressString = checkIpAddress(theBridgeSettings.getUpnpConfigAddress(), false);
+        	if(addressString == null)
+        		log.warn("The upnp config address, " + theBridgeSettings.getUpnpConfigAddress() + ", does not match any known IP's on this host.");
         }
         
         if(theBridgeSettings.getUpnpResponsePort() == null)
@@ -257,5 +240,40 @@ public class BridgeSettings extends BackupHandler {
 		}
 		
 		return content;
+	}
+	
+	private String checkIpAddress(String ipAddress, boolean checkForLocalhost) {
+		Enumeration<NetworkInterface> ifs =	null;
+		try {
+			ifs =	NetworkInterface.getNetworkInterfaces();
+		} catch(SocketException e) {
+	        log.error("checkIpAddress cannot get ip address of this host, Exiting with message: " + e.getMessage(), e);
+	        return null;			
+		}
+		String addressString = null;
+        InetAddress address = null;
+		while (ifs.hasMoreElements() && addressString == null) {
+			NetworkInterface xface = ifs.nextElement();
+			Enumeration<InetAddress> addrs = xface.getInetAddresses();
+			String name = xface.getName();
+			int IPsPerNic = 0;
+
+			while (addrs.hasMoreElements() && IPsPerNic == 0) {
+				address = addrs.nextElement();
+				if (InetAddressUtils.isIPv4Address(address.getHostAddress())) {
+					log.debug(name + " ... has IPV4 addr " + address);
+					if(checkForLocalhost && (!name.equalsIgnoreCase(Configuration.LOOP_BACK_INTERFACE) || !address.getHostAddress().equalsIgnoreCase(Configuration.LOOP_BACK_ADDRESS))) {
+						IPsPerNic++;
+						addressString = address.getHostAddress();
+						log.debug("checkIpAddress found " + addressString + " from interface " + name);
+					}
+					else if(ipAddress != null && ipAddress.equalsIgnoreCase(address.getHostAddress())){
+						addressString = ipAddress;
+						IPsPerNic++;
+					}
+				}
+			}
+		}
+		return addressString;
 	}
 }

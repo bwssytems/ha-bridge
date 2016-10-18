@@ -11,6 +11,9 @@ public class DeviceDescriptor{
 	@SerializedName("id")
 	@Expose
 	private String id;
+	@SerializedName("uniqueid")
+	@Expose
+	private String uniqueid;
 	@SerializedName("name")
 	@Expose
     private String name;
@@ -50,6 +53,9 @@ public class DeviceDescriptor{
     @SerializedName("contentBodyOff")
     @Expose
     private String contentBodyOff;
+    @SerializedName("contentBodyDim")
+    @Expose
+    private String contentBodyDim;
 
     private DeviceState deviceState;
     
@@ -125,6 +131,14 @@ public class DeviceDescriptor{
         this.id = id;
     }
 
+	public String getUniqueid() {
+		return uniqueid;
+	}
+
+	public void setUniqueid(String uniqueid) {
+		this.uniqueid = uniqueid;
+	}
+
 	public String getHeaders() {
 		return headers;
 	}
@@ -163,6 +177,14 @@ public class DeviceDescriptor{
 
 	public void setContentBodyOff(String contentBodyOff) {
 		this.contentBodyOff = contentBodyOff;
+	}
+
+	public String getContentBodyDim() {
+		return contentBodyDim;
+	}
+
+	public void setContentBodyDim(String contentBodyDim) {
+		this.contentBodyDim = contentBodyDim;
 	}
 
 	public DeviceState getDeviceState() {
