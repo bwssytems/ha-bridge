@@ -26,9 +26,9 @@
 
 	<dependencies>
 		<dependency>
-		    <groupId>com.github.bwssytems</groupId>
+		    <groupId>net.whistlingfish</groupId>
 		    <artifactId>harmony-java-client</artifactId>
-		    <version>1.0.8</version>
+		    <version>1.0.9</version>
 		    <exclusions>
 		       <exclusion> 
 		          <groupId>org.slf4j</groupId>

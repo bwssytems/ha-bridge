@@ -44,6 +44,7 @@
 				<th sortable-header col="hub">Hub</th>
 				<th>On Button</th>
 				<th>Off Button</th>
+				<th>Press and Hold Time</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
@@ -68,9 +69,11 @@
 							value="{{funcoff.action}}">{{funcoff.label}}</option>
 					</optgroup>
 			</select></td>
+			<td><input type="number" class="form-control" id="({harmonydevice.device.id}}-pressTime"
+					   ng-model="devicepresstime" placeholder="200"/></td>
 			<td>
 				<button class="btn btn-success" type="submit"
-					ng-click="buildButtonUrls(harmonydevice, devicectrlon, devicectrloff)">Build
+					ng-click="buildButtonUrls(harmonydevice, devicectrlon, devicectrloff, devicepresstime)">Build
 					A Button</button>
 			</td>
 		</tr>

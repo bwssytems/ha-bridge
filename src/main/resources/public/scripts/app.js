@@ -1069,7 +1069,7 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 		$scope.device.offUrl = "{\"name\":\"-1\"}";
 	};
 
-	$scope.buildButtonUrls = function (harmonydevice, onbutton, offbutton) {
+	$scope.buildButtonUrls = function (harmonydevice, onbutton, offbutton, presstime) {
 		var currentOn = $scope.device.onUrl;
 		var currentOff = $scope.device.offUrl;
 		var actionOn = angular.fromJson(onbutton);

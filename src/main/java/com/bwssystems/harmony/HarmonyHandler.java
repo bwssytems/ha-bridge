@@ -101,7 +101,7 @@ public class HarmonyHandler {
 					log.info("noop mode: Harmony api press a button requested for device: " + aDeviceButton.getDevice() + " and a for button: " + aDeviceButton.getButton());
 				}
             	else
-					harmonyClient.pressButton(Integer.parseInt(aDeviceButton.getDevice()), aDeviceButton.getButton());
+					harmonyClient.pressButton(Integer.parseInt(aDeviceButton.getDevice()), aDeviceButton.getButton(), aDeviceButton.getPressHoldTime());
 				
 			} catch (IllegalArgumentException e) {
 				try {

@@ -3,6 +3,8 @@ package com.bwssystems.harmony;
 public class ButtonPress {
 	private String device;
 	private String button;
+	private int pressHoldTime=200;
+
 	public String getDevice() {
 		return device;
 	}
@@ -21,5 +23,13 @@ public class ButtonPress {
 				return true;
 		}
 		return false;
+	}
+
+	public int getPressHoldTime() {
+		return pressHoldTime;
+	}
+
+	public void setPressHoldTime(int pressHoldTime) {
+		this.pressHoldTime = pressHoldTime;
 	}
 }

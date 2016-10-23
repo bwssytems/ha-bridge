@@ -6,6 +6,7 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 *.iml
+.project
 data
 .idea
 /target/
