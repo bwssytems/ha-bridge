@@ -54,7 +54,7 @@ public class HABridge {
         bridgeSettings = new BridgeSettings();
         while(!bridgeSettings.getBridgeControl().isStop()) {
         	bridgeSettings.buildSettings();
-            log.info("HA Bridge (v" + theVersion.getVersion() + ") initializing....");
+            log.info("HA Bridge initializing....");
 	        // sparkjava config directive to set ip address for the web server to listen on
 	        // ipAddress("0.0.0.0"); // not used
 	        // sparkjava config directive to set port for the web server to listen on

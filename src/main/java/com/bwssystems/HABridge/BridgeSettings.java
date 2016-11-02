@@ -31,6 +31,11 @@ public class BridgeSettings extends BackupHandler {
 		super();
 		bridgeControl = new BridgeControlDescriptor();
 		theBridgeSettings = new BridgeSettingsDescriptor();
+        String ipV6Stack = System.getProperty("ipV6Stack");
+        if(ipV6Stack == null || !ipV6Stack.equalsIgnoreCase("true")) {
+        	System.setProperty("java.net.preferIPv4Stack" , "true");
+        }
+
 	}
 	public BridgeControlDescriptor getBridgeControl() {
 		return bridgeControl;
@@ -42,7 +47,6 @@ public class BridgeSettings extends BackupHandler {
         String addressString = null;
         String theVeraAddress = null;
         String theHarmonyAddress = null;
-
         String configFileProperty = System.getProperty("config.file");
         if(configFileProperty == null) {
         	Path filePath = Paths.get(Configuration.CONFIG_FILE);

@@ -33,7 +33,7 @@ public class DeviceRepository extends BackupHandler {
 	private Map<String, DeviceDescriptor> devices;
     private Path repositoryPath;
 	private Gson gson;
-    private Integer maxId;
+    private Integer nextId;
     private Logger log = LoggerFactory.getLogger(DeviceRepository.class);
 	
     public DeviceRepository(String deviceDb) {
@@ -45,7 +45,7 @@ public class DeviceRepository extends BackupHandler {
 		repositoryPath = null;
 		repositoryPath = Paths.get(deviceDb);
 		setupParams(repositoryPath, ".bk", "device.db-");
-		maxId = 1;
+		nextId = 0;
 		_loadRepository(repositoryPath);
 	}
     
@@ -62,8 +62,8 @@ public class DeviceRepository extends BackupHandler {
 			DeviceDescriptor list[] = gson.fromJson(jsonContent, DeviceDescriptor[].class);
 			for(int i = 0; i < list.length; i++) {
 				put(list[i].getId(), list[i]);
-				if(Integer.decode(list[i].getId()) > maxId) {
-					maxId = Integer.decode(list[i].getId());
+				if(Integer.decode(list[i].getId()) > nextId) {
+					nextId = Integer.decode(list[i].getId());
 				}
 			}
 		}    	
@@ -93,8 +93,8 @@ public class DeviceRepository extends BackupHandler {
 	        if(descriptors[i].getId() != null && descriptors[i].getId().length() > 0)
 	        	devices.remove(descriptors[i].getId());
 	        else {
-	        	descriptors[i].setId(String.valueOf(maxId));
-	        	maxId++;
+	        	nextId++;
+	        	descriptors[i].setId(String.valueOf(nextId));
 	        }
 	        if(descriptors[i].getUniqueid() == null || descriptors[i].getUniqueid().length() == 0) {
 	        	BigInteger bigInt = BigInteger.valueOf(Integer.decode(descriptors[i].getId()));
@@ -115,18 +115,18 @@ public class DeviceRepository extends BackupHandler {
 		List<DeviceDescriptor> list = new ArrayList<DeviceDescriptor>(devices.values());
 		Iterator<DeviceDescriptor> deviceIterator = list.iterator();
 		Map<String, DeviceDescriptor> newdevices = new HashMap<String, DeviceDescriptor>();;
-		maxId = 1;
+		nextId = 0;
         log.debug("Renumber devices.");
 		while(deviceIterator.hasNext()) {
+        	nextId++;
 			DeviceDescriptor theDevice = deviceIterator.next();
-        	theDevice.setId(String.valueOf(maxId));
-        	BigInteger bigInt = BigInteger.valueOf(maxId);
+        	theDevice.setId(String.valueOf(nextId));
+        	BigInteger bigInt = BigInteger.valueOf(nextId);
         	byte[] theBytes = bigInt.toByteArray();
         	String hexValue = DatatypeConverter.printHexBinary(theBytes);
        	
         	theDevice.setUniqueid("00:17:88:5E:D3:" + hexValue + "-" + hexValue);
 	        newdevices.put(theDevice.getId(), theDevice);
-        	maxId++;
 		}
         devices = newdevices;
     	String  jsonValue = gson.toJson(findAll());

@@ -931,7 +931,9 @@ public class HueMulator implements HueErrorStringSet {
 		        			
 							String anUrl = replaceIntensityValue(callItems[i].getItem(), calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false);
 							String body;
-							if (state.isOn())
+							if(stateHasBri || stateHasBriInc)
+								body = replaceIntensityValue(device.getContentBodyDim(), calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false);
+							else if (state.isOn())
 								body = replaceIntensityValue(device.getContentBody(), calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false);
 							else
 								body = replaceIntensityValue(device.getContentBodyOff(), calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false);

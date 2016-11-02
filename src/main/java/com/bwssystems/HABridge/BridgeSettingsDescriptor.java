@@ -32,6 +32,7 @@ public class BridgeSettingsDescriptor {
 	private boolean halconfigured;
 	private Map<String, WhitelistEntry> whitelist;
 	private boolean settingsChanged;
+	private String myechourl;
 	
 	public BridgeSettingsDescriptor() {
 		super();
@@ -45,6 +46,7 @@ public class BridgeSettingsDescriptor {
 		this.farenheit = true;
 		this.whitelist = null;
 		this.settingsChanged = false;
+		this.myechourl = "echo.amazon.com/#cards";
 	}
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -207,6 +209,12 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setSettingsChanged(boolean settingsChanged) {
 		this.settingsChanged = settingsChanged;
+	}
+	public String getMyechourl() {
+		return myechourl;
+	}
+	public void setMyechourl(String myechourl) {
+		this.myechourl = myechourl;
 	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
