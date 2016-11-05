@@ -1,5 +1,5 @@
 # ha-bridge
-Emulates Philips Hue api to other home automation gateways such as an Amazon Echo.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
+Emulates Philips Hue api to other home automation gateways such as an Amazon Echo or Google Home.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
 
 In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest and the ability to proxy all of your real Hue bridges behind this bridge.
 
@@ -87,6 +87,7 @@ The default port number for the bridge is 80. To override what the default or wh
 ```
 java -jar -Dserver.port=80 ha-bridge-W.X.Y.jar
 ```
+Note: if using with a Google Home device, port 80 *must* be used.
 
 ## HA Bridge Usage and Configuration
 This section will cover the basics of configuration and where this configuration can be done. This requires that you have started your bridge process and then have pointed your
@@ -272,6 +273,39 @@ DIM Commands |
 To see what Alexa thinks you said, you can check in the home page for your Alexa.
 
 To view or remove devices that Alexa knows about, you can use the mobile app `Menu / Settings / Connected Home` or go to http://echo.amazon.com/#cards.
+
+## Google Assistant
+Google Home is supported as of v3.2.0 and forward, but only if the bridge is running on port 80.
+
+Use the Google Home app on a phone to add new "home control" devices by going into `Settings / Home Control / +`
+as described [here](https://support.google.com/googlehome/answer/7124115?hl=en&ref_topic=7125624#homecontrol).
+Click on `Philips Hue` under the `Add new` section. If ha-bridge is on the same network as the
+phone as well as the Home device, then the app should quickly pass through the pairing step and
+populate with all of the devices. If instead it takes you to a Philips Hue login page, this means
+that the bridge was not properly discovered.
+
+Then you can say "OK Google, Turn on the office light" or whatever name you have given your configured devices.
+
+The Google Assistant can also group lights into rooms as described in the main [help article](https://support.google.com/googlehome/answer/7072090?hl=en&ref_topic=7029100).
+
+Here is the table of items to use to tell Google what you want to do. Note that either "OK Google"
+or "Hey Google" can be used as a trigger.
+ 
+To do this: | Say "Hey Google", then...
+------------|--------------------------
+To turn on/off a light | "Turn on <light name>"
+Dim a light | "Dim the <light name>"
+Brighten a light | "Brighten the <light name>"
+Set a light brightness to a certain percentage | "Set <light name> to 50%"
+Dim/Brighten lights by a certain percentage | "Dim/Brighten <light name> by 50%"
+Turn on/off all lights in room | “Turn on/off lights in <room name>" 
+Turn on/off all lights | “Turn on/off all of the lights”
+
+To see what Home thinks you said, you can ask "Hey Google, What did I say?" or check the history in the app.
+
+New or removed devices are picked up automatically as soon as they are added/removed from ha-bridge.
+No re-discovery step is necessary.
+
 ## Configuration REST API Usage
 This section will describe the REST api available for configuration. The REST body examples are all formatted for easy reading, the actual body usage should be like this:
 ```
@@ -932,17 +966,45 @@ ST: upnp:rootdevice\r\n
 ST: ssdp:all\r\n
 ```
 
-If this criteria is met, the following response is provided to the calling application:
+If this criteria is met, the following three responses are provided to the calling application:
 
 ```
-HTTP/1.1 200 OK\r\n
-CACHE-CONTROL: max-age=86400\r\n
-EXT:\r\n
-LOCATION: http://192.168.1.1:80/description.xml\r\n
-SERVER: FreeRTOS/7.4.2 UPnP/1.0 IpBridge/1.10.0\r\n 
-ST: urn:schemas-upnp-org:device:basic:1\r\n
-"USN: uuid:2f402f80-da50-11e1-9b23-001788102201::urn:schemas-upnp-org:device:basic:1\r\n\r\n
+HTTP/1.1 200 OK
+HOST: 239.255.255.250:1900
+CACHE-CONTROL: max-age=100
+EXT:
+LOCATION: http://192.168.1.1:80/description.xml
+SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/1.15.0
+hue-bridgeid: 001E06FFFE123456
+ST: upnp:rootdevice
+USN: uuid:2f402f80-da50-11e1-9b23-001e06123456::upnp:rootdevice
 ```
+```
+HTTP/1.1 200 OK
+HOST: 239.255.255.250:1900
+CACHE-CONTROL: max-age=100
+EXT:
+LOCATION: http://192.168.1.1:80/description.xml
+SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/1.15.0
+hue-bridgeid: 001E06FFFE123456
+ST: uuid:2f402f80-da50-11e1-9b23-001e06123456
+USN: uuid:2f402f80-da50-11e1-9b23-001e06123456
+```
+```
+HTTP/1.1 200 OK
+HOST: 239.255.255.250:1900
+CACHE-CONTROL: max-age=100
+EXT:
+LOCATION: http://192.168.1.1:80/description.xml
+SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/1.15.0
+hue-bridgeid: 001E06FFFE123456
+ST: urn:schemas-upnp-org:device:basic:1
+USN: uuid:2f402f80-da50-11e1-9b23-001e06123456
+```
+ 
+Note that `192.168.1.1` and `12345` are replaced with the actual IP address and last 6 digits of the MAC address, respectively.
+
+
 ### UPNP description service
 The bridge provides the description service which is used by the calling app to interogate access details after it has decided the upnp multicast response is the correct device.
 #### Get Description
