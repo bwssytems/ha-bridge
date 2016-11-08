@@ -33,6 +33,7 @@ public class BridgeSettingsDescriptor {
 	private Map<String, WhitelistEntry> whitelist;
 	private boolean settingsChanged;
 	private String myechourl;
+	private String webaddress;
 	
 	public BridgeSettingsDescriptor() {
 		super();
@@ -47,6 +48,7 @@ public class BridgeSettingsDescriptor {
 		this.whitelist = null;
 		this.settingsChanged = false;
 		this.myechourl = "echo.amazon.com/#cards";
+		this.webaddress = "0.0.0.0";
 	}
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -215,6 +217,12 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setMyechourl(String myechourl) {
 		this.myechourl = myechourl;
+	}
+	public String getWebaddress() {
+		return webaddress;
+	}
+	public void setWebaddress(String webaddress) {
+		this.webaddress = webaddress;
 	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)

@@ -769,11 +769,7 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 				(type == "off" && (bridgeService.aContainsB(device.offUrl, "${intensity.byte}") ||
 				bridgeService.aContainsB(device.offUrl, "${intensity.percent}") ||
 				bridgeService.aContainsB(device.offUrl, "${intensity.math(")))   ||
-				(type == "dim" && (bridgeService.aContainsB(device.dimUrl, "${intensity.byte}") ||
-						bridgeService.aContainsB(device.dimUrl, "${intensity.percent}") ||
-						bridgeService.aContainsB(device.dimUrl, "${intensity.math(") ||
-						bridgeService.aContainsB(device.deviceType, "passthru") ||
-						bridgeService.aContainsB(device.mapType, "hueDevice"))))) {
+				(type == "dim"))) {
 			$scope.bridge.device = device;
 			$scope.bridge.type = type;
 			ngDialog.open({

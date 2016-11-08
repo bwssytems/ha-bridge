@@ -21,7 +21,7 @@ Then locate the jar and start the server with:
 ATTENTION: This requires JDK 1.8 to run
 
 ```
-java -jar ha-bridge-3.2.1.jar
+java -jar ha-bridge-3.2.2.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
@@ -38,7 +38,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/amazon-echo/data/habridge.config /home/pi/amazon-echo/ha-bridge-3.2.1.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/amazon-echo/data/habridge.config /home/pi/amazon-echo/ha-bridge-3.2.2.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -46,11 +46,11 @@ WantedBy=multi-user.target
 
 Basic script setup to run the bridge on a pi.
 
-Create the directory and make sure that ha-bridge-3.2.1.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-3.2.2.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v3.2.1/ha-bridge-3.2.1.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v3.2.2/ha-bridge-3.2.2.jar
 ```
 Edit the shell script for starting:
 ```
@@ -60,7 +60,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar /home/pi/habridge/ha-bridge-3.2.1.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar /home/pi/habridge/ha-bridge-3.2.2.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
 Exit and save the file with ctrl-X and follow the prompts and then execute on the command line:
@@ -108,6 +108,8 @@ The default location for the configuration file to contain the settings for the 
 The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify `<directory>/<filename>  explicitly.
 #### UPNP IP Address
 The server defaults to the first available address on the host if this is not given. This default may NOT be the correct IP that is your public IP for your host on the network. It is best to set this parameter to not have discovery issues. Replace this value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery. 
+#### Web Server IP Address
+The server defaults to all interfaces on the machine (0.0.0.0). Replace this value with the server ipv4 address you would like to use as the address that will bind to a specific ip address on an interface if you would like. This is only necessary if you want to isolate how access is handled to the web UI. 
 #### Web Server Port
 The server defaults to running on port 80. To override what the default is, specify a different number. ATTENTION: If you want to use any of the apps made for the Hue to control this bridge, you should keep this port set to 80.
 #### UPNP Response Port
@@ -298,8 +300,8 @@ Dim a light | "Dim the <light name>"
 Brighten a light | "Brighten the <light name>"
 Set a light brightness to a certain percentage | "Set <light name> to 50%"
 Dim/Brighten lights by a certain percentage | "Dim/Brighten <light name> by 50%"
-Turn on/off all lights in room | “Turn on/off lights in <room name>" 
-Turn on/off all lights | “Turn on/off all of the lights”
+Turn on/off all lights in room | â€œTurn on/off lights in <room name>" 
+Turn on/off all lights | â€œTurn on/off all of the lightsâ€�
 
 To see what Home thinks you said, you can ask "Hey Google, What did I say?" or check the history in the app.
 

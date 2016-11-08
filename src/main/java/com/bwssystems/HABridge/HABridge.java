@@ -56,7 +56,7 @@ public class HABridge {
         	bridgeSettings.buildSettings();
             log.info("HA Bridge initializing....");
 	        // sparkjava config directive to set ip address for the web server to listen on
-	        // ipAddress("0.0.0.0"); // not used
+	        ipAddress(bridgeSettings.getBridgeSettingsDescriptor().getWebaddress());
 	        // sparkjava config directive to set port for the web server to listen on
 	        port(bridgeSettings.getBridgeSettingsDescriptor().getServerPort());
 	        // sparkjava config directive to set html static file location for Jetty
