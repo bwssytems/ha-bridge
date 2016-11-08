@@ -34,8 +34,6 @@ pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases
 ```
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
 
-*NOTE ON RC.LOCAL*: Due to the way network subsystem is brought up on the pi, it uses the new systemctl to start services. The old style runlevel setup, which rc.local is part of does not get the benefit of knowing if the network has been fully realized. Starting ha-bridge from rc.local on next gen systems will cause unexpected results and issues with discovering registered devices. 
-
 ```
 [Unit]
 Description=HA Bridge
@@ -50,6 +48,8 @@ ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.confi
 WantedBy=multi-user.target
 ```
 Basic script setup to run the bridge on a pi.
+
+*NOTE ON RC.LOCAL*: Due to the way network subsystem is brought up on the pi, it uses the new systemctl to start services. The old style runlevel setup, which rc.local is part of does not get the benefit of knowing if the network has been fully realized. Starting ha-bridge from rc.local on next gen systems will cause unexpected results and issues with discovering registered devices. 
 
 Edit the shell script for starting:
 ```
