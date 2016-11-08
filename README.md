@@ -26,6 +26,12 @@ java -jar ha-bridge-3.2.2.jar
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
+Create the directory and make sure that ha-bridge-3.2.2.jar is in your /home/pi/habridge directory.
+```
+pi@raspberrypi:~ $ mkdir habridge
+pi@raspberrypi:~ $ cd habridge
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v3.2.2/ha-bridge-3.2.2.jar
+```
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
 
 *NOTE ON RC.LOCAL*: Due to the way network subsystem is brought up on the pi, it uses the new systemctl to start services. The old style runlevel setup, which rc.local is part of does not get the benefit of knowing if the network has been fully realized. Starting ha-bridge from rc.local on next gen systems will cause unexpected results and issues with discovering registered devices. 
@@ -38,20 +44,13 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/amazon-echo/data/habridge.config /home/pi/amazon-echo/ha-bridge-3.2.2.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-3.2.2.jar
 
 [Install]
 WantedBy=multi-user.target
 ```
-
 Basic script setup to run the bridge on a pi.
 
-Create the directory and make sure that ha-bridge-3.2.2.jar is in your /home/pi/habridge directory.
-```
-pi@raspberrypi:~ $ mkdir habridge
-pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v3.2.2/ha-bridge-3.2.2.jar
-```
 Edit the shell script for starting:
 ```
 pi@raspberrypi:~/habridge $ nano starthabridge.sh
@@ -60,7 +59,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar /home/pi/habridge/ha-bridge-3.2.2.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-3.2.2.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
 Exit and save the file with ctrl-X and follow the prompts and then execute on the command line:
