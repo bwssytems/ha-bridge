@@ -680,6 +680,22 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     	    }
     	}    	
     };
+    $scope.addMQTTtoSettings = function (newmqttname, newmqttip) {
+    	if($scope.bridge.settings.mqttaddress == null) {
+			$scope.bridge.settings.mqttaddress = { devices: [] };
+		}
+    	var newmqtt = {name: newmqttname, ip: newmqttip }
+    	$scope.bridge.settings.mqttaddress.devices.push(newmqtt);
+    	$scope.newmqttname = null;
+    	$scope.newmqttip = null;
+    };
+    $scope.removeMQTTtoSettings = function (mqttname, mqttip) {
+    	for(var i = $scope.bridge.settings.mqttaddress.devices.length - 1; i >= 0; i--) {
+    	    if($scope.bridge.settings.mqttaddress.devices[i].name === mqttname && $scope.bridge.settings.mqttaddress.devices[i].ip === mqttip) {
+    	    	$scope.bridge.settings.mqttaddress.devices.splice(i, 1);
+    	    }
+    	}    	
+    };
     $scope.bridgeReinit = function () {
     	bridgeService.reinit();
     };

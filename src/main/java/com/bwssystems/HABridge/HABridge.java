@@ -13,6 +13,7 @@ import com.bwssystems.NestBridge.NestHome;
 import com.bwssystems.hal.HalHome;
 import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.hue.HueHome;
+import com.bwssystems.mqtt.MQTTHome;
 import com.bwssystems.util.UDPDatagramSender;
 
 public class HABridge {
@@ -39,6 +40,7 @@ public class HABridge {
         NestHome nestHome;
         HueHome hueHome;
         HalHome halHome;
+        MQTTHome mqttHome;
         HueMulator theHueMulator;
         UDPDatagramSender udpSender;
         UpnpSettingsResource theSettingResponder;
@@ -72,6 +74,8 @@ public class HABridge {
 	        hueHome = new HueHome(bridgeSettings.getBridgeSettingsDescriptor());
 	        //setup the hal configuration if available
 	        halHome = new HalHome(bridgeSettings.getBridgeSettingsDescriptor());
+	        //setup the mqtt handlers if available
+	        mqttHome = new MQTTHome(bridgeSettings.getBridgeSettingsDescriptor());
 	        // setup the class to handle the resource setup rest api
 	        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), harmonyHome, nestHome, hueHome, halHome);
 	        // setup the class to handle the upnp response rest api
@@ -104,6 +108,8 @@ public class HABridge {
 	        nestHome = null;
 	        harmonyHome.shutdownHarmonyHubs();
 	        harmonyHome = null;
+	        mqttHome.shutdownMQTTClients();
+	        mqttHome = null;
 	        udpSender.closeResponseSocket();
         }
         log.info("HA Bridge (v" + theVersion.getVersion() + ") exiting....");

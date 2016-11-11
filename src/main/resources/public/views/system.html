@@ -237,6 +237,35 @@
 						placeholder="thetoken"></td>
 				</tr>
 				<tr>
+					<td>MQTT Client IDs and IP Addresses</td>
+					<td><table
+							class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Client ID</th>
+									<th>IP</th>
+									<th>Manage</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="mqtt in bridge.settings.mqttaddress.devices">
+								<td>{{mqtt.name}}</td>
+								<td>{{mqtt.ip}}</td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removeMQTTtoSettings(mqtt.name, mqtt.ip)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-next-mqtt-name"
+									class="form-control" type="text" ng-model="newmqttname"
+									placeholder="A MQTT Client ID"></td>
+								<td><input id="bridge-settings-next-mqtt-ip"
+									class="form-control" type="text" ng-model="newmqttip"
+									placeholder="MQTT Broker IP and port"></td>
+								<td><button class="btn btn-success" type="submit"
+										ng-click="addMQTTtoSettings(newmqttname, newmqttip)">Add</button></td>
+							</tr>
+						</table></td>
+				</tr>
+				<tr>
 					<td>Nest Username</td>
 					<td><input id="bridge-settings-nestuser" class="form-control"
 						type="text" ng-model="bridge.settings.nestuser"
