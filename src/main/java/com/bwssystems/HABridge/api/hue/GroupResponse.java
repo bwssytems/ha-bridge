@@ -3,7 +3,6 @@ package com.bwssystems.HABridge.api.hue;
 import java.util.List;
 
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
-import com.bwssystems.HABridge.dao.DeviceRepository;
 
 public class GroupResponse {
 	private DeviceState action;

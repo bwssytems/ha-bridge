@@ -174,7 +174,7 @@ public class HueMulator implements HueErrorStringSet {
 	    	}
 	    	
 	    	if(groupId.equalsIgnoreCase("0")) {
-	    		GroupResponse theResponse = GroupResponse.createGroupResponse(repository.findAll());
+	    		GroupResponse theResponse = GroupResponse.createGroupResponse(repository.findAllByRequester(request.ip()));
 	    		return new Gson().toJson(theResponse, GroupResponse.class);
 	    	}
 
@@ -271,7 +271,7 @@ public class HueMulator implements HueErrorStringSet {
 	    		return theErrorResp.getTheErrors();
 	    	}
 
-	        List<DeviceDescriptor> deviceList = repository.findAll();
+	        List<DeviceDescriptor> deviceList = repository.findAllByRequester(request.ip());
 	        Map<String, DeviceResponse> deviceResponseMap = new HashMap<>();
 	        for (DeviceDescriptor device : deviceList) {
 	        	DeviceResponse deviceResponse = null;
@@ -437,7 +437,7 @@ public class HueMulator implements HueErrorStringSet {
 	    		return theErrorResp.getTheErrors();
 	    	}
 
-	        List<DeviceDescriptor> descriptorList = repository.findAll();
+	        List<DeviceDescriptor> descriptorList = repository.findAllByRequester(request.ip());
 	    	HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(), bridgeSettings.getWhitelist());
 	        Map<String, DeviceResponse> deviceList = new HashMap<>();
 	        if (descriptorList != null) {
@@ -623,6 +623,7 @@ public class HueMulator implements HueErrorStringSet {
 	        DeviceState state = null;
 	        boolean stateHasBri = false;
 	        boolean stateHasBriInc = false;
+        	Integer theDelay = bridgeSettings.getButtonsleep();
 	        log.debug("hue state change requested: " + userId + " from " + request.ip() + " body: " + request.body());
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json"); 
@@ -661,7 +662,6 @@ public class HueMulator implements HueErrorStringSet {
 	        state = device.getDeviceState();
 	        if(state == null)
 	        	state = DeviceState.createDeviceState();
-	        state.fillIn();
 
 	        theHeaders = new Gson().fromJson(device.getHeaders(), NameValue[].class);
 
@@ -782,11 +782,21 @@ public class HueMulator implements HueErrorStringSet {
 		        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 		        	}
 		        	else {
+			        	Integer setCount = 1;
 		        		for(int i = 0; i < deviceButtons.length; i++) {
-		        			if( i > 0)
-		        				Thread.sleep(bridgeSettings.getButtonsleep());
-		    	        	log.debug("pressing button: " + deviceButtons[i].getDevice() + " - " + deviceButtons[i].getButton() + " - iteration: " + String.valueOf(i));
-		        			myHarmony.pressButton(deviceButtons[i]);
+			        		if(deviceButtons[i].getCount() != null && deviceButtons[i].getCount() > 0)
+			        			setCount = deviceButtons[i].getCount();
+			        		else
+			        			setCount = 1;
+			        		for(int x = 0; x < setCount; x++) {
+			        			if( x > 0) {
+			        				Thread.sleep(theDelay);
+			        			}
+			        			if(deviceButtons[i].getDelay() != null &&deviceButtons[i].getDelay() > 0)
+			        				theDelay = deviceButtons[i].getDelay();
+			    	        	log.debug("pressing button: " + deviceButtons[i].getDevice() + " - " + deviceButtons[i].getButton() + " - iteration: " + String.valueOf(i) + " - count: " + String.valueOf(x));
+			        			myHarmony.pressButton(deviceButtons[i]);
+			        		}
 		        		}
 		        	}
 	        	}
@@ -852,20 +862,29 @@ public class HueMulator implements HueErrorStringSet {
 	        			url = "[{\"item\":\"" + url +"\"}]";
 	        	}
 	        	CallItem[] callItems = new Gson().fromJson(url, CallItem[].class);
+	        	Integer setCount = 1;
 	        	for(int i = 0; i < callItems.length; i++) {
-        			if( i > 0) {
-        				Thread.sleep(bridgeSettings.getButtonsleep());
-        			}
-        			String intermediate;
-        			if(callItems[i].getItem().contains("exec://"))
-		        		intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
-		        	else
-		        		intermediate = callItems[i].getItem();
-        			String anError = doExecRequest(intermediate, calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), lightId);
-        			if(anError != null) {
-        				responseString = anError;
-						i = callItems.length+1;
-        			}
+	        		if(callItems[i].getCount() != null && callItems[i].getCount() > 0)
+	        			setCount = callItems[i].getCount();
+	        		else
+	        			setCount = 1;
+	        		for(int x = 0; x < setCount; x++) {
+	        			if( x > 0) {
+	        				Thread.sleep(theDelay);
+	        			}
+	        			if(callItems[i].getDelay() != null && callItems[i].getDelay() > 0)
+	        				theDelay = callItems[i].getDelay();
+	        			String intermediate;
+	        			if(callItems[i].getItem().contains("exec://"))
+			        		intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
+			        	else
+			        		intermediate = callItems[i].getItem();
+	        			String anError = doExecRequest(intermediate, calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), lightId);
+	        			if(anError != null) {
+	        				responseString = anError;
+							i = callItems.length+1;
+	        			}
+		        	}
 	        	}
 	        }
 	        else // This section allows the usage of http/tcp/udp/exec calls in a given set of items
@@ -878,77 +897,86 @@ public class HueMulator implements HueErrorStringSet {
 	        			url = "[{\"item\":\"" + url +"\"}]";
 	        	}
 	        	CallItem[] callItems = new Gson().fromJson(url, CallItem[].class);
+	        	Integer setCount = 1;
         		for(int i = 0; i < callItems.length; i++) {
-        			if( i > 0) {
-        				Thread.sleep(bridgeSettings.getButtonsleep());
-        			}
-		        	try {
-		        		if(callItems[i].getItem().contains("udp://") || callItems[i].getItem().contains("tcp://")) {
-			        		String intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
-			        		String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
-			        		String theUrlBody = intermediate.substring(intermediate.indexOf('/')+1);
-			        		String hostAddr = null;
-			        		String port = null;
-			        		if(hostPortion.contains(":")) {
-			        			hostAddr = hostPortion.substring(0, intermediate.indexOf(':'));
-			        			port = hostPortion.substring(intermediate.indexOf(':') + 1);
+	        		if(callItems[i].getCount() != null && callItems[i].getCount() > 0)
+	        			setCount = callItems[i].getCount();
+	        		else
+	        			setCount = 1;
+	        		for(int x = 0; x < setCount; x++) {
+	        			if( x > 0) {
+	        				Thread.sleep(theDelay);
+	        			}
+	        			if(callItems[i].getDelay() != null && callItems[i].getDelay() > 0)
+	        				theDelay = callItems[i].getDelay();
+			        	try {
+			        		if(callItems[i].getItem().contains("udp://") || callItems[i].getItem().contains("tcp://")) {
+				        		String intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
+				        		String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
+				        		String theUrlBody = intermediate.substring(intermediate.indexOf('/')+1);
+				        		String hostAddr = null;
+				        		String port = null;
+				        		if(hostPortion.contains(":")) {
+				        			hostAddr = hostPortion.substring(0, intermediate.indexOf(':'));
+				        			port = hostPortion.substring(intermediate.indexOf(':') + 1);
+				        		}
+				        		else
+				        			hostAddr = hostPortion;
+				        		InetAddress IPAddress = InetAddress.getByName(hostAddr);;
+				        		if(theUrlBody.startsWith("0x")) {
+				        			theUrlBody = replaceIntensityValue(theUrlBody, calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), true);
+				        			sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
+				        		}
+				        		else {
+				        			theUrlBody = replaceIntensityValue(theUrlBody, calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false);
+				        			sendData = theUrlBody.getBytes();
+				        		}
+				        		if(callItems[i].getItem().contains("udp://")) {
+				    	        	log.debug("executing HUE api request to UDP: " + callItems[i].getItem());
+					        		theUDPDatagramSender.sendUDPResponse(new String(sendData), IPAddress, Integer.parseInt(port));
+				        		}
+				        		else if(callItems[i].getItem().contains("tcp://"))
+				        		{
+				    	        	log.debug("executing HUE api request to TCP: " + callItems[i].getItem());
+					        		Socket dataSendSocket = new Socket(IPAddress, Integer.parseInt(port));
+					        		DataOutputStream outToClient = new DataOutputStream(dataSendSocket.getOutputStream());
+					        		outToClient.write(sendData);
+					        		outToClient.flush();
+					        		dataSendSocket.close();
+				        		}
 			        		}
-			        		else
-			        			hostAddr = hostPortion;
-			        		InetAddress IPAddress = InetAddress.getByName(hostAddr);;
-			        		if(theUrlBody.startsWith("0x")) {
-			        			theUrlBody = replaceIntensityValue(theUrlBody, calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), true);
-			        			sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
+			        		else if(callItems[i].getItem().contains("exec://")) {
+				        		String intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
+			        			String anError = doExecRequest(intermediate, calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), lightId);
+			        			if(anError != null) {
+			        				responseString = anError;
+									i = callItems.length+1;
+			        			}
 			        		}
 			        		else {
-			        			theUrlBody = replaceIntensityValue(theUrlBody, calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false);
-			        			sendData = theUrlBody.getBytes();
+			    	        	log.debug("executing HUE api request to Http " + (device.getHttpVerb() == null?"GET":device.getHttpVerb()) + ": " + callItems[i].getItem());
+			        			
+								String anUrl = replaceIntensityValue(callItems[i].getItem(), calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false);
+								String body;
+								if(stateHasBri || stateHasBriInc)
+									body = replaceIntensityValue(device.getContentBodyDim(), calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false);
+								else if (state.isOn())
+									body = replaceIntensityValue(device.getContentBody(), calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false);
+								else
+									body = replaceIntensityValue(device.getContentBodyOff(), calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false);
+								// make call
+								if (doHttpRequest(anUrl, device.getHttpVerb(), device.getContentType(), body, theHeaders) == null) {
+									log.warn("Error on calling url to change device state: " + anUrl);
+									responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+									i = callItems.length+1;
+								}
 			        		}
-			        		if(callItems[i].getItem().contains("udp://")) {
-			    	        	log.debug("executing HUE api request to UDP: " + callItems[i].getItem());
-				        		theUDPDatagramSender.sendUDPResponse(new String(sendData), IPAddress, Integer.parseInt(port));
-			        		}
-			        		else if(callItems[i].getItem().contains("tcp://"))
-			        		{
-			    	        	log.debug("executing HUE api request to TCP: " + callItems[i].getItem());
-				        		Socket dataSendSocket = new Socket(IPAddress, Integer.parseInt(port));
-				        		DataOutputStream outToClient = new DataOutputStream(dataSendSocket.getOutputStream());
-				        		outToClient.write(sendData);
-				        		outToClient.flush();
-				        		dataSendSocket.close();
-			        		}
-		        		}
-		        		else if(callItems[i].getItem().contains("exec://")) {
-			        		String intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
-		        			String anError = doExecRequest(intermediate, calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), lightId);
-		        			if(anError != null) {
-		        				responseString = anError;
-								i = callItems.length+1;
-		        			}
-		        		}
-		        		else {
-		    	        	log.debug("executing HUE api request to Http " + (device.getHttpVerb() == null?"GET":device.getHttpVerb()) + ": " + callItems[i].getItem());
-		        			
-							String anUrl = replaceIntensityValue(callItems[i].getItem(), calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false);
-							String body;
-							if(stateHasBri || stateHasBriInc)
-								body = replaceIntensityValue(device.getContentBodyDim(), calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false);
-							else if (state.isOn())
-								body = replaceIntensityValue(device.getContentBody(), calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false);
-							else
-								body = replaceIntensityValue(device.getContentBodyOff(), calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false);
-							// make call
-							if (doHttpRequest(anUrl, device.getHttpVerb(), device.getContentType(), body, theHeaders) == null) {
-								log.warn("Error on calling url to change device state: " + anUrl);
-								responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
-								i = callItems.length+1;
-							}
-		        		}
-		    		}  catch (Exception e) {
-		    			log.warn("Change device state, Could not send data for network request: " + callItems[i].getItem() + " with Message: " + e.getMessage());
-		    			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
-						i = callItems.length+1;
-		    		}
+			    		}  catch (Exception e) {
+			    			log.warn("Change device state, Could not send data for network request: " + callItems[i].getItem() + " with Message: " + e.getMessage());
+			    			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+							i = callItems.length+1;
+			    		}
+	        		}
         		}
 	        }
 	        

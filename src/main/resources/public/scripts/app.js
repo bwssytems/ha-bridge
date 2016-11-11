@@ -145,6 +145,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		self.state.device.contentBody = null;
 		self.state.device.contentBodyDim = null;
 		self.state.device.contentBodyOff = null;
+		self.state.device.requesterAddress = null;
 		self.state.olddevicename = "";
 	};
 
