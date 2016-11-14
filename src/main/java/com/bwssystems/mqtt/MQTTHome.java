@@ -31,7 +31,7 @@ public class MQTTHome {
 
 	public void shutdownMQTTClients() {
 		log.debug("Shutting down MQTT handlers.");
-		if(!handlers.isEmpty()) {
+		if(handlers != null && !handlers.isEmpty()) {
 			Iterator<String> keys = handlers.keySet().iterator();
 			while(keys.hasNext()) {
 				String key = keys.next();

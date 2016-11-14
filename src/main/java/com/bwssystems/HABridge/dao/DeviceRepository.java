@@ -101,13 +101,15 @@ public class DeviceRepository extends BackupHandler {
 			theDevice = anIterator.next();
 			theRequesterAddress = theDevice.getRequesterAddress();
 			addressMap = new HashMap<String, String>();
-			if (theRequesterAddress.contains(",")) {
-				String[] theArray = theRequesterAddress.split(",");
-				for (String v : theArray) {
-					addressMap.put(v, v);
-				}
-			} else
-				addressMap.put(theRequesterAddress, theRequesterAddress);
+			if(theRequesterAddress != null) {
+				if (theRequesterAddress.contains(",")) {
+					String[] theArray = theRequesterAddress.split(",");
+					for (String v : theArray) {
+						addressMap.put(v.trim(), v.trim());
+					}
+				} else
+					addressMap.put(theRequesterAddress, theRequesterAddress);
+			}
 			if (theRequesterAddress == null || theRequesterAddress.length() == 0 || addressMap.containsKey(anAddress))
 				theReturnList.add(theDevice);
 		}
