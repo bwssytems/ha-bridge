@@ -1,7 +1,9 @@
 package com.bwssystems.mqtt;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -53,4 +55,15 @@ public class MQTTHome {
 		return aHandler;
 	}
 	
+	public List<MQTTBroker> getBrokers() {
+		Iterator<String> keys = handlers.keySet().iterator();
+		ArrayList<MQTTBroker> deviceList = new ArrayList<MQTTBroker>();
+		while(keys.hasNext()) {
+			String key = keys.next();
+			MQTTHandler aHandler = handlers.get(key);
+			MQTTBroker aDevice = new MQTTBroker(aHandler.getMyConfig());
+			deviceList.add(aDevice);
+		}
+		return deviceList;
+	}
 }

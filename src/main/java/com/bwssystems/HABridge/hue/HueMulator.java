@@ -25,6 +25,9 @@ import com.bwssystems.hue.HueDeviceIdentifier;
 import com.bwssystems.hue.HueErrorStringSet;
 import com.bwssystems.hue.HueHome;
 import com.bwssystems.hue.HueUtil;
+import com.bwssystems.mqtt.MQTTHandler;
+import com.bwssystems.mqtt.MQTTHome;
+import com.bwssystems.mqtt.MQTTMessage;
 import com.bwssystems.nest.controller.Nest;
 import com.bwssystems.util.JsonTransformer;
 import com.bwssystems.util.UDPDatagramSender;
@@ -92,6 +95,7 @@ public class HueMulator implements HueErrorStringSet {
     private HarmonyHome myHarmonyHome;
     private Nest theNest;
     private HueHome myHueHome;
+    private MQTTHome mqttHome;
     private HttpClient httpClient;
     private CloseableHttpClient httpclientSSL;
     private SSLContext sslcontext;
@@ -104,7 +108,7 @@ public class HueMulator implements HueErrorStringSet {
     private String errorString;
 
 
-    public HueMulator(BridgeSettingsDescriptor theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome, UDPDatagramSender aUdpDatagramSender) {
+    public HueMulator(BridgeSettingsDescriptor theBridgeSettings, DeviceRepository aDeviceRepository, HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome, MQTTHome aMqttHome, UDPDatagramSender aUdpDatagramSender) {
         httpClient = HttpClients.createDefault();
         // Trust own CA and all self-signed certs
         sslcontext = SSLContexts.createDefault();
@@ -135,6 +139,10 @@ public class HueMulator implements HueErrorStringSet {
 			this.myHueHome = aHueHome;
 		else
 			this.myHueHome = null;
+		if(theBridgeSettings.isValidMQTT())
+			this.mqttHome = aMqttHome;
+		else
+			this.mqttHome = null;
         bridgeSettings = theBridgeSettings;
         theUDPDatagramSender = aUdpDatagramSender;
         hueUser = null;
@@ -851,6 +859,44 @@ public class HueMulator implements HueErrorStringSet {
 		        		log.warn("no valid Nest control info: " + thermoSetting.getControl());
 		        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"no valid Nest control info\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 	        		}
+	        	}
+	        }
+	        else if((device.getMapType() != null && device.getMapType().equalsIgnoreCase("mqttMessage")))
+	        {
+	        	log.debug("executing HUE api request to send message to MQTT broker: " + url);
+	        	if(mqttHome != null)
+	        	{
+		        	if(url.substring(0, 1).equalsIgnoreCase("{")) {
+		        		url = "[" + url +"]";
+		        	}
+		        	MQTTMessage[] mqttMessages = new Gson().fromJson(url, MQTTMessage[].class);
+			        	Integer setCount = 1;
+		        		for(int i = 0; i < mqttMessages.length; i++) {
+				        	MQTTHandler mqttHandler = mqttHome.getMQTTHandler(mqttMessages[i].getClientId());
+				        	if(mqttHandler == null)
+				        	{
+				        		log.warn("Should not get here, no mqtt hanlder available");
+				        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Should not get here, no mqtt handler available\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+				        	}
+			        		if(mqttMessages[i].getCount() != null && mqttMessages[i].getCount() > 0)
+			        			setCount = mqttMessages[i].getCount();
+			        		else
+			        			setCount = 1;
+			        		for(int x = 0; x < setCount; x++) {
+			        			if( x > 0) {
+			        				Thread.sleep(theDelay);
+			        			}
+			        			if(mqttMessages[i].getDelay() != null &&mqttMessages[i].getDelay() > 0)
+			        				theDelay = mqttMessages[i].getDelay();
+			    	        	log.debug("publishing message: " + mqttMessages[i].getClientId() + " - " + mqttMessages[i].getTopic() + " - " + mqttMessages[i].getMessage() + " - iteration: " + String.valueOf(i) + " - count: " + String.valueOf(x));
+			    	        	mqttHandler.publishMessage(mqttMessages[i].getTopic(), mqttMessages[i].getMessage());
+			        		}
+		        		}
+	        	}
+	        	else {
+	        		log.warn("Should not get here, no mqtt brokers configured");
+	        		responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId + "\",\"description\": \"Should not get here, no mqtt brokers configured\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+	        		
 	        	}
 	        }
 	        else if(device.getDeviceType().startsWith("exec")) {

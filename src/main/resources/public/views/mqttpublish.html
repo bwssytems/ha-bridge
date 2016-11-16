@@ -28,7 +28,7 @@
 			setup for your MQTT Brokers.</p>
 	</div>
 
-	<scrollable-table watch="bridge.mqtt">
+	<scrollable-table watch="bridge.mqttbrokers">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
@@ -40,21 +40,21 @@
 				<th>Actions</th>
 			</tr>
 		</thead>
-		<tr ng-repeat="harmonydevice in bridge.harmonydevices">
+		<tr ng-repeat="mqttbroker in bridge.mqttbrokers">
 			<td>{{$index+1}}</td>
-			<td>{{mqtt.broker.name}}</td>
-			<td>{{mqtt.broker.ip}}</td>
+			<td>{{mqttbroker.clientId}}</td>
+			<td>{{mqttbroker.ip}}</td>
 			<td>
-				<textarea rows="3" class="form-control" id="mqtt-topic"
-							ng-model="mqtttopic" placeholder="URL to turn device on"></textarea>
+				<textarea rows="2" class="form-control" id="mqtt-topic"
+							ng-model="mqtttopic" placeholder="The MQTT Topic"></textarea>
 			</td>
-			<td><
-				<textarea rows="3" class="form-control" id="mqtt-content"
-							ng-model="mqttcontent" placeholder="URL to turn device on"></textarea>
+			<td>
+				<textarea rows="2" class="form-control" id="mqtt-content"
+							ng-model="mqttcontent" placeholder="The MQTT Message Content"></textarea>
 			</td>
 			<td>
 				<button class="btn btn-success" type="submit"
-					ng-click="buildMQTTPublish(mqtt.broker, dmqtttopic, mqttcontent)">Build
+					ng-click="buildMQTTPublish(mqttbroker, mqtttopic, mqttcontent)">Build
 					publish Message</button>
 			</td>
 		</tr>
@@ -70,7 +70,7 @@
 				class={{imgButtonsUrl}} aria-hidden="true"></span></a>
 		</h2>
 	</div>
-	<scrollable-table ng-if="buttonsVisible" watch="bridge.mqtt">
+	<scrollable-table ng-if="buttonsVisible" watch="bridge.mqttbrokers">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
@@ -82,7 +82,7 @@
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="device in bridge.devices | configuredButtons | orderBy:predicate:reverse">
+			ng-repeat="device in bridge.devices | configuredMqttMsgs | orderBy:predicate:reverse">
 			<td>{{$index+1}}</td>
 			<td>{{device.name}}</td>
 			<td>{{device.targetDevice}}</td>

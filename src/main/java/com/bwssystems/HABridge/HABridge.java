@@ -77,7 +77,7 @@ public class HABridge {
 	        //setup the mqtt handlers if available
 	        mqttHome = new MQTTHome(bridgeSettings.getBridgeSettingsDescriptor());
 	        // setup the class to handle the resource setup rest api
-	        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), harmonyHome, nestHome, hueHome, halHome);
+	        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), harmonyHome, nestHome, hueHome, halHome,  mqttHome);
 	        // setup the class to handle the upnp response rest api
 	        theSettingResponder = new UpnpSettingsResource(bridgeSettings.getBridgeSettingsDescriptor());
 	        theSettingResponder.setupServer();
@@ -88,7 +88,7 @@ public class HABridge {
 	        }
 	        else {
 		        // setup the class to handle the hue emulator rest api
-		        theHueMulator = new HueMulator(bridgeSettings.getBridgeSettingsDescriptor(), theResources.getDeviceRepository(), harmonyHome, nestHome, hueHome, udpSender);
+		        theHueMulator = new HueMulator(bridgeSettings.getBridgeSettingsDescriptor(), theResources.getDeviceRepository(), harmonyHome, nestHome, hueHome, mqttHome, udpSender);
 		        theHueMulator.setupServer();
 		        // wait for the sparkjava initialization of the rest api classes to be complete
 		        awaitInitialization();

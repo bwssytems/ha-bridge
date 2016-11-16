@@ -152,6 +152,7 @@ public class BridgeSettings extends BackupHandler {
         theBridgeSettings.setNestConfigured(theBridgeSettings.isValidNest());
         theBridgeSettings.setHueconfigured(theBridgeSettings.isValidHue());
         theBridgeSettings.setHalconfigured(theBridgeSettings.isValidHal());
+        theBridgeSettings.setMqttconfigured(theBridgeSettings.isValidMQTT());
         if(serverPortOverride != null)
         	theBridgeSettings.setServerPort(serverPortOverride);
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");

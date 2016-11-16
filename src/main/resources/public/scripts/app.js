@@ -37,6 +37,9 @@ app.config(function ($routeProvider) {
 	}).when('/haldevices', {
 		templateUrl: 'views/haldevice.html',
 		controller: 'HalController'		
+	}).when('/mqttmessages', {
+		templateUrl: 'views/mqttpublish.html',
+		controller: 'MQTTController'		
 	}).otherwise({
 		templateUrl: 'views/configuration.html',
 		controller: 'ViewingController'
@@ -62,7 +65,7 @@ String.prototype.replaceAll = function(search, replace)
 
 app.service('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, habridgeversion: ""};
+	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, habridgeversion: ""};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
@@ -189,6 +192,11 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		return;
 	}
 
+	this.updateShowMqtt = function () {
+		this.state.showMqtt = self.state.settings.mqttconfigured;
+		return;
+	}
+
 	this.loadBridgeSettings = function () {
 		return $http.get(this.state.systemsbase + "/settings").then(
 				function (response) {
@@ -198,6 +206,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.updateShowNest();
 					self.updateShowHue();
 					self.updateShowHal();
+					self.updateShowMqtt();
 				},
 				function (error) {
 					self.displayWarn("Load Bridge Settings Error: ", error);
@@ -336,6 +345,19 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 				},
 				function (error) {
 					self.displayWarn("Get Hal Devices Error: ", error);
+				}
+		);
+	};
+
+	this.viewMQTTDevices = function () {
+		if(!this.state.showMqtt)
+			return;
+		return $http.get(this.state.base + "/mqtt/devices").then(
+				function (response) {
+					self.state.mqttbrokers = response.data;
+				},
+				function (error) {
+					self.displayWarn("Get MQTT Devices Error: ", error);
 				}
 		);
 	};
@@ -1728,6 +1750,71 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 
 });
 
+app.controller('MQTTController', function ($scope, $location, $http, bridgeService, ngDialog) {
+	$scope.bridge = bridgeService.state;
+	$scope.device = $scope.bridge.device;
+	bridgeService.viewMQTTDevices();
+	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	$scope.buttonsVisible = false;
+
+	$scope.clearDevice = function () {
+		bridgeService.clearDevice();
+	};
+
+	$scope.buildMQTTPublish = function (mqttbroker, mqtttopic, mqttmessage) {
+		var currentOn = $scope.device.onUrl;
+		var currentOff = $scope.device.offUrl;
+		if( $scope.device.mapType == "mqttMessage") {
+			$scope.device.mapId = $scope.device.mapId + "-" + mqtttopic;
+			$scope.device.onUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\"}]";
+			$scope.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\"}]";        		
+		}
+		else if ($scope.device.mapType == null || $scope.device.mapType == "") {
+			bridgeService.clearDevice();
+			$scope.device.deviceType = "mqtt";
+			$scope.device.targetDevice = mqttbroker.clientId;
+			$scope.device.name = mqttbroker.clientId + mqtttopic;
+			$scope.device.mapType = "mqttMessage";
+			$scope.device.mapId =  mqttbroker.clientId + "-" + mqtttopic;
+			$scope.device.onUrl = "[{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\"}]";
+			$scope.device.offUrl = "[{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\"}]";
+		}
+	};
+
+	$scope.addDevice = function () {
+		if($scope.device.name == "" && $scope.device.onUrl == "")
+			return;
+		bridgeService.addDevice($scope.device).then(
+				function () {
+					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewMQTTDevices();
+				},
+				function (error) {
+				}
+		);
+
+	};
+
+	$scope.toggleButtons = function () {
+		$scope.buttonsVisible = !$scope.buttonsVisible;
+		if($scope.buttonsVisible)
+			$scope.imgButtonsUrl = "glyphicon glyphicon-minus";
+		else
+			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	};
+
+	$scope.deleteDeviceByMapId = function (id, mapType) {
+		$scope.bridge.mapandid = { id, mapType };
+		ngDialog.open({
+			template: 'deleteMapandIdDialog',
+			controller: 'DeleteMapandIdDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
+	};
+
+});
+
 app.controller('EditController', function ($scope, $location, $http, bridgeService) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = $scope.bridge.device;
@@ -1995,6 +2082,20 @@ app.filter('configuredButtons', function() {
 			return out;
 		for (var i = 0; i < input.length; i++) {
 			if(input[i].mapType == "harmonyButton"){
+				out.push(input[i]);
+			}
+		}
+		return out;
+	}
+});
+
+app.filter('configuredMqttMsgs', function() {
+	return function(input) {
+		var out = [];
+		if(input == null)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if(input[i].mapType == "mqttMessage"){
 				out.push(input[i]);
 			}
 		}

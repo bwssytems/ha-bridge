@@ -51,6 +51,10 @@ public class MQTTHandler {
 		}
 	}
 	
+	public NamedIP getMyConfig() {
+		return myConfig;
+	}
+
 	public void shutdown() {
 		try {
 			myClient.disconnect();
