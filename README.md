@@ -1,7 +1,7 @@
 # ha-bridge
 Emulates Philips Hue api to other home automation gateways such as an Amazon Echo or Google Home.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
 
-**ATTENTION: This does not work with the software Alexa. That version does not have any capability for Hue Bridge discovery!**
+**ATTENTION: This requires a physical Amazon Echo, Dot or Tap and does not work with prototype devices built using the Alexa Voice Service e.g. Amazon's Alexa AVS Sample App and Sam Machin's AlexaPi. The AVS version does not have any capability for Hue Bridge discovery!**
 
 In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest and the ability to proxy all of your real Hue bridges behind this bridge.
 
