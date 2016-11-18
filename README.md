@@ -120,9 +120,9 @@ Provide IP Addresses of your Veras that you want to utilize with the bridge. Als
 #### Harmony Names and IP Addresses
 Provide IP Addresses of your Harmony Hubs that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the activity or buttons by the call it receives and send it to the target Harmony Hub and activity/button you configure. 
 #### Harmony Username
-The user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub features.
+depracated
 #### Harmony Password
-The password for the user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub Features.
+depracated
 #### Hue Names and IP Addresses
 Provide IP Addresses of your Hue Bridges that you want to proxy through the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will passthru the call it receives to the target Hue and device you configure.
 
