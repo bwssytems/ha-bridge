@@ -15,10 +15,12 @@ import com.bwssystems.HABridge.NamedIP;
 public class MQTTHome {
     private static final Logger log = LoggerFactory.getLogger(MQTTHome.class);
 	private Map<String, MQTTHandler> handlers;
+	private Boolean validMqtt;
 
 	public MQTTHome(BridgeSettingsDescriptor bridgeSettings) {
 		super();
-		if(!bridgeSettings.isValidMQTT())
+		validMqtt = bridgeSettings.isValidMQTT();
+		if(!validMqtt)
 			return;
 
 		handlers = new HashMap<String, MQTTHandler>();
@@ -32,6 +34,8 @@ public class MQTTHome {
 	}
 
 	public void shutdownMQTTClients() {
+		if(!validMqtt)
+			return;
 		log.debug("Shutting down MQTT handlers.");
 		if(handlers != null && !handlers.isEmpty()) {
 			Iterator<String> keys = handlers.keySet().iterator();
@@ -43,6 +47,8 @@ public class MQTTHome {
 	}
 
 	public MQTTHandler getMQTTHandler(String aName) {
+		if(!validMqtt)
+			return null;
 		MQTTHandler aHandler;
 		if(aName == null || aName.equals("")) {
 			aHandler = null;
@@ -56,6 +62,8 @@ public class MQTTHome {
 	}
 	
 	public List<MQTTBroker> getBrokers() {
+		if(!validMqtt)
+			return null;
 		Iterator<String> keys = handlers.keySet().iterator();
 		ArrayList<MQTTBroker> deviceList = new ArrayList<MQTTBroker>();
 		while(keys.hasNext()) {

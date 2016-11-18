@@ -797,11 +797,13 @@ public class HueMulator implements HueErrorStringSet {
 			        		else
 			        			setCount = 1;
 			        		for(int x = 0; x < setCount; x++) {
-			        			if( x > 0) {
+			        			if( x > 0 || i > 0) {
 			        				Thread.sleep(theDelay);
 			        			}
-			        			if(deviceButtons[i].getDelay() != null &&deviceButtons[i].getDelay() > 0)
+			        			if(deviceButtons[i].getDelay() != null && deviceButtons[i].getDelay() > 0)
 			        				theDelay = deviceButtons[i].getDelay();
+			        			else
+			        				theDelay = bridgeSettings.getButtonsleep();
 			    	        	log.debug("pressing button: " + deviceButtons[i].getDevice() + " - " + deviceButtons[i].getButton() + " - iteration: " + String.valueOf(i) + " - count: " + String.valueOf(x));
 			        			myHarmony.pressButton(deviceButtons[i]);
 			        		}
@@ -883,11 +885,13 @@ public class HueMulator implements HueErrorStringSet {
 			        		else
 			        			setCount = 1;
 			        		for(int x = 0; x < setCount; x++) {
-			        			if( x > 0) {
+			        			if( x > 0 || i > 0) {
 			        				Thread.sleep(theDelay);
 			        			}
 			        			if(mqttMessages[i].getDelay() != null &&mqttMessages[i].getDelay() > 0)
 			        				theDelay = mqttMessages[i].getDelay();
+			        			else
+			        				theDelay = bridgeSettings.getButtonsleep();
 			    	        	log.debug("publishing message: " + mqttMessages[i].getClientId() + " - " + mqttMessages[i].getTopic() + " - " + mqttMessages[i].getMessage() + " - iteration: " + String.valueOf(i) + " - count: " + String.valueOf(x));
 			    	        	mqttHandler.publishMessage(mqttMessages[i].getTopic(), mqttMessages[i].getMessage());
 			        		}
@@ -915,11 +919,13 @@ public class HueMulator implements HueErrorStringSet {
 	        		else
 	        			setCount = 1;
 	        		for(int x = 0; x < setCount; x++) {
-	        			if( x > 0) {
+	        			if( x > 0 || i > 0) {
 	        				Thread.sleep(theDelay);
 	        			}
 	        			if(callItems[i].getDelay() != null && callItems[i].getDelay() > 0)
 	        				theDelay = callItems[i].getDelay();
+	        			else
+	        				theDelay = bridgeSettings.getButtonsleep();
 	        			String intermediate;
 	        			if(callItems[i].getItem().contains("exec://"))
 			        		intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
@@ -950,11 +956,13 @@ public class HueMulator implements HueErrorStringSet {
 	        		else
 	        			setCount = 1;
 	        		for(int x = 0; x < setCount; x++) {
-	        			if( x > 0) {
+	        			if( x > 0 || i > 0) {
 	        				Thread.sleep(theDelay);
 	        			}
 	        			if(callItems[i].getDelay() != null && callItems[i].getDelay() > 0)
 	        				theDelay = callItems[i].getDelay();
+	        			else
+	        				theDelay = bridgeSettings.getButtonsleep();
 			        	try {
 			        		if(callItems[i].getItem().contains("udp://") || callItems[i].getItem().contains("tcp://")) {
 				        		String intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);

@@ -702,14 +702,16 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     	    }
     	}    	
     };
-    $scope.addMQTTtoSettings = function (newmqttname, newmqttip) {
+    $scope.addMQTTtoSettings = function (newmqttname, newmqttip, newmqttusername, newmqttpassword) {
     	if($scope.bridge.settings.mqttaddress == null) {
 			$scope.bridge.settings.mqttaddress = { devices: [] };
 		}
-    	var newmqtt = {name: newmqttname, ip: newmqttip }
+    	var newmqtt = {name: newmqttname, ip: newmqttip, username: newmqttusername, password: newmqttpassword }
     	$scope.bridge.settings.mqttaddress.devices.push(newmqtt);
     	$scope.newmqttname = null;
     	$scope.newmqttip = null;
+    	$scope.newmqttusername = null;
+    	$scope.newmqttpassword = null;
     };
     $scope.removeMQTTtoSettings = function (mqttname, mqttip) {
     	for(var i = $scope.bridge.settings.mqttaddress.devices.length - 1; i >= 0; i--) {

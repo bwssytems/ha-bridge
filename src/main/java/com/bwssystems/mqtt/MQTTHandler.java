@@ -20,7 +20,7 @@ public class MQTTHandler {
 
 	public MQTTHandler(NamedIP aConfig) {
 		super();
-		log.debug("Setting up handler for name: " + aConfig.getName());
+		log.info("Setting up handler for name: " + aConfig.getName());
         MemoryPersistence persistence = new MemoryPersistence();
 		myConfig = aConfig;
         try {
@@ -30,6 +30,12 @@ public class MQTTHandler {
 		}
         MqttConnectOptions connOpts = new MqttConnectOptions();
         connOpts.setCleanSession(true);
+        if(aConfig.getUsername() != null && aConfig.getUsername().trim().length() > 0) {
+        	if(aConfig.getPassword() != null && aConfig.getPassword().trim().length() > 0) {
+        		connOpts.setUserName(aConfig.getUsername().trim());
+        		connOpts.setPassword(aConfig.getPassword().trim().toCharArray());
+        	}
+        }
         try {
 			myClient.connect(connOpts);
 		} catch (MqttSecurityException e) {

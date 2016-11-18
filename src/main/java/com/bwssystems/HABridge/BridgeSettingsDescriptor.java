@@ -12,8 +12,6 @@ public class BridgeSettingsDescriptor {
 	private String upnpdevicedb;
 	private IpList veraaddress;
 	private IpList harmonyaddress;
-	private String harmonyuser;
-	private String harmonypwd;
 	private Integer buttonsleep;
 	private boolean upnpstrict;
 	private boolean traceupnp;
@@ -94,18 +92,6 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setHarmonyAddress(IpList harmonyaddress) {
 		this.harmonyaddress = harmonyaddress;
-	}
-	public String getHarmonyUser() {
-		return harmonyuser;
-	}
-	public void setHarmonyUser(String harmonyuser) {
-		this.harmonyuser = harmonyuser;
-	}
-	public String getHarmonyPwd() {
-		return harmonypwd;
-	}
-	public void setHarmonyPwd(String harmonypwd) {
-		this.harmonypwd = harmonypwd;
 	}
 	public boolean isUpnpStrict() {
 		return upnpstrict;
@@ -252,10 +238,6 @@ public class BridgeSettingsDescriptor {
 			return false;		
 		List<NamedIP> devicesList = this.getHarmonyAddress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
-			return false;
-		if(this.getHarmonyPwd() == null || this.getHarmonyPwd().equals(""))
-			return false;
-		if(this.getHarmonyUser() == null || this.getHarmonyUser().equals(""))
 			return false;
 		return true;
 	}
