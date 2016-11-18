@@ -102,8 +102,6 @@ public class BridgeSettings extends BackupHandler {
 		        }
 	        }
 	        theBridgeSettings.setHarmonyAddress(theHarmonyList);
-	        theBridgeSettings.setHarmonyUser(System.getProperty("harmony.user"));
-	        theBridgeSettings.setHarmonyPwd(System.getProperty("harmony.pwd"));
 	        theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
 	        theBridgeSettings.setTraceupnp(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
 	        theBridgeSettings.setButtonsleep(Integer.parseInt(System.getProperty("button.sleep", Configuration.DEFAULT_BUTTON_SLEEP)));
@@ -152,6 +150,7 @@ public class BridgeSettings extends BackupHandler {
         theBridgeSettings.setNestConfigured(theBridgeSettings.isValidNest());
         theBridgeSettings.setHueconfigured(theBridgeSettings.isValidHue());
         theBridgeSettings.setHalconfigured(theBridgeSettings.isValidHal());
+        theBridgeSettings.setMqttconfigured(theBridgeSettings.isValidMQTT());
         if(serverPortOverride != null)
         	theBridgeSettings.setServerPort(serverPortOverride);
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");

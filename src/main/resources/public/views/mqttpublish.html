@@ -2,57 +2,94 @@
 	<li role="presentation"><a href="#">Bridge Devices</a></li>
 	<li role="presentation"><a href="#/system">Bridge Control</a></li>
 	<li role="presentation"><a href="#/logs">Logs</a></li>
-	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#/veradevices">Vera Devices</a></li>
-	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#/verascenes">Vera Scenes</a></li>
-	<li role="presentation" class="active"><a
-		href="#/harmonyactivities">Harmony Activities</a></li>
-	<li role="presentation"><a href="#/harmonydevices">Harmony
-			Devices</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonydevices">Harmony Devices</a></li>
 	<li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
-	<li ng-if="bridge.showHue" role="presentation"><a
-		href="#/huedevices">Hue Devices</a></li>
-	<li ng-if="bridge.showHal" role="presentation"><a
-		href="#/haldevices">HAL Devices</a></li>
-	<li ng-if="bridge.showMqtt" role="presentation"><a href="#/mqttmessages">MQTT Messages</a></li>
+	<li ng-if="bridge.showHue" role="presentation"><a href="#/huedevices">Hue Devices</a></li>
+	<li ng-if="bridge.showHal" role="presentation"><a href="#/haldevices">HAL Devices</a></li>
+	<li role="presentation" class="active"><a href="#/mqttmessages">MQTT Messages</a></li>
 	<li role="presentation"><a href="#/editor">Manual Add</a></li>
 </ul>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">Harmony Activity List</h2>
+		<h2 class="panel-title">MQTT Messages</h2>
 	</div>
 	<div class="panel-body">
-		<p class="text-muted">For any Harmony Activity, use the action
-			buttons to generate the device addition information below
-			automatically. Then you can modify the name to anything you want that
-			will be the keyword for Alexa. Click the 'Add Bridge Device' to
-			finish that selection setup. The 'Already Configured Activities' list
-			below will show what is already setup for your Harmony Hubs.</p>
+		<p class="text-muted">For any MQTT Broker, use the
+			build button to generate the configuration for the publish generation.
+			You can add topic and content in the text areas provided
+			then selecting the publish generation. Then you can modify the name
+			to anything you want that will be the keyword for Alexa. Click the
+			'Add Bridge Device' to finish that selection setup. The 'Already
+			Configured MQTT Publish messages' list below will show what is already
+			setup for your MQTT Brokers.</p>
 	</div>
 
-	<scrollable-table watch="bridge.harmonyactivities">
+	<scrollable-table watch="bridge.mqttbrokers">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<th>Row</th>
-				<th sortable-header col="name">Name</th>
-				<th sortable-header col="id">Id</th>
-				<th sortable-header col="hub">Hub</th>
+				<th sortable-header col="name">ClientID</th>
+				<th sortable-header col="ip">IP</th>
+				<th>Topic</th>
+				<th>Content</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tr ng-repeat="mqttbroker in bridge.mqttbrokers">
+			<td>{{$index+1}}</td>
+			<td>{{mqttbroker.clientId}}</td>
+			<td>{{mqttbroker.ip}}</td>
+			<td>
+				<textarea rows="2" class="form-control" id="mqtt-topic"
+							ng-model="mqtttopic" placeholder="The MQTT Topic"></textarea>
+			</td>
+			<td>
+				<textarea rows="2" class="form-control" id="mqtt-content"
+							ng-model="mqttcontent" placeholder="The MQTT Message Content"></textarea>
+			</td>
+			<td>
+				<button class="btn btn-success" type="submit"
+					ng-click="buildMQTTPublish(mqttbroker, mqtttopic, mqttcontent)">Build
+					publish Message</button>
+			</td>
+		</tr>
+	</table>
+	</scrollable-table>
+	</li>
+	</ul>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h2 class="panel-title">
+			Already Configured MQTT Messages <a ng-click="toggleButtons()"><span
+				class={{imgButtonsUrl}} aria-hidden="true"></span></a>
+		</h2>
+	</div>
+	<scrollable-table ng-if="buttonsVisible" watch="bridge.mqttbrokers">
+	<table class="table table-bordered table-striped table-hover">
+		<thead>
+			<tr>
+				<th>Row</th>
+				<th sortable-header col="nameclientid">Name</th>
+				<th sortable-header col="ip">ClientID</th>
+				<th>MQTT Message ID</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="harmonyactivity in bridge.harmonyactivities | availableHarmonyActivityId">
+			ng-repeat="device in bridge.devices | configuredMqttMsgs | orderBy:predicate:reverse">
 			<td>{{$index+1}}</td>
-			<td>{{harmonyactivity.activity.label}}</td>
-			<td>{{harmonyactivity.activity.id}}</td>
-			<td>{{harmonyactivity.hub}}</td>
+			<td>{{device.name}}</td>
+			<td>{{device.targetDevice}}</td>
+			<td>{{device.mapId}}</td>
 			<td>
-				<button class="btn btn-success" type="submit"
-					ng-click="buildActivityUrls(harmonyactivity)">Generate
-					Bridge Device</button>
+				<button class="btn btn-danger" type="submit"
+					ng-click="deleteDeviceByMapId(device.mapId, device.mapType)">Delete</button>
 			</td>
 		</tr>
 	</table>
@@ -60,39 +97,7 @@
 </div>
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">
-			Already Configured Activities <a ng-click="toggleButtons()"><span
-				class={{imgButtonsUrl}} aria-hidden="true"></span></a>
-		</h2>
-	</div>
-	<scrollable-table ng-if="buttonsVisible"
-		watch="bridge.harmonyactivities">
-	<table class="table table-bordered table-striped table-hover">
-		<thead>
-			<tr>
-				<th>Row</th>
-				<th sortable-header col="name">Name</th>
-				<th sortable-header col="id">Id</th>
-				<th sortable-header col="hub">Hub</th>
-				<th>Actions</th>
-			</tr>
-		</thead>
-		<tr
-			ng-repeat="harmonyactivity in bridge.harmonyactivities | unavailableHarmonyActivityId">
-			<td>{{$index+1}}</td>
-			<td>{{harmonyactivity.activity.label}}</td>
-			<td>{{harmonyactivity.activity.id}}</td>
-			<td>{{harmonyactivity.hub}}</td>
-			<td><button class="btn btn-danger" type="submit"
-					ng-click="deleteDeviceByMapId(harmonyactivity.activity.id, 'harmonyActivity')">Delete</button></td>
-		</tr>
-	</table>
-	</scrollable-table>
-</div>
-<div class="panel panel-default">
-	<div class="panel-heading">
-		<h2 class="panel-title">Add a Bridge Device for a Harmony
-			Activity</h2>
+		<h2 class="panel-title">Add a Bridge Device for MQTT Messages</h2>
 	</div>
 	<div class="panel-body">
 		<form class="form-horizontal">

@@ -15,6 +15,7 @@
 		href="#/huedevices">Hue Devices</a></li>
 	<li ng-if="bridge.showHal" role="presentation"><a
 		href="#/haldevices">HAL Devices</a></li>
+	<li ng-if="bridge.showMqtt" role="presentation"><a href="#/mqttmessages">MQTT Messages</a></li>
 	<li role="presentation" class="active"><a href="#/editor">Manual
 			Add</a></li>
 </ul>
@@ -126,6 +127,16 @@
 						<option value="TCP">TCP</option>
 						<option value="exec">Execute Script/Program</option>
 					</select>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<label class="col-xs-12 col-sm-2 control-label" for="device-requester-addr">Requester Address (comma separated list) </label>
+	
+				<div class="col-xs-8 col-sm-7">
+					<input type="text" class="form-control" id="evice-requester-addr"
+						ng-model="device.requesterAddress" placeholder="Only use if you want to restrict this device to a specific caller(s)">
 				</div>
 			</div>
 		</div>
