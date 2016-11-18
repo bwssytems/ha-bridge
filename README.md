@@ -23,16 +23,16 @@ Then locate the jar and start the server with:
 ATTENTION: This requires JDK 1.8 to run
 
 ```
-java -jar ha-bridge-3.2.2.jar
+java -jar ha-bridge-3.5.0.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
-Create the directory and make sure that ha-bridge-3.2.2.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-3.5.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v3.2.2/ha-bridge-3.2.2.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v3.5.0/ha-bridge-3.5.0.jar
 ```
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
 
@@ -44,7 +44,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-3.2.2.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-3.5.0.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -61,7 +61,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-3.2.2.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-3.5.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
 Exit and save the file with ctrl-X and follow the prompts and then execute on the command line:
@@ -131,6 +131,8 @@ Don't forget - You will need to push the link button when you got to the Hue Tab
 Provide IP Addresses of your HAL Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target HAL and device/scene you configure. 
 #### HAL Token
 The token you generate or give to a HAL and must be the same for all HAL's you have identified. This needs to be given if you are using the HAL features.
+#### MQTT Client IDs and IP Addresses	
+Provide Client ID and IP Addresses and ports of your MQTT Brokers that you want to utilize with the bridge. Also, you can provide the username and password if you have secured yourMQTT broker which is optional. When these Client ID and IP's are given, the bridge will be able to publish mqtt messages by the call it receives and send it to the target MQTT Broker you configure. The MQTT Messages Tab will become available to help you build messages.
 #### Nest Username
 The user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features. There is no need to give any ip address or host information as this contacts your cloud account.
 #### Nest Password
@@ -194,11 +196,11 @@ tcp://192.168.5.5:110000/0x
 ```
 
 #### Multiple Call Construct
-Also available is the ability to specify multiple commands in the On URL, Dim URL and Off URL areas by adding Json constructs listed here. This is only for the types of tcp, udp, http, https or a new exec type.
+Also available is the ability to specify multiple commands in the On URL, Dim URL and Off URL areas by adding Json constructs listed here. This is only for the types of tcp, udp, http, https or a new exec type. Also within the item format you can specify delay in milliseconds and count per item. These new paramters work on device buttons for the Harmony as well.
 Format Example in the URL areas:
 ```
 [{"item":"http://192.168.1.1:8180/do/this/thing"},
-{"item":"http://192.168.1.1:8180/do/the/next/thing"},
+{"item":"http://192.168.1.1:8180/do/the/next/thing","delay":1000,"count":2},
 "item":"http://192.168.1.1:8180/do/another/thing"}]
 
 
