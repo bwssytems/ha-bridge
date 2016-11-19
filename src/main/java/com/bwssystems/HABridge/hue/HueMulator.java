@@ -66,6 +66,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -1125,6 +1127,7 @@ public class HueMulator implements HueErrorStringSet {
     protected String doHttpRequest(String url, String httpVerb, String contentType, String body, NameValue[] headers) {
         HttpUriRequest request = null;
     	String theContent = null;
+    	URI theURI = null;
     	ContentType parsedContentType = null;
     	StringEntity requestBody = null;
         if(contentType != null && contentType.length() > 0) {
@@ -1132,17 +1135,22 @@ public class HueMulator implements HueErrorStringSet {
 	        if(body != null && body.length() > 0)
 	        	requestBody = new StringEntity(body, parsedContentType);
         }
-        
+        try {
+			theURI = new URI(url);
+		} catch (URISyntaxException e1) {
+        	log.warn("Error creating URI http request: " + url + " with message: " + e1.getMessage());
+            return null;        	
+		}
         try {
 	        if(HttpGet.METHOD_NAME.equalsIgnoreCase(httpVerb) || httpVerb == null) {
-	            request = new HttpGet(url);
+	            request = new HttpGet(theURI);
 	        }else if(HttpPost.METHOD_NAME.equalsIgnoreCase(httpVerb)){
-	            HttpPost postRequest = new HttpPost(url);
+	            HttpPost postRequest = new HttpPost(theURI);
 	            if(requestBody != null)
 	            	postRequest.setEntity(requestBody);
 	            request = postRequest;
 	        }else if(HttpPut.METHOD_NAME.equalsIgnoreCase(httpVerb)){
-	            HttpPut putRequest = new HttpPut(url);
+	            HttpPut putRequest = new HttpPut(theURI);
 	            if(requestBody != null)
 	            	putRequest.setEntity(requestBody);
 	            request = putRequest;
