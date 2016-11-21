@@ -2,80 +2,60 @@
 	<li role="presentation"><a href="#">Bridge Devices</a></li>
 	<li role="presentation"><a href="#/system">Bridge Control</a></li>
 	<li role="presentation"><a href="#/logs">Logs</a></li>
-	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#/veradevices">Vera Devices</a></li>
-	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#/verascenes">Vera Scenes</a></li>
-	<li role="presentation"><a href="#/harmonyactivities">Harmony
-			Activities</a></li>
-	<li role="presentation" class="active"><a href="#/harmonydevices">Harmony
-			Devices</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a href="#/veradevices">Vera Devices</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a href="#/verascenes">Vera Scenes</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonyactivities">Harmony Activities</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a href="#/harmonydevices">Harmony Devices</a></li>
 	<li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
-	<li ng-if="bridge.showHue" role="presentation"><a
-		href="#/huedevices">Hue Devices</a></li>
-	<li ng-if="bridge.showHal" role="presentation"><a
-		href="#/haldevices">HAL Devices</a></li>
-	<li ng-if="bridge.showMqtt" role="presentation"><a href="#/mqttmessages">MQTT Messages</a></li>
+	<li ng-if="bridge.showHue" role="presentation"><a href="#/huedevices">Hue Devices</a></li>
+	<li ng-if="bridge.showHal" role="presentation"><a href="#/haldevices">HAL Devices</a></li>
+	<li role="presentation" class="active"><a href="#/mqttmessages">MQTT Messages</a></li>
 	<li role="presentation"><a href="#/editor">Manual Add</a></li>
 </ul>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">Harmony Device List</h2>
+		<h2 class="panel-title">MQTT Messages</h2>
 	</div>
 	<div class="panel-body">
-		<p class="text-muted">For any Harmony Device and Buttons, use the
-			build button to generate the configuration for this bridge device.
-			You can add button presses by selecting yoru devic and buttons and
-			then selecting the Build Button. This will allow multiple button
-			presses to be built for a given device. Then you can modify the name
+		<p class="text-muted">For any MQTT Broker, use the
+			build button to generate the configuration for the publish generation.
+			You can add topic and content in the text areas provided
+			then selecting the publish generation. Then you can modify the name
 			to anything you want that will be the keyword for Alexa. Click the
 			'Add Bridge Device' to finish that selection setup. The 'Already
-			Configured Harmony Buttons' list below will show what is already
-			setup for your Harmony Hubs.</p>
+			Configured MQTT Publish messages' list below will show what is already
+			setup for your MQTT Brokers.</p>
 	</div>
 
-	<scrollable-table watch="bridge.harmonydevices">
+	<scrollable-table watch="bridge.mqttbrokers">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<th>Row</th>
-				<th sortable-header col="name">Name</th>
-				<th sortable-header col="id">Id</th>
-				<th sortable-header col="hub">Hub</th>
-				<th>On Button</th>
-				<th>Off Button</th>
-				<th>Press and Hold Time</th>
+				<th sortable-header col="name">ClientID</th>
+				<th sortable-header col="ip">IP</th>
+				<th>Topic</th>
+				<th>Content</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
-		<tr ng-repeat="harmonydevice in bridge.harmonydevices">
+		<tr ng-repeat="mqttbroker in bridge.mqttbrokers">
 			<td>{{$index+1}}</td>
-			<td>{{harmonydevice.device.label}}</td>
-			<td>{{harmonydevice.device.id}}</td>
-			<td>{{harmonydevice.hub}}</td>
-			<td><select name="device-ctrlon" id="device-ctrlon"
-				ng-model="devicectrlon">
-					<optgroup ng-repeat="ctrlon in harmonydevice.device.controlGroup"
-						label="{{ctrlon.name}}">
-						<option ng-repeat="funcon in ctrlon.function"
-							value="{{funcon.action}}">{{funcon.label}}</option>
-					</optgroup>
-			</select></td>
-			<td><select name="device-ctrloff" id="device-ctrloff"
-				ng-model="devicectrloff">
-					<optgroup ng-repeat="ctrloff in harmonydevice.device.controlGroup"
-						label="{{ctrloff.name}}">
-						<option ng-repeat="funcoff in ctrloff.function"
-							value="{{funcoff.action}}">{{funcoff.label}}</option>
-					</optgroup>
-			</select></td>
-			<td><input type="number" class="form-control" id="device-pressTime"
-					   ng-model="devicepresstime" placeholder="200"/></td>
+			<td>{{mqttbroker.clientId}}</td>
+			<td>{{mqttbroker.ip}}</td>
+			<td>
+				<textarea rows="2" class="form-control" id="mqtt-topic"
+							ng-model="mqtttopic" placeholder="The MQTT Topic"></textarea>
+			</td>
+			<td>
+				<textarea rows="2" class="form-control" id="mqtt-content"
+							ng-model="mqttcontent" placeholder="The MQTT Message Content"></textarea>
+			</td>
 			<td>
 				<button class="btn btn-success" type="submit"
-					ng-click="buildButtonUrls(harmonydevice, devicectrlon, devicectrloff, devicepresstime)">Build
-					A Button</button>
+					ng-click="buildMQTTPublish(mqttbroker, mqtttopic, mqttcontent)">Build
+					publish Message</button>
 			</td>
 		</tr>
 	</table>
@@ -86,27 +66,25 @@
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title">
-			Already Configured Harmony Buttons <a ng-click="toggleButtons()"><span
+			Already Configured MQTT Messages <a ng-click="toggleButtons()"><span
 				class={{imgButtonsUrl}} aria-hidden="true"></span></a>
 		</h2>
 	</div>
-	<scrollable-table ng-if="buttonsVisible" watch="bridge.harmonydevices">
+	<scrollable-table ng-if="buttonsVisible" watch="bridge.mqttbrokers">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<th>Row</th>
-				<th sortable-header col="name">Name</th>
-				<th sortable-header col="id">Device Id</th>
-				<th sortable-header col="targetDevice">Hub</th>
-				<th>Harmony Device-Button On-Button Off</th>
+				<th sortable-header col="nameclientid">Name</th>
+				<th sortable-header col="ip">ClientID</th>
+				<th>MQTT Message ID</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="device in bridge.devices | configuredButtons | orderBy:predicate:reverse">
+			ng-repeat="device in bridge.devices | configuredMqttMsgs | orderBy:predicate:reverse">
 			<td>{{$index+1}}</td>
 			<td>{{device.name}}</td>
-			<td>{{device.id}}</td>
 			<td>{{device.targetDevice}}</td>
 			<td>{{device.mapId}}</td>
 			<td>
@@ -119,7 +97,7 @@
 </div>
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">Add a Bridge Device for Harmony Buttons</h2>
+		<h2 class="panel-title">Add a Bridge Device for MQTT Messages</h2>
 	</div>
 	<div class="panel-body">
 		<form class="form-horizontal">

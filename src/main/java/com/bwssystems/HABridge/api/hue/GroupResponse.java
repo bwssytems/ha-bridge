@@ -1,5 +1,9 @@
 package com.bwssystems.HABridge.api.hue;
 
+import java.util.List;
+
+import com.bwssystems.HABridge.dao.DeviceDescriptor;
+
 public class GroupResponse {
 	private DeviceState action;
 	private String[] lights;
@@ -23,11 +27,17 @@ public class GroupResponse {
 		this.name = name;
 	}
 	
-	 public static GroupResponse createGroupResponse(String[] theLights) {
+	 public static GroupResponse createGroupResponse(List<DeviceDescriptor> deviceList) {
+	        String[] theList = new String[deviceList.size()];
+	        int i = 0;
+	        for (DeviceDescriptor device : deviceList) {
+             theList[i] = device.getId();
+             i++;
+	        }
 		 GroupResponse theResponse = new GroupResponse();
 		 theResponse.setAction(DeviceState.createDeviceState());
 		 theResponse.setName("Lightset 0");
-		 theResponse.setLights(theLights);
+		 theResponse.setLights(theList);
 		 return theResponse;
 	 }
 }

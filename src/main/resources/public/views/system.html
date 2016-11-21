@@ -16,6 +16,7 @@
 		href="#/huedevices">Hue Devices</a></li>
 	<li ng-if="bridge.showHal" role="presentation"><a
 		href="#/haldevices">HAL Devices</a></li>
+	<li ng-if="bridge.showMqtt" role="presentation"><a href="#/mqttmessages">MQTT Messages</a></li>
 	<li role="presentation"><a href="#/editor">Manual Add</a></li>
 </ul>
 
@@ -81,6 +82,13 @@
 						class="form-control" type="text"
 						ng-model="bridge.settings.upnpconfigaddress"
 						placeholder="192.168.1.1"></td>
+				</tr>
+				<tr>
+					<td>Web Server IP Address</td>
+					<td><input id="bridge-settings-webaddress"
+						class="form-control" type="text"
+						ng-model="bridge.settings.webaddress"
+						placeholder="0.0.0.0"></td>
 				</tr>
 				<tr>
 					<td>Web Server Port</td>
@@ -153,19 +161,6 @@
 						</table></td>
 				</tr>
 				<tr>
-					<td>Harmony Username</td>
-					<td><input id="bridge-settings-harmonyuser"
-						class="form-control" type="text"
-						ng-model="bridge.settings.harmonyuser"
-						placeholder="someone@gmail.com"></td>
-				</tr>
-				<tr>
-					<td>Harmony Password</td>
-					<td><input id="bridge-settings-harmonypwd"
-						class="form-control" type="password"
-						ng-model="bridge.settings.harmonypwd" placeholder="thepassword"></td>
-				</tr>
-				<tr>
 					<td>Hue Names and IP Addresses</td>
 					<td><table
 							class="table table-bordered table-striped table-hover">
@@ -230,6 +225,47 @@
 						placeholder="thetoken"></td>
 				</tr>
 				<tr>
+					<td>MQTT Client IDs and IP Addresses</td>
+					<td><table
+							class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Client ID</th>
+									<th>IP</th>
+									<th>User (opt)</th>
+									<th>Password (opt)</th>
+									<th>Manage</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="mqtt in bridge.settings.mqttaddress.devices">
+								<td>{{mqtt.name}}</td>
+								<td>{{mqtt.ip}}</td>
+								<td>{{mqtt.username}}</td>
+								<td ng-if="mqtt.password">*******</td>
+								<td ng-if="!mqtt.password"> </td>
+
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removeMQTTtoSettings(mqtt.name, mqtt.ip)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-next-mqtt-name"
+									class="form-control" type="text" ng-model="newmqttname"
+									placeholder="A MQTT Client ID"></td>
+								<td><input id="bridge-settings-next-mqtt-ip"
+									class="form-control" type="text" ng-model="newmqttip"
+									placeholder="MQTT Broker IP and port"></td>
+								<td><input id="bridge-settings-next-mqtt-username"
+									class="form-control" type="text" ng-model="newmqttusername"
+									placeholder="MQTT Broker username (optional)"></td>
+								<td><input id="bridge-settings-next-mqtt-password"
+									class="form-control" type="password" ng-model="newmqttpassword"
+									placeholder="MQTT Broker password (opt)"></td>
+								<td><button class="btn btn-success" type="submit"
+										ng-click="addMQTTtoSettings(newmqttname, newmqttip, newmqttusername, newmqttpassword)">Add</button></td>
+							</tr>
+						</table></td>
+				</tr>
+				<tr>
 					<td>Nest Username</td>
 					<td><input id="bridge-settings-nestuser" class="form-control"
 						type="text" ng-model="bridge.settings.nestuser"
@@ -271,6 +307,12 @@
 					<td><input type="checkbox"
 						ng-model="bridge.settings.traceupnp" ng-true-value=true
 						ng-false-value=false> {{bridge.settings.traceupnp}}</td>
+				</tr>
+				<tr>
+					<td>My Echo URL</td>
+					<td><input id="bridge-settings-myechourl" class="form-control"
+						type="text" ng-model="bridge.settings.myechourl"
+						placeholder="echo.amazon.com/#cards"></td>
 				</tr>
 			</table>
 		</form>

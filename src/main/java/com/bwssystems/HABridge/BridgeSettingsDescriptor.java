@@ -12,8 +12,6 @@ public class BridgeSettingsDescriptor {
 	private String upnpdevicedb;
 	private IpList veraaddress;
 	private IpList harmonyaddress;
-	private String harmonyuser;
-	private String harmonypwd;
 	private Integer buttonsleep;
 	private boolean upnpstrict;
 	private boolean traceupnp;
@@ -32,7 +30,11 @@ public class BridgeSettingsDescriptor {
 	private boolean halconfigured;
 	private Map<String, WhitelistEntry> whitelist;
 	private boolean settingsChanged;
-	
+	private String myechourl;
+	private String webaddress;
+	private IpList mqttaddress;
+	private boolean mqttconfigured;
+
 	public BridgeSettingsDescriptor() {
 		super();
 		this.upnpstrict = true;
@@ -42,9 +44,12 @@ public class BridgeSettingsDescriptor {
 		this.harmonyconfigured = false;
 		this.hueconfigured = false;
 		this.halconfigured = false;
+		this.mqttconfigured = false;
 		this.farenheit = true;
 		this.whitelist = null;
 		this.settingsChanged = false;
+		this.myechourl = "echo.amazon.com/#cards";
+		this.webaddress = "0.0.0.0";
 	}
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -87,18 +92,6 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setHarmonyAddress(IpList harmonyaddress) {
 		this.harmonyaddress = harmonyaddress;
-	}
-	public String getHarmonyUser() {
-		return harmonyuser;
-	}
-	public void setHarmonyUser(String harmonyuser) {
-		this.harmonyuser = harmonyuser;
-	}
-	public String getHarmonyPwd() {
-		return harmonypwd;
-	}
-	public void setHarmonyPwd(String harmonypwd) {
-		this.harmonypwd = harmonypwd;
 	}
 	public boolean isUpnpStrict() {
 		return upnpstrict;
@@ -208,6 +201,30 @@ public class BridgeSettingsDescriptor {
 	public void setSettingsChanged(boolean settingsChanged) {
 		this.settingsChanged = settingsChanged;
 	}
+	public String getMyechourl() {
+		return myechourl;
+	}
+	public void setMyechourl(String myechourl) {
+		this.myechourl = myechourl;
+	}
+	public String getWebaddress() {
+		return webaddress;
+	}
+	public void setWebaddress(String webaddress) {
+		this.webaddress = webaddress;
+	}
+	public IpList getMqttaddress() {
+		return mqttaddress;
+	}
+	public void setMqttaddress(IpList mqttaddress) {
+		this.mqttaddress = mqttaddress;
+	}
+	public boolean isMqttconfigured() {
+		return mqttconfigured;
+	}
+	public void setMqttconfigured(boolean mqttconfigured) {
+		this.mqttconfigured = mqttconfigured;
+	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
 			return false;
@@ -221,10 +238,6 @@ public class BridgeSettingsDescriptor {
 			return false;		
 		List<NamedIP> devicesList = this.getHarmonyAddress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
-			return false;
-		if(this.getHarmonyPwd() == null || this.getHarmonyPwd().equals(""))
-			return false;
-		if(this.getHarmonyUser() == null || this.getHarmonyUser().equals(""))
 			return false;
 		return true;
 	}
@@ -250,6 +263,14 @@ public class BridgeSettingsDescriptor {
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
 		if(this.getHaltoken() == null || this.getHaltoken().equals(""))
+			return false;
+		return true;
+	}
+	public Boolean isValidMQTT() {
+		if(this.getMqttaddress() == null || this.getMqttaddress().getDevices().size() <= 0)
+			return false;
+		List<NamedIP> devicesList = this.getMqttaddress().getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
 		return true;
 	}

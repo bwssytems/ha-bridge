@@ -26,6 +26,7 @@ import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.hue.HueHome;
 import com.bwssystems.luupRequests.Device;
 import com.bwssystems.luupRequests.Scene;
+import com.bwssystems.mqtt.MQTTHome;
 import com.bwssystems.util.JsonTransformer;
 import com.bwssystems.vera.VeraHome;
 import com.google.gson.Gson;
@@ -42,9 +43,10 @@ public class DeviceResource {
     private NestHome nestHome;
     private HueHome hueHome;
     private HalHome halHome;
+    private MQTTHome mqttHome;
     private static final Set<String> supportedVerbs = new HashSet<>(Arrays.asList("get", "put", "post"));
 
-	public DeviceResource(BridgeSettingsDescriptor theSettings, HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome, HalHome aHalHome) {
+	public DeviceResource(BridgeSettingsDescriptor theSettings, HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome, HalHome aHalHome, MQTTHome aMqttHome) {
 		this.deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
 
 		if(theSettings.isValidVera())
@@ -71,6 +73,11 @@ public class DeviceResource {
 			this.halHome = aHalHome;
 		else
 			this.halHome = null;
+
+		if(theSettings.isValidMQTT())
+			this.mqttHome = aMqttHome;
+		else
+			this.mqttHome = null;
 
 		setupEndpoints();
 	}
@@ -278,6 +285,31 @@ public class DeviceResource {
 	      	}
 	      	response.status(HttpStatus.SC_OK);
 	      	return halHome.getDevices();
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/mqtt/devices", "application/json", (request, response) -> {
+	    	log.debug("Get MQTT brokers");
+	      	if(mqttHome == null) {
+				response.status(HttpStatus.SC_NOT_FOUND);
+				return new ErrorMessage("A MQTT config is not available.");
+	      	}
+	      	response.status(HttpStatus.SC_OK);
+	      	return mqttHome.getBrokers();
+	    }, new JsonTransformer());
+
+	    // http://ip_address:port/api/devices/exec/renumber CORS request
+	    options(API_CONTEXT + "/exec/renumber", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "POST");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+    	post (API_CONTEXT + "/exec/renumber", "application/json", (request, response) -> {
+	    	log.debug("Renumber devices.");
+	    	deviceRepository.renumber();
+	        return null;
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/backup/available", "application/json", (request, response) -> {

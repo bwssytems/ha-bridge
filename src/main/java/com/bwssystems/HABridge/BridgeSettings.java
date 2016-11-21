@@ -43,7 +43,6 @@ public class BridgeSettings extends BackupHandler {
         String addressString = null;
         String theVeraAddress = null;
         String theHarmonyAddress = null;
-
         String configFileProperty = System.getProperty("config.file");
         if(configFileProperty == null) {
         	Path filePath = Paths.get(Configuration.CONFIG_FILE);
@@ -99,8 +98,6 @@ public class BridgeSettings extends BackupHandler {
 		        }
 	        }
 	        theBridgeSettings.setHarmonyAddress(theHarmonyList);
-	        theBridgeSettings.setHarmonyUser(System.getProperty("harmony.user"));
-	        theBridgeSettings.setHarmonyPwd(System.getProperty("harmony.pwd"));
 	        theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
 	        theBridgeSettings.setTraceupnp(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
 	        theBridgeSettings.setButtonsleep(Integer.parseInt(System.getProperty("button.sleep", Configuration.DEFAULT_BUTTON_SLEEP)));
@@ -165,6 +162,7 @@ public class BridgeSettings extends BackupHandler {
         theBridgeSettings.setNestConfigured(theBridgeSettings.isValidNest());
         theBridgeSettings.setHueconfigured(theBridgeSettings.isValidHue());
         theBridgeSettings.setHalconfigured(theBridgeSettings.isValidHal());
+        theBridgeSettings.setMqttconfigured(theBridgeSettings.isValidMQTT());
         if(serverPortOverride != null)
         	theBridgeSettings.setServerPort(serverPortOverride);
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
@@ -257,5 +255,40 @@ public class BridgeSettings extends BackupHandler {
 		}
 		
 		return content;
+	}
+
+	private String checkIpAddress(String ipAddress, boolean checkForLocalhost) {
+		Enumeration<NetworkInterface> ifs =	null;
+		try {
+			ifs =	NetworkInterface.getNetworkInterfaces();
+		} catch(SocketException e) {
+	        log.error("checkIpAddress cannot get ip address of this host, Exiting with message: " + e.getMessage(), e);
+	        return null;
+		}
+		String addressString = null;
+        InetAddress address = null;
+		while (ifs.hasMoreElements() && addressString == null) {
+			NetworkInterface xface = ifs.nextElement();
+			Enumeration<InetAddress> addrs = xface.getInetAddresses();
+			String name = xface.getName();
+			int IPsPerNic = 0;
+
+			while (addrs.hasMoreElements() && IPsPerNic == 0) {
+				address = addrs.nextElement();
+				if (InetAddressUtils.isIPv4Address(address.getHostAddress())) {
+					log.debug(name + " ... has IPV4 addr " + address);
+					if(checkForLocalhost && (!name.equalsIgnoreCase(Configuration.LOOP_BACK_INTERFACE) || !address.getHostAddress().equalsIgnoreCase(Configuration.LOOP_BACK_ADDRESS))) {
+						IPsPerNic++;
+						addressString = address.getHostAddress();
+						log.debug("checkIpAddress found " + addressString + " from interface " + name);
+					}
+					else if(ipAddress != null && ipAddress.equalsIgnoreCase(address.getHostAddress())){
+						addressString = ipAddress;
+						IPsPerNic++;
+					}
+				}
+			}
+		}
+		return addressString;
 	}
 }

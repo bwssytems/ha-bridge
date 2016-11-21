@@ -1,5 +1,7 @@
 # ha-bridge
-Emulates Philips Hue api to other home automation gateways such as an Amazon Echo.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
+Emulates Philips Hue api to other home automation gateways such as an Amazon Echo or Google Home.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
+
+**ATTENTION: This requires a physical Amazon Echo, Dot or Tap and does not work with prototype devices built using the Alexa Voice Service e.g. Amazon's Alexa AVS Sample App and Sam Machin's AlexaPi. The AVS version does not have any capability for Hue Bridge discovery!**
 
 In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest and the ability to proxy all of your real Hue bridges behind this bridge.
 
@@ -21,14 +23,18 @@ Then locate the jar and start the server with:
 ATTENTION: This requires JDK 1.8 to run
 
 ```
-java -jar ha-bridge-3.1.0.jar
+java -jar ha-bridge-3.5.1.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
+Create the directory and make sure that ha-bridge-3.5.1.jar is in your /home/pi/habridge directory.
+```
+pi@raspberrypi:~ $ mkdir habridge
+pi@raspberrypi:~ $ cd habridge
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v3.5.1/ha-bridge-3.5.1.jar
+```
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
-
-*NOTE ON RC.LOCAL*: Due to the way network subsystem is brought up on the pi, it uses the new systemctl to start services. The old style runlevel setup, which rc.local is part of does not get the benefit of knowing if the network has been fully realized. Starting ha-bridge from rc.local on next gen systems will cause unexpected results and issues with discovering registered devices. 
 
 ```
 [Unit]
@@ -38,20 +44,15 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/amazon-echo/data/habridge.config /home/pi/amazon-echo/ha-bridge-3.1.0.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-3.5.1.jar
 
 [Install]
 WantedBy=multi-user.target
 ```
-
 Basic script setup to run the bridge on a pi.
 
-Create the directory and make sure that ha-bridge-3.1.0.jar is in your /home/pi/habridge directory.
-```
-pi@raspberrypi:~ $ mkdir habridge
-pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v3.1.0/ha-bridge-3.1.0.jar
-```
+*NOTE ON RC.LOCAL*: Due to the way network subsystem is brought up on the pi, it uses the new systemctl to start services. The old style runlevel setup, which rc.local is part of does not get the benefit of knowing if the network has been fully realized. Starting ha-bridge from rc.local on next gen systems will cause unexpected results and issues with discovering registered devices. 
+
 Edit the shell script for starting:
 ```
 pi@raspberrypi:~/habridge $ nano starthabridge.sh
@@ -60,7 +61,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar /home/pi/habridge/ha-bridge-3.1.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-3.5.1.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
 Exit and save the file with ctrl-X and follow the prompts and then execute on the command line:
@@ -83,14 +84,15 @@ The default location for the configuration file to contain the settings for the 
 java -jar -Dconfig.file=/home/me/data/myhabridge.config ha-bridge-W.X.Y.jar
 ```
 ### -Dserver.port=`<port number>`
-The default port number for the bridge is 8080. To override what the default or what is in the configuration file for this parameter, specify -Dserver.port=`<port number>` explicitly. This is especially helpful if you are running the ha-bridge for the first time and have another application on port 8080. The command line example:
+The default port number for the bridge is 80. To override what the default or what is in the configuration file for this parameter, specify -Dserver.port=`<port number>` explicitly. This is especially helpful if you are running the ha-bridge for the first time and have another application on port 80. The command line example:
 ```
 java -jar -Dserver.port=80 ha-bridge-W.X.Y.jar
 ```
+Note: if using with a Google Home device, port 80 *must* be used.
 
 ## HA Bridge Usage and Configuration
 This section will cover the basics of configuration and where this configuration can be done. This requires that you have started your bridge process and then have pointed your
-favorite web interface by going to the http://<my ip address>:<port> or http://localhost:<port> with port you have assigned. The default quick link is http://localhost:8080 for yoru reference.
+favorite web interface by going to the http://<my ip address>:<port> or http://localhost:<port> with port you have assigned. The default quick link is http://localhost for yoru reference.
 ### The Bridge Devices Tab
 This screen allows you to see your devices you have configured for the ha-bridge to present to a controller, such as an Amazon Echo/Dot. It gives you a count of devices as there have been reports that the Echo only supports a limited number, but has been growing as of late, YMMV. You can test each device from this page as this calls the ha-bridge just as a controller would, i.e. the Echo. This is useful to make sure your configuration for each device is correct and for trouble shooting. You can also manages your devices as well by editing and making a new device copy as well as deleting it.
 
@@ -107,8 +109,10 @@ The default location for the configuration file to contain the settings for the 
 The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify `<directory>/<filename>  explicitly.
 #### UPNP IP Address
 The server defaults to the first available address on the host if this is not given. This default may NOT be the correct IP that is your public IP for your host on the network. It is best to set this parameter to not have discovery issues. Replace this value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery. 
+#### Web Server IP Address
+The server defaults to all interfaces on the machine (0.0.0.0). Replace this value with the server ipv4 address you would like to use as the address that will bind to a specific ip address on an interface if you would like. This is only necessary if you want to isolate how access is handled to the web UI. 
 #### Web Server Port
-The server defaults to running on port 8080. To override what the default is, specify a different number. ATTENTION: If you want to use any of the apps made for the Hue to control this bridge, you should set this port to 80.
+The server defaults to running on port 80. To override what the default is, specify a different number. ATTENTION: If you want to use any of the apps made for the Hue to control this bridge, you should keep this port set to 80.
 #### UPNP Response Port
 The upnp response port that will be used. The default is 50000.  
 #### Vera Names and IP Addresses
@@ -116,9 +120,9 @@ Provide IP Addresses of your Veras that you want to utilize with the bridge. Als
 #### Harmony Names and IP Addresses
 Provide IP Addresses of your Harmony Hubs that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the activity or buttons by the call it receives and send it to the target Harmony Hub and activity/button you configure. 
 #### Harmony Username
-The user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub features.
+depracated
 #### Harmony Password
-The password for the user name of the MyHarmony.com account for the Harmony Hub. This needs to be given if you are using the Harmony Hub Features.
+depracated
 #### Hue Names and IP Addresses
 Provide IP Addresses of your Hue Bridges that you want to proxy through the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will passthru the call it receives to the target Hue and device you configure.
 
@@ -127,6 +131,8 @@ Don't forget - You will need to push the link button when you got to the Hue Tab
 Provide IP Addresses of your HAL Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target HAL and device/scene you configure. 
 #### HAL Token
 The token you generate or give to a HAL and must be the same for all HAL's you have identified. This needs to be given if you are using the HAL features.
+#### MQTT Client IDs and IP Addresses	
+Provide Client ID and IP Addresses and ports of your MQTT Brokers that you want to utilize with the bridge. Also, you can provide the username and password if you have secured yourMQTT broker which is optional. When these Client ID and IP's are given, the bridge will be able to publish mqtt messages by the call it receives and send it to the target MQTT Broker you configure. The MQTT Messages Tab will become available to help you build messages.
 #### Nest Username
 The user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features. There is no need to give any ip address or host information as this contacts your cloud account.
 #### Nest Password
@@ -190,11 +196,11 @@ tcp://192.168.5.5:110000/0x
 ```
 
 #### Multiple Call Construct
-Also available is the ability to specify multiple commands in the On URL, Dim URL and Off URL areas by adding Json constructs listed here. This is only for the types of tcp, udp, http, https or a new exec type.
+Also available is the ability to specify multiple commands in the On URL, Dim URL and Off URL areas by adding Json constructs listed here. This is only for the types of tcp, udp, http, https or a new exec type. Also within the item format you can specify delay in milliseconds and count per item. These new paramters work on device buttons for the Harmony as well.
 Format Example in the URL areas:
 ```
 [{"item":"http://192.168.1.1:8180/do/this/thing"},
-{"item":"http://192.168.1.1:8180/do/the/next/thing"},
+{"item":"http://192.168.1.1:8180/do/the/next/thing","delay":1000,"count":2},
 "item":"http://192.168.1.1:8180/do/another/thing"}]
 
 
@@ -272,6 +278,39 @@ DIM Commands |
 To see what Alexa thinks you said, you can check in the home page for your Alexa.
 
 To view or remove devices that Alexa knows about, you can use the mobile app `Menu / Settings / Connected Home` or go to http://echo.amazon.com/#cards.
+
+## Google Assistant
+Google Home is supported as of v3.2.0 and forward, but only if the bridge is running on port 80.
+
+Use the Google Home app on a phone to add new "home control" devices by going into `Settings / Home Control / +`
+as described [here](https://support.google.com/googlehome/answer/7124115?hl=en&ref_topic=7125624#homecontrol).
+Click on `Philips Hue` under the `Add new` section. If ha-bridge is on the same network as the
+phone as well as the Home device, then the app should quickly pass through the pairing step and
+populate with all of the devices. If instead it takes you to a Philips Hue login page, this means
+that the bridge was not properly discovered.
+
+Then you can say "OK Google, Turn on the office light" or whatever name you have given your configured devices.
+
+The Google Assistant can also group lights into rooms as described in the main [help article](https://support.google.com/googlehome/answer/7072090?hl=en&ref_topic=7029100).
+
+Here is the table of items to use to tell Google what you want to do. Note that either "OK Google"
+or "Hey Google" can be used as a trigger.
+ 
+To do this: | Say "Hey Google", then...
+------------|--------------------------
+To turn on/off a light | "Turn on <light name>"
+Dim a light | "Dim the <light name>"
+Brighten a light | "Brighten the <light name>"
+Set a light brightness to a certain percentage | "Set <light name> to 50%"
+Dim/Brighten lights by a certain percentage | "Dim/Brighten <light name> by 50%"
+Turn on/off all lights in room | â€œTurn on/off lights in <room name>" 
+Turn on/off all lights | â€œTurn on/off all of the lightsâ€�
+
+To see what Home thinks you said, you can ask "Hey Google, What did I say?" or check the history in the app.
+
+New or removed devices are picked up automatically as soon as they are added/removed from ha-bridge.
+No re-discovery step is necessary.
+
 ## Configuration REST API Usage
 This section will describe the REST api available for configuration. The REST body examples are all formatted for easy reading, the actual body usage should be like this:
 ```
@@ -282,7 +321,7 @@ These calls can be accomplished with a REST tool using the following URLs and HT
 ### Add a device 
 Add a new device to the HA Bridge configuration. There is a basic examples and then three alternate examples for the add. Please note that dimming is supported as well as custom value based on the dimming number given from the echo. This is under the Dimming and Value example.
 ```
-POST http://host:8080/api/devices
+POST http://host/api/devices
 ```
 #### Body Arguments
 Name |	Type |	Description | Required
@@ -932,22 +971,50 @@ ST: upnp:rootdevice\r\n
 ST: ssdp:all\r\n
 ```
 
-If this criteria is met, the following response is provided to the calling application:
+If this criteria is met, the following three responses are provided to the calling application:
 
 ```
-HTTP/1.1 200 OK\r\n
-CACHE-CONTROL: max-age=86400\r\n
-EXT:\r\n
-LOCATION: http://192.168.1.1:8080/description.xml\r\n
-SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/0.1\r\n 
-ST: urn:schemas-upnp-org:device:basic:1\r\n
-"USN: uuid:Socket-1_0-221438K0100073::urn:schemas-upnp-org:device:basic:1\r\n\r\n
+HTTP/1.1 200 OK
+HOST: 239.255.255.250:1900
+CACHE-CONTROL: max-age=100
+EXT:
+LOCATION: http://192.168.1.1:80/description.xml
+SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/1.15.0
+hue-bridgeid: 001E06FFFE123456
+ST: upnp:rootdevice
+USN: uuid:2f402f80-da50-11e1-9b23-001e06123456::upnp:rootdevice
 ```
+```
+HTTP/1.1 200 OK
+HOST: 239.255.255.250:1900
+CACHE-CONTROL: max-age=100
+EXT:
+LOCATION: http://192.168.1.1:80/description.xml
+SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/1.15.0
+hue-bridgeid: 001E06FFFE123456
+ST: uuid:2f402f80-da50-11e1-9b23-001e06123456
+USN: uuid:2f402f80-da50-11e1-9b23-001e06123456
+```
+```
+HTTP/1.1 200 OK
+HOST: 239.255.255.250:1900
+CACHE-CONTROL: max-age=100
+EXT:
+LOCATION: http://192.168.1.1:80/description.xml
+SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/1.15.0
+hue-bridgeid: 001E06FFFE123456
+ST: urn:schemas-upnp-org:device:basic:1
+USN: uuid:2f402f80-da50-11e1-9b23-001e06123456
+```
+ 
+Note that `192.168.1.1` and `12345` are replaced with the actual IP address and last 6 digits of the MAC address, respectively.
+
+
 ### UPNP description service
 The bridge provides the description service which is used by the calling app to interogate access details after it has decided the upnp multicast response is the correct device.
 #### Get Description
 ```
-GET http://host:8080/description.xml
+GET http://host:80/description.xml
 ```
 #### Response
 ```
@@ -957,18 +1024,18 @@ GET http://host:8080/description.xml
 	<major>1</major>\n
 	<minor>0</minor>\n
 	</specVersion>\n
-	<URLBase>http://192.168.1.1:8080/</URLBase>\n
+	<URLBase>http://192.168.1.1:80/</URLBase>\n
 	<device>\n
 		<deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>\n
-		<friendlyName>HA-Bridge (192.168.1.1)</friendlyName>\n
+		<friendlyName>Philips hue (192.168.1.1)</friendlyName>\n
 		<manufacturer>Royal Philips Electronics</manufacturer>\n
-		<manufacturerURL>http://www.bwssystems.com</manufacturerURL>\n
-		<modelDescription>Hue Emulator for HA bridge</modelDescription>\n
-		<modelName>Philips hue bridge 2012</modelName>\n
-		<modelNumber>929000226503</modelNumber>\n
-		<modelURL>http://www.bwssystems.com/apps.html</modelURL>\n
+		<manufacturerURL>http://www.philips.com</manufacturerURL>\n
+		<modelDescription>Philips hue Personal Wireless Lighting</modelDescription>\n"
+		<modelName>Philips hue bridge 2015</modelName>\n
+		<modelNumber>BSB002</modelNumber>\n
+		<modelURL>http://www.meethue.com</modelURL>\n
 		<serialNumber>0017880ae670</serialNumber>\n
-		<UDN>uuid:88f6698f-2c83-4393-bd03-cd54a9f8595</UDN>\n
+		<UDN>uuid:2f402f80-da50-11e1-9b23-001788102201</UDN>\n
 		<serviceList>\n
 			<service>\n
 				<serviceType>(null)</serviceType>\n

@@ -75,7 +75,7 @@ public class HarmonyServer {
 					log.info(format("activity changed: [%d] %s", activity.getId(), activity.getLabel()));
 				}
 			});
-			harmonyClient.connect(myNameAndIP.getIp(), mySettings.getHarmonyUser(), mySettings.getHarmonyPwd());
+			harmonyClient.connect(myNameAndIP.getIp());
         }
         myHarmony = new HarmonyHandler(harmonyClient, noopCalls, devResponse);
 	}

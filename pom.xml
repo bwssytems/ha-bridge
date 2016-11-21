@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>3.1.0</version>
+	<version>3.5.1</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
@@ -22,13 +22,17 @@
 	    	<id>jitpack.io</id>
 		    <url>https://jitpack.io</url>
 		</repository>
+	    <repository>
+	        <id>Eclipse Paho Repo</id>
+	        <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
+	    </repository>
 	</repositories>
 
 	<dependencies>
 		<dependency>
 		    <groupId>net.whistlingfish</groupId>
 		    <artifactId>harmony-java-client</artifactId>
-		    <version>1.0.9</version>
+		    <version>1.1.1</version>
 		    <exclusions>
 		       <exclusion> 
 		          <groupId>org.slf4j</groupId>
@@ -43,7 +47,7 @@
         <dependency>
             <groupId>com.github.bwssytems</groupId>
             <artifactId>nest-controller</artifactId>
-            <version>1.0.8</version>
+            <version>1.0.9</version>
 		    <exclusions>
 		       <exclusion> 
 		          <groupId>org.slf4j</groupId>
@@ -106,6 +110,11 @@
 		  <artifactId>smack-core</artifactId>
 		  <version>4.0.7</version>
 		</dependency>
+	    <dependency>
+	        <groupId>org.eclipse.paho</groupId>
+	        <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+	        <version>1.1.0</version>
+	    </dependency>
 	</dependencies>
 
 	<build>
@@ -179,6 +188,12 @@
 								</filter>
 								<filter>
 									<artifact>com.github.bwssytems:harmony-java-client</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>org.eclipse.paho:org.eclipse.paho.client.mqttv3</artifact>
 									<includes>
 										<include>**</include>
 									</includes>

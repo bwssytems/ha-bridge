@@ -2,6 +2,7 @@ package com.bwssystems.HABridge.dao;
 
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,8 +10,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Random;
+
+import javax.xml.bind.DatatypeConverter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +33,7 @@ public class DeviceRepository extends BackupHandler {
 	private Map<String, DeviceDescriptor> devices;
     private Path repositoryPath;
 	private Gson gson;
-    final private Random random = new Random();
+    private Integer nextId;
     private Logger log = LoggerFactory.getLogger(DeviceRepository.class);
 	
     public DeviceRepository(String deviceDb) {
@@ -41,6 +45,7 @@ public class DeviceRepository extends BackupHandler {
 		repositoryPath = null;
 		repositoryPath = Paths.get(deviceDb);
 		setupParams(repositoryPath, ".bk", "device.db-");
+		nextId = 0;
 		_loadRepository(repositoryPath);
 	}
     
@@ -57,6 +62,9 @@ public class DeviceRepository extends BackupHandler {
 			DeviceDescriptor list[] = gson.fromJson(jsonContent, DeviceDescriptor[].class);
 			for(int i = 0; i < list.length; i++) {
 				put(list[i].getId(), list[i]);
+				if(Integer.decode(list[i].getId()) > nextId) {
+					nextId = Integer.decode(list[i].getId());
+				}
 			}
 		}    	
     }
@@ -65,12 +73,48 @@ public class DeviceRepository extends BackupHandler {
 		List<DeviceDescriptor> list = new ArrayList<DeviceDescriptor>(devices.values());
 		return list;
 	}
-
-	public List<DeviceDescriptor> findByDeviceType(String aType) {
+/*
+	public List<DeviceDescriptor> findAllByRequester(String anAddress) {
 		List<DeviceDescriptor> list = new ArrayList<DeviceDescriptor>(devices.values());
-		return list;
+		List<DeviceDescriptor> theReturnList = new ArrayList<DeviceDescriptor>();
+		Iterator<DeviceDescriptor> anIterator = list.iterator();
+		DeviceDescriptor theDevice;
+		String theRequesterAddress;
+		while(anIterator.hasNext()) {
+			 theDevice = anIterator.next();
+			 theRequesterAddress = theDevice.getRequesterAddress();
+			 if(theRequesterAddress == null || theRequesterAddress.length() == 0 || theRequesterAddress.contains(anAddress))
+				theReturnList.add(theDevice);
+		}
+		return theReturnList;
 	}
-	
+*/
+	public List<DeviceDescriptor> findAllByRequester(String anAddress) {
+		List<DeviceDescriptor> list = new ArrayList<DeviceDescriptor>(devices.values());
+		List<DeviceDescriptor> theReturnList = new ArrayList<DeviceDescriptor>();
+		Iterator<DeviceDescriptor> anIterator = list.iterator();
+		DeviceDescriptor theDevice;
+		String theRequesterAddress;
+
+		HashMap<String,String > addressMap;
+		while (anIterator.hasNext()) {
+			theDevice = anIterator.next();
+			theRequesterAddress = theDevice.getRequesterAddress();
+			addressMap = new HashMap<String, String>();
+			if(theRequesterAddress != null) {
+				if (theRequesterAddress.contains(",")) {
+					String[] theArray = theRequesterAddress.split(",");
+					for (String v : theArray) {
+						addressMap.put(v.trim(), v.trim());
+					}
+				} else
+					addressMap.put(theRequesterAddress, theRequesterAddress);
+			}
+			if (theRequesterAddress == null || theRequesterAddress.length() == 0 || addressMap.containsKey(anAddress))
+				theReturnList.add(theDevice);
+		}
+		return theReturnList;
+	}
 	public DeviceDescriptor findOne(String id) {
     	return devices.get(id);	
     }
@@ -84,14 +128,45 @@ public class DeviceRepository extends BackupHandler {
 		for(int i = 0; i < descriptors.length; i++) {
 	        if(descriptors[i].getId() != null && descriptors[i].getId().length() > 0)
 	        	devices.remove(descriptors[i].getId());
-	        else
-	        	descriptors[i].setId(String.valueOf(random.nextInt(Integer.MAX_VALUE)));
+	        else {
+	        	nextId++;
+	        	descriptors[i].setId(String.valueOf(nextId));
+	        }
+	        if(descriptors[i].getUniqueid() == null || descriptors[i].getUniqueid().length() == 0) {
+	        	BigInteger bigInt = BigInteger.valueOf(Integer.decode(descriptors[i].getId()));
+	        	byte[] theBytes = bigInt.toByteArray();
+	        	String hexValue = DatatypeConverter.printHexBinary(theBytes);
+
+	        	descriptors[i].setUniqueid("00:17:88:5E:D3:" + hexValue + "-" + hexValue);
+	        }
 	        put(descriptors[i].getId(), descriptors[i]);
 	        theNames = theNames + " " + descriptors[i].getName() + ", ";
 		}
     	String  jsonValue = gson.toJson(findAll());
         repositoryWriter(jsonValue, repositoryPath);
         log.debug("Save device(s): " + theNames);
+    }
+    
+	public void renumber() {
+		List<DeviceDescriptor> list = new ArrayList<DeviceDescriptor>(devices.values());
+		Iterator<DeviceDescriptor> deviceIterator = list.iterator();
+		Map<String, DeviceDescriptor> newdevices = new HashMap<String, DeviceDescriptor>();;
+		nextId = 0;
+        log.debug("Renumber devices.");
+		while(deviceIterator.hasNext()) {
+        	nextId++;
+			DeviceDescriptor theDevice = deviceIterator.next();
+        	theDevice.setId(String.valueOf(nextId));
+        	BigInteger bigInt = BigInteger.valueOf(nextId);
+        	byte[] theBytes = bigInt.toByteArray();
+        	String hexValue = DatatypeConverter.printHexBinary(theBytes);
+       	
+        	theDevice.setUniqueid("00:17:88:5E:D3:" + hexValue + "-" + hexValue);
+	        newdevices.put(theDevice.getId(), theDevice);
+		}
+        devices = newdevices;
+    	String  jsonValue = gson.toJson(findAll());
+        repositoryWriter(jsonValue, repositoryPath);
     }
     
 	public String delete(DeviceDescriptor aDescriptor) {

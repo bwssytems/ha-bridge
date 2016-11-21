@@ -40,11 +40,11 @@ public class HueConfig
 	    SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("UTC"));
 		aConfig.setMac(HueConfig.getMacAddress(ipaddress));
-		aConfig.setApiversion("1.10.0");
+		aConfig.setApiversion("1.15.0");
 		aConfig.setPortalservices(false);
 		aConfig.setGateway(ipaddress);
-		aConfig.setSwversion("01028090");
-		aConfig.setLinkbutton(false);
+		aConfig.setSwversion("01035934");
+		aConfig.setLinkbutton(true);
 		aConfig.setIpaddress(ipaddress);
 		aConfig.setProxyport(0);
 		aConfig.setSwupdate(Swupdate.createSwupdate());
@@ -56,7 +56,7 @@ public class HueConfig
 		aConfig.setLocaltime(dateFormat.format(new Date()));
 		aConfig.setTimezone(TimeZone.getDefault().getID());
 		aConfig.setZigbeechannel("6");
-		aConfig.setBridgeid(HuePublicConfig.getBridgeIdFromMac(aConfig.getMac(), ipaddress));
+		aConfig.setBridgeid(HuePublicConfig.createConfig(name, ipaddress).getHueBridgeIdFromMac());
 		aConfig.setModelid("BSB002");
 		aConfig.setFactorynew(false);
 		aConfig.setReplacesbridgeid(null);

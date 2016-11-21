@@ -13,6 +13,8 @@ import com.bwssystems.NestBridge.NestHome;
 import com.bwssystems.hal.HalHome;
 import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.hue.HueHome;
+import com.bwssystems.mqtt.MQTTHome;
+import com.bwssystems.util.UDPDatagramSender;
 
 public class HABridge {
 	
@@ -38,7 +40,9 @@ public class HABridge {
         NestHome nestHome;
         HueHome hueHome;
         HalHome halHome;
+        MQTTHome mqttHome;
         HueMulator theHueMulator;
+        UDPDatagramSender udpSender;
         UpnpSettingsResource theSettingResponder;
         UpnpListener theUpnpListener;
         SystemControl theSystem;
@@ -52,9 +56,9 @@ public class HABridge {
         bridgeSettings = new BridgeSettings();
         while(!bridgeSettings.getBridgeControl().isStop()) {
         	bridgeSettings.buildSettings();
-            log.info("HA Bridge (v" + theVersion.getVersion() + ") initializing....");
+            log.info("HA Bridge initializing....");
 	        // sparkjava config directive to set ip address for the web server to listen on
-	        // ipAddress("0.0.0.0"); // not used
+	        ipAddress(bridgeSettings.getBridgeSettingsDescriptor().getWebaddress());
 	        // sparkjava config directive to set port for the web server to listen on
 	        port(bridgeSettings.getBridgeSettingsDescriptor().getServerPort());
 	        // sparkjava config directive to set html static file location for Jetty
@@ -70,31 +74,43 @@ public class HABridge {
 	        hueHome = new HueHome(bridgeSettings.getBridgeSettingsDescriptor());
 	        //setup the hal configuration if available
 	        halHome = new HalHome(bridgeSettings.getBridgeSettingsDescriptor());
+	        //setup the mqtt handlers if available
+	        mqttHome = new MQTTHome(bridgeSettings.getBridgeSettingsDescriptor());
 	        // setup the class to handle the resource setup rest api
-	        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), harmonyHome, nestHome, hueHome, halHome);
-	        // setup the class to handle the hue emulator rest api
-	        theHueMulator = new HueMulator(bridgeSettings.getBridgeSettingsDescriptor(), theResources.getDeviceRepository(), harmonyHome, nestHome, hueHome);
-	        theHueMulator.setupServer();
+	        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), harmonyHome, nestHome, hueHome, halHome,  mqttHome);
 	        // setup the class to handle the upnp response rest api
 	        theSettingResponder = new UpnpSettingsResource(bridgeSettings.getBridgeSettingsDescriptor());
 	        theSettingResponder.setupServer();
-	        // wait for the sparkjava initialization of the rest api classes to be complete
-	        awaitInitialization();
-	
-	        // start the upnp ssdp discovery listener
-	        theUpnpListener = new UpnpListener(bridgeSettings.getBridgeSettingsDescriptor(), bridgeSettings.getBridgeControl());
-	        if(theUpnpListener.startListening())
-	        	log.info("HA Bridge (v" + theVersion.getVersion() + ") reinitialization requessted....");
-	        else
-	        	bridgeSettings.getBridgeControl().setStop(true);
-	        if(bridgeSettings.getBridgeSettingsDescriptor().isSettingsChanged())
-	        	bridgeSettings.save(bridgeSettings.getBridgeSettingsDescriptor());
+	        // setup the UDP Datagram socket to be used by the HueMulator and the upnpListener
+	        udpSender = UDPDatagramSender.createUDPDatagramSender(bridgeSettings.getBridgeSettingsDescriptor().getUpnpResponsePort());
+	        if(udpSender == null) {
+	        	bridgeSettings.getBridgeControl().setStop(true);	        	
+	        }
+	        else {
+		        // setup the class to handle the hue emulator rest api
+		        theHueMulator = new HueMulator(bridgeSettings.getBridgeSettingsDescriptor(), theResources.getDeviceRepository(), harmonyHome, nestHome, hueHome, mqttHome, udpSender);
+		        theHueMulator.setupServer();
+		        // wait for the sparkjava initialization of the rest api classes to be complete
+		        awaitInitialization();
+		
+		        // start the upnp ssdp discovery listener
+		        theUpnpListener = new UpnpListener(bridgeSettings.getBridgeSettingsDescriptor(), bridgeSettings.getBridgeControl(), udpSender);
+		        if(theUpnpListener.startListening())
+		        	log.info("HA Bridge (v" + theVersion.getVersion() + ") reinitialization requessted....");
+		        else
+		        	bridgeSettings.getBridgeControl().setStop(true);
+		        if(bridgeSettings.getBridgeSettingsDescriptor().isSettingsChanged())
+		        	bridgeSettings.save(bridgeSettings.getBridgeSettingsDescriptor());
+	        }
 	        bridgeSettings.getBridgeControl().setReinit(false);
 	        stop();
 	        nestHome.closeTheNest();
 	        nestHome = null;
 	        harmonyHome.shutdownHarmonyHubs();
 	        harmonyHome = null;
+	        mqttHome.shutdownMQTTClients();
+	        mqttHome = null;
+	        udpSender.closeResponseSocket();
         }
         log.info("HA Bridge (v" + theVersion.getVersion() + ") exiting....");
         System.exit(0);
