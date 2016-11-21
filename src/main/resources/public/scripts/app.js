@@ -1069,15 +1069,16 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 		$scope.device.offUrl = "{\"name\":\"-1\"}";
 	};
 
-	$scope.buildButtonUrls = function (harmonydevice, onbutton, offbutton, presstime) {
+	$scope.buildButtonUrls = function (harmonydevice, onbutton, offbutton, pressTime) {
 		var currentOn = $scope.device.onUrl;
 		var currentOff = $scope.device.offUrl;
 		var actionOn = angular.fromJson(onbutton);
 		var actionOff = angular.fromJson(offbutton);
+		console.log("prestime:" +pressTime);
 		if( $scope.device.mapType == "harmonyButton") {
 			$scope.device.mapId = $scope.device.mapId + "-" + actionOn.command;
-			$scope.device.onUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOn.command + "\"}]";
-			$scope.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOff.command + "\"}]";        		
+			$scope.device.onUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOn.command + "\",\"pressHoldTime\":\"" + pressTime + "\"}]";
+			$scope.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOff.command + "\",\"pressHoldTime\":\"" + pressTime + "\"}]";
 		}
 		else if ($scope.device.mapType == null || $scope.device.mapType == "") {
 			bridgeService.clearDevice();
@@ -1086,8 +1087,8 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 			$scope.device.name = harmonydevice.device.label;
 			$scope.device.mapType = "harmonyButton";
 			$scope.device.mapId = harmonydevice.device.id + "-" + actionOn.command;
-			$scope.device.onUrl = "[{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOn.command + "\"}]";
-			$scope.device.offUrl = "[{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOff.command + "\"}]";
+			$scope.device.onUrl = "[{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOn.command + "\",\"pressHoldTime\":\"" + pressTime + "\"}]";
+			$scope.device.offUrl = "[{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOff.command + "\",\"pressHoldTime\":\"" + pressTime + "\"}]";
 		}
 	};
 

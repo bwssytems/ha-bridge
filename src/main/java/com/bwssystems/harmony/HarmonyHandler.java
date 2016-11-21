@@ -94,7 +94,7 @@ public class HarmonyHandler {
 	}
 
 	public Boolean pressButton(ButtonPress aDeviceButton) {
-		log.debug("Harmony api press a button requested for device: " + aDeviceButton.getDevice() + " and a for button: " + aDeviceButton.getButton() + " noop mode: " + noopCalls);
+		log.info("Harmony api press a button requested for device: " + aDeviceButton.getDevice() + " and a for button: " + aDeviceButton.getButton() + " noop mode: " + noopCalls + " pressholdtime: " +aDeviceButton.getPressHoldTime());
 		if (aDeviceButton.isValid()) {
 			try {
 				if (noopCalls || devMode) {

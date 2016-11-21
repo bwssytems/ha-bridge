@@ -11,6 +11,8 @@
 		<MaxSize>512</MaxSize>
 	</appender>
 
+	<logger name="net.whistlingfish" level="DEBUG" />
+
 	<root level="info">
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="CYCLIC" />
