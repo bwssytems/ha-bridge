@@ -3,6 +3,8 @@ Emulates Philips Hue api to other home automation gateways such as an Amazon Ech
 
 **ATTENTION: This requires a physical Amazon Echo, Dot or Tap and does not work with prototype devices built using the Alexa Voice Service e.g. Amazon's Alexa AVS Sample App and Sam Machin's AlexaPi. The AVS version does not have any capability for Hue Bridge discovery!**
 
+**NOTE: This software does require the user to have knwoledge on how processes run on Linux or Windows with java. Also, an understanding of networking basics will help as well. This system reveives upnp udp multicast packets from devices to be found, so that is some thing to understand. Please make sure you have all your devices use static IP addresses from your router. Most all questions have been answered already. PLEASE USE GOOGLE TO FIND YOUR ANSWERS!**
+
 In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest and the ability to proxy all of your real Hue bridges behind this bridge.
 
 Alternatively the Bridge supports custom calls as well using http/https/udp and tcp such as the LimitlessLED/MiLight bulbs using the UDP protocol. Binary data is supported with UDP/TCP.
@@ -243,37 +245,20 @@ After this Tell Alexa: "Alexa, discover my devices". If there is an issue you ca
 
 Then you can say "Alexa, Turn on the office light" or whatever name you have given your configured devices.  
 
-Here is the table of items to use to tell Alexa what you want to do:
+Here is the table of items to use to tell Alexa what you want to do, this has changed over time due to Amazon reserving words for skills:
 
 To do this... |	Say this...
 --------------|------------
 ON Commands | 
  | Alexa, turn on `<Device Name>`
- | Alexa, start `<Device Name>`
- | Alexa, unlock `<Device Name>`
- | Alexa, open `<Device Name>`
- | Alexa, boot up `<Device Name>`
- | Alexa, run `<Device Name>`
- | Alexa, arm `<Device Name>`
 OFF Commands | 
  | Alexa, turn off `<Device Name>`
- | Alexa, stop `<Device Name>` (this one is tricky to get right)
- | Alexa, stop running `<Device Name>` (also very tricky)
- | Alexa, lock `<Device Name>`
- | Alexa, close `<Device Name>`
- | Alexa, shutdown `<Device Name>`
- | Alexa, shut `<Device Name>`
- | Alexa, disarm `<Device Name>`
 DIM Commands | 
  | Alexa, brighten `<Device Name>` to `<Position>`
  | Alexa, dim `<Device Name> to <Position>`
  | Alexa, brighten `<Device Name>`
  | Alexa, dim `<Device Name>`
- | Alexa, raise `<Device Name>` to `<Position>`
- | Alexa, lower `<Device Name>` to `<Position>`
  | Alexa, set `<Device Name>` to `<Position>`
- | Alexa, turn up `<Device Name>` to `<Position>`
- | Alexa, turn down `<Device Name>` to `<Position>`
 
 To see what Alexa thinks you said, you can check in the home page for your Alexa.
 
