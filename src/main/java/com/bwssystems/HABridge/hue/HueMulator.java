@@ -1,6 +1,7 @@
 package com.bwssystems.HABridge.hue;
 
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.api.CallItemDeserializer;
 import com.bwssystems.HABridge.api.NameValue;
@@ -749,7 +750,9 @@ public class HueMulator implements HueErrorStringSet {
 					state.setBri(0);
 				}
 			}
-			if(!(device.getMapType() != null && device.getMapType().equalsIgnoreCase("hueDevice"))) {
+
+			// code for backwards compatibility
+			if(!(device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE))) {
 				if(url == null)
 					url = device.getOnUrl();
 			}
@@ -774,15 +777,25 @@ public class HueMulator implements HueErrorStringSet {
 			}
 			Integer setCount = 1;
 			for (int i = 0; callItems != null && i < callItems.length; i++) {
+				if(!filterByRequester(callItems[i].getRequesterAddress(), request.ip())) {
+					log.debug("filter for requester address not present in list: " + callItems[i].getRequesterAddress() + " with request ip of: " + request.ip());
+					continue;
+				}
 				if (callItems[i].getCount() != null && callItems[i].getCount() > 0)
 					setCount = callItems[i].getCount();
 				else
 					setCount = 1;
+				// code for backwards compatibility
+				if((callItems[i].getType() == null || callItems[i].getType().trim().length() == 0) && (device.getMapType() != null && device.getMapType().trim().length() > 0)) {
+					if(device.getMapType() != null || device.getMapType().length() > 0)
+						callItems[i].setType(device.getMapType());
+					else if(device.getDeviceType() != null || device.getDeviceType().length() > 0)
+						callItems[i].setType(device.getDeviceType());
+					else
+						callItems[i].setType(DeviceMapTypes.CUSTOM_DEVICE);
+				}
 
-				if((callItems[i].getType() == null || callItems[i].getType().trim().length() == 0) && (device.getMapType() != null && device.getMapType().trim().length() > 0))
-					callItems[i].setType(device.getMapType());
-
-				if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase("hueDevice")) {
+				if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE)) {
 					if (myHueHome != null) {
 
 						HueDeviceIdentifier deviceId = new Gson().fromJson(callItems[i].getItem(), HueDeviceIdentifier.class);
@@ -796,54 +809,49 @@ public class HueMulator implements HueErrorStringSet {
 						}
 
 						// make call
-						responseString = doHttpRequest(
-								"http://" + deviceId.getIpAddress() + "/api/" + myHueHome.getTheHUERegisteredUser()
-										+ "/lights/" + deviceId.getDeviceId() + "/state",
-								HttpPut.METHOD_NAME, device.getContentType(), request.body(), null);
+						for (int x = 0; x < setCount; x++) {
+							if (x > 0 || i > 0) {
+								Thread.sleep(theDelay);
+							}
+							if (callItems[i].getDelay() != null && callItems[i].getDelay() > 0)
+								theDelay = callItems[i].getDelay();
+							else
+								theDelay = bridgeSettings.getButtonsleep();
+							responseString = doHttpRequest(
+									"http://" + deviceId.getIpAddress() + "/api/" + myHueHome.getTheHUERegisteredUser()
+											+ "/lights/" + deviceId.getDeviceId() + "/state",
+									HttpPut.METHOD_NAME, device.getContentType(), request.body(), null);
+							if (responseString.contains("[{\"error\":"))
+									x = setCount;
+						}
 						if (responseString == null) {
 							log.warn("Error on calling url to change device state: " + url);
 							responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 									+ "\",\"description\": \"Error on calling HUE to change device state\", \"parameter\": \"/lights/"
 									+ lightId + "state\"}}]";
-						} else if (responseString.contains("[{\"error\":")
-								&& responseString.contains("unauthorized user")) {
-							myHueHome.setTheHUERegisteredUser(null);
-							hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(),
-									myHueHome.getTheHUERegisteredUser(), this);
-							if (hueUser == null) {
-								return errorString;
+						} else if (responseString.contains("[{\"error\":")) {
+							if(responseString.contains("unauthorized user")) {
+								myHueHome.setTheHUERegisteredUser(null);
+								hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(),
+										myHueHome.getTheHUERegisteredUser(), this);
+								if (hueUser == null) {
+									return errorString;
+								}
+								myHueHome.setTheHUERegisteredUser(hueUser);
 							}
-							myHueHome.setTheHUERegisteredUser(hueUser);
+							else
+								log.warn("Error occurred when calling Hue Passthru: " + responseString);
 						}
-					} else
+					} else {
+						log.warn("No HUE home configured for HUE device passthru call for deviceID: " + device.getId());
 						responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 								+ "\",\"description\": \"No HUE configured\", \"parameter\": \"/lights/" + lightId
 								+ "state\"}}]";
-				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase("harmonyActivity")) {
+					}
+				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.HARMONY_ACTIVITY)) {
 					log.debug("executing HUE api request to change activity to Harmony: " + url);
 					if (myHarmonyHome != null) {
 						RunActivity anActivity = new Gson().fromJson(url, RunActivity.class);
-						HarmonyHandler myHarmony = myHarmonyHome.getHarmonyHandler(device.getTargetDevice());
-						if (myHarmony == null) {
-							log.warn("Should not get here, no harmony hub available");
-							responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-									+ "\",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/"
-									+ lightId + "state\"}}]";
-						} else
-							myHarmony.startActivity(anActivity);
-					} else {
-						log.warn("Should not get here, no harmony configured");
-						responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-								+ "\",\"description\": \"Should not get here, no harmony configured\", \"parameter\": \"/lights/"
-								+ lightId + "state\"}}]";
-					}
-				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase("harmonyButton")) {
-					log.debug("executing HUE api request to button press(es) to Harmony: " + url);
-					if (myHarmonyHome != null) {
-						if (url.substring(0, 1).equalsIgnoreCase("{")) {
-							url = "[" + url + "]";
-						}
-						ButtonPress[] deviceButtons = new Gson().fromJson(url, ButtonPress[].class);
 						HarmonyHandler myHarmony = myHarmonyHome.getHarmonyHandler(device.getTargetDevice());
 						if (myHarmony == null) {
 							log.warn("Should not get here, no harmony hub available");
@@ -859,10 +867,64 @@ public class HueMulator implements HueErrorStringSet {
 									theDelay = callItems[i].getDelay();
 								else
 									theDelay = bridgeSettings.getButtonsleep();
-								log.debug("pressing button: " + deviceButtons[i].getDevice() + " - "
-										+ deviceButtons[i].getButton() + " - iteration: " + String.valueOf(i)
-										+ " - count: " + String.valueOf(x));
-								myHarmony.pressButton(deviceButtons[i]);
+								myHarmony.startActivity(anActivity);
+							}
+						}
+					} else {
+						log.warn("Should not get here, no harmony configured");
+						responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+								+ "\",\"description\": \"Should not get here, no harmony configured\", \"parameter\": \"/lights/"
+								+ lightId + "state\"}}]";
+					}
+				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.HARMONY_BUTTON)) {
+					log.debug("executing HUE api request to button press(es) to Harmony: " + url);
+					if (myHarmonyHome != null) {
+						if (url.substring(0, 1).equalsIgnoreCase("{")) {
+							url = "[" + url + "]";
+						}
+						ButtonPress[] deviceButtons = new Gson().fromJson(url, ButtonPress[].class);
+						HarmonyHandler myHarmony = myHarmonyHome.getHarmonyHandler(device.getTargetDevice());
+						if (myHarmony == null) {
+							log.warn("Should not get here, no harmony hub available");
+							responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+									+ "\",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/"
+									+ lightId + "state\"}}]";
+						} else {
+							if(deviceButtons.length > 1) {
+					        	Integer theCount = 1;
+				        		for(int z = 0; z < deviceButtons.length; z++) {
+					        		if(deviceButtons[z].getCount() != null && deviceButtons[z].getCount() > 0)
+					        			theCount = deviceButtons[z].getCount();
+					        		else
+					        			theCount = 1;
+					        		for(int y = 0; y < theCount; y++) {
+					        			if( y > 0 || z > 0) {
+					        				Thread.sleep(theDelay);
+					        			}
+					        			if(deviceButtons[z].getDelay() != null && deviceButtons[z].getDelay() > 0)
+					        				theDelay = deviceButtons[z].getDelay();
+					        			else
+					        				theDelay = bridgeSettings.getButtonsleep();
+					    	        	log.debug("pressing button: " + deviceButtons[z].getDevice() + " - " + deviceButtons[z].getButton() + " - iteration: " + String.valueOf(z) + " - count: " + String.valueOf(y));
+					        			myHarmony.pressButton(deviceButtons[z]);
+					        		}
+				        		}
+							}
+							else {
+								for (int x = 0; x < setCount; x++) {
+									if (x > 0 || i > 0) {
+										Thread.sleep(theDelay);
+									}
+									if (callItems[i].getDelay() != null && callItems[i].getDelay() > 0) {
+										theDelay = callItems[i].getDelay();
+									}
+									else
+										theDelay = bridgeSettings.getButtonsleep();
+									log.debug("pressing button: " + deviceButtons[i].getDevice() + " - "
+											+ deviceButtons[i].getButton() + " - iteration: " + String.valueOf(i)
+											+ " - count: " + String.valueOf(x));
+									myHarmony.pressButton(deviceButtons[i]);
+								}
 							}
 						}
 					} else {
@@ -872,7 +934,7 @@ public class HueMulator implements HueErrorStringSet {
 								+ lightId + "state\"}}]";
 
 					}
-				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase("nestHomeAway")) {
+				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.NEST_HOMEAWAY)) {
 					log.debug("executing HUE api request to set away for nest home: " + url);
 					if (theNest == null) {
 						log.warn("Should not get here, no Nest available");
@@ -883,7 +945,7 @@ public class HueMulator implements HueErrorStringSet {
 						NestInstruction homeAway = new Gson().fromJson(url, NestInstruction.class);
 						theNest.getHome(homeAway.getName()).setAway(homeAway.getAway());
 					}
-				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase("nestThermoSet")) {
+				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.NEST_THERMO_SET)) {
 					log.debug("executing HUE api request to set thermostat for nest: " + url);
 					if (theNest == null) {
 						log.warn("Should not get here, no Nest available");
@@ -934,7 +996,7 @@ public class HueMulator implements HueErrorStringSet {
 									+ lightId + "state\"}}]";
 						}
 					}
-				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase("mqttMessage")) {
+				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.MQTT_MESSAGE)) {
 					log.debug("executing HUE api request to send message to MQTT broker: " + url);
 					if (mqttHome != null) {
 						MQTTMessage[] mqttMessages = new Gson().fromJson(url, MQTTMessage[].class);
@@ -965,8 +1027,13 @@ public class HueMulator implements HueErrorStringSet {
 								+ lightId + "state\"}}]";
 
 					}
-				} else if (callItems[i].getType() != null && callItems[i].getType().trim().startsWith("exec")) {
+				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.EXEC_DEVICE)) {
 					log.debug("Exec Request called with url: " + url);
+					String intermediate;
+					if (callItems[i].getItem().contains("exec://"))
+						intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
+					else
+						intermediate = callItems[i].getItem();
 					for (int x = 0; x < setCount; x++) {
 						if (x > 0 || i > 0) {
 							Thread.sleep(theDelay);
@@ -975,16 +1042,11 @@ public class HueMulator implements HueErrorStringSet {
 							theDelay = callItems[i].getDelay();
 						else
 							theDelay = bridgeSettings.getButtonsleep();
-						String intermediate;
-						if (callItems[i].getItem().contains("exec://"))
-							intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
-						else
-							intermediate = callItems[i].getItem();
 						String anError = doExecRequest(intermediate,
 								calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), lightId);
 						if (anError != null) {
 							responseString = anError;
-							i = callItems.length + 1;
+							x = setCount;
 						}
 					}
 				} else // This section allows the usage of http/tcp/udp/exec
@@ -1014,7 +1076,7 @@ public class HueMulator implements HueErrorStringSet {
 								} else
 									hostAddr = hostPortion;
 								InetAddress IPAddress = InetAddress.getByName(hostAddr);
-								;
+
 								if (theUrlBody.startsWith("0x")) {
 									theUrlBody = replaceIntensityValue(theUrlBody,
 											calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc),
@@ -1047,7 +1109,7 @@ public class HueMulator implements HueErrorStringSet {
 										lightId);
 								if (anError != null) {
 									responseString = anError;
-									i = callItems.length + 1;
+									x = setCount;
 								}
 							} else {
 								log.debug("executing HUE api request to Http "
@@ -1076,7 +1138,7 @@ public class HueMulator implements HueErrorStringSet {
 									responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 											+ "\",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/"
 											+ lightId + "state\"}}]";
-									i = callItems.length + 1;
+									x = setCount;
 								}
 							}
 						} catch (Exception e) {
@@ -1085,7 +1147,7 @@ public class HueMulator implements HueErrorStringSet {
 							responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 									+ "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/"
 									+ lightId + "state\"}}]";
-							i = callItems.length + 1;
+							x = setCount;
 						}
 					}
 				}
@@ -1476,5 +1538,23 @@ public class HueMulator implements HueErrorStringSet {
 	@Override
 	public void setErrorString(String anError) {
 		errorString = anError;
+	}
+
+	private Boolean filterByRequester(String requesterFilterList, String anAddress) {
+		if (requesterFilterList == null || requesterFilterList.length() == 0)
+			return true;
+
+		HashMap<String, String> addressMap;
+		addressMap = new HashMap<String, String>();
+		if (requesterFilterList.contains(",")) {
+			String[] theArray = requesterFilterList.split(",");
+			for (String v : theArray) {
+				addressMap.put(v.trim(), v.trim());
+			}
+		} else
+			addressMap.put(requesterFilterList.trim(), requesterFilterList.trim());
+		if (addressMap.containsKey(anAddress))
+			return true;
+		return false;
 	}
 }

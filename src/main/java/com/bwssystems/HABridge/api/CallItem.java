@@ -1,11 +1,11 @@
 package com.bwssystems.HABridge.api;
 
 public class CallItem {
-	private String type;
-	private String requesterAddress;
 	private String item;
 	private Integer count;
 	private Integer delay;
+	private String type;
+	private String requesterAddress;
 
 	public String getType() {
 		return type;
