@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.dao.BackupFilename;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
@@ -295,6 +296,11 @@ public class DeviceResource {
 	      	}
 	      	response.status(HttpStatus.SC_OK);
 	      	return mqttHome.getBrokers();
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/map/types", "application/json", (request, response) -> {
+	    	log.debug("Get map types");
+	      	return new DeviceMapTypes();
 	    }, new JsonTransformer());
 
 	    // http://ip_address:port/api/devices/exec/renumber CORS request

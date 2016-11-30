@@ -191,7 +191,7 @@ public class HueMulator implements HueErrorStringSet {
 
 			if (groupId.equalsIgnoreCase("0")) {
 				GroupResponse theResponse = GroupResponse
-						.createGroupResponse(repository.findAllByRequester(request.ip()));
+						.createGroupResponse(repository.findAll());
 				return new Gson().toJson(theResponse, GroupResponse.class);
 			}
 
@@ -301,7 +301,7 @@ public class HueMulator implements HueErrorStringSet {
 				return theErrorResp.getTheErrors();
 			}
 
-			List<DeviceDescriptor> deviceList = repository.findAllByRequester(request.ip());
+			List<DeviceDescriptor> deviceList = repository.findAll();
 			Map<String, DeviceResponse> deviceResponseMap = new HashMap<>();
 			for (DeviceDescriptor device : deviceList) {
 				DeviceResponse deviceResponse = null;
@@ -480,7 +480,7 @@ public class HueMulator implements HueErrorStringSet {
 				return theErrorResp.getTheErrors();
 			}
 
-			List<DeviceDescriptor> descriptorList = repository.findAllByRequester(request.ip());
+			List<DeviceDescriptor> descriptorList = repository.findAll();
 			HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(),
 					bridgeSettings.getWhitelist());
 			Map<String, DeviceResponse> deviceList = new HashMap<>();
@@ -752,7 +752,7 @@ public class HueMulator implements HueErrorStringSet {
 			}
 
 			// code for backwards compatibility
-			if(!(device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE))) {
+			if(!(device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]))) {
 				if(url == null)
 					url = device.getOnUrl();
 			}
@@ -777,8 +777,8 @@ public class HueMulator implements HueErrorStringSet {
 			}
 			Integer setCount = 1;
 			for (int i = 0; callItems != null && i < callItems.length; i++) {
-				if(!filterByRequester(callItems[i].getRequesterAddress(), request.ip())) {
-					log.debug("filter for requester address not present in list: " + callItems[i].getRequesterAddress() + " with request ip of: " + request.ip());
+				if(!filterByRequester(callItems[i].getFilterIPs(), request.ip())) {
+					log.debug("filter for requester address not present in list: " + callItems[i].getFilterIPs() + " with request ip of: " + request.ip());
 					continue;
 				}
 				if (callItems[i].getCount() != null && callItems[i].getCount() > 0)
@@ -792,10 +792,10 @@ public class HueMulator implements HueErrorStringSet {
 					else if(device.getDeviceType() != null || device.getDeviceType().length() > 0)
 						callItems[i].setType(device.getDeviceType());
 					else
-						callItems[i].setType(DeviceMapTypes.CUSTOM_DEVICE);
+						callItems[i].setType(DeviceMapTypes.CUSTOM_DEVICE[DeviceMapTypes.typeIndex]);
 				}
 
-				if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE)) {
+				if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) {
 					if (myHueHome != null) {
 
 						HueDeviceIdentifier deviceId = new Gson().fromJson(callItems[i].getItem(), HueDeviceIdentifier.class);
@@ -848,7 +848,7 @@ public class HueMulator implements HueErrorStringSet {
 								+ "\",\"description\": \"No HUE configured\", \"parameter\": \"/lights/" + lightId
 								+ "state\"}}]";
 					}
-				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.HARMONY_ACTIVITY)) {
+				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.typeIndex])) {
 					log.debug("executing HUE api request to change activity to Harmony: " + url);
 					if (myHarmonyHome != null) {
 						RunActivity anActivity = new Gson().fromJson(url, RunActivity.class);
@@ -876,7 +876,7 @@ public class HueMulator implements HueErrorStringSet {
 								+ "\",\"description\": \"Should not get here, no harmony configured\", \"parameter\": \"/lights/"
 								+ lightId + "state\"}}]";
 					}
-				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.HARMONY_BUTTON)) {
+				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.HARMONY_BUTTON[DeviceMapTypes.typeIndex])) {
 					log.debug("executing HUE api request to button press(es) to Harmony: " + url);
 					if (myHarmonyHome != null) {
 						if (url.substring(0, 1).equalsIgnoreCase("{")) {
@@ -934,7 +934,7 @@ public class HueMulator implements HueErrorStringSet {
 								+ lightId + "state\"}}]";
 
 					}
-				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.NEST_HOMEAWAY)) {
+				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.NEST_HOMEAWAY[DeviceMapTypes.typeIndex])) {
 					log.debug("executing HUE api request to set away for nest home: " + url);
 					if (theNest == null) {
 						log.warn("Should not get here, no Nest available");
@@ -945,7 +945,7 @@ public class HueMulator implements HueErrorStringSet {
 						NestInstruction homeAway = new Gson().fromJson(url, NestInstruction.class);
 						theNest.getHome(homeAway.getName()).setAway(homeAway.getAway());
 					}
-				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.NEST_THERMO_SET)) {
+				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.NEST_THERMO_SET[DeviceMapTypes.typeIndex])) {
 					log.debug("executing HUE api request to set thermostat for nest: " + url);
 					if (theNest == null) {
 						log.warn("Should not get here, no Nest available");
@@ -996,7 +996,7 @@ public class HueMulator implements HueErrorStringSet {
 									+ lightId + "state\"}}]";
 						}
 					}
-				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.MQTT_MESSAGE)) {
+				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.MQTT_MESSAGE[DeviceMapTypes.typeIndex])) {
 					log.debug("executing HUE api request to send message to MQTT broker: " + url);
 					if (mqttHome != null) {
 						MQTTMessage[] mqttMessages = new Gson().fromJson(url, MQTTMessage[].class);
@@ -1027,7 +1027,7 @@ public class HueMulator implements HueErrorStringSet {
 								+ lightId + "state\"}}]";
 
 					}
-				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.EXEC_DEVICE)) {
+				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.EXEC_DEVICE[DeviceMapTypes.typeIndex])) {
 					log.debug("Exec Request called with url: " + url);
 					String intermediate;
 					if (callItems[i].getItem().contains("exec://"))

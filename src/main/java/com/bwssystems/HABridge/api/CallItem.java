@@ -5,7 +5,7 @@ public class CallItem {
 	private Integer count;
 	private Integer delay;
 	private String type;
-	private String requesterAddress;
+	private String filterIPs;
 
 	public String getType() {
 		return type;
@@ -15,12 +15,12 @@ public class CallItem {
 		this.type = type;
 	}
 
-	public String getRequesterAddress() {
-		return requesterAddress;
+	public String getFilterIPs() {
+		return filterIPs;
 	}
 
-	public void setRequesterAddress(String requesterAddress) {
-		this.requesterAddress = requesterAddress;
+	public void setFilterIPs(String filterIPs) {
+		this.filterIPs = filterIPs;
 	}
 
 	public String getItem() {

@@ -56,9 +56,6 @@ public class DeviceDescriptor{
     @SerializedName("contentBodyDim")
     @Expose
     private String contentBodyDim;
-    @SerializedName("requesterAddress")
-    @Expose
-    private String requesterAddress;
 
     private DeviceState deviceState;
     
@@ -188,14 +185,6 @@ public class DeviceDescriptor{
 
 	public void setContentBodyDim(String contentBodyDim) {
 		this.contentBodyDim = contentBodyDim;
-	}
-
-	public String getRequesterAddress() {
-		return requesterAddress;
-	}
-
-	public void setRequesterAddress(String requesterAddress) {
-		this.requesterAddress = requesterAddress;
 	}
 
 	public DeviceState getDeviceState() {
