@@ -697,10 +697,7 @@ public class HueMulator implements HueErrorStringSet {
 			}
 
 			if (request.body().contains("\"bri\"")) {
-				if (theStateChanges.isOn() && theStateChanges.getBri() == 0)
-					stateHasBri = false;
-				else
-					stateHasBri = true;
+				stateHasBri = true;
 			}
 			if (request.body().contains("\"bri_inc\""))
 				stateHasBriInc = true;
@@ -721,7 +718,7 @@ public class HueMulator implements HueErrorStringSet {
 			theHeaders = new Gson().fromJson(device.getHeaders(), NameValue[].class);
 
 			if (stateHasBri) {
-				if (theStateChanges.getBri() > 0 && !state.isOn())
+				if(!state.isOn())
 					state.setOn(true);
 
 				url = device.getDimUrl();
@@ -729,10 +726,10 @@ public class HueMulator implements HueErrorStringSet {
 				if (url == null || url.length() == 0)
 					url = device.getOnUrl();
 			} else if (stateHasBriInc) {
-				if ((state.getBri() + theStateChanges.getBri_inc()) > 0 && !state.isOn())
+				if(!state.isOn())
 					state.setOn(true);
-				else if ((state.getBri() + theStateChanges.getBri_inc()) <= 0 && state.isOn())
-					state.setOn(false);
+				if ((state.getBri() + theStateChanges.getBri_inc()) <= 0)
+					state.setBri(theStateChanges.getBri_inc());
 
 				url = device.getDimUrl();
 
@@ -742,12 +739,12 @@ public class HueMulator implements HueErrorStringSet {
 				if (theStateChanges.isOn()) {
 					url = device.getOnUrl();
 					state.setOn(true);
-					if (state.getBri() <= 0)
-						state.setBri(255);
-				} else {
+//					if (state.getBri() <= 0)
+//						state.setBri(255);
+				} else if (!theStateChanges.isOn()) {
 					url = device.getOffUrl();
 					state.setOn(false);
-					state.setBri(0);
+//					state.setBri(0);
 				}
 			}
 
@@ -1167,10 +1164,10 @@ public class HueMulator implements HueErrorStringSet {
 		if (hasBri) {
 			setIntensity = theChanges.getBri();
 		} else if (hasBriInc) {
-			if ((setIntensity + theChanges.getBri_inc()) < 0)
-				setIntensity = 0;
+			if ((setIntensity + theChanges.getBri_inc()) <= 0)
+				setIntensity = theChanges.getBri_inc();
 			else if ((setIntensity + theChanges.getBri_inc()) > 255)
-				setIntensity = 255;
+				setIntensity = theChanges.getBri_inc();
 			else
 				setIntensity = setIntensity + theChanges.getBri_inc();
 		}
