@@ -783,10 +783,10 @@ public class HueMulator implements HueErrorStringSet {
 				else
 					setCount = 1;
 				// code for backwards compatibility
-				if((callItems[i].getType() == null || callItems[i].getType().trim().length() == 0) && (device.getMapType() != null && device.getMapType().trim().length() > 0)) {
-					if(device.getMapType() != null || device.getMapType().length() > 0)
+				if((callItems[i].getType() == null || callItems[i].getType().trim().length() == 0)) {
+					if(device.getMapType() != null && device.getMapType().length() > 0)
 						callItems[i].setType(device.getMapType());
-					else if(device.getDeviceType() != null || device.getDeviceType().length() > 0)
+					else if(device.getDeviceType() != null && device.getDeviceType().length() > 0)
 						callItems[i].setType(device.getDeviceType());
 					else
 						callItems[i].setType(DeviceMapTypes.CUSTOM_DEVICE[DeviceMapTypes.typeIndex]);
