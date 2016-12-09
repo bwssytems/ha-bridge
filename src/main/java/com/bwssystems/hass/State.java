@@ -1,5 +1,8 @@
 package com.bwssystems.hass;
 
+import java.util.Map;
+
+import com.google.gson.JsonElement;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -7,7 +10,7 @@ public class State {
 
 @SerializedName("attributes")
 @Expose
-private Attributes attributes;
+private Map<String, JsonElement>  attributes;
 @SerializedName("entity_id")
 @Expose
 private String entityId;
@@ -26,7 +29,7 @@ private String state;
 * @return
 * The attributes
 */
-public Attributes getAttributes() {
+public Map<String, JsonElement>  getAttributes() {
 return attributes;
 }
 
@@ -35,7 +38,7 @@ return attributes;
 * @param attributes
 * The attributes
 */
-public void setAttributes(Attributes attributes) {
+public void setAttributes(Map<String, JsonElement>  attributes) {
 this.attributes = attributes;
 }
 
