@@ -24,6 +24,7 @@ import com.bwssystems.HABridge.dao.ErrorMessage;
 import com.bwssystems.NestBridge.NestHome;
 import com.bwssystems.hal.HalHome;
 import com.bwssystems.harmony.HarmonyHome;
+import com.bwssystems.hass.HassHome;
 import com.bwssystems.hue.HueHome;
 import com.bwssystems.luupRequests.Device;
 import com.bwssystems.luupRequests.Scene;
@@ -45,9 +46,10 @@ public class DeviceResource {
     private HueHome hueHome;
     private HalHome halHome;
     private MQTTHome mqttHome;
+    private HassHome hassHome;
     private static final Set<String> supportedVerbs = new HashSet<>(Arrays.asList("get", "put", "post"));
 
-	public DeviceResource(BridgeSettingsDescriptor theSettings, HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome, HalHome aHalHome, MQTTHome aMqttHome) {
+	public DeviceResource(BridgeSettingsDescriptor theSettings, HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome, HalHome aHalHome, MQTTHome aMqttHome, HassHome aHassHome) {
 		this.deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
 
 		if(theSettings.isValidVera())
@@ -79,6 +81,11 @@ public class DeviceResource {
 			this.mqttHome = aMqttHome;
 		else
 			this.mqttHome = null;
+
+		if(theSettings.isValidHass())
+			this.hassHome = aHassHome;
+		else
+			this.hassHome = null;
 
 		setupEndpoints();
 	}
@@ -296,6 +303,16 @@ public class DeviceResource {
 	      	}
 	      	response.status(HttpStatus.SC_OK);
 	      	return mqttHome.getBrokers();
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/hass/devices", "application/json", (request, response) -> {
+	    	log.debug("Get HomeAssistant Clients");
+	      	if(hassHome == null) {
+				response.status(HttpStatus.SC_NOT_FOUND);
+				return new ErrorMessage("A HomeAssistant config is not available.");
+	      	}
+	      	response.status(HttpStatus.SC_OK);
+	      	return hassHome.getDevices();
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/map/types", "application/json", (request, response) -> {

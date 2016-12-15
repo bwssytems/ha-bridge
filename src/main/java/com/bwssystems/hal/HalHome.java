@@ -27,7 +27,7 @@ public class HalHome {
 	      	try {
 	      		hals.put(aHal.getName(), new HalInfo(aHal, bridgeSettings.getHaltoken()));
 			} catch (Exception e) {
-		        log.error("Cannot get harmony client (" + aHal.getName() + ") setup, Exiting with message: " + e.getMessage(), e);
+		        log.error("Cannot get hal client (" + aHal.getName() + ") setup, Exiting with message: " + e.getMessage(), e);
 		        return;
 			}
 		}

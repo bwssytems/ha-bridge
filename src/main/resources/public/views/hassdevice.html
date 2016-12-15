@@ -12,24 +12,26 @@
 		href="#/harmonydevices">Harmony Devices</a></li>
 	<li ng-if="bridge.showHue" role="presentation"><a
 		href="#/huedevices">Hue Devices</a></li>
-	<li role="presentation" class="active"><a href="#/haldevices">HAL
+	<li ng-if="bridge.showHal" role="presentation" class="active"><a href="#/haldevices">HAL
 			Devices</a></li>
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#/mqttmessages">MQTT Messages</a></li>
+	<li role="presentation" class="active"><a href="#/hassdevices">HomeAssistant
+			Devices</a></li>
 	<li role="presentation"><a href="#/editor">Manual Add</a></li>
 </ul>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">HAL Device List
-			({{bridge.haldevices.length}})</h2>
+		<h2 class="panel-title">HomeAssistant Device List
+			({{bridge.hassdevices.length}})</h2>
 	</div>
 	<div class="panel-body">
-		<p class="text-muted">For any HAL Device, use the action buttons
+		<p class="text-muted">For any HomeAssistant Device, use the action buttons
 			to generate the device addition information below automatically. Then
 			you can modify the name to anything you want that will be the keyword
 			for Alexa. Click the 'Add Bridge Device' to finish that selection
-			setup. The 'Already Configured HAL Devices' list below will show what
-			is already setup for your HAL.</p>
+			setup. The 'Already Configured HomeAssistant Devices' list below will show what
+			is already setup for your HomeAssitant.</p>
 		<p>
 			Also, use this select menu for which type of dim control you would
 			like to be generated: <select name="device-dim-control"
@@ -43,9 +45,9 @@
 		<p>Use the check boxes by the names to use the bulk addition
 			feature. Select your items and dim control type if wanted, then click
 			bulk add below. Your items will be added with on and off or dim and
-			off if selected with the name of the device from the HAL.</p>
+			off if selected with the name of the device from the HomeAssitant.</p>
 	</div>
-	<scrollable-table watch="bridge.haldevices">
+	<scrollable-table watch="bridge.hassdevices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
@@ -55,58 +57,37 @@
 					value="{{selectAll}}"
 					ng-checked="selectAll"
 					ng-click="toggleSelectAll()"> Name</span></th>
-				<th sortable-header col="category">Category</th>
-				<th sortable-header col="halname">HAL</th>
-				<th>On Button</th>
-				<th>Off Button</th>
+				<th sortable-header col="hassname">HomeAssitant</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
-		<tr ng-repeat="haldevice in bridge.haldevices | availableHalDeviceId">
+		<tr ng-repeat="hassdevice in bridge.hassdevices | availableHassDeviceId">
 			<td>{{$index+1}}</td>
 			<td><input type="checkbox" name="bulk.devices[]"
-				value="{{haldevice.haldevicename}}"
-				ng-checked="bulk.devices.indexOf(haldevice.haldevicename) > -1"
-				ng-click="toggleSelection(haldevice.haldevicename)">
-				{{haldevice.haldevicename}}</td>
-			<td>{{haldevice.haldevicetype}}</td>
-			<td>{{haldevice.halname}}</td>
+				value="{{hassdevice.deviceState.entity_id}}"
+				ng-checked="bulk.devices.indexOf(hassdevice.deviceState.entity_id) > -1"
+				ng-click="toggleSelection(hassdevice.deviceState.entity_id)">
+				{{hassdevice.deviceState.entity_id}}</td>
+			<td>{{hassdevice.hassname}}</td>
 			<td>
-				<select name="button-on" id="button-on"	ng-model="button_on">
-						<option ng-repeat="aButtonOn in haldevice.buttons.DeviceElements"
-							value="{{aButtonOn}}">{{aButtonOn.DeviceName}}</option>
-				</select>
-			</td>
-			<td>
-				<select name="button-off" id="button-off" ng-model="button_off">
-						<option ng-repeat="aButtonOff in haldevice.buttons.DeviceElements"
-							value="{{aButtonOff}}">{{aButtonOff.DeviceName}}</option>
-				</select>
-			</td>
-			<td>
-				<button ng-if="haldevice.haldevicetype != 'Home' && haldevice.haldevicetype != 'HVAC' && haldevice.haldevicetype != 'IrData'" class="btn btn-success" type="submit"
-					ng-click="buildDeviceUrls(haldevice, device_dim_control)">Generate
+				<button ng-if="hassdevice.hassdevicetype != 'Home' && hassdevice.hassdevicetype != 'HVAC' && hassdevice.hassdevicetype != 'IrData'" class="btn btn-success" type="submit"
+					ng-click="buildDeviceUrls(hassdevice, device_dim_control)">Generate
 					Bridge Device</button>
-				<button ng-if="haldevice.haldevicetype == 'Home'" class="btn btn-success" type="submit"
-					ng-click="buildHALHomeUrls(haldevice)">Home/Away</button>
-				<button ng-if="haldevice.haldevicetype == 'IrData'" class="btn btn-success" type="submit"
-					ng-click="buildButtonUrls(haldevice, button_on, button_off)">Build
-					A Button</button>
-				<ul ng-if="haldevice.haldevicetype == 'HVAC'" class="list-group">
+				<ul ng-if="hassdevice.hassdevicetype == 'HVAC'" class="list-group">
 					<li class="list-group-item">
 						<p>
 							<button class="btn btn-success" type="submit"
-								ng-click="buildHALHeatUrls(haldevice)">Heat</button>
+								ng-click="buildhassHeatUrls(hassdevice)">Heat</button>
 							<button class="btn btn-success" type="submit"
-								ng-click="buildHALCoolUrls(haldevice)">Cool</button>
+								ng-click="buildhassCoolUrls(hassdevice)">Cool</button>
 							<button class="btn btn-success" type="submit"
-								ng-click="buildHALAutoUrls(haldevice)">Auto</button>
+								ng-click="buildhassAutoUrls(hassdevice)">Auto</button>
 						</p>
 						<p>
 							<button class="btn btn-success" type="submit"
-								ng-click="buildHALOffUrls(haldevice)">Off</button>
+								ng-click="buildhassOffUrls(hassdevice)">Off</button>
 							<button class="btn btn-success" type="submit"
-								ng-click="buildHALFanUrls(haldevice)">Fan</button>
+								ng-click="buildhassFanUrls(hassdevice)">Fan</button>
 						</p>
 					</li>
 				</ul>
@@ -123,26 +104,24 @@
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title">
-			Already Configured HAL Devices <a ng-click="toggleButtons()"><span
+			Already Configured HomeAssitant Devices <a ng-click="toggleButtons()"><span
 				class={{imgButtonsUrl}} aria-hidden="true"></span></a></a>
 		</h2>
 	</div>
-	<scrollable-table ng-if="buttonsVisible" watch="bridge.haldevices">
+	<scrollable-table ng-if="buttonsVisible" watch="bridge.hassdevices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<th>Row</th>
 				<th sortable-header col="name">Name</th>
-				<th sortable-header col="category">Category</th>
-				<th sortable-header col="halname">HAL</th>
+				<th sortable-header col="hassname">hass</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="device in bridge.devices | unavailableHalDeviceId">
+			ng-repeat="device in bridge.devices | unavailableHassDeviceId">
 			<td>{{$index+1}}</td>
 			<td>{{device.name}}</td>
-			<td>{{device.deviceType}}</td>
 			<td>{{device.targetDevice}}</td>
 			<td>
 				<button class="btn btn-danger" type="submit"
@@ -154,7 +133,7 @@
 </div>
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">Add Bridge Device for a HAL Device</h2>
+		<h2 class="panel-title">Add Bridge Device for a HomeAssitant Device</h2>
 	</div>
 	<div class="panel-body">
 		<form class="form-horizontal">

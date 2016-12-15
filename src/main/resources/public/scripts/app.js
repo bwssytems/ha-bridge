@@ -40,6 +40,9 @@ app.config(function ($routeProvider) {
 	}).when('/mqttmessages', {
 		templateUrl: 'views/mqttpublish.html',
 		controller: 'MQTTController'		
+	}).when('/hassdevices', {
+		templateUrl: 'views/hassevice.html',
+		controller: 'HassController'		
 	}).otherwise({
 		templateUrl: 'views/configuration.html',
 		controller: 'ViewingController'
@@ -65,7 +68,7 @@ String.prototype.replaceAll = function(search, replace)
 
 app.service('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, habridgeversion: ""};
+	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, habridgeversion: ""};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
@@ -197,6 +200,11 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		return;
 	}
 
+	this.updateShowHass = function () {
+		this.state.showHass = self.state.settings.hassconfigured;
+		return;
+	}
+
 	this.loadBridgeSettings = function () {
 		return $http.get(this.state.systemsbase + "/settings").then(
 				function (response) {
@@ -207,6 +215,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 					self.updateShowHue();
 					self.updateShowHal();
 					self.updateShowMqtt();
+					self.updateShowHass();
 				},
 				function (error) {
 					self.displayWarn("Load Bridge Settings Error: ", error);
@@ -358,6 +367,19 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 				},
 				function (error) {
 					self.displayWarn("Get MQTT Devices Error: ", error);
+				}
+		);
+	};
+
+	this.viewHassDevices = function () {
+		if(!this.state.showHass)
+			return;
+		return $http.get(this.state.base + "/hass/devices").then(
+				function (response) {
+					self.state.hassdevices = response.data;
+				},
+				function (error) {
+					self.displayWarn("Get Hass Devices Error: ", error);
 				}
 		);
 	};
@@ -1817,6 +1839,302 @@ app.controller('MQTTController', function ($scope, $location, $http, bridgeServi
 
 });
 
+app.controller('HassController', function ($scope, $location, $http, bridgeService, ngDialog) {
+	$scope.bridge = bridgeService.state;
+	$scope.device = $scope.bridge.device;
+	$scope.device_dim_control = "";
+	$scope.bulk = { devices: [] };
+	$scope.selectAll = false;
+	bridgeService.viewHassDevices();
+	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	$scope.buttonsVisible = false;
+
+	$scope.clearDevice = function () {
+		bridgeService.clearDevice();
+	};
+
+	$scope.buildDeviceUrls = function (hassdevice, dim_control) {
+		bridgeService.clearDevice();
+		$scope.device = $scope.bridge.device;
+		var preOnCmd = "";
+		var preDimCmd = "";
+		var preOffCmd = "";
+		var nameCmd = ""
+		var postCmd = "?Token=" + $scope.bridge.settings.haltoken;
+		if(hassdevice.hassdevicetype == "Group") {
+			$scope.device.deviceType = "group";
+			preOnCmd = "/GroupService!GroupCmd=On";
+			preOffCmd = "/GroupService!GroupCmd=Off";
+			nameCmd = "!GroupName=";
+		}
+		else if(hassdevice.hassdevicetype == "Macro") {
+			$scope.device.deviceType = "macro";
+			preOnCmd = "/MacroService!MacroCmd=Set!MacroName=";
+			preOffCmd = preOnCmd;
+		}
+		else if(hassdevice.hassdevicetype == "Scene") {
+			$scope.device.deviceType = "scene";
+			preOnCmd = "/SceneService!SceneCmd=Set!SceneName=";
+			preOffCmd = preOnCmd;
+		}
+		else {
+			$scope.device.deviceType = "switch";
+			preOnCmd = "/DeviceService!DeviceCmd=SetDevice!DeviceValue=On";
+			preDimCmd = "/DeviceService!DeviceCmd=SetDevice!DeviceValue=Dim!DevicePercent=";
+			preOffCmd = "/DeviceService!DeviceCmd=SetDevice!DeviceValue=Off";
+			nameCmd = "!DeviceName=";
+		}
+		$scope.device.name = hassdevice.hassdevicename;
+		$scope.device.targetDevice = hassdevice.halname;
+		$scope.device.mapType = "hassdevice";
+		$scope.device.mapId = hassdevice.hassdevicename + "-" + hassdevice.halname;
+		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0) && $scope.device.deviceType == "switch")
+			$scope.device.dimUrl = "http://" + hassdevice.haladdress
+			+ preDimCmd
+			+ dim_control
+			+ nameCmd
+			+ hassdevice.hassdevicename.replaceAll(" ", "%20")
+			+ postCmd;
+		else
+			$scope.device.dimUrl = "http://" + hassdevice.haladdress
+			+ preOnCmd
+			+ nameCmd
+			+ hassdevice.hassdevicename.replaceAll(" ", "%20")
+			+ postCmd;
+		$scope.device.onUrl = "http://" + hassdevice.haladdress
+		+ preOnCmd
+		+ nameCmd
+		+ hassdevice.hassdevicename.replaceAll(" ", "%20")
+		+ postCmd;
+		$scope.device.offUrl = "http://" + hassdevice.haladdress 
+		+ preOffCmd
+		+ nameCmd
+		+ hassdevice.hassdevicename.replaceAll(" ", "%20")
+		+ postCmd;
+	};
+
+	$scope.buildHassHomeUrls = function (hassdevice) {
+		bridgeService.clearDevice();
+		$scope.device.deviceType = "home";
+		$scope.device.name = hassdevice.hassdevicename;
+		$scope.device.targetDevice = hassdevice.halname;
+		$scope.device.mapType = "halHome";
+		$scope.device.mapId = hassdevice.hassdevicename + "-" + hassdevice.halname + "-HomeAway";
+		$scope.device.onUrl = "http://" + hassdevice.haladdress + "/ModeService!ModeCmd=Set!ModeName=Home?Token=" + $scope.bridge.settings.haltoken;
+		$scope.device.offUrl = "http://" + hassdevice.haladdress	+ "/ModeService!ModeCmd=Set!ModeName=Away?Token=" + $scope.bridge.settings.haltoken;
+	};
+
+	$scope.buildHassHeatUrls = function (hassdevice) {
+		bridgeService.clearDevice();
+		$scope.device.deviceType = "thermo";
+		$scope.device.name = hassdevice.hassdevicename + " Heat";
+		$scope.device.targetDevice = hassdevice.halname;
+		$scope.device.mapType = "halThermoSet";
+		$scope.device.mapId = hassdevice.hassdevicename + "-" + hassdevice.halname + "-SetHeat";
+		$scope.device.onUrl = "http://" + hassdevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ hassdevice.hassdevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Heat?Token="
+		+ $scope.bridge.settings.haltoken;
+		$scope.device.dimUrl = "http://" + hassdevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ hassdevice.hassdevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Heat!HeatSpValue=${intensity.percent}?Token="
+		+ $scope.bridge.settings.haltoken;
+		$scope.device.offUrl = "http://" + hassdevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ hassdevice.hassdevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Off?Token="
+	};
+
+	$scope.buildHassCoolUrls = function (hassdevice) {
+		bridgeService.clearDevice();
+		$scope.device.deviceType = "thermo";
+		$scope.device.name = hassdevice.hassdevicename + " Cool";
+		$scope.device.targetDevice = hassdevice.halname;
+		$scope.device.mapType = "halThermoSet";
+		$scope.device.mapId = hassdevice.hassdevicename + "-" + hassdevice.halname + "-SetCool";
+		$scope.device.onUrl = "http://" + hassdevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ hassdevice.hassdevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Cool?Token="
+		+ $scope.bridge.settings.haltoken;
+		$scope.device.dimUrl = "http://" + hassdevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ hassdevice.hassdevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Cool!CoolSpValue=${intensity.percent}?Token="
+		+ $scope.bridge.settings.haltoken;
+		$scope.device.offUrl = "http://" + hassdevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ hassdevice.hassdevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Off?Token="
+	};
+
+	$scope.buildHassAutoUrls = function (hassdevice) {
+		bridgeService.clearDevice();
+		$scope.device.deviceType = "thermo";
+		$scope.device.name = hassdevice.hassdevicename + " Auto";
+		$scope.device.targetDevice = hassdevice.halname;
+		$scope.device.mapType = "halThermoSet";
+		$scope.device.mapId = hassdevice.hassdevicename + "-" + hassdevice.halname + "-SetAuto";
+		$scope.device.onUrl = "http://" + hassdevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ hassdevice.hassdevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Auto?Token="
+		+ $scope.bridge.settings.haltoken;
+		$scope.device.offUrl = "http://" + hassdevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ hassdevice.hassdevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Off?Token="
+	};
+
+	$scope.buildHassOffUrls = function (hassdevice) {
+		bridgeService.clearDevice();
+		$scope.device.deviceType = "thermo";
+		$scope.device.name = hassdevice.hassdevicename + " Thermostat";
+		$scope.device.targetDevice = hassdevice.halname;
+		$scope.device.mapType = "halThermoSet";
+		$scope.device.mapId = hassdevice.hassdevicename + "-" + hassdevice.halname + "-TurnOff";
+		$scope.device.onUrl = "http://" + hassdevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ hassdevice.hassdevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Auto?Token="
+		+ $scope.bridge.settings.haltoken;
+		$scope.device.offUrl = "http://" + hassdevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ hassdevice.hassdevicename.replaceAll(" ", "%20") 
+		+ "!HVACMode=Off?Token="
+	};
+
+	$scope.buildHassFanUrls = function (hassdevice) {
+		bridgeService.clearDevice();
+		$scope.device.deviceType = "thermo";
+		$scope.device.name = hassdevice.hassdevicename + " Fan";
+		$scope.device.targetDevice = hassdevice.halname;
+		$scope.device.mapType = "halThermoSet";
+		$scope.device.mapId = hassdevice.hassdevicename + "-" + hassdevice.halname + "-SetFan";
+		$scope.device.onUrl = "http://" + hassdevice.haladdress 
+		+ "/HVACService!HVACCmd=Set!HVACName=" 
+		+ hassdevice.hassdevicename.replaceAll(" ", "%20") 
+		+ "!FanMode=On?Token="
+		+ $scope.bridge.settings.haltoken;
+		$scope.device.offUrl = "http://" + hassdevice.haladdress 
+			+ "/HVACService!HVACCmd=Set!HVACName=" 
+			+ hassdevice.hassdevicename.replaceAll(" ", "%20") 
+			+ "!FanMode=Auto?Token="
+			+ $scope.bridge.settings.haltoken;
+	};
+
+	$scope.addDevice = function () {
+		if($scope.device.name == "" && $scope.device.onUrl == "")
+			return;
+		bridgeService.addDevice($scope.device).then(
+				function () {
+					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewhassdevices();
+				},
+				function (error) {
+					bridgeService.displayWarn("Error adding device: " + $scope.device.name, error)
+				}
+		);
+
+	};
+
+	$scope.bulkAddDevices = function(dim_control) {
+		var devicesList = [];
+		for(var i = 0; i < $scope.bulk.devices.length; i++) {
+			for(var x = 0; x < bridgeService.state.hassdevices.length; x++) {
+				if(bridgeService.state.hassdevices[x].hassdevicename == $scope.bulk.devices[i]) {
+					if(bridgeService.state.hassdevices[x].hassdevicetype == "HVAC")
+						$scope.buildHALAutoUrls(bridgeService.state.hassdevices[x]);
+					else if(bridgeService.state.hassdevices[x].hassdevicetype == "HOME")
+						$scope.buildHALHomeUrls(bridgeService.state.hassdevices[x]);
+					else
+						$scope.buildDeviceUrls(bridgeService.state.hassdevices[x],dim_control);
+					devicesList[i] = {
+							name: $scope.device.name,
+							mapId: $scope.device.mapId,
+							mapType: $scope.device.mapType,
+							deviceType: $scope.device.deviceType,
+							targetDevice: $scope.device.targetDevice,
+							onUrl: $scope.device.onUrl,
+							dimUrl: $scope.device.dimUrl,
+							offUrl: $scope.device.offUrl,
+							headers: $scope.device.headers,
+							httpVerb: $scope.device.httpVerb,
+							contentType: $scope.device.contentType,
+							contentBody: $scope.device.contentBody,
+							contentBodyDim: $scope.device.contentBodyDim,
+							contentBodyOff: $scope.device.contentBodyOff
+					};
+				}
+			}
+		}
+		bridgeService.bulkAddDevice(devicesList).then(
+				function () {
+					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewhassdevices();
+				},
+				function (error) {
+					bridgeService.displayWarn("Error adding Hass devices in bulk.", error)
+				}
+			);
+		$scope.bulk = { devices: [] };
+		$scope.selectAll = false;
+	};
+
+	$scope.toggleSelection = function toggleSelection(deviceId) {
+		var idx = $scope.bulk.devices.indexOf(deviceId);
+
+		// is currently selected
+		if (idx > -1) {
+			$scope.bulk.devices.splice(idx, 1);
+			if($scope.bulk.devices.length == 0 && $scope.selectAll)
+				$scope.selectAll = false;
+		}
+
+		// is newly selected
+		else {
+			$scope.bulk.devices.push(deviceId);
+			$scope.selectAll = true;
+		}
+	};
+
+	$scope.toggleSelectAll = function toggleSelectAll() {
+		if($scope.selectAll) {
+			$scope.selectAll = false;
+			$scope.bulk = { devices: [] };
+		}
+		else {
+			$scope.selectAll = true;
+			for(var x = 0; x < bridgeService.state.hassdevices.length; x++) {
+				if($scope.bulk.devices.indexOf(bridgeService.state.hassdevices[x]) < 0 && !bridgeService.findDeviceByMapId(bridgeService.state.hassdevices[x].hassdevicename + "-" +  bridgeService.state.hassdevices[x].halname, bridgeService.state.hassdevices[x].halname, "hassdevice"))
+					$scope.bulk.devices.push(bridgeService.state.hassdevices[x].hassdevicename);
+			}
+		}
+	};
+
+	$scope.toggleButtons = function () {
+		$scope.buttonsVisible = !$scope.buttonsVisible;
+		if($scope.buttonsVisible)
+			$scope.imgButtonsUrl = "glyphicon glyphicon-minus";
+		else
+			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	};
+
+	$scope.deleteDeviceByMapId = function (id, mapType) {
+		$scope.bridge.mapandid = { id, mapType };
+		ngDialog.open({
+			template: 'deleteMapandIdDialog',
+			controller: 'DeleteMapandIdDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
+	};
+
+});
+
 app.controller('EditController', function ($scope, $location, $http, bridgeService) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = $scope.bridge.device;
@@ -2098,6 +2416,34 @@ app.filter('configuredMqttMsgs', function() {
 			return out;
 		for (var i = 0; i < input.length; i++) {
 			if(input[i].mapType == "mqttMessage"){
+				out.push(input[i]);
+			}
+		}
+		return out;
+	}
+});
+
+app.filter('availableHassDeviceId', function(bridgeService) {
+	return function(input) {
+		var out = [];
+		if(input == null)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if(!bridgeService.findDeviceByMapId(input[i].hassdevicename + "-" +  input[i].hassname, input[i].hassname, "hassDevice")){
+				out.push(input[i]);
+			}
+		}
+		return out;
+	}
+});
+
+app.filter('unavailableHassDeviceId', function(bridgeService) {
+	return function(input) {
+		var out = [];
+		if(input == null)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if(input[i].mapType != null && bridgeService.aContainsB(input[i].mapType, "hass")){
 				out.push(input[i]);
 			}
 		}

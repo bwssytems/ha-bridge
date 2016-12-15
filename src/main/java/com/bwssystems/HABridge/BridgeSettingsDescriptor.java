@@ -34,6 +34,8 @@ public class BridgeSettingsDescriptor {
 	private String webaddress;
 	private IpList mqttaddress;
 	private boolean mqttconfigured;
+	private IpList hassaddress;
+	private boolean hassconfigured;
 	
 	public BridgeSettingsDescriptor() {
 		super();
@@ -45,6 +47,7 @@ public class BridgeSettingsDescriptor {
 		this.hueconfigured = false;
 		this.halconfigured = false;
 		this.mqttconfigured = false;
+		this.hassconfigured = false;
 		this.farenheit = true;
 		this.whitelist = null;
 		this.settingsChanged = false;
@@ -225,6 +228,18 @@ public class BridgeSettingsDescriptor {
 	public void setMqttconfigured(boolean mqttconfigured) {
 		this.mqttconfigured = mqttconfigured;
 	}
+	public IpList getHassaddress() {
+		return hassaddress;
+	}
+	public void setHassaddress(IpList hassaddress) {
+		this.hassaddress = hassaddress;
+	}
+	public boolean isHassconfigured() {
+		return hassconfigured;
+	}
+	public void setHassconfigured(boolean hassconfigured) {
+		this.hassconfigured = hassconfigured;
+	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
 			return false;
@@ -270,6 +285,14 @@ public class BridgeSettingsDescriptor {
 		if(this.getMqttaddress() == null || this.getMqttaddress().getDevices().size() <= 0)
 			return false;		
 		List<NamedIP> devicesList = this.getMqttaddress().getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+		return true;
+	}
+	public Boolean isValidHass() {
+		if(this.getHassaddress() == null || this.getHassaddress().getDevices().size() <= 0)
+			return false;		
+		List<NamedIP> devicesList = this.getHassaddress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
 		return true;

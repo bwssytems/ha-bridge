@@ -17,6 +17,8 @@
 	<li ng-if="bridge.showHal" role="presentation"><a
 		href="#/haldevices">HAL Devices</a></li>
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#/mqttmessages">MQTT Messages</a></li>
+	<li ng-if="bridge.showHass" role="presentation"><a href="#/hassdevices">HomeAssistant
+			Devices</a></li>
 	<li role="presentation"><a href="#/editor">Manual Add</a></li>
 </ul>
 
@@ -262,6 +264,40 @@
 									placeholder="MQTT Broker password (opt)"></td>
 								<td><button class="btn btn-success" type="submit"
 										ng-click="addMQTTtoSettings(newmqttname, newmqttip, newmqttusername, newmqttpassword)">Add</button></td>
+							</tr>
+						</table></td>
+				</tr>
+				<tr>
+					<td>HomeAssistant Names and IP Addresses</td>
+					<td><table
+							class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>IP</th>
+									<th>Port</th>
+									<th>Manage</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="hass in bridge.settings.hassaddress.devices">
+								<td>{{hass.name}}</td>
+								<td>{{hass.ip}}</td>
+								<td>{{hass.port}}</td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removeHasstoSettings(hass.name, hass.ip)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-next-hass-name"
+									class="form-control" type="text" ng-model="newhassname"
+									placeholder="A HomeAssistant"></td>
+								<td><input id="bridge-settings-next-hass-ip"
+									class="form-control" type="text" ng-model="newhassip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-next-hass-port"
+									class="form-control" type="text" ng-model="newhassport"
+									deafult="8123"></td>
+								<td><button class="btn btn-success" type="submit"
+										ng-click="addHasstoSettings(newhassname, newhassip, newhassport)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>

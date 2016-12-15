@@ -12,6 +12,7 @@ import com.bwssystems.HABridge.upnp.UpnpSettingsResource;
 import com.bwssystems.NestBridge.NestHome;
 import com.bwssystems.hal.HalHome;
 import com.bwssystems.harmony.HarmonyHome;
+import com.bwssystems.hass.HassHome;
 import com.bwssystems.hue.HueHome;
 import com.bwssystems.mqtt.MQTTHome;
 import com.bwssystems.util.UDPDatagramSender;
@@ -41,6 +42,7 @@ public class HABridge {
         HueHome hueHome;
         HalHome halHome;
         MQTTHome mqttHome;
+        HassHome hassHome;
         HueMulator theHueMulator;
         UDPDatagramSender udpSender;
         UpnpSettingsResource theSettingResponder;
@@ -77,7 +79,9 @@ public class HABridge {
 	        //setup the mqtt handlers if available
 	        mqttHome = new MQTTHome(bridgeSettings.getBridgeSettingsDescriptor());
 	        // setup the class to handle the resource setup rest api
-	        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), harmonyHome, nestHome, hueHome, halHome,  mqttHome);
+	        //setup the HomeAssistant configuration if available
+	        hassHome = new HassHome(bridgeSettings.getBridgeSettingsDescriptor());
+	        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), harmonyHome, nestHome, hueHome, halHome,  mqttHome, hassHome);
 	        // setup the class to handle the upnp response rest api
 	        theSettingResponder = new UpnpSettingsResource(bridgeSettings.getBridgeSettingsDescriptor());
 	        theSettingResponder.setupServer();
