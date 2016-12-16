@@ -195,7 +195,7 @@ public class HueMulator implements HueErrorStringSet {
 				return new Gson().toJson(theResponse, GroupResponse.class);
 			}
 
-			return "[{\"error\":{\"type\":\"3\", \"address\": \"/api/" + userId + "/groups/" + "0"
+			return "[{\"error\":{\"type\":\"3\", \"address\": \"/api/" + userId + "/groups/" + groupId
 					+ "\",\"description\": \"Object not found\"}}]";
 		});
 		// http://ip_address:port/api/{userId}/scenes returns json objects of
@@ -467,6 +467,37 @@ public class HueMulator implements HueErrorStringSet {
 		// http://ip_address:port/api/{userId} returns json objects for the full
 		// state
 		get(HUE_CONTEXT + "/:userid", "application/json", (request, response) -> {
+			String userId = request.params(":userid");
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.type("application/json");
+			response.status(HttpStatus.SC_OK);
+			log.debug("hue api full state requested: " + userId + " from " + request.ip());
+			if (validateWhitelistUser(userId, false) == null) {
+				log.debug("Valudate user, No User supplied");
+				HueErrorResponse theErrorResp = new HueErrorResponse();
+				theErrorResp.addError(new HueError(
+						new HueErrorDetails("1", "/api/" + userId, "unauthorized user", null, null, null)));
+				return theErrorResp.getTheErrors();
+			}
+
+			List<DeviceDescriptor> descriptorList = repository.findAll();
+			HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(),
+					bridgeSettings.getWhitelist());
+			Map<String, DeviceResponse> deviceList = new HashMap<>();
+			if (descriptorList != null) {
+				descriptorList.forEach(descriptor -> {
+					DeviceResponse deviceResponse = DeviceResponse.createResponse(descriptor);
+					deviceList.put(descriptor.getId(), deviceResponse);
+				});
+				apiResponse.setLights(deviceList);
+			}
+
+			return apiResponse;
+		} , new JsonTransformer());
+
+		// http://ip_address:port/api/{userId}/ returns json objects for the full
+		// state
+		get(HUE_CONTEXT + "/:userid/", "application/json", (request, response) -> {
 			String userId = request.params(":userid");
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");

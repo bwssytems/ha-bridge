@@ -41,7 +41,7 @@ app.config(function ($routeProvider) {
 		templateUrl: 'views/mqttpublish.html',
 		controller: 'MQTTController'		
 	}).when('/hassdevices', {
-		templateUrl: 'views/hassevice.html',
+		templateUrl: 'views/hassdevice.html',
 		controller: 'HassController'		
 	}).otherwise({
 		templateUrl: 'views/configuration.html',
@@ -742,6 +742,23 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     	    }
     	}    	
     };
+    $scope.addHasstoSettings = function (newhassname, newhassip, newhassport) {
+    	if($scope.bridge.settings.hassaddress == null) {
+			$scope.bridge.settings.hassaddress = { devices: [] };
+		}
+    	var newhass = {name: newhassname, ip: newhassip, port: newhassport }
+    	$scope.bridge.settings.hassaddress.devices.push(newhass);
+    	$scope.newhassname = null;
+    	$scope.newhassip = null;
+    	$scope.newhassport = null;
+    };
+    $scope.removeHasstoSettings = function (hassname, hassip) {
+    	for(var i = $scope.bridge.settings.hassaddress.devices.length - 1; i >= 0; i--) {
+    	    if($scope.bridge.settings.hassaddress.devices[i].name === hassname && $scope.bridge.settings.hassaddress.devices[i].ip === hassip) {
+    	    	$scope.bridge.settings.hassaddress.devices.splice(i, 1);
+    	    }
+    	}    	
+    };
     $scope.bridgeReinit = function () {
     	bridgeService.reinit();
     };
@@ -951,6 +968,10 @@ app.controller('DeleteMapandIdDialogCtrl', function ($scope, bridgeService, ngDi
 			bridgeService.viewHueDevices();
 		if(mapandid.mapType == "halDevice")
 			bridgeService.viewHalDevices();
+		if(mapandid.mapType == "mqttMessage")
+			bridgeService.viewMQTTDevices();
+		if(mapandid.mapType == "hassDevice")
+			bridgeService.viewHassDevices();
 		$scope.bridge.mapandid = null;
 	};
 });
@@ -1856,72 +1877,25 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 	$scope.buildDeviceUrls = function (hassdevice, dim_control) {
 		bridgeService.clearDevice();
 		$scope.device = $scope.bridge.device;
-		var preOnCmd = "";
-		var preDimCmd = "";
-		var preOffCmd = "";
-		var nameCmd = ""
-		var postCmd = "?Token=" + $scope.bridge.settings.haltoken;
-		if(hassdevice.hassdevicetype == "Group") {
-			$scope.device.deviceType = "group";
-			preOnCmd = "/GroupService!GroupCmd=On";
-			preOffCmd = "/GroupService!GroupCmd=Off";
-			nameCmd = "!GroupName=";
+		if( $scope.device.mapType == "hassDevice" ) {
+			$scope.device.mapId = $scope.device.mapId + "-" + hassdevice.deviceState.entity_id;
+			$scope.device.onUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"item\":\"{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"state\":\"on\"}\"}]";
+			if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0))
+				$scope.device.dimUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"item\":\"{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"state\":\"on\",\"bri\":\"" + dim_control + "\"}\"}]";
+			$scope.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"item\":\"{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"state\":\"off\"}\"}]";
 		}
-		else if(hassdevice.hassdevicetype == "Macro") {
-			$scope.device.deviceType = "macro";
-			preOnCmd = "/MacroService!MacroCmd=Set!MacroName=";
-			preOffCmd = preOnCmd;
+		else if ($scope.device.mapType == null || $scope.device.mapType == "") {
+			bridgeService.clearDevice();
+			$scope.device.deviceType = hassdevice.domain;
+			$scope.device.targetDevice = hassdevice.hassname;
+			$scope.device.name = hassdevice.deviceState.entity_id;
+			$scope.device.mapType = "hassDevice";
+			$scope.device.mapId =  hassdevice.hassname + "-" + hassdevice.deviceState.entity_id;
+			$scope.device.onUrl = "[{\"item\":\"{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"state\":\"on\"}\"}]";
+			if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0))
+				$scope.device.dimUrl = "[{\"item\":\"{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"state\":\"on\",\"bri\":\"" + dim_control + "\"}\"}]";
+			$scope.device.offUrl = "[{\"item\":\"{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"state\":\"off\"}\"}]";
 		}
-		else if(hassdevice.hassdevicetype == "Scene") {
-			$scope.device.deviceType = "scene";
-			preOnCmd = "/SceneService!SceneCmd=Set!SceneName=";
-			preOffCmd = preOnCmd;
-		}
-		else {
-			$scope.device.deviceType = "switch";
-			preOnCmd = "/DeviceService!DeviceCmd=SetDevice!DeviceValue=On";
-			preDimCmd = "/DeviceService!DeviceCmd=SetDevice!DeviceValue=Dim!DevicePercent=";
-			preOffCmd = "/DeviceService!DeviceCmd=SetDevice!DeviceValue=Off";
-			nameCmd = "!DeviceName=";
-		}
-		$scope.device.name = hassdevice.hassdevicename;
-		$scope.device.targetDevice = hassdevice.halname;
-		$scope.device.mapType = "hassdevice";
-		$scope.device.mapId = hassdevice.hassdevicename + "-" + hassdevice.halname;
-		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0) && $scope.device.deviceType == "switch")
-			$scope.device.dimUrl = "http://" + hassdevice.haladdress
-			+ preDimCmd
-			+ dim_control
-			+ nameCmd
-			+ hassdevice.hassdevicename.replaceAll(" ", "%20")
-			+ postCmd;
-		else
-			$scope.device.dimUrl = "http://" + hassdevice.haladdress
-			+ preOnCmd
-			+ nameCmd
-			+ hassdevice.hassdevicename.replaceAll(" ", "%20")
-			+ postCmd;
-		$scope.device.onUrl = "http://" + hassdevice.haladdress
-		+ preOnCmd
-		+ nameCmd
-		+ hassdevice.hassdevicename.replaceAll(" ", "%20")
-		+ postCmd;
-		$scope.device.offUrl = "http://" + hassdevice.haladdress 
-		+ preOffCmd
-		+ nameCmd
-		+ hassdevice.hassdevicename.replaceAll(" ", "%20")
-		+ postCmd;
-	};
-
-	$scope.buildHassHomeUrls = function (hassdevice) {
-		bridgeService.clearDevice();
-		$scope.device.deviceType = "home";
-		$scope.device.name = hassdevice.hassdevicename;
-		$scope.device.targetDevice = hassdevice.halname;
-		$scope.device.mapType = "halHome";
-		$scope.device.mapId = hassdevice.hassdevicename + "-" + hassdevice.halname + "-HomeAway";
-		$scope.device.onUrl = "http://" + hassdevice.haladdress + "/ModeService!ModeCmd=Set!ModeName=Home?Token=" + $scope.bridge.settings.haltoken;
-		$scope.device.offUrl = "http://" + hassdevice.haladdress	+ "/ModeService!ModeCmd=Set!ModeName=Away?Token=" + $scope.bridge.settings.haltoken;
 	};
 
 	$scope.buildHassHeatUrls = function (hassdevice) {

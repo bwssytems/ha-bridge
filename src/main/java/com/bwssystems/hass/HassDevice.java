@@ -2,6 +2,8 @@ package com.bwssystems.hass;
 
 public class HassDevice {
 	private State deviceState;
+	private String deviceName;
+	private String domain;
 	private String hassaddress;
 	private String hassname;
 	public State getDeviceState() {
@@ -9,6 +11,18 @@ public class HassDevice {
 	}
 	public void setDeviceState(State deviceState) {
 		this.deviceState = deviceState;
+	}
+	public String getDeviceName() {
+		return deviceName;
+	}
+	public void setDeviceName(String deviceName) {
+		this.deviceName = deviceName;
+	}
+	public String getDomain() {
+		return domain;
+	}
+	public void setDomain(String domain) {
+		this.domain = domain;
 	}
 	public String getHassaddress() {
 		return hassaddress;

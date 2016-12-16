@@ -59,6 +59,8 @@ public class HassHome {
 			aNewHassDevice.setDeviceState(theDevice);
 			aNewHassDevice.setHassaddress(hassMap.get(theKey).getHassAddress().getIp());
 			aNewHassDevice.setHassname(theKey);
+			aNewHassDevice.setDeviceName(theDevice.getAttributes().get("friendly_name").getAsString());
+			aNewHassDevice.setDomain(theDevice.getEntityId().substring(0, theDevice.getEntityId().indexOf(".")));
 			theDeviceList.add(aNewHassDevice);
 		}
 		return true;

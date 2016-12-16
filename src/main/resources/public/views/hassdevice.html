@@ -70,10 +70,10 @@
 				{{hassdevice.deviceState.entity_id}}</td>
 			<td>{{hassdevice.hassname}}</td>
 			<td>
-				<button ng-if="hassdevice.hassdevicetype != 'Home' && hassdevice.hassdevicetype != 'HVAC' && hassdevice.hassdevicetype != 'IrData'" class="btn btn-success" type="submit"
+				<button ng-if="hassdevice.domain != 'climate' && hassdevice.domain != 'sensor' && hassdevice.domain != 'sun'" class="btn btn-success" type="submit"
 					ng-click="buildDeviceUrls(hassdevice, device_dim_control)">Generate
 					Bridge Device</button>
-				<ul ng-if="hassdevice.hassdevicetype == 'HVAC'" class="list-group">
+				<ul ng-if="hassdevice.domain == 'climate'" class="list-group">
 					<li class="list-group-item">
 						<p>
 							<button class="btn btn-success" type="submit"
