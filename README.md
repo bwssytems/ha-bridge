@@ -5,6 +5,8 @@ Emulates Philips Hue api to other home automation gateways such as an Amazon Ech
 
 **NOTE: This software does require the user to have knwoledge on how processes run on Linux or Windows with java. Also, an understanding of networking basics will help as well. This system reveives upnp udp multicast packets from devices to be found, so that is some thing to understand. Please make sure you have all your devices use static IP addresses from your router. Most all questions have been answered already. PLEASE USE GOOGLE TO FIND YOUR ANSWERS!**
 
+**NOTE: This software does not control Philips Hue devices directly. A physical Philips Hue Hub is required for that, by which the ha-bridge can then proxy all of your real Hue bridges behind this bridge.**
+
 In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest and the ability to proxy all of your real Hue bridges behind this bridge.
 
 Alternatively the Bridge supports custom calls as well using http/https/udp and tcp such as the LimitlessLED/MiLight bulbs using the UDP protocol. Binary data is supported with UDP/TCP.
