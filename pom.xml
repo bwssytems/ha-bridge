@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>3.5.1h</version>
+	<version>3.5.1i</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
@@ -115,6 +115,11 @@
 	        <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
 	        <version>1.1.0</version>
 	    </dependency>
+		<dependency>
+		    <groupId>junit</groupId>
+		    <artifactId>junit</artifactId>
+		    <version>4.11</version>
+		</dependency>
 	</dependencies>
 
 	<build>
