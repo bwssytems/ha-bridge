@@ -28,7 +28,7 @@ public class UDPDatagramSender {
 	}
 
 	private boolean initializeSocket(int port) {
-		log.info("Initializing UDP response Seocket...");
+		log.info("Initializing UDP response Socket...");
 		udpResponsePort = port;
 		boolean portLoopControl = true;
 		int retryCount = 0;
