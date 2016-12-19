@@ -92,7 +92,7 @@ public class HABridge {
 	        }
 	        else {
 		        // setup the class to handle the hue emulator rest api
-		        theHueMulator = new HueMulator(bridgeSettings.getBridgeSettingsDescriptor(), theResources.getDeviceRepository(), harmonyHome, nestHome, hueHome, mqttHome, udpSender);
+		        theHueMulator = new HueMulator(bridgeSettings.getBridgeSettingsDescriptor(), theResources.getDeviceRepository(), harmonyHome, nestHome, hueHome, mqttHome, hassHome, udpSender);
 		        theHueMulator.setupServer();
 		        // wait for the sparkjava initialization of the rest api classes to be complete
 		        awaitInitialization();

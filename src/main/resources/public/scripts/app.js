@@ -1811,8 +1811,8 @@ app.controller('MQTTController', function ($scope, $location, $http, bridgeServi
 		var currentOff = $scope.device.offUrl;
 		if( $scope.device.mapType == "mqttMessage") {
 			$scope.device.mapId = $scope.device.mapId + "-" + mqtttopic;
-			$scope.device.onUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\"}]";
-			$scope.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\"}]";        		
+			$scope.device.onUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"item\":{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\"},\"type\":\"mqttMessage\"}]";
+			$scope.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"item\":{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\"},\"type\":\"mqttMessage\"}]";        		
 		}
 		else if ($scope.device.mapType == null || $scope.device.mapType == "") {
 			bridgeService.clearDevice();
@@ -1821,8 +1821,8 @@ app.controller('MQTTController', function ($scope, $location, $http, bridgeServi
 			$scope.device.name = mqttbroker.clientId + mqtttopic;
 			$scope.device.mapType = "mqttMessage";
 			$scope.device.mapId =  mqttbroker.clientId + "-" + mqtttopic;
-			$scope.device.onUrl = "[{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\"}]";
-			$scope.device.offUrl = "[{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\"}]";
+			$scope.device.onUrl = "[{\"item\":{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\"},\"type\":\"mqttMessage\"}]";
+			$scope.device.offUrl = "[{\"item\":{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\"},\"type\":\"mqttMessage\"}]";
 		}
 	};
 
@@ -1875,14 +1875,16 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 	};
 
 	$scope.buildDeviceUrls = function (hassdevice, dim_control) {
-		bridgeService.clearDevice();
 		$scope.device = $scope.bridge.device;
+		var currentOn = $scope.device.onUrl;
+		var currentDim = $scope.device.dimUrl;
+		var currentOff = $scope.device.offUrl;
 		if( $scope.device.mapType == "hassDevice" ) {
 			$scope.device.mapId = $scope.device.mapId + "-" + hassdevice.deviceState.entity_id;
-			$scope.device.onUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"item\":\"{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"state\":\"on\"}\"}]";
+			$scope.device.onUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"item\":{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"},\"type\":\"hassDevice\"}]";
 			if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0))
-				$scope.device.dimUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"item\":\"{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"state\":\"on\",\"bri\":\"" + dim_control + "\"}\"}]";
-			$scope.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"item\":\"{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"state\":\"off\"}\"}]";
+				$scope.device.dimUrl = currentDim.substr(0, currentDim.indexOf("]")) + ",{\"item\":{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\",\"bri\":\"" + dim_control + "\"},\"type\":\"hassDevice\"}]";
+			$scope.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"item\":{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"off\"},\"type\":\"hassDevice\"}]";
 		}
 		else if ($scope.device.mapType == null || $scope.device.mapType == "") {
 			bridgeService.clearDevice();
@@ -1891,10 +1893,10 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 			$scope.device.name = hassdevice.deviceState.entity_id;
 			$scope.device.mapType = "hassDevice";
 			$scope.device.mapId =  hassdevice.hassname + "-" + hassdevice.deviceState.entity_id;
-			$scope.device.onUrl = "[{\"item\":\"{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"state\":\"on\"}\"}]";
+			$scope.device.onUrl = "[{\"item\":{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"},\"type\":\"hassDevice\"}]";
 			if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0))
-				$scope.device.dimUrl = "[{\"item\":\"{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"state\":\"on\",\"bri\":\"" + dim_control + "\"}\"}]";
-			$scope.device.offUrl = "[{\"item\":\"{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"state\":\"off\"}\"}]";
+				$scope.device.dimUrl = "[{\"item\":{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\",\"bri\":\"" + dim_control + "\"},\"type\":\"hassDevice\"}]";
+			$scope.device.offUrl = "[{\"item\":{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"off\"},\"type\":\"hassDevice\"}]";
 		}
 	};
 
@@ -2006,7 +2008,7 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 				function () {
 					$scope.clearDevice();
 					bridgeService.viewDevices();
-					bridgeService.viewhassdevices();
+					bridgeService.viewHassDevices();
 				},
 				function (error) {
 					bridgeService.displayWarn("Error adding device: " + $scope.device.name, error)
@@ -2019,11 +2021,9 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 		var devicesList = [];
 		for(var i = 0; i < $scope.bulk.devices.length; i++) {
 			for(var x = 0; x < bridgeService.state.hassdevices.length; x++) {
-				if(bridgeService.state.hassdevices[x].hassdevicename == $scope.bulk.devices[i]) {
-					if(bridgeService.state.hassdevices[x].hassdevicetype == "HVAC")
-						$scope.buildHALAutoUrls(bridgeService.state.hassdevices[x]);
-					else if(bridgeService.state.hassdevices[x].hassdevicetype == "HOME")
-						$scope.buildHALHomeUrls(bridgeService.state.hassdevices[x]);
+				if(bridgeService.state.hassdevices[x].deviceName == $scope.bulk.devices[i]) {
+					if(bridgeService.state.hassdevices[x].domain == "climate")
+						$scope.buildHassAutoUrls(bridgeService.state.hassdevices[x]);
 					else
 						$scope.buildDeviceUrls(bridgeService.state.hassdevices[x],dim_control);
 					devicesList[i] = {

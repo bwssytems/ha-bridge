@@ -1,7 +1,9 @@
 package com.bwssystems.HABridge.api;
 
+import com.google.gson.JsonElement;
+
 public class CallItem {
-	private String item;
+	private JsonElement item;
 	private Integer count;
 	private Integer delay;
 	private String type;
@@ -23,12 +25,12 @@ public class CallItem {
 		this.filterIPs = filterIPs;
 	}
 
-	public String getItem() {
+	public JsonElement getItem() {
 		return item;
 	}
 
-	public void setItem(String anitem) {
-		item = anitem;
+	public void setItem(JsonElement item) {
+		this.item = item;
 	}
 
 	public Integer getCount() {

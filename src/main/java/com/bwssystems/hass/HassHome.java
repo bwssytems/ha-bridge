@@ -15,9 +15,13 @@ import com.bwssystems.HABridge.NamedIP;
 public class HassHome {
     private static final Logger log = LoggerFactory.getLogger(HassHome.class);
 	private Map<String, HomeAssistant> hassMap;
+	private Boolean validHass;
 	
 	public HassHome(BridgeSettingsDescriptor bridgeSettings) {
 		super();
+		validHass = bridgeSettings.isValidHass();
+		if(!validHass)
+			return;
 		hassMap = new HashMap<String,HomeAssistant>();
 		if(!bridgeSettings.isValidHass())
 			return;
@@ -33,8 +37,25 @@ public class HassHome {
 		}
 	}
 
+	public HomeAssistant getHomeAssistant(String aName) {
+		if(!validHass)
+			return null;
+		HomeAssistant aHomeAssistant;
+		if(aName == null || aName.equals("")) {
+			aHomeAssistant = null;
+			log.debug("Cannot get HomeAssistant for name as it is empty.");
+		}
+		else {
+			aHomeAssistant = hassMap.get(aName);
+			log.debug("Retrieved a HomeAssistant for name: " + aName);
+		}
+		return aHomeAssistant;
+	}
+	
 	public List<HassDevice> getDevices() {
-		log.debug("consolidating devices for hues");
+		log.debug("consolidating devices for hass");
+		if(!validHass)
+			return null;
 		List<State> theResponse = null;
 		Iterator<String> keys = hassMap.keySet().iterator();
 		List<HassDevice> deviceList = new ArrayList<HassDevice>();

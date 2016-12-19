@@ -16,6 +16,7 @@ public class DeviceMapTypes {
 	public final static String[] HAL_THERMO_SET = { "halThermoSet", "HAL Thermostat"};
 	public final static String[] MQTT_MESSAGE = { "mqttMessage", "MQTT Message"};
 	public final static String[] EXEC_DEVICE = { "execDevice", "Execute Script/Program"};
+	public final static String[] HASS_DEVICE = { "hassDevice", "HomeAssistant Device"};
 
 	public final static int typeIndex = 0;
 	public final static int displayIndex = 1;
@@ -34,6 +35,7 @@ public class DeviceMapTypes {
 	public String[] halThermoSet;
 	public String[] mqttMessage;
 	public String[] execDevice;
+	public String[] hassDevice;
 
 	public int typeindex;
 	public int displayindex;
@@ -57,6 +59,7 @@ public class DeviceMapTypes {
 		this.setTypeindex(typeIndex);
 		this.setVeraDevice(VERA_DEVICE);
 		this.setVeraScene(VERA_SCENE);
+		this.setHassDevice(HASS_DEVICE);
 	}
 	public String[] getCustomDevice() {
 		return customDevice;
@@ -141,6 +144,12 @@ public class DeviceMapTypes {
 	}
 	public void setExecDevice(String[] execDevice) {
 		this.execDevice = execDevice;
+	}
+	public String[] getHassDevice() {
+		return hassDevice;
+	}
+	public void setHassDevice(String[] hassDevice) {
+		this.hassDevice = hassDevice;
 	}
 	public int getTypeindex() {
 		return typeindex;

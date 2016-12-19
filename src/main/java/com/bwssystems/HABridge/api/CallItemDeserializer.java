@@ -14,11 +14,16 @@ public class CallItemDeserializer implements JsonDeserializer<CallItem> {
         JsonObject jsonObj = json.getAsJsonObject();
         JsonElement jsonElem;
         jsonElem = jsonObj.get("item");
-        aCallItem.setItem(jsonElem.getAsString());
+        aCallItem.setItem(jsonElem);
         jsonElem = jsonObj.get("delay");
         aCallItem.setDelay(jsonElem.getAsInt());
         jsonElem = jsonObj.get("count");
         aCallItem.setCount(jsonElem.getAsInt());
+        jsonElem = jsonObj.get("type");
+        aCallItem.setType(jsonElem.getAsString());
+        jsonElem = jsonObj.get("filterIPs");
+        aCallItem.setFilterIPs(jsonElem.getAsString());
+        
         return aCallItem;
     }
 

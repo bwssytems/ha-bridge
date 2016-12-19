@@ -23,6 +23,9 @@ import com.bwssystems.harmony.ButtonPress;
 import com.bwssystems.harmony.HarmonyHandler;
 import com.bwssystems.harmony.HarmonyHome;
 import com.bwssystems.harmony.RunActivity;
+import com.bwssystems.hass.HassCommand;
+import com.bwssystems.hass.HassHome;
+import com.bwssystems.hass.HomeAssistant;
 import com.bwssystems.hue.HueDeviceIdentifier;
 import com.bwssystems.hue.HueErrorStringSet;
 import com.bwssystems.hue.HueHome;
@@ -101,6 +104,7 @@ public class HueMulator implements HueErrorStringSet {
 	private Nest theNest;
 	private HueHome myHueHome;
 	private MQTTHome mqttHome;
+	private HassHome hassHome;
 	private HttpClient httpClient;
 	private CloseableHttpClient httpclientSSL;
 	private SSLContext sslcontext;
@@ -114,7 +118,7 @@ public class HueMulator implements HueErrorStringSet {
 	// private Gson callItemGson;
 
 	public HueMulator(BridgeSettingsDescriptor theBridgeSettings, DeviceRepository aDeviceRepository,
-			HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome, MQTTHome aMqttHome,
+			HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome, MQTTHome aMqttHome, HassHome aHassHome,
 			UDPDatagramSender aUdpDatagramSender) {
 		httpClient = HttpClients.createDefault();
 		// Trust own CA and all self-signed certs
@@ -142,6 +146,10 @@ public class HueMulator implements HueErrorStringSet {
 			this.mqttHome = aMqttHome;
 		else
 			this.mqttHome = null;
+		if (theBridgeSettings.isValidHass())
+			this.hassHome = aHassHome;
+		else
+			this.hassHome = null;
 		bridgeSettings = theBridgeSettings;
 		theUDPDatagramSender = aUdpDatagramSender;
 		hueUser = null;
@@ -1055,13 +1063,44 @@ public class HueMulator implements HueErrorStringSet {
 								+ lightId + "state\"}}]";
 
 					}
+				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.HASS_DEVICE[DeviceMapTypes.typeIndex])) {
+					log.debug("executing HUE api request to send message to HomeAssistant: " + url);
+					if (hassHome != null) {
+						HassCommand hassCommand = new Gson().fromJson(callItems[i].getItem(), HassCommand.class);
+						HomeAssistant homeAssistant = hassHome.getHomeAssistant(hassCommand.getHassName());
+						if (homeAssistant == null) {
+							log.warn("Should not get here, no HomeAssistants available");
+							responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+									+ "\",\"description\": \"Should not get here, no HiomeAssistant clients available\", \"parameter\": \"/lights/"
+									+ lightId + "state\"}}]";
+						}
+						for (int x = 0; x < setCount; x++) {
+							if (x > 0 || i > 0) {
+								Thread.sleep(theDelay);
+							}
+							if (callItems[i].getDelay() != null && callItems[i].getDelay() > 0)
+								theDelay = callItems[i].getDelay();
+							else
+								theDelay = bridgeSettings.getButtonsleep();
+							log.debug("calling HomeAssistant: " + hassCommand.getHassName() + " - "
+									+ hassCommand.getEntityId() + " - " + hassCommand.getState() + " - " + hassCommand.getBri()
+									+ " - iteration: " + String.valueOf(i) + " - count: " + String.valueOf(x));
+							homeAssistant.callCommand(hassCommand);
+						}
+					} else {
+						log.warn("Should not get here, no HomeAssistant clients configured");
+						responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+								+ "\",\"description\": \"Should not get here, no HomeAssistants configured\", \"parameter\": \"/lights/"
+								+ lightId + "state\"}}]";
+
+					}
 				} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.EXEC_DEVICE[DeviceMapTypes.typeIndex])) {
 					log.debug("Exec Request called with url: " + url);
 					String intermediate;
-					if (callItems[i].getItem().contains("exec://"))
-						intermediate = callItems[i].getItem().substring(callItems[i].getItem().indexOf("://") + 3);
+					if (callItems[i].getItem().getAsString().contains("exec://"))
+						intermediate = callItems[i].getItem().getAsString().substring(callItems[i].getItem().getAsString().indexOf("://") + 3);
 					else
-						intermediate = callItems[i].getItem();
+						intermediate = callItems[i].getItem().getAsString();
 					for (int x = 0; x < setCount; x++) {
 						if (x > 0 || i > 0) {
 							Thread.sleep(theDelay);
@@ -1090,10 +1129,10 @@ public class HueMulator implements HueErrorStringSet {
 						else
 							theDelay = bridgeSettings.getButtonsleep();
 						try {
-							if (callItems[i].getItem().contains("udp://")
-									|| callItems[i].getItem().contains("tcp://")) {
-								String intermediate = callItems[i].getItem()
-										.substring(callItems[i].getItem().indexOf("://") + 3);
+							if (callItems[i].getItem().getAsString().contains("udp://")
+									|| callItems[i].getItem().getAsString().contains("tcp://")) {
+								String intermediate = callItems[i].getItem().getAsString()
+										.substring(callItems[i].getItem().getAsString().indexOf("://") + 3);
 								String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
 								String theUrlBody = intermediate.substring(intermediate.indexOf('/') + 1);
 								String hostAddr = null;
@@ -1116,12 +1155,12 @@ public class HueMulator implements HueErrorStringSet {
 											false);
 									sendData = theUrlBody.getBytes();
 								}
-								if (callItems[i].getItem().contains("udp://")) {
-									log.debug("executing HUE api request to UDP: " + callItems[i].getItem());
+								if (callItems[i].getItem().getAsString().contains("udp://")) {
+									log.debug("executing HUE api request to UDP: " + callItems[i].getItem().getAsString());
 									theUDPDatagramSender.sendUDPResponse(new String(sendData), IPAddress,
 											Integer.parseInt(port));
-								} else if (callItems[i].getItem().contains("tcp://")) {
-									log.debug("executing HUE api request to TCP: " + callItems[i].getItem());
+								} else if (callItems[i].getItem().getAsString().contains("tcp://")) {
+									log.debug("executing HUE api request to TCP: " + callItems[i].getItem().getAsString());
 									Socket dataSendSocket = new Socket(IPAddress, Integer.parseInt(port));
 									DataOutputStream outToClient = new DataOutputStream(
 											dataSendSocket.getOutputStream());
@@ -1129,9 +1168,9 @@ public class HueMulator implements HueErrorStringSet {
 									outToClient.flush();
 									dataSendSocket.close();
 								}
-							} else if (callItems[i].getItem().contains("exec://")) {
-								String intermediate = callItems[i].getItem()
-										.substring(callItems[i].getItem().indexOf("://") + 3);
+							} else if (callItems[i].getItem().getAsString().contains("exec://")) {
+								String intermediate = callItems[i].getItem().getAsString()
+										.substring(callItems[i].getItem().getAsString().indexOf("://") + 3);
 								String anError = doExecRequest(intermediate,
 										calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc),
 										lightId);
@@ -1142,9 +1181,9 @@ public class HueMulator implements HueErrorStringSet {
 							} else {
 								log.debug("executing HUE api request to Http "
 										+ (device.getHttpVerb() == null ? "GET" : device.getHttpVerb()) + ": "
-										+ callItems[i].getItem());
+										+ callItems[i].getItem().getAsString());
 
-								String anUrl = replaceIntensityValue(callItems[i].getItem(),
+								String anUrl = replaceIntensityValue(callItems[i].getItem().getAsString(),
 										calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false);
 								String body;
 								if (stateHasBri || stateHasBriInc)
@@ -1171,7 +1210,7 @@ public class HueMulator implements HueErrorStringSet {
 							}
 						} catch (Exception e) {
 							log.warn("Change device state, Could not send data for network request: "
-									+ callItems[i].getItem() + " with Message: " + e.getMessage());
+									+ callItems[i].getItem().getAsString() + " with Message: " + e.getMessage());
 							responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 									+ "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/"
 									+ lightId + "state\"}}]";
