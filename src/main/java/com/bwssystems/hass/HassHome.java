@@ -10,21 +10,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
+import com.bwssystems.HABridge.api.CallItem;
+import com.bwssystems.HABridge.api.hue.DeviceState;
+import com.bwssystems.HABridge.api.hue.StateChangeBody;
+import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.HueMulatorHandler;
+import com.bwssystems.HABridge.hue.MultiCommandUtil;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-public class HassHome {
+public class HassHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(HassHome.class);
 	private Map<String, HomeAssistant> hassMap;
 	private Boolean validHass;
+	private Gson aGsonHandler;
 	
 	public HassHome(BridgeSettingsDescriptor bridgeSettings) {
 		super();
+		createHome(bridgeSettings);
+	}
+
+	@Override
+	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
 		validHass = bridgeSettings.isValidHass();
 		if(!validHass)
-			return;
+			return null;
 		hassMap = new HashMap<String,HomeAssistant>();
-		if(!bridgeSettings.isValidHass())
-			return;
 		Iterator<NamedIP> theList = bridgeSettings.getHassaddress().getDevices().iterator();
 		while(theList.hasNext()) {
 			NamedIP aHass = theList.next();
@@ -32,9 +45,13 @@ public class HassHome {
 	      		hassMap.put(aHass.getName(), new HomeAssistant(aHass));
 			} catch (Exception e) {
 		        log.error("Cannot get hass (" + aHass.getName() + ") setup, Exiting with message: " + e.getMessage(), e);
-		        return;
+		        return null;
 			}
 		}
+		aGsonHandler =
+				new GsonBuilder()
+				.create();
+		return this;
 	}
 
 	public HomeAssistant getHomeAssistant(String aName) {
@@ -85,5 +102,41 @@ public class HassHome {
 			theDeviceList.add(aNewHassDevice);
 		}
 		return true;
+	}
+	
+	@Override
+	public String deviceHandler(CallItem anItem, MultiCommandUtil multiComand, String lightId, int iterationCount, DeviceState state,
+			StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc) {
+		String theReturn = null;
+		log.debug("executing HUE api request to send message to HomeAssistant: " + anItem.getItem().toString());
+			HassCommand hassCommand = aGsonHandler.fromJson(anItem.getItem(), HassCommand.class);
+			hassCommand.setBri(BrightnessDecode.replaceIntensityValue(hassCommand.getBri(),
+					BrightnessDecode.calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false));
+			HomeAssistant homeAssistant = getHomeAssistant(hassCommand.getHassName());
+			if (homeAssistant == null) {
+				log.warn("Should not get here, no HomeAssistants available");
+				theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+						+ "\",\"description\": \"Should not get here, no HiomeAssistant clients available\", \"parameter\": \"/lights/"
+						+ lightId + "state\"}}]";
+			} else {
+			for (int x = 0; x < multiComand.getSetCount(); x++) {
+				if (x > 0 || iterationCount > 0) {
+					try {
+						Thread.sleep(multiComand.getTheDelay());
+					} catch (InterruptedException e) {
+						// ignore
+					}
+				}
+				if (anItem.getDelay() != null && anItem.getDelay() > 0)
+					multiComand.setTheDelay(anItem.getDelay());
+//				else
+//					this.setTheDelay(bridgeSettings.getButtonsleep());
+				log.debug("calling HomeAssistant: " + hassCommand.getHassName() + " - "
+						+ hassCommand.getEntityId() + " - " + hassCommand.getState() + " - " + hassCommand.getBri()
+						+ " - iteration: " + String.valueOf(iterationCount) + " - count: " + String.valueOf(x));
+				homeAssistant.callCommand(hassCommand);
+			}
+			}
+		return theReturn;
 	}
 }

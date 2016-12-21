@@ -15,7 +15,7 @@ public class DeviceMapTypes {
 	public final static String[] HAL_HOME = { "halHome", "HAL Home Status"};
 	public final static String[] HAL_THERMO_SET = { "halThermoSet", "HAL Thermostat"};
 	public final static String[] MQTT_MESSAGE = { "mqttMessage", "MQTT Message"};
-	public final static String[] EXEC_DEVICE = { "execDevice", "Execute Script/Program"};
+	public final static String[] EXEC_DEVICE = { "exec", "Execute Script/Program"};
 	public final static String[] HASS_DEVICE = { "hassDevice", "HomeAssistant Device"};
 
 	public final static int typeIndex = 0;
