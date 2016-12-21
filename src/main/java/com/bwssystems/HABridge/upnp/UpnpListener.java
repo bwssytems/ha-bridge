@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.bwssystems.HABridge.BridgeControlDescriptor;
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.Configuration;
+import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.HuePublicConfig;
 import com.bwssystems.util.UDPDatagramSender;
 
@@ -29,28 +30,28 @@ public class UpnpListener {
 			"CACHE-CONTROL: max-age=100\r\n" +
 			"EXT:\r\n" +
 			"LOCATION: http://%s:%s/description.xml\r\n" +
-			"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/1.15.0\r\n" + 
+			"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" + 
 			"hue-bridgeid: %s\r\n" +
 			"ST: upnp:rootdevice\r\n" +
-			"USN: uuid:2f402f80-da50-11e1-9b23-%s::upnp:rootdevice\r\n\r\n";
+			"USN: uuid:" + HueConstants.UUID_PREFIX + "%s::upnp:rootdevice\r\n\r\n";
 	private String responseTemplate2 = "HTTP/1.1 200 OK\r\n" +
 			"HOST: %s:%s\r\n" +
 			"CACHE-CONTROL: max-age=100\r\n" +
 			"EXT:\r\n" +
 			"LOCATION: http://%s:%s/description.xml\r\n" +
-			"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/1.15.0\r\n" + 
+			"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" + 
 			"hue-bridgeid: %s\r\n" +
-			"ST: uuid:2f402f80-da50-11e1-9b23-%s\r\n" +
-			"USN: uuid:2f402f80-da50-11e1-9b23-%s\r\n\r\n";
+			"ST: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n" +
+			"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 	private String responseTemplate3 = "HTTP/1.1 200 OK\r\n" +
 			"HOST: %s:%s\r\n" +
 			"CACHE-CONTROL: max-age=100\r\n" +
 			"EXT:\r\n" +
 			"LOCATION: http://%s:%s/description.xml\r\n" +
-			"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/1.15.0\r\n" + 
+			"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" + 
 			"hue-bridgeid: %s\r\n" +
 			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
-			"USN: uuid:2f402f80-da50-11e1-9b23-%s\r\n\r\n";
+			"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 
 	public UpnpListener(BridgeSettingsDescriptor theSettings, BridgeControlDescriptor theControl, UDPDatagramSender aUdpDatagramSender) {
 		super();
@@ -199,7 +200,7 @@ public class UpnpListener {
 		String discoveryResponse = null;
 		String bridgeId = null;
 		String bridgeSNUUID = null;
-		HuePublicConfig aHueConfig = HuePublicConfig.createConfig("temp", responseAddress);
+		HuePublicConfig aHueConfig = HuePublicConfig.createConfig("temp", responseAddress, HueConstants.HUB_VERSION);
 		bridgeId = aHueConfig.getBridgeid();
 		bridgeSNUUID = aHueConfig.getSNUUIDFromMac();
 		discoveryResponse = String.format(responseTemplate1, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID);

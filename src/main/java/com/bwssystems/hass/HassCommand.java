@@ -4,7 +4,7 @@ public class HassCommand {
 	private String entityId;
 	private String hassName;
 	private String state;
-	private Integer bri;
+	private String bri;
 	public String getEntityId() {
 		return entityId;
 	}
@@ -23,11 +23,10 @@ public class HassCommand {
 	public void setState(String state) {
 		this.state = state;
 	}
-	public Integer getBri() {
+	public String getBri() {
 		return bri;
 	}
-	public void setBri(Integer bri) {
+	public void setBri(String bri) {
 		this.bri = bri;
-	}
-	
+	}	
 }

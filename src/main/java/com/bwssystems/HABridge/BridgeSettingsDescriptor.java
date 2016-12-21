@@ -3,6 +3,7 @@ package com.bwssystems.HABridge;
 import java.util.List;
 import java.util.Map;
 
+import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.WhitelistEntry;
 
 public class BridgeSettingsDescriptor {
@@ -36,6 +37,7 @@ public class BridgeSettingsDescriptor {
 	private boolean mqttconfigured;
 	private IpList hassaddress;
 	private boolean hassconfigured;
+	private String hubversion;
 	
 	public BridgeSettingsDescriptor() {
 		super();
@@ -53,6 +55,7 @@ public class BridgeSettingsDescriptor {
 		this.settingsChanged = false;
 		this.myechourl = "echo.amazon.com/#cards";
 		this.webaddress = "0.0.0.0";
+		this.hubversion = HueConstants.HUB_VERSION;
 	}
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -239,6 +242,12 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setHassconfigured(boolean hassconfigured) {
 		this.hassconfigured = hassconfigured;
+	}
+	public String getHubversion() {
+		return hubversion;
+	}
+	public void setHubversion(String hubversion) {
+		this.hubversion = hubversion;
 	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)

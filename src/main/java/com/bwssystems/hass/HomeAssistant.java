@@ -73,7 +73,7 @@ public class HomeAssistant {
 		}
 		if(aCommand.getState().equalsIgnoreCase("on")) {
 			aUrl = aUrl + "/turn_on";
-			if(aCommand.getBri() != null && aCommand.getBri() > 0)
+			if(aCommand.getBri() != null)
 				aBody = aBody + ",\"state\":\"on\",\"attributes\":{\"brightness\":" + aCommand.getBri() + "}}";
 			else
 				aBody = aBody + "}";

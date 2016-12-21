@@ -19,7 +19,7 @@ public class HueUtil {
     private static final Logger log = LoggerFactory.getLogger(HueUtil.class);
 	public static final String HUE_REQUEST = "/api";
 
-	public static final String registerWithHue(HttpClient anHttpClient, String ipAddress, String aName, String theUser, HueErrorStringSet errorStringSet) {
+	public static final String registerWithHue(HttpClient anHttpClient, String ipAddress, String aName, String theUser) {
     	UserCreateRequest theLogin = new UserCreateRequest();
         theLogin.setDevicetype("HABridge#MyMachine");
         HttpPost postRequest = new HttpPost("http://" + ipAddress + HUE_REQUEST);
@@ -39,7 +39,6 @@ public class HueUtil {
                 	}
                 	else
                 		log.warn("registerWithHue returned an unexpected error: " + theBody);
-                	errorStringSet.setErrorString(theBody);
                 }
                 else {
 	            	SuccessUserResponse[] theResponses = new Gson().fromJson(theBody, SuccessUserResponse[].class); //read content for data, SuccessUserResponse[].class);

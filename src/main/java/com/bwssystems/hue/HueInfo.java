@@ -15,7 +15,7 @@ import com.bwssystems.HABridge.api.hue.HueApiResponse;
 import com.google.gson.Gson;
 
 
-public class HueInfo implements HueErrorStringSet {
+public class HueInfo {
     private static final Logger log = LoggerFactory.getLogger(HueInfo.class);
     private HttpClient httpClient;
     private NamedIP hueAddress;
@@ -50,7 +50,7 @@ public class HueInfo implements HueErrorStringSet {
 	    		log.debug("GET HueApiResponse - data: " + theData);
 	    		if(theData.contains("[{\"error\":")) {
 	    			if(theData.contains("unauthorized user")) {
-	    				theUser = HueUtil.registerWithHue(httpClient, hueAddress.getIp(), hueAddress.getName(), theHueHome.getTheHUERegisteredUser(), this);
+	    				theUser = HueUtil.registerWithHue(httpClient, hueAddress.getIp(), hueAddress.getName(), theHueHome.getTheHUERegisteredUser());
 	        			if(theUser == null) {
 	        				log.warn("Register to Hue for " + hueAddress.getName() + " returned error: " + errorString);
 	        				return null;
@@ -102,10 +102,5 @@ public class HueInfo implements HueErrorStringSet {
 
 	public void setHueAddress(NamedIP hueAddress) {
 		this.hueAddress = hueAddress;
-	}
-
-	@Override
-	public void setErrorString(String anError) {
-		errorString = anError;
 	}
 }
