@@ -424,7 +424,7 @@ contentBodyOff | string | This is the content body that you would like to send w
 ### Update a Device 
 Update an existing device using it's ID that was given when the device was created and the update could contain any of the fields that are used and shown in the previous examples when adding a device. 
 ```
-POST http://host:port/api/devices/<id>
+PUT http://host:port/api/devices/<id>
 ```
 #### Body Arguments
 Name |	Type |	Description | Required
