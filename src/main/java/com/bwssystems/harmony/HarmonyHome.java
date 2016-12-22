@@ -11,53 +11,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.DeviceMapTypes;
+import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.IpList;
 import com.bwssystems.HABridge.NamedIP;
+import com.bwssystems.HABridge.api.CallItem;
+import com.bwssystems.HABridge.api.hue.DeviceState;
+import com.bwssystems.HABridge.api.hue.StateChangeBody;
+import com.bwssystems.HABridge.hue.MultiCommandUtil;
 
 import net.whistlingfish.harmony.config.Activity;
 import net.whistlingfish.harmony.config.Device;
 
-public class HarmonyHome {
+public class HarmonyHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(HarmonyHome.class);
 	private Map<String, HarmonyServer> hubs;
 	private Boolean isDevMode;
+	private Boolean validHarmony;
 
 	public HarmonyHome(BridgeSettingsDescriptor bridgeSettings) {
 		super();
-        isDevMode = Boolean.parseBoolean(System.getProperty("dev.mode", "false"));
-		hubs = new HashMap<String, HarmonyServer>();
-		if(!bridgeSettings.isValidHarmony() && !isDevMode)
-			return;
-		if(isDevMode) {
-			NamedIP devModeIp = new NamedIP();
-			devModeIp.setIp("10.10.10.10");
-			devModeIp.setName("devMode");
-			List<NamedIP> theList = new ArrayList<NamedIP>();
-			theList.add(devModeIp);
-			IpList thedevList = new IpList();
-			thedevList.setDevices(theList);
-			bridgeSettings.setHarmonyAddress(thedevList);
-		}
-		Iterator<NamedIP> theList = bridgeSettings.getHarmonyAddress().getDevices().iterator();
-		while(theList.hasNext()) {
-			NamedIP aHub = theList.next();
-	      	try {
-	      		hubs.put(aHub.getName(), HarmonyServer.setup(bridgeSettings, isDevMode, aHub));
-			} catch (Exception e) {
-		        log.error("Cannot get harmony client (" + aHub.getName() + ") setup, Exiting with message: " + e.getMessage(), e);
-		        return;
-			}
-		}
+		createHome(bridgeSettings);
 	}
 
-	public void shutdownHarmonyHubs() {
-		if(isDevMode)
+	@Override
+	public void closeHome() {
+		if(isDevMode || hubs == null)
 			return;
 		Iterator<String> keys = hubs.keySet().iterator();
 		while(keys.hasNext()) {
 			String key = keys.next();
 			hubs.get(key).getMyHarmony().shutdown();
 		}
+		
+		hubs = null;
 	}
 
 	public HarmonyHandler getHarmonyHandler(String aName) {
@@ -123,5 +110,56 @@ public class HarmonyHome {
 			}
 		}
 		return deviceList;
+	}
+
+	@Override
+	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int iterationCount,
+			DeviceState state, StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc) {
+		// TODO Auto-generated method stub
+		log.info("device handler not implemented");
+		return null;
+	}
+
+	@Override
+	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
+        isDevMode = Boolean.parseBoolean(System.getProperty("dev.mode", "false"));
+        validHarmony = bridgeSettings.isValidHarmony();
+		if(!validHarmony && !isDevMode) {
+			log.debug("No valid Harmony config");
+		} else {
+			hubs = new HashMap<String, HarmonyServer>();
+			if(isDevMode) {
+				NamedIP devModeIp = new NamedIP();
+				devModeIp.setIp("10.10.10.10");
+				devModeIp.setName("devMode");
+				List<NamedIP> theList = new ArrayList<NamedIP>();
+				theList.add(devModeIp);
+				IpList thedevList = new IpList();
+				thedevList.setDevices(theList);
+				bridgeSettings.setHarmonyAddress(thedevList);
+			}
+			Iterator<NamedIP> theList = bridgeSettings.getHarmonyAddress().getDevices().iterator();
+			while(theList.hasNext() && validHarmony) {
+				NamedIP aHub = theList.next();
+		      	try {
+		      		hubs.put(aHub.getName(), HarmonyServer.setup(bridgeSettings, isDevMode, aHub));
+				} catch (Exception e) {
+			        log.error("Cannot get harmony client (" + aHub.getName() + ") setup, Exiting with message: " + e.getMessage(), e);
+			        validHarmony = false;
+				}
+			}
+		}
+		return this;
+	}
+
+	@Override
+	public Object getItems(String type) {
+		if(type.equalsIgnoreCase(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.resourceIndex]))
+			return getActivities();
+		if(type.equalsIgnoreCase(DeviceMapTypes.HARMONY_BUTTON[DeviceMapTypes.resourceIndex]))
+			return getDevices();
+		if(type.equalsIgnoreCase("current_activity"))
+			return getCurrentActivities();
+		return null;
 	}
 }

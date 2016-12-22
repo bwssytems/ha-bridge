@@ -193,4 +193,14 @@ public class HomeAssistant {
 		}
 		return theContent;
 	}
+	
+	protected void closeClient() {
+		httpClient = null;
+		try {
+			httpclientSSL.close();
+		} catch (IOException e) {
+			// noop
+		}
+		httpclientSSL = null;
+	}
 }

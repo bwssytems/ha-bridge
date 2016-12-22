@@ -10,30 +10,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
+import com.bwssystems.HABridge.api.CallItem;
+import com.bwssystems.HABridge.api.hue.DeviceState;
+import com.bwssystems.HABridge.api.hue.StateChangeBody;
+import com.bwssystems.HABridge.hue.MultiCommandUtil;
 
-public class HalHome {
+public class HalHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(HalHome.class);
 	private Map<String, HalInfo> hals;
 
 	public HalHome(BridgeSettingsDescriptor bridgeSettings) {
 		super();
-		hals = new HashMap<String, HalInfo>();
-		if(!bridgeSettings.isValidHal())
-			return;
-		Iterator<NamedIP> theList = bridgeSettings.getHaladdress().getDevices().iterator();
-		while(theList.hasNext()) {
-			NamedIP aHal = theList.next();
-	      	try {
-	      		hals.put(aHal.getName(), new HalInfo(aHal, bridgeSettings.getHaltoken()));
-			} catch (Exception e) {
-		        log.error("Cannot get hal client (" + aHal.getName() + ") setup, Exiting with message: " + e.getMessage(), e);
-		        return;
-			}
-		}
+		createHome(bridgeSettings);
 	}
 
-	public List<HalDevice> getDevices() {
+	@Override
+	public Object getItems(String type) {
 		log.debug("consolidating devices for hues");
 		List<HalDevice> theResponse = null;
 		Iterator<String> keys = hals.keySet().iterator();
@@ -109,5 +103,36 @@ public class HalHome {
 			theDeviceList.add(aNewHalDevice);
 		}
 		return true;
+	}
+
+	@Override
+	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int iterationCount,
+			DeviceState state, StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc) {
+		log.info("device handler not implemented");
+		return null;
+	}
+
+	@Override
+	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
+		hals = new HashMap<String, HalInfo>();
+		if(!bridgeSettings.isValidHal())
+			return null;
+		Iterator<NamedIP> theList = bridgeSettings.getHaladdress().getDevices().iterator();
+		while(theList.hasNext()) {
+			NamedIP aHal = theList.next();
+	      	try {
+	      		hals.put(aHal.getName(), new HalInfo(aHal, bridgeSettings.getHaltoken()));
+			} catch (Exception e) {
+		        log.error("Cannot get hal client (" + aHal.getName() + ") setup, Exiting with message: " + e.getMessage(), e);
+		        return null;
+			}
+		}
+		return this;
+	}
+
+	@Override
+	public void closeHome() {
+		// noop
+		
 	}
 }

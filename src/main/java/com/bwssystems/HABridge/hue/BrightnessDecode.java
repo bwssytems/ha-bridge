@@ -100,4 +100,8 @@ public class BrightnessDecode {
 		return request;
 	}
 
+	// Helper Method
+	public static String calculateReplaceIntensityValue(String request, DeviceState state, StateChangeBody theChanges, boolean hasBri, boolean hasBriInc, boolean isHex) {
+		return replaceIntensityValue(request, calculateIntensity(state, theChanges, hasBri, hasBriInc), isHex);
+	}
 }

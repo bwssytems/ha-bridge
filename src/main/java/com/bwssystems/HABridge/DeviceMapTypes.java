@@ -1,167 +1,70 @@
 package com.bwssystems.HABridge;
 
+import java.util.ArrayList;
+
 public class DeviceMapTypes {
 
-	public final static String[] CUSTOM_DEVICE = { "custom", "Custom"};
-	public final static String[] VERA_DEVICE = { "veraDevice", "Vera Device"};
-	public final static String[] VERA_SCENE = { "veraScene", "Vera Scene"};
-	public final static String[] HARMONY_ACTIVITY = { "harmonyActivity", "Harmony Activity"};
-	public final static String[] HARMONY_BUTTON = { "harmonyButton", "Harmony Button"};
-	public final static String[] NEST_HOMEAWAY = { "nestHomeAway", "Nest Home Status"};
-	public final static String[] NEST_THERMO_SET = { "nestThermoSet", "Nest Thermostat"};
-	public final static String[] HUE_DEVICE = { "hueDevice", "Hue Device"};
-	public final static String[] HAL_DEVICE = { "halDevice", "HAL Device"};
-	public final static String[] HAL_BUTTON = { "halButton", "HAL Button"};
-	public final static String[] HAL_HOME = { "halHome", "HAL Home Status"};
-	public final static String[] HAL_THERMO_SET = { "halThermoSet", "HAL Thermostat"};
-	public final static String[] MQTT_MESSAGE = { "mqttMessage", "MQTT Message"};
-	public final static String[] EXEC_DEVICE = { "exec", "Execute Script/Program"};
-	public final static String[] HASS_DEVICE = { "hassDevice", "HomeAssistant Device"};
+	public final static String[] CUSTOM_DEVICE = { "custom", "Custom", "none"};
+	public final static String[] VERA_DEVICE = { "veraDevice", "Vera Device", "vera"};
+	public final static String[] VERA_SCENE = { "veraScene", "Vera Scene", "vera"};
+	public final static String[] HARMONY_ACTIVITY = { "harmonyActivity", "Harmony Activity", "harmony"};
+	public final static String[] HARMONY_BUTTON = { "harmonyButton", "Harmony Button", "harmony"};
+	public final static String[] NEST_HOMEAWAY = { "nestHomeAway", "Nest Home Status", "nest"};
+	public final static String[] NEST_THERMO_SET = { "nestThermoSet", "Nest Thermostat", "nest"};
+	public final static String[] HUE_DEVICE = { "hueDevice", "Hue Device", "hue"};
+	public final static String[] HAL_DEVICE = { "halDevice", "HAL Device", "hal"};
+	public final static String[] HAL_BUTTON = { "halButton", "HAL Button", "hal"};
+	public final static String[] HAL_HOME = { "halHome", "HAL Home Status", "hal"};
+	public final static String[] HAL_THERMO_SET = { "halThermoSet", "HAL Thermostat", "hal"};
+	public final static String[] MQTT_MESSAGE = { "mqttMessage", "MQTT Message", "mqtt"};
+	public final static String[] EXEC_DEVICE = { "exec", "Execute Script/Program", "command"};
+	public final static String[] CMD_DEVICE = { "cmdDevice", "Execute Command/Script/Program", "command"};
+	public final static String[] HASS_DEVICE = { "hassDevice", "HomeAssistant Device", "hass"};
+	public final static String[] TCP_DEVICE = { "tcpDevice", "TCP Device", "none"};
+	public final static String[] UDP_DEVICE = { "udpDevice", "UDP Device", "none"};
+	public final static String[] HTTP_DEVICE = { "httpDevice", "HTTP Device", "none"};
+	public final static String[] DEFAULT_DEVICE = { "udpDevice", "Default Device", "none"};
 
 	public final static int typeIndex = 0;
 	public final static int displayIndex = 1;
+	public final static int resourceIndex = 1;
 
-	public String[] customDevice;
-	public String[] veraDevice;
-	public String[] veraScene;
-	public String[] harmonyActivity;
-	public String[] harmonyButton;
-	public String[] nestHomeAway;
-	public String[] nestThermoSet;
-	public String[] hueDevice;
-	public String[] halDevice;
-	public String[] halButton;
-	public String[] halHome;
-	public String[] halThermoSet;
-	public String[] mqttMessage;
-	public String[] execDevice;
-	public String[] hassDevice;
-
-	public int typeindex;
-	public int displayindex;
-	
+	ArrayList<String[]> deviceMapTypes;
 	
 	public DeviceMapTypes() {
 		super();
-		this.setCustomDevice(CUSTOM_DEVICE);
-		this.setDisplayindex(displayIndex);
-		this.setExecDevice(EXEC_DEVICE);
-		this.setHalButton(HAL_BUTTON);
-		this.setHalDevice(HAL_DEVICE);
-		this.setHalHome(HAL_HOME);
-		this.setHalThermoSet(HAL_THERMO_SET);
-		this.setHarmonyActivity(HARMONY_ACTIVITY);
-		this.setHarmonyButton(HARMONY_BUTTON);
-		this.setHueDevice(HUE_DEVICE);
-		this.setMqttMessage(MQTT_MESSAGE);
-		this.setNestHomeAway(NEST_HOMEAWAY);
-		this.setNestThermoSet(NEST_THERMO_SET);
-		this.setTypeindex(typeIndex);
-		this.setVeraDevice(VERA_DEVICE);
-		this.setVeraScene(VERA_SCENE);
-		this.setHassDevice(HASS_DEVICE);
+		deviceMapTypes = new ArrayList<String[]>();
+		deviceMapTypes.add(CUSTOM_DEVICE);
+		deviceMapTypes.add(CMD_DEVICE);
+		deviceMapTypes.add(DEFAULT_DEVICE);
+		deviceMapTypes.add(EXEC_DEVICE);
+		deviceMapTypes.add(HAL_DEVICE);
+		deviceMapTypes.add(HAL_HOME);
+		deviceMapTypes.add(HAL_THERMO_SET);
+		deviceMapTypes.add(HASS_DEVICE);
+		deviceMapTypes.add(HTTP_DEVICE);
+		deviceMapTypes.add(HUE_DEVICE);
+		deviceMapTypes.add(MQTT_MESSAGE);
+		deviceMapTypes.add(NEST_HOMEAWAY);
+		deviceMapTypes.add(NEST_THERMO_SET);
+		deviceMapTypes.add(TCP_DEVICE);
+		deviceMapTypes.add(UDP_DEVICE);
+		deviceMapTypes.add(VERA_DEVICE);
+		deviceMapTypes.add(VERA_SCENE);
+		deviceMapTypes.add(HAL_BUTTON);
+		deviceMapTypes.add(HARMONY_ACTIVITY);
+		deviceMapTypes.add(HARMONY_BUTTON);
 	}
-	public String[] getCustomDevice() {
-		return customDevice;
+	public static int getTypeIndex() {
+		return typeIndex;
 	}
-	public void setCustomDevice(String[] customDevice) {
-		this.customDevice = customDevice;
+	public static int getDisplayIndex() {
+		return displayIndex;
 	}
-	public String[] getVeraDevice() {
-		return veraDevice;
+	public static int getResourceindex() {
+		return resourceIndex;
 	}
-	public void setVeraDevice(String[] veraDevice) {
-		this.veraDevice = veraDevice;
+	public ArrayList<String[]> getDeviceMapTypes() {
+		return deviceMapTypes;
 	}
-	public String[] getVeraScene() {
-		return veraScene;
-	}
-	public void setVeraScene(String[] veraScene) {
-		this.veraScene = veraScene;
-	}
-	public String[] getHarmonyActivity() {
-		return harmonyActivity;
-	}
-	public void setHarmonyActivity(String[] harmonyActivity) {
-		this.harmonyActivity = harmonyActivity;
-	}
-	public String[] getHarmonyButton() {
-		return harmonyButton;
-	}
-	public void setHarmonyButton(String[] harmonyButton) {
-		this.harmonyButton = harmonyButton;
-	}
-	public String[] getNestHomeAway() {
-		return nestHomeAway;
-	}
-	public void setNestHomeAway(String[] nestHomeAway) {
-		this.nestHomeAway = nestHomeAway;
-	}
-	public String[] getNestThermoSet() {
-		return nestThermoSet;
-	}
-	public void setNestThermoSet(String[] nestThermoSet) {
-		this.nestThermoSet = nestThermoSet;
-	}
-	public String[] getHueDevice() {
-		return hueDevice;
-	}
-	public void setHueDevice(String[] hueDevice) {
-		this.hueDevice = hueDevice;
-	}
-	public String[] getHalDevice() {
-		return halDevice;
-	}
-	public void setHalDevice(String[] halDevice) {
-		this.halDevice = halDevice;
-	}
-	public String[] getHalButton() {
-		return halButton;
-	}
-	public void setHalButton(String[] halButton) {
-		this.halButton = halButton;
-	}
-	public String[] getHalHome() {
-		return halHome;
-	}
-	public void setHalHome(String[] halHome) {
-		this.halHome = halHome;
-	}
-	public String[] getHalThermoSet() {
-		return halThermoSet;
-	}
-	public void setHalThermoSet(String[] halThermoSet) {
-		this.halThermoSet = halThermoSet;
-	}
-	public String[] getMqttMessage() {
-		return mqttMessage;
-	}
-	public void setMqttMessage(String[] mqttMessage) {
-		this.mqttMessage = mqttMessage;
-	}
-	public String[] getExecDevice() {
-		return execDevice;
-	}
-	public void setExecDevice(String[] execDevice) {
-		this.execDevice = execDevice;
-	}
-	public String[] getHassDevice() {
-		return hassDevice;
-	}
-	public void setHassDevice(String[] hassDevice) {
-		this.hassDevice = hassDevice;
-	}
-	public int getTypeindex() {
-		return typeindex;
-	}
-	public void setTypeindex(int typeindex) {
-		this.typeindex = typeindex;
-	}
-	public int getDisplayindex() {
-		return displayindex;
-	}
-	public void setDisplayindex(int displayindex) {
-		this.displayindex = displayindex;
-	}
-
 }
