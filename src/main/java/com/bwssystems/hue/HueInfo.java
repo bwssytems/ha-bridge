@@ -2,10 +2,10 @@ package com.bwssystems.hue;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+
+import com.bwssystems.HABridge.HttpRequestHelper;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,6 @@ import com.google.gson.Gson;
 
 public class HueInfo implements HueErrorStringSet {
     private static final Logger log = LoggerFactory.getLogger(HueInfo.class);
-    private HttpClient httpClient;
     private NamedIP hueAddress;
 	private String theUser;
 	private HueHome theHueHome;
@@ -25,7 +24,6 @@ public class HueInfo implements HueErrorStringSet {
 
     public HueInfo(NamedIP addressName, HueHome aHueHome) {
 		super();
-        httpClient = HttpClients.createDefault();
         hueAddress = addressName;
         theUser = "habridge";
         theHueHome = aHueHome;
@@ -50,7 +48,7 @@ public class HueInfo implements HueErrorStringSet {
 	    		log.debug("GET HueApiResponse - data: " + theData);
 	    		if(theData.contains("[{\"error\":")) {
 	    			if(theData.contains("unauthorized user")) {
-	    				theUser = HueUtil.registerWithHue(httpClient, hueAddress.getIp(), hueAddress.getName(), theHueHome.getTheHUERegisteredUser(), this);
+	    				theUser = HueUtil.registerWithHue(hueAddress.getIp(), hueAddress.getName(), theHueHome.getTheHUERegisteredUser(), this);
 	        			if(theUser == null) {
 	        				log.warn("Register to Hue for " + hueAddress.getName() + " returned error: " + errorString);
 	        				return null;
@@ -84,7 +82,7 @@ public class HueInfo implements HueErrorStringSet {
         log.debug("calling GET on URL: " + url);
         HttpGet httpGet = new HttpGet(url);
         try {
-            HttpResponse response = httpClient.execute(httpGet);
+            HttpResponse response = HttpRequestHelper.INSTANCE.getHttpClient().execute(httpGet);
             log.debug("GET on URL responded: " + response.getStatusLine().getStatusCode());
             if(response.getStatusLine().getStatusCode() == 200){
                 theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); //read content for data

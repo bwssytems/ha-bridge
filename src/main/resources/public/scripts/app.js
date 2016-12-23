@@ -654,18 +654,21 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     	    }
     	}    	
     };
-    $scope.addHarmonytoSettings = function (newharmonyname, newharmonyip) {
+    $scope.addHarmonytoSettings = function (newharmonyname, newharmonyip, newharmonywebhook) {
     	if($scope.bridge.settings.harmonyaddress == null) {
 			$scope.bridge.settings.harmonyaddress = { devices: [] };
 		}
-    	var newharmony = {name: newharmonyname, ip: newharmonyip }
+    	var newharmony = {name: newharmonyname, ip: newharmonyip , webhook: newharmonywebhook }
     	$scope.bridge.settings.harmonyaddress.devices.push(newharmony);
     	$scope.newharmonyname = null;
-    	$scope.newharmonyip = null;
+        $scope.newharmonyip = null;
+        $scope.newharmonywebhook = null;
     };
-    $scope.removeHarmonytoSettings = function (harmonyname, harmonyip) {
+    $scope.removeHarmonytoSettings = function (harmonyname, harmonyip, harmonywebhook) {
     	for(var i = $scope.bridge.settings.harmonyaddress.devices.length - 1; i >= 0; i--) {
-    	    if($scope.bridge.settings.harmonyaddress.devices[i].name === harmonyname && $scope.bridge.settings.harmonyaddress.devices[i].ip === harmonyip) {
+    	    if($scope.bridge.settings.harmonyaddress.devices[i].name === harmonyname
+                    && $scope.bridge.settings.harmonyaddress.devices[i].ip === harmonyip
+                    && $scope.bridge.settings.harmonyaddress.devices[i].webhook === harmonywebhook) {
     	    	$scope.bridge.settings.harmonyaddress.devices.splice(i, 1);
     	    }
     	}    	

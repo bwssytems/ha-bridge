@@ -2,8 +2,8 @@ package com.bwssystems.HABridge.hue;
 
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.DeviceMapTypes;
+import com.bwssystems.HABridge.HttpRequestHelper;
 import com.bwssystems.HABridge.api.CallItem;
-import com.bwssystems.HABridge.api.CallItemDeserializer;
 import com.bwssystems.HABridge.api.NameValue;
 import com.bwssystems.HABridge.api.UserCreateRequest;
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
@@ -34,7 +34,6 @@ import com.bwssystems.nest.controller.Nest;
 import com.bwssystems.util.JsonTransformer;
 import com.bwssystems.util.UDPDatagramSender;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import net.java.dev.eval.Expression;
 
@@ -43,22 +42,9 @@ import static spark.Spark.options;
 import static spark.Spark.post;
 import static spark.Spark.put;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.http.util.EntityUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,9 +55,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -80,7 +63,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
 
-import javax.net.ssl.SSLContext;
 import javax.xml.bind.DatatypeConverter;
 
 /**
@@ -101,11 +83,6 @@ public class HueMulator implements HueErrorStringSet {
 	private Nest theNest;
 	private HueHome myHueHome;
 	private MQTTHome mqttHome;
-	private HttpClient httpClient;
-	private CloseableHttpClient httpclientSSL;
-	private SSLContext sslcontext;
-	private SSLConnectionSocketFactory sslsf;
-	private RequestConfig globalConfig;
 	private BridgeSettingsDescriptor bridgeSettings;
 	private UDPDatagramSender theUDPDatagramSender;
 	private byte[] sendData;
@@ -116,15 +93,6 @@ public class HueMulator implements HueErrorStringSet {
 	public HueMulator(BridgeSettingsDescriptor theBridgeSettings, DeviceRepository aDeviceRepository,
 			HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome, MQTTHome aMqttHome,
 			UDPDatagramSender aUdpDatagramSender) {
-		httpClient = HttpClients.createDefault();
-		// Trust own CA and all self-signed certs
-		sslcontext = SSLContexts.createDefault();
-		// Allow TLSv1 protocol only
-		sslsf = new SSLConnectionSocketFactory(sslcontext, new String[] { "TLSv1" }, null,
-				SSLConnectionSocketFactory.getDefaultHostnameVerifier());
-		globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build();
-		httpclientSSL = HttpClients.custom().setSSLSocketFactory(sslsf).setDefaultRequestConfig(globalConfig).build();
-
 		repository = aDeviceRepository;
 		if (theBridgeSettings.isValidHarmony())
 			this.myHarmonyHome = theHarmonyHome;
@@ -309,7 +277,7 @@ public class HueMulator implements HueErrorStringSet {
 				if ((device.getMapType() != null && device.getMapType().equalsIgnoreCase("hueDevice"))) {
 					HueDeviceIdentifier deviceId = new Gson().fromJson(device.getOnUrl(), HueDeviceIdentifier.class);
 					if (myHueHome.getTheHUERegisteredUser() == null) {
-						hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(),
+						hueUser = HueUtil.registerWithHue(deviceId.getIpAddress(), device.getName(),
 								myHueHome.getTheHUERegisteredUser(), this);
 						if (hueUser == null) {
 							return errorString;
@@ -317,7 +285,7 @@ public class HueMulator implements HueErrorStringSet {
 						myHueHome.setTheHUERegisteredUser(hueUser);
 					}
 					// make call
-					responseString = doHttpRequest(
+					responseString = HttpRequestHelper.INSTANCE.doHttpRequest(
 							"http://" + deviceId.getIpAddress() + "/api/" + myHueHome.getTheHUERegisteredUser()
 									+ "/lights/" + deviceId.getDeviceId(),
 							HttpGet.METHOD_NAME, device.getContentType(), null, null);
@@ -327,7 +295,7 @@ public class HueMulator implements HueErrorStringSet {
 					} else
 						if (responseString.contains("[{\"error\":") && responseString.contains("unauthorized user")) {
 						myHueHome.setTheHUERegisteredUser(null);
-						hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(),
+						hueUser = HueUtil.registerWithHue(deviceId.getIpAddress(), device.getName(),
 								myHueHome.getTheHUERegisteredUser(), this);
 						if (hueUser == null) {
 							return errorString;
@@ -527,7 +495,7 @@ public class HueMulator implements HueErrorStringSet {
 			if ((device.getMapType() != null && device.getMapType().equalsIgnoreCase("hueDevice"))) {
 				HueDeviceIdentifier deviceId = new Gson().fromJson(device.getOnUrl(), HueDeviceIdentifier.class);
 				if (myHueHome.getTheHUERegisteredUser() == null) {
-					hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(),
+					hueUser = HueUtil.registerWithHue(deviceId.getIpAddress(), device.getName(),
 							myHueHome.getTheHUERegisteredUser(), this);
 					if (hueUser == null) {
 						return errorString;
@@ -535,15 +503,15 @@ public class HueMulator implements HueErrorStringSet {
 					myHueHome.setTheHUERegisteredUser(hueUser);
 				}
 				// make call
-				responseString = doHttpRequest("http://" + deviceId.getIpAddress() + "/api/"
+				responseString = HttpRequestHelper.INSTANCE.doHttpRequest("http://" + deviceId.getIpAddress() + "/api/"
 						+ myHueHome.getTheHUERegisteredUser() + "/lights/" + deviceId.getDeviceId(),
-						HttpGet.METHOD_NAME, device.getContentType(), null, null);
+                                                                                          HttpGet.METHOD_NAME, device.getContentType(), null, null);
 				if (responseString == null) {
 					log.warn("Error on calling hue device to get state: " + device.getName());
 					lightResponse = DeviceResponse.createResponse(device);
 				} else if (responseString.contains("[{\"error\":") && responseString.contains("unauthorized user")) {
 					myHueHome.setTheHUERegisteredUser(null);
-					hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(),
+					hueUser = HueUtil.registerWithHue(deviceId.getIpAddress(), device.getName(),
 							myHueHome.getTheHUERegisteredUser(), this);
 					if (hueUser == null) {
 						return errorString;
@@ -800,7 +768,7 @@ public class HueMulator implements HueErrorStringSet {
 
 						HueDeviceIdentifier deviceId = new Gson().fromJson(callItems[i].getItem(), HueDeviceIdentifier.class);
 						if (myHueHome.getTheHUERegisteredUser() == null) {
-							hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(),
+							hueUser = HueUtil.registerWithHue(deviceId.getIpAddress(), device.getName(),
 									myHueHome.getTheHUERegisteredUser(), this);
 							if (hueUser == null) {
 								return errorString;
@@ -817,7 +785,7 @@ public class HueMulator implements HueErrorStringSet {
 								theDelay = callItems[i].getDelay();
 							else
 								theDelay = bridgeSettings.getButtonsleep();
-							responseString = doHttpRequest(
+							responseString = HttpRequestHelper.INSTANCE.doHttpRequest(
 									"http://" + deviceId.getIpAddress() + "/api/" + myHueHome.getTheHUERegisteredUser()
 											+ "/lights/" + deviceId.getDeviceId() + "/state",
 									HttpPut.METHOD_NAME, device.getContentType(), request.body(), null);
@@ -832,7 +800,7 @@ public class HueMulator implements HueErrorStringSet {
 						} else if (responseString.contains("[{\"error\":")) {
 							if(responseString.contains("unauthorized user")) {
 								myHueHome.setTheHUERegisteredUser(null);
-								hueUser = HueUtil.registerWithHue(httpClient, deviceId.getIpAddress(), device.getName(),
+								hueUser = HueUtil.registerWithHue(deviceId.getIpAddress(), device.getName(),
 										myHueHome.getTheHUERegisteredUser(), this);
 								if (hueUser == null) {
 									return errorString;
@@ -1132,8 +1100,8 @@ public class HueMulator implements HueErrorStringSet {
 											calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc),
 											false);
 								// make call
-								if (doHttpRequest(anUrl, device.getHttpVerb(), device.getContentType(), body,
-										theHeaders) == null) {
+								if (HttpRequestHelper.INSTANCE.doHttpRequest(anUrl, device.getHttpVerb(), device.getContentType(), body,
+                                                                                                             theHeaders) == null) {
 									log.warn("Error on calling url to change device state: " + anUrl);
 									responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 											+ "\",\"description\": \"Error on calling url to change device state\", \"parameter\": \"/lights/"
@@ -1237,84 +1205,6 @@ public class HueMulator implements HueErrorStringSet {
 			}
 		}
 		return request;
-	}
-
-	// This function executes the url from the device repository against the
-	// target as http or https as defined
-	protected String doHttpRequest(String url, String httpVerb, String contentType, String body, NameValue[] headers) {
-		HttpUriRequest request = null;
-		String theContent = null;
-		URI theURI = null;
-		ContentType parsedContentType = null;
-		StringEntity requestBody = null;
-		if (contentType != null && contentType.length() > 0) {
-			parsedContentType = ContentType.parse(contentType);
-			if (body != null && body.length() > 0)
-				requestBody = new StringEntity(body, parsedContentType);
-		}
-		try {
-			theURI = new URI(url);
-		} catch (URISyntaxException e1) {
-			log.warn("Error creating URI http request: " + url + " with message: " + e1.getMessage());
-			return null;
-		}
-		try {
-			if (HttpGet.METHOD_NAME.equalsIgnoreCase(httpVerb) || httpVerb == null) {
-				request = new HttpGet(theURI);
-			} else if (HttpPost.METHOD_NAME.equalsIgnoreCase(httpVerb)) {
-				HttpPost postRequest = new HttpPost(theURI);
-				if (requestBody != null)
-					postRequest.setEntity(requestBody);
-				request = postRequest;
-			} else if (HttpPut.METHOD_NAME.equalsIgnoreCase(httpVerb)) {
-				HttpPut putRequest = new HttpPut(theURI);
-				if (requestBody != null)
-					putRequest.setEntity(requestBody);
-				request = putRequest;
-			}
-		} catch (IllegalArgumentException e) {
-			log.warn("Error creating outbound http request: IllegalArgumentException in log", e);
-			return null;
-		}
-		log.debug("Making outbound call in doHttpRequest: " + request);
-		if (headers != null && headers.length > 0) {
-			for (int i = 0; i < headers.length; i++) {
-				request.setHeader(headers[i].getName(), headers[i].getValue());
-			}
-		}
-		try {
-			HttpResponse response;
-			if (url.startsWith("https"))
-				response = httpclientSSL.execute(request);
-			else
-				response = httpClient.execute(request);
-			log.debug((httpVerb == null ? "GET" : httpVerb) + " execute on URL responded: "
-					+ response.getStatusLine().getStatusCode());
-			if (response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
-				if (response.getEntity() != null) {
-					try {
-						theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); // read
-																											// content
-																											// for
-																											// data
-						EntityUtils.consume(response.getEntity()); // close out
-																	// inputstream
-																	// ignore
-																	// content
-					} catch (Exception e) {
-						log.debug(
-								"Error ocurred in handling response entity after successful call, still responding success. "
-										+ e.getMessage(),
-								e);
-					}
-				}
-				if (theContent == null)
-					theContent = "";
-			}
-		} catch (IOException e) {
-			log.warn("Error calling out to HA gateway: IOException in log", e);
-		}
-		return theContent;
 	}
 
 	private String doExecRequest(String anItem, int intensity, String lightId) {

@@ -138,25 +138,30 @@
 							<thead>
 								<tr>
 									<th>Name</th>
-									<th>IP</th>
+                                                                        <th>IP</th>
+                                                                        <th>Webhook</th>
 									<th>Manage</th>
 								</tr>
 							</thead>
 							<tr ng-repeat="harmony in bridge.settings.harmonyaddress.devices">
 								<td>{{harmony.name}}</td>
-								<td>{{harmony.ip}}</td>
+                                                                <td>{{harmony.ip}}</td>
+                                                                <td>{{harmony.webhook}}</td>
 								<td><button class="btn btn-danger" type="submit"
-										ng-click="removeHarmonytoSettings(harmony.name, harmony.ip)">Del</button></td>
+										ng-click="removeHarmonytoSettings(harmony.name, harmony.ip, harmony.webhook)">Del</button></td>
 							</tr>
 							<tr>
 								<td><input id="bridge-settings-next-harmony-name"
 									class="form-control" type="text" ng-model="newharmonyname"
 									placeholder="A Harmony"></td>
-								<td><input id="bridge-settings-next-harmony-ip"
-									class="form-control" type="text" ng-model="newharmonyip"
-									placeholder="192.168.1.3"></td>
+                                                            <td><input id="bridge-settings-next-harmony-ip"
+                                                                       class="form-control" type="text" ng-model="newharmonyip"
+                                                                       placeholder="192.168.1.3"></td>
+                                                            <td><input id="bridge-settings-next-harmony-webhook"
+                                                                       class="form-control" type="text" ng-model="newharmonywebhook"
+                                                                       placeholder="http://hook?a=${activity.label}"></td>
 								<td><button class="btn btn-success" type="submit"
-										ng-click="addHarmonytoSettings(newharmonyname, newharmonyip)">Add</button></td>
+										ng-click="addHarmonytoSettings(newharmonyname, newharmonyip, newharmonywebhook)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>

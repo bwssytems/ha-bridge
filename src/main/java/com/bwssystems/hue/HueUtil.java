@@ -2,8 +2,8 @@ package com.bwssystems.hue;
 
 import java.io.IOException;
 
+import com.bwssystems.HABridge.HttpRequestHelper;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -19,7 +19,7 @@ public class HueUtil {
     private static final Logger log = LoggerFactory.getLogger(HueUtil.class);
 	public static final String HUE_REQUEST = "/api";
 
-	public static final String registerWithHue(HttpClient anHttpClient, String ipAddress, String aName, String theUser, HueErrorStringSet errorStringSet) {
+	public static final String registerWithHue(String ipAddress, String aName, String theUser, HueErrorStringSet errorStringSet) {
     	UserCreateRequest theLogin = new UserCreateRequest();
         theLogin.setDevicetype("HABridge#MyMachine");
         HttpPost postRequest = new HttpPost("http://" + ipAddress + HUE_REQUEST);
@@ -28,7 +28,7 @@ public class HueUtil {
         HttpResponse response = null;
         postRequest.setEntity(requestBody);
         try {
-            response = anHttpClient.execute(postRequest);
+            response = HttpRequestHelper.INSTANCE.getHttpClient().execute(postRequest);
             log.debug("POST execute on URL responded: " + response.getStatusLine().getStatusCode());
             if(response.getStatusLine().getStatusCode() >= 200  && response.getStatusLine().getStatusCode() < 300){
             	String theBody = EntityUtils.toString(response.getEntity());
