@@ -13,13 +13,14 @@ import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.api.SuccessUserResponse;
 import com.bwssystems.HABridge.api.UserCreateRequest;
+import com.bwssystems.http.HTTPHandler;
 import com.google.gson.Gson;
 
 public class HueUtil {
     private static final Logger log = LoggerFactory.getLogger(HueUtil.class);
 	public static final String HUE_REQUEST = "/api";
 
-	public static final String registerWithHue(HttpClient anHttpClient, String ipAddress, String aName, String theUser) {
+	public static final String registerWithHue(HTTPHandler anHttpClient, String ipAddress, String aName, String theUser) {
     	UserCreateRequest theLogin = new UserCreateRequest();
         theLogin.setDevicetype("HABridge#MyMachine");
         HttpPost postRequest = new HttpPost("http://" + ipAddress + HUE_REQUEST);

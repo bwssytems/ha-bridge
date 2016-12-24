@@ -12,12 +12,13 @@ import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.hue.HueApiResponse;
+import com.bwssystems.http.HTTPHandler;
 import com.google.gson.Gson;
 
 
 public class HueInfo {
     private static final Logger log = LoggerFactory.getLogger(HueInfo.class);
-    private HttpClient httpClient;
+    private HTTPHandler httpClient;
     private NamedIP hueAddress;
 	private String theUser;
 	private HueHome theHueHome;
@@ -25,7 +26,7 @@ public class HueInfo {
 
     public HueInfo(NamedIP addressName, HueHome aHueHome) {
 		super();
-        httpClient = HttpClients.createDefault();
+        httpClient = new HTTPHandler();
         hueAddress = addressName;
         theUser = "habridge";
         theHueHome = aHueHome;
@@ -45,7 +46,7 @@ public class HueInfo {
     			break;
     		}
     		theUrl = "http://" + hueAddress.getIp() + HueUtil.HUE_REQUEST + "/" + theUser;
-    		theData = doHttpGETRequest(theUrl);
+    		theData = httpClient.doHttpRequest(theUrl, null, null, null, null);
 	    	if(theData != null) {
 	    		log.debug("GET HueApiResponse - data: " + theData);
 	    		if(theData.contains("[{\"error\":")) {
@@ -76,24 +77,6 @@ public class HueInfo {
 	    	}
     	}
     	return theHueApiResponse;
-    }
-
-	//	This function executes the url against the vera
-    protected String doHttpGETRequest(String url) {
-    	String theContent = null;
-        log.debug("calling GET on URL: " + url);
-        HttpGet httpGet = new HttpGet(url);
-        try {
-            HttpResponse response = httpClient.execute(httpGet);
-            log.debug("GET on URL responded: " + response.getStatusLine().getStatusCode());
-            if(response.getStatusLine().getStatusCode() == 200){
-                theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); //read content for data
-                EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
-            }
-        } catch (IOException e) {
-            log.error("doHttpGETRequest: Error calling out to HA gateway: " + e.getMessage());
-        }
-        return theContent;
     }
 
 	public NamedIP getHueAddress() {
