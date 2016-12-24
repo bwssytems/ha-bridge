@@ -58,11 +58,11 @@ public class HomeManager {
 		resourceList.put(DeviceMapTypes.HASS_DEVICE[DeviceMapTypes.resourceIndex], aHome);
 		homeList.put(DeviceMapTypes.HASS_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		//setup the command execution Home
-		aHome = new CommandHome().createHome(bridgeSettings);
+		aHome = new CommandHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.EXEC_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.CMD_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		//setup the http handler Home
-		aHome = new HTTPHome().createHome(bridgeSettings);
+		aHome = new HTTPHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.HTTP_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.CUSTOM_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex], aHome);

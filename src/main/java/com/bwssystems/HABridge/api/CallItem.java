@@ -8,6 +8,10 @@ public class CallItem {
 	private Integer delay;
 	private String type;
 	private String filterIPs;
+	private String httpVerb;
+	private String httpBody;
+	private String httpHeaders;
+	private String contentType;
 
 	public String getType() {
 		return type;
@@ -47,5 +51,37 @@ public class CallItem {
 
 	public void setDelay(Integer delay) {
 		this.delay = delay;
+	}
+
+	public String getHttpVerb() {
+		return httpVerb;
+	}
+
+	public void setHttpVerb(String httpVerb) {
+		this.httpVerb = httpVerb;
+	}
+
+	public String getHttpBody() {
+		return httpBody;
+	}
+
+	public void setHttpBody(String httpBody) {
+		this.httpBody = httpBody;
+	}
+
+	public String getHttpHeaders() {
+		return httpHeaders;
+	}
+
+	public void setHttpHeaders(String httpHeaders) {
+		this.httpHeaders = httpHeaders;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
 	}
 }

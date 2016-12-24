@@ -1,20 +1,14 @@
 package com.bwssystems.vera;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.NamedIP;
+import com.bwssystems.http.HTTPHandler;
 import com.bwssystems.luupRequests.Categorie;
 import com.bwssystems.luupRequests.Device;
 import com.bwssystems.luupRequests.Room;
@@ -25,13 +19,13 @@ import com.google.gson.Gson;
 
 public class VeraInfo {
     private static final Logger log = LoggerFactory.getLogger(VeraInfo.class);
-    private HttpClient httpClient;
+    private HTTPHandler httpClient;
     private static final String SDATA_REQUEST = ":3480/data_request?id=sdata&output_format=json";
     private NamedIP veraAddress;
 
     public VeraInfo(NamedIP addressName) {
 		super();
-        httpClient = HttpClients.createDefault();
+        httpClient = new HTTPHandler();
         veraAddress = addressName;
 	}
     
@@ -41,7 +35,7 @@ public class VeraInfo {
 		String theUrl = "http://" + veraAddress.getIp() + SDATA_REQUEST;
     	String theData;
     	
-    	theData = doHttpGETRequest(theUrl);
+    	theData = httpClient.doHttpRequest(theUrl, null, null, null, null);
     	if(theData != null) {
 	    	theSdata = new Gson().fromJson(theData, Sdata.class);
 	        log.debug("GET sdata - full: " + theSdata.getFull() + ", version: " + theSdata.getVersion());
@@ -88,22 +82,4 @@ public class VeraInfo {
 			theScene.setVeraname(veraAddress.getName());
 		}
 	}
-
-	//	This function executes the url against the vera
-    protected String doHttpGETRequest(String url) {
-    	String theContent = null;
-        log.debug("calling GET on URL: " + url);
-        HttpGet httpGet = new HttpGet(url);
-        try {
-            HttpResponse response = httpClient.execute(httpGet);
-            log.debug("GET on URL responded: " + response.getStatusLine().getStatusCode());
-            if(response.getStatusLine().getStatusCode() == 200){
-                theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); //read content for data
-                EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
-            }
-        } catch (IOException e) {
-            log.error("doHttpGETRequest: Error calling out to HA gateway: " + e.getMessage());
-        }
-        return theContent;
-    }
 }

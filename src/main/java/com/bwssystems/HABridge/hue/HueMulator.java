@@ -1225,31 +1225,7 @@ public class HueMulator {
 			} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.HASS_DEVICE[DeviceMapTypes.typeIndex])) {
 				responseString = homeManager.findHome(DeviceMapTypes.HASS_DEVICE[DeviceMapTypes.typeIndex]).deviceHandler(callItems[i], aMultiUtil, lightId, i, state, theStateChanges, stateHasBri, stateHasBriInc);
 			} else if (callItems[i].getType() != null && callItems[i].getType().trim().equalsIgnoreCase(DeviceMapTypes.EXEC_DEVICE[DeviceMapTypes.typeIndex])) {
-				log.debug("Exec Request called with url: " + url);
-				String intermediate;
-				if (callItems[i].getItem().getAsString().contains("exec://"))
-					intermediate = callItems[i].getItem().getAsString().substring(callItems[i].getItem().getAsString().indexOf("://") + 3);
-				else
-					intermediate = callItems[i].getItem().getAsString();
-				for (int x = 0; x < aMultiUtil.getSetCount(); x++) {
-					if (x > 0 || i > 0) {
-						try {
-							Thread.sleep(aMultiUtil.getTheDelay());
-						} catch (InterruptedException e) {
-							// ignore
-						}
-					}
-					if (callItems[i].getDelay() != null && callItems[i].getDelay() > 0)
-						aMultiUtil.setTheDelay(callItems[i].getDelay());
-					else
-						aMultiUtil.setTheDelay(bridgeSettings.getButtonsleep());
-					String anError = doExecRequest(intermediate,
-							BrightnessDecode.calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), lightId);
-					if (anError != null) {
-						responseString = anError;
-						x = aMultiUtil.getSetCount();
-					}
-				}
+				responseString = homeManager.findHome(DeviceMapTypes.EXEC_DEVICE[DeviceMapTypes.typeIndex]).deviceHandler(callItems[i], aMultiUtil, lightId, i, state, theStateChanges, stateHasBri, stateHasBriInc);
 			} else // This section allows the usage of http/tcp/udp/exec
 					// calls in a given set of items
 			{
