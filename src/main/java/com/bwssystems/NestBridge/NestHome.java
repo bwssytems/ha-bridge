@@ -12,6 +12,7 @@ import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.bwssystems.HABridge.api.hue.StateChangeBody;
+import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.nest.controller.Home;
@@ -103,7 +104,7 @@ public class NestHome implements com.bwssystems.HABridge.Home {
 
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int iterationCount,
-			DeviceState state, StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc) {
+			DeviceState state, StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc, DeviceDescriptor device, String body) {
 		String responseString = null;
 		log.debug("executing HUE api request to set away for nest " + anItem.getType() + ": " + anItem.getItem().toString());
 		if(!validNest) {

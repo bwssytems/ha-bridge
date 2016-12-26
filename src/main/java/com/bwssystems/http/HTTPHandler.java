@@ -126,6 +126,16 @@ public class HTTPHandler {
 		return theContent;
 	}
 	
+	public HttpClient getHttpClient() {
+		return httpClient;
+	}
+
+
+	public CloseableHttpClient getHttpclientSSL() {
+		return httpclientSSL;
+	}
+
+
 	public void closeHandler() {
 		httpClient = null;
 		try {

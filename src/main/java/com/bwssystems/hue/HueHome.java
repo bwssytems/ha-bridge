@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.http.client.methods.HttpPut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,13 +17,19 @@ import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.bwssystems.HABridge.api.hue.HueApiResponse;
 import com.bwssystems.HABridge.api.hue.StateChangeBody;
+import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
+import com.bwssystems.http.HTTPHandler;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class HueHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(HueHome.class);
 	private Map<String, HueInfo> hues;
 	private String theHUERegisteredUser;
 	private Boolean validHue;
+	private Gson aGsonHandler;
+	private HTTPHandler anHttpHandler;
 	
 	public HueHome(BridgeSettingsDescriptor bridgeSettings) {
 		super();
@@ -72,10 +79,58 @@ public class HueHome implements Home {
 
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int iterationCount,
-			DeviceState state, StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc) {
-		// TODO Auto-generated method stub
-		log.info("device handler not implemented");
-		return null;
+			DeviceState state, StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc, DeviceDescriptor device, String body) {
+		String responseString = null;
+		String hueUser;
+		HueDeviceIdentifier deviceId = aGsonHandler.fromJson(anItem.getItem(), HueDeviceIdentifier.class);
+		if (getTheHUERegisteredUser() == null) {
+			hueUser = HueUtil.registerWithHue(anHttpHandler, deviceId.getIpAddress(), device.getName(),
+					getTheHUERegisteredUser());
+			if (hueUser == null) {
+				return responseString;
+			}
+			setTheHUERegisteredUser(hueUser);
+		}
+
+		// make call
+		for (int x = 0; x < aMultiUtil.getSetCount(); x++) {
+			if (x > 0 || iterationCount > 0) {
+				try {
+					Thread.sleep(aMultiUtil.getTheDelay());
+				} catch (InterruptedException e) {
+					// ignore
+				}
+			}
+			if (anItem.getDelay() != null && anItem.getDelay() > 0)
+				aMultiUtil.setTheDelay(anItem.getDelay());
+			else
+				aMultiUtil.setTheDelay(aMultiUtil.getDelayDefault());
+			responseString = anHttpHandler.doHttpRequest(
+					"http://" + deviceId.getIpAddress() + "/api/" + getTheHUERegisteredUser()
+							+ "/lights/" + deviceId.getDeviceId() + "/state",
+					HttpPut.METHOD_NAME, "application/json", body, null);
+			if (responseString.contains("[{\"error\":"))
+					x = aMultiUtil.getSetCount();
+		}
+		if (responseString == null) {
+			log.warn("Error on calling Hue passthru to change device state: " + device.getName());
+			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+					+ "\",\"description\": \"Error on calling HUE to change device state\", \"parameter\": \"/lights/"
+					+ lightId + "state\"}}]";
+		} else if (responseString.contains("[{\"error\":")) {
+			if(responseString.contains("unauthorized user")) {
+				setTheHUERegisteredUser(null);
+				hueUser = HueUtil.registerWithHue(anHttpHandler, deviceId.getIpAddress(), device.getName(),
+						getTheHUERegisteredUser());
+				if (hueUser == null) {
+					return responseString;
+				}
+				setTheHUERegisteredUser(hueUser);
+			}
+			else
+				log.warn("Error occurred when calling Hue Passthru: " + responseString);
+		}
+		return responseString;
 	}
 
 	@Override
@@ -91,13 +146,16 @@ public class HueHome implements Home {
 	      		hues.put(aHue.getName(), new HueInfo(aHue, this));
 			}
 			theHUERegisteredUser = null;
+			aGsonHandler =
+					new GsonBuilder()
+			//	.registerTypeAdapter(CallItem.class, new CallItemDeserializer())
+			.create();
 		}
 		return this;
 	}
 
 	@Override
 	public void closeHome() {
-		// TODO Auto-generated method stub
-		
+		anHttpHandler.closeHandler();
 	}
 }

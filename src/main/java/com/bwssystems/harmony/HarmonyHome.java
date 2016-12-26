@@ -18,7 +18,10 @@ import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.bwssystems.HABridge.api.hue.StateChangeBody;
+import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import net.whistlingfish.harmony.config.Activity;
 import net.whistlingfish.harmony.config.Device;
@@ -28,6 +31,7 @@ public class HarmonyHome implements Home {
 	private Map<String, HarmonyServer> hubs;
 	private Boolean isDevMode;
 	private Boolean validHarmony;
+	private Gson aGsonHandler;
 
 	public HarmonyHome(BridgeSettingsDescriptor bridgeSettings) {
 		super();
@@ -114,10 +118,79 @@ public class HarmonyHome implements Home {
 
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int iterationCount,
-			DeviceState state, StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc) {
-		// TODO Auto-generated method stub
-		log.info("device handler not implemented");
-		return null;
+			DeviceState state, StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc, DeviceDescriptor device, String body) {
+		String responseString = null;
+		log.debug("executing HUE api request to change " + anItem.getType() + " to Harmony: " + device.getTargetDevice());
+		if(!validHarmony) {
+			log.warn("Should not get here, no harmony configured");
+			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+					+ "\",\"description\": \"Should not get here, no harmony configured\", \"parameter\": \"/lights/"
+					+ lightId + "state\"}}]";			
+		} else {
+			if(anItem.getType().trim().equalsIgnoreCase(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.typeIndex]))
+			{
+				RunActivity anActivity = aGsonHandler.fromJson(anItem.getItem().toString(), RunActivity.class);
+				HarmonyHandler myHarmony = getHarmonyHandler(device.getTargetDevice());
+				if (myHarmony == null) {
+					log.warn("Should not get here, no harmony hub available");
+					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+							+ "\",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/"
+							+ lightId + "state\"}}]";
+				} else {
+					for (int x = 0; x < aMultiUtil.getSetCount(); x++) {
+						if (x > 0 || iterationCount > 0) {
+							try {
+								Thread.sleep(aMultiUtil.getTheDelay());
+							} catch (InterruptedException e) {
+								// ignore
+							}
+						}
+						if (anItem.getDelay() != null && anItem.getDelay() > 0)
+							aMultiUtil.setTheDelay(anItem.getDelay());
+						else
+							aMultiUtil.setTheDelay(aMultiUtil.getDelayDefault());
+						myHarmony.startActivity(anActivity);
+					}
+				}
+			} else if(anItem.getType().trim().equalsIgnoreCase(DeviceMapTypes.HARMONY_BUTTON[DeviceMapTypes.typeIndex])) {
+				String url = anItem.getItem().toString();
+				if (url.substring(0, 1).equalsIgnoreCase("{")) {
+					url = "[" + url + "]";
+				}
+				ButtonPress[] deviceButtons = aGsonHandler.fromJson(url, ButtonPress[].class);
+				HarmonyHandler myHarmony = getHarmonyHandler(device.getTargetDevice());
+				if (myHarmony == null) {
+					log.warn("Should not get here, no harmony hub available");
+					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+							+ "\",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/"
+							+ lightId + "state\"}}]";
+				} else {
+		        	Integer theCount = 1;
+	        		for(int z = 0; z < deviceButtons.length; z++) {
+		        		if(deviceButtons[z].getCount() != null && deviceButtons[z].getCount() > 0)
+		        			theCount = deviceButtons[z].getCount();
+		        		else
+		        			theCount = aMultiUtil.getSetCount();
+		        		for(int y = 0; y < theCount; y++) {
+		        			if( y > 0 || z > 0) {
+									try {
+										Thread.sleep(aMultiUtil.getTheDelay());
+									} catch (InterruptedException e) {
+										// ignore
+									}
+								}
+								if (anItem.getDelay() != null && anItem.getDelay() > 0)
+									aMultiUtil.setTheDelay(anItem.getDelay());
+								else
+									aMultiUtil.setTheDelay(aMultiUtil.getDelayDefault());
+		    	        	log.debug("pressing button: " + deviceButtons[z].getDevice() + " - " + deviceButtons[z].getButton() + " - iteration: " + String.valueOf(z) + " - count: " + String.valueOf(y));
+		        			myHarmony.pressButton(deviceButtons[z]);
+		        		}
+	        		}
+				}
+			}
+		}
+		return responseString;
 	}
 
 	@Override
@@ -128,6 +201,9 @@ public class HarmonyHome implements Home {
 			log.debug("No valid Harmony config");
 		} else {
 			hubs = new HashMap<String, HarmonyServer>();
+			aGsonHandler =
+					new GsonBuilder()
+					.create();
 			if(isDevMode) {
 				NamedIP devModeIp = new NamedIP();
 				devModeIp.setIp("10.10.10.10");

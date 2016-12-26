@@ -5,6 +5,7 @@ public class ButtonPress {
 	private String button;
 	private Integer delay;
 	private Integer count;
+	private String hub;
 	public String getDevice() {
 		return device;
 	}
@@ -35,5 +36,11 @@ public class ButtonPress {
 				return true;
 		}
 		return false;
+	}
+	public String getHub() {
+		return hub;
+	}
+	public void setHub(String hub) {
+		this.hub = hub;
 	}
 }

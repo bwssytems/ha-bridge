@@ -20,7 +20,7 @@ public class HueUtil {
     private static final Logger log = LoggerFactory.getLogger(HueUtil.class);
 	public static final String HUE_REQUEST = "/api";
 
-	public static final String registerWithHue(HTTPHandler anHttpClient, String ipAddress, String aName, String theUser) {
+	public static final String registerWithHue(HTTPHandler anHttpHandler, String ipAddress, String aName, String theUser) {
     	UserCreateRequest theLogin = new UserCreateRequest();
         theLogin.setDevicetype("HABridge#MyMachine");
         HttpPost postRequest = new HttpPost("http://" + ipAddress + HUE_REQUEST);
@@ -28,6 +28,7 @@ public class HueUtil {
         StringEntity requestBody = new StringEntity(new Gson().toJson(theLogin), parsedContentType);
         HttpResponse response = null;
         postRequest.setEntity(requestBody);
+        HttpClient anHttpClient = anHttpHandler.getHttpClient();
         try {
             response = anHttpClient.execute(postRequest);
             log.debug("POST execute on URL responded: " + response.getStatusLine().getStatusCode());

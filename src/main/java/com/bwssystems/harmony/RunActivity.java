@@ -2,6 +2,7 @@ package com.bwssystems.harmony;
 
 public class RunActivity {
 	private String name;
+	private String hub;
 
 	public String getName() {
 		return name;
@@ -14,5 +15,13 @@ public class RunActivity {
 		if (name != null && !name.isEmpty())
 			return true;
 		return false;
+	}
+
+	public String getHub() {
+		return hub;
+	}
+
+	public void setHub(String hub) {
+		this.hub = hub;
 	}
 }

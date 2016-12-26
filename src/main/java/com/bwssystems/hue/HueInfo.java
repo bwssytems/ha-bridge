@@ -1,12 +1,5 @@
 package com.bwssystems.hue;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
