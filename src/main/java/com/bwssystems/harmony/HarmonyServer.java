@@ -87,17 +87,19 @@ public class HarmonyServer {
                 @Override
                 public void activityStarted(Activity activity) {
                     String webhook = myNameAndIP.getWebhook();
-                    try {
-                        // Replacing variables
-                        webhook = webhook.replace(ACTIVIY_ID, activity.getId().toString());
-                        webhook = webhook.replace(ACTIVIY_LABEL, URLEncoder.encode(activity.getLabel(), "UTF-8"));
+                    if(webhook != null) {
+                        try {
+                            // Replacing variables
+                            webhook = webhook.replace(ACTIVIY_ID, activity.getId().toString());
+                            webhook = webhook.replace(ACTIVIY_LABEL, URLEncoder.encode(activity.getLabel(), "UTF-8"));
 
-                        log.info(format("calling webhook: %s", webhook));
+                            log.info(format("calling webhook: %s", webhook));
 
-                        // Calling webhook
-                        HttpRequestHelper.INSTANCE.doHttpRequest(webhook, HttpGet.METHOD_NAME, null, null, null);
-                    } catch (Exception e) {
-                        log.warn("could not call webhook: " + webhook, e);
+                            // Calling webhook
+                            HttpRequestHelper.INSTANCE.doHttpRequest(webhook, HttpGet.METHOD_NAME, null, null, null);
+                        } catch (Exception e) {
+                            log.warn("could not call webhook: " + webhook, e);
+                        }
                     }
                     log.info(format("activity changed: [%d] %s", activity.getId(), activity.getLabel()));
                 }
