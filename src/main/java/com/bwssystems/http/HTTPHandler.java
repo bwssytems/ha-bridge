@@ -111,10 +111,8 @@ public class HTTPHandler {
 																	// ignore
 																	// content
 					} catch (Exception e) {
-						log.debug(
-								"Error ocurred in handling response entity after successful call, still responding success. "
-										+ e.getMessage(),
-								e);
+						log.debug("Error ocurred in handling response entity after successful call, still responding success. "
+										+ e.getMessage(), e);
 					}
 				}
 				if (theContent == null)
