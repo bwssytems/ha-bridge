@@ -14,6 +14,7 @@ import com.bwssystems.hue.HueHome;
 import com.bwssystems.mqtt.MQTTHome;
 import com.bwssystems.tcp.TCPHome;
 import com.bwssystems.udp.UDPHome;
+import com.bwssystems.util.UDPDatagramSender;
 import com.bwssystems.vera.VeraHome;
 
 public class HomeManager {
@@ -26,7 +27,7 @@ public class HomeManager {
 	}
 
 	// factory method
-	public void buildHomes(BridgeSettingsDescriptor bridgeSettings) {
+	public void buildHomes(BridgeSettingsDescriptor bridgeSettings, UDPDatagramSender aUdpDatagramSender) {
 		Home aHome = null;
         //setup the harmony connection if available
 		aHome = new HarmonyHome(bridgeSettings);
@@ -69,10 +70,10 @@ public class HomeManager {
 		homeList.put(DeviceMapTypes.VERA_SCENE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.DEFAULT_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		//setup the tcp handler Home
-		aHome = new TCPHome().createHome(bridgeSettings);
+		aHome = new TCPHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.TCP_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		//setup the udp handler Home
-		aHome = new UDPHome().createHome(bridgeSettings);
+		aHome = new UDPHome(bridgeSettings, aUdpDatagramSender);
 		homeList.put(DeviceMapTypes.UDP_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		
 		aHome = new VeraHome(bridgeSettings);

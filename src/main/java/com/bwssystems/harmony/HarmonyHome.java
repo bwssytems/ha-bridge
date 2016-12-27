@@ -90,13 +90,11 @@ public class HarmonyHome implements Home {
 		ArrayList<HarmonyActivity> activityList = new ArrayList<HarmonyActivity>();
 		while(keys.hasNext()) {
 			String key = keys.next();
-			Iterator<Activity> activities = hubs.get(key).getMyHarmony().getActivities().iterator();
-			while(activities.hasNext()) {
-				HarmonyActivity anActivity = new HarmonyActivity();
-				anActivity.setActivity(activities.next());
-				anActivity.setHub(key);
-				activityList.add(anActivity);
-			}
+			Activity theActivity = hubs.get(key).getMyHarmony().getCurrentActivity();
+			HarmonyActivity anActivity = new HarmonyActivity();
+			anActivity.setActivity(theActivity);
+			anActivity.setHub(key);
+			activityList.add(anActivity);
 		}
 		return activityList;
 	}

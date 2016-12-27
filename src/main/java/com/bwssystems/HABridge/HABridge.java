@@ -57,22 +57,22 @@ public class HABridge {
 	        // setup system control api first
 	        theSystem = new SystemControl(bridgeSettings, theVersion);
 	        theSystem.setupServer();
-	        //Setup the device connection homes through the manager
-	        homeManager = new HomeManager();
-	        homeManager.buildHomes(bridgeSettings.getBridgeSettingsDescriptor());
-	        // setup the class to handle the resource setup rest api
-	        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), homeManager);
-	        // setup the class to handle the upnp response rest api
-	        theSettingResponder = new UpnpSettingsResource(bridgeSettings.getBridgeSettingsDescriptor());
-	        theSettingResponder.setupServer();
 	        // setup the UDP Datagram socket to be used by the HueMulator and the upnpListener
 	        udpSender = UDPDatagramSender.createUDPDatagramSender(bridgeSettings.getBridgeSettingsDescriptor().getUpnpResponsePort());
 	        if(udpSender == null) {
 	        	bridgeSettings.getBridgeControl().setStop(true);	        	
 	        }
 	        else {
+		        //Setup the device connection homes through the manager
+		        homeManager = new HomeManager();
+		        homeManager.buildHomes(bridgeSettings.getBridgeSettingsDescriptor(), udpSender);
+		        // setup the class to handle the resource setup rest api
+		        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), homeManager);
+		        // setup the class to handle the upnp response rest api
+		        theSettingResponder = new UpnpSettingsResource(bridgeSettings.getBridgeSettingsDescriptor());
+		        theSettingResponder.setupServer();
 		        // setup the class to handle the hue emulator rest api
-		        theHueMulator = new HueMulator(bridgeSettings.getBridgeSettingsDescriptor(), theResources.getDeviceRepository(), homeManager, udpSender);
+		        theHueMulator = new HueMulator(bridgeSettings.getBridgeSettingsDescriptor(), theResources.getDeviceRepository(), homeManager);
 		        theHueMulator.setupServer();
 		        // wait for the sparkjava initialization of the rest api classes to be complete
 		        awaitInitialization();
@@ -85,11 +85,11 @@ public class HABridge {
 		        	bridgeSettings.getBridgeControl().setStop(true);
 		        if(bridgeSettings.getBridgeSettingsDescriptor().isSettingsChanged())
 		        	bridgeSettings.save(bridgeSettings.getBridgeSettingsDescriptor());
+		        homeManager.closeHomes();
+		        udpSender.closeResponseSocket();
 	        }
 	        bridgeSettings.getBridgeControl().setReinit(false);
 	        stop();
-	        homeManager.closeHomes();
-	        udpSender.closeResponseSocket();
         }
         log.info("HA Bridge (v" + theVersion.getVersion() + ") exiting....");
         System.exit(0);
