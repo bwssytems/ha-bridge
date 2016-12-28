@@ -4,18 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.bwssystems.HABridge.devicemanagmeent.ResourceHandler;
-import com.bwssystems.NestBridge.NestHome;
-import com.bwssystems.exec.CommandHome;
-import com.bwssystems.hal.HalHome;
-import com.bwssystems.harmony.HarmonyHome;
-import com.bwssystems.hass.HassHome;
-import com.bwssystems.http.HTTPHome;
-import com.bwssystems.hue.HueHome;
-import com.bwssystems.mqtt.MQTTHome;
-import com.bwssystems.tcp.TCPHome;
-import com.bwssystems.udp.UDPHome;
-import com.bwssystems.util.UDPDatagramSender;
-import com.bwssystems.vera.VeraHome;
+import com.bwssystems.HABridge.plugins.NestBridge.NestHome;
+import com.bwssystems.HABridge.plugins.exec.CommandHome;
+import com.bwssystems.HABridge.plugins.hal.HalHome;
+import com.bwssystems.HABridge.plugins.harmony.HarmonyHome;
+import com.bwssystems.HABridge.plugins.hass.HassHome;
+import com.bwssystems.HABridge.plugins.http.HTTPHome;
+import com.bwssystems.HABridge.plugins.hue.HueHome;
+import com.bwssystems.HABridge.plugins.mqtt.MQTTHome;
+import com.bwssystems.HABridge.plugins.tcp.TCPHome;
+import com.bwssystems.HABridge.plugins.udp.UDPHome;
+import com.bwssystems.HABridge.plugins.vera.VeraHome;
+import com.bwssystems.HABridge.util.UDPDatagramSender;
 
 public class HomeManager {
 	Map<String, Home> homeList;
@@ -33,6 +33,7 @@ public class HomeManager {
 		aHome = new HarmonyHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.resourceIndex], aHome);
 		homeList.put(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.typeIndex], aHome);
+		resourceList.put(DeviceMapTypes.HARMONY_BUTTON[DeviceMapTypes.resourceIndex], aHome);
 		homeList.put(DeviceMapTypes.HARMONY_BUTTON[DeviceMapTypes.typeIndex], aHome);
         //setup the nest connection if available
 		aHome = new NestHome(bridgeSettings);
@@ -72,9 +73,11 @@ public class HomeManager {
 		//setup the tcp handler Home
 		aHome = new TCPHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.TCP_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.TCP_DEVICE_COMPAT[DeviceMapTypes.typeIndex], aHome);
 		//setup the udp handler Home
 		aHome = new UDPHome(bridgeSettings, aUdpDatagramSender);
 		homeList.put(DeviceMapTypes.UDP_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.UDP_DEVICE_COMPAT[DeviceMapTypes.typeIndex], aHome);
 		
 		aHome = new VeraHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.resourceIndex], aHome);

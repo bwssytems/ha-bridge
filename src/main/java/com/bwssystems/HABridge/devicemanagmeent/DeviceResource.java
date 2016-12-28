@@ -22,7 +22,7 @@ import com.bwssystems.HABridge.dao.BackupFilename;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
 import com.bwssystems.HABridge.dao.ErrorMessage;
-import com.bwssystems.util.JsonTransformer;
+import com.bwssystems.HABridge.util.JsonTransformer;
 import com.google.gson.Gson;
 
 /**

@@ -94,6 +94,11 @@ java -jar -Dserver.port=80 ha-bridge-W.X.Y.jar
 ```
 Note: if using with a Google Home device, port 80 *must* be used.
 
+### -Dserver.ip=`<ip address>`
+The default ip address for the bridge to listen on is all interfaces (0.0.0.0). To override what the default or what is in the configuration file for this parameter, specify -Dserver.ip=`<ip address>` explicitly. This is especially helpful if you are running the ha-bridge for the first time and have another application on that utilizes the default interface. The command line example:
+```
+java -jar -Dserver.ip=192.168.1.1 ha-bridge-W.X.Y.jar
+```
 ## HA Bridge Usage and Configuration
 This section will cover the basics of configuration and where this configuration can be done. This requires that you have started your bridge process and then have pointed your
 favorite web interface by going to the http://<my ip address>:<port> or http://localhost:<port> with port you have assigned. The default quick link is http://localhost for yoru reference.

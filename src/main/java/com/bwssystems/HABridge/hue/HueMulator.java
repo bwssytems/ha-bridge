@@ -15,11 +15,9 @@ import com.bwssystems.HABridge.api.hue.HuePublicConfig;
 import com.bwssystems.HABridge.api.hue.StateChangeBody;
 import com.bwssystems.HABridge.api.hue.WhitelistEntry;
 import com.bwssystems.HABridge.dao.*;
-import com.bwssystems.http.HTTPHandler;
-import com.bwssystems.hue.HueDeviceIdentifier;
-import com.bwssystems.hue.HueHome;
-import com.bwssystems.hue.HueUtil;
-import com.bwssystems.util.JsonTransformer;
+import com.bwssystems.HABridge.plugins.hue.HueDeviceIdentifier;
+import com.bwssystems.HABridge.plugins.hue.HueHome;
+import com.bwssystems.HABridge.util.JsonTransformer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -29,7 +27,6 @@ import static spark.Spark.post;
 import static spark.Spark.put;
 
 import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +52,6 @@ public class HueMulator {
 	private HueHome myHueHome;
 	private BridgeSettingsDescriptor bridgeSettings;
 	private Gson aGsonHandler;
-	private HTTPHandler anHttpHandler;
 
 	public HueMulator(BridgeSettingsDescriptor theBridgeSettings, DeviceRepository aDeviceRepository, HomeManager aHomeManager) {
 		repository = aDeviceRepository;
@@ -63,7 +59,6 @@ public class HueMulator {
 		homeManager= aHomeManager;
 		myHueHome = (HueHome) homeManager.findHome(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]);
 		aGsonHandler = new GsonBuilder().create();
-		anHttpHandler = new HTTPHandler();
 	}
 
 	// This function sets up the sparkjava rest calls for the hue api
@@ -131,7 +126,7 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			return lightsListHandler("lights", request.params(":userid"), request.ip());
+			return lightsListHandler(request.params(":userid"), request.ip());
 		} , new JsonTransformer());
 
 		// http://ip_address:port/api/{userId}/lights/ returns json objects of
@@ -140,7 +135,7 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			return lightsListHandler("lights", request.params(":userid"), request.ip());
+			return lightsListHandler(request.params(":userid"), request.ip());
 		} , new JsonTransformer());
 
 		// http://ip_address:port/api CORS request
@@ -493,8 +488,7 @@ public class HueMulator {
 		theErrors = validateWhitelistUser(userId, false);
 		if (theErrors == null) {
 			if (groupId.equalsIgnoreCase("0")) {
-				GroupResponse theResponse = GroupResponse
-						.createGroupResponse(repository.findAll());
+				GroupResponse theResponse = GroupResponse.createGroupResponse(repository.findAll());
 				return theResponse;
 			}
 			theErrors = HueErrorResponse.createResponse("3", userId + "/groups/" + groupId, "Object not found", null, null, null).getTheErrors();
@@ -503,7 +497,7 @@ public class HueMulator {
 		return theErrors;
 	}
 
-	private Object lightsListHandler(String type, String userId, String requestIp) {
+	private Object lightsListHandler(String userId, String requestIp) {
 		HueError[] theErrors = null;
 		Map<String, DeviceResponse> deviceResponseMap = null;
 		if (bridgeSettings.isTraceupnp())
@@ -512,33 +506,12 @@ public class HueMulator {
 		theErrors = validateWhitelistUser(userId, false);
 		if (theErrors == null) {
 			List<DeviceDescriptor> deviceList = repository.findAll();
-			deviceResponseMap = new HashMap<>();
+			deviceResponseMap = new HashMap<String, DeviceResponse>();
 			for (DeviceDescriptor device : deviceList) {
 				DeviceResponse deviceResponse = null;
-				String responseString;
-				if ((device.getMapType() != null && device.getMapType().equalsIgnoreCase("hueDevice"))) {
+				if ((device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]))) {
 					HueDeviceIdentifier deviceId = aGsonHandler.fromJson(device.getOnUrl(), HueDeviceIdentifier.class);
-					theErrors = validateHueUser(userId, deviceId.getIpAddress(), device.getName());
-					if (theErrors == null) {
-						// make call
-						responseString = anHttpHandler.doHttpRequest(
-								"http://" + deviceId.getIpAddress() + "/api/" + myHueHome.getTheHUERegisteredUser()
-										+ "/lights/" + deviceId.getDeviceId(),
-								HttpGet.METHOD_NAME, device.getContentType(), null, null);
-						if (responseString == null) {
-							log.warn("Error on calling hue device to get state: " + device.getName());
-							deviceResponse = DeviceResponse.createResponse(device);
-						} else if (responseString.contains("[{\"error\":") && responseString.contains("unauthorized user")) {
-								myHueHome.setTheHUERegisteredUser(null);
-								theErrors = validateHueUser(userId, deviceId.getIpAddress(), device.getName());
-								if (theErrors == null)
-									deviceResponse = DeviceResponse.createResponse(device);
-						} else {
-							deviceResponse = aGsonHandler.fromJson(responseString, DeviceResponse.class);
-							if (deviceResponse != null) 
-								deviceResponse.setName(device.getName());
-						}
-					}
+					deviceResponse = myHueHome.getHueDeviceInfo(deviceId, device);
 				}
 
 				if (deviceResponse == null)
@@ -559,7 +532,7 @@ public class HueMulator {
 		String aDeviceType = null;
 
 		if (bridgeSettings.isTraceupnp())
-			log.info("Traceupnp: hue api/ user create requested: " + body + " from " + ipAddress);
+			log.info("Traceupnp: hue api user create requested: " + body + " from " + ipAddress);
 		log.debug("hue api user create requested: " + body + " from " + ipAddress);
 
 		if (body != null && !body.isEmpty()) {
@@ -576,7 +549,7 @@ public class HueMulator {
 		if (bridgeSettings.isTraceupnp())
 			log.info("Traceupnp: hue api user create requested for device type: " + aDeviceType + " and username: "
 					+ newUser + (followingSlash ? " /api/ called" : ""));
-		log.debug("hue api user create requested for device type: " + aDeviceType + " and username: " + newUser);
+		log.debug("hue api user create requested for device type: " + aDeviceType + " and username: " + newUser + (followingSlash ? " /api/ called" : ""));
 
 		return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";
 		
@@ -599,22 +572,23 @@ public class HueMulator {
 		return apiResponse.getConfig();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Object getFullState(String userId, String ipAddress) {
 		log.debug("hue api full state requested: " + userId + " from " + ipAddress);
 		HueError[] theErrors = validateWhitelistUser(userId, false);
 		if (theErrors != null)
 			return theErrors;
 
-		List<DeviceDescriptor> descriptorList = repository.findAll();
 		HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(),
 				bridgeSettings.getWhitelist(), bridgeSettings.getHubversion());
-		Map<String, DeviceResponse> deviceList = new HashMap<>();
-		if (descriptorList != null) {
-			descriptorList.forEach(descriptor -> {
-				DeviceResponse deviceResponse = DeviceResponse.createResponse(descriptor);
-				deviceList.put(descriptor.getId(), deviceResponse);
-			});
+		Object aReturn = this.lightsListHandler(userId, ipAddress);
+		Map<String, DeviceResponse> deviceList = new HashMap<String, DeviceResponse>();
+		if(aReturn.getClass() == deviceList.getClass()) {
+			deviceList = (Map<String, DeviceResponse>) aReturn;
 			apiResponse.setLights(deviceList);
+		}
+		else {
+			return aReturn;
 		}
 
 		return apiResponse;
@@ -634,39 +608,17 @@ public class HueMulator {
 			log.debug("found device named: " + device.getName());
 		}
 		DeviceResponse lightResponse = null;
-		String responseString;
-		if ((device.getMapType() != null && device.getMapType().equalsIgnoreCase("hueDevice"))) {
+		if ((device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]))) {
 			HueDeviceIdentifier deviceId = aGsonHandler.fromJson(device.getOnUrl(), HueDeviceIdentifier.class);
-			theErrors = validateHueUser(userId, deviceId.getIpAddress(), device.getName());
-			if (theErrors == null) {
-			// make call
-			responseString = anHttpHandler.doHttpRequest("http://" + deviceId.getIpAddress() + "/api/"
-					+ myHueHome.getTheHUERegisteredUser() + "/lights/" + deviceId.getDeviceId(),
-					HttpGet.METHOD_NAME, device.getContentType(), null, null);
-			if (responseString == null) {
-				log.warn("Error on calling hue device to get state: " + device.getName());
-				lightResponse = DeviceResponse.createResponse(device);
-			} else if (responseString.contains("[{\"error\":") && responseString.contains("unauthorized user")) {
-				myHueHome.setTheHUERegisteredUser(null);
-				theErrors = validateHueUser(userId, deviceId.getIpAddress(), device.getName());
-				if (theErrors == null)
-					lightResponse = DeviceResponse.createResponse(device);
-			} else {
-				lightResponse = aGsonHandler.fromJson(responseString, DeviceResponse.class);
-				if (lightResponse == null)
-					lightResponse = DeviceResponse.createResponse(device);
-			}
-			}
+			lightResponse = myHueHome.getHueDeviceInfo(deviceId, device);
 		} else
 			lightResponse = DeviceResponse.createResponse(device);
 
-		if(theErrors != null)
-			return theErrors;
 		return lightResponse;
 		
 	}
 
-	private String updateState(String userId, String lightId, String body,String ipAddress) {
+	private String updateState(String userId, String lightId, String body, String ipAddress) {
 		String responseString = null;
 		StateChangeBody theStateChanges = null;
 		DeviceState state = null;
@@ -679,9 +631,8 @@ public class HueMulator {
 		theStateChanges = aGsonHandler.fromJson(body, StateChangeBody.class);
 		if (theStateChanges == null) {
 			log.warn("Could not parse state change body. Light state not changed.");
-			responseString = "[{\"error\":{\"type\": 2, \"address\": \"/lights/" + lightId
-					+ "\",\"description\": \"Could not parse state change body.\"}}]";
-			return responseString;
+			return aGsonHandler.toJson(HueErrorResponse.createResponse("2", "/lights/" + lightId,
+					"Could not parse state change body.", null, null, null).getTheErrors(), HueError[].class);
 		}
 
 		if (body.contains("\"bri\"")) {
@@ -697,9 +648,8 @@ public class HueMulator {
 		if (device == null) {
 			log.warn("Could not find device: " + lightId + " for hue state change request: " + userId + " from "
 					+ ipAddress + " body: " + body);
-			responseString = "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId
-					+ "\",\"description\": \"Could not find device\", \"resource\": \"/lights/" + lightId + "\"}}]";
-			return responseString;
+			return aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/lights/" + lightId,
+					"Could not find device.", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
 		}
 		state = device.getDeviceState();
 		if (state == null)
@@ -723,32 +673,13 @@ public class HueMulator {
 				state.setBri(0);
 			}
 		}
-		responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId,
-				device.getDeviceState());
+		responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, device.getDeviceState());
 		device.getDeviceState().setBri(BrightnessDecode.calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc));
 
 		return responseString;
 		
 	}
 
-	private HueError[] validateHueUser(String userId, String ipAddress, String aName) {
-		String hueUser;
-		HueErrorResponse theErrorResp = null;
-		if (myHueHome.getTheHUERegisteredUser() == null) {
-			hueUser = HueUtil.registerWithHue(anHttpHandler, ipAddress, aName,
-					myHueHome.getTheHUERegisteredUser());
-			if (hueUser == null) {
-				theErrorResp = HueErrorResponse.createResponse("901", "/api/" + userId, "Could not register proxy to other hue hub", null, null, null);
-			} else
-				myHueHome.setTheHUERegisteredUser(hueUser);
-		}
-		
-		if(theErrorResp != null)
-			return theErrorResp.getTheErrors();
-
-		return null;
-	}
-	
 	private String changeState(String userId, String lightId, String body, String ipAddress) {
 		String responseString = null;
 		String url = null;
@@ -768,9 +699,8 @@ public class HueMulator {
 		theStateChanges = aGsonHandler.fromJson(body, StateChangeBody.class);
 		if (theStateChanges == null) {
 			log.warn("Could not parse state change body. Light state not changed.");
-			responseString = "[{\"error\":{\"type\": 2, \"address\": \"/lights/" + lightId
-					+ "\",\"description\": \"Could not parse state change body.\"}}]";
-			return responseString;
+			return aGsonHandler.toJson(HueErrorResponse.createResponse("2", "/lights/" + lightId,
+					"Could not parse state change body.", null, null, null).getTheErrors(), HueError[].class);
 		}
 
 		if (body.contains("\"bri\"")) {
@@ -783,9 +713,8 @@ public class HueMulator {
 		if (device == null) {
 			log.warn("Could not find device: " + lightId + " for hue state change request: " + userId + " from "
 					+ ipAddress + " body: " + body);
-			responseString = "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId
-					+ "\",\"description\": \"Could not find device\", \"resource\": \"/lights/" + lightId + "\"}}]";
-			return responseString;
+			return aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/lights/" + lightId,
+					"Could not find device.", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
 		}
 
 		state = device.getDeviceState();
@@ -829,8 +758,15 @@ public class HueMulator {
 			if (!url.startsWith("[")) {
 				if (url.startsWith("{\"item"))
 					url = "[" + url + "]";
-				else
-					url = "[{\"item\":\"" + url + "\"}]";
+				else {
+					if(url.startsWith("{"))
+						url = "[{\"item\":" + url + "}]";
+					else
+						url = "[{\"item\":\"" + url + "\"}]";
+				}
+			} else {
+				if(!url.startsWith("[{\"item\""))
+					url = "[{\"item\":" + url + "}]";
 			}
 
 			CallItem[] callItems = null;
@@ -862,8 +798,8 @@ public class HueMulator {
 		} else {
 			log.warn("Could not find url: " + lightId + " for hue state change request: " + userId + " from "
 					+ ipAddress + " body: " + body);
-			responseString = "[{\"error\":{\"type\": 3, \"address\": \"/lights/" + lightId
-					+ "\",\"description\": \"Could not find url\", \"resource\": \"/lights/" + lightId + "\"}}]";
+			responseString =  aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/lights/" + lightId,
+					"Could not find url.", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
 		}
 
 		if (responseString == null || !responseString.contains("[{\"error\":")) {

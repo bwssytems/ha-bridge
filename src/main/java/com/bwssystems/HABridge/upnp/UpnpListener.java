@@ -8,7 +8,7 @@ import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.Configuration;
 import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.HuePublicConfig;
-import com.bwssystems.util.UDPDatagramSender;
+import com.bwssystems.HABridge.util.UDPDatagramSender;
 
 import java.io.IOException;
 import java.net.*;

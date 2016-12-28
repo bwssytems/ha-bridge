@@ -21,7 +21,9 @@ public class DeviceMapTypes {
 	public final static String[] CMD_DEVICE = { "cmdDevice", "Execute Command/Script/Program", "command"};
 	public final static String[] HASS_DEVICE = { "hassDevice", "HomeAssistant Device", "hass"};
 	public final static String[] TCP_DEVICE = { "tcpDevice", "TCP Device", "none"};
+	public final static String[] TCP_DEVICE_COMPAT = { "TCP", "TCP Device", "none"};
 	public final static String[] UDP_DEVICE = { "udpDevice", "UDP Device", "none"};
+	public final static String[] UDP_DEVICE_COMPAT = { "UDP", "UDP Device", "none"};
 	public final static String[] HTTP_DEVICE = { "httpDevice", "HTTP Device", "none"};
 	public final static String[] DEFAULT_DEVICE = { "udpDevice", "Default Device", "none"};
 
@@ -34,13 +36,12 @@ public class DeviceMapTypes {
 	public DeviceMapTypes() {
 		super();
 		deviceMapTypes = new ArrayList<String[]>();
-		deviceMapTypes.add(CUSTOM_DEVICE);
 		deviceMapTypes.add(CMD_DEVICE);
 		deviceMapTypes.add(DEFAULT_DEVICE);
-		deviceMapTypes.add(EXEC_DEVICE);
 		deviceMapTypes.add(HAL_DEVICE);
 		deviceMapTypes.add(HAL_HOME);
 		deviceMapTypes.add(HAL_THERMO_SET);
+		deviceMapTypes.add(HAL_BUTTON);
 		deviceMapTypes.add(HASS_DEVICE);
 		deviceMapTypes.add(HTTP_DEVICE);
 		deviceMapTypes.add(HUE_DEVICE);
@@ -51,7 +52,6 @@ public class DeviceMapTypes {
 		deviceMapTypes.add(UDP_DEVICE);
 		deviceMapTypes.add(VERA_DEVICE);
 		deviceMapTypes.add(VERA_SCENE);
-		deviceMapTypes.add(HAL_BUTTON);
 		deviceMapTypes.add(HARMONY_ACTIVITY);
 		deviceMapTypes.add(HARMONY_BUTTON);
 	}

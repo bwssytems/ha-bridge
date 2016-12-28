@@ -3,11 +3,11 @@ package com.bwssystems.hass.test;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.bwssystems.hass.Field;
-import com.bwssystems.hass.FieldDeserializer;
-import com.bwssystems.hass.Service;
-import com.bwssystems.hass.ServiceDeserializer;
-import com.bwssystems.hass.ServiceElement;
+import com.bwssystems.HABridge.plugins.hass.Field;
+import com.bwssystems.HABridge.plugins.hass.FieldDeserializer;
+import com.bwssystems.HABridge.plugins.hass.Service;
+import com.bwssystems.HABridge.plugins.hass.ServiceDeserializer;
+import com.bwssystems.HABridge.plugins.hass.ServiceElement;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;

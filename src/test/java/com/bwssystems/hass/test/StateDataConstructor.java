@@ -2,7 +2,7 @@ package com.bwssystems.hass.test;
 
 import java.util.Map.Entry;
 
-import com.bwssystems.hass.State;
+import com.bwssystems.HABridge.plugins.hass.State;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;

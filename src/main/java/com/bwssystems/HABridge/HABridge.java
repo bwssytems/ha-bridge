@@ -9,7 +9,7 @@ import com.bwssystems.HABridge.devicemanagmeent.*;
 import com.bwssystems.HABridge.hue.HueMulator;
 import com.bwssystems.HABridge.upnp.UpnpListener;
 import com.bwssystems.HABridge.upnp.UpnpSettingsResource;
-import com.bwssystems.util.UDPDatagramSender;
+import com.bwssystems.HABridge.util.UDPDatagramSender;
 
 public class HABridge {
 	
