@@ -41,7 +41,7 @@ public class HTTPHandler {
 		// Trust own CA and all self-signed certs
 		sslcontext = SSLContexts.createDefault();
 		// Allow TLSv1 protocol only
-		sslsf = new SSLConnectionSocketFactory(sslcontext, new String[] { "TLSv1" }, null,
+		sslsf = new SSLConnectionSocketFactory(sslcontext, new String[] { "TLSv1,TLSv1.1,TLSv1.2" }, null,
 				SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 		globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build();
 		httpclientSSL = HttpClients.custom().setSSLSocketFactory(sslsf).setDefaultRequestConfig(globalConfig).build();

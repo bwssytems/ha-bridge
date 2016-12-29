@@ -1639,10 +1639,10 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 
 	$scope.buildHALFanUrls = function (haldevice) {
 		onpayload = "http://" + haldevice.haladdress 
-		+ "/HVACService!HVACCmd=Set!HVACName=" 
-		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!FanMode=On?Token="
-		+ $scope.bridge.settings.haltoken;
+			+ "/HVACService!HVACCmd=Set!HVACName=" 
+			+ haldevice.haldevicename.replaceAll(" ", "%20") 
+			+ "!FanMode=On?Token="
+			+ $scope.bridge.settings.haltoken;
 		offpayload = "http://" + haldevice.haladdress 
 			+ "/HVACService!HVACCmd=Set!HVACName=" 
 			+ haldevice.haldevicename.replaceAll(" ", "%20") 
