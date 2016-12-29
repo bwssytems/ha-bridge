@@ -74,7 +74,7 @@ public class UDPHome implements Home {
 				sendData = theUrlBody.getBytes();
 			}
 			try {
-				theUDPDatagramSender.sendUDPResponse(new String(sendData), IPAddress,
+				theUDPDatagramSender.sendUDPResponse(sendData, IPAddress,
 						Integer.parseInt(port));
 			} catch (NumberFormatException e) {
 				// noop

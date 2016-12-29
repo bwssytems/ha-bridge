@@ -1036,7 +1036,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 				$scope.device.dimUrl = "[{\"item\":\"http://" + veradevice.veraaddress + ":" + $scope.vera.port
 				+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
 				+ veradevice.id + "\"},\"type\":\"veraDevice\"}]";
-			$scope.device.onUrl = "[{\"item\":{\"clientId\":\"http://" + veradevice.veraaddress + ":" + $scope.vera.port
+			$scope.device.onUrl = "[{\"item\":\"http://" + veradevice.veraaddress + ":" + $scope.vera.port
 				+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
 				+ veradevice.id + "\"},\"type\":\"veraDevice\"}]";
 			$scope.device.offUrl = "[{\"item\":\"http://" + veradevice.veraaddress + ":" + $scope.vera.port
@@ -1052,10 +1052,10 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 			$scope.device.mapId = $scope.device.mapId + "-" + verascene.id;
 			$scope.device.onUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"item\":\"http://" + verascene.veraaddress + ":" + $scope.vera.port
 			+ "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
-			+ verascene.id+ "\"},\"type\":\"veraDevice\"}]";
+			+ verascene.id + "\"},\"type\":\"veraScene\"}]";
 			$scope.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"item\":\"http://" + verascene.veraaddress + ":" + $scope.vera.port
 			+ "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
-			+ verascene.id+ "\"},\"type\":\"veraDevice\"}]";
+			+ verascene.id + "\"},\"type\":\"veraScene\"}]";
 		}
 		else if ($scope.device.mapType === undefined || $scope.device.mapType == null || $scope.device.mapType == "") {
 			bridgeService.clearDevice();
@@ -1066,10 +1066,10 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 			$scope.device.mapId = verascene.id;
 			$scope.device.onUrl = "[{\"item\":\"http://" + verascene.veraaddress + ":" + $scope.vera.port
 			+ "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
-			+ verascene.id+ "\"},\"type\":\"veraDevice\"}]";
+			+ verascene.id + "\"},\"type\":\"veraScene\"}]";
 			$scope.device.offUrl = "[{\"item\":\"http://" + verascene.veraaddress + ":" + $scope.vera.port
 			+ "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
-			+ verascene.id+ "\"},\"type\":\"veraDevice\"}]";
+			+ verascene.id + "\"},\"type\":\"veraScene\"}]";
 		}
 	};
 
@@ -1194,13 +1194,22 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 
 	$scope.buildActivityUrls = function (harmonyactivity) {
 		bridgeService.clearDevice();
-		$scope.device.deviceType = "activity";
-		$scope.device.targetDevice = harmonyactivity.hub;
-		$scope.device.name = harmonyactivity.activity.label;
-		$scope.device.mapType = "harmonyActivity";
-		$scope.device.mapId = harmonyactivity.activity.id;
-		$scope.device.onUrl = "{\"name\":\"" + harmonyactivity.activity.id + "\"}";
-		$scope.device.offUrl = "{\"name\":\"-1\"}";
+		var currentOn = $scope.device.onUrl;
+		var currentOff = $scope.device.offUrl;
+		if($scope.device.mapType !== undefined && $scope.device.mapType != null && $scope.device.mapType != "") {
+			$scope.device.mapId = $scope.device.mapId + "-" + harmonyactivity.activity.id;
+			$scope.device.onUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"item\":{\"name\":\"" + harmonyactivity.activity.id + "\"}" + "\"},\"type\":\"harmonyActivity\"}]";
+			$scope.device.offUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"item\":{\"name\":\"-1\"}" + "\"},\"type\":\"harmonyActivity\"}]";			
+		}
+		else if ($scope.device.mapType == null || $scope.device.mapType == "") {
+			$scope.device.deviceType = "activity";
+			$scope.device.targetDevice = harmonyactivity.hub;
+			$scope.device.name = harmonyactivity.activity.label;
+			$scope.device.mapType = "harmonyActivity";
+			$scope.device.mapId = harmonyactivity.activity.id;
+			$scope.device.onUrl = "[{\"item\":{\"name\":\"" + harmonyactivity.activity.id + "\"}" + "\"},\"type\":\"harmonyActivity\"}]";
+			$scope.device.offUrl = "[{\"item\":{\"name\":\"-1\"}" + "\"},\"type\":\"harmonyActivity\"}]";			
+		}
 	};
 
 	$scope.buildButtonUrls = function (harmonydevice, onbutton, offbutton) {
@@ -1208,10 +1217,10 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 		var currentOff = $scope.device.offUrl;
 		var actionOn = angular.fromJson(onbutton);
 		var actionOff = angular.fromJson(offbutton);
-		if( $scope.device.mapType == "harmonyButton") {
+		if($scope.device.mapType !== undefined && $scope.device.mapType != null && $scope.device.mapType != "") {
 			$scope.device.mapId = $scope.device.mapId + "-" + actionOn.command;
-			$scope.device.onUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOn.command + "\"}]";
-			$scope.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOff.command + "\"}]";        		
+			$scope.device.onUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"item\":{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOn.command + "\"}]";
+			$scope.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"item\":{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOff.command + "\"}]";        		
 		}
 		else if ($scope.device.mapType == null || $scope.device.mapType == "") {
 			bridgeService.clearDevice();
@@ -1220,8 +1229,8 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 			$scope.device.name = harmonydevice.device.label;
 			$scope.device.mapType = "harmonyButton";
 			$scope.device.mapId = harmonydevice.device.id + "-" + actionOn.command;
-			$scope.device.onUrl = "[{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOn.command + "\"}]";
-			$scope.device.offUrl = "[{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOff.command + "\"}]";
+			$scope.device.onUrl = "[{\"item\":{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOn.command + "\"}]";
+			$scope.device.offUrl = "[{\"item\":{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOff.command + "\"}]";
 		}
 	};
 

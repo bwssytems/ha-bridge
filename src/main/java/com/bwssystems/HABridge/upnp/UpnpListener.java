@@ -209,7 +209,7 @@ public class UpnpListener {
 		}
 		else
 			log.debug("sendUpnpResponse discovery responseTemplate1 is <<<" + discoveryResponse + ">>>");
-		theUDPDatagramSender.sendUDPResponse(discoveryResponse, requester, sourcePort);
+		theUDPDatagramSender.sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
 
 		discoveryResponse = String.format(responseTemplate2, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
 		if(traceupnp) {
@@ -217,7 +217,7 @@ public class UpnpListener {
 		}
 		else
 			log.debug("sendUpnpResponse discovery responseTemplate2 is <<<" + discoveryResponse + ">>>");
-		theUDPDatagramSender.sendUDPResponse(discoveryResponse, requester, sourcePort);
+		theUDPDatagramSender.sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
 
 		discoveryResponse = String.format(responseTemplate3, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID);
 		if(traceupnp) {
@@ -225,6 +225,6 @@ public class UpnpListener {
 		}
 		else
 			log.debug("sendUpnpResponse discovery responseTemplate3 is <<<" + discoveryResponse + ">>>");
-		theUDPDatagramSender.sendUDPResponse(discoveryResponse, requester, sourcePort);
+		theUDPDatagramSender.sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
 	}
 }

@@ -62,11 +62,11 @@ public class UDPDatagramSender {
 		responseSocket.close();
 	}
 
-	public void sendUDPResponse(String udpResponse, InetAddress requester, int sourcePort) throws IOException {
-		log.debug("Sending response string: <<<" + udpResponse + ">>>");
+	public void sendUDPResponse(byte[] udpMessage, InetAddress requester, int sourcePort) throws IOException {
+		log.debug("Sending response string: <<<" + new String(udpMessage) + ">>>");
 		if(responseSocket == null)
 			throw new IOException("Socket not initialized");
-		DatagramPacket response = new DatagramPacket(udpResponse.getBytes(), udpResponse.length(), requester, sourcePort);
+		DatagramPacket response = new DatagramPacket(udpMessage, udpMessage.length, requester, sourcePort);
 		responseSocket.send(response);
 	}
 }
