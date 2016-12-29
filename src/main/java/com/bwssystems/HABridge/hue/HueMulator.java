@@ -764,10 +764,8 @@ public class HueMulator {
 					else
 						url = "[{\"item\":\"" + url + "\"}]";
 				}
-			} else {
-				if(!url.startsWith("[{\"item\""))
-					url = "[{\"item\":" + url + "}]";
-			}
+			} else if(!url.startsWith("[{\"item\""))
+				url = "[{\"item\":" + url + "}]";
 
 			CallItem[] callItems = null;
 			callItems = aGsonHandler.fromJson(url, CallItem[].class);

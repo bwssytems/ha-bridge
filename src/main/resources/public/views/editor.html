@@ -16,72 +16,11 @@
 	<li ng-if="bridge.showHal" role="presentation"><a
 		href="#/haldevices">HAL Devices</a></li>
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#/mqttmessages">MQTT Messages</a></li>
+	<li ng-if="bridge.showHass" role="presentation"><a href="#/hassdevices">HomeAssistant Devices</a></li>
 	<li role="presentation" class="active"><a href="#/editor">Manual
 			Add</a></li>
 </ul>
 
-<div ng-if="bridge.showVera" class="panel panel-default">
-	<div class="panel-heading">
-		<h2 class="panel-title">Generate a new device/scene/control point</h2>
-	</div>
-	<div class="panel-body">
-		<p class="text-muted">You can generate on/off URLs by filling in
-			the Vera server URL, port, and device ID; or you can fill them out
-			manually in the lower section.</p>
-	</div>
-	<form class="form-horizontal">
-		<div class="form-group">
-			<label class="col-xs-12 col-sm-2 control-label" for="vera-base">Vera
-				Server URL </label>
-
-			<div class="col-xs-8 col-sm-7">
-				<input type="text" class="form-control" id="vera-base"
-					ng-model="vera.base"
-					placeholder="Vera URL (e.g. http://192.168.1.100)">
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="col-xs-2 col-sm-2 control-label" for="vera-port">Vera
-				Request Port </label>
-
-			<div class="col-xs-10 col-sm-2">
-				<input type="text" class="form-control" id="vera-port"
-					ng-model="vera.port" placeholder="Vera Port (typically 3480)">
-			</div>
-
-			<label class="col-xs-2 col-sm-2 control-label" for="vera-id">Device
-				ID </label>
-
-			<div class="col-xs-10 col-sm-2">
-				<input type="text" class="form-control" id="vera-id"
-					ng-model="vera.id" placeholder="ID">
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="col-xs-2 col-sm-2 control-label"
-				for="device-dim-control">Device Dim Control</label>
-
-			<div class="col-xs-10 col-sm-2">
-				<select name="device-dim-control" id="device-dim-control"
-					ng-model="device_dim_control">
-					<option value="">none</option>
-					<option value="${intensity..byte}">Pass-thru Value</option>
-					<option value="${intensity.percent}">Percentage</option>
-					<option value="${intensity.math(X*1)}">Custom Math</option>
-				</select>
-			</div>
-		</div>
-		<div class="form-group">
-			<button type="submit"
-				ng-click="buildUrlsUsingDevice(device_dim_control)"
-				class="col-xs-2 col-sm-2 col-xs-offset-2 col-sm-offset-2 btn btn-success">Generate
-				Device URLs</button>
-			<button type="submit" ng-click="buildUrlsUsingScene()"
-				class="col-xs-2 col-sm-2 col-xs-offset-2 col-sm-offset-2 btn btn-success">Generate
-				Scene URLs</button>
-		</div>
-	</form>
-</div>
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title">Add a new device</h2>

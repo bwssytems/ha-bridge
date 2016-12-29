@@ -27,27 +27,25 @@ public class HueInfo {
     private static final Logger log = LoggerFactory.getLogger(HueInfo.class);
     private HTTPHandler httpClient;
     private NamedIP hueAddress;
-	private String theUser;
 	public static final String HUE_REQUEST = "/api";
 
     public HueInfo(NamedIP addressName) {
 		super();
         httpClient = new HTTPHandler();
         hueAddress = addressName;
-        theUser = null;
-	}
+ 	}
     
 	public HueApiResponse getHueApiResponse() {
 		HueApiResponse theHueApiResponse = null;
 
-		if(theUser == null) {
+		if(hueAddress.getUsername() == null) {
 			registerWithHue();
-			if(theUser == null) {
+			if(hueAddress.getUsername() == null) {
 				log.warn("Could not register with hue: " + hueAddress.getName());
 			}
 		}
 		
-		String theUrl = "http://" + hueAddress.getIp() + HUE_REQUEST + "/" + theUser;
+		String theUrl = "http://" + hueAddress.getIp() + HUE_REQUEST + "/" + hueAddress.getUsername();
     	String theData;
     	boolean loopControl = true;
     	int retryCount = 0;
@@ -63,14 +61,14 @@ public class HueInfo {
 					// ignore
 				}
     		}
-    		theUrl = "http://" + hueAddress.getIp() + HueUtil.HUE_REQUEST + "/" + theUser;
+    		theUrl = "http://" + hueAddress.getIp() + HueUtil.HUE_REQUEST + "/" + hueAddress.getUsername();
     		theData = httpClient.doHttpRequest(theUrl, null, null, null, null);
 	    	if(theData != null) {
 	    		log.debug("GET HueApiResponse - data: " + theData);
 	    		if(theData.contains("[{\"error\":")) {
 	    			if(theData.contains("unauthorized user")) {
-	    				theUser = registerWithHue();
-	        			if(theUser == null) {
+	    				registerWithHue();
+	        			if(hueAddress.getUsername() == null) {
 	        				log.warn("Retry Register to Hue for " + hueAddress.getName() + " returned error: " + theData);
 	        			}
 	        			retryCount++;
@@ -118,25 +116,25 @@ public class HueInfo {
                 }
                 else {
 	            	SuccessUserResponse[] theResponses = new Gson().fromJson(theBody, SuccessUserResponse[].class); //read content for data, SuccessUserResponse[].class);
-	            	theUser = theResponses[0].getSuccess().getUsername();
+	            	hueAddress.setUsername(theResponses[0].getSuccess().getUsername());
                 }
             }
             EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
         } catch (IOException e) {
         	log.warn("Error logging into HUE: IOException in log", e);
         }
-        return theUser;
+        return hueAddress.getUsername();
     }
 
 	public DeviceResponse getHueDeviceInfo(String hueDeviceId, DeviceDescriptor device) {
 		String responseString = null;
 		DeviceResponse deviceResponse = null;
-		if(theUser == null)
+		if(hueAddress.getUsername() == null)
 			registerWithHue();
-		if (theUser != null) {
+		if (hueAddress.getUsername() != null) {
 			// make call
 			responseString = httpClient.doHttpRequest(
-					"http://" + hueAddress.getIp() + "/api/" + theUser
+					"http://" + hueAddress.getIp() + "/api/" + hueAddress.getUsername()
 							+ "/lights/" + hueDeviceId,
 					HttpGet.METHOD_NAME, "application/json", null, null);
 			if (responseString == null) {
@@ -160,11 +158,11 @@ public class HueInfo {
 
 	public String changeState(HueDeviceIdentifier deviceId, String lightId, String body) {
 		String responseString = null;
-		if(theUser == null)
+		if(hueAddress.getUsername() == null)
 			registerWithHue();
-		if (theUser != null) {
+		if (hueAddress.getUsername() != null) {
 			responseString = httpClient.doHttpRequest(
-					"http://" + deviceId.getIpAddress() + "/api/" + theUser
+					"http://" + deviceId.getIpAddress() + "/api/" + hueAddress.getUsername()
 							+ "/lights/" + deviceId.getDeviceId() + "/state",
 					HttpPut.METHOD_NAME, "application/json", body, null);
 			if (responseString == null) {
