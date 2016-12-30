@@ -88,8 +88,8 @@ public class TCPHome implements Home {
 
 	@Override
 	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
-		// noop
-		return null;
+		log.info("TCP Home created.");
+		return this;
 	}
 
 	@Override

@@ -36,6 +36,7 @@ public class HueInfo {
  	}
     
 	public HueApiResponse getHueApiResponse() {
+		log.debug("Get hue info to hue " + hueAddress.getName());
 		HueApiResponse theHueApiResponse = null;
 
 		if(hueAddress.getUsername() == null) {
@@ -103,7 +104,7 @@ public class HueInfo {
         HttpClient anHttpClient = httpClient.getHttpClient();
         try {
             response = anHttpClient.execute(postRequest);
-            log.debug("POST execute on URL responded: " + response.getStatusLine().getStatusCode());
+            log.debug("registerWithHue - POST execute on " + hueAddress.getName() + "URL responded: " + response.getStatusLine().getStatusCode());
             if(response.getStatusLine().getStatusCode() >= 200  && response.getStatusLine().getStatusCode() < 300){
             	String theBody = EntityUtils.toString(response.getEntity());
                 log.debug("registerWithHue response data: " + theBody);
@@ -127,6 +128,7 @@ public class HueInfo {
     }
 
 	public DeviceResponse getHueDeviceInfo(String hueDeviceId, DeviceDescriptor device) {
+		log.debug("Get hue device info to "+ hueAddress.getName() + " passthru id " + hueDeviceId);
 		String responseString = null;
 		DeviceResponse deviceResponse = null;
 		if(hueAddress.getUsername() == null)
@@ -157,6 +159,7 @@ public class HueInfo {
 	}
 
 	public String changeState(HueDeviceIdentifier deviceId, String lightId, String body) {
+		log.debug("Changing state for ha-bridge id " + lightId + " to " + deviceId.getHueName() + " passthru id " + deviceId.getDeviceId() + " with state " + body );
 		String responseString = null;
 		if(hueAddress.getUsername() == null)
 			registerWithHue();

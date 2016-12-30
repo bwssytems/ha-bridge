@@ -37,9 +37,8 @@ public class HassHome implements Home {
 		hassMap = null;
 		aGsonHandler = null;
 		validHass = bridgeSettings.isValidHass();
-		if(!validHass){
-        	log.debug("not a valid hass");
-        } else {
+		log.info("HomeAssistant Home created." + (validHass ? "" : " No HomeAssistants configured."));
+		if(validHass) {
 			hassMap = new HashMap<String,HomeAssistant>();
 			aGsonHandler =
 					new GsonBuilder()
@@ -95,6 +94,8 @@ public class HassHome implements Home {
 	}
 
 	private Boolean addHassDevices(List<HassDevice> theDeviceList, List<State> theSourceList, String theKey) {
+		if(!validHass)
+			return null;
 		Iterator<State> devices = theSourceList.iterator();
 		while(devices.hasNext()) {
 			State theDevice = devices.next();
@@ -155,6 +156,8 @@ public class HassHome implements Home {
 
 	@Override
 	public void closeHome() {
+		if(!validHass)
+			return;
 		Iterator<String> keys = hassMap.keySet().iterator();
 		while(keys.hasNext()) {
 			String key = keys.next();

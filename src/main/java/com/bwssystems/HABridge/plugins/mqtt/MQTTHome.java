@@ -117,9 +117,8 @@ public class MQTTHome implements Home {
 	@Override
 	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
 		validMqtt = bridgeSettings.isValidMQTT();
-		if(!validMqtt) {
-			log.debug("No MQTT configuration");
-		} else {
+		log.info("MQTT Home created." + (validMqtt ? "" : " No MQTT Clients configured."));
+		if(validMqtt) {
 			aGsonHandler =
 					new GsonBuilder()
 					.create();

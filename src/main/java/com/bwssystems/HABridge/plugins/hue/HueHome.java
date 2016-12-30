@@ -35,6 +35,8 @@ public class HueHome implements Home {
 	@Override
 	public Object getItems(String type) {
 		log.debug("consolidating devices for hues");
+		if(!validHue)
+			return null;
 		Iterator<String> keys = hues.keySet().iterator();
 		ArrayList<HueDevice> deviceList = new ArrayList<HueDevice>();
 		while(keys.hasNext()) {
@@ -66,6 +68,8 @@ public class HueHome implements Home {
 	}
 
 	public DeviceResponse getHueDeviceInfo(HueDeviceIdentifier deviceId, DeviceDescriptor device) {
+		if(!validHue)
+			return null;
 		DeviceResponse deviceResponse = null;
 		HueInfo aHueInfo = hues.get(device.getTargetDevice());
 		deviceResponse = aHueInfo.getHueDeviceInfo(deviceId.getDeviceId(), device);
@@ -75,6 +79,8 @@ public class HueHome implements Home {
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int iterationCount,
 			DeviceState state, StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc, DeviceDescriptor device, String body) {
+		if(!validHue)
+			return null;
 		String responseString = null;
 		HueDeviceIdentifier deviceId = aGsonHandler.fromJson(anItem.getItem(), HueDeviceIdentifier.class);
 		if(deviceId.getHueName() == null || deviceId.getHueName().isEmpty())
@@ -106,9 +112,8 @@ public class HueHome implements Home {
 	@Override
 	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
 		validHue = bridgeSettings.isValidHue();
-		if(!validHue) {
-			log.debug("No Hue Configuration");
-		} else {
+		log.info("Hue passthru Home created." + (validHue ? "" : " No Hue passtrhu systems configured."));
+		if(validHue) {
 			hues = new HashMap<String, HueInfo>();
 			Iterator<NamedIP> theList = bridgeSettings.getHueaddress().getDevices().iterator();
 			while(theList.hasNext()) {
@@ -122,6 +127,8 @@ public class HueHome implements Home {
 
 	@Override
 	public void closeHome() {
+		if(!validHue)
+			return;
 		Iterator<String> keys = hues.keySet().iterator();
 		while(keys.hasNext()) {
 			String key = keys.next();

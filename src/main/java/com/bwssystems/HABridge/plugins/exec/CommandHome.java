@@ -79,7 +79,7 @@ public class CommandHome implements Home {
 
 	@Override
 	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
-		// noop
+		log.info("Command Home for system program execution created.");
 		return this;
 	}
 

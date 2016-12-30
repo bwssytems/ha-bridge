@@ -80,6 +80,7 @@ public class HTTPHome implements Home {
 	@Override
 	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
 		anHttpHandler = new HTTPHandler();
+		log.info("Http Home created.");
 		return this;
 	}
 

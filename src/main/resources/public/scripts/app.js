@@ -51,7 +51,8 @@ app.config(function ($routeProvider) {
 
 app.run( function (bridgeService) {
 	bridgeService.loadBridgeSettings();
-	bridgeService.getHABridgeVersion();	
+	bridgeService.getHABridgeVersion();
+	bridgeService.viewMapTypes();
 });
 
 String.prototype.replaceAll = function(search, replace)
@@ -68,7 +69,7 @@ String.prototype.replaceAll = function(search, replace)
 
 app.service('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, habridgeversion: ""};
+	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: [], mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, habridgeversion: ""};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
@@ -384,6 +385,28 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 		);
 	};
 
+	this.viewMapTypes = function () {
+		return $http.get(this.state.base + "/map/types").then(
+				function (response) {
+					self.state.mapTypes = response.data;
+				},
+				function (error) {
+					self.displayWarn("Get mapTypes Error: ", error);
+				}
+		);
+	};
+
+	this.getMapType = function(aMapType) {
+		var i, s, len = self.state.mapTypes.length;
+		for (i=0; i<len; ++i) {
+			  if (i in self.state.mapTypes) {
+			    s = self.state.mapTypes[i];
+			    if(aMapType == s[0])
+			    	return self.state.mapTypes[i];
+			  }
+		}
+		return null;
+	}
 	this.updateLogLevels = function(logComponents) {
 		return $http.put(this.state.systemsbase + "/logmgmt/update", logComponents ).then(
 				function (response) {
@@ -732,6 +755,7 @@ app.service('bridgeService', function ($http, $window, ngToast) {
 
 app.controller('SystemController', function ($scope, $location, $http, $window, bridgeService) {
     bridgeService.viewConfigs();
+    bridgeService.loadBridgeSettings();
     $scope.bridge = bridgeService.state;
     $scope.optionalbackupname = "";
     $scope.bridge.isInControl = false;
@@ -2002,8 +2026,10 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 });
 
 app.controller('EditController', function ($scope, $location, $http, bridgeService) {
+	bridgeService.viewMapTypes();
 	$scope.bridge = bridgeService.state;
 	$scope.device = $scope.bridge.device;
+	$scope.mapTypeSelected = bridgeService.getMapType($scope.device.mapType); 
 	$scope.device_dim_control = "";
 	$scope.bulk = { devices: [] };
 	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
@@ -2016,7 +2042,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 	$scope.addDevice = function () {
 		if($scope.device.name == "" && $scope.device.onUrl == "")
 			return;
-		bridgeService.buildUrls($scope.device.onUrl, $scope.device.dimUrl, $scope.device.offUrl, true, null, null, $scope.device.deviceType,  null, null, null);
+		$scope.device.mapType = $scope.mapTypeSelected[0];
 		bridgeService.addDevice($scope.device).then(
 				function () {
 					$scope.clearDevice();

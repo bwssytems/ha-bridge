@@ -87,8 +87,8 @@ public class UDPHome implements Home {
 
 	@Override
 	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
-		// TODO Auto-generated method stub
-		return null;
+		log.info("UDP Home created.");
+		return this;
 	}
 
 	@Override

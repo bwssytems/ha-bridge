@@ -21,6 +21,7 @@ import com.bwssystems.HABridge.hue.MultiCommandUtil;
 public class HalHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(HalHome.class);
 	private Map<String, HalInfo> hals;
+	private Boolean validHal;
 
 	public HalHome(BridgeSettingsDescriptor bridgeSettings) {
 		super();
@@ -29,6 +30,8 @@ public class HalHome implements Home {
 
 	@Override
 	public Object getItems(String type) {
+		if(!validHal)
+			return null;
 		log.debug("consolidating devices for hues");
 		List<HalDevice> theResponse = null;
 		Iterator<String> keys = hals.keySet().iterator();
@@ -92,6 +95,8 @@ public class HalHome implements Home {
 	}
 	
 	private Boolean addHalDevices(List<HalDevice> theDeviceList, List<HalDevice> theSourceList, String theKey) {
+		if(!validHal)
+			return null;
 		Iterator<HalDevice> devices = theSourceList.iterator();
 		while(devices.hasNext()) {
 			HalDevice theDevice = devices.next();
@@ -115,9 +120,11 @@ public class HalHome implements Home {
 
 	@Override
 	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
-		hals = new HashMap<String, HalInfo>();
-		if(!bridgeSettings.isValidHal())
+		validHal = bridgeSettings.isValidHal();
+		log.info("HAL Home created." + (validHal ? "" : " No HAL devices configured."));
+		if(!validHal)
 			return null;
+		hals = new HashMap<String, HalInfo>();
 		Iterator<NamedIP> theList = bridgeSettings.getHaladdress().getDevices().iterator();
 		while(theList.hasNext()) {
 			NamedIP aHal = theList.next();

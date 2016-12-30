@@ -94,9 +94,8 @@ public class VeraHome implements Home {
 	@Override
 	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
 		validVera = bridgeSettings.isValidVera();
-		if(!validVera) {
-			log.debug("No valid veras");
-		} else {
+		log.info("Vera Home created." + (validVera ? "" : " No Veras configured."));
+		if(validVera) {
 			veras = new HashMap<String, VeraInfo>();
 			Iterator<NamedIP> theList = bridgeSettings.getVeraAddress().getDevices().iterator();
 			while(theList.hasNext()) {

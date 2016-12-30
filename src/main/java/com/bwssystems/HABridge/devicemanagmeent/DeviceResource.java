@@ -157,60 +157,60 @@ public class DeviceResource {
     	get (API_CONTEXT + "/vera/devices", "application/json", (request, response) -> {
 	    	log.debug("Get vera devices");
         	response.status(HttpStatus.SC_OK);
-	        return homeManager.findResource(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.resourceIndex]).getItems(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex]);
+	        return homeManager.findResource(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/vera/scenes", "application/json", (request, response) -> {
 	    	log.debug("Get vera scenes");
 	        response.status(HttpStatus.SC_OK);
-	        return homeManager.findResource(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.resourceIndex]).getItems(DeviceMapTypes.VERA_SCENE[DeviceMapTypes.typeIndex]);
+	        return homeManager.findResource(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.VERA_SCENE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/harmony/activities", "application/json", (request, response) -> {
 	    	log.debug("Get harmony activities");
 	      	response.status(HttpStatus.SC_OK);
-	      	return homeManager.findResource(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.resourceIndex]).getItems(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.typeIndex]);
+	      	return homeManager.findResource(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/harmony/show", "application/json", (request, response) -> {
 	    	log.debug("Get harmony current activity");
-      		return homeManager.findResource(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.resourceIndex]).getItems("current_activity");
+      		return homeManager.findResource(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.typeIndex]).getItems("current_activity");
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/harmony/devices", "application/json", (request, response) -> {
 	    	log.debug("Get harmony devices");
 	      	response.status(HttpStatus.SC_OK);
-	      	return homeManager.findResource(DeviceMapTypes.HARMONY_BUTTON[DeviceMapTypes.resourceIndex]).getItems(DeviceMapTypes.HARMONY_BUTTON[DeviceMapTypes.typeIndex]);
+	      	return homeManager.findResource(DeviceMapTypes.HARMONY_BUTTON[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.HARMONY_BUTTON[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/nest/items", "application/json", (request, response) -> {
 	    	log.debug("Get nest items");
 	      	response.status(HttpStatus.SC_OK);
-	      	return homeManager.findResource(DeviceMapTypes.NEST_HOMEAWAY[DeviceMapTypes.resourceIndex]).getItems(DeviceMapTypes.NEST_HOMEAWAY[DeviceMapTypes.typeIndex]);
+	      	return homeManager.findResource(DeviceMapTypes.NEST_HOMEAWAY[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.NEST_HOMEAWAY[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/hue/devices", "application/json", (request, response) -> {
 	    	log.debug("Get hue items");
 	      	response.status(HttpStatus.SC_OK);
-	      	return homeManager.findResource(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.resourceIndex]).getItems(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]);
+	      	return homeManager.findResource(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/hal/devices", "application/json", (request, response) -> {
 	    	log.debug("Get hal items");
 	      	response.status(HttpStatus.SC_OK);
-	      	return homeManager.findResource(DeviceMapTypes.HAL_DEVICE[DeviceMapTypes.resourceIndex]).getItems(DeviceMapTypes.HAL_DEVICE[DeviceMapTypes.typeIndex]);
+	      	return homeManager.findResource(DeviceMapTypes.HAL_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.HAL_DEVICE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/mqtt/devices", "application/json", (request, response) -> {
 	    	log.debug("Get MQTT brokers");
 	      	response.status(HttpStatus.SC_OK);
-	      	return homeManager.findResource(DeviceMapTypes.MQTT_MESSAGE[DeviceMapTypes.resourceIndex]).getItems(DeviceMapTypes.MQTT_MESSAGE[DeviceMapTypes.typeIndex]);
+	      	return homeManager.findResource(DeviceMapTypes.MQTT_MESSAGE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.MQTT_MESSAGE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/hass/devices", "application/json", (request, response) -> {
 	    	log.debug("Get HomeAssistant Clients");
 	      	response.status(HttpStatus.SC_OK);
-	      	return homeManager.findResource(DeviceMapTypes.HASS_DEVICE[DeviceMapTypes.resourceIndex]).getItems(DeviceMapTypes.HASS_DEVICE[DeviceMapTypes.typeIndex]);
+	      	return homeManager.findResource(DeviceMapTypes.HASS_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.HASS_DEVICE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/map/types", "application/json", (request, response) -> {

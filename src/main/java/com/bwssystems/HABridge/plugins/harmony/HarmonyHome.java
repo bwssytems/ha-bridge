@@ -40,6 +40,8 @@ public class HarmonyHome implements Home {
 
 	@Override
 	public void closeHome() {
+		if(!validHarmony)
+			return;
 		if(isDevMode || hubs == null)
 			return;
 		Iterator<String> keys = hubs.keySet().iterator();
@@ -52,6 +54,8 @@ public class HarmonyHome implements Home {
 	}
 
 	public HarmonyHandler getHarmonyHandler(String aName) {
+		if(!validHarmony)
+			return null;
 		HarmonyHandler aHandler = null;
 		if(aName == null || aName.equals("")) {
 			aName = "default";
@@ -73,6 +77,8 @@ public class HarmonyHome implements Home {
 	public List<HarmonyActivity> getActivities() {
 		Iterator<String> keys = hubs.keySet().iterator();
 		ArrayList<HarmonyActivity> activityList = new ArrayList<HarmonyActivity>();
+		if(!validHarmony)
+			return null;
 		while(keys.hasNext()) {
 			String key = keys.next();
 			Iterator<Activity> activities = hubs.get(key).getMyHarmony().getActivities().iterator();
@@ -88,6 +94,8 @@ public class HarmonyHome implements Home {
 	public List<HarmonyActivity> getCurrentActivities() {
 		Iterator<String> keys = hubs.keySet().iterator();
 		ArrayList<HarmonyActivity> activityList = new ArrayList<HarmonyActivity>();
+		if(!validHarmony)
+			return null;
 		while(keys.hasNext()) {
 			String key = keys.next();
 			Activity theActivity = hubs.get(key).getMyHarmony().getCurrentActivity();
@@ -101,6 +109,8 @@ public class HarmonyHome implements Home {
 	public List<HarmonyDevice> getDevices() {
 		Iterator<String> keys = hubs.keySet().iterator();
 		ArrayList<HarmonyDevice> deviceList = new ArrayList<HarmonyDevice>();
+		if(!validHarmony)
+			return null;
 		while(keys.hasNext()) {
 			String key = keys.next();
 			Iterator<Device> devices = hubs.get(key).getMyHarmony().getDevices().iterator();
@@ -195,9 +205,8 @@ public class HarmonyHome implements Home {
 	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
         isDevMode = Boolean.parseBoolean(System.getProperty("dev.mode", "false"));
         validHarmony = bridgeSettings.isValidHarmony();
-		if(!validHarmony && !isDevMode) {
-			log.debug("No valid Harmony config");
-		} else {
+		log.info("Harmony Home created." + (validHarmony ? "" : " No Harmony devices configured.") + (isDevMode ? " DevMode is set." : ""));
+		if(validHarmony || isDevMode) {
 			hubs = new HashMap<String, HarmonyServer>();
 			aGsonHandler =
 					new GsonBuilder()

@@ -154,7 +154,6 @@ public class NestHome implements com.bwssystems.HABridge.Home {
 							+ lightId + "state\"}}]";
 				}
 		}
-		log.info("device handler not implemented");
 		return responseString;
 	}
 
@@ -165,10 +164,9 @@ public class NestHome implements com.bwssystems.HABridge.Home {
         nestItems = null;
         validNest = bridgeSettings.isValidNest();
 		aGsonHandler = null;
+		log.info("Nest Home created." + (validNest ? "" : " No Nest configured."));
         
-        if(!validNest) {
-        	log.debug("not a valid nest");
-        } else {
+        if(validNest) {
     		aGsonHandler = new GsonBuilder().create();
 	
     		isFarenheit = bridgeSettings.isFarenheit();

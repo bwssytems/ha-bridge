@@ -52,9 +52,11 @@ public class HueMulator {
 	private HueHome myHueHome;
 	private BridgeSettingsDescriptor bridgeSettings;
 	private Gson aGsonHandler;
+	private DeviceMapTypes validMapTypes;
 
 	public HueMulator(BridgeSettingsDescriptor theBridgeSettings, DeviceRepository aDeviceRepository, HomeManager aHomeManager) {
 		repository = aDeviceRepository;
+		validMapTypes = new DeviceMapTypes();
 		bridgeSettings = theBridgeSettings;
 		homeManager= aHomeManager;
 		myHueHome = (HueHome) homeManager.findHome(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]);
@@ -780,11 +782,11 @@ public class HueMulator {
 				else
 					aMultiUtil.setSetCount(1);
 				// code for backwards compatibility
-				if((callItems[i].getType() == null || callItems[i].getType().trim().length() == 0)) {
-					if(device.getMapType() != null && device.getMapType().length() > 0)
-						callItems[i].setType(device.getMapType());
-					else if(device.getDeviceType() != null && device.getDeviceType().length() > 0)
-						callItems[i].setType(device.getDeviceType());
+				if((callItems[i].getType() == null || callItems[i].getType().trim().isEmpty())) {
+					if(validMapTypes.validateType(device.getMapType()))
+						callItems[i].setType(device.getMapType().trim());
+					else if(validMapTypes.validateType(device.getDeviceType()))
+						callItems[i].setType(device.getDeviceType().trim());
 					else
 						callItems[i].setType(DeviceMapTypes.CUSTOM_DEVICE[DeviceMapTypes.typeIndex]);
 				}
