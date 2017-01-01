@@ -257,7 +257,7 @@ OFF Commands |
  | Alexa, turn off `<Device Name>`
 DIM Commands | 
  | Alexa, brighten `<Device Name>` to `<Position>`
- | Alexa, dim `<Device Name> to <Position>`
+ | Alexa, dim `<Device Name>` to `<Position>`
  | Alexa, brighten `<Device Name>`
  | Alexa, dim `<Device Name>`
  | Alexa, set `<Device Name>` to `<Position>`
