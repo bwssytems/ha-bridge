@@ -12,8 +12,6 @@ import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
-import com.bwssystems.HABridge.api.hue.DeviceState;
-import com.bwssystems.HABridge.api.hue.StateChangeBody;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
@@ -76,24 +74,25 @@ public class MQTTHome implements Home {
 	}
 
 	@Override
-	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int iterationCount,
-			DeviceState state, StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc, DeviceDescriptor device, String body) {
+	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
+			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
 		String responseString = null;
 		log.debug("executing HUE api request to send message to MQTT broker: " + anItem.getItem().toString());
 		if (validMqtt) {
-			MQTTMessage[] mqttMessages = aGsonHandler.fromJson(BrightnessDecode.replaceIntensityValue(anItem.getItem().toString(),
-					BrightnessDecode.calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false), MQTTMessage[].class);
+			String mqttObject = BrightnessDecode.calculateReplaceIntensityValue(anItem.getItem().toString(),
+					intensity, targetBri, targetBriInc, false);
+			if (mqttObject.substring(0, 1).equalsIgnoreCase("{"))
+				mqttObject = "[" + mqttObject + "]";
+			MQTTMessage[] mqttMessages = aGsonHandler.fromJson(mqttObject, MQTTMessage[].class);
         	Integer theCount = 1;
        		for(int z = 0; z < mqttMessages.length; z++) {
         		if(mqttMessages[z].getCount() != null && mqttMessages[z].getCount() > 0)
         			theCount = mqttMessages[z].getCount();
-        		else
-        			theCount = aMultiUtil.getSetCount();
         		for(int y = 0; y < theCount; y++) {
         			if( y > 0 || z > 0) {
 						log.debug("publishing message: " + mqttMessages[y].getClientId() + " - "
 								+ mqttMessages[y].getTopic() + " - " + mqttMessages[y].getMessage()
-								+ " - iteration: " + String.valueOf(iterationCount) + " - count: " + String.valueOf(z));
+								+ " - count: " + String.valueOf(z));
 						
 						MQTTHandler mqttHandler = getMQTTHandler(mqttMessages[y].getClientId());
 						if (mqttHandler == null) {

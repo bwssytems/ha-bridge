@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.api.CallItem;
-import com.bwssystems.HABridge.api.hue.DeviceState;
-import com.bwssystems.HABridge.api.hue.StateChangeBody;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
@@ -103,8 +101,8 @@ public class NestHome implements com.bwssystems.HABridge.Home {
 	}
 
 	@Override
-	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int iterationCount,
-			DeviceState state, StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc, DeviceDescriptor device, String body) {
+	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
+			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
 		String responseString = null;
 		log.debug("executing HUE api request to set away for nest " + anItem.getType() + ": " + anItem.getItem().toString());
 		if(!validNest) {
@@ -118,18 +116,18 @@ public class NestHome implements com.bwssystems.HABridge.Home {
 		} else if (anItem.getType() != null && anItem.getType().trim().equalsIgnoreCase(DeviceMapTypes.NEST_THERMO_SET[DeviceMapTypes.typeIndex])) {
 				NestInstruction thermoSetting = aGsonHandler.fromJson(anItem.getItem().toString(), NestInstruction.class);
 				if (thermoSetting.getControl().equalsIgnoreCase("temp")) {
-					if (stateHasBri) {
+					if (targetBri != null) {
 						if (isFarenheit)
 							thermoSetting
 									.setTemp(
 											String.valueOf((Double
 													.parseDouble(BrightnessDecode.calculateReplaceIntensityValue(thermoSetting.getTemp(),
-															state, theStateChanges,	stateHasBri, stateHasBriInc, false)) - 32.0) / 1.8));
+															intensity, targetBri, targetBriInc, false)) - 32.0) / 1.8));
 						else
 							thermoSetting
 									.setTemp(
 											String.valueOf(Double.parseDouble(BrightnessDecode.calculateReplaceIntensityValue(thermoSetting.getTemp(),
-													state, theStateChanges,	stateHasBri, stateHasBriInc, false))));
+													intensity, targetBri, targetBriInc, false))));
 						log.debug("Setting thermostat: " + thermoSetting.getName() + " to "
 								+ thermoSetting.getTemp() + "C");
 						theNest.getThermostat(thermoSetting.getName())

@@ -13,15 +13,20 @@ import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
-import com.bwssystems.HABridge.api.hue.DeviceState;
-import com.bwssystems.HABridge.api.hue.StateChangeBody;
+import com.bwssystems.HABridge.api.NameValue;
+import com.bwssystems.HABridge.api.hue.HueError;
+import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
+import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
+import com.bwssystems.HABridge.plugins.http.HTTPHandler;
+import com.google.gson.Gson;
 
 public class HalHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(HalHome.class);
 	private Map<String, HalInfo> hals;
 	private Boolean validHal;
+	private HTTPHandler anHttpHandler;
 
 	public HalHome(BridgeSettingsDescriptor bridgeSettings) {
 		super();
@@ -108,14 +113,30 @@ public class HalHome implements Home {
 			aNewHalDevice.setHalname(theKey);
 			theDeviceList.add(aNewHalDevice);
 		}
+		anHttpHandler = new HTTPHandler();
 		return true;
 	}
 
 	@Override
-	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int iterationCount,
-			DeviceState state, StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc, DeviceDescriptor device, String body) {
-		log.info("device handler not implemented");
-		return null;
+	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
+			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
+		log.debug("executing HUE api request to HAL Http " + anItem.getItem().getAsString());
+		String responseString = null;
+
+			String anUrl = BrightnessDecode.calculateReplaceIntensityValue(anItem.getItem().getAsString(),
+					intensity, targetBri, targetBriInc, false);
+			String aBody;
+			aBody = BrightnessDecode.calculateReplaceIntensityValue(anItem.getHttpBody(),
+					intensity, targetBri, targetBriInc, false);
+			// make call
+			if (anHttpHandler.doHttpRequest(anUrl, anItem.getHttpVerb(), anItem.getContentType(), aBody,
+					new Gson().fromJson(anItem.getHttpHeaders(), NameValue[].class)) == null) {
+				log.warn("Error on calling url to change device state: " + anUrl);
+				responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
+						"Error on calling url to change device state", "/lights/"
+						+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+			}
+		return responseString;
 	}
 
 	@Override

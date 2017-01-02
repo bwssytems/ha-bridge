@@ -10,9 +10,6 @@ import javax.xml.bind.DatatypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.api.hue.DeviceState;
-import com.bwssystems.HABridge.api.hue.StateChangeBody;
-
 import net.java.dev.eval.Expression;
 
 public class BrightnessDecode {
@@ -23,17 +20,16 @@ public class BrightnessDecode {
 	private static final String INTENSITY_MATH_VALUE = "X";
 	private static final String INTENSITY_MATH_CLOSE = ")}";
 
-	public static int calculateIntensity(DeviceState state, StateChangeBody theChanges, boolean hasBri, boolean hasBriInc) {
-		int setIntensity = state.getBri();
-		if (hasBri) {
-			setIntensity = theChanges.getBri();
-		} else if (hasBriInc) {
-			if ((setIntensity + theChanges.getBri_inc()) <= 0)
-				setIntensity = theChanges.getBri_inc();
-			else if ((setIntensity + theChanges.getBri_inc()) > 255)
-				setIntensity = theChanges.getBri_inc();
+	public static int calculateIntensity(int setIntensity, Integer targetBri, Integer targetBriInc) {
+		if (targetBri != null) {
+			setIntensity = targetBri;
+		} else if (targetBriInc != null) {
+			if ((setIntensity + targetBriInc) <= 0)
+				setIntensity = targetBriInc;
+			else if ((setIntensity + targetBriInc) > 255)
+				setIntensity = targetBriInc;
 			else
-				setIntensity = setIntensity + theChanges.getBri_inc();
+				setIntensity = setIntensity + targetBriInc;
 		}
 		return setIntensity;
 	}
@@ -101,7 +97,7 @@ public class BrightnessDecode {
 	}
 
 	// Helper Method
-	public static String calculateReplaceIntensityValue(String request, DeviceState state, StateChangeBody theChanges, boolean hasBri, boolean hasBriInc, boolean isHex) {
-		return replaceIntensityValue(request, calculateIntensity(state, theChanges, hasBri, hasBriInc), isHex);
+	public static String calculateReplaceIntensityValue(String request, int theIntensity, Integer targetBri, Integer targetBriInc, boolean isHex) {
+		return replaceIntensityValue(request, calculateIntensity(theIntensity, targetBri, targetBriInc), isHex);
 	}
 }

@@ -7,10 +7,8 @@ import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.api.NameValue;
-import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.bwssystems.HABridge.api.hue.HueError;
 import com.bwssystems.HABridge.api.hue.HueErrorResponse;
-import com.bwssystems.HABridge.api.hue.StateChangeBody;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
@@ -26,8 +24,8 @@ public class HTTPHome implements Home {
 	}
 
 	@Override
-	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int iterationCount,
-			DeviceState state, StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc, DeviceDescriptor device, String body) {
+	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
+			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
 		String responseString = null;
 		
 		//Backwards Compatibility Items
@@ -46,24 +44,11 @@ public class HTTPHome implements Home {
 				+ (anItem.getHttpVerb() == null ? "GET" : anItem.getHttpVerb()) + ": "
 				+ anItem.getItem().getAsString());
 
-		for (int x = 0; x < aMultiUtil.getSetCount(); x++) {
-			if (x > 0 || iterationCount > 0) {
-				try {
-					Thread.sleep(aMultiUtil.getTheDelay());
-				} catch (InterruptedException e) {
-					// ignore
-				}
-			}
-			if (anItem.getDelay() != null && anItem.getDelay() > 0)
-				aMultiUtil.setTheDelay(anItem.getDelay());
-			else
-				aMultiUtil.setTheDelay(aMultiUtil.getDelayDefault());
 			String anUrl = BrightnessDecode.calculateReplaceIntensityValue(anItem.getItem().getAsString(),
-					state, theStateChanges, stateHasBri, stateHasBriInc, false);
+					intensity, targetBri, targetBriInc, false);
 			String aBody;
 			aBody = BrightnessDecode.calculateReplaceIntensityValue(anItem.getHttpBody(),
-					state, theStateChanges, stateHasBri, stateHasBriInc,
-					false);
+					intensity, targetBri, targetBriInc, false);
 			// make call
 			if (anHttpHandler.doHttpRequest(anUrl, anItem.getHttpVerb(), anItem.getContentType(), aBody,
 					new Gson().fromJson(anItem.getHttpHeaders(), NameValue[].class)) == null) {
@@ -71,9 +56,7 @@ public class HTTPHome implements Home {
 				responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
 						"Error on calling url to change device state", "/lights/"
 						+ lightId + "state", null, null).getTheErrors(), HueError[].class);
-				x = aMultiUtil.getSetCount();
 			}
-		}
 		return responseString;
 	}
 

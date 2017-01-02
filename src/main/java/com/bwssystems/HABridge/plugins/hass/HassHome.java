@@ -13,8 +13,6 @@ import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
-import com.bwssystems.HABridge.api.hue.DeviceState;
-import com.bwssystems.HABridge.api.hue.StateChangeBody;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
@@ -111,8 +109,8 @@ public class HassHome implements Home {
 	}
 	
 	@Override
-	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int iterationCount, DeviceState state,
-			StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc, DeviceDescriptor device, String body) {
+	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
+			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
 		String theReturn = null;
 		log.debug("executing HUE api request to send message to HomeAssistant: " + anItem.getItem().toString());
 		if(!validHass) {
@@ -124,7 +122,7 @@ public class HassHome implements Home {
 		} else {
 			HassCommand hassCommand = aGsonHandler.fromJson(anItem.getItem(), HassCommand.class);
 			hassCommand.setBri(BrightnessDecode.replaceIntensityValue(hassCommand.getBri(),
-					BrightnessDecode.calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc), false));
+					BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false));
 			HomeAssistant homeAssistant = getHomeAssistant(hassCommand.getHassName());
 			if (homeAssistant == null) {
 				log.warn("Should not get here, no HomeAssistants available");
@@ -132,23 +130,9 @@ public class HassHome implements Home {
 						+ "\",\"description\": \"Should not get here, no HiomeAssistant clients available\", \"parameter\": \"/lights/"
 						+ lightId + "state\"}}]";
 			} else {
-				for (int x = 0; x < aMultiUtil.getSetCount(); x++) {
-					if (x > 0 || iterationCount > 0) {
-						try {
-							Thread.sleep(aMultiUtil.getTheDelay());
-						} catch (InterruptedException e) {
-							// ignore
-						}
-					}
-					if (anItem.getDelay() != null && anItem.getDelay() > 0)
-						aMultiUtil.setTheDelay(anItem.getDelay());
-					else
-						aMultiUtil.setTheDelay(aMultiUtil.getDelayDefault());
 					log.debug("calling HomeAssistant: " + hassCommand.getHassName() + " - "
-							+ hassCommand.getEntityId() + " - " + hassCommand.getState() + " - " + hassCommand.getBri()
-							+ " - iteration: " + String.valueOf(iterationCount) + " - count: " + String.valueOf(x));
+							+ hassCommand.getEntityId() + " - " + hassCommand.getState() + " - " + hassCommand.getBri());
 					homeAssistant.callCommand(hassCommand);
-				}
 			}
 		}
 		return theReturn;

@@ -843,15 +843,16 @@ app.controller('SystemController', function ($scope, $location, $http, $window, 
     	    }
     	}    	
     };
-    $scope.addHasstoSettings = function (newhassname, newhassip, newhassport) {
+    $scope.addHasstoSettings = function (newhassname, newhassip, newhassport, newhasspassword) {
     	if($scope.bridge.settings.hassaddress == null) {
 			$scope.bridge.settings.hassaddress = { devices: [] };
 		}
-    	var newhass = {name: newhassname, ip: newhassip, port: newhassport }
+    	var newhass = {name: newhassname, ip: newhassip, port: newhassport, password: newhasspassword }
     	$scope.bridge.settings.hassaddress.devices.push(newhass);
     	$scope.newhassname = null;
     	$scope.newhassip = null;
     	$scope.newhassport = null;
+    	$scope.newhasspassword = null;
     };
     $scope.removeHasstoSettings = function (hassname, hassip) {
     	for(var i = $scope.bridge.settings.hassaddress.devices.length - 1; i >= 0; i--) {

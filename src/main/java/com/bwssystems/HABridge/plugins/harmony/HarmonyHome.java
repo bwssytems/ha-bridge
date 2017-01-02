@@ -16,8 +16,6 @@ import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.IpList;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
-import com.bwssystems.HABridge.api.hue.DeviceState;
-import com.bwssystems.HABridge.api.hue.StateChangeBody;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.google.gson.Gson;
@@ -125,8 +123,8 @@ public class HarmonyHome implements Home {
 	}
 
 	@Override
-	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int iterationCount,
-			DeviceState state, StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc, DeviceDescriptor device, String body) {
+	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
+			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
 		String responseString = null;
 		log.debug("executing HUE api request to change " + anItem.getType() + " to Harmony: " + device.getName());
 		if(!validHarmony) {
@@ -147,20 +145,7 @@ public class HarmonyHome implements Home {
 							+ "\",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/"
 							+ lightId + "state\"}}]";
 				} else {
-					for (int x = 0; x < aMultiUtil.getSetCount(); x++) {
-						if (x > 0 || iterationCount > 0) {
-							try {
-								Thread.sleep(aMultiUtil.getTheDelay());
-							} catch (InterruptedException e) {
-								// ignore
-							}
-						}
-						if (anItem.getDelay() != null && anItem.getDelay() > 0)
-							aMultiUtil.setTheDelay(anItem.getDelay());
-						else
-							aMultiUtil.setTheDelay(aMultiUtil.getDelayDefault());
-						myHarmony.startActivity(anActivity);
-					}
+					myHarmony.startActivity(anActivity);
 				}
 			} else if(anItem.getType().trim().equalsIgnoreCase(DeviceMapTypes.HARMONY_BUTTON[DeviceMapTypes.typeIndex])) {
 				String url = anItem.getItem().toString();
@@ -172,8 +157,6 @@ public class HarmonyHome implements Home {
         		for(int z = 0; z < deviceButtons.length; z++) {
 	        		if(deviceButtons[z].getCount() != null && deviceButtons[z].getCount() > 0)
 	        			theCount = deviceButtons[z].getCount();
-	        		else
-	        			theCount = aMultiUtil.getSetCount();
 	        		for(int y = 0; y < theCount; y++) {
 	        			if( y > 0 || z > 0) {
 								try {

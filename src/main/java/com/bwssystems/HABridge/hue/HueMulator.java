@@ -624,8 +624,8 @@ public class HueMulator {
 		String responseString = null;
 		StateChangeBody theStateChanges = null;
 		DeviceState state = null;
-		boolean stateHasBri = false;
-		boolean stateHasBriInc = false;
+		Integer targetBri = null;
+		Integer targetBriInc = null;
 		log.debug("Update state requested: " + userId + " from " + ipAddress + " body: " + body);
 		HueError[] theErrors = validateWhitelistUser(userId, false);
 		if (theErrors != null)
@@ -637,15 +637,6 @@ public class HueMulator {
 					"Could not parse state change body.", null, null, null).getTheErrors(), HueError[].class);
 		}
 
-		if (body.contains("\"bri\"")) {
-			if (theStateChanges.isOn() && theStateChanges.getBri() == 0)
-				stateHasBri = false;
-			else
-				stateHasBri = true;
-		}
-		if (body.contains("\"bri_inc\""))
-			stateHasBriInc = true;
-
 		DeviceDescriptor device = repository.findOne(lightId);
 		if (device == null) {
 			log.warn("Could not find device: " + lightId + " for hue state change request: " + userId + " from "
@@ -653,17 +644,27 @@ public class HueMulator {
 			return aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/lights/" + lightId,
 					"Could not find device.", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
 		}
+
+		if (body.contains("\"bri_inc\""))
+			targetBriInc = new Integer(theStateChanges.getBri_inc());
+		else if (body.contains("\"bri\"")) {
+			if (theStateChanges.isOn() && theStateChanges.getBri() == 0)
+				targetBri = null;
+			else
+				targetBri = new Integer(theStateChanges.getBri());
+		}
+
 		state = device.getDeviceState();
 		if (state == null)
 			state = DeviceState.createDeviceState();
 		state.fillIn();
-		if (stateHasBri) {
-			if (theStateChanges.getBri() > 0 && !state.isOn())
+		if (targetBri != null) {
+			if (targetBri > 0 && !state.isOn())
 				state.setOn(true);
-		} else if (stateHasBriInc) {
-			if ((state.getBri() + theStateChanges.getBri_inc()) > 0 && !state.isOn())
+		} else if (targetBriInc != null) {
+			if ((state.getBri() + targetBriInc) > 0 && !state.isOn())
 				state.setOn(true);
-			else if ((state.getBri() + theStateChanges.getBri_inc()) <= 0 && state.isOn())
+			else if ((state.getBri() + targetBriInc) <= 0 && state.isOn())
 				state.setOn(false);
 		} else {
 			if (theStateChanges.isOn()) {
@@ -676,10 +677,9 @@ public class HueMulator {
 			}
 		}
 		responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, device.getDeviceState());
-		device.getDeviceState().setBri(BrightnessDecode.calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc));
+		device.getDeviceState().setBri(BrightnessDecode.calculateIntensity(state.getBri(), targetBri, targetBriInc));
 
 		return responseString;
-		
 	}
 
 	private String changeState(String userId, String lightId, String body, String ipAddress) {
@@ -687,9 +687,9 @@ public class HueMulator {
 		String url = null;
 		StateChangeBody theStateChanges = null;
 		DeviceState state = null;
+		Integer targetBri = null;
+		Integer targetBriInc = null;
 		MultiCommandUtil aMultiUtil = new MultiCommandUtil();
-		boolean stateHasBri = false;
-		boolean stateHasBriInc = false;
 		aMultiUtil.setTheDelay(bridgeSettings.getButtonsleep());
 		aMultiUtil.setDelayDefault(bridgeSettings.getButtonsleep());
 		aMultiUtil.setSetCount(1);
@@ -705,12 +705,6 @@ public class HueMulator {
 					"Could not parse state change body.", null, null, null).getTheErrors(), HueError[].class);
 		}
 
-		if (body.contains("\"bri\"")) {
-			stateHasBri = true;
-		}
-		if (body.contains("\"bri_inc\""))
-			stateHasBriInc = true;
-
 		DeviceDescriptor device = repository.findOne(lightId);
 		if (device == null) {
 			log.warn("Could not find device: " + lightId + " for hue state change request: " + userId + " from "
@@ -719,23 +713,20 @@ public class HueMulator {
 					"Could not find device.", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
 		}
 
+		if (body.contains("\"bri_inc\"")) {
+			targetBriInc = new Integer(theStateChanges.getBri_inc());
+		}
+		else if (body.contains("\"bri\"")) {
+			targetBri = new Integer(theStateChanges.getBri());
+		}
+
 		state = device.getDeviceState();
 		if (state == null)
 			state = DeviceState.createDeviceState();
 
-		if (stateHasBri) {
+		if (targetBri != null || targetBriInc != null) {
 			if(!state.isOn())
 				state.setOn(true);
-
-			url = device.getDimUrl();
-
-			if (url == null || url.length() == 0)
-				url = device.getOnUrl();
-		} else if (stateHasBriInc) {
-			if(!state.isOn())
-				state.setOn(true);
-			if ((state.getBri() + theStateChanges.getBri_inc()) <= 0)
-				state.setBri(theStateChanges.getBri_inc());
 
 			url = device.getDimUrl();
 
@@ -792,7 +783,20 @@ public class HueMulator {
 				}
 	
 				if (callItems[i].getType() != null) {
-					responseString = homeManager.findHome(callItems[i].getType().trim()).deviceHandler(callItems[i], aMultiUtil, lightId, i, state, theStateChanges, stateHasBri, stateHasBriInc, device, body);
+					for (int x = 0; x < aMultiUtil.getSetCount(); x++) {
+						if (x > 0 || i > 0) {
+							try {
+								Thread.sleep(aMultiUtil.getTheDelay());
+							} catch (InterruptedException e) {
+								// ignore
+							}
+						}
+						if (callItems[i].getDelay() != null && callItems[i].getDelay() > 0)
+							aMultiUtil.setTheDelay(callItems[i].getDelay());
+						else
+							aMultiUtil.setTheDelay(aMultiUtil.getDelayDefault());
+						responseString = homeManager.findHome(callItems[i].getType().trim()).deviceHandler(callItems[i], aMultiUtil, lightId, state.getBri(), targetBri, targetBriInc, device, body);
+					}
 				}
 			}
 		} else {
@@ -804,7 +808,7 @@ public class HueMulator {
 
 		if (responseString == null || !responseString.contains("[{\"error\":")) {
 			responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state);
-			state.setBri(BrightnessDecode.calculateIntensity(state, theStateChanges, stateHasBri, stateHasBriInc));
+			state.setBri(BrightnessDecode.calculateIntensity(state.getBri(), targetBri, targetBriInc));
 			device.setDeviceState(state);
 		}
 		return responseString;

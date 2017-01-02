@@ -13,9 +13,7 @@ import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
-import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.bwssystems.HABridge.api.hue.HueApiResponse;
-import com.bwssystems.HABridge.api.hue.StateChangeBody;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.google.gson.Gson;
@@ -77,8 +75,8 @@ public class HueHome implements Home {
 	}
 	
 	@Override
-	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int iterationCount,
-			DeviceState state, StateChangeBody theStateChanges, boolean stateHasBri, boolean stateHasBriInc, DeviceDescriptor device, String body) {
+	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
+			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
 		if(!validHue)
 			return null;
 		String responseString = null;
@@ -89,23 +87,8 @@ public class HueHome implements Home {
 		HueInfo theHue = hues.get(deviceId.getHueName());
 
 		// make call
-		for (int x = 0; x < aMultiUtil.getSetCount(); x++) {
-			if (x > 0 || iterationCount > 0) {
-				try {
-					Thread.sleep(aMultiUtil.getTheDelay());
-				} catch (InterruptedException e) {
-					// ignore
-				}
-			}
-			if (anItem.getDelay() != null && anItem.getDelay() > 0)
-				aMultiUtil.setTheDelay(anItem.getDelay());
-			else
-				aMultiUtil.setTheDelay(aMultiUtil.getDelayDefault());
-			
-			responseString = theHue.changeState(deviceId, lightId, body);
-			if (responseString.contains("[{\"error\":"))
-					x = aMultiUtil.getSetCount();
-		}
+		responseString = theHue.changeState(deviceId, lightId, body);
+
 		return responseString;
 	}
 
