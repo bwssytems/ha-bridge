@@ -40,7 +40,11 @@ public class HomeAssistant {
 		String aBody = "{\"entity_id\":\"" + aCommand.getEntityId() + "\"";
 		NameValue[] headers = null;
 		if(hassAddress.getPassword() != null && !hassAddress.getPassword().isEmpty()) {
-			headers = new Gson().fromJson("{\"name\":\"x-ha-access\",\"value\":\"" + hassAddress.getPassword() + "\"}", NameValue[].class);
+			NameValue password = new NameValue();
+			password.setName("x-ha-access");
+			password.setValue(hassAddress.getPassword());
+			headers = new NameValue[1];
+			headers[0] = password;
 		}
 		if(aCommand.getState().equalsIgnoreCase("on")) {
 			aUrl = aUrl + "/turn_on";
@@ -63,8 +67,16 @@ public class HomeAssistant {
 		State[] theHassStates;
 		String theUrl = null;
     	String theData;
+		NameValue[] headers = null;
+		if(hassAddress.getPassword() != null && !hassAddress.getPassword().isEmpty()) {
+			NameValue password = new NameValue();
+			password.setName("x-ha-access");
+			password.setValue(hassAddress.getPassword());
+			headers = new NameValue[1];
+			headers[0] = password;
+		}
    		theUrl = "http://" + hassAddress.getIp() + ":" + hassAddress.getPort() + "/api/states";
-   		theData = anHttpHandler.doHttpRequest(theUrl, HttpGet.METHOD_NAME, null, null, null);
+   		theData = anHttpHandler.doHttpRequest(theUrl, HttpGet.METHOD_NAME, "application/json", null, headers);
     	if(theData != null) {
     		log.debug("GET Hass States - data: " + theData);
     		theHassStates = new Gson().fromJson(theData, State[].class);

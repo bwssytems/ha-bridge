@@ -18,6 +18,7 @@ import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 
 public class HassHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(HassHome.class);
@@ -101,7 +102,11 @@ public class HassHome implements Home {
 			aNewHassDevice.setDeviceState(theDevice);
 			aNewHassDevice.setHassaddress(hassMap.get(theKey).getHassAddress().getIp());
 			aNewHassDevice.setHassname(theKey);
-			aNewHassDevice.setDeviceName(theDevice.getAttributes().get("friendly_name").getAsString());
+			JsonElement friendlyName = theDevice.getAttributes().get("friendly_name");
+			if(friendlyName == null)
+				aNewHassDevice.setDeviceName(theDevice.getEntityId());
+			else
+				aNewHassDevice.setDeviceName(friendlyName.getAsString());
 			aNewHassDevice.setDomain(theDevice.getEntityId().substring(0, theDevice.getEntityId().indexOf(".")));
 			theDeviceList.add(aNewHassDevice);
 		}

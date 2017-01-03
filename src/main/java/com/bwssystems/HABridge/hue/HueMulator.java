@@ -261,30 +261,30 @@ public class HueMulator {
 		});
 	}
 	
-	private String formatSuccessHueResponse(StateChangeBody state, String body, String lightId,
-			DeviceState deviceState) {
+	private String formatSuccessHueResponse(StateChangeBody stateChanges, String body, String lightId,
+			DeviceState deviceState, Integer targetBri, Integer targetBriInc) {
 
 		String responseString = "[";
 		boolean notFirstChange = false;
 		if (body.contains("\"on\"")) {
 			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/on\":";
-			if (state.isOn()) {
+			if (stateChanges.isOn()) {
 				responseString = responseString + "true}}";
 			} else {
 				responseString = responseString + "false}}";
 			}
 			if (deviceState != null)
-				deviceState.setOn(state.isOn());
+				deviceState.setOn(stateChanges.isOn());
 			notFirstChange = true;
 		}
 
 		if (body.contains("\"bri\"")) {
 			if (notFirstChange)
 				responseString = responseString + ",";
-			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/bri\":" + state.getBri()
+			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/bri\":" + stateChanges.getBri()
 					+ "}}";
 			if (deviceState != null)
-				deviceState.setBri(state.getBri());
+				deviceState.setBri(stateChanges.getBri());
 			notFirstChange = true;
 		}
 
@@ -292,49 +292,52 @@ public class HueMulator {
 			if (notFirstChange)
 				responseString = responseString + ",";
 			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/bri_inc\":"
-					+ state.getBri_inc() + "}}";
+					+ stateChanges.getBri_inc() + "}}";
 			// INFO: Bright inc check for deviceState needs to be outside of
 			// this method
+			if (deviceState != null)
+				deviceState.setBri(BrightnessDecode.calculateIntensity(deviceState.getBri(), targetBri, targetBriInc));
+
 			notFirstChange = true;
 		}
 
 		if (body.contains("\"ct\"")) {
 			if (notFirstChange)
 				responseString = responseString + ",";
-			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/ct\":" + state.getCt()
+			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/ct\":" + stateChanges.getCt()
 					+ "}}";
 			if (deviceState != null)
-				deviceState.setCt(state.getCt());
+				deviceState.setCt(stateChanges.getCt());
 			notFirstChange = true;
 		}
 
 		if (body.contains("\"xy\"")) {
 			if (notFirstChange)
 				responseString = responseString + ",";
-			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/xy\":" + state.getXy()
+			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/xy\":" + stateChanges.getXy()
 					+ "}}";
 			if (deviceState != null)
-				deviceState.setXy(state.getXy());
+				deviceState.setXy(stateChanges.getXy());
 			notFirstChange = true;
 		}
 
 		if (body.contains("\"hue\"")) {
 			if (notFirstChange)
 				responseString = responseString + ",";
-			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/hue\":" + state.getHue()
+			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/hue\":" + stateChanges.getHue()
 					+ "}}";
 			if (deviceState != null)
-				deviceState.setHue(state.getHue());
+				deviceState.setHue(stateChanges.getHue());
 			notFirstChange = true;
 		}
 
 		if (body.contains("\"sat\"")) {
 			if (notFirstChange)
 				responseString = responseString + ",";
-			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/sat\":" + state.getSat()
+			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/sat\":" + stateChanges.getSat()
 					+ "}}";
 			if (deviceState != null)
-				deviceState.setSat(state.getSat());
+				deviceState.setSat(stateChanges.getSat());
 			notFirstChange = true;
 		}
 
@@ -342,9 +345,9 @@ public class HueMulator {
 			if (notFirstChange)
 				responseString = responseString + ",";
 			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/ct_inc\":"
-					+ state.getCt_inc() + "}}";
+					+ stateChanges.getCt_inc() + "}}";
 			if (deviceState != null)
-				deviceState.setCt(deviceState.getCt() + state.getCt_inc());
+				deviceState.setCt(deviceState.getCt() + stateChanges.getCt_inc());
 			notFirstChange = true;
 		}
 
@@ -352,9 +355,9 @@ public class HueMulator {
 			if (notFirstChange)
 				responseString = responseString + ",";
 			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/xy_inc\":"
-					+ state.getXy_inc() + "}}";
+					+ stateChanges.getXy_inc() + "}}";
 			if (deviceState != null)
-				deviceState.setXy(state.getXy());
+				deviceState.setXy(stateChanges.getXy());
 			notFirstChange = true;
 		}
 
@@ -362,9 +365,9 @@ public class HueMulator {
 			if (notFirstChange)
 				responseString = responseString + ",";
 			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/hue_inc\":"
-					+ state.getHue_inc() + "}}";
+					+ stateChanges.getHue_inc() + "}}";
 			if (deviceState != null)
-				deviceState.setHue(deviceState.getHue() + state.getHue_inc());
+				deviceState.setHue(deviceState.getHue() + stateChanges.getHue_inc());
 			notFirstChange = true;
 		}
 
@@ -372,9 +375,9 @@ public class HueMulator {
 			if (notFirstChange)
 				responseString = responseString + ",";
 			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/sat_inc\":"
-					+ state.getSat_inc() + "}}";
+					+ stateChanges.getSat_inc() + "}}";
 			if (deviceState != null)
-				deviceState.setSat(deviceState.getSat() + state.getSat_inc());
+				deviceState.setSat(deviceState.getSat() + stateChanges.getSat_inc());
 			notFirstChange = true;
 		}
 
@@ -382,9 +385,9 @@ public class HueMulator {
 			if (notFirstChange)
 				responseString = responseString + ",";
 			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/effect\":"
-					+ state.getEffect() + "}}";
+					+ stateChanges.getEffect() + "}}";
 			if (deviceState != null)
-				deviceState.setEffect(state.getEffect());
+				deviceState.setEffect(stateChanges.getEffect());
 			notFirstChange = true;
 		}
 
@@ -392,7 +395,7 @@ public class HueMulator {
 			if (notFirstChange)
 				responseString = responseString + ",";
 			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/transitiontime\":"
-					+ state.getTransitiontime() + "}}";
+					+ stateChanges.getTransitiontime() + "}}";
 			// if(deviceState != null)
 			// deviceState.setTransitiontime(state.getTransitiontime());
 			notFirstChange = true;
@@ -402,11 +405,17 @@ public class HueMulator {
 			if (notFirstChange)
 				responseString = responseString + ",";
 			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/alert\":"
-					+ state.getAlert() + "}}";
+					+ stateChanges.getAlert() + "}}";
 			if (deviceState != null)
-				deviceState.setAlert(state.getAlert());
+				deviceState.setAlert(stateChanges.getAlert());
 			notFirstChange = true;
 		}
+
+		if(deviceState.isOn() && deviceState.getBri() <= 0)
+			deviceState.setBri(255);
+		
+		if(!deviceState.isOn() && (targetBri != null || targetBriInc != null))
+			deviceState.setOn(true);
 
 		responseString = responseString + "]";
 
@@ -648,36 +657,15 @@ public class HueMulator {
 		if (body.contains("\"bri_inc\""))
 			targetBriInc = new Integer(theStateChanges.getBri_inc());
 		else if (body.contains("\"bri\"")) {
-			if (theStateChanges.isOn() && theStateChanges.getBri() == 0)
-				targetBri = null;
-			else
-				targetBri = new Integer(theStateChanges.getBri());
+			targetBri = new Integer(theStateChanges.getBri());
 		}
 
 		state = device.getDeviceState();
 		if (state == null)
 			state = DeviceState.createDeviceState();
-		state.fillIn();
-		if (targetBri != null) {
-			if (targetBri > 0 && !state.isOn())
-				state.setOn(true);
-		} else if (targetBriInc != null) {
-			if ((state.getBri() + targetBriInc) > 0 && !state.isOn())
-				state.setOn(true);
-			else if ((state.getBri() + targetBriInc) <= 0 && state.isOn())
-				state.setOn(false);
-		} else {
-			if (theStateChanges.isOn()) {
-				state.setOn(true);
-				if (state.getBri() <= 0)
-					state.setBri(255);
-			} else {
-				state.setOn(false);
-				state.setBri(0);
-			}
-		}
-		responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, device.getDeviceState());
-		device.getDeviceState().setBri(BrightnessDecode.calculateIntensity(state.getBri(), targetBri, targetBriInc));
+
+		responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc);
+		device.setDeviceState(state);
 
 		return responseString;
 	}
@@ -725,9 +713,6 @@ public class HueMulator {
 			state = DeviceState.createDeviceState();
 
 		if (targetBri != null || targetBriInc != null) {
-			if(!state.isOn())
-				state.setOn(true);
-
 			url = device.getDimUrl();
 
 			if (url == null || url.length() == 0)
@@ -735,10 +720,8 @@ public class HueMulator {
 		} else {
 			if (theStateChanges.isOn()) {
 				url = device.getOnUrl();
-				state.setOn(true);
 			} else if (!theStateChanges.isOn()) {
 				url = device.getOffUrl();
-				state.setOn(false);
 			}
 		}
 
@@ -807,8 +790,7 @@ public class HueMulator {
 		}
 
 		if (responseString == null || !responseString.contains("[{\"error\":")) {
-			responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state);
-			state.setBri(BrightnessDecode.calculateIntensity(state.getBri(), targetBri, targetBriInc));
+			responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc);
 			device.setDeviceState(state);
 		}
 		return responseString;
