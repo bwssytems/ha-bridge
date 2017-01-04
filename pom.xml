@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>4beta2.4</version>
+	<version>4beta2.5</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
