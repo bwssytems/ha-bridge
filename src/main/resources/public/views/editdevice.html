@@ -108,17 +108,78 @@
 		</div>
 		<div class="form-group">
 			<div class="row">
-				<label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On URL</label>
+				<label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On Items</label>
 
 				<div class="col-xs-8 col-sm-7">
-					<textarea rows="3" class="form-control" id="device-on-url"
-						ng-model="device.onUrl" placeholder="URL to turn device on"></textarea>
+					<scrollable-table watch="onDevices">
+					<table class="table table-bordered table-striped table-hover">
+						<thead>
+							<tr>
+								<th>Type</th>
+								<th>Target Item</th>
+								<th>Delay</th>
+								<th>Count</th>
+								<th>Filter IPs</th>
+								<th>Http Verb</th>
+								<th>Http Body</th>
+								<th>Http Headers</th>
+								<th>Content Type</th>
+							</tr>
+						</thead>
+						<tr ng-repeat="anItem in onDevices">
+							<td>
+								<select ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]" ng-model="anItem.type"></select>
+							</td>
+							<td><textarea rows="1" class="form-control" id="item-target"
+							ng-model="anItem.item" placeholder="Target Desc"></textarea></td>
+							<td><textarea rows="1" class="form-control" id="item-delay"
+							ng-model="anItem.delay" placeholder="Delay millis"></textarea></td>
+							<td><textarea rows="1" class="form-control" id="item-count"
+							ng-model="anItem.count" placeholder="Delay millis"></textarea></td>
+							<td><textarea rows="1" class="form-control" id="item-filterIPs"
+							ng-model="anItem.filterIPs" placeholder="Delay millis"></textarea></td>
+							<td>
+								<select name="item-http-verb" id="item-http-verb" ng-model="anItem.httpVerb">
+									<option value="">---Please select---</option>
+									<!-- not selected / blank option -->
+									<option value="GET">GET</option>
+									<option value="PUT">PUT</option>
+									<option value="POST">POST</option>
+								</select>
+							</td>
+							<td><textarea rows="1" class="form-control" id="item-httpBody"
+							ng-model="anItem.httpBody" placeholder="Delay millis"></textarea></td>
+							<td><textarea rows="1" class="form-control" id="item-httpHeaders"
+							ng-model="anItem.httpHeaders" placeholder="Delay millis"></textarea></td>
+							<td>
+								<select name="item-content-type" id="item-content-type"
+									ng-model="item.contentType">
+									<option value="">---Please select---</option>
+									<!-- not selected / blank option -->
+									<option value="application/atom+xml">application/atom+xml</option>
+									<option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+									<option value="application/json">application/json</option>
+									<option value="application/octet-stream">application/octet-stream</option>
+									<option value="application/svg+xml">application/svg+xml</option>
+									<option value="application/xhtml+xml">application/xhtml+xml</option>
+									<option value="application/xml">application/xml</option>
+									<option value="*">*</option>
+									<option value="multipart/form-data">multipart/form-data</option>
+									<option value="text/html">text/html</option>
+									<option value="text/plain">text/plain</option>
+									<option value="text/xml">text/xml</option>
+									<option value="*/*">*/*</option>
+								</select>
+							</td>
+						</tr>
+					</table>
+					</scrollable-table>
 				</div>
 			</div>
 		</div>
 		<div class="form-group">
 			<div class="row">
-				<label class="col-xs-12 col-sm-2 control-label" for="device-dim-url">Dim URL</label>
+				<label class="col-xs-12 col-sm-2 control-label" for="device-dim-url">Dim Items</label>
 
 				<div class="col-xs-8 col-sm-7">
 					<textarea rows="3" class="form-control" id="device-dim-url"
@@ -128,7 +189,7 @@
 		</div>
 		<div class="form-group">
 			<div class="row">
-				<label class="col-xs-12 col-sm-2 control-label" for="device-off-url">Off URL</label>
+				<label class="col-xs-12 col-sm-2 control-label" for="device-off-url">Off Items</label>
 
 				<div class="col-xs-8 col-sm-7">
 					<textarea rows="3" class="form-control" id="device-off-url"

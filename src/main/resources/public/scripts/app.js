@@ -384,6 +384,30 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		);
 	};
 
+	this.getCallObjects = function (deviceString) {
+		if (!deviceString.startsWith("[")) {
+			if (deviceString.startsWith("{\"item"))
+				deviceString = "[" + deviceString + "]"
+			else {
+				if (deviceString.startsWith("{"))
+					deviceString = "[{\"item\":" + deviceString + "}]"
+				else
+					deviceString = "[{\"item\":\"" + deviceString + "\"}]"
+			}
+		} else if (!deviceString.startsWith("[{\"item\""))
+			deviceString = "[{\"item\":" + deviceString + "}]"
+		var newDevices = angular.fromJson(deviceString)
+		var i, s, len = newDevices.length
+		for (i=0; i<len; ++i) {
+				  if (i in newDevices) {
+			    s = newDevices[i];
+				if (s.type !== null)
+					s.type = self.getMapType(s.type)
+			  }
+		}
+		return newDevices
+	}
+	
 	this.viewMapTypes = function () {
 		return $http.get(this.state.base + "/map/types").then(
 				function (response) {
@@ -705,7 +729,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					currentOff = "[{\"item\":\"" + currentOff + "\",\"type\":\"" + deviceMapType + "\"}]";
 			}
 			self.state.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"item\":";		
-		} else if (self.state.device.mapType ==== undefined || self.state.device.mapType === null || self.state.device.mapType === "") {
+		} else if (self.state.device.mapType === undefined || self.state.device.mapType === null || self.state.device.mapType === "") {
 			this.clearDevice();
 			self.state.device.deviceType = deviceType;
 			self.state.device.name = deviceName;
@@ -2027,6 +2051,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 	bridgeService.viewMapTypes();
 	$scope.bridge = bridgeService.state;
 	$scope.device = $scope.bridge.device;
+	$scope.onDevices = bridgeService.getCallObjects($scope.bridge.device.onUrl);
 	$scope.mapTypeSelected = bridgeService.getMapType($scope.device.mapType); 
 	$scope.device_dim_control = "";
 	$scope.bulk = { devices: [] };
@@ -2035,6 +2060,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 
 	$scope.clearDevice = function () {
 		bridgeService.clearDevice();
+		$scope.onDevices = null;
 	};
 
 	$scope.addDevice = function () {
