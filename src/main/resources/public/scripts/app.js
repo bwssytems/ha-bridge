@@ -408,6 +408,20 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		return newDevices
 	}
 	
+	this.updateCallObjectsType = function (theDevices) {
+		var i, s, type, len = theDevices.length
+		for (i=0; i<len; ++i) {
+			if (i in theDevices) {
+			    s = theDevices[i];
+				if (s.type !== null)
+					type = self.getMapType(s.type[0])
+					s.type = type[0]
+			  }
+		}
+		return theDevices
+		
+	}
+	
 	this.viewMapTypes = function () {
 		return $http.get(this.state.base + "/map/types").then(
 				function (response) {
@@ -473,7 +487,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 	this.addDevice = function (aDevice) {
 		var device = {};
 		angular.extend(device, aDevice );
-		if (device.httpVerb !== null && device.httpVerb !== "")
+		if (device.deviceType === null || device.deviceType === "")
 			device.deviceType = "custom";
 		if (device.targetDevice === null || device.targetDevice === "")
 			device.targetDevice = "Encapsulated";
@@ -2052,9 +2066,13 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 	$scope.bridge = bridgeService.state;
 	$scope.device = $scope.bridge.device;
 	$scope.onDevices = bridgeService.getCallObjects($scope.bridge.device.onUrl);
+	$scope.newOnItem = [];
+	$scope.dimDevices = bridgeService.getCallObjects($scope.bridge.device.dimUrl);
+	$scope.newDimItem = [];
+	$scope.offDevices = bridgeService.getCallObjects($scope.bridge.device.offUrl);
+	$scope.newOffItem = [];
 	$scope.mapTypeSelected = bridgeService.getMapType($scope.device.mapType); 
 	$scope.device_dim_control = "";
-	$scope.bulk = { devices: [] };
 	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	$scope.buttonsVisible = false;
 
@@ -2067,6 +2085,9 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 		if($scope.device.name === "" && $scope.device.onUrl === "")
 			return;
 		$scope.device.mapType = $scope.mapTypeSelected[0];
+		$scope.device.onUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.onDevices));
+		$scope.device.dimUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.dimDevices));
+		$scope.device.offUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.offDevices));
 		bridgeService.addDevice($scope.device).then(
 				function () {
 					$scope.clearDevice();
@@ -2088,6 +2109,10 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 			return;
 		}
 		$scope.device.id = null;
+		$scope.device.mapType = $scope.mapTypeSelected[0];
+		$scope.device.onUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.onDevices));
+		$scope.device.dimUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.dimDevices));
+		$scope.device.offUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.offDevices));
 		bridgeService.addDevice($scope.device).then(
 				function () {
 					$scope.clearDevice();
@@ -2097,7 +2122,50 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 		);
 
 	};
+    $scope.addItemOn = function (anItem) {
+    	if (anItem.item === null || anItem.item === "")
+    		return;
+    	var newitem = { item: anItem.item, type: anItem.type, delay: anItem.delay, count: anItem.count, filterIPs: anItem.filterIPs, httpVerb: anItem.httpVerb, httpBody: anItem.httpBody, httpHeaders: anItem.httpHeaders, contentType: anItem.contentType };
+    	$scope.onDevices.push(newitem);
+    	$scope.newOnItem = [];
+    };
+    $scope.removeItemOn = function (anItem) {
+    	for(var i = $scope.onDevices.length - 1; i >= 0; i--) {
+    	    if($scope.onDevices[i].item === anItem.item && $scope.onDevices[i].type === anItem.type) {
+    	    	$scope.onDevices.splice(i, 1);
+    	    }
+    	}    	
+    };
 
+    $scope.addItemDim = function (anItem) {
+    	if (anItem.item === null || anItem.item === "")
+    		return;
+    	var newitem = { item: anItem.item, type: anItem.type, delay: anItem.delay, count: anItem.count, filterIPs: anItem.filterIPs, httpVerb: anItem.httpVerb, httpBody: anItem.httpBody, httpHeaders: anItem.httpHeaders, contentType: anItem.contentType };
+    	$scope.dimDevices.push(newitem);
+    	$scope.newDimItem = [];
+    };
+    $scope.removeItemDim = function (anItem) {
+    	for(var i = $scope.dimDevices.length - 1; i >= 0; i--) {
+    	    if($scope.dimDevices[i].item === anItem.item && $scope.dimDevices[i].type === anItem.type) {
+    	    	$scope.dimDevices.splice(i, 1);
+    	    }
+    	}    	
+    };
+
+    $scope.addItemOff = function (anItem) {
+    	if (anItem.item === null || anItem.item === "")
+    		return;
+    	var newitem = { item: anItem.item, type: anItem.type, delay: anItem.delay, count: anItem.count, filterIPs: anItem.filterIPs, httpVerb: anItem.httpVerb, httpBody: anItem.httpBody, httpHeaders: anItem.httpHeaders, contentType: anItem.contentType };
+    	$scope.offDevices.push(newitem);
+    	$scope.newOffItem = [];
+    };
+    $scope.removeItemOff = function (anItem) {
+    	for(var i = $scope.offDevices.length - 1; i >= 0; i--) {
+    	    if($scope.offDevices[i].item === anItem.item && $scope.offDevices[i].type === anItem.type) {
+    	    	$scope.offDevices.splice(i, 1);
+    	    }
+    	}    	
+    };
 });
 
 app.filter('availableHarmonyActivityId', function(bridgeService) {

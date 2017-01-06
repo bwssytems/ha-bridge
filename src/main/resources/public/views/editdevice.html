@@ -33,32 +33,35 @@
 			point device.</p>
 		<p>When copying, update the name and select the "Add Bridge
 			Device" Button.</p>
-	</div>
-	<form class="form-horizontal">
-		<div class="form-group">
-			<label class="col-xs-12 col-sm-2 control-label" for="device-name">Name</label>
 
-			<div class="col-xs-8 col-sm-7">
+	<form name="form">
+	<p>
+		<button class="btn btn-primary" ng-click="copyDevice()">Add	Bridge Device</button>
+		<button type="submit" class="col-xs-4 col-sm-2 btn btn-success"	ng-click="addDevice()">Update Bridge Device</button>
+		<button class="btn btn-danger" ng-click="clearDevice()">Clear Device</button>
+	</p>
+	<table class="table table-bordered table-striped table-hover">
+	
+		<tr>
+			<td><label class="col-xs-12 col-sm-2 control-label" for="device-name">Name</label></td>
+
+			<td>
 				<input type="text" class="form-control" id="device-name"
 					ng-model="device.name" placeholder="Device Name">
-			</div>
-			<button type="submit" class="col-xs-4 col-sm-2 btn btn-success"
-				ng-click="addDevice()">Update Bridge Device</button>
-		</div>
-		<div class="form-group">
-			<label class="col-xs-12 col-sm-2 control-label" for="device-target">Target</label>
+			</td>
+		</tr>
+		<tr>
+			<td><label class="col-xs-12 col-sm-2 control-label" for="device-target">Target</label></td>
 
-			<div class="col-xs-8 col-sm-7">
+			<td>
 				<input type="text" class="form-control" id="device-target"
 					ng-model="device.targetDevice" placeholder="default">
-			</div>
-			<button class="btn btn-primary" ng-click="copyDevice()">Add	Bridge Device</button>
-		</div>
-		<div class="form-group">
-			<div class="row">
-				<label class="col-xs-12 col-sm-2 control-label" for="device-type">Device Type</label>
+			</td>
+		</tr>
+		<tr>
+				<td><label class="col-xs-12 col-sm-2 control-label" for="device-type">Device Type</label></td>
 
-				<div class="col-xs-8 col-sm-7">
+				<td>
 					<select name="device-type" id="device-type"
 						ng-model="device.deviceType">
 						<option value="">---Types if needed---</option>
@@ -76,41 +79,36 @@
 						<option value="thermo">Thermo</option>
 						<option value="passthru">Pass Thru</option>
 					</select>
-				</div>
-			</div>
-		</div>
-		<div class="form-group">
-			<div class="row">
-				<label class="col-xs-12 col-sm-2 control-label"
-					for="device-map-type">Map Type</label>
+				</td>
+		</tr>
+		<tr>
+				<td><label class="col-xs-12 col-sm-2 control-label"
+					for="device-map-type">Map Type</label></td>
 
-				<div class="col-xs-8 col-sm-7">
+				<td>
 					<select ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]" ng-model="mapTypeSelected"></select>
-				</div>
-				<button class="btn btn-danger" ng-click="clearDevice()">Clear Device</button>
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="col-xs-12 col-sm-2 control-label" for="device-unique-id">Unique Id (used for Hue responses)</label>
+				</td>
+		</tr>
+		<tr>
+			<td><label class="col-xs-12 col-sm-2 control-label" for="device-unique-id">Unique Id (used for Hue responses)</label></td>
 
-			<div class="col-xs-8 col-sm-7">
+			<td>
 				<input type="text" class="form-control" id="device-unique-id"
 					ng-model="device.uniqueid" placeholder="AA:BB:CC:DD:EE:FF-XX" readonly>
-			</div>
-		</div>
-		<div ng-if="device.mapType" class="form-group">
-			<label class="col-xs-12 col-sm-2 control-label" for="device-map-id">Map ID</label>
+			</td>
+		</tr>
+		<tr>
+			<td><label class="col-xs-12 col-sm-2 control-label" for="device-map-id">Map ID</label></td>
 
-			<div class="col-xs-8 col-sm-7">
+			<td>
 				<input type="text" class="form-control" id="device-map-id"
 					ng-model="device.mapId" placeholder="1111">
-			</div>
-		</div>
-		<div class="form-group">
-			<div class="row">
-				<label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On Items</label>
+			</td>
+		</tr>
+		<tr>
+				<td><label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On Items</label></td>
 
-				<div class="col-xs-8 col-sm-7">
+				<td>
 					<scrollable-table watch="onDevices">
 					<table class="table table-bordered table-striped table-hover">
 						<thead>
@@ -124,22 +122,23 @@
 								<th>Http Body</th>
 								<th>Http Headers</th>
 								<th>Content Type</th>
+								<th>Manage</th>
 							</tr>
 						</thead>
-						<tr ng-repeat="anItem in onDevices">
+						<tr ng-repeat="onItem in onDevices">
 							<td>
-								<select ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]" ng-model="anItem.type"></select>
+								<select ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]" ng-model="onItem.type"></select>
 							</td>
-							<td><textarea rows="1" class="form-control" id="item-target"
-							ng-model="anItem.item" placeholder="Target Desc"></textarea></td>
-							<td><textarea rows="1" class="form-control" id="item-delay"
-							ng-model="anItem.delay" placeholder="Delay millis"></textarea></td>
-							<td><textarea rows="1" class="form-control" id="item-count"
-							ng-model="anItem.count" placeholder="Delay millis"></textarea></td>
-							<td><textarea rows="1" class="form-control" id="item-filterIPs"
-							ng-model="anItem.filterIPs" placeholder="Delay millis"></textarea></td>
+							<td><textarea rows="1" cols="20" class="form-control" id="item-target"
+							ng-model="onItem.item" placeholder="The Call"></textarea></td>
+							<td><textarea rows="1" cols="4" class="form-control" id="item-delay"
+							ng-model="onItem.delay" placeholder="millis"></textarea></td>
+							<td><textarea rows="1" cols="2" class="form-control" id="item-count"
+							ng-model="onItem.count" placeholder="number"></textarea></td>
+							<td><textarea rows="1" cols="16"class="form-control" id="item-filterIPs"
+							ng-model="onItem.filterIPs" placeholder="restrict IPs"></textarea></td>
 							<td>
-								<select name="item-http-verb" id="item-http-verb" ng-model="anItem.httpVerb">
+								<select name="item-http-verb" id="item-http-verb" ng-model="onItem.httpVerb">
 									<option value="">---Please select---</option>
 									<!-- not selected / blank option -->
 									<option value="GET">GET</option>
@@ -147,13 +146,13 @@
 									<option value="POST">POST</option>
 								</select>
 							</td>
-							<td><textarea rows="1" class="form-control" id="item-httpBody"
-							ng-model="anItem.httpBody" placeholder="Delay millis"></textarea></td>
-							<td><textarea rows="1" class="form-control" id="item-httpHeaders"
-							ng-model="anItem.httpHeaders" placeholder="Delay millis"></textarea></td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-httpBody"
+							ng-model="onItem.httpBody" placeholder="body args"></textarea></td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-httpHeaders"
+							ng-model="onItem.httpHeaders" placeholder="format like: [{&quot;name&quot;:&quot;A name&quot;,&quot;value&quot;:&quot;a value&quot;}]"></textarea></td>
 							<td>
 								<select name="item-content-type" id="item-content-type"
-									ng-model="item.contentType">
+									ng-model="onItem.contentType">
 									<option value="">---Please select---</option>
 									<!-- not selected / blank option -->
 									<option value="application/atom+xml">application/atom+xml</option>
@@ -171,49 +170,315 @@
 									<option value="*/*">*/*</option>
 								</select>
 							</td>
+							<td><button class="btn btn-danger" type="submit"
+									ng-click="removeItemOn(onItem)">Del</button></td>
+						</tr>
+						<tr>
+							<td>
+								<select ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]" ng-model="newOnItem.type"></select>
+							</td>
+							<td><textarea rows="1" cols="20" class="form-control" id="item-target"
+							ng-model="newOnItem.item" placeholder="The Call"></textarea></td>
+							<td><textarea rows="1" cols="4" class="form-control" id="item-delay"
+							ng-model="newOnItem.delay" placeholder="millis"></textarea></td>
+							<td><textarea rows="1" cols="2" class="form-control" id="item-count"
+							ng-model="newOnItem.count" placeholder="number"></textarea></td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-filterIPs"
+							ng-model="newOnItem.filterIPs" placeholder="restrict IPs"></textarea></td>
+							<td>
+								<select name="item-http-verb" id="item-http-verb" ng-model="newOnItem.httpVerb">
+									<option value="">---Please select---</option>
+									<!-- not selected / blank option -->
+									<option value="GET">GET</option>
+									<option value="PUT">PUT</option>
+									<option value="POST">POST</option>
+								</select>
+							</td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-httpBody"
+							ng-model="newOnItem.httpBody" placeholder="body args"></textarea></td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-httpHeaders"
+							ng-model="newOnItem.httpHeaders" placeholder="format like: [{&quot;name&quot;:&quot;A name&quot;,&quot;value&quot;:&quot;a value&quot;}]"></textarea></td>
+							<td>
+								<select name="item-content-type" id="item-content-type"
+									ng-model="newOnItem.contentType">
+									<option value="">---Please select---</option>
+									<!-- not selected / blank option -->
+									<option value="application/atom+xml">application/atom+xml</option>
+									<option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+									<option value="application/json">application/json</option>
+									<option value="application/octet-stream">application/octet-stream</option>
+									<option value="application/svg+xml">application/svg+xml</option>
+									<option value="application/xhtml+xml">application/xhtml+xml</option>
+									<option value="application/xml">application/xml</option>
+									<option value="*">*</option>
+									<option value="multipart/form-data">multipart/form-data</option>
+									<option value="text/html">text/html</option>
+									<option value="text/plain">text/plain</option>
+									<option value="text/xml">text/xml</option>
+									<option value="*/*">*/*</option>
+								</select>
+							</td>
+							<td><button class="btn btn-success" type="submit"
+									ng-click="addItemOn(newOnItem)">Add</button></td>
 						</tr>
 					</table>
 					</scrollable-table>
-				</div>
-			</div>
-		</div>
-		<div class="form-group">
-			<div class="row">
-				<label class="col-xs-12 col-sm-2 control-label" for="device-dim-url">Dim Items</label>
+				</td>
+		</tr>
+		<tr>
+				<td><label class="col-xs-12 col-sm-2 control-label" for="device-dim-url">Dim Items</label></td>
 
-				<div class="col-xs-8 col-sm-7">
-					<textarea rows="3" class="form-control" id="device-dim-url"
-						ng-model="device.dimUrl" placeholder="URL to dim device"></textarea>
-				</div>
-			</div>
-		</div>
-		<div class="form-group">
-			<div class="row">
-				<label class="col-xs-12 col-sm-2 control-label" for="device-off-url">Off Items</label>
+				<td>
+					<scrollable-table watch="dimDevices">
+					<table class="table table-bordered table-striped table-hover">
+						<thead>
+							<tr>
+								<th>Type</th>
+								<th>Target Item</th>
+								<th>Delay</th>
+								<th>Count</th>
+								<th>Filter IPs</th>
+								<th>Http Verb</th>
+								<th>Http Body</th>
+								<th>Http Headers</th>
+								<th>Content Type</th>
+								<th>Manage</th>
+							</tr>
+						</thead>
+						<tr ng-repeat="dimItem in dimDevices">
+							<td>
+								<select ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]" ng-model="dimItem.type"></select>
+							</td>
+							<td><textarea rows="1" cols="20" class="form-control" id="item-target"
+							ng-model="dimItem.item" placeholder="The Call"></textarea></td>
+							<td><textarea rows="1" cols="4" class="form-control" id="item-delay"
+							ng-model="dimItem.delay" placeholder="millis"></textarea></td>
+							<td><textarea rows="1" cols="2" class="form-control" id="item-count"
+							ng-model="dimItem.count" placeholder="number"></textarea></td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-filterIPs"
+							ng-model="dimItem.filterIPs" placeholder="restrict IPs"></textarea></td>
+							<td>
+								<select name="item-http-verb" id="item-http-verb" ng-model="dimItem.httpVerb">
+									<option value="">---Please select---</option>
+									<!-- not selected / blank option -->
+									<option value="GET">GET</option>
+									<option value="PUT">PUT</option>
+									<option value="POST">POST</option>
+								</select>
+							</td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-httpBody"
+							ng-model="dimItem.httpBody" placeholder="body args"></textarea></td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-httpHeaders"
+							ng-model="dimItem.httpHeaders" placeholder="format like: [{&quot;name&quot;:&quot;A name&quot;,&quot;value&quot;:&quot;a value&quot;}]"></textarea></td>
+							<td>
+								<select name="item-content-type" id="item-content-type"
+									ng-model="dimItem.contentType">
+									<option value="">---Please select---</option>
+									<!-- not selected / blank option -->
+									<option value="application/atom+xml">application/atom+xml</option>
+									<option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+									<option value="application/json">application/json</option>
+									<option value="application/octet-stream">application/octet-stream</option>
+									<option value="application/svg+xml">application/svg+xml</option>
+									<option value="application/xhtml+xml">application/xhtml+xml</option>
+									<option value="application/xml">application/xml</option>
+									<option value="*">*</option>
+									<option value="multipart/form-data">multipart/form-data</option>
+									<option value="text/html">text/html</option>
+									<option value="text/plain">text/plain</option>
+									<option value="text/xml">text/xml</option>
+									<option value="*/*">*/*</option>
+								</select>
+							</td>
+							<td><button class="btn btn-danger" type="submit"
+									ng-click="removeItemDim(dimItem)">Del</button></td>
+						</tr>
+						<tr>
+							<td>
+								<select ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]" ng-model="newDimItem.type"></select>
+							</td>
+							<td><textarea rows="1" cols="20" class="form-control" id="item-target"
+							ng-model="newDimItem.item" placeholder="The Call"></textarea></td>
+							<td><textarea rows="1" cols="4" class="form-control" id="item-delay"
+							ng-model="newDimItem.delay" placeholder="millis"></textarea></td>
+							<td><textarea rows="1" cols="2" class="form-control" id="item-count"
+							ng-model="newDimItem.count" placeholder="number"></textarea></td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-filterIPs"
+							ng-model="newDimItem.filterIPs" placeholder="restrict IPs"></textarea></td>
+							<td>
+								<select name="item-http-verb" id="item-http-verb" ng-model="newDimItem.httpVerb">
+									<option value="">---Please select---</option>
+									<!-- not selected / blank option -->
+									<option value="GET">GET</option>
+									<option value="PUT">PUT</option>
+									<option value="POST">POST</option>
+								</select>
+							</td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-httpBody"
+							ng-model="newDimItem.httpBody" placeholder="body args"></textarea></td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-httpHeaders"
+							ng-model="newDimItem.httpHeaders" placeholder="format like: [{&quot;name&quot;:&quot;A name&quot;,&quot;value&quot;:&quot;a value&quot;}]"></textarea></td>
+							<td>
+								<select name="item-content-type" id="item-content-type"
+									ng-model="newDimItem.contentType">
+									<option value="">---Please select---</option>
+									<!-- not selected / blank option -->
+									<option value="application/atom+xml">application/atom+xml</option>
+									<option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+									<option value="application/json">application/json</option>
+									<option value="application/octet-stream">application/octet-stream</option>
+									<option value="application/svg+xml">application/svg+xml</option>
+									<option value="application/xhtml+xml">application/xhtml+xml</option>
+									<option value="application/xml">application/xml</option>
+									<option value="*">*</option>
+									<option value="multipart/form-data">multipart/form-data</option>
+									<option value="text/html">text/html</option>
+									<option value="text/plain">text/plain</option>
+									<option value="text/xml">text/xml</option>
+									<option value="*/*">*/*</option>
+								</select>
+							</td>
+							<td><button class="btn btn-success" type="submit"
+									ng-click="addItemDim(newDimItem)">Add</button></td>
+						</tr>
+					</table>
+					</scrollable-table>
+				</td>
+		</tr>
+		<tr>
+				<td><label class="col-xs-12 col-sm-2 control-label" for="device-off-url">Off Items</label></td>
 
-				<div class="col-xs-8 col-sm-7">
-					<textarea rows="3" class="form-control" id="device-off-url"
-						ng-model="device.offUrl" placeholder="URL to turn device off"></textarea>
-				</div>
-			</div>
-		</div>
-		<div class="form-group">
-			<div class="row">
-				<label class="col-xs-12 col-sm-2 control-label" for="device-headers">HTTP Headers</label>
+				<td>
+					<scrollable-table watch="offDevices">
+					<table class="table table-bordered table-striped table-hover">
+						<thead>
+							<tr>
+								<th>Type</th>
+								<th>Target Item</th>
+								<th>Delay</th>
+								<th>Count</th>
+								<th>Filter IPs</th>
+								<th>Http Verb</th>
+								<th>Http Body</th>
+								<th>Http Headers</th>
+								<th>Content Type</th>
+								<th>Manage</th>
+							</tr>
+						</thead>
+						<tr ng-repeat="offItem in offDevices">
+							<td>
+								<select ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]" ng-model="offItem.type"></select>
+							</td>
+							<td><textarea rows="1" cols="20" class="form-control" id="item-target"
+							ng-model="offItem.item" placeholder="The Call"></textarea></td>
+							<td><textarea rows="1" cols="4" class="form-control" id="item-delay"
+							ng-model="offItem.delay" placeholder="millis"></textarea></td>
+							<td><textarea rows="1" cols="2" class="form-control" id="item-count"
+							ng-model="offItem.count" placeholder="number"></textarea></td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-filterIPs"
+							ng-model="offItem.filterIPs" placeholder="restrict IPs"></textarea></td>
+							<td>
+								<select name="item-http-verb" id="item-http-verb" ng-model="offItem.httpVerb">
+									<option value="">---Please select---</option>
+									<!-- not selected / blank option -->
+									<option value="GET">GET</option>
+									<option value="PUT">PUT</option>
+									<option value="POST">POST</option>
+								</select>
+							</td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-httpBody"
+							ng-model="offItem.httpBody" placeholder="body args"></textarea></td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-httpHeaders"
+							ng-model="offItem.httpHeaders" placeholder="format like: [{&quot;name&quot;:&quot;A name&quot;,&quot;value&quot;:&quot;a value&quot;}]"></textarea></td>
+							<td>
+								<select name="item-content-type" id="item-content-type"
+									ng-model="offItem.contentType">
+									<option value="">---Please select---</option>
+									<!-- not selected / blank option -->
+									<option value="application/atom+xml">application/atom+xml</option>
+									<option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+									<option value="application/json">application/json</option>
+									<option value="application/octet-stream">application/octet-stream</option>
+									<option value="application/svg+xml">application/svg+xml</option>
+									<option value="application/xhtml+xml">application/xhtml+xml</option>
+									<option value="application/xml">application/xml</option>
+									<option value="*">*</option>
+									<option value="multipart/form-data">multipart/form-data</option>
+									<option value="text/html">text/html</option>
+									<option value="text/plain">text/plain</option>
+									<option value="text/xml">text/xml</option>
+									<option value="*/*">*/*</option>
+								</select>
+							</td>
+							<td><button class="btn btn-danger" type="submit"
+									ng-click="removeItemOff(offItem)">Del</button></td>
+						</tr>
+						<tr>
+							<td>
+								<select ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]" ng-model="newOffItem.type"></select>
+							</td>
+							<td><textarea rows="1" cols="20" class="form-control" id="item-target"
+							ng-model="newOffItem.item" placeholder="The Call"></textarea></td>
+							<td><textarea rows="1" cols="4" class="form-control" id="item-delay"
+							ng-model="newOffItem.delay" placeholder="millis"></textarea></td>
+							<td><textarea rows="1" cols="2" class="form-control" id="item-count"
+							ng-model="newOffItem.count" placeholder="number"></textarea></td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-filterIPs"
+							ng-model="newOffItem.filterIPs" placeholder="restrict IPs"></textarea></td>
+							<td>
+								<select name="item-http-verb" id="item-http-verb" ng-model="newOffItem.httpVerb">
+									<option value="">---Please select---</option>
+									<!-- not selected / blank option -->
+									<option value="GET">GET</option>
+									<option value="PUT">PUT</option>
+									<option value="POST">POST</option>
+								</select>
+							</td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-httpBody"
+							ng-model="newOffItem.httpBody" placeholder="body args"></textarea></td>
+							<td><textarea rows="1" cols="16" class="form-control" id="item-httpHeaders"
+							ng-model="newOffItem.httpHeaders" placeholder="format like: [{&quot;name&quot;:&quot;A name&quot;,&quot;value&quot;:&quot;a value&quot;}]"></textarea></td>
+							<td>
+								<select name="item-content-type" id="item-content-type"
+									ng-model="newOffItem.contentType">
+									<option value="">---Please select---</option>
+									<!-- not selected / blank option -->
+									<option value="application/atom+xml">application/atom+xml</option>
+									<option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+									<option value="application/json">application/json</option>
+									<option value="application/octet-stream">application/octet-stream</option>
+									<option value="application/svg+xml">application/svg+xml</option>
+									<option value="application/xhtml+xml">application/xhtml+xml</option>
+									<option value="application/xml">application/xml</option>
+									<option value="*">*</option>
+									<option value="multipart/form-data">multipart/form-data</option>
+									<option value="text/html">text/html</option>
+									<option value="text/plain">text/plain</option>
+									<option value="text/xml">text/xml</option>
+									<option value="*/*">*/*</option>
+								</select>
+							</td>
+							<td><button class="btn btn-success" type="submit"
+									ng-click="addItemOff(newOffItem)">Add</button></td>
+						</tr>
+					</table>
+					</scrollable-table>
+				</td>
+		</tr>
+		<tr>
+				<td><label class="col-xs-12 col-sm-2 control-label" for="device-headers">HTTP Headers</label></td>
 
-				<div class="col-xs-8 col-sm-7">
+				<td>
 					<textarea rows="3" class="form-control" id="device-headers"
 						ng-model="device.headers"
 						placeholder="format like: [{&quot;name&quot;:&quot;A name&quot;,&quot;value&quot;:&quot;a value&quot;}]"></textarea>
-				</div>
-			</div>
-		</div>
-		<div class="form-group">
-			<div class="row">
-				<label class="col-xs-12 col-sm-2 control-label"
-					for="device-http-verb">Http Verb</label>
+				</td>
+		</tr>
+		<tr>
+				<td><label class="col-xs-12 col-sm-2 control-label"
+					for="device-http-verb">Http Verb</label></td>
 
-				<div class="col-xs-8 col-sm-7">
+				<td>
 					<select name="device-http-verb" id="device-http-verb"
 						ng-model="device.httpVerb">
 						<option value="">---Please select---</option>
@@ -222,15 +487,13 @@
 						<option value="PUT">PUT</option>
 						<option value="POST">POST</option>
 					</select>
-				</div>
-			</div>
-		</div>
-		<div ng-if="device.httpVerb" class="form-group">
-			<div class="row">
-				<label class="col-xs-12 col-sm-2 control-label"
-					for="device-content-type">Content Type</label>
+				</td>
+		</tr>
+		<tr>
+				<td><label class="col-xs-12 col-sm-2 control-label"
+					for="device-content-type">Content Type</label></td>
 
-				<div class="col-xs-8 col-sm-7">
+				<td>
 					<select name="device-content-type" id="device-content-type"
 						ng-model="device.contentType">
 						<option value="">---Please select---</option>
@@ -249,47 +512,39 @@
 						<option value="text/xml">text/xml</option>
 						<option value="*/*">*/*</option>
 					</select>
-				</div>
-			</div>
-		</div>
-		<div ng-if="device.httpVerb" class="form-group">
-			<div class="row">
-				<label class="col-xs-12 col-sm-2 control-label"
-					for="device-content-body">Content Body On</label>
+				</td>
+		</tr>
+		<tr>
+					<td><label class="col-xs-12 col-sm-2 control-label"
+					for="device-content-body">Content Body On</label></td>
 
-				<div class="col-xs-8 col-sm-7">
+				<td>
 					<textarea rows="3" class="form-control" id="device-content-body"
 						ng-model="device.contentBody"
 						placeholder="Content Body On for specific GET/PUT/POST type"></textarea>
-				</div>
-				<div class="clearfix visible-xs"></div>
-			</div>
-		</div>
-		<div ng-if="device.httpVerb" class="form-group">
-			<div class="row">
-				<label class="col-xs-12 col-sm-2 control-label"
-					for="device-content-body-dim">Content Body Dim</label>
+				</td>
+		</tr>
+		<tr>
+				<td><label class="col-xs-12 col-sm-2 control-label"
+					for="device-content-body-dim">Content Body Dim</label></td>
 
-				<div class="col-xs-8 col-sm-7">
+				<td>
 					<textarea rows="3" class="form-control" id="device-content-body-dim"
 						ng-model="device.contentBodyDim"
 						placeholder="Content Body Dim for specific GET/PUT/POST type"></textarea>
-				</div>
-				<div class="clearfix visible-xs"></div>
-			</div>
-		</div>
-		<div ng-if="device.httpVerb" class="form-group">
-			<div class="row">
-				<label class="col-xs-12 col-sm-2 control-label"
-					for="device-content-body-off">Content Body Off</label>
+				</td>
+		</tr>
+		<tr>
+				<td><label class="col-xs-12 col-sm-2 control-label"
+					for="device-content-body-off">Content Body Off</label></td>
 
-				<div class="col-xs-8 col-sm-7">
+				<td>
 					<textarea rows="3" class="form-control"
 						id="device-content-body-off" ng-model="device.contentBodyOff"
 						placeholder="Content Body Off for specific GET/PUT/POST type"></textarea>
-				</div>
-				<div class="clearfix visible-xs"></div>
-			</div>
-		</div>
+				</td>
+		</tr>
+	</table>
 	</form>
+	</div>
 </div>
