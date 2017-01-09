@@ -12,7 +12,8 @@ import com.bwssystems.HABridge.util.UDPDatagramSender;
 
 import java.io.IOException;
 import java.net.*;
-
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Enumeration;
 import org.apache.http.conn.util.*;
 
@@ -25,6 +26,9 @@ public class UpnpListener {
 	private boolean strict;
 	private boolean traceupnp;
 	private BridgeControlDescriptor bridgeControl;
+	private String bridgeId;
+	private String bridgeSNUUID;
+	private HuePublicConfig aHueConfig;
 	private String responseTemplate1 = "HTTP/1.1 200 OK\r\n" +
 			"HOST: %s:%s\r\n" +
 			"CACHE-CONTROL: max-age=100\r\n" +
@@ -53,6 +57,16 @@ public class UpnpListener {
 			"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
 			"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 
+	private String notifyTemplate = "NOTIFY * HTTP/1.1\r\n" +
+			"HOST: %s:%s\r\n" +
+			"CACHE-CONTROL: max-age=100\r\n" +
+			"LOCATION: http://%s:%s/description.xml\r\n" +
+			"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" + 
+			"NTS: ssdp:alive\r\n" +
+			"hue-bridgeid: %s\r\n" +
+			"NT: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n" +
+			"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
+
 	public UpnpListener(BridgeSettingsDescriptor theSettings, BridgeControlDescriptor theControl, UDPDatagramSender aUdpDatagramSender) {
 		super();
 		theUDPDatagramSender = aUdpDatagramSender;
@@ -61,6 +75,9 @@ public class UpnpListener {
 		strict = theSettings.isUpnpStrict();
 		traceupnp = theSettings.isTraceupnp();
 		bridgeControl = theControl;
+		aHueConfig = HuePublicConfig.createConfig("temp", responseAddress, HueConstants.HUB_VERSION);
+		bridgeId = aHueConfig.getBridgeid();
+		bridgeSNUUID = aHueConfig.getSNUUIDFromMac();
 	}
 
 	@SuppressWarnings("resource")
@@ -118,6 +135,13 @@ public class UpnpListener {
 		log.info("UPNP Discovery Listener running and ready....");
 		boolean loopControl = true;
 		boolean error = false;
+		try {
+			upnpMulticastSocket.setSoTimeout((int) Configuration.UPNP_NOTIFY_TIMEOUT);
+		} catch (SocketException e1) {
+			log.warn("Could not sent soTimeout on multi-cast socket");
+		}
+		Instant current, previous;
+		previous = Instant.now();
 		while (loopControl) { // trigger shutdown here
 			byte[] buf = new byte[1024];
 			DatagramPacket packet = new DatagramPacket(buf, buf.length);
@@ -131,6 +155,15 @@ public class UpnpListener {
 						log.debug("UpnpListener send upnp exception: ", e);
 					}
 				}
+
+				current = Instant.now();
+				if(ChronoUnit.MILLIS.between(previous, current) > Configuration.UPNP_NOTIFY_TIMEOUT) {
+					sendUpnpNotify(socketAddress.getAddress(), upnpMulticastSocket);
+					previous = Instant.now();
+				}
+
+			} catch (SocketTimeoutException e) {
+				sendUpnpNotify(socketAddress.getAddress(), upnpMulticastSocket);
 			} catch (IOException e) {
 				log.error("UpnpListener encountered an error reading socket. Shutting down", e);
 				error = true;
@@ -198,11 +231,6 @@ public class UpnpListener {
 
 	protected void sendUpnpResponse(InetAddress requester, int sourcePort) throws IOException {
 		String discoveryResponse = null;
-		String bridgeId = null;
-		String bridgeSNUUID = null;
-		HuePublicConfig aHueConfig = HuePublicConfig.createConfig("temp", responseAddress, HueConstants.HUB_VERSION);
-		bridgeId = aHueConfig.getBridgeid();
-		bridgeSNUUID = aHueConfig.getSNUUIDFromMac();
 		discoveryResponse = String.format(responseTemplate1, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID);
 		if(traceupnp) {
 			log.info("Traceupnp: sendUpnpResponse discovery responseTemplate1 is <<<" + discoveryResponse + ">>>");
@@ -226,5 +254,22 @@ public class UpnpListener {
 		else
 			log.debug("sendUpnpResponse discovery responseTemplate3 is <<<" + discoveryResponse + ">>>");
 		theUDPDatagramSender.sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
+	}
+	
+	protected void sendUpnpNotify(InetAddress aSocketAddress, MulticastSocket theUpnpMulticastSocket) {
+		String notifyData = null;
+		log.debug("Sending notify packet for upnp.");
+		notifyData = String.format(notifyTemplate, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
+		if(traceupnp) {
+			log.info("Traceupnp: sendUpnpNotify notifyTemplate is <<<" + notifyData + ">>>");
+		}
+		DatagramPacket notifyPacket = new DatagramPacket(notifyData.getBytes(), notifyData.length(), aSocketAddress, Configuration.UPNP_DISCOVERY_PORT);
+		try {
+			theUpnpMulticastSocket.send(notifyPacket);
+		} catch (IOException e1) {
+			log.warn("UpnpListener encountered an error sending upnp notify packet. IP: " + notifyPacket.getAddress().getHostAddress() + " with message: " + e1.getMessage());
+			log.debug("UpnpListener send upnp notify exception: ", e1);
+		}
+
 	}
 }

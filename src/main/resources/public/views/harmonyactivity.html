@@ -38,9 +38,9 @@
 		<thead>
 			<tr>
 				<th>Row</th>
-				<th sortable-header col="name">Name</th>
-				<th sortable-header col="id">Id</th>
-				<th sortable-header col="hub">Hub</th>
+				<th sortable-header col="label" comparator-fn="comparatorLabel">Name</th>
+				<th sortable-header col="id" comparator-fn="comparatorNumber">Id</th>
+				<th sortable-header col="hub" comparator-fn="comparatorHub">Hub</th>
 				<th>Actions</th>
 			</tr>
 		</thead>

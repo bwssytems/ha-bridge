@@ -12,4 +12,5 @@ public class Configuration {
 	public static final String UPNP_MULTICAST_ADDRESS = "239.255.255.250";
 	public static final String CONFIG_FILE = "data/habridge.config";
 	public static final int NUMBER_OF_LOG_MESSAGES = 512;
+	public static final long UPNP_NOTIFY_TIMEOUT = 20000;
 }

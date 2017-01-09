@@ -55,7 +55,7 @@
 					value="{{selectAll}}"
 					ng-checked="selectAll"
 					ng-click="toggleSelectAll()"> Name</span></th>
-				<th sortable-header col="id">Id</th>
+				<th sortable-header col="id" comparator-fn="comparatorUniqueId">Id</th>
 				<th sortable-header col="category">Category</th>
 				<th sortable-header col="room">Room</th>
 				<th sortable-header col="veraname">Vera</th>

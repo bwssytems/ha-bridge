@@ -132,6 +132,12 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		);
 	};
 
+	this.compareUniqueId = function(r1, r2) {
+		 if (r1.id === r2.id)
+		      return 0;
+		 return parseInt(r1.id) > parseInt(r2.id) ? 1 : -1;
+	};
+
 	this.clearDevice = function () {
 		self.state.device = {};
 		self.state.olddevicename = "";
@@ -151,6 +157,43 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 	this.aContainsB = function (a, b) {
 		return a.indexOf(b) >= 0;
 	}
+
+	this.compareHarmonyNumber = function(r1, r2) {
+		if (r1.device !== undefined) {
+		 if (r1.device.id === r2.device.id)
+		      return 0;
+		 return r1.device.id > r2.device.id ? 1 : -1;
+		}
+		if (r1.activity !== undefined) {
+			 if (r1.activity.id === r2.activity.id)
+			      return 0;
+			 return r1.activity.id > r2.activity.id ? 1 : -1;
+		}
+		return 0;
+	};
+
+	this.compareHarmonyLabel = function(r1, r2) {
+		if (r1.device !== undefined) {
+		 if (r1.device.label === r2.device.label)
+		      return 0;
+		 return r1.device.label > r2.device.label ? 1 : -1;
+		}
+		if (r1.activity !== undefined) {
+			 if (r1.activity.label === r2.activity.label)
+			      return 0;
+			 return r1.activity.label > r2.activity.label ? 1 : -1;
+		}
+		return 0;
+	};
+
+	this.compareHarmonyHub = function(r1, r2) {
+		if (r1.hub !== undefined) {
+		 if (r1.hub === r2.hub)
+		      return 0;
+		 return r1.hub > r2.hub ? 1 : -1;
+		}
+		return 0;
+	};
 
 	this.updateShowVera = function () {
 		this.state.showVera = self.state.settings.veraconfigured;
@@ -961,6 +1004,7 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 	$scope.imgUrl = "glyphicon glyphicon-plus";
 	$scope.visibleBk = false;
 	$scope.imgBkUrl = "glyphicon glyphicon-plus";
+	$scope.comparatorUniqueId = bridgeService.compareUniqueId;
 	$scope.testUrl = function (device, type) {
 		var dialogNeeded = false;
 		if((type === "on" && (bridgeService.aContainsB(device.onUrl, "${intensity.byte}") ||
@@ -1107,6 +1151,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 	bridgeService.viewVeraScenes();
 	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	$scope.buttonsVisible = false;
+	$scope.comparatorUniqueId = bridgeService.compareUniqueId;
 
 	$scope.clearDevice = function () {
 		bridgeService.clearDevice();
@@ -1261,6 +1306,9 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 	bridgeService.viewHarmonyDevices();
 	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	$scope.buttonsVisible = false;
+	$scope.comparatorNumber = bridgeService.compareHarmonyNumber;
+	$scope.comparatorLabel = bridgeService.compareHarmonyLabel;
+	$scope.comparatorHub = bridgeService.compareHarmonyHub;
 
 	$scope.clearDevice = function () {
 		bridgeService.clearDevice();
@@ -2352,7 +2400,7 @@ app.filter('unavailableHalDeviceId', function (bridgeService) {
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType !== null && bridgeService.aContainsB(input[i].mapType, "hal")){
+			if(input[i].mapType !== undefined && input[i].mapType !== null && bridgeService.aContainsB(input[i].mapType, "hal")){
 				out.push(input[i]);
 			}
 		}
@@ -2366,7 +2414,7 @@ app.filter('configuredButtons', function () {
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType === "harmonyButton"){
+			if(input[i].mapType !== undefined && input[i].mapType === "harmonyButton"){
 				out.push(input[i]);
 			}
 		}
@@ -2380,7 +2428,7 @@ app.filter('configuredMqttMsgs', function () {
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType === "mqttMessage"){
+			if(input[i].mapType !== undefined && input[i].mapType === "mqttMessage"){
 				out.push(input[i]);
 			}
 		}
@@ -2408,7 +2456,7 @@ app.filter('unavailableHassDeviceId', function (bridgeService) {
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType !== null && bridgeService.aContainsB(input[i].mapType, "hass")){
+			if(input[i].mapType !== undefined && input[i].mapType !== null && bridgeService.aContainsB(input[i].mapType, "hass")){
 				out.push(input[i]);
 			}
 		}

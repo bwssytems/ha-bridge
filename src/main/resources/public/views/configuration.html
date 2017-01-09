@@ -37,7 +37,7 @@
 		<thead>
 			<tr>
 				<th>Row</th>
-				<th sortable-header col="id">ID</th>
+				<th sortable-header col="id" comparator-fn="comparatorUniqueId">ID</th>
 				<th sortable-header col="name">Name</th>
 				<th sortable-header col="deviceType">Type</th>
 				<th sortable-header col="targetDevice">Target</th>
@@ -72,7 +72,7 @@
 	<div class="panel-heading">
 		<h1 class="panel-title">
 			Bridge Device DB Backup <a ng-click="toggleBk()"><span
-				class={{imgBkUrl}} aria-hidden="true"></a>
+				class={{imgBkUrl}} aria-hidden="true"></span></a>
 		</h1>
 	</div>
 	<div ng-if="visibleBk" class="animate-if" class="panel-body">
