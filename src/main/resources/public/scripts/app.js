@@ -10,9 +10,6 @@ app.config (function ($routeProvider) {
 	}).when ('/logs', {
 		templateUrl: 'views/logs.html',
 		controller: 'LogsController'		
-	}).when ('/editor', {
-		templateUrl: 'views/editor.html',
-		controller: 'EditController'		
 	}).when ('/editdevice', {
 		templateUrl: 'views/editdevice.html',
 		controller: 'EditController'		
@@ -2079,6 +2076,8 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 	$scope.clearDevice = function () {
 		bridgeService.clearDevice();
 		$scope.onDevices = null;
+		$scope.dimDevices = null;
+		$scope.offDevices = null;
 	};
 
 	$scope.addDevice = function () {
