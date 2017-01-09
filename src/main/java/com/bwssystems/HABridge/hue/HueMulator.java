@@ -273,8 +273,11 @@ public class HueMulator {
 			} else {
 				responseString = responseString + "false}}";
 			}
-			if (deviceState != null)
+			if (deviceState != null) {
 				deviceState.setOn(stateChanges.isOn());
+				if(!deviceState.isOn() && deviceState.getBri() == 255)
+					deviceState.setBri(0);
+			}
 			notFirstChange = true;
 		}
 

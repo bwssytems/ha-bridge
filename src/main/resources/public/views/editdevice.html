@@ -1,25 +1,25 @@
 <ul class="nav nav-pills" role="tablist">
-	<li role="presentation"><a href="#">Bridge Devices</a></li>
-	<li role="presentation"><a href="#/system">Bridge Control</a></li>
-	<li role="presentation"><a href="#/logs">Logs</a></li>
+	<li role="presentation"><a href="#!/">Bridge Devices</a></li>
+	<li role="presentation"><a href="#!/system">Bridge Control</a></li>
+	<li role="presentation"><a href="#!/logs">Logs</a></li>
 	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#/veradevices">Vera Devices</a></li>
+		href="#!/veradevices">Vera Devices</a></li>
 	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#/verascenes">Vera Scenes</a></li>
+		href="#!/verascenes">Vera Scenes</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
-		href="#/harmonyactivities">Harmony Activities</a></li>
+		href="#!/harmonyactivities">Harmony Activities</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
-		href="#/harmonydevices">Harmony Devices</a></li>
-	<li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
+		href="#!/harmonydevices">Harmony Devices</a></li>
+	<li ng-if="bridge.showNest" role="presentation"><a href="#!/nest">Nest</a></li>
 	<li ng-if="bridge.showHue" role="presentation"><a
-		href="#/huedevices">Hue Devices</a></li>
+		href="#!/huedevices">Hue Devices</a></li>
 	<li ng-if="bridge.showHal" role="presentation"><a
-		href="#/haldevices">HAL Devices</a></li>
+		href="#!/haldevices">HAL Devices</a></li>
 	<li ng-if="bridge.showMqtt" role="presentation"><a
-		href="#/mqttmessages">MQTT Messages</a></li>
+		href="#!/mqttmessages">MQTT Messages</a></li>
 	<li ng-if="bridge.showHass" role="presentation"><a
-		href="#/hassdevices">HomeAssistant Devices</a></li>
-	<li role="presentation" class="active"><a href="#/editdevice">Add/Edit</a></li>
+		href="#!/hassdevices">HomeAssistant Devices</a></li>
+	<li role="presentation" class="active"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
 <div class="panel panel-default">
@@ -46,32 +46,29 @@
 
 		<form name="form">
 			<p>
-				<button class="btn btn-primary" ng-click="copyDevice()">Add
+				<button class="btn btn-primary" ng-click="editDevice(true)">Add
 					Bridge Device</button>
 				<button type="submit" class="col-xs-4 col-sm-2 btn btn-success"
-					ng-click="addDevice()">Update Bridge Device</button>
+					ng-click="editDevice(false)">Update Bridge Device</button>
 				<button class="btn btn-danger" ng-click="clearDevice()">Clear
 					Device</button>
 			</p>
 			<table class="table table-bordered table-striped table-hover">
 
 				<tr>
-					<td><label class="col-xs-12 col-sm-2 control-label"
-						for="device-name">Name</label></td>
+					<td><label>Name</label></td>
 
 					<td><input type="text" class="form-control" id="device-name"
 						ng-model="device.name" placeholder="Device Name"></td>
 				</tr>
 				<tr>
-					<td><label class="col-xs-12 col-sm-2 control-label"
-						for="device-target">Target</label></td>
+					<td><label>Target</label></td>
 
 					<td><input type="text" class="form-control" id="device-target"
 						ng-model="device.targetDevice" placeholder="default"></td>
 				</tr>
 				<tr>
-					<td><label class="col-xs-12 col-sm-2 control-label"
-						for="device-type">Device Type</label></td>
+					<td><label>Device Type (Informational)</label></td>
 
 					<td><select name="device-type" id="device-type"
 						ng-model="device.deviceType">
@@ -92,31 +89,27 @@
 					</select></td>
 				</tr>
 				<tr>
-					<td><label class="col-xs-12 col-sm-2 control-label"
-						for="device-map-type">Map Type</label></td>
+					<td><label>Map Type (Legacy)</label></td>
 
 					<td><select
 						ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]"
 						ng-model="mapTypeSelected"></select></td>
 				</tr>
 				<tr>
-					<td><label class="col-xs-12 col-sm-2 control-label"
-						for="device-unique-id">Unique Id (used for Hue responses)</label></td>
+					<td><label>Unique Id (used for Hue responses)</label></td>
 
 					<td><input type="text" class="form-control"
 						id="device-unique-id" ng-model="device.uniqueid"
 						placeholder="AA:BB:CC:DD:EE:FF-XX" readonly></td>
 				</tr>
 				<tr>
-					<td><label class="col-xs-12 col-sm-2 control-label"
-						for="device-map-id">Map ID</label></td>
+					<td><label>Map ID</label></td>
 
 					<td><input type="text" class="form-control" id="device-map-id"
 						ng-model="device.mapId" placeholder="1111"></td>
 				</tr>
 				<tr>
-					<td><label class="col-xs-12 col-sm-2 control-label"
-						for="device-on-url">On Items</label></td>
+					<td><label>On Items</label></td>
 
 					<td><scrollable-table watch="onDevices">
 						<table class="table table-bordered table-striped table-hover">
@@ -237,8 +230,7 @@
 						</scrollable-table></td>
 				</tr>
 				<tr>
-					<td><label class="col-xs-12 col-sm-2 control-label"
-						for="device-dim-url">Dim Items</label></td>
+					<td><label>Dim Items</label></td>
 
 					<td><scrollable-table watch="dimDevices">
 						<table class="table table-bordered table-striped table-hover">
@@ -360,8 +352,7 @@
 						</scrollable-table></td>
 				</tr>
 				<tr>
-					<td><label class="col-xs-12 col-sm-2 control-label"
-						for="device-off-url">Off Items</label></td>
+					<td><label>Off Items</label></td>
 
 					<td><scrollable-table watch="offDevices">
 						<table class="table table-bordered table-striped table-hover">
@@ -483,17 +474,21 @@
 						</scrollable-table></td>
 				</tr>
 				<tr>
-					<td><label class="col-xs-12 col-sm-2 control-label"
-						for="device-headers">HTTP Headers</label></td>
+					<td><label>Legacy Fields <a ng-click="toggleButtons()"><span class={{imgButtonsUrl}} aria-hidden="true"></span></a></label>
+					</td>
+					<td>
+					</td>
+				</tr>
+				<tr ng-if="buttonsVisible">
+					<td><label>HTTP Headers</label></td>
 
 					<td><textarea rows="3" class="form-control"
 							id="device-headers" ng-model="device.headers"
 							placeholder="format like: [{&quot;name&quot;:&quot;A name&quot;,&quot;value&quot;:&quot;a value&quot;}]"></textarea>
 					</td>
 				</tr>
-				<tr>
-					<td><label class="col-xs-12 col-sm-2 control-label"
-						for="device-http-verb">Http Verb</label></td>
+				<tr ng-if="buttonsVisible">
+					<td><label>Http Verb</label></td>
 
 					<td><select name="device-http-verb" id="device-http-verb"
 						ng-model="device.httpVerb">
@@ -504,9 +499,8 @@
 							<option value="POST">POST</option>
 					</select></td>
 				</tr>
-				<tr>
-					<td><label class="col-xs-12 col-sm-2 control-label"
-						for="device-content-type">Content Type</label></td>
+				<tr ng-if="buttonsVisible">
+					<td><label>Content Type</label></td>
 
 					<td><select name="device-content-type"
 						id="device-content-type" ng-model="device.contentType">
@@ -527,27 +521,24 @@
 							<option value="*/*">*/*</option>
 					</select></td>
 				</tr>
-				<tr>
-					<td><label class="col-xs-12 col-sm-2 control-label"
-						for="device-content-body">Content Body On</label></td>
+				<tr ng-if="buttonsVisible">
+					<td><label>Content Body On</label></td>
 
 					<td><textarea rows="3" class="form-control"
 							id="device-content-body" ng-model="device.contentBody"
 							placeholder="Content Body On for specific GET/PUT/POST type"></textarea>
 					</td>
 				</tr>
-				<tr>
-					<td><label class="col-xs-12 col-sm-2 control-label"
-						for="device-content-body-dim">Content Body Dim</label></td>
+				<tr ng-if="buttonsVisible">
+					<td><label>Content Body Dim</label></td>
 
 					<td><textarea rows="3" class="form-control"
 							id="device-content-body-dim" ng-model="device.contentBodyDim"
 							placeholder="Content Body Dim for specific GET/PUT/POST type"></textarea>
 					</td>
 				</tr>
-				<tr>
-					<td><label class="col-xs-12 col-sm-2 control-label"
-						for="device-content-body-off">Content Body Off</label></td>
+				<tr ng-if="buttonsVisible">
+					<td><label>Content Body Off</label></td>
 
 					<td><textarea rows="3" class="form-control"
 							id="device-content-body-off" ng-model="device.contentBodyOff"
