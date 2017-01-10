@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>4beta3.1</version>
+	<version>4beta3.2</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>com.github.bwssytems</groupId>
             <artifactId>nest-controller</artifactId>
-            <version>1.0.12</version>
+            <version>1.0.13</version>
 		    <exclusions>
 		       <exclusion> 
 		          <groupId>org.slf4j</groupId>

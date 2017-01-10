@@ -45,7 +45,7 @@
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="harmonyactivity in bridge.harmonyactivities | availableHarmonyActivityId">
+			ng-repeat="harmonyactivity in bridge.harmonyactivities">
 			<td>{{$index+1}}</td>
 			<td>{{harmonyactivity.activity.label}}</td>
 			<td>{{harmonyactivity.activity.id}}</td>
@@ -73,19 +73,25 @@
 			<tr>
 				<th>Row</th>
 				<th sortable-header col="name">Name</th>
-				<th sortable-header col="id">Id</th>
-				<th sortable-header col="hub">Hub</th>
+				<th sortable-header col="targetDevice">Hub</th>
+				<th>Map Id</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="harmonyactivity in bridge.harmonyactivities | unavailableHarmonyActivityId">
+			ng-repeat="device in bridge.devices | configuredHarmonyActivities">
 			<td>{{$index+1}}</td>
-			<td>{{harmonyactivity.activity.label}}</td>
-			<td>{{harmonyactivity.activity.id}}</td>
-			<td>{{harmonyactivity.hub}}</td>
-			<td><button class="btn btn-danger" type="submit"
-					ng-click="deleteDeviceByMapId(harmonyactivity.activity.id, 'harmonyActivity')">Delete</button></td>
+			<td>{{device.name}}</td>
+			<td>{{device.targetDevice}}</td>
+			<td>{{device.mapId}}</td>
+			<td>
+				<p>
+					<button class="btn btn-warning" type="submit"
+						ng-click="editDevice(device)">Edit</button>
+					<button class="btn btn-danger" type="submit"
+						ng-click="deleteDevice(device)">Delete</button>
+				</p>
+			</td>
 		</tr>
 	</table>
 	</scrollable-table>

@@ -51,7 +51,7 @@
 				<th>Actions</th>
 			</tr>
 		</thead>
-		<tr ng-repeat="huedevice in bridge.huedevices | availableHueDeviceId">
+		<tr ng-repeat="huedevice in bridge.huedevices">
 			<td>{{$index+1}}</td>
 			<td><input type="checkbox" name="bulk.devices[]"
 				value="{{huedevice.device.uniqueid}}"
@@ -87,20 +87,24 @@
 			<tr>
 				<th>Row</th>
 				<th sortable-header col="name">Name</th>
-				<th sortable-header col="id">Id</th>
-				<th sortable-header col="huename">hue</th>
+				<th sortable-header col="targetDevice">hue</th>
+				<th>Map Id</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="huedevice in bridge.huedevices | unavailableHueDeviceId">
+			ng-repeat="device in bridge.devices | configuredHueItems">
 			<td>{{$index+1}}</td>
-			<td>{{huedevice.device.name}}</td>
-			<td>{{huedevice.device.uniqueid}}</td>
-			<td>{{huedevice.huename}}</td>
+			<td>{{device.name}}</td>
+			<td>{{device.targetDevice}}</td>
+			<td>{{device.mapId}}</td>
 			<td>
-				<button class="btn btn-danger" type="submit"
-					ng-click="deleteDeviceByMapId(huedevice.device.uniqueid, 'hueDevice')">Delete</button>
+				<p>
+					<button class="btn btn-warning" type="submit"
+						ng-click="editDevice(device)">Edit</button>
+					<button class="btn btn-danger" type="submit"
+						ng-click="deleteDevice(device)">Delete</button>
+				</p>
 			</td>
 		</tr>
 	</table>

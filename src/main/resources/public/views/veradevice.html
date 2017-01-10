@@ -63,7 +63,7 @@
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="veradevice in bridge.veradevices | availableVeraDeviceId">
+			ng-repeat="veradevice in bridge.veradevices">
 			<td>{{$index+1}}</td>
 			<td><input type="checkbox" name="bulk.devices[]"
 				value="{{veradevice.id}}"
@@ -95,30 +95,30 @@
 				class={{imgButtonsUrl}} aria-hidden="true"></span></a></a>
 		</h2>
 	</div>
-	<scrollable-table ng-if="buttonsVisible" watch="bridge.veradevices">
+	<scrollable-table ng-if="buttonsVisible" watch="bridge.devices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<th>Row</th>
 				<th sortable-header col="name">Name</th>
-				<th sortable-header col="id">Id</th>
-				<th sortable-header col="category">Category</th>
-				<th sortable-header col="room">Room</th>
-				<th sortable-header col="veraname">Vera</th>
+				<th sortable-header col="targetDevice">Vera</th>
+				<th>Map Id</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="veradevice in bridge.veradevices | unavailableVeraDeviceId">
+			ng-repeat="device in bridge.devices | configuredVeraDevices">
 			<td>{{$index+1}}</td>
-			<td>{{veradevice.name}}</td>
-			<td>{{veradevice.id}}</td>
-			<td>{{veradevice.category}}</td>
-			<td>{{veradevice.room}}</td>
-			<td>{{veradevice.veraname}}</td>
+			<td>{{device.name}}</td>
+			<td>{{device.targetDevice}}</td>
+			<td>{{device.mapId}}</td>
 			<td>
-				<button class="btn btn-danger" type="submit"
-					ng-click="deleteDeviceByMapId(veradevice.id, 'veraDevice')">Delete</button>
+				<p>
+					<button class="btn btn-warning" type="submit"
+						ng-click="editDevice(device)">Edit</button>
+					<button class="btn btn-danger" type="submit"
+						ng-click="deleteDevice(device)">Delete</button>
+				</p>
 			</td>
 		</tr>
 	</table>

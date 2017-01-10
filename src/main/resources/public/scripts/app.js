@@ -428,6 +428,8 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 			    s = newDevices[i];
 				if (s.type !== null)
 					s.type = self.getMapType(s.type)
+				if (angular.isObject(s.item))
+					s.item = angular.toJson(s.item)
 			  }
 		}
 		return newDevices
@@ -692,13 +694,6 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		);
 	};
 
-	this.deleteDeviceByMapId = function (id, type) {
-		for (var i = 0; i < this.state.devices.length; i++) {
-			if (this.state.devices[i].mapId === id && this.aContainsB(this.state.devices[i].mapType, type))
-				return self.deleteDevice(this.state.devices[i].id);
-		}
-	};
-
 	this.editDevice = function (device) {
 		self.state.device = device;
 		self.state.olddevicename = device.name;
@@ -728,7 +723,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 						return;
 					}
 						
-					self.displaySuccess("Request Exceuted: " + msgDescription);
+					self.displaySuccess("Request Executed: " + msgDescription);
 				},
 				function (error) {
 					self.displayWarn("Request Error, Pleae look in your habridge log: ", error);
@@ -1007,13 +1002,9 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 	$scope.comparatorUniqueId = bridgeService.compareUniqueId;
 	$scope.testUrl = function (device, type) {
 		var dialogNeeded = false;
-		if((type === "on" && (bridgeService.aContainsB(device.onUrl, "${intensity.byte}") ||
-				bridgeService.aContainsB(device.onUrl, "${intensity.percent}") ||
-				bridgeService.aContainsB(device.onUrl, "${intensity.math(")) ||
-				(type === "off" && (bridgeService.aContainsB(device.offUrl, "${intensity.byte}") ||
-				bridgeService.aContainsB(device.offUrl, "${intensity.percent}") ||
-				bridgeService.aContainsB(device.offUrl, "${intensity.math(")))   ||
-				(type === "dim"))) {
+		if ((type === "on" && device.onUrl !== undefined && bridgeService.aContainsB(device.onUrl, "${intensity")) ||
+				(type === "off" && device.offUrl !== undefined && bridgeService.aContainsB(device.offUrl, "${intensity")) ||
+				(type === "dim" && device.dimUrl !== undefined)) {
 			$scope.bridge.device = device;
 			$scope.bridge.type = type;
 			ngDialog.open({
@@ -1108,35 +1099,6 @@ app.controller('DeleteDialogCtrl', function ($scope, bridgeService, ngDialog) {
 		bridgeService.viewDevices();
 		$scope.bridge.device = null;
 		$scope.bridge.type = "";
-	};
-});
-
-app.controller('DeleteMapandIdDialogCtrl', function ($scope, bridgeService, ngDialog) {
-	$scope.bridge = bridgeService.state;
-	$scope.mapandid = $scope.bridge.mapandid;
-	$scope.deleteMapandId = function (mapandid) {
-		ngDialog.close('ngdialog1');
-		bridgeService.deleteDeviceByMapId(mapandid.id, mapandid.mapType);
-		bridgeService.viewDevices();
-		if(mapandid.mapType === "veraDevice")
-			bridgeService.viewVeraDevices();
-		if(mapandid.mapType === "veraScene")
-			bridgeService.viewVeraScenes();
-		if(mapandid.mapType === "harmonyActivity")
-			bridgeService.viewHarmonyActivities();
-		if(mapandid.mapType === "harmonyButton")
-			bridgeService.viewHarmonyDevices();
-		if(mapandid.mapType === "nestThermoSet" || mapandid.mapType === "nestHomeAway")
-			bridgeService.viewNestItems();
-		if(mapandid.mapType === "hueDevice")
-			bridgeService.viewHueDevices();
-		if(mapandid.mapType === "halDevice")
-			bridgeService.viewHalDevices();
-		if(mapandid.mapType === "mqttMessage")
-			bridgeService.viewMQTTDevices();
-		if(mapandid.mapType === "hassDevice")
-			bridgeService.viewHassDevices();
-		$scope.bridge.mapandid = null;
 	};
 });
 
@@ -1288,15 +1250,19 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	};
 
-	$scope.deleteDeviceByMapId = function (id, mapType) {
-		$scope.bridge.mapandid = { id, mapType };
+	$scope.deleteDevice = function (device) {
+		$scope.bridge.device = device;
 		ngDialog.open({
-			template: 'deleteMapandIdDialog',
-			controller: 'DeleteMapandIdDialogCtrl',
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
 			className: 'ngdialog-theme-default'
 		});
 	};
-
+	
+	$scope.editDevice = function (device) {
+		bridgeService.editDevice(device);
+		$location.path('/editdevice');
+	};
 });
 
 app.controller('HarmonyController', function ($scope, $location, $http, bridgeService, ngDialog) {
@@ -1357,15 +1323,19 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	};
 
-	$scope.deleteDeviceByMapId = function (id, mapType) {
-		$scope.bridge.mapandid = { id, mapType };
+	$scope.deleteDevice = function (device) {
+		$scope.bridge.device = device;
 		ngDialog.open({
-			template: 'deleteMapandIdDialog',
-			controller: 'DeleteMapandIdDialogCtrl',
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
 			className: 'ngdialog-theme-default'
 		});
 	};
-
+	
+	$scope.editDevice = function (device) {
+		bridgeService.editDevice(device);
+		$location.path('/editdevice');
+	};
 });
 
 app.controller('NestController', function ($scope, $location, $http, bridgeService, ngDialog) {
@@ -1455,15 +1425,19 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	};
 
-	$scope.deleteDeviceByMapId = function (id, mapType) {
-		$scope.bridge.mapandid = { id, mapType };
+	$scope.deleteDevice = function (device) {
+		$scope.bridge.device = device;
 		ngDialog.open({
-			template: 'deleteMapandIdDialog',
-			controller: 'DeleteMapandIdDialogCtrl',
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
 			className: 'ngdialog-theme-default'
 		});
 	};
-
+	
+	$scope.editDevice = function (device) {
+		bridgeService.editDevice(device);
+		$location.path('/editdevice');
+	};
 });
 
 app.controller('HueController', function ($scope, $location, $http, bridgeService, ngDialog) {
@@ -1582,15 +1556,19 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	};
 
-	$scope.deleteDeviceByMapId = function (id, mapType) {
-		$scope.bridge.mapandid = { id, mapType };
+	$scope.deleteDevice = function (device) {
+		$scope.bridge.device = device;
 		ngDialog.open({
-			template: 'deleteMapandIdDialog',
-			controller: 'DeleteMapandIdDialogCtrl',
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
 			className: 'ngdialog-theme-default'
 		});
 	};
-
+	
+	$scope.editDevice = function (device) {
+		bridgeService.editDevice(device);
+		$location.path('/editdevice');
+	};
 });
 
 app.controller('HalController', function ($scope, $location, $http, bridgeService, ngDialog) {
@@ -1865,15 +1843,19 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	};
 
-	$scope.deleteDeviceByMapId = function (id, mapType) {
-		$scope.bridge.mapandid = { id, mapType };
+	$scope.deleteDevice = function (device) {
+		$scope.bridge.device = device;
 		ngDialog.open({
-			template: 'deleteMapandIdDialog',
-			controller: 'DeleteMapandIdDialogCtrl',
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
 			className: 'ngdialog-theme-default'
 		});
 	};
-
+	
+	$scope.editDevice = function (device) {
+		bridgeService.editDevice(device);
+		$location.path('/editdevice');
+	};
 });
 
 app.controller('MQTTController', function ($scope, $location, $http, bridgeService, ngDialog) {
@@ -1919,15 +1901,19 @@ app.controller('MQTTController', function ($scope, $location, $http, bridgeServi
 			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	};
 
-	$scope.deleteDeviceByMapId = function (id, mapType) {
-		$scope.bridge.mapandid = { id, mapType };
+	$scope.deleteDevice = function (device) {
+		$scope.bridge.device = device;
 		ngDialog.open({
-			template: 'deleteMapandIdDialog',
-			controller: 'DeleteMapandIdDialogCtrl',
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
 			className: 'ngdialog-theme-default'
 		});
 	};
-
+	
+	$scope.editDevice = function (device) {
+		bridgeService.editDevice(device);
+		$location.path('/editdevice');
+	};
 });
 
 app.controller('HassController', function ($scope, $location, $http, bridgeService, ngDialog) {
@@ -2114,30 +2100,37 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	};
 
-	$scope.deleteDeviceByMapId = function (id, mapType) {
-		$scope.bridge.mapandid = { id, mapType };
+	$scope.deleteDevice = function (device) {
+		$scope.bridge.device = device;
 		ngDialog.open({
-			template: 'deleteMapandIdDialog',
-			controller: 'DeleteMapandIdDialogCtrl',
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
 			className: 'ngdialog-theme-default'
 		});
 	};
-
+	
+	$scope.editDevice = function (device) {
+		bridgeService.editDevice(device);
+		$location.path('/editdevice');
+	};
 });
 
 app.controller('EditController', function ($scope, $location, $http, bridgeService) {
 	bridgeService.viewMapTypes();
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
+	$scope.onDevices = null;
+	$scope.dimDevices = null;
+	$scope.offDevices = null;
 	if ($scope.device !== undefined && $scope.device.name !== undefined) {
-		$scope.onDevices = bridgeService.getCallObjects($scope.bridge.device.onUrl);
-		$scope.dimDevices = bridgeService.getCallObjects($scope.bridge.device.dimUrl);
-		$scope.offDevices = bridgeService.getCallObjects($scope.bridge.device.offUrl);
-	} else {
-		$scope.onDevices = null;
-		$scope.dimDevices = null;
-		$scope.offDevices = null;
+		if($scope.bridge.device.onUrl !== undefined)
+			$scope.onDevices = bridgeService.getCallObjects($scope.bridge.device.onUrl);
+		if($scope.bridge.device.dimUrl !== undefined)
+			$scope.dimDevices = bridgeService.getCallObjects($scope.bridge.device.dimUrl);
+		if($scope.bridge.device.offUrl !== undefined)
+			$scope.offDevices = bridgeService.getCallObjects($scope.bridge.device.offUrl);
 	}
+	
 	$scope.newOnItem = {};
 	$scope.newDimItem = {};
 	$scope.newOffItem = {};
@@ -2171,9 +2164,9 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 		$scope.device.mapType = $scope.mapTypeSelected[0];
 		if ($scope.onDevices !== null)
 			$scope.device.onUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.onDevices));
-		if ($scope.onDevices !== null)
+		if ($scope.dimDevices !== null)
 			$scope.device.dimUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.dimDevices));
-		if ($scope.onDevices !== null)
+		if ($scope.offDevices !== null)
 			$scope.device.offUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.offDevices));
 		bridgeService.addDevice($scope.device).then(
 				function () {
@@ -2186,9 +2179,11 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 	};
 
     $scope.addItemOn = function (anItem) {
-    	if (anItem.item === null || anItem.item === "")
+    	if (anItem.item === undefined || anItem.item === null || anItem.item === "")
     		return;
     	var newitem = { item: anItem.item, type: anItem.type, delay: anItem.delay, count: anItem.count, filterIPs: anItem.filterIPs, httpVerb: anItem.httpVerb, httpBody: anItem.httpBody, httpHeaders: anItem.httpHeaders, contentType: anItem.contentType };
+    	if ($scope.onDevices === null)
+    		$scope.onDevices = [];
     	$scope.onDevices.push(newitem);
     	$scope.newOnItem = [];
     };
@@ -2201,9 +2196,11 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
     };
 
     $scope.addItemDim = function (anItem) {
-    	if (anItem.item === null || anItem.item === "")
+    	if (anItem.item === undefined || anItem.item === null || anItem.item === "")
     		return;
     	var newitem = { item: anItem.item, type: anItem.type, delay: anItem.delay, count: anItem.count, filterIPs: anItem.filterIPs, httpVerb: anItem.httpVerb, httpBody: anItem.httpBody, httpHeaders: anItem.httpHeaders, contentType: anItem.contentType };
+    	if ($scope.dimDevices === null)
+    		$scope.dimDevices = [];
     	$scope.dimDevices.push(newitem);
     	$scope.newDimItem = [];
     };
@@ -2216,9 +2213,11 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
     };
 
     $scope.addItemOff = function (anItem) {
-    	if (anItem.item === null || anItem.item === "")
+    	if (anItem.item === undefined || anItem.item === null || anItem.item === "")
     		return;
     	var newitem = { item: anItem.item, type: anItem.type, delay: anItem.delay, count: anItem.count, filterIPs: anItem.filterIPs, httpVerb: anItem.httpVerb, httpBody: anItem.httpBody, httpHeaders: anItem.httpHeaders, contentType: anItem.contentType };
+    	if ($scope.offDevices === null)
+    		$scope.offDevices = [];
     	$scope.offDevices.push(newitem);
     	$scope.newOffItem = [];
     };
@@ -2239,13 +2238,13 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 
 });
 
-app.filter('availableHarmonyActivityId', function(bridgeService) {
+app.filter('configuredVeraDevices', function () {
 	return function(input) {
 		var out = [];
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(!bridgeService.findDeviceByMapId(input[i].activity.id, input[i].hub, "harmonyActivity")){
+			if(input[i].mapType !== undefined && input[i].mapType !== null && input[i].mapType === "veraDevice"){
 				out.push(input[i]);
 			}
 		}
@@ -2253,13 +2252,13 @@ app.filter('availableHarmonyActivityId', function(bridgeService) {
 	}
 });
 
-app.filter('unavailableHarmonyActivityId', function (bridgeService) {
+app.filter('configuredVeraScenes', function () {
 	return function(input) {
 		var out = [];
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(bridgeService.findDeviceByMapId(input[i].activity.id, input[i].hub, "harmonyActivity")){
+			if(input[i].mapType !== undefined && input[i].mapType !== null && input[i].mapType === "veraScene"){
 				out.push(input[i]);
 			}
 		}
@@ -2267,13 +2266,13 @@ app.filter('unavailableHarmonyActivityId', function (bridgeService) {
 	}
 });
 
-app.filter('availableVeraDeviceId', function (bridgeService) {
+app.filter('configuredNestItems', function (bridgeService) {
 	return function(input) {
 		var out = [];
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(!bridgeService.findDeviceByMapId(input[i].id, input[i].veraname, "veraDevice")){
+			if(input[i].mapType !== undefined && input[i].mapType !== null && bridgeService.aContainsB(input[i].mapType, "nest")){
 				out.push(input[i]);
 			}
 		}
@@ -2281,13 +2280,13 @@ app.filter('availableVeraDeviceId', function (bridgeService) {
 	}
 });
 
-app.filter('unavailableVeraDeviceId', function (bridgeService) {
+app.filter('configuredHueItems', function (bridgeService) {
 	return function(input) {
 		var out = [];
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(bridgeService.findDeviceByMapId(input[i].id, input[i].veraname, "veraDevice")){
+			if(input[i].mapType !== undefined && input[i].mapType !== null && bridgeService.aContainsB(input[i].mapType, "hue")){
 				out.push(input[i]);
 			}
 		}
@@ -2295,106 +2294,7 @@ app.filter('unavailableVeraDeviceId', function (bridgeService) {
 	}
 });
 
-app.filter('availableVeraSceneId', function (bridgeService) {
-	return function(input) {
-		var out = [];
-		if(input === undefined || input === null || input.length === undefined)
-			return out;
-		for (var i = 0; i < input.length; i++) {
-			if(!bridgeService.findDeviceByMapId(input[i].id, input[i].veraname, "veraScene")){
-				out.push(input[i]);
-			}
-		}
-		return out;
-	}
-});
-
-app.filter('unavailableVeraSceneId', function (bridgeService) {
-	return function(input) {
-		var out = [];
-		if(input === null || input === null || input.length === undefined)
-			return out;
-		for (var i = 0; i < input.length; i++) {
-			if(bridgeService.findDeviceByMapId(input[i].id,input[i].veraname, "veraScene")){
-				out.push(input[i]);
-			}
-		}
-		return out;
-	}
-});
-
-app.filter('availableNestItemId', function (bridgeService) {
-	return function(input) {
-		var out = [];
-		if(input === undefined || input === null || input.length === undefined)
-			return out;
-		for (var i = 0; i < input.length; i++) {
-			if(!bridgeService.findNestItemByMapId(input[i].id, "nestHomeAway")){
-				out.push(input[i]);
-			}
-		}
-		return out;
-	}
-});
-
-app.filter('unavailableNestItemId', function (bridgeService) {
-	return function(input) {
-		var out = [];
-		if(input === undefined || input === null || input.length === undefined)
-			return out;
-		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType !== null && bridgeService.aContainsB(input[i].mapType, "nest")){
-				out.push(input[i]);
-			}
-		}
-		return out;
-	}
-});
-
-app.filter('availableHueDeviceId', function (bridgeService) {
-	return function(input) {
-		var out = [];
-		if(input === undefined || input === null || input.length === undefined)
-			return out;
-		for (var i = 0; i < input.length; i++) {
-			if(!bridgeService.findDeviceByMapId(input[i].device.uniqueid, input[i].huename, "hueDevice")){
-				out.push(input[i]);
-			}
-		}
-		return out;
-	}
-});
-
-app.filter('unavailableHueDeviceId', function (bridgeService) {
-	return function(input) {
-		var out = [];
-		if(input === undefined || input === null || input.length === undefined)
-			return out;
-		for (var i = 0; i < input.length; i++) {
-			if(bridgeService.findDeviceByMapId(input[i].device.uniqueid, input[i].huename, "hueDevice")){
-				out.push(input[i]);
-			}
-		}
-		return out;
-	}
-});
-
-app.filter('availableHalDeviceId', function (bridgeService) {
-	return function(input) {
-		var out = [];
-		if(input === undefined || input === null || input.length === undefined)
-			return out;
-		for (var i = 0; i < input.length; i++) {
-			if(!bridgeService.findDeviceByMapId(input[i].haldevicename + "-" +  input[i].halname, input[i].halname, "halDevice") &&
-					!bridgeService.findDeviceByMapId(input[i].haldevicename + "-" +  input[i].halname + "-HomeAway", input[i].halname, "halHome") ){
-				out.push(input[i]);
-			}
-		}
-		return out;
-	}
-});
-
-app.filter('unavailableHalDeviceId', function (bridgeService) {
+app.filter('configuredHalItems', function (bridgeService) {
 	return function(input) {
 		var out = [];
 		if(input === undefined || input === null || input.length === undefined)
@@ -2408,13 +2308,27 @@ app.filter('unavailableHalDeviceId', function (bridgeService) {
 	}
 });
 
-app.filter('configuredButtons', function () {
+app.filter('configuredHarmonyActivities', function () {
 	return function(input) {
 		var out = [];
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType !== undefined && input[i].mapType === "harmonyButton"){
+			if(input[i].mapType !== undefined && input[i].mapType !== null && input[i].mapType === "harmonyActivity"){
+				out.push(input[i]);
+			}
+		}
+		return out;
+	}
+});
+
+app.filter('configuredHarmonyButtons', function () {
+	return function(input) {
+		var out = [];
+		if(input === undefined || input === null || input.length === undefined)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if(input[i].mapType !== undefined && input[i].mapType !== null && input[i].mapType === "harmonyButtons"){
 				out.push(input[i]);
 			}
 		}
@@ -2428,7 +2342,7 @@ app.filter('configuredMqttMsgs', function () {
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType !== undefined && input[i].mapType === "mqttMessage"){
+			if(input[i].mapType !== undefined && input[i].mapType !== null && input[i].mapType === "mqttMessage"){
 				out.push(input[i]);
 			}
 		}
@@ -2436,21 +2350,7 @@ app.filter('configuredMqttMsgs', function () {
 	}
 });
 
-app.filter('availableHassDeviceId', function (bridgeService) {
-	return function(input) {
-		var out = [];
-		if(input === undefined || input === null || input.length === undefined)
-			return out;
-		for (var i = 0; i < input.length; i++) {
-			if(!bridgeService.findDeviceByMapId(input[i].hassdevicename + "-" +  input[i].hassname, input[i].hassname, "hassDevice")){
-				out.push(input[i]);
-			}
-		}
-		return out;
-	}
-});
-
-app.filter('unavailableHassDeviceId', function (bridgeService) {
+app.filter('configuredHassItems', function (bridgeService) {
 	return function(input) {
 		var out = [];
 		if(input === undefined || input === null || input.length === undefined)

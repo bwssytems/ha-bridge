@@ -63,7 +63,7 @@
 				<th>Actions</th>
 			</tr>
 		</thead>
-		<tr ng-repeat="haldevice in bridge.haldevices | availableHalDeviceId">
+		<tr ng-repeat="haldevice in bridge.haldevices">
 			<td>{{$index+1}}</td>
 			<td><input type="checkbox" name="bulk.devices[]"
 				value="{{haldevice.haldevicename}}"
@@ -136,18 +136,24 @@
 				<th sortable-header col="name">Name</th>
 				<th sortable-header col="category">Category</th>
 				<th sortable-header col="halname">HAL</th>
+				<th>Map Id</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="device in bridge.devices | unavailableHalDeviceId">
+			ng-repeat="device in bridge.devices | configuredHalItems">
 			<td>{{$index+1}}</td>
 			<td>{{device.name}}</td>
 			<td>{{device.deviceType}}</td>
 			<td>{{device.targetDevice}}</td>
+			<td>{{device.mapId}}</td>
 			<td>
-				<button class="btn btn-danger" type="submit"
-					ng-click="deleteDeviceByMapId(device.mapId, device.mapType)">Delete</button>
+				<p>
+					<button class="btn btn-warning" type="submit"
+						ng-click="editDevice(device)">Edit</button>
+					<button class="btn btn-danger" type="submit"
+						ng-click="deleteDevice(device)">Delete</button>
+				</p>
 			</td>
 		</tr>
 	</table>
