@@ -32,8 +32,7 @@ public class UDPHome implements Home {
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
 			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
 		log.debug("executing HUE api request to UDP: " + anItem.getItem().getAsString());
-		String intermediate = anItem.getItem().getAsString()
-				.substring(anItem.getItem().getAsString().indexOf("://") + 3);
+		String intermediate = anItem.getItem().getAsString().substring(anItem.getItem().getAsString().indexOf("://") + 3);
 		String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
 		String theUrlBody = intermediate.substring(intermediate.indexOf('/') + 1);
 		String hostAddr = null;
@@ -51,17 +50,14 @@ public class UDPHome implements Home {
 		}
 
 		if (theUrlBody.startsWith("0x")) {
-			theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody,
-					intensity, targetBri, targetBriInc, true);
+			theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, true);
 			sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
 		} else {
-			theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody,
-					intensity, targetBri, targetBriInc, false);
+			theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, false);
 			sendData = theUrlBody.getBytes();
 		}
 		try {
-			theUDPDatagramSender.sendUDPResponse(sendData, IPAddress,
-					Integer.parseInt(port));
+			theUDPDatagramSender.sendUDPResponse(sendData, IPAddress, Integer.parseInt(port));
 		} catch (NumberFormatException e) {
 			// noop
 		} catch (IOException e) {

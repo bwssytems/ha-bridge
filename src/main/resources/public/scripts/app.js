@@ -2148,6 +2148,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 		$scope.newDimItem = {};
 		$scope.newOffItem = {};
 		$scope.device = bridgeService.state.device;
+		$scope.mapTypeSelected = null;
 	};
 
 	$scope.editDevice = function (copy) {
@@ -2161,7 +2162,10 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 		}
 		if (copy)
 			$scope.device.id = null;
-		$scope.device.mapType = $scope.mapTypeSelected[0];
+		if($scope.mapTypeSelected !== undefined && $scope.mapTypeSelected !== null)
+			$scope.device.mapType = $scope.mapTypeSelected[0];
+		else
+			$scope.device.mapType = null;
 		if ($scope.onDevices !== null)
 			$scope.device.onUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.onDevices));
 		if ($scope.dimDevices !== null)
