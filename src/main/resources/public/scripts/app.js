@@ -733,10 +733,18 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 	};
 
 	this.buildUrls = function (onpayload, dimpayload, offpayload, isObject, anId, deviceName, deviceTarget, deviceType, deviceMapType, count, delay) {
-		var currentOn = self.state.device.onUrl;
-		var currentDim = self.state.device.dimUrl;
-		var currentOff = self.state.device.offUrl;
-		if (self.state.device.mapType !== undefined && self.state.device.mapType !== null && self.state.device.mapType !== "") {
+		var currentOn = "";
+		var currentDim = "";
+		var currentOff = "";
+		if (self.state.device !== undefined && self.state.device !== null) {
+			if (self.state.device.onUrl !== undefined && self.state.device.onUrl !== null)
+				currentOn = self.state.device.onUrl;
+			if (self.state.device.dimUrl !== undefined && self.state.device.dimUrl !== null)
+				currentDim = self.state.device.dimUrl;
+			if (self.state.device.offUrl !== undefined && self.state.device.offnUrl !== null)
+				currentOff = self.state.device.offUrl;
+		}
+		if (self.state.device !== undefined && self.state.device !== null && self.state.device.mapType !== undefined && self.state.device.mapType !== null && self.state.device.mapType !== "") {
 			self.state.device.mapId = self.state.device.mapId + "-" + anId;
 			if (dimpayload !== null) {
 				if (currentDim.indexOf("{\"item") !== 1 ) {
@@ -764,7 +772,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					currentOff = "[{\"item\":\"" + currentOff + "\",\"type\":\"" + deviceMapType + "\"}]";
 			}
 			self.state.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"item\":";		
-		} else if (self.state.device.mapType === undefined || self.state.device.mapType === null || self.state.device.mapType === "") {
+		} else if (self.state.device === undefined || self.state.device === null || self.state.device.mapType === undefined || self.state.device.mapType === null || self.state.device.mapType === "") {
 			this.clearDevice();
 			self.state.device.deviceType = deviceType;
 			self.state.device.name = deviceName;
