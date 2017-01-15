@@ -20,6 +20,7 @@ import com.bwssystems.HABridge.plugins.hue.HueHome;
 import com.bwssystems.HABridge.util.JsonTransformer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 import static spark.Spark.get;
 import static spark.Spark.options;
@@ -746,9 +747,17 @@ public class HueMulator {
 			} else if(!url.startsWith("[{\"item\""))
 				url = "[{\"item\":" + url + "}]";
 
+			log.debug("Decode Json for url items: " + url);
 			CallItem[] callItems = null;
-			callItems = aGsonHandler.fromJson(url, CallItem[].class);
-
+			try {
+				callItems = aGsonHandler.fromJson(url, CallItem[].class);
+			} catch(JsonSyntaxException e) {
+				log.warn("Could not decode Json for url items: " + lightId + " for hue state change request: " + userId + " from "
+						+ ipAddress + " body: " + body + " url items: " + url);
+				return aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/lights/" + lightId,
+						"Could decode json in request", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
+			}
+			
 			for (int i = 0; callItems != null && i < callItems.length; i++) {
 				if(!filterByRequester(callItems[i].getFilterIPs(), ipAddress)) {
 					log.debug("filter for requester address not present in list: " + callItems[i].getFilterIPs() + " with request ip of: " + ipAddress);
