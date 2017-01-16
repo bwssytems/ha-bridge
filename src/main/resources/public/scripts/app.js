@@ -826,7 +826,7 @@ app.controller ('SystemController', function ($scope, $location, $http, $window,
     $scope.visible = false;
     $scope.imgUrl = "glyphicon glyphicon-plus";
     $scope.addVeratoSettings = function (newveraname, newveraip) {
-    	if($scope.bridge.settings.veraaddress === null) {
+    	if($scope.bridge.settings.veraaddress === undefined || $scope.bridge.settings.veraaddress === null) {
     		$scope.bridge.settings.veraaddress = { devices: [] };
 		}
     	var newVera = {name: newveraname, ip: newveraip }
@@ -842,7 +842,7 @@ app.controller ('SystemController', function ($scope, $location, $http, $window,
     	}    	
     };
     $scope.addHarmonytoSettings = function (newharmonyname, newharmonyip) {
-    	if($scope.bridge.settings.harmonyaddress === null) {
+    	if($scope.bridge.settings.harmonyaddress === undefined || $scope.bridge.settings.harmonyaddress === null) {
 			$scope.bridge.settings.harmonyaddress = { devices: [] };
 		}
     	var newharmony = {name: newharmonyname, ip: newharmonyip }
@@ -858,7 +858,7 @@ app.controller ('SystemController', function ($scope, $location, $http, $window,
     	}    	
     };
     $scope.addHuetoSettings = function (newhuename, newhueip) {
-    	if($scope.bridge.settings.hueaddress === null) {
+    	if($scope.bridge.settings.hueaddress === undefined || $scope.bridge.settings.hueaddress === null) {
 			$scope.bridge.settings.hueaddress = { devices: [] };
 		}
     	var newhue = {name: newhuename, ip: newhueip }
@@ -874,7 +874,7 @@ app.controller ('SystemController', function ($scope, $location, $http, $window,
     	}    	
     };
     $scope.addHaltoSettings = function (newhalname, newhalip) {
-    	if($scope.bridge.settings.haladdress === null) {
+    	if($scope.bridge.settings.haladdress === undefined || $scope.bridge.settings.haladdress === null) {
 			$scope.bridge.settings.haladdress = { devices: [] };
 		}
     	var newhal = {name: newhalname, ip: newhalip }
@@ -890,7 +890,7 @@ app.controller ('SystemController', function ($scope, $location, $http, $window,
     	}    	
     };
     $scope.addMQTTtoSettings = function (newmqttname, newmqttip, newmqttusername, newmqttpassword) {
-    	if($scope.bridge.settings.mqttaddress === null) {
+    	if($scope.bridge.settings.mqttaddress === undefined || $scope.bridge.settings.mqttaddress === null) {
 			$scope.bridge.settings.mqttaddress = { devices: [] };
 		}
     	var newmqtt = {name: newmqttname, ip: newmqttip, username: newmqttusername, password: newmqttpassword }
@@ -908,7 +908,7 @@ app.controller ('SystemController', function ($scope, $location, $http, $window,
     	}    	
     };
     $scope.addHasstoSettings = function (newhassname, newhassip, newhassport, newhasspassword) {
-    	if($scope.bridge.settings.hassaddress === null) {
+    	if($scope.bridge.settings.hassaddress === undefined || $scope.bridge.settings.hassaddress === null) {
 			$scope.bridge.settings.hassaddress = { devices: [] };
 		}
     	var newhass = {name: newhassname, ip: newhassip, port: newhassport, password: newhasspassword }
