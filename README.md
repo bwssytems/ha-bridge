@@ -205,7 +205,7 @@ Format Example in the URL areas:
 ```
 [{"item":"http://192.168.1.1:8180/do/this/thing"},
 {"item":"http://192.168.1.1:8180/do/the/next/thing","delay":1000,"count":2},
-"item":"http://192.168.1.1:8180/do/another/thing"}]
+{"item":"http://192.168.1.1:8180/do/another/thing"}]
 
 
 [{"item":"udp://192.168.1.1:5000/0x450555"},
