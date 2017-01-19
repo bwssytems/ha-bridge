@@ -38,8 +38,15 @@ pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
 pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.0.0/ha-bridge-4.0.0.jar
 ```
+#### System Control Setup on a pi (preferred)
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
 
+Start here to create the habridge.service unit file:
+```
+pi@raspberrypi:~ $ cd /etc/systemd/system
+pi@raspberrypi:~ $ sudo nano habridge.service
+```
+Copy the text below into the editor nano.
 ```
 [Unit]
 Description=HA Bridge
@@ -53,7 +60,25 @@ ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.confi
 [Install]
 WantedBy=multi-user.target
 ```
-Basic script setup to run the bridge on a pi.
+Save the file in the editor by hitting CTL-X and then saying Y to update and save.
+
+Reload the system control config:
+```
+pi@raspberrypi:~ $ sudo systemctl daemon-reload
+```
+To start the bridge:
+```
+pi@raspberrypi:~ $ sudo systemctl start habridge.service
+```
+To start the service at boot, use the `enable` command:
+```
+pi@raspberrypi:~ $ sudo systemctl enable habridge.service
+```
+To look at the log, the output goes into the system log at `/var/log/syslog':
+```
+pi@raspberrypi:~ $ tail -f /var/log/syslog
+```
+#### Basic script setup to run the bridge on a pi.
 
 *NOTE ON RC.LOCAL*: Due to the way network subsystem is brought up on the pi, it uses the new systemctl to start services. The old style runlevel setup, which rc.local is part of does not get the benefit of knowing if the network has been fully realized. Starting ha-bridge from rc.local on next gen systems will cause unexpected results and issues with discovering registered devices. 
 
@@ -167,10 +192,10 @@ You must configure devices before you will have any thing for the Echo or other 
 #### Helpers
 The easy way to get devices configured is with the use of the helpers for the Vera or Harmony, Nest and Hue to create devices that the bridge will present.
 
-For the Helpers, each item being presented from the target system has a button such as `Generate Bridge Device`, `Build A Button` or specific tasks such as `Temp` for thermostats that is used to create the specific device parameters and give it a name in the "Add a Bridge Device..." area below. The next thing to check is the name for the bridge device that it is something that makes sense especially if you usign the ha-bridge with an Echo as this is what the Echo will interpret as the device you want. Then select the `Add Bridge Device` button to finalize it.
+For the Helpers, each item being presented from the target system has a button such as `Build Item`, `Build A Button` or specific tasks such as `Temp` for thermostats that is used to create the specific device parameters. The build action buttons will put you into the edit screen. The next thing to check is the name for the bridge device that it is something that makes sense especially if you using the ha-bridge with an Echo or Google Home as this is what the Echo or Google Home will interpret as the device you want. Also, you can go back to any helper tab and click a build action button to add another item for a multi-command. After you are done in the edit tab, click the `Add Bridge Device` to finish that selection setup. 
 
 The helper tabs will also show you what you have already configured for that target type. Click on the `+` and you will see them and be able to delete them.
-#### The Manual Add Tab
+#### The Add/Edit Tab
 Another way to add a device is through the Manual Add Tab. This allows you to manually enter the name, the on and off URLs and select if there are custom handling with the type of call that can be made. This allows for control of anything that has a distinct request that can be executed so you are not limited to the Vera, Harmony, Nest or other Hue.
 
 The format of these can be the default HTTP request which executes the URLs formatted as `http://<your stuff here>` as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use `https://<your secure call here>`. When using POST and PUT, you have the ability to specify the body that will be sent with the request as well as the application type for the http call.
@@ -210,7 +235,7 @@ Format Example in the URL areas:
 ```
 [{"item":"http://192.168.1.1:8180/do/this/thing"},
 {"item":"http://192.168.1.1:8180/do/the/next/thing","delay":1000,"count":2},
-"item":"http://192.168.1.1:8180/do/another/thing"}]
+{"item":"http://192.168.1.1:8180/do/another/thing"}]
 
 
 [{"item":"udp://192.168.1.1:5000/0x450555"},
@@ -262,7 +287,7 @@ OFF Commands |
  | Alexa, turn off `<Device Name>`
 DIM Commands | 
  | Alexa, brighten `<Device Name>` to `<Position>`
- | Alexa, dim `<Device Name> to <Position>`
+ | Alexa, dim `<Device Name>` to `<Position>`
  | Alexa, brighten `<Device Name>`
  | Alexa, dim `<Device Name>`
  | Alexa, set `<Device Name>` to `<Position>`
