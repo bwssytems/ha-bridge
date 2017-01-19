@@ -409,24 +409,30 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		);
 	};
 
+	this.formatCallItem = function (currentItem) {
+		if(!currentItem.startsWith("{\"item") && !currentItem.startsWith("[{\"item")) {
+			if (currentItem.startsWith("[") || currentItem.startsWith("{"))
+				currentItem = "[{\"item\":" + currentItem + "}]";
+			else
+				currentItem = "[{\"item\":\"" + currentItem + "\"}]";
+		} else if(currentItem.startsWith("{\"item"))
+			currentItem = "[" + currentItem + "]";
+
+		return currentItem;
+	};
+	
 	this.getCallObjects = function (deviceString) {
-		if (!deviceString.startsWith("[")) {
-			if (deviceString.startsWith("{\"item"))
-				deviceString = "[" + deviceString + "]"
-			else {
-				if (deviceString.startsWith("{"))
-					deviceString = "[{\"item\":" + deviceString + "}]"
-				else
-					deviceString = "[{\"item\":\"" + deviceString + "\"}]"
-			}
-		} else if (!deviceString.startsWith("[{\"item\""))
-			deviceString = "[{\"item\":" + deviceString + "}]"
+		if (deviceString === undefined || deviceString === "")
+			return null;
+
+		deviceString = self.formatCallItem(deviceString);
+
 		var newDevices = angular.fromJson(deviceString)
 		var i, s, len = newDevices.length
 		for (i=0; i<len; ++i) {
 				  if (i in newDevices) {
 			    s = newDevices[i];
-				if (s.type !== null)
+				if (s.type !== undefined && s.type !== null)
 					s.type = self.getMapType(s.type)
 				if (angular.isObject(s.item))
 					s.item = angular.toJson(s.item)
@@ -731,47 +737,43 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		);
 		return;        		
 	};
+	
+	this.formatUrlItem = function (currentItem) {
+		var formattedItem = "";
+		if (currentItem !== "") {
+			currentItem = self.formatCallItem(currentItem);
+			formattedItem = currentItem.substr(0, currentItem.length - 1) + ",{\"item\":";
+		} else
+			formattedItem = "[{\"item\":";
+
+		return formattedItem;
+	};
 
 	this.buildUrls = function (onpayload, dimpayload, offpayload, isObject, anId, deviceName, deviceTarget, deviceType, deviceMapType, count, delay) {
 		var currentOn = "";
 		var currentDim = "";
 		var currentOff = "";
 		if (self.state.device !== undefined && self.state.device !== null) {
-			if (self.state.device.onUrl !== undefined && self.state.device.onUrl !== null)
+			if (self.state.device.onUrl !== undefined && self.state.device.onUrl !== null&& self.state.device.onUrl !== "")
 				currentOn = self.state.device.onUrl;
-			if (self.state.device.dimUrl !== undefined && self.state.device.dimUrl !== null)
+			if (self.state.device.dimUrl !== undefined && self.state.device.dimUrl !== null && self.state.device.dimUrl !== "")
 				currentDim = self.state.device.dimUrl;
-			if (self.state.device.offUrl !== undefined && self.state.device.offnUrl !== null)
+			if (self.state.device.offUrl !== undefined && self.state.device.offnUrl !== null && self.state.device.offnUrl !== "")
 				currentOff = self.state.device.offUrl;
 		}
 		if (self.state.device !== undefined && self.state.device !== null && self.state.device.mapType !== undefined && self.state.device.mapType !== null && self.state.device.mapType !== "") {
 			self.state.device.mapId = self.state.device.mapId + "-" + anId;
-			if (dimpayload !== null) {
-				if (currentDim.indexOf("{\"item") !== 1 ) {
-					if (isObject)
-						currentDim = "[{\"item\":" + currentDim + ",\"type\":\"" + deviceMapType + "\"}]";
-					else
-						currentDim = "[{\"item\":\"" + currentDim + "\",\"type\":\"" + deviceMapType + "\"}]";
-				}
-
-				self.state.device.dimUrl = currentDim.substr(0, currentDim.indexOf("]")) + ",{\"item\":";
+			if (dimpayload !== undefined && dimpayload !== null && dimpayload !== "") {
+				self.state.device.dimUrl = self.formatUrlItem(currentDim);					
 			}
 
-			if (currentOn.indexOf("{\"item") !== 1 ) {
-				if (isObject)
-					currentOn = "[{\"item\":" + currentOn + ",\"type\":\"" + deviceMapType + "\"}]";
-				else
-					currentOn = "[{\"item\":\"" + currentOn + "\",\"type\":\"" + deviceMapType + "\"}]";
+			if (onpayload !== undefined && onpayload !== null && onpayload !== "") {
+				self.state.device.onUrl = self.formatUrlItem(currentOn);
 			}
-			self.state.device.onUrl = currentOn.substr(0, currentOn.indexOf("]")) + ",{\"item\":";
 
-			if (currentOff.indexOf("{\"item") !== 1 ) {
-				if (isObject)
-					currentOff = "[{\"item\":" + currentOff + ",\"type\":\"" + deviceMapType + "\"}]";
-				else
-					currentOff = "[{\"item\":\"" + currentOff + "\",\"type\":\"" + deviceMapType + "\"}]";
+			if (offpayload !== undefined && offpayload !== null && offpayload !== "") {
+				self.state.device.offUrl = self.formatUrlItem(currentOff);
 			}
-			self.state.device.offUrl = currentOff.substr(0, currentOff.indexOf("]")) + ",{\"item\":";		
 		} else if (self.state.device === undefined || self.state.device === null || self.state.device.mapType === undefined || self.state.device.mapType === null || self.state.device.mapType === "") {
 			this.clearDevice();
 			self.state.device.deviceType = deviceType;
@@ -779,41 +781,53 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 			self.state.device.targetDevice = deviceTarget;
 			self.state.device.mapType = deviceMapType;
 			self.state.device.mapId = anId;
-			if(dimpayload !== null)
+			if (dimpayload !== undefined && dimpayload !== null && dimpayload !== "")
 				self.state.device.dimUrl = "[{\"item\":";
-			self.state.device.onUrl = "[{\"item\":";
-			self.state.device.offUrl = "[{\"item\":";
+			if (onpayload !== undefined && onpayload !== null && onpayload !== "")
+				self.state.device.onUrl = "[{\"item\":";
+			if (offpayload !== undefined && offpayload !== null && offpayload !== "")
+				self.state.device.offUrl = "[{\"item\":";
 		}
 		
 		if (isObject) {
-			if (dimpayload !== null)
+			if (dimpayload !== undefined && dimpayload !== null && dimpayload !== "")
 				self.state.device.dimUrl = self.state.device.dimUrl + dimpayload;
-			self.state.device.onUrl = self.state.device.onUrl + onpayload;
-			self.state.device.offUrl = self.state.device.offUrl + offpayload;
+			if (onpayload !== undefined && onpayload !== null && onpayload !== "")
+				self.state.device.onUrl = self.state.device.onUrl + onpayload;
+			if (offpayload !== undefined && offpayload !== null && offpayload !== "")
+				self.state.device.offUrl = self.state.device.offUrl + offpayload;
 			
 		} else {
-			if (dimpayload !== null)
+			if (dimpayload !== undefined && dimpayload !== null && dimpayload !== "")
 				self.state.device.dimUrl = self.state.device.dimUrl + "\"" + dimpayload + "\"";
-			self.state.device.onUrl = self.state.device.onUrl + "\"" + onpayload + "\"";
-			self.state.device.offUrl = self.state.device.offUrl + "\"" + offpayload + "\"";
+			if (onpayload !== undefined && onpayload !== null && onpayload !== "")
+				self.state.device.onUrl = self.state.device.onUrl + "\"" + onpayload + "\"";
+			if (offpayload !== undefined && offpayload !== null && offpayload !== "")
+				self.state.device.offUrl = self.state.device.offUrl + "\"" + offpayload + "\"";
 		}
 		
 		if (count !== undefined && count !== null && count !== "") {
-			if (dimpayload !== null)
+			if (dimpayload !== undefined && dimpayload !== null && dimpayload !== "")
 				self.state.device.dimUrl = self.state.device.dimUrl + ",\"count\":\"" + count;
-			self.state.device.onUrl = self.state.device.onUrl + ",\"count\":\"" + count;
-			self.state.device.offUrl = self.state.device.offUrl + ",\"count\":\"" + count;
+			if (onpayload !== undefined && onpayload !== null && onpayload !== "")
+				self.state.device.onUrl = self.state.device.onUrl + ",\"count\":\"" + count;
+			if (offpayload !== undefined && offpayload !== null && offpayload !== "")
+				self.state.device.offUrl = self.state.device.offUrl + ",\"count\":\"" + count;
 		}
 		if (delay !== undefined && delay !== null && delay !== "") {
-			if (dimpayload !== null)
+			if (dimpayload !== undefined && dimpayload !== null && dimpayload !== "")
 				self.state.device.dimUrl = self.state.device.dimUrl + ",\"delay\":\"" + delay;
-			self.state.device.onUrl = self.state.device.onUrl + ",\"delay\":\"" + delay;
-			self.state.device.offUrl = self.state.device.offUrl + ",\"delay\":\"" + delay;
+			if (onpayload !== undefined && onpayload !== null && onpayload !== "")
+				self.state.device.onUrl = self.state.device.onUrl + ",\"delay\":\"" + delay;
+			if (offpayload !== undefined && offpayload !== null && offpayload !== "")
+				self.state.device.offUrl = self.state.device.offUrl + ",\"delay\":\"" + delay;
 		}
-		if (dimpayload !== null)
+		if (dimpayload !== undefined && dimpayload !== null && dimpayload !== "")
 			self.state.device.dimUrl = self.state.device.dimUrl + ",\"type\":\"" + deviceMapType + "\"}]";
-		self.state.device.onUrl = self.state.device.onUrl + ",\"type\":\"" + deviceMapType + "\"}]";
-		self.state.device.offUrl = self.state.device.offUrl + ",\"type\":\"" + deviceMapType + "\"}]";
+		if (onpayload !== undefined && onpayload !== null && onpayload !== "")
+			self.state.device.onUrl = self.state.device.onUrl + ",\"type\":\"" + deviceMapType + "\"}]";
+		if (offpayload !== undefined && offpayload !== null && offpayload !== "")
+			self.state.device.offUrl = self.state.device.offUrl + ",\"type\":\"" + deviceMapType + "\"}]";
 	};
 });
 
@@ -1149,6 +1163,8 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 
 			bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, veradevice.id, veradevice.name, veradevice.veraname, "switch", "veraDevice", null, null);
 			$scope.device = bridgeService.state.device;
+			bridgeService.editDevice($scope.device);
+			$location.path('/editdevice');
 	};
 
 	$scope.buildSceneUrls = function (verascene) {
@@ -1160,23 +1176,9 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 			+ verascene.id;
 
 		bridgeService.buildUrls(onpayload, null, offpayload, false, verascene.id, verascene.name, verascene.veraname, "scene", "veraScene", null, null);
-	};
-
-	$scope.addDevice = function () {
-		if($scope.device.name === "" && $scope.device.onUrl === "")
-			return;
-		bridgeService.addDevice($scope.device).then(
-				function () {
-					$scope.clearDevice();
-					bridgeService.viewDevices();
-					bridgeService.viewVeraDevices();
-					bridgeService.viewVeraScenes();
-				},
-				function (error) {
-					bridgeService.displayWarn("Error adding device: " + $scope.device.name, error)
-				}
-		);
-
+		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.bulkAddDevices = function(dim_control) {
@@ -1295,6 +1297,8 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 
 		bridgeService.buildUrls(onpayload, null, offpayload, true, harmonyactivity.activity.id,  harmonyactivity.activity.label, harmonyactivity.hub, "activity", "harmonyActivity", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildButtonUrls = function (harmonydevice, onbutton, offbutton) {
@@ -1305,22 +1309,8 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 
 		bridgeService.buildUrls(onpayload, null, offpayload, true, actionOn.command,  harmonydevice.device.label, harmonydevice.hub, "button", "harmonyButton", null, null);
 		$scope.device = bridgeService.state.device;
-	};
-
-	$scope.addDevice = function () {
-		if($scope.device.name === "" && $scope.device.onUrl === "")
-			return;
-		bridgeService.addDevice($scope.device).then(
-				function () {
-					$scope.clearDevice();
-					bridgeService.viewDevices();
-					bridgeService.viewHarmonyActivities();
-					bridgeService.viewHarmonyDevices();
-				},
-				function (error) {
-				}
-		);
-
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.toggleButtons = function () {
@@ -1363,6 +1353,8 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		offpayload = "{\"name\":\"" + nestitem.id + "\",\"away\":true,\"control\":\"status\"}";
 		bridgeService.buildUrls(onpayload, null, offpayload, true, nestitem.id,  nestitem.name, nestitem.name, "home", "nestHomeAway", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildNestTempUrls = function (nestitem) {
@@ -1371,6 +1363,8 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		offpayload = "{\"name\":\"" + nestitem.id + "\",\"control\":\"off\"}";
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, nestitem.id + "-SetTemp",  nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Temperature", nestitem.location, "thermo", "nestThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildNestHeatUrls = function (nestitem) {
@@ -1379,6 +1373,8 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		offpayload = "{\"name\":\"" + nestitem.id + "\",\"control\":\"off\"}";
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, nestitem.id + "-SetHeat",  nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Heat", nestitem.location, "thermo", "nestThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildNestCoolUrls = function (nestitem) {
@@ -1387,6 +1383,8 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		offpayload = "{\"name\":\"" + nestitem.id + "\",\"control\":\"off\"}";
 		bridgeService.buildUrls(onpayload,dimpayload, offpayload, true, nestitem.id + "-SetCool",  nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Cool", nestitem.location, "thermo", "nestThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildNestRangeUrls = function (nestitem) {
@@ -1394,6 +1392,8 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		offpayload = "{\"name\":\"" + nestitem.id + "\",\"control\":\"off\"}";
 		bridgeService.buildUrls(onpayload, null, offpayload, true, nestitem.id + "-SetRange",  nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Range", nestitem.location, "thermo", "nestThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildNestOffUrls = function (nestitem) {
@@ -1401,6 +1401,8 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		offpayload = "{\"name\":\"" + nestitem.id + "\",\"control\":\"off\"}";
 		bridgeService.buildUrls(onpayload, null, offpayload, true, nestitem.id + "-TurnOff",  nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Thermostat", nestitem.location, "thermo", "nestThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildNestFanUrls = function (nestitem) {
@@ -1408,21 +1410,8 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		offpayload = "{\"name\":\"" + nestitem.id + "\",\"control\":\"fan-auto\"}";
 		bridgeService.buildUrls(onpayload, null, offpayload, true, nestitem.id + "-SetFan",  nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Fan", nestitem.location, "thermo", "nestThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
-	};
-
-	$scope.addDevice = function () {
-		if($scope.device.name === "" && $scope.device.onUrl === "")
-			return;
-		bridgeService.addDevice($scope.device).then(
-				function () {
-					$scope.clearDevice();
-					bridgeService.viewDevices();
-					bridgeService.viewNestItems();
-				},
-				function (error) {
-				}
-		);
-
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.toggleButtons = function () {
@@ -1467,22 +1456,8 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 		offpayload = "{\"ipAddress\":\"" + huedevice.hueaddress + "\",\"deviceId\":\"" + huedevice.huedeviceid +"\",\"hueName\":\"" + huedevice.huename + "\"}";
 		bridgeService.buildUrls(onpayload, null, offpayload, true, huedevice.device.uniqueid,  huedevice.device.name, huedevice.huename, "passthru",  "hueDevice", null, null);
 		$scope.device = bridgeService.state.device;
-	};
-
-	$scope.addDevice = function () {
-		if($scope.device.name === "" && $scope.device.onUrl === "")
-			return;
-		bridgeService.addDevice($scope.device).then(
-				function () {
-					$scope.clearDevice();
-					bridgeService.viewDevices();
-					bridgeService.viewHueDevices();
-				},
-				function (error) {
-					bridgeService.displayWarn("Error adding device: " + $scope.device.name, error)
-				}
-		);
-
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.bulkAddDevices = function() {
@@ -1649,6 +1624,8 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		+ postCmd;
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname,  haldevice.haldevicename, haldevice.halname, aDeviceType,  "halDevice", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildButtonUrls = function (haldevice, onbutton, offbutton) {
@@ -1659,6 +1636,8 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-" + actionOn.DeviceName,  haldevice.haldevicename, haldevice.halname, "button",  "halButton", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildHALHomeUrls = function (haldevice) {
@@ -1666,6 +1645,8 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		offpayload = "http://" + haldevice.haladdress	+ "/ModeService!ModeCmd=Set!ModeName=Away?Token=" + $scope.bridge.settings.haltoken;
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-HomeAway",  haldevice.haldevicename, haldevice.halname, "home",  "halHome", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildHALHeatUrls = function (haldevice) {
@@ -1686,6 +1667,8 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		+ $scope.bridge.settings.haltoken;
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-SetHeat",  haldevice.haldevicename + " Heat", haldevice.halname, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildHALCoolUrls = function (haldevice) {
@@ -1706,6 +1689,8 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		+ $scope.bridge.settings.haltoken;
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-SetCool",  haldevice.haldevicename + " Cool", haldevice.halname, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildHALAutoUrls = function (haldevice) {
@@ -1720,6 +1705,8 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		+ "!HVACMode=Off?Token="
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-SetAuto",  haldevice.haldevicename + " Auto", haldevice.halname, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildHALOffUrls = function (haldevice) {
@@ -1735,6 +1722,8 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		$scope.device.offUrl = "http://" + haldevice.haladdress 
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-TurnOff",  haldevice.haldevicename + " Thermostat", haldevice.halname, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildHALFanUrls = function (haldevice) {
@@ -1750,22 +1739,8 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 			+ $scope.bridge.settings.haltoken;
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-SetFan",  haldevice.haldevicename + " Fan", haldevice.halname, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
-	};
-
-	$scope.addDevice = function () {
-		if($scope.device.name === "" && $scope.device.onUrl === "")
-			return;
-		bridgeService.addDevice($scope.device).then(
-				function () {
-					$scope.clearDevice();
-					bridgeService.viewDevices();
-					bridgeService.viewHalDevices();
-				},
-				function (error) {
-					bridgeService.displayWarn("Error adding device: " + $scope.device.name, error)
-				}
-		);
-
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.bulkAddDevices = function(dim_control) {
@@ -1884,21 +1859,8 @@ app.controller('MQTTController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, null, offpayload, true, mqttbroker.clientId + "-" + mqtttopic, mqttbroker.clientId + mqtttopic, mqttbroker.clientId, "mqtt",  "mqttMessage", null, null);
 		$scope.device = bridgeService.state.device;
-	};
-
-	$scope.addDevice = function () {
-		if($scope.device.name === "" && $scope.device.onUrl === "")
-			return;
-		bridgeService.addDevice($scope.device).then(
-				function () {
-					$scope.clearDevice();
-					bridgeService.viewDevices();
-					bridgeService.viewMQTTDevices();
-				},
-				function (error) {
-				}
-		);
-
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.toggleButtons = function () {
@@ -1949,6 +1911,8 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildHassHeatUrls = function (hassdevice) {
@@ -1961,6 +1925,8 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildHassCoolUrls = function (hassdevice) {
@@ -1973,6 +1939,8 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildHassAutoUrls = function (hassdevice) {
@@ -1985,6 +1953,8 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildHassOffUrls = function (hassdevice) {
@@ -1997,6 +1967,8 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
 		$scope.device = bridgeService.state.device;
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.buildHassFanUrls = function (hassdevice) {
@@ -2009,22 +1981,8 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
 		$scope.device = bridgeService.state.device;
-	};
-
-	$scope.addDevice = function () {
-		if($scope.device.name === "" && $scope.device.onUrl === "")
-			return;
-		bridgeService.addDevice($scope.device).then(
-				function () {
-					$scope.clearDevice();
-					bridgeService.viewDevices();
-					bridgeService.viewHassDevices();
-				},
-				function (error) {
-					bridgeService.displayWarn("Error adding device: " + $scope.device.name, error)
-				}
-		);
-
+		bridgeService.editDevice($scope.device);
+		$location.path('/editdevice');
 	};
 
 	$scope.bulkAddDevices = function(dim_control) {

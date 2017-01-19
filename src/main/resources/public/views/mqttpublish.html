@@ -20,10 +20,13 @@
 	</div>
 	<div class="panel-body">
 		<p class="text-muted">For any MQTT Broker, use the
-			build button to generate the configuration for the publish generation.
+			build action buttons
+			to generate the item addition information into the ha-bridge device and this will put you into the edit screen.
 			You can add topic and content in the text areas provided
 			then selecting the publish generation. Then you can modify the name
-			to anything you want that will be the keyword for Alexa. Click the
+			to anything you want that will be the keyword for Alexa. Also, you can go back to any helper tab and click a build 
+			action button to add another item for a multi-command. After you are
+			 done in the edit tab, click the
 			'Add Bridge Device' to finish that selection setup. The 'Already
 			Configured MQTT Publish messages' list below will show what is already
 			setup for your MQTT Brokers.</p>
@@ -38,7 +41,7 @@
 				<th sortable-header col="ip">IP</th>
 				<th>Topic</th>
 				<th>Content</th>
-				<th>Actions</th>
+				<th>Build Actions</th>
 			</tr>
 		</thead>
 		<tr ng-repeat="mqttbroker in bridge.mqttbrokers">
@@ -99,50 +102,6 @@
 		</tr>
 	</table>
 	</scrollable-table>
-</div>
-<div class="panel panel-default">
-	<div class="panel-heading">
-		<h2 class="panel-title">Add a Bridge Device for MQTT Messages</h2>
-	</div>
-	<div class="panel-body">
-		<form class="form-horizontal">
-			<div class="form-group">
-				<label class="col-xs-12 col-sm-2 control-label" for="device-name">Name
-				</label>
-
-				<div class="col-xs-8 col-sm-7">
-					<input type="text" class="form-control" id="device-name"
-						ng-model="device.name" placeholder="Device Name">
-				</div>
-				<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary"
-					ng-click="addDevice()">Add Bridge Device</button>
-			</div>
-			<div class="form-group">
-				<div class="row">
-					<label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On
-						URL </label>
-
-					<div class="col-xs-8 col-sm-7">
-						<textarea rows="3" class="form-control" id="device-on-url"
-							ng-model="device.onUrl" placeholder="URL to turn device on"></textarea>
-					</div>
-					<button class="btn btn-danger" ng-click="clearDevice()">
-						Clear Device</button>
-				</div>
-			</div>
-			<div class="form-group">
-				<div class="row">
-					<label class="col-xs-12 col-sm-2 control-label"
-						for="device-off-url">Off URL </label>
-
-					<div class="col-xs-8 col-sm-7">
-						<textarea rows="3" class="form-control" id="device-off-url"
-							ng-model="device.offUrl" placeholder="URL to turn device off"></textarea>
-					</div>
-				</div>
-			</div>
-		</form>
-	</div>
 </div>
 <script type="text/ng-template" id="deleteMapandIdDialog">
 		<div class="ngdialog-message">

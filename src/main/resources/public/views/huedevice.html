@@ -26,10 +26,12 @@
 			({{bridge.huedevices.length}})</h2>
 	</div>
 	<div class="panel-body">
-		<p class="text-muted">For any Hue Device, use the action buttons
-			to generate the device addition information below automatically. Then
+		<p class="text-muted">For any Hue Device, use the build action buttons
+			to generate the item addition information into the ha-bridge device and this will put you into the edit screen. Then
 			you can modify the name to anything you want that will be the keyword
-			for Alexa. Click the 'Add Bridge Device' to finish that selection
+			for Alexa. Also, you can go back to any helper tab and click a build 
+			action button to add another item for a multi-command. After you are
+			 done in the edit tab, click the 'Add Bridge Device' to finish that selection
 			setup. The 'Already Configured Hue Devices' list below will show what
 			is already setup for your Hue.</p>
 		<p>Use the check boxes by the names to use the bulk addition
@@ -48,7 +50,7 @@
 					ng-click="toggleSelectAll()"> Name</span></th>
 				<th sortable-header col="id">Id</th>
 				<th sortable-header col="huename">Hue</th>
-				<th>Actions</th>
+				<th>Build Actions</th>
 			</tr>
 		</thead>
 		<tr ng-repeat="huedevice in bridge.huedevices">
@@ -62,8 +64,7 @@
 			<td>{{huedevice.huename}}</td>
 			<td>
 				<button class="btn btn-success" type="submit"
-					ng-click="buildDeviceUrls(huedevice)">Generate Bridge
-					Device</button>
+					ng-click="buildDeviceUrls(huedevice)">Build Item</button>
 			</td>
 		</tr>
 	</table>
@@ -109,38 +110,6 @@
 		</tr>
 	</table>
 	</scrollable-table>
-</div>
-<div class="panel panel-default">
-	<div class="panel-heading">
-		<h2 class="panel-title">Add Bridge Device for a Hue Device</h2>
-	</div>
-	<div class="panel-body">
-		<form class="form-horizontal">
-			<div class="form-group">
-				<label class="col-xs-12 col-sm-2 control-label" for="device-name">Name
-				</label>
-
-				<div class="col-xs-8 col-sm-7">
-					<input type="text" class="form-control" id="device-name"
-						ng-model="device.name" placeholder="Device Name">
-				</div>
-				<button type="submit" class="col-xs-4 col-sm-2 btn btn-primary"
-					ng-click="addDevice()">Add Bridge Device</button>
-			</div>
-			<div class="form-group">
-				<div class="row">
-					<label class="col-xs-12 col-sm-2 control-label" for="device-on-url">On
-						URL </label>
-
-					<div class="col-xs-8 col-sm-7">
-						<textarea rows="3" class="form-control" id="device-on-url"
-							ng-model="device.onUrl" placeholder="URL to turn device on"></textarea>
-					</div>
-					<button class="btn btn-danger" ng-click="clearDevice()">
-						Clear Device</button>
-				</div>
-		</form>
-	</div>
 </div>
 <script type="text/ng-template" id="deleteMapandIdDialog">
 		<div class="ngdialog-message">
