@@ -26,6 +26,8 @@ Then locate the jar and start the server with:
 
 ATTENTION: This requires JDK 1.8 to run
 
+ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
+
 ```
 java -jar ha-bridge-3.5.1.jar
 ```
