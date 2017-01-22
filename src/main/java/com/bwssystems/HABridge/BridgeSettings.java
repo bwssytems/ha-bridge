@@ -18,8 +18,8 @@ import org.apache.http.conn.util.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.util.BackupHandler;
-import com.bwssystems.util.JsonTransformer;
+import com.bwssystems.HABridge.util.BackupHandler;
+import com.bwssystems.HABridge.util.JsonTransformer;
 import com.google.gson.Gson;
 
 public class BridgeSettings extends BackupHandler {
@@ -54,6 +54,7 @@ public class BridgeSettings extends BackupHandler {
         		configFileProperty = Configuration.CONFIG_FILE;
         }
         String serverPortOverride = System.getProperty("server.port");
+        String serverIpOverride = System.getProperty("server.ip");
         if(configFileProperty != null)
         {
         	log.info("reading from config file: " + configFileProperty);
@@ -151,8 +152,11 @@ public class BridgeSettings extends BackupHandler {
         theBridgeSettings.setHueconfigured(theBridgeSettings.isValidHue());
         theBridgeSettings.setHalconfigured(theBridgeSettings.isValidHal());
         theBridgeSettings.setMqttconfigured(theBridgeSettings.isValidMQTT());
+        theBridgeSettings.setHassconfigured(theBridgeSettings.isValidHass());
         if(serverPortOverride != null)
         	theBridgeSettings.setServerPort(serverPortOverride);
+        if(serverIpOverride != null)
+        	theBridgeSettings.setWebaddress(serverIpOverride);
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
 	}
 

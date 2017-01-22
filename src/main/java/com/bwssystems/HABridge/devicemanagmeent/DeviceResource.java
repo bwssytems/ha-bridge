@@ -17,19 +17,12 @@ import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.DeviceMapTypes;
+import com.bwssystems.HABridge.HomeManager;
 import com.bwssystems.HABridge.dao.BackupFilename;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
 import com.bwssystems.HABridge.dao.ErrorMessage;
-import com.bwssystems.NestBridge.NestHome;
-import com.bwssystems.hal.HalHome;
-import com.bwssystems.harmony.HarmonyHome;
-import com.bwssystems.hue.HueHome;
-import com.bwssystems.luupRequests.Device;
-import com.bwssystems.luupRequests.Scene;
-import com.bwssystems.mqtt.MQTTHome;
-import com.bwssystems.util.JsonTransformer;
-import com.bwssystems.vera.VeraHome;
+import com.bwssystems.HABridge.util.JsonTransformer;
 import com.google.gson.Gson;
 
 /**
@@ -39,47 +32,12 @@ public class DeviceResource {
     private static final String API_CONTEXT = "/api/devices";
     private static final Logger log = LoggerFactory.getLogger(DeviceResource.class);
     private DeviceRepository deviceRepository;
-    private VeraHome veraHome;
-    private HarmonyHome myHarmonyHome;
-    private NestHome nestHome;
-    private HueHome hueHome;
-    private HalHome halHome;
-    private MQTTHome mqttHome;
+    private HomeManager homeManager;
     private static final Set<String> supportedVerbs = new HashSet<>(Arrays.asList("get", "put", "post"));
 
-	public DeviceResource(BridgeSettingsDescriptor theSettings, HarmonyHome theHarmonyHome, NestHome aNestHome, HueHome aHueHome, HalHome aHalHome, MQTTHome aMqttHome) {
+	public DeviceResource(BridgeSettingsDescriptor theSettings, HomeManager aHomeManager) {
 		this.deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
-
-		if(theSettings.isValidVera())
-			this.veraHome = new VeraHome(theSettings);
-		else
-			this.veraHome = null;
-		
-		if(theSettings.isValidHarmony())
-			this.myHarmonyHome = theHarmonyHome;
-		else
-			this.myHarmonyHome = null;
-		
-		if(theSettings.isValidNest())
-			this.nestHome = aNestHome;
-		else
-			this.nestHome = null;
-
-		if(theSettings.isValidHue())
-			this.hueHome = aHueHome;
-		else
-			this.hueHome = null;
-
-		if(theSettings.isValidHal())
-			this.halHome = aHalHome;
-		else
-			this.halHome = null;
-
-		if(theSettings.isValidMQTT())
-			this.mqttHome = aMqttHome;
-		else
-			this.mqttHome = null;
-
+		homeManager = aHomeManager;
 		setupEndpoints();
 	}
 
@@ -198,109 +156,66 @@ public class DeviceResource {
 
     	get (API_CONTEXT + "/vera/devices", "application/json", (request, response) -> {
 	    	log.debug("Get vera devices");
-	        if(veraHome == null){
-				response.status(HttpStatus.SC_NOT_FOUND);
-				return new ErrorMessage("A Vera is not available.");
-	        }
-	        List<Device> theDevices = veraHome.getDevices();
-	        if(theDevices == null) {
-	        	response.status(HttpStatus.SC_SERVICE_UNAVAILABLE);
-	        	return new ErrorMessage("A Vera request failed to get devices. Check your Vera IP addresses.");
-	        }
-	        else
-	        	response.status(HttpStatus.SC_OK);
-	        return theDevices;
+        	response.status(HttpStatus.SC_OK);
+	        return homeManager.findResource(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/vera/scenes", "application/json", (request, response) -> {
 	    	log.debug("Get vera scenes");
-	        if(veraHome == null){
-				response.status(HttpStatus.SC_NOT_FOUND);
-				return new ErrorMessage("A Vera is not available.");
-	        }
-	        List<Scene> theScenes = veraHome.getScenes();
-	        if(theScenes == null) {
-	        	response.status(HttpStatus.SC_SERVICE_UNAVAILABLE);
-	        	return new ErrorMessage("A Vera is not available and failed to get scenes. Check your Vera IP addresses.");
-	        }
-	        else
-	        	response.status(HttpStatus.SC_OK);
-	        return theScenes;
+	        response.status(HttpStatus.SC_OK);
+	        return homeManager.findResource(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.VERA_SCENE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/harmony/activities", "application/json", (request, response) -> {
 	    	log.debug("Get harmony activities");
-	      	if(myHarmonyHome == null) {
-				response.status(HttpStatus.SC_NOT_FOUND);
-				return new ErrorMessage("A Harmony is not available.");	      		
-	      	}
 	      	response.status(HttpStatus.SC_OK);
-	      	return myHarmonyHome.getActivities();
+	      	return homeManager.findResource(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/harmony/show", "application/json", (request, response) -> {
 	    	log.debug("Get harmony current activity");
-	      	if(myHarmonyHome == null) {
-	      		response.status(HttpStatus.SC_NOT_FOUND);
-	      		return new ErrorMessage("A Harmony is not available.");	
-	      	}
-	      	response.status(HttpStatus.SC_OK);
-      		return myHarmonyHome.getCurrentActivities();
+      		return homeManager.findResource(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.typeIndex]).getItems("current_activity");
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/harmony/devices", "application/json", (request, response) -> {
 	    	log.debug("Get harmony devices");
-	      	if(myHarmonyHome == null) {
-				response.status(HttpStatus.SC_NOT_FOUND);
-				return new ErrorMessage("A Harmony is not available.");		      		
-	      	}
 	      	response.status(HttpStatus.SC_OK);
-	      	return myHarmonyHome.getDevices();
+	      	return homeManager.findResource(DeviceMapTypes.HARMONY_BUTTON[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.HARMONY_BUTTON[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/nest/items", "application/json", (request, response) -> {
 	    	log.debug("Get nest items");
-	      	if(nestHome == null) {
-				response.status(HttpStatus.SC_NOT_FOUND);
-				return new ErrorMessage("A Nest is not available.");
-	      	}
 	      	response.status(HttpStatus.SC_OK);
-	      	return nestHome.getItems();
+	      	return homeManager.findResource(DeviceMapTypes.NEST_HOMEAWAY[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.NEST_HOMEAWAY[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/hue/devices", "application/json", (request, response) -> {
 	    	log.debug("Get hue items");
-	      	if(hueHome == null) {
-				response.status(HttpStatus.SC_NOT_FOUND);
-				return new ErrorMessage("A Hue is not available.");
-	      	}
 	      	response.status(HttpStatus.SC_OK);
-	      	return hueHome.getDevices();
+	      	return homeManager.findResource(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/hal/devices", "application/json", (request, response) -> {
 	    	log.debug("Get hal items");
-	      	if(halHome == null) {
-				response.status(HttpStatus.SC_NOT_FOUND);
-				return new ErrorMessage("A Hal is not available.");
-	      	}
 	      	response.status(HttpStatus.SC_OK);
-	      	return halHome.getDevices();
+	      	return homeManager.findResource(DeviceMapTypes.HAL_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.HAL_DEVICE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/mqtt/devices", "application/json", (request, response) -> {
 	    	log.debug("Get MQTT brokers");
-	      	if(mqttHome == null) {
-				response.status(HttpStatus.SC_NOT_FOUND);
-				return new ErrorMessage("A MQTT config is not available.");
-	      	}
 	      	response.status(HttpStatus.SC_OK);
-	      	return mqttHome.getBrokers();
+	      	return homeManager.findResource(DeviceMapTypes.MQTT_MESSAGE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.MQTT_MESSAGE[DeviceMapTypes.typeIndex]);
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/hass/devices", "application/json", (request, response) -> {
+	    	log.debug("Get HomeAssistant Clients");
+	      	response.status(HttpStatus.SC_OK);
+	      	return homeManager.findResource(DeviceMapTypes.HASS_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.HASS_DEVICE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/map/types", "application/json", (request, response) -> {
 	    	log.debug("Get map types");
-	      	return new DeviceMapTypes();
+	      	return new DeviceMapTypes().getDeviceMapTypes();
 	    }, new JsonTransformer());
 
 	    // http://ip_address:port/api/devices/exec/renumber CORS request

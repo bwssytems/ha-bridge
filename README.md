@@ -29,16 +29,16 @@ ATTENTION: This requires JDK 1.8 to run
 ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
 
 ```
-java -jar ha-bridge-3.5.1.jar
+java -jar ha-bridge-4.0.0.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
-Create the directory and make sure that ha-bridge-3.5.1.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-4.0.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v3.5.1/ha-bridge-3.5.1.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.0.0/ha-bridge-4.0.0.jar
 ```
 #### System Control Setup on a pi (preferred)
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
@@ -57,7 +57,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-3.5.1.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.0.0.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -92,7 +92,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-3.5.1.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.0.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
 Exit and save the file with ctrl-X and follow the prompts and then execute on the command line:
@@ -121,6 +121,11 @@ java -jar -Dserver.port=80 ha-bridge-W.X.Y.jar
 ```
 Note: if using with a Google Home device, port 80 *must* be used.
 
+### -Dserver.ip=`<ip address>`
+The default ip address for the bridge to listen on is all interfaces (0.0.0.0). To override what the default or what is in the configuration file for this parameter, specify -Dserver.ip=`<ip address>` explicitly. This is especially helpful if you are running the ha-bridge for the first time and have another application on that utilizes the default interface. The command line example:
+```
+java -jar -Dserver.ip=192.168.1.1 ha-bridge-W.X.Y.jar
+```
 ## HA Bridge Usage and Configuration
 This section will cover the basics of configuration and where this configuration can be done. This requires that you have started your bridge process and then have pointed your
 favorite web interface by going to the http://<my ip address>:<port> or http://localhost:<port> with port you have assigned. The default quick link is http://localhost for yoru reference.
@@ -189,10 +194,10 @@ You must configure devices before you will have any thing for the Echo or other 
 #### Helpers
 The easy way to get devices configured is with the use of the helpers for the Vera or Harmony, Nest and Hue to create devices that the bridge will present.
 
-For the Helpers, each item being presented from the target system has a button such as `Generate Bridge Device`, `Build A Button` or specific tasks such as `Temp` for thermostats that is used to create the specific device parameters and give it a name in the "Add a Bridge Device..." area below. The next thing to check is the name for the bridge device that it is something that makes sense especially if you usign the ha-bridge with an Echo as this is what the Echo will interpret as the device you want. Then select the `Add Bridge Device` button to finalize it.
+For the Helpers, each item being presented from the target system has a button such as `Build Item`, `Build A Button` or specific tasks such as `Temp` for thermostats that is used to create the specific device parameters. The build action buttons will put you into the edit screen. The next thing to check is the name for the bridge device that it is something that makes sense especially if you using the ha-bridge with an Echo or Google Home as this is what the Echo or Google Home will interpret as the device you want. Also, you can go back to any helper tab and click a build action button to add another item for a multi-command. After you are done in the edit tab, click the `Add Bridge Device` to finish that selection setup. 
 
 The helper tabs will also show you what you have already configured for that target type. Click on the `+` and you will see them and be able to delete them.
-#### The Manual Add Tab
+#### The Add/Edit Tab
 Another way to add a device is through the Manual Add Tab. This allows you to manually enter the name, the on and off URLs and select if there are custom handling with the type of call that can be made. This allows for control of anything that has a distinct request that can be executed so you are not limited to the Vera, Harmony, Nest or other Hue.
 
 The format of these can be the default HTTP request which executes the URLs formatted as `http://<your stuff here>` as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use `https://<your secure call here>`. When using POST and PUT, you have the ability to specify the body that will be sent with the request as well as the application type for the http call.
@@ -450,6 +455,8 @@ contentBodyOff | string | This is the content body that you would like to send w
 ```
 ### Update a Device 
 Update an existing device using it's ID that was given when the device was created and the update could contain any of the fields that are used and shown in the previous examples when adding a device. 
+
+**Note: You must supply all fields of the device in return as this is a replacement update for the given id.**
 ```
 PUT http://host:port/api/devices/<id>
 ```
@@ -1078,11 +1085,6 @@ GET http://host:80/description.xml
 		</iconList>\n
 	</device>\n
 </root>\n
-```
-## Debugging
-To turn on debugging for the bridge, use the following extra parm in the command line:
-```
--Dorg.slf4j.simpleLogger.defaultLogLevel=DEBUG
 ```
 ## Development Mode
 To turn on development mode so that it will not need an Harmony Hub for testing, use the following extra parm in the command line and the harmony ip and login info will not be needed:

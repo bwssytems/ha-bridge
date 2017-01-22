@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.HuePublicConfig;
 
 import static spark.Spark.get;
@@ -30,10 +31,10 @@ public class UpnpSettingsResource {
 				+ "<manufacturerURL>http://www.philips.com</manufacturerURL>\n"
 				+ "<modelDescription>Philips hue Personal Wireless Lighting</modelDescription>\n"
 				+ "<modelName>Philips hue bridge 2015</modelName>\n"
-				+ "<modelNumber>BSB002</modelNumber>\n"
+				+ "<modelNumber>" + HueConstants.MODEL_ID + "</modelNumber>\n"
 				+ "<modelURL>http://www.meethue.com</modelURL>\n"
 				+ "<serialNumber>%s</serialNumber>\n"
-				+ "<UDN>uuid:2f402f80-da50-11e1-9b23-%s</UDN>\n"
+				+ "<UDN>uuid:" + HueConstants.UUID_PREFIX + "%s</UDN>\n"
 				+ "<serviceList>\n"
 					+ "<service>\n"
 						+ "<serviceType>(null)</serviceType>\n"
@@ -78,7 +79,7 @@ public class UpnpSettingsResource {
 				log.debug("upnp device settings requested: " + " from " + request.ip() + ":" + request.port());
 			String portNumber = Integer.toString(request.port());
 			String filledTemplate = null;
-			String bridgeIdMac = HuePublicConfig.createConfig("temp", theSettings.getUpnpConfigAddress()).getSNUUIDFromMac();
+			String bridgeIdMac = HuePublicConfig.createConfig("temp", theSettings.getUpnpConfigAddress(), HueConstants.HUB_VERSION).getSNUUIDFromMac();
 			filledTemplate = String.format(hueTemplate, theSettings.getUpnpConfigAddress(), portNumber, theSettings.getUpnpConfigAddress(), bridgeIdMac, bridgeIdMac);
 			if(theSettings.isTraceupnp())
 				log.info("Traceupnp: upnp device settings template filled with address: " + theSettings.getUpnpConfigAddress() + " and port: " + portNumber);

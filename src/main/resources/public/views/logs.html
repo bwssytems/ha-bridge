@@ -1,22 +1,23 @@
 <ul class="nav nav-pills" role="tablist">
-	<li role="presentation"><a href="#">Bridge Devices</a></li>
-	<li role="presentation"><a href="#/system">Bridge Control</a></li>
-	<li role="presentation" class="active"><a href="#/logs">Logs</a></li>
+	<li role="presentation"><a href="#!/">Bridge Devices</a></li>
+	<li role="presentation"><a href="#!/system">Bridge Control</a></li>
+	<li role="presentation" class="active"><a href="#!/logs">Logs</a></li>
 	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#/veradevices">Vera Devices</a></li>
+		href="#!/veradevices">Vera Devices</a></li>
 	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#/verascenes">Vera Scenes</a></li>
+		href="#!/verascenes">Vera Scenes</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
-		href="#/harmonyactivities">Harmony Activities</a></li>
+		href="#!/harmonyactivities">Harmony Activities</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
-		href="#/harmonydevices">Harmony Devices</a></li>
-	<li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
+		href="#!/harmonydevices">Harmony Devices</a></li>
+	<li ng-if="bridge.showNest" role="presentation"><a href="#!/nest">Nest</a></li>
 	<li ng-if="bridge.showHue" role="presentation"><a
-		href="#/huedevices">Hue Devices</a></li>
+		href="#!/huedevices">Hue Devices</a></li>
 	<li ng-if="bridge.showHal" role="presentation"><a
-		href="#/haldevices">HAL Devices</a></li>
-	<li ng-if="bridge.showMqtt" role="presentation"><a href="#/mqttmessages">MQTT Messages</a></li>
-	<li role="presentation"><a href="#/editor">Manual Add</a></li>
+		href="#!/haldevices">HAL Devices</a></li>
+	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
+	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
+	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
 <div class="panel panel-default">
@@ -28,7 +29,6 @@
 			<button class="btn btn-primary" type="submit" ng-click="updateLogs()">Update
 				Log</button>
 		</p>
-	</div>
 	<scrollable-table watch="bridge.logMsgs">
 	<table class="table table-striped table-bordered table-hover">
 		<thead>
@@ -47,6 +47,7 @@
 		</tr>
 	</table>
 	</scrollable-table>
+	</div>
 </div>
 <div class="panel panel-default">
 	<div class="panel-heading">
@@ -55,7 +56,7 @@
 				class={{imgUrl}} aria-hidden="true"></a>
 		</h1>
 	</div>
-	<div ng-if="visible" class="animate-if" class="panel-body">
+	<div ng-if="visible" class="panel-body">
 		<p>
 			<button class="btn btn-primary" type="submit"
 				ng-click="updateLoggers()">Update Log Levels</button>
