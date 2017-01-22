@@ -38,7 +38,6 @@
 			feature. Select your items, then click bulk add below. Your items
 			will be added with on and off or dim and off if selected with the
 			name of the device from the Hue.</p>
-	</div>
 	<scrollable-table watch="bridge.huedevices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
@@ -74,6 +73,7 @@
 			ng-click="bulkAddDevices()">Bulk Add
 			({{bulk.devices.length}})</button>
 	</div>
+	</div>
 </div>
 <div class="panel panel-default">
 	<div class="panel-heading">
@@ -82,7 +82,8 @@
 				class={{imgButtonsUrl}} aria-hidden="true"></span></a></a>
 		</h2>
 	</div>
-	<scrollable-table ng-if="buttonsVisible" watch="bridge.huedevices">
+	<div ng-if="buttonsVisible" class="panel-body">
+	<scrollable-table watch="bridge.huedevices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
@@ -110,6 +111,7 @@
 		</tr>
 	</table>
 	</scrollable-table>
+	</div>
 </div>
 <script type="text/ng-template" id="deleteMapandIdDialog">
 		<div class="ngdialog-message">

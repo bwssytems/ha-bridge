@@ -33,7 +33,6 @@
 			 done in the edit tab, click the 'Add Bridge Device' to finish that selection
 			setup. The 'Already Configured Nest Items' list below will show what
 			is already setup for your Nest.</p>
-	</div>
 
 	<scrollable-table watch="bridge.nestitems">
 	<table class="table table-bordered table-striped table-hover">
@@ -81,6 +80,7 @@
 		</tr>
 	</table>
 	</scrollable-table>
+	</div>
 </div>
 <div class="panel panel-default">
 	<div class="panel-heading">
@@ -89,7 +89,8 @@
 				class={{imgButtonsUrl}} aria-hidden="true"></span></a>
 		</h2>
 	</div>
-	<scrollable-table ng-if="buttonsVisible" watch="bridge.nestitems">
+	<div ng-if="buttonsVisible" class="panel-body">
+	<scrollable-table watch="bridge.nestitems">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
@@ -116,6 +117,7 @@
 		</tr>
 	</table>
 	</scrollable-table>
+	</div>
 </div>
 <script type="text/ng-template" id="deleteMapandIdDialog">
 		<div class="ngdialog-message">

@@ -24,9 +24,9 @@
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">Current devices
-			({{bridge.devices.length}})</h2>
+		<h1 class="panel-title">Current devices ({{bridge.devices.length}})</h1>
 	</div>
+	<div class="panel-body">
 
 		<p>
 			<button class="btn btn-primary" type="submit" ng-click="renumberDevices()">Renumber Devices</button>
@@ -67,6 +67,7 @@
 		</tr>
 	</table>
 	</scrollable-table>
+	</div>
 </div>
 <div class="panel panel-default">
 	<div class="panel-heading">
@@ -75,7 +76,7 @@
 				class={{imgBkUrl}} aria-hidden="true"></span></a>
 		</h1>
 	</div>
-	<div ng-if="visibleBk" class="animate-if" class="panel-body">
+	<div ng-if="visibleBk" class="panel-body">
 		<p>Control your backups from this area. Use the default name by hitting backup or specify your own.</p>
 		<form class="form-horizontal">
 			<div class="form-group">
