@@ -705,6 +705,10 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		self.state.olddevicename = device.name;
 	};
 
+	this.editNewDevice = function (device) {
+		self.state.device = device;
+	};
+
 	this.testUrl = function (device, type, value) {
 		var msgDescription = "unknown";
 		var testUrl = this.state.huebase + "/test/lights/" + device.id + "/state";
@@ -1163,7 +1167,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 
 			bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, veradevice.id, veradevice.name, veradevice.veraname, "switch", "veraDevice", null, null);
 			$scope.device = bridgeService.state.device;
-			bridgeService.editDevice($scope.device);
+			bridgeService.editNewDevice($scope.device);
 			$location.path('/editdevice');
 	};
 
@@ -1177,7 +1181,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, null, offpayload, false, verascene.id, verascene.name, verascene.veraname, "scene", "veraScene", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1297,7 +1301,7 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 
 		bridgeService.buildUrls(onpayload, null, offpayload, true, harmonyactivity.activity.id,  harmonyactivity.activity.label, harmonyactivity.hub, "activity", "harmonyActivity", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1309,7 +1313,7 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 
 		bridgeService.buildUrls(onpayload, null, offpayload, true, actionOn.command,  harmonydevice.device.label, harmonydevice.hub, "button", "harmonyButton", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1353,7 +1357,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		offpayload = "{\"name\":\"" + nestitem.id + "\",\"away\":true,\"control\":\"status\"}";
 		bridgeService.buildUrls(onpayload, null, offpayload, true, nestitem.id,  nestitem.name, nestitem.name, "home", "nestHomeAway", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1363,7 +1367,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		offpayload = "{\"name\":\"" + nestitem.id + "\",\"control\":\"off\"}";
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, nestitem.id + "-SetTemp",  nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Temperature", nestitem.location, "thermo", "nestThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1373,7 +1377,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		offpayload = "{\"name\":\"" + nestitem.id + "\",\"control\":\"off\"}";
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, nestitem.id + "-SetHeat",  nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Heat", nestitem.location, "thermo", "nestThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1383,7 +1387,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		offpayload = "{\"name\":\"" + nestitem.id + "\",\"control\":\"off\"}";
 		bridgeService.buildUrls(onpayload,dimpayload, offpayload, true, nestitem.id + "-SetCool",  nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Cool", nestitem.location, "thermo", "nestThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1392,7 +1396,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		offpayload = "{\"name\":\"" + nestitem.id + "\",\"control\":\"off\"}";
 		bridgeService.buildUrls(onpayload, null, offpayload, true, nestitem.id + "-SetRange",  nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Range", nestitem.location, "thermo", "nestThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1401,7 +1405,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		offpayload = "{\"name\":\"" + nestitem.id + "\",\"control\":\"off\"}";
 		bridgeService.buildUrls(onpayload, null, offpayload, true, nestitem.id + "-TurnOff",  nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Thermostat", nestitem.location, "thermo", "nestThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1410,7 +1414,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 		offpayload = "{\"name\":\"" + nestitem.id + "\",\"control\":\"fan-auto\"}";
 		bridgeService.buildUrls(onpayload, null, offpayload, true, nestitem.id + "-SetFan",  nestitem.name.substr(0, nestitem.name.indexOf("(")) + " Fan", nestitem.location, "thermo", "nestThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1456,7 +1460,7 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 		offpayload = "{\"ipAddress\":\"" + huedevice.hueaddress + "\",\"deviceId\":\"" + huedevice.huedeviceid +"\",\"hueName\":\"" + huedevice.huename + "\"}";
 		bridgeService.buildUrls(onpayload, null, offpayload, true, huedevice.device.uniqueid,  huedevice.device.name, huedevice.huename, "passthru",  "hueDevice", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1624,7 +1628,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		+ postCmd;
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname,  haldevice.haldevicename, haldevice.halname, aDeviceType,  "halDevice", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1636,7 +1640,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-" + actionOn.DeviceName,  haldevice.haldevicename, haldevice.halname, "button",  "halButton", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1645,7 +1649,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		offpayload = "http://" + haldevice.haladdress	+ "/ModeService!ModeCmd=Set!ModeName=Away?Token=" + $scope.bridge.settings.haltoken;
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-HomeAway",  haldevice.haldevicename, haldevice.halname, "home",  "halHome", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1667,7 +1671,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		+ $scope.bridge.settings.haltoken;
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-SetHeat",  haldevice.haldevicename + " Heat", haldevice.halname, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1689,7 +1693,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		+ $scope.bridge.settings.haltoken;
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-SetCool",  haldevice.haldevicename + " Cool", haldevice.halname, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1705,7 +1709,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		+ "!HVACMode=Off?Token="
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-SetAuto",  haldevice.haldevicename + " Auto", haldevice.halname, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1722,7 +1726,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		$scope.device.offUrl = "http://" + haldevice.haladdress 
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-TurnOff",  haldevice.haldevicename + " Thermostat", haldevice.halname, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1739,7 +1743,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 			+ $scope.bridge.settings.haltoken;
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-SetFan",  haldevice.haldevicename + " Fan", haldevice.halname, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1859,7 +1863,7 @@ app.controller('MQTTController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, null, offpayload, true, mqttbroker.clientId + "-" + mqtttopic, mqttbroker.clientId + mqtttopic, mqttbroker.clientId, "mqtt",  "mqttMessage", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1911,7 +1915,7 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1925,7 +1929,7 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1939,7 +1943,7 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1953,7 +1957,7 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1967,7 +1971,7 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -1981,7 +1985,7 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editDevice($scope.device);
+		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
 	};
 
@@ -2120,10 +2124,12 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 	$scope.editDevice = function (copy) {
 		if($scope.device.name === "" && $scope.device.onUrl === "") {
 			$scope.clearDevice();
+			bridgeService.displayWarn("Error adding/editing device. Name has not been given.", null);
 			return;
 		}
 		if(($scope.device.name === $scope.bridge.olddevicename) && copy) {
 			$scope.clearDevice();
+			bridgeService.displayWarn("Error adding device. Name has not been changed from original.", null);
 			return;
 		}
 		if (copy)
