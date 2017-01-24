@@ -38,6 +38,8 @@ public class BridgeSettingsDescriptor {
 	private IpList hassaddress;
 	private boolean hassconfigured;
 	private String hubversion;
+	private IpList domoticzaddress;
+	private boolean domoticzconfigured;
 	
 	public BridgeSettingsDescriptor() {
 		super();
@@ -249,6 +251,18 @@ public class BridgeSettingsDescriptor {
 	public void setHubversion(String hubversion) {
 		this.hubversion = hubversion;
 	}
+	public IpList getDomoticzaddress() {
+		return domoticzaddress;
+	}
+	public void setDomoticzaddress(IpList domoticzaddress) {
+		this.domoticzaddress = domoticzaddress;
+	}
+	public boolean isDomoticzconfigured() {
+		return domoticzconfigured;
+	}
+	public void setDomoticzconfigured(boolean domoticzconfigured) {
+		this.domoticzconfigured = domoticzconfigured;
+	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
 			return false;
@@ -302,6 +316,14 @@ public class BridgeSettingsDescriptor {
 		if(this.getHassaddress() == null || this.getHassaddress().getDevices().size() <= 0)
 			return false;		
 		List<NamedIP> devicesList = this.getHassaddress().getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+		return true;
+	}
+	public Boolean isValidDomoticz() {
+		if(this.getDomoticzaddress() == null || this.getDomoticzaddress().getDevices().size() <= 0)
+			return false;		
+		List<NamedIP> devicesList = this.getDomoticzaddress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
 		return true;
