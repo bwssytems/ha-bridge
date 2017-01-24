@@ -18,6 +18,7 @@
 		href="#!/haldevices">HAL Devices</a></li>
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
 	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
+	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
@@ -303,6 +304,51 @@
 									placeholder="Home Assistant password (opt)"></td>
 								<td><button class="btn btn-success" type="submit"
 										ng-click="addHasstoSettings(newhassname, newhassip, newhassport, newhasspassword)">Add</button></td>
+							</tr>
+						</table></td>
+				</tr>
+				<tr>
+					<td>Domoticz Names and IP Addresses</td>
+					<td><table
+							class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>IP</th>
+									<th>Port</th>
+									<th>Username (opt)</th>
+									<th>Password (opt)</th>
+									<th>Manage</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="domoticz in bridge.settings.domoticzaddress.devices">
+								<td>{{domoticz.name}}</td>
+								<td>{{domoticz.ip}}</td>
+								<td>{{domoticz.port}}</td>
+								<td>{{domoticz.username}}</td>
+								<td ng-if="domoticz.password">*******</td>
+								<td ng-if="!domoticz.password"> </td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removeDomoticztoSettings(domoticz.name, domoticz.ip)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-next-domoticz-name"
+									class="form-control" type="text" ng-model="newdomoticzname"
+									placeholder="A HomeAssistant"></td>
+								<td><input id="bridge-settings-next-domoticz-ip"
+									class="form-control" type="text" ng-model="newdomoticzip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-next-domoticz-port"
+									class="form-control" type="text" ng-model="newdomoticzport"
+									placeholder="8123"></td>
+								<td><input id="bridge-settings-next-domoticz-username"
+									class="form-control" type="text" ng-model="newdomoticzusername"
+									placeholder="username"></td>
+								<td><input id="bridge-settings-next-domoticz-password"
+									class="form-control" type="password" ng-model="newdomoticzpassword"
+									placeholder="Home Assistant password (opt)"></td>
+								<td><button class="btn btn-success" type="submit"
+										ng-click="addDomoticztoSettings(newdomoticzname, newdomoticzip, newdomoticzport, newdomoticzusername, newdomoticzpassword)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>

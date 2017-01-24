@@ -134,16 +134,10 @@ public class BridgeSettings extends BackupHandler {
         if(theBridgeSettings.getUpnpDeviceDb() == null)
         	theBridgeSettings.setUpnpDeviceDb(Configuration.DEVICE_DB_DIRECTORY);
         
-        if(theBridgeSettings.getNumberoflogmessages() == null)
+        if(theBridgeSettings.getNumberoflogmessages() == null || theBridgeSettings.getNumberoflogmessages() <= 0)
         	theBridgeSettings.setNumberoflogmessages(new Integer(Configuration.NUMBER_OF_LOG_MESSAGES));
 
-        if(theBridgeSettings.getNumberoflogmessages() <= 0)
-        	theBridgeSettings.setNumberoflogmessages(new Integer(Configuration.NUMBER_OF_LOG_MESSAGES));
-
-        if(theBridgeSettings.getButtonsleep() == null)
-        	theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DEFAULT_BUTTON_SLEEP));
-        
-        if(theBridgeSettings.getButtonsleep() < 0)
+        if(theBridgeSettings.getButtonsleep() == null || theBridgeSettings.getButtonsleep() < 0)
         	theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DEFAULT_BUTTON_SLEEP));
 
         theBridgeSettings.setVeraconfigured(theBridgeSettings.isValidVera());
@@ -153,7 +147,8 @@ public class BridgeSettings extends BackupHandler {
         theBridgeSettings.setHalconfigured(theBridgeSettings.isValidHal());
         theBridgeSettings.setMqttconfigured(theBridgeSettings.isValidMQTT());
         theBridgeSettings.setHassconfigured(theBridgeSettings.isValidHass());
-        if(serverPortOverride != null)
+        theBridgeSettings.setDomoticzconfigured(theBridgeSettings.isValidDomoticz());
+       if(serverPortOverride != null)
         	theBridgeSettings.setServerPort(serverPortOverride);
         if(serverIpOverride != null)
         	theBridgeSettings.setWebaddress(serverIpOverride);

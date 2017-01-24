@@ -10,6 +10,9 @@ public class Devices {
     @SerializedName("ActTime")
     @Expose
     private Integer actTime;
+    @SerializedName("AllowWidgetOrdering")
+    @Expose
+    private Boolean allowWidgetOrdering;
     @SerializedName("ServerTime")
     @Expose
     private String serverTime;
@@ -35,6 +38,14 @@ public class Devices {
 
     public void setActTime(Integer actTime) {
         this.actTime = actTime;
+    }
+
+    public Boolean getAllowWidgetOrdering() {
+        return allowWidgetOrdering;
+    }
+
+    public void setAllowWidgetOrdering(Boolean allowWidgetOrdering) {
+        this.allowWidgetOrdering = allowWidgetOrdering;
     }
 
     public String getServerTime() {

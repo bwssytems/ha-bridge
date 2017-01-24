@@ -42,6 +42,9 @@ app.config (function ($locationProvider, $routeProvider) {
 	}).when ('/hassdevices', {
 		templateUrl: 'views/hassdevice.html',
 		controller: 'HassController'		
+	}).when ('/domoticzdevices', {
+		templateUrl: 'views/domoticzdevice.html',
+		controller: 'DomoticzController'		
 	}).otherwise ({
 		templateUrl: 'views/configuration.html',
 		controller: 'ViewingController'
@@ -68,7 +71,7 @@ String.prototype.replaceAll = function (search, replace)
 
 app.service ('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: {}, mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, habridgeversion: ""};
+	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: {}, mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, showDomoticz: false, habridgeversion: ""};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
@@ -230,6 +233,11 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		return;
 	}
 
+	this.updateShowDomoticz = function () {
+		this.state.showDomoticz = self.state.settings.domoticzconfigured;
+		return;
+	}
+
 	this.loadBridgeSettings = function () {
 		return $http.get(this.state.systemsbase + "/settings").then(
 				function (response) {
@@ -241,6 +249,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.updateShowHal();
 					self.updateShowMqtt();
 					self.updateShowHass();
+					self.updateShowDomoticz();
 				},
 				function (error) {
 					self.displayWarn("Load Bridge Settings Error: ", error);
@@ -405,6 +414,19 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 				},
 				function (error) {
 					self.displayWarn("Get Hass Devices Error: ", error);
+				}
+		);
+	};
+
+	this.viewDomoticzDevices = function () {
+		if (!this.state.showDomoticz)
+			return;
+		return $http.get(this.state.base + "/domoticz/devices").then(
+				function (response) {
+					self.state.domoticzdevices = response.data;
+				},
+				function (error) {
+					self.displayWarn("Get Domoticz Devices Error: ", error);
 				}
 		);
 	};
@@ -940,6 +962,24 @@ app.controller ('SystemController', function ($scope, $location, $http, $window,
     	for(var i = $scope.bridge.settings.hassaddress.devices.length - 1; i >= 0; i--) {
     	    if($scope.bridge.settings.hassaddress.devices[i].name === hassname && $scope.bridge.settings.hassaddress.devices[i].ip === hassip) {
     	    	$scope.bridge.settings.hassaddress.devices.splice(i, 1);
+    	    }
+    	}    	
+    };
+    $scope.addDomoticztoSettings = function (newdomoticzname, newdomoticzip, newdomoticzport, newdomoticzusername, newdomoticzpassword) {
+    	if($scope.bridge.settings.domoticzaddress === undefined || $scope.bridge.settings.domoticzaddress === null) {
+			$scope.bridge.settings.domoticzaddress = { devices: [] };
+		}
+    	var newdomoticz = {name: newdomoticzname, ip: newdomoticzip, port: newdomoticzport, username: newdomoticzusername, password: newdomoticzpassword }
+    	$scope.bridge.settings.domoticzaddress.devices.push(newdomoticz);
+    	$scope.newdomoticzname = null;
+    	$scope.newdomoticzip = null;
+    	$scope.newdomoticzport = null;
+    	$scope.newdomoticzpassword = null;
+    };
+    $scope.removeDomoticztoSettings = function (domoticzname, domoticzip) {
+    	for(var i = $scope.bridge.settings.domoticzaddress.devices.length - 1; i >= 0; i--) {
+    	    if($scope.bridge.settings.domoticzaddress.devices[i].name === domoticzname && $scope.bridge.settings.domoticzaddress.devices[i].ip === domoticzip) {
+    	    	$scope.bridge.settings.domoticzaddress.devices.splice(i, 1);
     	    }
     	}    	
     };
@@ -2058,6 +2098,162 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 			for(var x = 0; x < bridgeService.state.hassdevices.length; x++) {
 				if($scope.bulk.devices.indexOf(bridgeService.state.hassdevices[x]) < 0 && !bridgeService.findDeviceByMapId(bridgeService.state.hassdevices[x].hassdevicename + "-" +  bridgeService.state.hassdevices[x].halname, bridgeService.state.hassdevices[x].halname, "hassdevice"))
 					$scope.bulk.devices.push(bridgeService.state.hassdevices[x].hassdevicename);
+			}
+		}
+	};
+
+	$scope.toggleButtons = function () {
+		$scope.buttonsVisible = !$scope.buttonsVisible;
+		if($scope.buttonsVisible)
+			$scope.imgButtonsUrl = "glyphicon glyphicon-minus";
+		else
+			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	};
+
+	$scope.deleteDevice = function (device) {
+		$scope.bridge.device = device;
+		ngDialog.open({
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
+	};
+	
+	$scope.editDevice = function (device) {
+		bridgeService.editDevice(device);
+		$location.path('/editdevice');
+	};
+});
+
+app.controller('DomoticzController', function ($scope, $location, $http, bridgeService, ngDialog) {
+	$scope.bridge = bridgeService.state;
+	$scope.device = bridgeService.state.device;
+	$scope.device_dim_control = "";
+	$scope.bulk = { devices: [] };
+	$scope.selectAll = false;
+	bridgeService.viewDomoticzDevices();
+	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	$scope.buttonsVisible = false;
+
+	$scope.clearDevice = function () {
+		bridgeService.clearDevice();
+		$scope.device = bridgeService.state.device;
+	};
+
+	$scope.buildDeviceUrls = function (domoticzdevice, dim_control) {
+		var preOnCmd = "";
+		var preDimCmd = "";
+		var preOffCmd = "";
+		var nameCmd = "";
+		var aDeviceType;
+		var postCmd = "";
+		if(domoticzdevice.devicetype === "Scene") {
+			aDeviceType = "scene";
+			preOnCmd = "/SceneService!SceneCmd=Set!SceneName=";
+			preOffCmd = preOnCmd;
+		}
+		else {
+			aDeviceType = "switch";
+			preOnCmd = "/DeviceService!DeviceCmd=SetDevice!DeviceValue=On";
+			preDimCmd = "/DeviceService!DeviceCmd=SetDevice!DeviceValue=Dim!DevicePercent=";
+			preOffCmd = "/DeviceService!DeviceCmd=SetDevice!DeviceValue=Off";
+			nameCmd = "!DeviceName=";
+		}
+		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0) && aDeviceType === "switch")
+			dimpayload = "http://" + domoticzdevice.domoticzaddress
+			+ preDimCmd
+			+ dim_control
+			+ nameCmd
+			+ domoticzdevice.devicename.replaceAll(" ", "%20")
+			+ postCmd;
+		else
+			dimpayload = "http://" + domoticzdevice.domoticzaddress
+			+ preOnCmd
+			+ nameCmd
+			+ domoticzdevice.devicename.replaceAll(" ", "%20")
+			+ postCmd;
+		onpayload = "http://" + domoticzdevice.domoticzaddress
+		+ preOnCmd
+		+ nameCmd
+		+ domoticzdevice.devicename.replaceAll(" ", "%20")
+		+ postCmd;
+		offpayload = "http://" + domoticzdevice.domoticzaddress 
+		+ preOffCmd
+		+ nameCmd
+		+ domoticzdevice.haldevicename.replaceAll(" ", "%20")
+		+ postCmd;
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, domoticzdevice.devicename + "-" + domoticzdevice.domoticzname,  domoticzdevice.devicename, domoticzdevice.domoticzname, aDeviceType,  "domoticzDevice", null, null);
+		$scope.device = bridgeService.state.device;
+		bridgeService.editNewDevice($scope.device);
+		$location.path('/editdevice');
+	};
+
+	$scope.bulkAddDevices = function(dim_control) {
+		var devicesList = [];
+		for(var i = 0; i < $scope.bulk.devices.length; i++) {
+			for(var x = 0; x < bridgeService.state.domoticzdevices.length; x++) {
+				if(bridgeService.state.domoticzdevices[x].devicename === $scope.bulk.devices[i]) {
+					$scope.buildDeviceUrls(bridgeService.state.domoticzdevices[x],dim_control);
+					devicesList[i] = {
+							name: $scope.device.name,
+							mapId: $scope.device.mapId,
+							mapType: $scope.device.mapType,
+							deviceType: $scope.device.deviceType,
+							targetDevice: $scope.device.targetDevice,
+							onUrl: $scope.device.onUrl,
+							dimUrl: $scope.device.dimUrl,
+							offUrl: $scope.device.offUrl,
+							headers: $scope.device.headers,
+							httpVerb: $scope.device.httpVerb,
+							contentType: $scope.device.contentType,
+							contentBody: $scope.device.contentBody,
+							contentBodyDim: $scope.device.contentBodyDim,
+							contentBodyOff: $scope.device.contentBodyOff
+					};
+				}
+			}
+		}
+		bridgeService.bulkAddDevice(devicesList).then(
+				function () {
+					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewHalDevices();
+				},
+				function (error) {
+					bridgeService.displayWarn("Error adding HAL devices in bulk.", error)
+				}
+			);
+		$scope.bulk = { devices: [] };
+		$scope.selectAll = false;
+	};
+
+	$scope.toggleSelection = function toggleSelection(deviceId) {
+		var idx = $scope.bulk.devices.indexOf(deviceId);
+
+		// is currently selected
+		if (idx > -1) {
+			$scope.bulk.devices.splice(idx, 1);
+			if($scope.bulk.devices.length === 0 && $scope.selectAll)
+				$scope.selectAll = false;
+		}
+
+		// is newly selected
+		else {
+			$scope.bulk.devices.push(deviceId);
+			$scope.selectAll = true;
+		}
+	};
+
+	$scope.toggleSelectAll = function toggleSelectAll() {
+		if($scope.selectAll) {
+			$scope.selectAll = false;
+			$scope.bulk = { devices: [] };
+		}
+		else {
+			$scope.selectAll = true;
+			for(var x = 0; x < bridgeService.state.haldevices.length; x++) {
+				if($scope.bulk.devices.indexOf(bridgeService.state.haldevices[x]) < 0 && !bridgeService.findDeviceByMapId(bridgeService.state.haldevices[x].haldevicename + "-" +  bridgeService.state.haldevices[x].halname, bridgeService.state.haldevices[x].halname, "halDevice"))
+					$scope.bulk.devices.push(bridgeService.state.haldevices[x].haldevicename);
 			}
 		}
 	};

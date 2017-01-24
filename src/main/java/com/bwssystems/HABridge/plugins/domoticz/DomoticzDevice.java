@@ -1,32 +1,32 @@
 package com.bwssystems.HABridge.plugins.domoticz;
 
 public class DomoticzDevice {
-	private String Domoticzdevicetype;
-	private String Domoticzdevicename;
-	private String Domoticzaddress;
-	private String Domoticzname;
-	public String getDomoticzdevicetype() {
-		return Domoticzdevicetype;
+	private String devicetype;
+	private String devicename;
+	private String domoticzaddress;
+	private String domoticzname;
+	public String getDevicetype() {
+		return devicetype;
 	}
-	public void setDomoticzdevicetype(String Domoticzdevicetype) {
-		this.Domoticzdevicetype = Domoticzdevicetype;
+	public void setDevicetype(String devicetype) {
+		this.devicetype = devicetype;
 	}
-	public String getDomoticzdevicename() {
-		return Domoticzdevicename;
+	public String getDevicename() {
+		return devicename;
 	}
-	public void setDomoticzdevicename(String Domoticzdevicename) {
-		this.Domoticzdevicename = Domoticzdevicename;
+	public void setDevicename(String devicename) {
+		this.devicename = devicename;
 	}
 	public String getDomoticzaddress() {
-		return Domoticzaddress;
+		return domoticzaddress;
 	}
-	public void setDomoticzaddress(String Domoticzaddress) {
-		this.Domoticzaddress = Domoticzaddress;
+	public void setDomoticzaddress(String domoticzaddress) {
+		this.domoticzaddress = domoticzaddress;
 	}
 	public String getDomoticzname() {
-		return Domoticzname;
+		return domoticzname;
 	}
-	public void setDomoticzname(String Domoticzname) {
-		this.Domoticzname = Domoticzname;
+	public void setDomoticzname(String domoticzname) {
+		this.domoticzname = domoticzname;
 	}
 }

@@ -82,6 +82,12 @@ public class DeviceResult {
     @SerializedName("Notifications")
     @Expose
     private String notifications;
+    @SerializedName("OffAction")
+    @Expose
+    private String offAction;
+    @SerializedName("OnAction")
+    @Expose
+    private String onAction;
     @SerializedName("PlanID")
     @Expose
     private String planID;
@@ -341,6 +347,23 @@ public class DeviceResult {
 
     public void setNotifications(String notifications) {
         this.notifications = notifications;
+    }
+
+
+    public String getOffAction() {
+        return offAction;
+    }
+
+    public void setOffAction(String offAction) {
+        this.offAction = offAction;
+    }
+
+    public String getOnAction() {
+        return onAction;
+    }
+
+    public void setOnAction(String onAction) {
+        this.onAction = onAction;
     }
 
     public String getPlanID() {

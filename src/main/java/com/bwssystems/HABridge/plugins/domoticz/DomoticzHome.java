@@ -24,7 +24,7 @@ import com.google.gson.Gson;
 
 public class DomoticzHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(DomoticzHome.class);
-	private Map<String, DomoticzHandler> Domoticzs;
+	private Map<String, DomoticzHandler> domoticzs;
 	private Boolean validDomoticz;
 	private HTTPHandler anHttpHandler;
 
@@ -39,62 +39,22 @@ public class DomoticzHome implements Home {
 			return null;
 		log.debug("consolidating devices for hues");
 		List<DomoticzDevice> theResponse = null;
-		Iterator<String> keys = Domoticzs.keySet().iterator();
+		Iterator<String> keys = domoticzs.keySet().iterator();
 		List<DomoticzDevice> deviceList = new ArrayList<DomoticzDevice>();
 		while(keys.hasNext()) {
 			String key = keys.next();
-			theResponse = Domoticzs.get(key).getLights();
+			theResponse = domoticzs.get(key).getDevices();
 			if(theResponse != null)
 				addDomoticzDevices(deviceList, theResponse, key);
 			else {
 				log.warn("Cannot get lights for Domoticz with name: " + key + ", skipping this Domoticz.");
 				continue;
 			}
-			theResponse = Domoticzs.get(key).getAppliances();
-			if(theResponse != null)
-				addDomoticzDevices(deviceList, theResponse, key);
-			else
-				log.warn("Cannot get appliances for Domoticz with name: " + key);
-			theResponse = Domoticzs.get(key).getTheatre();
-			if(theResponse != null)
-				addDomoticzDevices(deviceList, theResponse, key);
-			else
-				log.warn("Cannot get theatre for Domoticz with name: " + key);
-			theResponse = Domoticzs.get(key).getCustom();
-			if(theResponse != null)
-				addDomoticzDevices(deviceList, theResponse, key);
-			else
-				log.warn("Cannot get custom for Domoticz with name: " + key);
-			theResponse = Domoticzs.get(key).getHVAC();
-			if(theResponse != null)
-				addDomoticzDevices(deviceList, theResponse, key);
-			else
-				log.warn("Cannot get HVAC for Domoticz with name: " + key);
-			theResponse = Domoticzs.get(key).getHome(key);
-			if(theResponse != null)
-				addDomoticzDevices(deviceList, theResponse, key);
-			else
-				log.warn("Cannot get Homes for Domoticz with name: " + key);
-			theResponse = Domoticzs.get(key).getGroups();
-			if(theResponse != null)
-				addDomoticzDevices(deviceList, theResponse, key);
-			else
-				log.warn("Cannot get Groups for Domoticz with name: " + key);
-			theResponse = Domoticzs.get(key).getMacros();
-			if(theResponse != null)
-				addDomoticzDevices(deviceList, theResponse, key);
-			else
-				log.warn("Cannot get Macros for Domoticz with name: " + key);
-			theResponse = Domoticzs.get(key).getScenes();
+			theResponse = domoticzs.get(key).getScenes();
 			if(theResponse != null)
 				addDomoticzDevices(deviceList, theResponse, key);
 			else
 				log.warn("Cannot get Scenes for Domoticz with name: " + key);
-			theResponse = Domoticzs.get(key).getButtons();
-			if(theResponse != null)
-				addDomoticzDevices(deviceList, theResponse, key);
-			else
-				log.warn("Cannot get Buttons for Domoticz with name: " + key);
 		}
 		return deviceList;
 	}
@@ -106,10 +66,9 @@ public class DomoticzHome implements Home {
 		while(devices.hasNext()) {
 			DomoticzDevice theDevice = devices.next();
 			DomoticzDevice aNewDomoticzDevice = new DomoticzDevice();
-			aNewDomoticzDevice.setDomoticzdevicetype(theDevice.getDomoticzdevicetype());
-			aNewDomoticzDevice.setDomoticzdevicename(theDevice.getDomoticzdevicename());
-//			aNewDomoticzDevice.setButtons(theDevice.getButtons());
-			aNewDomoticzDevice.setDomoticzaddress(Domoticzs.get(theKey).getDomoticzAddress().getIp());
+			aNewDomoticzDevice.setDevicetype(theDevice.getDevicetype());
+			aNewDomoticzDevice.setDevicename(theDevice.getDevicename());
+			aNewDomoticzDevice.setDomoticzaddress(domoticzs.get(theKey).getDomoticzAddress().getIp());
 			aNewDomoticzDevice.setDomoticzname(theKey);
 			theDeviceList.add(aNewDomoticzDevice);
 		}
@@ -141,16 +100,16 @@ public class DomoticzHome implements Home {
 
 	@Override
 	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
-//		validDomoticz = bridgeSettings.isValidDomoticz();
+		validDomoticz = bridgeSettings.isValidDomoticz();
 		log.info("Domoticz Home created." + (validDomoticz ? "" : " No Domoticz devices configured."));
 		if(!validDomoticz)
 			return null;
-		Domoticzs = new HashMap<String, DomoticzHandler>();
+		domoticzs = new HashMap<String, DomoticzHandler>();
 		Iterator<NamedIP> theList = bridgeSettings.getDomoticzaddress().getDevices().iterator();
 		while(theList.hasNext()) {
 			NamedIP aDomoticz = theList.next();
 	      	try {
-	      		Domoticzs.put(aDomoticz.getName(), new DomoticzHandler(aDomoticz, "stuff"));
+	      		domoticzs.put(aDomoticz.getName(), new DomoticzHandler(aDomoticz));
 			} catch (Exception e) {
 		        log.error("Cannot get Domoticz client (" + aDomoticz.getName() + ") setup, Exiting with message: " + e.getMessage(), e);
 		        return null;
