@@ -109,6 +109,54 @@ You should now be running the bridge. Check for errors:
 ```
 pi@raspberrypi:~/habridge $ tail -f habridge-log.txt
 ```
+## Run ha-bridge alongside web server already on port 80
+These examples will help you proxy your current webserver requests to the ha-bridge running on a different port, such as 8080.
+### Apache Example
+Reverse proxy with Apache on Ubuntu linux:
+
+a2enmod proxy
+a2enmod proxy_http
+a2enmod headers
+
+Added the following lines to my Apache config file “000-default”
+
+```
+<VirtualHost *:80>
+	ProxyPass         /api  http://localhost:8080/api nocanon
+	ProxyPassReverse  /api  http://localhost:8080/api
+	ProxyRequests     Off
+	AllowEncodedSlashes NoDecode
+
+	# Local reverse proxy authorization override
+	# Most unix distribution deny proxy by default (ie /etc/apache2/mods-enabled/proxy.conf in Ubuntu)
+	<Proxy http://localhost:8080/api*>
+		  Order deny,allow
+		  Allow from all
+	</Proxy>
+
+….. (the rest of the VirtualHost config section) …..
+</VirtualHost>
+```
+
+service apache2 restart
+### lighthttpd Example
+```
+server.modules   += ( "mod_proxy" )
+proxy.server = ( 
+	"/api" =>
+        (
+                ( "host" => "127.0.0.1",
+                  "port" => "8080"
+                )
+        )
+)
+```
+### nginx Example
+```
+location /api/ {
+    proxy_pass http://127.0.0.1:8080/api;
+}
+```
 ## Available Arguments
 Arguments are now deprecated. The ha-bridge will use the old -D arguments and populate the configuration screen, Brisge Control Tab, which can now be saved to a file and will not be needed. There is only one optional argument that overrides and that is the location of the configuration file. The default is the relative path "data/habridge.config".
 ### -Dconfig.file=`<filepath>`
