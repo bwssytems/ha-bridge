@@ -80,7 +80,11 @@ public class HueHome implements Home {
 		if(!validHue)
 			return null;
 		String responseString = null;
-		HueDeviceIdentifier deviceId = aGsonHandler.fromJson(anItem.getItem(), HueDeviceIdentifier.class);
+		HueDeviceIdentifier deviceId = null;
+		if(anItem.getItem().isJsonObject())
+			deviceId = aGsonHandler.fromJson(anItem.getItem(), HueDeviceIdentifier.class);
+		else
+			deviceId = aGsonHandler.fromJson(anItem.getItem().getAsString(), HueDeviceIdentifier.class);
 		if(deviceId.getHueName() == null || deviceId.getHueName().isEmpty())
 			deviceId.setHueName(device.getTargetDevice());
 		

@@ -276,7 +276,7 @@ public class HueMulator {
 			}
 			if (deviceState != null) {
 				deviceState.setOn(stateChanges.isOn());
-				if(!deviceState.isOn() && deviceState.getBri() == 255)
+				if(!deviceState.isOn() && deviceState.getBri() == 254)
 					deviceState.setBri(0);
 			}
 			notFirstChange = true;
@@ -416,7 +416,7 @@ public class HueMulator {
 		}
 
 		if(deviceState.isOn() && deviceState.getBri() <= 0)
-			deviceState.setBri(255);
+			deviceState.setBri(254);
 		
 		if(!deviceState.isOn() && (targetBri != null || targetBriInc != null))
 			deviceState.setOn(true);
@@ -734,7 +734,7 @@ public class HueMulator {
 			if(url == null)
 				url = device.getOnUrl();
 		}
-		if (url != null) {
+		if (url != null && !url.equals("")) {
 			if (!url.startsWith("[")) {
 				if (url.startsWith("{\"item"))
 					url = "[" + url + "]";

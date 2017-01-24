@@ -26,7 +26,7 @@ public class CommandHome implements Home {
 		String responseString = null;
 		String intermediate;
 		if (anItem.getItem().toString().contains("exec://"))
-			intermediate = anItem.getItem().getAsString().substring(anItem.getItem().toString().indexOf("://") + 3);
+			intermediate = anItem.getItem().getAsString().substring(anItem.getItem().getAsString().indexOf("://") + 3);
 		else
 			intermediate = anItem.getItem().getAsString();
 		String anError = doExecRequest(intermediate,

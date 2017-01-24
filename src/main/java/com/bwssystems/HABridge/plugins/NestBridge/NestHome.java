@@ -111,46 +111,54 @@ public class NestHome implements com.bwssystems.HABridge.Home {
 					+ "\",\"description\": \"Should not get here, no Nest available\", \"parameter\": \"/lights/"
 					+ lightId + "state\"}}]";
 		} else if (anItem.getType() != null && anItem.getType().trim().equalsIgnoreCase(DeviceMapTypes.NEST_HOMEAWAY[DeviceMapTypes.typeIndex])) {
-			NestInstruction homeAway = aGsonHandler.fromJson(anItem.getItem().toString(), NestInstruction.class);
+			NestInstruction homeAway = null;
+			if(anItem.getItem().isJsonObject())
+				homeAway = aGsonHandler.fromJson(anItem.getItem(), NestInstruction.class);
+			else
+				homeAway = aGsonHandler.fromJson(anItem.getItem().getAsString(), NestInstruction.class);
 			theNest.getHome(homeAway.getName()).setAway(homeAway.getAway());
 		} else if (anItem.getType() != null && anItem.getType().trim().equalsIgnoreCase(DeviceMapTypes.NEST_THERMO_SET[DeviceMapTypes.typeIndex])) {
-				NestInstruction thermoSetting = aGsonHandler.fromJson(anItem.getItem().toString(), NestInstruction.class);
-				if (thermoSetting.getControl().equalsIgnoreCase("temp")) {
-					if (targetBri != null) {
-						if (isFarenheit)
-							thermoSetting
-									.setTemp(
-											String.valueOf((Double
-													.parseDouble(BrightnessDecode.calculateReplaceIntensityValue(thermoSetting.getTemp(),
-															intensity, targetBri, targetBriInc, false)) - 32.0) / 1.8));
-						else
-							thermoSetting
-									.setTemp(
-											String.valueOf(Double.parseDouble(BrightnessDecode.calculateReplaceIntensityValue(thermoSetting.getTemp(),
-													intensity, targetBri, targetBriInc, false))));
-						log.debug("Setting thermostat: " + thermoSetting.getName() + " to "
-								+ thermoSetting.getTemp() + "C");
-						theNest.getThermostat(thermoSetting.getName())
-								.setTargetTemperature(Float.parseFloat(thermoSetting.getTemp()));
-					}
-				} else if (thermoSetting.getControl().contains("range")
-						|| thermoSetting.getControl().contains("heat")
-						|| thermoSetting.getControl().contains("cool")
-						|| thermoSetting.getControl().contains("off")) {
-					log.debug("Setting thermostat target type: " + thermoSetting.getName() + " to "
-							+ thermoSetting.getControl());
-					theNest.getThermostat(thermoSetting.getName()).setTargetType(thermoSetting.getControl());
-				} else if (thermoSetting.getControl().contains("fan")) {
-					log.debug("Setting thermostat fan mode: " + thermoSetting.getName() + " to "
-							+ thermoSetting.getControl().substring(4));
+			NestInstruction thermoSetting = null;
+			if(anItem.getItem().isJsonObject())
+				thermoSetting = aGsonHandler.fromJson(anItem.getItem(), NestInstruction.class);
+			else
+				thermoSetting = aGsonHandler.fromJson(anItem.getItem().getAsString(), NestInstruction.class);
+			if (thermoSetting.getControl().equalsIgnoreCase("temp")) {
+				if (targetBri != null) {
+					if (isFarenheit)
+						thermoSetting
+								.setTemp(
+										String.valueOf((Double
+												.parseDouble(BrightnessDecode.calculateReplaceIntensityValue(thermoSetting.getTemp(),
+													intensity, targetBri, targetBriInc, false)) - 32.0) / 1.8));
+					else
+						thermoSetting
+								.setTemp(
+										String.valueOf(Double.parseDouble(BrightnessDecode.calculateReplaceIntensityValue(thermoSetting.getTemp(),
+												intensity, targetBri, targetBriInc, false))));
+					log.debug("Setting thermostat: " + thermoSetting.getName() + " to "
+							+ thermoSetting.getTemp() + "C");
 					theNest.getThermostat(thermoSetting.getName())
-							.setFanMode(thermoSetting.getControl().substring(4));
-				} else {
-					log.warn("no valid Nest control info: " + thermoSetting.getControl());
-					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-							+ "\",\"description\": \"no valid Nest control info\", \"parameter\": \"/lights/"
-							+ lightId + "state\"}}]";
+							.setTargetTemperature(Float.parseFloat(thermoSetting.getTemp()));
 				}
+			} else if (thermoSetting.getControl().contains("range")
+					|| thermoSetting.getControl().contains("heat")
+					|| thermoSetting.getControl().contains("cool")
+					|| thermoSetting.getControl().contains("off")) {
+				log.debug("Setting thermostat target type: " + thermoSetting.getName() + " to "
+						+ thermoSetting.getControl());
+				theNest.getThermostat(thermoSetting.getName()).setTargetType(thermoSetting.getControl());
+			} else if (thermoSetting.getControl().contains("fan")) {
+				log.debug("Setting thermostat fan mode: " + thermoSetting.getName() + " to "
+						+ thermoSetting.getControl().substring(4));
+				theNest.getThermostat(thermoSetting.getName())
+						.setFanMode(thermoSetting.getControl().substring(4));
+			} else {
+				log.warn("no valid Nest control info: " + thermoSetting.getControl());
+				responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+						+ "\",\"description\": \"no valid Nest control info\", \"parameter\": \"/lights/"
+						+ lightId + "state\"}}]";
+			}
 		}
 		return responseString;
 	}
