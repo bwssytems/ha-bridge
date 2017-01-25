@@ -277,6 +277,7 @@
 									<th>IP</th>
 									<th>Port</th>
 									<th>Password (opt)</th>
+									<th>Use SSL</th>
 									<th>Manage</th>
 								</tr>
 							</thead>
@@ -286,6 +287,7 @@
 								<td>{{hass.port}}</td>
 								<td ng-if="hass.password">*******</td>
 								<td ng-if="!hass.password"> </td>
+								<td>{{hass.secure}}</td>
 								<td><button class="btn btn-danger" type="submit"
 										ng-click="removeHasstoSettings(hass.name, hass.ip)">Del</button></td>
 							</tr>
@@ -302,8 +304,11 @@
 								<td><input id="bridge-settings-next-hass-password"
 									class="form-control" type="password" ng-model="newhasspassword"
 									placeholder="Home Assistant password (opt)"></td>
+								<td><input type="checkbox"
+										ng-model="newhasssecure" ng-true-value=true
+										ng-false-value=false></td>
 								<td><button class="btn btn-success" type="submit"
-										ng-click="addHasstoSettings(newhassname, newhassip, newhassport, newhasspassword)">Add</button></td>
+										ng-click="addHasstoSettings(newhassname, newhassip, newhassport, newhasspassword, newhasssecure)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>

@@ -947,11 +947,11 @@ app.controller ('SystemController', function ($scope, $location, $http, $window,
     	    }
     	}    	
     };
-    $scope.addHasstoSettings = function (newhassname, newhassip, newhassport, newhasspassword) {
+    $scope.addHasstoSettings = function (newhassname, newhassip, newhassport, newhasspassword, newhasssecure) {
     	if($scope.bridge.settings.hassaddress === undefined || $scope.bridge.settings.hassaddress === null) {
 			$scope.bridge.settings.hassaddress = { devices: [] };
 		}
-    	var newhass = {name: newhassname, ip: newhassip, port: newhassport, password: newhasspassword }
+    	var newhass = {name: newhassname, ip: newhassip, port: newhassport, password: newhasspassword, secure: newhasssecure }
     	$scope.bridge.settings.hassaddress.devices.push(newhass);
     	$scope.newhassname = null;
     	$scope.newhassip = null;
@@ -2141,47 +2141,42 @@ app.controller('DomoticzController', function ($scope, $location, $http, bridgeS
 	};
 
 	$scope.buildDeviceUrls = function (domoticzdevice, dim_control) {
-		var preOnCmd = "";
-		var preDimCmd = "";
-		var preOffCmd = "";
+		var preCmd = "";
+		var postOnCmd = "";
+		var postDimCmd = "";
+		var postOffCmd = "";
 		var nameCmd = "";
 		var aDeviceType;
 		var postCmd = "";
 		if(domoticzdevice.devicetype === "Scene") {
 			aDeviceType = "scene";
-			preOnCmd = "/SceneService!SceneCmd=Set!SceneName=";
-			preOffCmd = preOnCmd;
+			preCmd = "/json.htm?type=command&param=switchscene&idx="
+			postOnCmd = "&switchcmd=On";
+			postOffCmd = "&switchcmd=Off";
 		}
 		else {
 			aDeviceType = "switch";
-			preOnCmd = "/DeviceService!DeviceCmd=SetDevice!DeviceValue=On";
-			preDimCmd = "/DeviceService!DeviceCmd=SetDevice!DeviceValue=Dim!DevicePercent=";
-			preOffCmd = "/DeviceService!DeviceCmd=SetDevice!DeviceValue=Off";
-			nameCmd = "!DeviceName=";
+			preCmd = "/json.htm?type=command&param=switchlight&idx="
+			postOnCmd = "&switchcmd=On";
+			postDimCmd = "&switchcmd=Set%20Level&level=";
+			postOffCmd = "&switchcmd=Off";
 		}
 		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0) && aDeviceType === "switch")
 			dimpayload = "http://" + domoticzdevice.domoticzaddress
-			+ preDimCmd
-			+ dim_control
-			+ nameCmd
-			+ domoticzdevice.devicename.replaceAll(" ", "%20")
-			+ postCmd;
+			+ preCmd
+			+ domoticzdevice.idx
+			+ postDimCmd
+			+ dim_control;
 		else
-			dimpayload = "http://" + domoticzdevice.domoticzaddress
-			+ preOnCmd
-			+ nameCmd
-			+ domoticzdevice.devicename.replaceAll(" ", "%20")
-			+ postCmd;
+			dimpayload = null;
 		onpayload = "http://" + domoticzdevice.domoticzaddress
-		+ preOnCmd
-		+ nameCmd
-		+ domoticzdevice.devicename.replaceAll(" ", "%20")
-		+ postCmd;
+		+ preCmd
+		+ domoticzdevice.idx
+		+ postOnCmd;
 		offpayload = "http://" + domoticzdevice.domoticzaddress 
-		+ preOffCmd
-		+ nameCmd
-		+ domoticzdevice.haldevicename.replaceAll(" ", "%20")
-		+ postCmd;
+		+ preCmd
+		+ domoticzdevice.idx
+		+ postOffCmd;
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, domoticzdevice.devicename + "-" + domoticzdevice.domoticzname,  domoticzdevice.devicename, domoticzdevice.domoticzname, aDeviceType,  "domoticzDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		bridgeService.editNewDevice($scope.device);

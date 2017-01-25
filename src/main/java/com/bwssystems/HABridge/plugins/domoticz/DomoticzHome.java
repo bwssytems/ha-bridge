@@ -65,12 +65,7 @@ public class DomoticzHome implements Home {
 		Iterator<DomoticzDevice> devices = theSourceList.iterator();
 		while(devices.hasNext()) {
 			DomoticzDevice theDevice = devices.next();
-			DomoticzDevice aNewDomoticzDevice = new DomoticzDevice();
-			aNewDomoticzDevice.setDevicetype(theDevice.getDevicetype());
-			aNewDomoticzDevice.setDevicename(theDevice.getDevicename());
-			aNewDomoticzDevice.setDomoticzaddress(domoticzs.get(theKey).getDomoticzAddress().getIp());
-			aNewDomoticzDevice.setDomoticzname(theKey);
-			theDeviceList.add(aNewDomoticzDevice);
+			theDeviceList.add(theDevice);
 		}
 		anHttpHandler = new HTTPHandler();
 		return true;

@@ -3,6 +3,7 @@ package com.bwssystems.HABridge.plugins.domoticz;
 public class DomoticzDevice {
 	private String devicetype;
 	private String devicename;
+	private String idx;
 	private String domoticzaddress;
 	private String domoticzname;
 	public String getDevicetype() {
@@ -16,6 +17,12 @@ public class DomoticzDevice {
 	}
 	public void setDevicename(String devicename) {
 		this.devicename = devicename;
+	}
+	public String getIdx() {
+		return idx;
+	}
+	public void setIdx(String idx) {
+		this.idx = idx;
 	}
 	public String getDomoticzaddress() {
 		return domoticzaddress;

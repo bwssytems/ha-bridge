@@ -57,7 +57,8 @@ public class DomoticzHandler {
 				DomoticzDevice aNewDomoticzDevice = new DomoticzDevice();
 				aNewDomoticzDevice.setDevicetype(theDevice.getType());
 				aNewDomoticzDevice.setDevicename(theDevice.getName());
-				aNewDomoticzDevice.setDomoticzaddress(domoticzAddress.getIp());
+				aNewDomoticzDevice.setIdx(theDevice.getIdx());
+				aNewDomoticzDevice.setDomoticzaddress(domoticzAddress.getIp() + ":" + domoticzAddress.getPort());
 				aNewDomoticzDevice.setDomoticzname(domoticzAddress.getName());
 				deviceList.add(aNewDomoticzDevice);
 	    		
