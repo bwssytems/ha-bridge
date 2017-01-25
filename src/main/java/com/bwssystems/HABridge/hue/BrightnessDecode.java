@@ -26,7 +26,7 @@ public class BrightnessDecode {
 		} else if (targetBriInc != null) {
 			if ((setIntensity + targetBriInc) <= 0)
 				setIntensity = targetBriInc;
-			else if ((setIntensity + targetBriInc) > 255)
+			else if ((setIntensity + targetBriInc) > 254)
 				setIntensity = targetBriInc;
 			else
 				setIntensity = setIntensity + targetBriInc;
@@ -38,7 +38,7 @@ public class BrightnessDecode {
 	 * light weight templating here, was going to use free marker but it was a
 	 * bit too heavy for what we were trying to do.
 	 *
-	 * currently provides: intensity.byte : 0-255 brightness. this is raw from
+	 * currently provides: intensity.byte : 0-254 brightness. this is raw from
 	 * the echo intensity.percent : 0-100, adjusted for the vera
 	 * intensity.math(X*1) : where X is the value from the interface call and
 	 * can use net.java.dev.eval math

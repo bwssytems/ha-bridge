@@ -276,7 +276,7 @@ public class HueMulator {
 			}
 			if (deviceState != null) {
 				deviceState.setOn(stateChanges.isOn());
-				if(!deviceState.isOn() && deviceState.getBri() == 255)
+				if(!deviceState.isOn() && deviceState.getBri() == 254)
 					deviceState.setBri(0);
 			}
 			notFirstChange = true;
@@ -416,7 +416,7 @@ public class HueMulator {
 		}
 
 		if(deviceState.isOn() && deviceState.getBri() <= 0)
-			deviceState.setBri(255);
+			deviceState.setBri(254);
 		
 		if(!deviceState.isOn() && (targetBri != null || targetBriInc != null))
 			deviceState.setOn(true);
@@ -524,10 +524,11 @@ public class HueMulator {
 			deviceResponseMap = new HashMap<String, DeviceResponse>();
 			for (DeviceDescriptor device : deviceList) {
 				DeviceResponse deviceResponse = null;
-				if ((device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]))) {
-					HueDeviceIdentifier deviceId = aGsonHandler.fromJson(device.getOnUrl(), HueDeviceIdentifier.class);
-					deviceResponse = myHueHome.getHueDeviceInfo(deviceId, device);
-				}
+				// In the multi command context, this is not valid anymore
+//				if ((device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]))) {
+//					HueDeviceIdentifier deviceId = aGsonHandler.fromJson(device.getOnUrl(), HueDeviceIdentifier.class);
+//					deviceResponse = myHueHome.getHueDeviceInfo(deviceId, device);
+//				}
 
 				if (deviceResponse == null)
 					deviceResponse = DeviceResponse.createResponse(device);
@@ -730,11 +731,11 @@ public class HueMulator {
 		}
 
 		// code for backwards compatibility
-		if(!(device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]))) {
+		if(device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) {
 			if(url == null)
 				url = device.getOnUrl();
 		}
-		if (url != null) {
+		if (url != null && !url.equals("")) {
 			if (!url.startsWith("[")) {
 				if (url.startsWith("{\"item"))
 					url = "[" + url + "]";

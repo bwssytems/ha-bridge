@@ -1,6 +1,8 @@
 # ha-bridge
 Emulates Philips Hue api to other home automation gateways such as an Amazon Echo or Google Home.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
 
+**SECURITY RISK: If you are unsure on how this software operates and what it exposes to your netowrk, please make sure you understand that it can allow root access to your sytem. It is best practice to not open this to the itnernet through your router as there are no security protocols in place to protect the system. The Licenese agreement states specifically that you use this at your own risk.**
+
 **ATTENTION: This requires a physical Amazon Echo, Dot or Tap and does not work with prototype devices built using the Alexa Voice Service e.g. Amazon's Alexa AVS Sample App and Sam Machin's AlexaPi. The AVS version does not have any capability for Hue Bridge discovery!**
 
 **NOTE: This software does require the user to have knwoledge on how processes run on Linux or Windows with java. Also, an understanding of networking basics will help as well. This system reveives upnp udp multicast packets from devices to be found, so that is some thing to understand. Please make sure you have all your devices use static IP addresses from your router. Most all questions have been answered already. PLEASE USE GOOGLE TO FIND YOUR ANSWERS!**
@@ -31,16 +33,16 @@ ATTENTION: This requires JDK 1.8 to run
 ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
 
 ```
-java -jar ha-bridge-4.0.0.jar
+java -jar ha-bridge-4.0.3.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
-Create the directory and make sure that ha-bridge-4.0.0.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-4.0.3.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.0.0/ha-bridge-4.0.0.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.0.3/ha-bridge-4.0.3.jar
 ```
 #### System Control Setup on a pi (preferred)
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
@@ -59,7 +61,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.0.0.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.0.3.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -94,7 +96,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.0.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.0.3.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
 Exit and save the file with ctrl-X and follow the prompts and then execute on the command line:
@@ -108,6 +110,54 @@ pi@raspberrypi:~/habridge $ ./starthabridge.sh
 You should now be running the bridge. Check for errors:
 ```
 pi@raspberrypi:~/habridge $ tail -f habridge-log.txt
+```
+## Run ha-bridge alongside web server already on port 80
+These examples will help you proxy your current webserver requests to the ha-bridge running on a different port, such as 8080.
+### Apache Example
+Reverse proxy with Apache on Ubuntu linux:
+
+a2enmod proxy
+a2enmod proxy_http
+a2enmod headers
+
+Added the following lines to my Apache config file “000-default”
+
+```
+<VirtualHost *:80>
+	ProxyPass         /api  http://localhost:8080/api nocanon
+	ProxyPassReverse  /api  http://localhost:8080/api
+	ProxyRequests     Off
+	AllowEncodedSlashes NoDecode
+
+	# Local reverse proxy authorization override
+	# Most unix distribution deny proxy by default (ie /etc/apache2/mods-enabled/proxy.conf in Ubuntu)
+	<Proxy http://localhost:8080/api*>
+		  Order deny,allow
+		  Allow from all
+	</Proxy>
+
+….. (the rest of the VirtualHost config section) …..
+</VirtualHost>
+```
+
+service apache2 restart
+### lighthttpd Example
+```
+server.modules   += ( "mod_proxy" )
+proxy.server = ( 
+	"/api" =>
+        (
+                ( "host" => "127.0.0.1",
+                  "port" => "8080"
+                )
+        )
+)
+```
+### nginx Example
+```
+location /api/ {
+    proxy_pass http://127.0.0.1:8080/api;
+}
 ```
 ## Available Arguments
 Arguments are now deprecated. The ha-bridge will use the old -D arguments and populate the configuration screen, Brisge Control Tab, which can now be saved to a file and will not be needed. There is only one optional argument that overrides and that is the location of the configuration file. The default is the relative path "data/habridge.config".

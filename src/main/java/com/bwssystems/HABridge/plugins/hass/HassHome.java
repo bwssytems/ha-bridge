@@ -125,9 +125,13 @@ public class HassHome implements Home {
 					+ lightId + "state\"}}]";
 
 		} else {
-			HassCommand hassCommand = aGsonHandler.fromJson(anItem.getItem(), HassCommand.class);
+			HassCommand hassCommand = null;
+			if(anItem.getItem().isJsonObject())
+				hassCommand = aGsonHandler.fromJson(anItem.getItem(), HassCommand.class);
+			else
+				hassCommand = aGsonHandler.fromJson(anItem.getItem().getAsString(), HassCommand.class);
 			hassCommand.setBri(BrightnessDecode.replaceIntensityValue(hassCommand.getBri(),
-					BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false));
+								BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false));
 			HomeAssistant homeAssistant = getHomeAssistant(hassCommand.getHassName());
 			if (homeAssistant == null) {
 				log.warn("Should not get here, no HomeAssistants available");

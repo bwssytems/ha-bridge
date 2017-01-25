@@ -152,7 +152,12 @@ public class HarmonyHome implements Home {
 					myHarmony.startActivity(anActivity);
 				}
 			} else if(anItem.getType().trim().equalsIgnoreCase(DeviceMapTypes.HARMONY_BUTTON[DeviceMapTypes.typeIndex])) {
-				String url = anItem.getItem().toString();
+				String url = null;
+				if(anItem.getItem().isJsonObject() || anItem.getItem().isJsonArray()) {
+					url = aGsonHandler.toJson(anItem.getItem());
+				} else
+					url = anItem.getItem().getAsString();
+
 				if (url.substring(0, 1).equalsIgnoreCase("{")) {
 					url = "[" + url + "]";
 				}

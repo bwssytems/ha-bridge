@@ -46,9 +46,10 @@ public class HTTPHome implements Home {
 
 			String anUrl = BrightnessDecode.calculateReplaceIntensityValue(anItem.getItem().getAsString(),
 					intensity, targetBri, targetBriInc, false);
-			String aBody;
-			aBody = BrightnessDecode.calculateReplaceIntensityValue(anItem.getHttpBody(),
-					intensity, targetBri, targetBriInc, false);
+			String aBody = null;
+			if(anItem.getHttpBody()!= null && !anItem.getHttpBody().isEmpty())
+				aBody = BrightnessDecode.calculateReplaceIntensityValue(anItem.getHttpBody(),
+						intensity, targetBri, targetBriInc, false);
 			// make call
 			if (anHttpHandler.doHttpRequest(anUrl, anItem.getHttpVerb(), anItem.getContentType(), aBody,
 					new Gson().fromJson(anItem.getHttpHeaders(), NameValue[].class)) == null) {

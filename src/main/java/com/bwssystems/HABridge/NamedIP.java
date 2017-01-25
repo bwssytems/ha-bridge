@@ -6,6 +6,7 @@ public class NamedIP {
 	private String port;
 	private String username;
 	private String password;
+	private Boolean secure;
 	
 	public String getName() {
 		return name;
@@ -36,5 +37,11 @@ public class NamedIP {
 	}
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	public Boolean getSecure() {
+		return secure;
+	}
+	public void setSecure(Boolean secure) {
+		this.secure = secure;
 	}
 }

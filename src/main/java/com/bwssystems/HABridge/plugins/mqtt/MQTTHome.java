@@ -79,8 +79,15 @@ public class MQTTHome implements Home {
 		String responseString = null;
 		log.debug("executing HUE api request to send message to MQTT broker: " + anItem.getItem().toString());
 		if (validMqtt) {
-			String mqttObject = BrightnessDecode.calculateReplaceIntensityValue(anItem.getItem().toString(),
-					intensity, targetBri, targetBriInc, false);
+			String mqttObject = null;
+			if(anItem.getItem().isJsonObject() || anItem.getItem().isJsonArray()) {
+				String theItem = aGsonHandler.toJson(anItem.getItem());
+				mqttObject = BrightnessDecode.calculateReplaceIntensityValue(theItem,
+						intensity, targetBri, targetBriInc, false);
+			}
+			else
+				mqttObject = BrightnessDecode.calculateReplaceIntensityValue(anItem.getItem().getAsString(),
+						intensity, targetBri, targetBriInc, false);
 			if (mqttObject.substring(0, 1).equalsIgnoreCase("{"))
 				mqttObject = "[" + mqttObject + "]";
 			MQTTMessage[] mqttMessages = aGsonHandler.fromJson(mqttObject, MQTTMessage[].class);
