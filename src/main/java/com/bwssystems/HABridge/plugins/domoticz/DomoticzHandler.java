@@ -40,7 +40,7 @@ public class DomoticzHandler {
 
 		String theUrl = null;
     	String theData;
-   		theUrl = "http://" + domoticzAddress.getIp() + rootRequest + type;
+   		theUrl = "http://" + domoticzAddress.getIp() + ":" + domoticzAddress.getPort() + rootRequest + type;
    		theData = httpClient.doHttpRequest(theUrl, null, null, null, null);
     	if(theData != null) {
     		log.debug("GET " + type + " DomoticzApiResponse - data: " + theData);
