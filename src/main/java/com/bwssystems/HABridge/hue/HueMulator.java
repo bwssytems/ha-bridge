@@ -524,10 +524,11 @@ public class HueMulator {
 			deviceResponseMap = new HashMap<String, DeviceResponse>();
 			for (DeviceDescriptor device : deviceList) {
 				DeviceResponse deviceResponse = null;
-				if ((device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]))) {
-					HueDeviceIdentifier deviceId = aGsonHandler.fromJson(device.getOnUrl(), HueDeviceIdentifier.class);
-					deviceResponse = myHueHome.getHueDeviceInfo(deviceId, device);
-				}
+				// In the multi command context, this is not valid anymore
+//				if ((device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]))) {
+//					HueDeviceIdentifier deviceId = aGsonHandler.fromJson(device.getOnUrl(), HueDeviceIdentifier.class);
+//					deviceResponse = myHueHome.getHueDeviceInfo(deviceId, device);
+//				}
 
 				if (deviceResponse == null)
 					deviceResponse = DeviceResponse.createResponse(device);
@@ -730,7 +731,7 @@ public class HueMulator {
 		}
 
 		// code for backwards compatibility
-		if(!(device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]))) {
+		if(device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) {
 			if(url == null)
 				url = device.getOnUrl();
 		}
