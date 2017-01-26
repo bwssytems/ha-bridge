@@ -15,6 +15,7 @@ import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
+import com.bwssystems.HABridge.hue.TimeDecode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -81,13 +82,13 @@ public class MQTTHome implements Home {
 		if (validMqtt) {
 			String mqttObject = null;
 			if(anItem.getItem().isJsonObject() || anItem.getItem().isJsonArray()) {
-				String theItem = aGsonHandler.toJson(anItem.getItem());
-				mqttObject = BrightnessDecode.calculateReplaceIntensityValue(theItem,
-						intensity, targetBri, targetBriInc, false);
+				mqttObject = aGsonHandler.toJson(anItem.getItem());
 			}
 			else
-				mqttObject = BrightnessDecode.calculateReplaceIntensityValue(anItem.getItem().getAsString(),
-						intensity, targetBri, targetBriInc, false);
+				mqttObject =anItem.getItem().getAsString();
+			mqttObject = BrightnessDecode.calculateReplaceIntensityValue(mqttObject,
+					intensity, targetBri, targetBriInc, false);
+			mqttObject = TimeDecode.replaceTimeValue(mqttObject);
 			if (mqttObject.substring(0, 1).equalsIgnoreCase("{"))
 				mqttObject = "[" + mqttObject + "]";
 			MQTTMessage[] mqttMessages = aGsonHandler.fromJson(mqttObject, MQTTMessage[].class);

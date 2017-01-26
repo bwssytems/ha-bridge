@@ -63,6 +63,12 @@
 						ng-model="device.name" placeholder="Device Name"></td>
 				</tr>
 				<tr>
+					<td>Inactive</td>
+					<td><input type="checkbox"
+						ng-model="device.inactive" ng-true-value=true
+						ng-false-value=false> {{device.inactive}}</td>
+				</tr>
+				<tr>
 					<td><label>Target</label></td>
 
 					<td><input type="text" class="form-control" id="device-target"

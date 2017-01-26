@@ -520,7 +520,7 @@ public class HueMulator {
 		log.debug("hue lights list requested: " + userId + " from " + requestIp);
 		theErrors = validateWhitelistUser(userId, false);
 		if (theErrors == null) {
-			List<DeviceDescriptor> deviceList = repository.findAll();
+			List<DeviceDescriptor> deviceList = repository.findActive();
 			deviceResponseMap = new HashMap<String, DeviceResponse>();
 			for (DeviceDescriptor device : deviceList) {
 				DeviceResponse deviceResponse = null;
@@ -552,7 +552,13 @@ public class HueMulator {
 		log.debug("hue api user create requested: " + body + " from " + ipAddress);
 
 		if (body != null && !body.isEmpty()) {
-			aNewUser = aGsonHandler.fromJson(body, UserCreateRequest.class);
+			try {
+				aNewUser = aGsonHandler.fromJson(body, UserCreateRequest.class);
+			} catch (Exception e) {
+				log.warn("Could not add user. Request garbled: " + body);
+				return aGsonHandler.toJson(HueErrorResponse.createResponse("2", "/",
+						"Could not add user.", null, null, null).getTheErrors(), HueError[].class);				
+			}
 			newUser = aNewUser.getUsername();
 			aDeviceType = aNewUser.getDevicetype();
 		}
@@ -644,7 +650,11 @@ public class HueMulator {
 		HueError[] theErrors = validateWhitelistUser(userId, false);
 		if (theErrors != null)
 			return aGsonHandler.toJson(theErrors);
-		theStateChanges = aGsonHandler.fromJson(body, StateChangeBody.class);
+		try {
+			theStateChanges = aGsonHandler.fromJson(body, StateChangeBody.class);
+		} catch (Exception e) {
+			theStateChanges = null;
+		}
 		if (theStateChanges == null) {
 			log.warn("Could not parse state change body. Light state not changed.");
 			return aGsonHandler.toJson(HueErrorResponse.createResponse("2", "/lights/" + lightId,
@@ -690,8 +700,11 @@ public class HueMulator {
 		HueError[] theErrors = validateWhitelistUser(userId, false);
 		if (theErrors != null)
 			return aGsonHandler.toJson(theErrors);
-
-		theStateChanges = aGsonHandler.fromJson(body, StateChangeBody.class);
+		try {
+			theStateChanges = aGsonHandler.fromJson(body, StateChangeBody.class);
+		} catch (Exception e) {
+			theStateChanges = null;
+		}
 		if (theStateChanges == null) {
 			log.warn("Could not parse state change body. Light state not changed.");
 			return aGsonHandler.toJson(HueErrorResponse.createResponse("2", "/lights/" + lightId,

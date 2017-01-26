@@ -33,16 +33,16 @@ ATTENTION: This requires JDK 1.8 to run
 ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
 
 ```
-java -jar ha-bridge-4.0.3.jar
+java -jar ha-bridge-4.1.0.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
-Create the directory and make sure that ha-bridge-4.0.3.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-4.1.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.0.3/ha-bridge-4.0.3.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.1.0/ha-bridge-4.1.0.jar
 ```
 #### System Control Setup on a pi (preferred)
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
@@ -61,7 +61,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.0.3.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.1.0.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -96,7 +96,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.0.3.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.1.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
 Exit and save the file with ctrl-X and follow the prompts and then execute on the command line:
@@ -252,7 +252,40 @@ The helper tabs will also show you what you have already configured for that tar
 #### The Add/Edit Tab
 Another way to add a device is through the Manual Add Tab. This allows you to manually enter the name, the on and off URLs and select if there are custom handling with the type of call that can be made. This allows for control of anything that has a distinct request that can be executed so you are not limited to the Vera, Harmony, Nest or other Hue.
 
-The format of these can be the default HTTP request which executes the URLs formatted as `http://<your stuff here>` as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use `https://<your secure call here>`. When using POST and PUT, you have the ability to specify the body that will be sent with the request as well as the application type for the http call.
+There is a new format for the on/dim/off URL areas. The new editor handles the intricasies of the components, but is broken down here for explanation.
+
+Here are the fields that can be put into the call item:
+Json Type | field name | What | Use
+----------|------------|------|-----
+String or JsonElement | item| This is the payload that will be called for devices | Required
+Integer | count | This is how many times this items will be executed | Optional
+Integer | delay | This is how long we will wait until the next call after | Optional
+String | type | This is the type of device we are executing | Required
+String | filterIPs | This is used filter on the IPs given in the list | Optional
+String | httpVerb | This is the http command if given, default is GET | Optional
+String | httpBody | Send this Body with a PUT or POST | Optional
+String | httpHeaders | Send these headers with the http call | Optional
+String | contentType | Define the type of content in the body | Optional
+
+Example:
+```
+[{"item":<a String that is quoted or another JSON object>,"type":"<atype>"."count":X."delay":X."filterIPs":"<comma separated list of IP addresses that are valid>"."httpVerb":"<GET,PUT,POST>","httpBody":"<body info>","httpHeaders":[{"name":"header name","value":"header value"},{"name":"another header","value":"another value"}],"contentType":"<http content type i.e application/json>"},{"item":<another item>,"type":"<aType>"}]
+```
+
+The format of the item can be the default HTTP request which executes the URLs formatted as `http://<your stuff here>` as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use `https://<your secure call here>`. When using POST and PUT, you have the ability to specify the body that will be sent with the request as well as the application type for the http call.
+
+The valid device types are: "custom", "veraDevice", "veraScene", "harmonyActivity", "harmonyButton", "nestHomeAway", "nestThermoSet", "hueDevice", "halDevice", 
+	"halButton", "halHome", "halThermoSet", "mqttMessage", "cmdDevice", "hassDevice", "tcpDevice", "udpDevice", "httpDevice", "domoticzDevice"
+
+Filter Ip example:
+```
+Turn on Lights in Bedroom 1 (http://api.call.here/1) - Restricted to Echo 1 (10.1.1.1)
+Turn on Lights in Bedroom 2 (http://api.call.here/2) - Restricted to Echo 2 (10.2.2.2)
+Turn on Lights in Bedroom 3 (http://api.call.here/3) - Restricted to Echo 3 (10.3.3.3)
+
+Device: "Lights"
+On URL: [{"item":"http://api.call.here/1", "httpVerb":"POST", "httpBody":"value1=1&value2=2","type":"httpDevice","filterIPs":"10.1.1.1"},{"item":"http://api.call.here/2", "httpVerb":"POST", "httpBody":"value1=1&value2=2","type":"httpDevice","filterIPs":"10.2.2.2"},{"item":"http://api.call.here/3", "httpVerb":"POST", "httpBody":"value1=1&value2=2","type":"httpDevice","filterIPs":"10.3.3.3"}]
+```
 
 Headers can be added as well using a Json construct [{"name":"header type name","value":"the header value"}] with the format example:
 ```
@@ -262,44 +295,43 @@ Headers can be added as well using a Json construct [{"name":"header type name",
 
 Another option that is detected by the bridge is to use UDP or TCP direct calls such as `udp://<ip_address>:<port>/<your stuff here>` to send a UDP request. TCP calls are handled the same way as `tcp://<ip_address>:<port>/<your stuff here>`. If your data for the UDP or TCP request is formatted as "0x00F009B9" lexical hex format, the bridge will convert the data into a binary stream to send.
 
-You can also use the value replacement constructs within these statements. Such as using the expressions ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 for straight pass through of the value or items that require special calculated values using ${intensity.math()} i.e. "${intensity.math(X/4)}".
+You can also use the value replacement constructs within these statements. Such as using the expressions "${time.format(Java time format string)}" for inserting a date/time stamp, ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 for straight pass through of the value or items that require special calculated values using ${intensity.math()} i.e. "${intensity.math(X/4)}". See Value Passing Controls Below.
 Examples:
 ```
-GET
-http://192.168.1.1:8180/set/this/value/${intensity.percent}
 
-PUT
-http://192.168.1.1:8280/set/this
-ContentBody: {"someValue":"${intensity.byte}"}
+[{"item":"http://192.168.1.1:8180/set/this/value/${intensity.percent}","type":"httpDevice","httpVerb":"GET"}]
 
-udp://192.168.1.1:5000/0x45${intensity.percent}55
 
-udp://192.168.2.2:6000/fireoffthismessage\n
+[{"item":"http://192.168.1.1:8280/set/this","type":"httpDevice","httpVerb":"PUT","httpBody":{"someValue":"${intensity.byte}"}}]
 
-tcp://192.168.3.3:9000/sendthismessage
+[{"item":"udp://192.168.1.1:5000/0x45${intensity.percent}55","type":"udpDevice"}]
 
-tcp://192.168.4.4:10000/0x435f12dd${intensity.math((X -4)*50)}438c
+[{"item":"udp://192.168.2.2:6000/fireoffthismessage\n","type":"udpDevice"}]
 
-tcp://192.168.5.5:110000/0x
+[{"item":"tcp://192.168.3.3:9000/sendthismessage","type":"tcpDevice"}]
+
+[{"item":"tcp://192.168.4.4:10000/0x435f12dd${intensity.math((X -4)*50)}438c","type":"tcpDevice"}]
+
+[{"item":"tcp://192.168.5.5:110000/0x","type":"tcpDevice"}]
 ```
 
 #### Multiple Call Construct
 Also available is the ability to specify multiple commands in the On URL, Dim URL and Off URL areas by adding Json constructs listed here. This is only for the types of tcp, udp, http, https or a new exec type. Also within the item format you can specify delay in milliseconds and count per item. These new paramters work on device buttons for the Harmony as well.
 Format Example in the URL areas:
 ```
-[{"item":"http://192.168.1.1:8180/do/this/thing"},
-{"item":"http://192.168.1.1:8180/do/the/next/thing","delay":1000,"count":2},
-{"item":"http://192.168.1.1:8180/do/another/thing"}]
+[{"item":"http://192.168.1.1:8180/do/this/thing","type":"httpDevice"},
+{"item":"http://192.168.1.1:8180/do/the/next/thing","delay":1000,"count":2,"type":"httpDevice"},
+{"item":"http://192.168.1.1:8180/do/another/thing","type":"httpDevice"}]
 
 
-[{"item":"udp://192.168.1.1:5000/0x450555"},
-{"item":"udp://192.168.1.1:5000/0x45${intensity.percent}55"}]
+[{"item":"udp://192.168.1.1:5000/0x450555","type":"udpDevice"},
+{"item":"udp://192.168.1.1:5000/0x45${intensity.percent}55","type":"udpDevice"}]
 
-[{"item":"udp://192.168.1.1:5000/0x450555"},
-{"item":"http://192.168.1.1:8180/do/this/thing"},
-{"item":"tcp://192.168.2.1/sendthisdata"},
-{"item":"https://192.168.12.1/do/this/secure/thing"},
-{"item":"exec://notepad.exe"}]
+[{"item":"udp://192.168.1.1:5000/0x450555","type":"udpDevice"},
+{"item":"http://192.168.1.1:8180/do/this/thing","type":"httpDevice"},
+{"item":"tcp://192.168.2.1/sendthisdata","type":"tcpDevice"},
+{"item":"https://192.168.12.1/do/this/secure/thing","type":"httpDevice"},
+{"item":"exec://notepad.exe","type":"cmdDevice"}]
 ```
 #### Script or Command Execution
 The release as of v2.0.0 will now support the execution of a local script or program. This will blindly fire off a process to run and is bound by the privileges of the java process.
@@ -308,20 +340,27 @@ To configure this type of manual add, you will need to select the Device type of
 
 In the URL areas, the format of the execution is just providing what command line you would like to run, or using the multiple call item construct described above.
 ```
-notepad.exe
+[{"item":"C:\\Users\\John\\Documents\\Applications\\putty.exe 192.168.1.1","type":"cmdDevice"},
+{"item":"notepad.exe","type":"cmdDevice"}]
 
 OR
 
-[{"item":"C:\\Users\\John\\Documents\\Applications\\putty.exe 192.168.1.1"},
-{"item":"notepad.exe"}]
+[{"item":"exec://notepad.exe","type":"cmdDevice"}]
 
-OR
+```
+#### Value Passing Controls
+There are multiple replacement constructs available to be put into any of the calls except Harmony items, Net Items and HAL items. These constructs are: "${time.format(Java time format string)}", "${intensity.percent}", "${intensity.byte}" and "${intensity.math(using X in your calc)}".
+You can control items that require special calculated values using ${intensity.math(<your expression using "X" as the value to operate on>)} i.e. "${intensity.math(X/4)}".
+For the items that want to have a date time put into the message, utilize ${time.format(yyyy-MM-ddTHH:mm:ssXXX)} where "yyyy-MM-ddTHH:mm:ssXXX" can be any format from the Java SimpleDateFormat documented here: https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
+e.g.
+```
+[{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=10&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.math(X/4)}","type":"httpDevice"}]
 
-/home/me/startsomething.sh
+[{"item":"udp://192.168.1.1:5000/0x45${intensity.percent}55","type":"udpDevice"}]
 
-OR
+[{"item":"tcp://192.168.1.1:5000/This is the intensity real value ${intensity.byte}","type":"tcpDevice"}]
 
-[{"item":"exec://notepad.exe"}]
+[{"item":{"clientId":"TestClient","topic":"Yep","message":"This is the time ${time.format(yyyy-MM-ddTHH:mm:ssXXX)}"},"type":"mqttDevice"}]
 
 ```
 
@@ -415,8 +454,8 @@ contentBodyOff | string | This is the content body that you would like to send w
 {
 "name" : "bedroom light",
 "deviceType" : "switch",
-  "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
-  "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
+  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
+  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
 }
 ```
 #### Dimming Control Example
@@ -426,8 +465,8 @@ e.g.
 {
     "name": "entry light",
     "deviceType": "switch",
-    "offUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31",
-    "onUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}"
+    "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31","type":"veraDevice"}],
+    "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}","type":"veraDevice"}]
 }
 ```
 See the echo's documentation for the dimming phrase.
@@ -439,8 +478,8 @@ e.g.
 {
     "name": "Thermostat,
     "deviceType": "custom",
-    "offUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=10",
-    "onUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=10&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.math(X/4)}"
+    "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=10","type":"veraDevice"}],
+    "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=10&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.math(X/4)}","type":"veraDevice"}]
 }
 ```
 See the echo's documentation for the dimming phrase.
@@ -452,12 +491,8 @@ e.g:
 {
     "name": "test device",
     "deviceType": "custom",
-    "offUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31",
-    "onUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}",
-  "httpVerb":"POST",
-  "contentType" : "application/json",
-  "contentBody" : "{\"fooBar\":\"baz_on\"}"
-  "contentBodyOff" : "{\"fooBar\":\"baz_off\"}"
+    "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31","httpVerb":"POST","contentType" : "application/json","httpBody" : "{\"fooBar\":\"baz_off\"}],
+    "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}","type":"httpDevice","httpVerb":"POST","contentType" : "application/json","httpBody" : "{\"fooBar\":\"baz_on\"}]
 }
 ```
 #### Custom Usage URLs Example
@@ -466,8 +501,8 @@ Anything that takes an action as a result of an HTTP request will probably work 
 {
   "name": "night mode",
   "deviceType": ""custom",
-  "offUrl": "http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=1",
-  "onUrl": "http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=3"
+  "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=1","type":"httpDevice"}],
+  "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=3","type":"httpDevice"}]
 }
 ```
 Here is a UDP example that can send binary data.
@@ -475,8 +510,8 @@ Here is a UDP example that can send binary data.
 {
   "name": "UDPPacket",
   "deviceType": "custom",
-  "offUrl": "udp://192.168.1.1:8899/0x460055",
-  "onUrl": "udp://192.168.1.1:8899/0x450055"
+  "offUrl": [{"item":"udp://192.168.1.1:8899/0x460055","type":"udpDevice"}],
+  "onUrl": [{"item":"udp://192.168.1.1:8899/0x450055","type":"udpDevice"}]
 }
 ```
 #### Response
@@ -501,8 +536,8 @@ contentBodyOff | string | This is the content body that you would like to send w
 "id" : "12345",
 "name" : "bedroom light",
 "deviceType" : "switch",
-  "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
-  "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
+  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
+  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
 }
 ```
 ### Update a Device 
@@ -535,8 +570,8 @@ contentBodyOff | string | This is the content body that you would like to send w
 "id" : "6789",
 "name" : "table light",
 "deviceType" : "switch",
-  "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
-  "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
+  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
+  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
 }
 ```
 #### Response
@@ -545,8 +580,8 @@ contentBodyOff | string | This is the content body that you would like to send w
 "id" : "6789",
 "name" : "table light",
 "deviceType" : "switch",
-  "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
-  "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
+  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
+  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
 }
 ```
 ### Get All Devices 
@@ -561,15 +596,15 @@ Individual entries are the same as a single device but in json list format.
 "id" : "12345",
 "name" : "bedroom light",
 "deviceType" : "switch",
-  "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
-  "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
+  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
+  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
 }
 {
 "id" : "6789",
 "name" : "table light",
 "deviceType" : "switch",
-  "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
-  "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
+  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
+  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
 }]
 ```
 ### Get a Specific Device 
@@ -584,8 +619,8 @@ The response is the same layout as defined in the add device response.
 "id" : "6789",
 "name" : "table light",
 "deviceType" : "switch",
-  "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
-  "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
+  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
+  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
 }
 ```
 ### Delete a Specific Device 

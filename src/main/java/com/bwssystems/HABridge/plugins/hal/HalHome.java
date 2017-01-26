@@ -19,6 +19,7 @@ import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
+import com.bwssystems.HABridge.hue.TimeDecode;
 import com.bwssystems.HABridge.plugins.http.HTTPHandler;
 import com.google.gson.Gson;
 
@@ -125,10 +126,13 @@ public class HalHome implements Home {
 
 			String anUrl = BrightnessDecode.calculateReplaceIntensityValue(anItem.getItem().getAsString(),
 					intensity, targetBri, targetBriInc, false);
+			anUrl = TimeDecode.replaceTimeValue(anUrl);
 			String aBody = null;
-			if(anItem.getHttpBody()!= null && !anItem.getHttpBody().isEmpty())
+			if(anItem.getHttpBody()!= null && !anItem.getHttpBody().isEmpty()) {
 				aBody = BrightnessDecode.calculateReplaceIntensityValue(anItem.getHttpBody(),
 						intensity, targetBri, targetBriInc, false);
+				aBody = TimeDecode.replaceTimeValue(aBody);
+			}
 			// make call
 			if (anHttpHandler.doHttpRequest(anUrl, anItem.getHttpVerb(), anItem.getContentType(), aBody,
 					new Gson().fromJson(anItem.getHttpHeaders(), NameValue[].class)) == null) {

@@ -16,6 +16,7 @@ import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
+import com.bwssystems.HABridge.hue.TimeDecode;
 
 public class TCPHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(TCPHome.class);
@@ -48,11 +49,11 @@ public class TCPHome implements Home {
 			// noop
 		}
 
+		theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, true);
+		theUrlBody = TimeDecode.replaceTimeValue(theUrlBody);
 		if (theUrlBody.startsWith("0x")) {
-			theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, true);
 			sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
 		} else {
-			theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, false);
 			sendData = theUrlBody.getBytes();
 		}
 

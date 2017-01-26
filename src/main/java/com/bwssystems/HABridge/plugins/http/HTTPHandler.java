@@ -4,8 +4,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -30,21 +34,22 @@ import com.bwssystems.HABridge.api.NameValue;
 public class HTTPHandler {
 	private static final Logger log = LoggerFactory.getLogger(HTTPHandler.class);
 	private HttpClient httpClient;
-	private CloseableHttpClient httpclientSSL;
-	private SSLContext sslcontext;
-	private SSLConnectionSocketFactory sslsf;
-	private RequestConfig globalConfig;
+//	private CloseableHttpClient httpclientSSL;
+//	private SSLContext sslcontext;
+//	private SSLConnectionSocketFactory sslsf;
+//	private RequestConfig globalConfig;
 	
 	
 	public HTTPHandler() {
 		httpClient = HttpClients.createDefault();
+		// Removed Specific SSL as Apache HttpClient automatically uses SSL if the URI starts with https://
 		// Trust own CA and all self-signed certs
-		sslcontext = SSLContexts.createDefault();
+//		sslcontext = SSLContexts.createDefault();
 		// Allow TLSv1 protocol only
-		sslsf = new SSLConnectionSocketFactory(sslcontext, new String[] { "TLSv1,TLSv1.1,TLSv1.2" }, null,
-				SSLConnectionSocketFactory.getDefaultHostnameVerifier());
-		globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build();
-		httpclientSSL = HttpClients.custom().setSSLSocketFactory(sslsf).setDefaultRequestConfig(globalConfig).build();
+//		sslsf = new SSLConnectionSocketFactory(sslcontext, new String[] { "TLS" }, null,
+//				SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+//		globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build();
+//		httpclientSSL = HttpClients.custom().setSSLSocketFactory(sslsf).setDefaultRequestConfig(globalConfig).build();
 	}
 
 
@@ -96,9 +101,10 @@ public class HTTPHandler {
 		}
 		try {
 			HttpResponse response;
-			if (url.startsWith("https"))
-				response = httpclientSSL.execute(request);
-			else
+			// Removed Specific SSL as Apache HttpClient automatically uses SSL if the URI starts with https://
+//			if (url.startsWith("xyzhttps"))
+//				response = httpclientSSL.execute(request);
+//			else
 				response = httpClient.execute(request);
 			log.debug((httpVerb == null ? "GET" : httpVerb) + " execute on URL responded: "
 					+ response.getStatusLine().getStatusCode());
@@ -132,18 +138,18 @@ public class HTTPHandler {
 	}
 
 
-	public CloseableHttpClient getHttpclientSSL() {
-		return httpclientSSL;
-	}
+//	public CloseableHttpClient getHttpclientSSL() {
+//		return httpclientSSL;
+//	}
 
 
 	public void closeHandler() {
 		httpClient = null;
-		try {
-			httpclientSSL.close();
-		} catch (IOException e) {
-			// noop
-		}
-		httpclientSSL = null;
+//		try {
+//			httpclientSSL.close();
+//		} catch (IOException e) {
+//			// noop
+//		}
+//		httpclientSSL = null;
 	}
 }

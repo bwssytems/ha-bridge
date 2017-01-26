@@ -56,6 +56,9 @@ public class DeviceDescriptor{
     @SerializedName("contentBodyDim")
     @Expose
     private String contentBodyDim;
+    @SerializedName("inactive")
+    @Expose
+    private Boolean inactive;
 
     private DeviceState deviceState;
     
@@ -195,6 +198,14 @@ public class DeviceDescriptor{
 
 	public void setDeviceState(DeviceState deviceState) {
 		this.deviceState = deviceState;
+	}
+
+	public Boolean getInactive() {
+		return inactive;
+	}
+
+	public void setInactive(Boolean inactive) {
+		this.inactive = inactive;
 	}
 
 }
