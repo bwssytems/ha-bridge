@@ -97,18 +97,16 @@ public class MQTTHome implements Home {
         		if(mqttMessages[z].getCount() != null && mqttMessages[z].getCount() > 0)
         			theCount = mqttMessages[z].getCount();
         		for(int y = 0; y < theCount; y++) {
-        			if( y > 0 || z > 0) {
-						log.debug("publishing message: " + mqttMessages[y].getClientId() + " - "
-								+ mqttMessages[y].getTopic() + " - " + mqttMessages[y].getMessage()
-								+ " - count: " + String.valueOf(z));
+ 					log.debug("publishing message: " + mqttMessages[y].getClientId() + " - "
+							+ mqttMessages[y].getTopic() + " - " + mqttMessages[y].getMessage()
+							+ " - count: " + String.valueOf(z));
 						
-						MQTTHandler mqttHandler = getMQTTHandler(mqttMessages[y].getClientId());
-						if (mqttHandler == null) {
-							log.warn("Should not get here, no mqtt hanlder available");
-						} else {
-							mqttHandler.publishMessage(mqttMessages[y].getTopic(), mqttMessages[y].getMessage());
-						}
-        			}
+					MQTTHandler mqttHandler = getMQTTHandler(mqttMessages[y].getClientId());
+					if (mqttHandler == null) {
+						log.warn("Should not get here, no mqtt hanlder available");
+					} else {
+						mqttHandler.publishMessage(mqttMessages[y].getTopic(), mqttMessages[y].getMessage());
+					}
         		}
  			}
 		} else {

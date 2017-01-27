@@ -37,7 +37,7 @@ public class HomeAssistant {
 		log.debug("calling HomeAssistant: " + aCommand.getHassName() + " - "
 				+ aCommand.getEntityId() + " - " + aCommand.getState() + " - " + aCommand.getBri());
 		String aUrl = null;
-		if(hassAddress.getSecure())
+		if(hassAddress.getSecure() != null && hassAddress.getSecure())
 			aUrl = "https";
 		else
 			aUrl = "http";
@@ -80,7 +80,7 @@ public class HomeAssistant {
 			headers = new NameValue[1];
 			headers[0] = password;
 		}
-		if(hassAddress.getSecure())
+		if(hassAddress.getSecure() != null && hassAddress.getSecure())
 			theUrl = "https";
 		else
 			theUrl = "http";

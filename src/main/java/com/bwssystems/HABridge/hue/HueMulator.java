@@ -9,6 +9,7 @@ import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.bwssystems.HABridge.api.hue.GroupResponse;
 import com.bwssystems.HABridge.api.hue.HueApiResponse;
+import com.bwssystems.HABridge.api.hue.HueConfig;
 import com.bwssystems.HABridge.api.hue.HueError;
 import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.api.hue.HuePublicConfig;
@@ -73,16 +74,34 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			return basicListHandler("groups", request.params(":userid"),  request.ip());
-		});
+			return groupsListHandler(request.params(":userid"),  request.ip());
+		} , new JsonTransformer());
 		// http://ip_address:port/api/{userId}/groups/{groupId} returns json
 		// object for specified group. Only 0 is supported
 		get(HUE_CONTEXT + "/:userid/groups/:groupid", "application/json", (request, response) -> {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			return  groupsListHandler(request.params(":groupid"), request.params(":userid"),  request.ip());
+			return  groupsIdHandler(request.params(":groupid"), request.params(":userid"),  request.ip());
 		} , new JsonTransformer());
+		// http://ip_address:port/:userid/groups CORS request
+		options(HUE_CONTEXT + "/:userid/groups", "application/json", (request, response) -> {
+			response.status(HttpStatus.SC_OK);
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+			response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+			response.header("Content-Type", "text/html");
+			return "";
+		});
+		// http://ip_address:port/:userid/groups
+		// dummy handler
+		post(HUE_CONTEXT + "/:userid/groups", "application/json", (request, response) -> {
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.type("application/json");
+			response.status(HttpStatus.SC_OK);
+			log.debug("group add requested from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
+			return "[{\"success\":{\"id\":\"1\"}}]";
+		});
 		// http://ip_address:port/api/{userId}/scenes returns json objects of
 		// all scenes configured
 		get(HUE_CONTEXT + "/:userid/scenes", "application/json", (request, response) -> {
@@ -90,6 +109,24 @@ public class HueMulator {
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
 			return basicListHandler("scenes", request.params(":userid"),  request.ip());
+		});
+		// http://ip_address:port/:userid/scenes CORS request
+		options(HUE_CONTEXT + "/:userid/scenes", "application/json", (request, response) -> {
+			response.status(HttpStatus.SC_OK);
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+			response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+			response.header("Content-Type", "text/html");
+			return "";
+		});
+		// http://ip_address:port/:userid/scenes
+		// dummy handler
+		post(HUE_CONTEXT + "/:userid/scenes", "application/json", (request, response) -> {
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.type("application/json");
+			response.status(HttpStatus.SC_OK);
+			log.debug("scene add requested from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
+			return "[{\"success\":{\"id\":\"1\"}}]";
 		});
 		// http://ip_address:port/api/{userId}/schedules returns json objects of
 		// all schedules configured
@@ -99,6 +136,24 @@ public class HueMulator {
 			response.status(HttpStatus.SC_OK);
 			return basicListHandler("schedules", request.params(":userid"),  request.ip());
 		});
+		// http://ip_address:port/:userid/schedules CORS request
+		options(HUE_CONTEXT + "/:userid/schedules", "application/json", (request, response) -> {
+			response.status(HttpStatus.SC_OK);
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+			response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+			response.header("Content-Type", "text/html");
+			return "";
+		});
+		// http://ip_address:port/:userid/schedules
+		// dummy handler
+		post(HUE_CONTEXT + "/:userid/schedules", "application/json", (request, response) -> {
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.type("application/json");
+			response.status(HttpStatus.SC_OK);
+			log.debug("schedules add requested from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
+			return "[{\"success\":{\"id\":\"1\"}}]";
+		});
 		// http://ip_address:port/api/{userId}/sensors returns json objects of
 		// all sensors configured
 		get(HUE_CONTEXT + "/:userid/sensors", "application/json", (request, response) -> {
@@ -106,6 +161,24 @@ public class HueMulator {
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
 			return basicListHandler("sensors", request.params(":userid"),  request.ip());
+		});
+		// http://ip_address:port/:userid/sensors CORS request
+		options(HUE_CONTEXT + "/:userid/sensors", "application/json", (request, response) -> {
+			response.status(HttpStatus.SC_OK);
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+			response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+			response.header("Content-Type", "text/html");
+			return "";
+		});
+		// http://ip_address:port/:userid/sensors
+		// dummy handler
+		post(HUE_CONTEXT + "/:userid/sensors", "application/json", (request, response) -> {
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.type("application/json");
+			response.status(HttpStatus.SC_OK);
+			log.debug("sensors add requested from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
+			return "[{\"success\":{\"id\":\"1\"}}]";
 		});
 		// http://ip_address:port/api/{userId}/rules returns json objects of all
 		// rules configured
@@ -115,6 +188,24 @@ public class HueMulator {
 			response.status(HttpStatus.SC_OK);
 			return basicListHandler("rules", request.params(":userid"),  request.ip());
 		});
+		// http://ip_address:port/:userid/rules CORS request
+		options(HUE_CONTEXT + "/:userid/rules", "application/json", (request, response) -> {
+			response.status(HttpStatus.SC_OK);
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+			response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+			response.header("Content-Type", "text/html");
+			return "";
+		});
+		// http://ip_address:port/:userid/rules
+		// dummy handler
+		post(HUE_CONTEXT + "/:userid/rules", "application/json", (request, response) -> {
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.type("application/json");
+			response.status(HttpStatus.SC_OK);
+			log.debug("rules add requested from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
+			return "[{\"success\":{\"id\":\"1\"}}]";
+		});
 		// http://ip_address:port/api/{userId}/resourcelinks returns json
 		// objects of all resourcelinks configured
 		get(HUE_CONTEXT + "/:userid/resourcelinks", "application/json", (request, response) -> {
@@ -122,6 +213,24 @@ public class HueMulator {
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
 			return basicListHandler("resourcelinks", request.params(":userid"),  request.ip());
+		});
+		// http://ip_address:port/:userid/resourcelinks CORS request
+		options(HUE_CONTEXT + "/:userid/resourcelinks", "application/json", (request, response) -> {
+			response.status(HttpStatus.SC_OK);
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+			response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+			response.header("Content-Type", "text/html");
+			return "";
+		});
+		// http://ip_address:port/:userid/resourcelinks
+		// dummy handler
+		post(HUE_CONTEXT + "/:userid/resourcelinks", "application/json", (request, response) -> {
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.type("application/json");
+			response.status(HttpStatus.SC_OK);
+			log.debug("resourcelinks add requested from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
+			return "[{\"success\":{\"id\":\"1\"}}]";
 		});
 		// http://ip_address:port/api/{userId}/lights returns json objects of
 		// all lights configured
@@ -194,6 +303,28 @@ public class HueMulator {
 			response.status(HttpStatus.SC_OK);
 			return getConfig(request.params(":userid"), request.ip());
 		} , new JsonTransformer());
+		// http://ip_address:port/:userid/config CORS request
+		options(HUE_CONTEXT + "/:userid/config", "application/json", (request, response) -> {
+			response.status(HttpStatus.SC_OK);
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+			response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+			response.header("Content-Type", "text/html");
+			return "";
+		});
+		// http://ip_address:port/:userid/config uses json
+		// object to set the config. this is to handle swupdates
+		put(HUE_CONTEXT + "/:userid/config", "application/json", (request, response) -> {
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.type("application/json");
+			response.status(HttpStatus.SC_OK);
+			log.debug("Config change requested from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
+			HueConfig aConfig = aGsonHandler.fromJson(request.body(), HueConfig.class);
+			if(aConfig.getPortalservices() != null) {
+				return "[{\"success\":{\"/config/portalservices\":true}}]";
+			}
+			return "[{\"success\":{\"/config/name\":\"My bridge\"}}]";
+		});
 
 		// http://ip_address:port/api/{userId} returns json objects for the full
 		// state
@@ -463,7 +594,7 @@ public class HueMulator {
 		}
 
 		if (!found) {
-			log.debug("Valudate user, No User supplied");
+			log.debug("Validate user, No User supplied");
 			return HueErrorResponse.createResponse("1", "/api/" + aUser, "unauthorized user", null, null, null).getTheErrors();
 		}
 		
@@ -496,14 +627,32 @@ public class HueMulator {
 
 		return "{}";
 	}
+	private Object groupsListHandler(String userId, String requestIp) {
+		log.debug("hue group list requested: " + userId + " from " + requestIp);
+		HueError[] theErrors = null;
+		Map<String, GroupResponse> groupResponseMap = null;
+		theErrors = validateWhitelistUser(userId, false);
+		if (theErrors == null) {
+			groupResponseMap = new HashMap<String, GroupResponse>();
+			groupResponseMap.put("1", (GroupResponse) this.groupsIdHandler("1", userId, requestIp));
+			return groupResponseMap;
+		}
 
-	private Object groupsListHandler(String groupId, String userId, String requestIp) {
-		log.debug("hue group 0 list requested: " + userId + " from " + requestIp);
+		return theErrors;
+	}
+
+
+	private Object groupsIdHandler(String groupId, String userId, String requestIp) {
+		log.debug("hue group id: <" + groupId + "> requested: " + userId + " from " + requestIp);
 		HueError[] theErrors = null;
 		theErrors = validateWhitelistUser(userId, false);
 		if (theErrors == null) {
 			if (groupId.equalsIgnoreCase("0")) {
-				GroupResponse theResponse = GroupResponse.createGroupResponse(repository.findAll());
+				GroupResponse theResponse = GroupResponse.createDefaultGroupResponse(repository.findActive());
+				return theResponse;
+			}
+			if (!groupId.equalsIgnoreCase("0")) {
+				GroupResponse theResponse = GroupResponse.createOtherGroupResponse(repository.findActive());
 				return theResponse;
 			}
 			theErrors = HueErrorResponse.createResponse("3", userId + "/groups/" + groupId, "Object not found", null, null, null).getTheErrors();
@@ -582,7 +731,7 @@ public class HueMulator {
 			log.info("Traceupnp: hue api/:userid/config config requested: " + userId + " from " + ipAddress);
 		log.debug("hue api config requested: " + userId + " from " + ipAddress);
 		if (validateWhitelistUser(userId, true) != null) {
-			log.debug("Valudate user, No User supplied, returning public config");
+			log.debug("hue api config requested, No User supplied, returning public config");
 			HuePublicConfig apiResponse = HuePublicConfig.createConfig("Philips hue",
 					bridgeSettings.getUpnpConfigAddress(), bridgeSettings.getHubversion());
 			return apiResponse;
@@ -603,15 +752,8 @@ public class HueMulator {
 
 		HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(),
 				bridgeSettings.getWhitelist(), bridgeSettings.getHubversion());
-		Object aReturn = this.lightsListHandler(userId, ipAddress);
-		Map<String, DeviceResponse> deviceList = new HashMap<String, DeviceResponse>();
-		if(aReturn.getClass() == deviceList.getClass()) {
-			deviceList = (Map<String, DeviceResponse>) aReturn;
-			apiResponse.setLights(deviceList);
-		}
-		else {
-			return aReturn;
-		}
+		apiResponse.setLights((Map<String, DeviceResponse>) this.lightsListHandler(userId, ipAddress));
+		apiResponse.setGroups((Map<String, GroupResponse>) this.groupsListHandler(userId, ipAddress));
 
 		return apiResponse;
 	}
@@ -727,8 +869,10 @@ public class HueMulator {
 		}
 
 		state = device.getDeviceState();
-		if (state == null)
+		if (state == null) {
 			state = DeviceState.createDeviceState();
+			device.setDeviceState(state);
+		}
 
 		if (targetBri != null || targetBriInc != null) {
 			url = device.getDimUrl();
@@ -816,8 +960,13 @@ public class HueMulator {
 		}
 
 		if (responseString == null || !responseString.contains("[{\"error\":")) {
-			responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc);
-			device.setDeviceState(state);
+			if(!device.isNoState()) {
+				responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc);
+				device.setDeviceState(state);
+			} else {
+				DeviceState dummyState = DeviceState.createDeviceState();
+				responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, dummyState, targetBri, targetBriInc);
+			}
 		}
 		return responseString;
 		

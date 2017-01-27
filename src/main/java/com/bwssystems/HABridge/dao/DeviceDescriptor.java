@@ -58,7 +58,10 @@ public class DeviceDescriptor{
     private String contentBodyDim;
     @SerializedName("inactive")
     @Expose
-    private Boolean inactive;
+    private boolean inactive;
+    @SerializedName("noState")
+    @Expose
+    private boolean noState;
 
     private DeviceState deviceState;
     
@@ -200,12 +203,38 @@ public class DeviceDescriptor{
 		this.deviceState = deviceState;
 	}
 
-	public Boolean getInactive() {
+	public boolean isInactive() {
 		return inactive;
 	}
 
-	public void setInactive(Boolean inactive) {
+	public void setInactive(boolean inactive) {
 		this.inactive = inactive;
 	}
 
+	public boolean isNoState() {
+		return noState;
+	}
+
+	public void setNoState(boolean noState) {
+		this.noState = noState;
+	}
+
+	public boolean containsType(String aType) {
+		if(this.mapType.contains(aType))
+			return true;
+		
+		if(this.deviceType.contains(aType))
+			return true;
+		
+		if(this.onUrl.contains(aType))
+			return true;
+		
+		if(this.dimUrl.contains(aType))
+			return true;
+		
+		if(this.offUrl.contains(aType))
+			return true;
+		
+		return false;
+	}
 }

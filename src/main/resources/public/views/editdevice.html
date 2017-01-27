@@ -19,6 +19,7 @@
 		href="#!/mqttmessages">MQTT Messages</a></li>
 	<li ng-if="bridge.showHass" role="presentation"><a
 		href="#!/hassdevices">HomeAssistant Devices</a></li>
+	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
 	<li role="presentation" class="active"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
@@ -67,6 +68,12 @@
 					<td><input type="checkbox"
 						ng-model="device.inactive" ng-true-value=true
 						ng-false-value=false> {{device.inactive}}</td>
+				</tr>
+				<tr>
+					<td>No State (Do not update state for device)</td>
+					<td><input type="checkbox"
+						ng-model="device.noState" ng-true-value=true
+						ng-false-value=false> {{device.noState}}</td>
 				</tr>
 				<tr>
 					<td><label>Target</label></td>

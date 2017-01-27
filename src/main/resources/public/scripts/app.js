@@ -161,6 +161,25 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		return a.indexOf(b) >= 0;
 	}
 
+	this.deviceContainsType = function (device, aType) {
+		if(device.mapType !== undefined && device.mapType !== null && device.mapType.indexOf(aType) >= 0)
+			return true;
+		
+		if(device.deviceType !== undefined && device.deviceType !== null && device.deviceType.indexOf(aType) >= 0)
+			return true;
+		
+		if(device.onUrl !== undefined && device.onUrl !== null && device.onUrl.indexOf(aType) >= 0)
+			return true;
+		
+		if(device.dimUrl !== undefined && device.dimUrl !== null && device.dimUrl.indexOf(aType) >= 0)
+			return true;
+		
+		if(device.offUrl !== undefined && device.offUrl !== null && device.offUrl.indexOf(aType) >= 0)
+			return true;
+		
+		
+		return false;
+	}
 	this.compareHarmonyNumber = function(r1, r2) {
 		if (r1.device !== undefined) {
 		 if (r1.device.id === r2.device.id)
@@ -2338,8 +2357,10 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 		bridgeService.addDevice($scope.device).then(
 				function () {
 					$scope.clearDevice();
+					$location.path('/');
 				},
 				function (error) {
+					bridgeService.displayWarn("Error adding/updating device....", error);
 				}
 		);
 
@@ -2405,13 +2426,13 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 
 });
 
-app.filter('configuredVeraDevices', function () {
+app.filter('configuredVeraDevices', function (bridgeService) {
 	return function(input) {
 		var out = [];
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType !== undefined && input[i].mapType !== null && input[i].mapType === "veraDevice"){
+			if(bridgeService.deviceContainsType(input[i], "veraDevice")){
 				out.push(input[i]);
 			}
 		}
@@ -2419,13 +2440,13 @@ app.filter('configuredVeraDevices', function () {
 	}
 });
 
-app.filter('configuredVeraScenes', function () {
+app.filter('configuredVeraScenes', function (bridgeService) {
 	return function(input) {
 		var out = [];
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType !== undefined && input[i].mapType !== null && input[i].mapType === "veraScene"){
+			if(bridgeService.deviceContainsType(input[i], "veraScene")){
 				out.push(input[i]);
 			}
 		}
@@ -2439,7 +2460,7 @@ app.filter('configuredNestItems', function (bridgeService) {
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType !== undefined && input[i].mapType !== null && bridgeService.aContainsB(input[i].mapType, "nest")){
+			if(bridgeService.deviceContainsType(input[i], "nest")){
 				out.push(input[i]);
 			}
 		}
@@ -2453,7 +2474,7 @@ app.filter('configuredHueItems', function (bridgeService) {
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType !== undefined && input[i].mapType !== null && bridgeService.aContainsB(input[i].mapType, "hue")){
+			if(bridgeService.deviceContainsType(input[i], "hue")){
 				out.push(input[i]);
 			}
 		}
@@ -2467,7 +2488,7 @@ app.filter('configuredHalItems', function (bridgeService) {
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType !== undefined && input[i].mapType !== null && bridgeService.aContainsB(input[i].mapType, "hal")){
+			if(bridgeService.deviceContainsType(input[i], "hal")){
 				out.push(input[i]);
 			}
 		}
@@ -2475,13 +2496,13 @@ app.filter('configuredHalItems', function (bridgeService) {
 	}
 });
 
-app.filter('configuredHarmonyActivities', function () {
+app.filter('configuredHarmonyActivities', function (bridgeService) {
 	return function(input) {
 		var out = [];
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType !== undefined && input[i].mapType !== null && input[i].mapType === "harmonyActivity"){
+			if(bridgeService.deviceContainsType(input[i], "harmonyActivity")){
 				out.push(input[i]);
 			}
 		}
@@ -2489,13 +2510,13 @@ app.filter('configuredHarmonyActivities', function () {
 	}
 });
 
-app.filter('configuredHarmonyButtons', function () {
-	return function(input) {
+app.filter('configuredHarmonyButtons', function (bridgeService) {
+	return function (input) {
 		var out = [];
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType !== undefined && input[i].mapType !== null && input[i].mapType === "harmonyButtons"){
+			if (bridgeService.deviceContainsType(input[i], "harmonyButton")) {
 				out.push(input[i]);
 			}
 		}
@@ -2503,13 +2524,13 @@ app.filter('configuredHarmonyButtons', function () {
 	}
 });
 
-app.filter('configuredMqttMsgs', function () {
+app.filter('configuredMqttMsgs', function (bridgeService) {
 	return function(input) {
 		var out = [];
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType !== undefined && input[i].mapType !== null && input[i].mapType === "mqttMessage"){
+			if (bridgeService.deviceContainsType(input[i], "mqtt")) {
 				out.push(input[i]);
 			}
 		}
@@ -2523,7 +2544,21 @@ app.filter('configuredHassItems', function (bridgeService) {
 		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(input[i].mapType !== undefined && input[i].mapType !== null && bridgeService.aContainsB(input[i].mapType, "hass")){
+			if (bridgeService.deviceContainsType(input[i], "hass")) {
+				out.push(input[i]);
+			}
+		}
+		return out;
+	}
+});
+
+app.filter('configuredDomoticzItems', function (bridgeService) {
+	return function(input) {
+		var out = [];
+		if(input === undefined || input === null || input.length === undefined)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if (bridgeService.deviceContainsType(input[i], "domoticz")) {
 				out.push(input[i]);
 			}
 		}
