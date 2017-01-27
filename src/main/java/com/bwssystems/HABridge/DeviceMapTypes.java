@@ -25,6 +25,7 @@ public class DeviceMapTypes {
 	public final static String[] UDP_DEVICE = { "udpDevice", "UDP Device"};
 	public final static String[] UDP_DEVICE_COMPAT = { "UDP", "UDP Device"};
 	public final static String[] HTTP_DEVICE = { "httpDevice", "HTTP Device"};
+	public final static String[] DOMOTICZ_DEVICE = { "domoticzDevice", "Domoticz Device"};
 
 	public final static int typeIndex = 0;
 	public final static int displayIndex = 1;
@@ -35,10 +36,13 @@ public class DeviceMapTypes {
 		super();
 		deviceMapTypes = new ArrayList<String[]>();
 		deviceMapTypes.add(CMD_DEVICE);
+		deviceMapTypes.add(DOMOTICZ_DEVICE);
 		deviceMapTypes.add(HAL_DEVICE);
 		deviceMapTypes.add(HAL_HOME);
 		deviceMapTypes.add(HAL_THERMO_SET);
 		deviceMapTypes.add(HAL_BUTTON);
+		deviceMapTypes.add(HARMONY_ACTIVITY);
+		deviceMapTypes.add(HARMONY_BUTTON);
 		deviceMapTypes.add(HASS_DEVICE);
 		deviceMapTypes.add(HTTP_DEVICE);
 		deviceMapTypes.add(HUE_DEVICE);
@@ -49,8 +53,6 @@ public class DeviceMapTypes {
 		deviceMapTypes.add(UDP_DEVICE);
 		deviceMapTypes.add(VERA_DEVICE);
 		deviceMapTypes.add(VERA_SCENE);
-		deviceMapTypes.add(HARMONY_ACTIVITY);
-		deviceMapTypes.add(HARMONY_BUTTON);
 	}
 	public static int getTypeIndex() {
 		return typeIndex;

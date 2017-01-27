@@ -15,6 +15,7 @@ import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
+import com.bwssystems.HABridge.hue.TimeDecode;
 import com.bwssystems.HABridge.util.UDPDatagramSender;
 
 public class UDPHome implements Home {
@@ -46,22 +47,23 @@ public class UDPHome implements Home {
 		try {
 			IPAddress = InetAddress.getByName(hostAddr);
 		} catch (UnknownHostException e) {
-			// noop
+			log.warn("Udp Call, unknown host, continuing...");
+			return null;
 		}
 
+		theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, true);
+		theUrlBody = TimeDecode.replaceTimeValue(theUrlBody);
 		if (theUrlBody.startsWith("0x")) {
-			theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, true);
 			sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
 		} else {
-			theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, false);
 			sendData = theUrlBody.getBytes();
 		}
 		try {
 			theUDPDatagramSender.sendUDPResponse(sendData, IPAddress, Integer.parseInt(port));
 		} catch (NumberFormatException e) {
-			// noop
+			log.warn("Udp Call, Number format exception on port, continuing...");
 		} catch (IOException e) {
-			// noop
+			log.warn("IO exception on udp call, continuing...");
 		}
 		return null;
 	}

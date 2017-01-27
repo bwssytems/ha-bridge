@@ -19,6 +19,7 @@
 		href="#!/haldevices">HAL Devices</a></li>
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
 	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
+	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
@@ -41,6 +42,8 @@
 				<th sortable-header col="name">Name</th>
 				<th sortable-header col="deviceType">Type</th>
 				<th sortable-header col="targetDevice">Target</th>
+				<th sortable-header col="inactive">Inactive</th>
+				<th sortable-header col="noState">No State</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
@@ -50,6 +53,8 @@
 			<td>{{device.name}}</td>
 			<td>{{device.deviceType}}</td>
 			<td>{{device.targetDevice}}</td>
+			<td>{{device.inactive}}</td>
+			<td>{{device.noState}}</td>
 			<td>
 				<p>
 					<button class="btn btn-info" type="submit"

@@ -11,6 +11,7 @@ import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
+import com.bwssystems.HABridge.hue.TimeDecode;
 
 public class CommandHome implements Home {
 	private static final Logger log = LoggerFactory.getLogger(CommandHome.class);
@@ -29,20 +30,21 @@ public class CommandHome implements Home {
 			intermediate = anItem.getItem().getAsString().substring(anItem.getItem().getAsString().indexOf("://") + 3);
 		else
 			intermediate = anItem.getItem().getAsString();
-		String anError = doExecRequest(intermediate,
-			BrightnessDecode.calculateIntensity(itensity, targetBri, targetBriInc), lightId);
+		intermediate = BrightnessDecode.calculateReplaceIntensityValue(intermediate, itensity, targetBri, targetBriInc, false);
+		intermediate = TimeDecode.replaceTimeValue(intermediate);
+		String anError = doExecRequest(intermediate, lightId);
 		if (anError != null) {
 			responseString = anError;
 		}
 		return responseString;
 	}
 
-	private String doExecRequest(String anItem, int intensity, String lightId) {
+	private String doExecRequest(String anItem, String lightId) {
 		log.debug("Executing request: " + anItem);
 		String responseString = null;
 		if (anItem != null && !anItem.equalsIgnoreCase("")) {
 			try {
-				Process p = Runtime.getRuntime().exec(BrightnessDecode.replaceIntensityValue(anItem, intensity, false));
+				Process p = Runtime.getRuntime().exec(anItem);
 				log.debug("Process running: " + p.isAlive());
 			} catch (IOException e) {
 				log.warn("Could not execute request: " + anItem, e);

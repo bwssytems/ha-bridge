@@ -74,6 +74,15 @@ public class DeviceRepository extends BackupHandler {
 		return list;
 	}
 
+	public List<DeviceDescriptor> findActive() {
+		List<DeviceDescriptor> list = new ArrayList<DeviceDescriptor>();
+		for(DeviceDescriptor aDevice : new ArrayList<DeviceDescriptor>(devices.values())) {
+			if(!aDevice.isInactive())
+				list.add(aDevice);
+		}
+		return list;
+	}
+
 	public DeviceDescriptor findOne(String id) {
     	return devices.get(id);	
     }

@@ -36,7 +36,12 @@ public class HomeAssistant {
 	public Boolean callCommand(HassCommand aCommand) {
 		log.debug("calling HomeAssistant: " + aCommand.getHassName() + " - "
 				+ aCommand.getEntityId() + " - " + aCommand.getState() + " - " + aCommand.getBri());
-		String aUrl = "http://" + hassAddress.getIp() + ":" + hassAddress.getPort() + "/api/services/" + aCommand.getEntityId().substring(0, aCommand.getEntityId().indexOf("."));
+		String aUrl = null;
+		if(hassAddress.getSecure() != null && hassAddress.getSecure())
+			aUrl = "https";
+		else
+			aUrl = "http";
+		aUrl = aUrl + "://" + hassAddress.getIp() + ":" + hassAddress.getPort() + "/api/services/" + aCommand.getEntityId().substring(0, aCommand.getEntityId().indexOf("."));
 		String aBody = "{\"entity_id\":\"" + aCommand.getEntityId() + "\"";
 		NameValue[] headers = null;
 		if(hassAddress.getPassword() != null && !hassAddress.getPassword().isEmpty()) {
@@ -75,7 +80,11 @@ public class HomeAssistant {
 			headers = new NameValue[1];
 			headers[0] = password;
 		}
-   		theUrl = "http://" + hassAddress.getIp() + ":" + hassAddress.getPort() + "/api/states";
+		if(hassAddress.getSecure() != null && hassAddress.getSecure())
+			theUrl = "https";
+		else
+			theUrl = "http";
+   		theUrl = theUrl + "://" + hassAddress.getIp() + ":" + hassAddress.getPort() + "/api/states";
    		theData = anHttpHandler.doHttpRequest(theUrl, HttpGet.METHOD_NAME, "application/json", null, headers);
     	if(theData != null) {
     		log.debug("GET Hass States - data: " + theData);

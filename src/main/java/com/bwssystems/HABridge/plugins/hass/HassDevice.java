@@ -4,6 +4,7 @@ public class HassDevice {
 	private State deviceState;
 	private String deviceName;
 	private String domain;
+	private Boolean secure;
 	private String hassaddress;
 	private String hassname;
 	public State getDeviceState() {
@@ -23,6 +24,12 @@ public class HassDevice {
 	}
 	public void setDomain(String domain) {
 		this.domain = domain;
+	}
+	public Boolean getSecure() {
+		return secure;
+	}
+	public void setSecure(Boolean secure) {
+		this.secure = secure;
 	}
 	public String getHassaddress() {
 		return hassaddress;

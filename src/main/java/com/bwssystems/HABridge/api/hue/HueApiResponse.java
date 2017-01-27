@@ -12,7 +12,7 @@ import com.google.gson.JsonObject;
 public class HueApiResponse {
     private Map<String, DeviceResponse> lights;
     private Map<String, JsonObject> scenes;
-    private Map<String, JsonObject> groups;
+    private Map<String, GroupResponse> groups;
     private Map<String, JsonObject> schedules;
     private Map<String, JsonObject> sensors;
     private Map<String, JsonObject> rules;
@@ -44,11 +44,11 @@ public class HueApiResponse {
 		this.scenes = scenes;
 	}
 
-	public Map<String, JsonObject> getGroups() {
+	public Map<String, GroupResponse> getGroups() {
 		return groups;
 	}
 
-	public void setGroups(Map<String, JsonObject> groups) {
+	public void setGroups(Map<String, GroupResponse> groups) {
 		this.groups = groups;
 	}
 

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.bwssystems.HABridge.devicemanagmeent.ResourceHandler;
 import com.bwssystems.HABridge.plugins.NestBridge.NestHome;
+import com.bwssystems.HABridge.plugins.domoticz.DomoticzHome;
 import com.bwssystems.HABridge.plugins.exec.CommandHome;
 import com.bwssystems.HABridge.plugins.hal.HalHome;
 import com.bwssystems.HABridge.plugins.harmony.HarmonyHome;
@@ -69,6 +70,7 @@ public class HomeManager {
 		homeList.put(DeviceMapTypes.CUSTOM_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.VERA_SCENE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		//setup the tcp handler Home
 		aHome = new TCPHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.TCP_DEVICE[DeviceMapTypes.typeIndex], aHome);
@@ -81,6 +83,9 @@ public class HomeManager {
 		aHome = new VeraHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		resourceList.put(DeviceMapTypes.VERA_SCENE[DeviceMapTypes.typeIndex], aHome);
+        //setup the HomeAssistant configuration if available
+		aHome = new DomoticzHome(bridgeSettings);
+		resourceList.put(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex], aHome);
 	}
 	
 	public Home findHome(String type) {
