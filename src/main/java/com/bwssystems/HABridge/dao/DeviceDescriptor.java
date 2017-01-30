@@ -220,19 +220,22 @@ public class DeviceDescriptor{
 	}
 
 	public boolean containsType(String aType) {
-		if(this.mapType.contains(aType))
+		if(aType == null)
+			return false;
+		
+		if(this.mapType != null && this.mapType.contains(aType))
 			return true;
 		
-		if(this.deviceType.contains(aType))
+		if(this.deviceType != null && this.deviceType.contains(aType))
 			return true;
 		
-		if(this.onUrl.contains(aType))
+		if(this.onUrl != null && this.onUrl.contains(aType))
 			return true;
 		
-		if(this.dimUrl.contains(aType))
+		if(this.dimUrl != null && this.dimUrl.contains(aType))
 			return true;
 		
-		if(this.offUrl.contains(aType))
+		if(this.offUrl != null && this.offUrl.contains(aType))
 			return true;
 		
 		return false;
