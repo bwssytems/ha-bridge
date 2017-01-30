@@ -673,11 +673,24 @@ public class HueMulator {
 			deviceResponseMap = new HashMap<String, DeviceResponse>();
 			for (DeviceDescriptor device : deviceList) {
 				DeviceResponse deviceResponse = null;
-				// In the multi command context, this is not valid anymore
-//				if ((device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]))) {
-//					HueDeviceIdentifier deviceId = aGsonHandler.fromJson(device.getOnUrl(), HueDeviceIdentifier.class);
-//					deviceResponse = myHueHome.getHueDeviceInfo(deviceId, device);
-//				}
+				if (device.containsType(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) {
+					CallItem[] callItems = null;
+					try {
+						if(device.getOnUrl() != null)
+							callItems = aGsonHandler.fromJson(device.getOnUrl(), CallItem[].class);
+					} catch(JsonSyntaxException e) {
+						log.warn("Could not decode Json for url items to get Hue state for device: " + device.getName());
+						callItems = null;
+					}
+					
+					for (int i = 0; callItems != null && i < callItems.length; i++) {
+						if((callItems[i].getType() != null && callItems[i].getType().equals(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) ||
+									(callItems[i].getItem().getAsString().contains("hueName"))) {
+							deviceResponse = myHueHome.getHueDeviceInfo(callItems[i], device);
+							i = callItems.length;
+						}
+					}
+				}
 
 				if (deviceResponse == null)
 					deviceResponse = DeviceResponse.createResponse(device);
@@ -772,10 +785,25 @@ public class HueMulator {
 			log.debug("found device named: " + device.getName());
 		}
 		DeviceResponse lightResponse = null;
-		if ((device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]))) {
-			HueDeviceIdentifier deviceId = aGsonHandler.fromJson(device.getOnUrl(), HueDeviceIdentifier.class);
-			lightResponse = myHueHome.getHueDeviceInfo(deviceId, device);
-		} else
+		if (device.containsType(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) {
+			CallItem[] callItems = null;
+			try {
+				if(device.getOnUrl() != null)
+					callItems = aGsonHandler.fromJson(device.getOnUrl(), CallItem[].class);
+			} catch(JsonSyntaxException e) {
+				log.warn("Could not decode Json for url items to get Hue state for device: " + device.getName());
+				callItems = null;
+			}
+			
+			for (int i = 0; callItems != null && i < callItems.length; i++) {
+				if((callItems[i].getType() != null && callItems[i].getType().equals(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) || callItems[i].getItem().getAsString().startsWith("{\"ipAddress\":\"")) {
+					lightResponse = myHueHome.getHueDeviceInfo(callItems[i], device);
+					i = callItems.length;
+				}
+			}
+		}
+
+		if (lightResponse == null)
 			lightResponse = DeviceResponse.createResponse(device);
 
 		return lightResponse;
