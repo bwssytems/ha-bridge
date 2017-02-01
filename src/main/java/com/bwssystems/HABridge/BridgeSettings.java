@@ -148,6 +148,7 @@ public class BridgeSettings extends BackupHandler {
         theBridgeSettings.setMqttconfigured(theBridgeSettings.isValidMQTT());
         theBridgeSettings.setHassconfigured(theBridgeSettings.isValidHass());
         theBridgeSettings.setDomoticzconfigured(theBridgeSettings.isValidDomoticz());
+        // Lifx is either configured or not, so it does not need an update.
        if(serverPortOverride != null)
         	theBridgeSettings.setServerPort(serverPortOverride);
         if(serverIpOverride != null)

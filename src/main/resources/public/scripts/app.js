@@ -45,6 +45,9 @@ app.config (function ($locationProvider, $routeProvider) {
 	}).when ('/domoticzdevices', {
 		templateUrl: 'views/domoticzdevice.html',
 		controller: 'DomoticzController'		
+	}).when ('/lifxdevices', {
+		templateUrl: 'views/lifxdevice.html',
+		controller: 'DomoticzController'		
 	}).otherwise ({
 		templateUrl: 'views/configuration.html',
 		controller: 'ViewingController'
@@ -71,7 +74,7 @@ String.prototype.replaceAll = function (search, replace)
 
 app.service ('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: {}, mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, showDomoticz: false, habridgeversion: ""};
+	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: {}, mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, showDomoticz: false, showLifx: false, habridgeversion: ""};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
@@ -254,6 +257,11 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 
 	this.updateShowDomoticz = function () {
 		this.state.showDomoticz = self.state.settings.domoticzconfigured;
+		return;
+	}
+
+	this.updateShowLifx = function () {
+		this.state.showDomoticz = self.state.settings.lifxconfigured;
 		return;
 	}
 
@@ -446,6 +454,19 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 				},
 				function (error) {
 					self.displayWarn("Get Domoticz Devices Error: ", error);
+				}
+		);
+	};
+
+	this.viewLifxDevices = function () {
+		if (!this.state.showLifx)
+			return;
+		return $http.get(this.state.base + "/lifx/devices").then(
+				function (response) {
+					self.state.lifxdevices = response.data;
+				},
+				function (error) {
+					self.displayWarn("Get Lifx Devices Error: ", error);
 				}
 		);
 	};
@@ -2295,6 +2316,124 @@ app.controller('DomoticzController', function ($scope, $location, $http, bridgeS
 	};
 });
 
+app.controller('LifxController', function ($scope, $location, $http, bridgeService, ngDialog) {
+	$scope.bridge = bridgeService.state;
+	$scope.device = bridgeService.state.device;
+	$scope.device_dim_control = "";
+	$scope.bulk = { devices: [] };
+	$scope.selectAll = false;
+	bridgeService.viewLifxDevices();
+	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	$scope.buttonsVisible = false;
+
+	$scope.clearDevice = function () {
+		bridgeService.clearDevice();
+		$scope.device = bridgeService.state.device;
+	};
+
+	$scope.buildDeviceUrls = function (lifxdevice, dim_control) {
+		dimpayload = "{\"name\":\"" + lifxdevice.name + "\"}";
+		onpayload = "{\"name\":\"" + lifxdevice.name + "\"}";
+		offpayload = "{\"name\":\"" + lifxdevice.name + "\"}";
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, lifxdevice.name,  lifxdevice.name, lifxdevice.name, aDeviceType,  "lifxDevice", null, null);
+		$scope.device = bridgeService.state.device;
+		bridgeService.editNewDevice($scope.device);
+		$location.path('/editdevice');
+	};
+
+	$scope.bulkAddDevices = function(dim_control) {
+		var devicesList = [];
+		for(var i = 0; i < $scope.bulk.devices.length; i++) {
+			for(var x = 0; x < bridgeService.state.lifxdevices.length; x++) {
+				if(bridgeService.state.lifxdevices[x].devicename === $scope.bulk.devices[i]) {
+					$scope.buildDeviceUrls(bridgeService.state.lifxdevices[x],dim_control);
+					devicesList[i] = {
+							name: $scope.device.name,
+							mapId: $scope.device.mapId,
+							mapType: $scope.device.mapType,
+							deviceType: $scope.device.deviceType,
+							targetDevice: $scope.device.targetDevice,
+							onUrl: $scope.device.onUrl,
+							dimUrl: $scope.device.dimUrl,
+							offUrl: $scope.device.offUrl,
+							headers: $scope.device.headers,
+							httpVerb: $scope.device.httpVerb,
+							contentType: $scope.device.contentType,
+							contentBody: $scope.device.contentBody,
+							contentBodyDim: $scope.device.contentBodyDim,
+							contentBodyOff: $scope.device.contentBodyOff
+					};
+				}
+			}
+		}
+		bridgeService.bulkAddDevice(devicesList).then(
+				function () {
+					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewHalDevices();
+				},
+				function (error) {
+					bridgeService.displayWarn("Error adding HAL devices in bulk.", error)
+				}
+			);
+		$scope.bulk = { devices: [] };
+		$scope.selectAll = false;
+	};
+
+	$scope.toggleSelection = function toggleSelection(deviceId) {
+		var idx = $scope.bulk.devices.indexOf(deviceId);
+
+		// is currently selected
+		if (idx > -1) {
+			$scope.bulk.devices.splice(idx, 1);
+			if($scope.bulk.devices.length === 0 && $scope.selectAll)
+				$scope.selectAll = false;
+		}
+
+		// is newly selected
+		else {
+			$scope.bulk.devices.push(deviceId);
+			$scope.selectAll = true;
+		}
+	};
+
+	$scope.toggleSelectAll = function toggleSelectAll() {
+		if($scope.selectAll) {
+			$scope.selectAll = false;
+			$scope.bulk = { devices: [] };
+		}
+		else {
+			$scope.selectAll = true;
+			for(var x = 0; x < bridgeService.state.haldevices.length; x++) {
+				if($scope.bulk.devices.indexOf(bridgeService.state.haldevices[x]) < 0 && !bridgeService.findDeviceByMapId(bridgeService.state.haldevices[x].haldevicename + "-" +  bridgeService.state.haldevices[x].halname, bridgeService.state.haldevices[x].halname, "halDevice"))
+					$scope.bulk.devices.push(bridgeService.state.haldevices[x].haldevicename);
+			}
+		}
+	};
+
+	$scope.toggleButtons = function () {
+		$scope.buttonsVisible = !$scope.buttonsVisible;
+		if($scope.buttonsVisible)
+			$scope.imgButtonsUrl = "glyphicon glyphicon-minus";
+		else
+			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	};
+
+	$scope.deleteDevice = function (device) {
+		$scope.bridge.device = device;
+		ngDialog.open({
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
+	};
+	
+	$scope.editDevice = function (device) {
+		bridgeService.editDevice(device);
+		$location.path('/editdevice');
+	};
+});
+
 app.controller('EditController', function ($scope, $location, $http, bridgeService) {
 	bridgeService.viewMapTypes();
 	$scope.bridge = bridgeService.state;
@@ -2559,6 +2698,20 @@ app.filter('configuredDomoticzItems', function (bridgeService) {
 			return out;
 		for (var i = 0; i < input.length; i++) {
 			if (bridgeService.deviceContainsType(input[i], "domoticz")) {
+				out.push(input[i]);
+			}
+		}
+		return out;
+	}
+});
+
+app.filter('configuredLifxItems', function (bridgeService) {
+	return function(input) {
+		var out = [];
+		if(input === undefined || input === null || input.length === undefined)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if (bridgeService.deviceContainsType(input[i], "lifx")) {
 				out.push(input[i]);
 			}
 		}

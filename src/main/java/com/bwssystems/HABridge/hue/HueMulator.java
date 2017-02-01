@@ -16,7 +16,6 @@ import com.bwssystems.HABridge.api.hue.HuePublicConfig;
 import com.bwssystems.HABridge.api.hue.StateChangeBody;
 import com.bwssystems.HABridge.api.hue.WhitelistEntry;
 import com.bwssystems.HABridge.dao.*;
-import com.bwssystems.HABridge.plugins.hue.HueDeviceIdentifier;
 import com.bwssystems.HABridge.plugins.hue.HueHome;
 import com.bwssystems.HABridge.util.JsonTransformer;
 import com.google.gson.Gson;
