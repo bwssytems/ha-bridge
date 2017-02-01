@@ -149,8 +149,12 @@ public class HalInfo {
 			theData = httpClient.doHttpRequest(theUrl, null, null, null, null);
 			if (theData != null) {
 				log.debug("GET IrData for IR Device " + theHalDevice.getHaldevicename() + " HalApiResponse - data: " + theData);
-				theHalApiResponse = new Gson().fromJson(theData, DeviceElements.class);
-				if (theHalApiResponse.getDeviceElements() == null) {
+				try {
+					theHalApiResponse = new Gson().fromJson(theData, DeviceElements.class);
+				} catch (Exception e) {
+					theHalApiResponse = null;
+				}
+				if (theHalApiResponse == null || theHalApiResponse.getDeviceElements() == null) {
 					StatusDescription theStatus = new Gson().fromJson(theData, StatusDescription.class);
 					if (theStatus.getStatus() == null) {
 						log.warn("Cannot get buttons for IR Device " + theHalDevice.getHaldevicename() + " for hal "
