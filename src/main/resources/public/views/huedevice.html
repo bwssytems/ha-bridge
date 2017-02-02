@@ -18,6 +18,7 @@
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
 	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
+	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
@@ -35,9 +36,9 @@
 			 done in the edit tab, click the 'Add Bridge Device' to finish that selection
 			setup. The 'Already Configured Hue Devices' list below will show what
 			is already setup for your Hue.</p>
-		<p>Use the check boxes by the names to use the bulk addition
+		<p class="text-muted">Use the check boxes by the names to use the bulk addition
 			feature. Select your items, then click bulk add below. Your items
-			will be added with on and off or dim and off if selected with the
+			will be added with on, off and dim with the
 			name of the device from the Hue.</p>
 	<scrollable-table watch="bridge.huedevices">
 	<table class="table table-bordered table-striped table-hover">

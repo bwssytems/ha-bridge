@@ -261,7 +261,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 	}
 
 	this.updateShowLifx = function () {
-		this.state.showDomoticz = self.state.settings.lifxconfigured;
+		this.state.showLifx = self.state.settings.lifxconfigured;
 		return;
 	}
 
@@ -277,6 +277,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.updateShowMqtt();
 					self.updateShowHass();
 					self.updateShowDomoticz();
+					self.updateShowLifx();
 				},
 				function (error) {
 					self.displayWarn("Load Bridge Settings Error: ", error);
@@ -2332,10 +2333,10 @@ app.controller('LifxController', function ($scope, $location, $http, bridgeServi
 	};
 
 	$scope.buildDeviceUrls = function (lifxdevice, dim_control) {
-		dimpayload = "{\"name\":\"" + lifxdevice.name + "\"}";
-		onpayload = "{\"name\":\"" + lifxdevice.name + "\"}";
-		offpayload = "{\"name\":\"" + lifxdevice.name + "\"}";
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, lifxdevice.name,  lifxdevice.name, lifxdevice.name, aDeviceType,  "lifxDevice", null, null);
+		dimpayload = angular.toJson(lifxdevice);
+		onpayload = angular.toJson(lifxdevice);
+		offpayload = angular.toJson(lifxdevice);
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, lifxdevice.name,  lifxdevice.name, lifxdevice.name, null,  "lifxDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');

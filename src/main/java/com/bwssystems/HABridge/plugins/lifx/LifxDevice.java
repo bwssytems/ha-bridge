@@ -21,11 +21,13 @@ public class LifxDevice {
 			anEntry = new LifxEntry();
 			anEntry.setId(((LFXLight)lifxObject).getID());
 			anEntry.setName(((LFXLight)lifxObject).getLabel());
+			anEntry.setType(LIGHT_TYPE);
 		}
 		if(type.equals(GROUP_TYPE)) {
 			anEntry = new LifxEntry();
 			anEntry.setId("na");
 			anEntry.setName(((LFXGroup)lifxObject).getLabel());
+			anEntry.setType(GROUP_TYPE);
 		}
 		return anEntry;
 	}
