@@ -47,7 +47,7 @@ app.config (function ($locationProvider, $routeProvider) {
 		controller: 'DomoticzController'		
 	}).when ('/lifxdevices', {
 		templateUrl: 'views/lifxdevice.html',
-		controller: 'DomoticzController'		
+		controller: 'LifxController'		
 	}).otherwise ({
 		templateUrl: 'views/configuration.html',
 		controller: 'ViewingController'
@@ -2336,7 +2336,7 @@ app.controller('LifxController', function ($scope, $location, $http, bridgeServi
 		dimpayload = angular.toJson(lifxdevice);
 		onpayload = angular.toJson(lifxdevice);
 		offpayload = angular.toJson(lifxdevice);
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, lifxdevice.name,  lifxdevice.name, lifxdevice.name, null,  "lifxDevice", null, null);
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, lifxdevice.name,  lifxdevice.name, lifxdevice.name, null,  "lifxDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		bridgeService.editNewDevice($scope.device);
 		$location.path('/editdevice');
