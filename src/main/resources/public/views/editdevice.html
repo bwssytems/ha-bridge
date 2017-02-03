@@ -20,6 +20,7 @@
 	<li ng-if="bridge.showHass" role="presentation"><a
 		href="#!/hassdevices">HomeAssistant Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
+	<li ng-if="bridge.showSomfy" role="presentation"><a href="#!/somfydevices">Somfy Devices</a></li>
 	<li role="presentation" class="active"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
@@ -41,7 +42,7 @@
 			payload&quot;},{&quot;item&quot;:&quot;another payload&quot;}] to
 			execute multiple entries. Adding the value replacements
 			(${intensity..byte},${intensity.percent},${intensity.math(X*1)}) will
-			also work. Also, you can go back to any helper tab and click a build 
+			also work. Also, you can go back to any helper tab and click a build
 			action button to add another item for a multi-command.</p>
 		<p>When copying, update the name and select the "Add Bridge
 			Device" Button.</p>
