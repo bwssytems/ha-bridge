@@ -219,7 +219,13 @@ public class DeviceResource {
 	      	return homeManager.findResource(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
-    	get (API_CONTEXT + "/map/types", "application/json", (request, response) -> {
+		get (API_CONTEXT + "/somfy/devices", "application/json", (request, response) -> {
+			log.debug("Get somfy devices");
+			response.status(HttpStatus.SC_OK);
+			return homeManager.findResource(DeviceMapTypes.SOMFY_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.SOMFY_DEVICE[DeviceMapTypes.typeIndex]);
+		}, new JsonTransformer());
+
+		get (API_CONTEXT + "/map/types", "application/json", (request, response) -> {
 	    	log.debug("Get map types");
 	      	return new DeviceMapTypes().getDeviceMapTypes();
 	    }, new JsonTransformer());

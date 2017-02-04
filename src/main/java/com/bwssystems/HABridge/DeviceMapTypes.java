@@ -26,6 +26,7 @@ public class DeviceMapTypes {
 	public final static String[] UDP_DEVICE_COMPAT = { "UDP", "UDP Device"};
 	public final static String[] HTTP_DEVICE = { "httpDevice", "HTTP Device"};
 	public final static String[] DOMOTICZ_DEVICE = { "domoticzDevice", "Domoticz Device"};
+	public final static String[] SOMFY_DEVICE = { "somfyDevice", "Somfy Device"};
 
 	public final static int typeIndex = 0;
 	public final static int displayIndex = 1;
@@ -53,6 +54,7 @@ public class DeviceMapTypes {
 		deviceMapTypes.add(UDP_DEVICE);
 		deviceMapTypes.add(VERA_DEVICE);
 		deviceMapTypes.add(VERA_SCENE);
+		deviceMapTypes.add(SOMFY_DEVICE);
 	}
 	public static int getTypeIndex() {
 		return typeIndex;
@@ -63,7 +65,7 @@ public class DeviceMapTypes {
 	public ArrayList<String[]> getDeviceMapTypes() {
 		return deviceMapTypes;
 	}
-	
+
 	public Boolean validateType(String type) {
 		if(type == null || type.trim().isEmpty())
 			return false;
