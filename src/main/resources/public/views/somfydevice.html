@@ -1,0 +1,147 @@
+<ul class="nav nav-pills" role="tablist">
+	<li role="presentation"><a href="#!/">Bridge Devices</a></li>
+	<li role="presentation"><a href="#!/system">Bridge Control</a></li>
+	<li role="presentation"><a href="#!/logs">Logs</a></li>
+	<li role="presentation"><a href="#!/veradevices">Vera
+			Devices</a></li>
+	<li role="presentation"><a href="#!/verascenes">Vera Scenes</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a
+		href="#!/harmonyactivities">Harmony Activities</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a
+		href="#!/harmonydevices">Harmony Devices</a></li>
+	<li ng-if="bridge.showNest" role="presentation"><a href="#!/nest">Nest</a></li>
+	<li ng-if="bridge.showHue" role="presentation"><a
+		href="#!/huedevices">Hue Devices</a></li>
+	<li ng-if="bridge.showHal" role="presentation"><a
+		href="#!/haldevices">HAL Devices</a></li>
+	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
+	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
+	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
+	<li ng-if="bridge.showSomfy" role="presentation" class="active"><a href="#!/somfydevices">Somfy Devices</a></li>
+	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
+</ul>
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h2 class="panel-title">Somfy Device List
+			({{bridge.somfydevices.length}})</h2>
+	</div>
+	<div class="panel-body">
+		<p class="text-muted">For any Somfy Device, use the build action buttons
+			to generate the item addition information into the ha-bridge device
+			and this will put you into the edit screen. Then
+			you can modify the name to anything you want that will be the keyword
+			for the Echo or Google Home. Also, you can go back to any helper tab and click a build
+			action button to add another item for a multi-command. After you are
+			 done in the edit tab, click the 'Add Bridge Device' to finish that selection
+			setup. The 'Already Configured Somfy Devices' list below will show
+			what is already setup for your Somfy.</p>
+		<p>
+			Also, use this select menu for which type of dim control you would
+			like to be generated: <select name="device-somfy-dim-control"
+				id="device-somfy-dim-control" ng-model="device_somfy_dim_control">
+				<option value="">none</option>
+				<option value="${intensity.byte}">Pass-thru Value</option>
+				<option value="${intensity.percent}">Percentage</option>
+				<option value="${intensity.math(X*1)}">Custom Math</option>
+			</select>
+		</p>
+		<p>Use the check boxes by the names to use the bulk addition
+			feature. Select your items and dim control type if wanted, then click
+			bulk add below. Your items will be added with on and off or dim and
+			off if selected with the name of the device from the Somfy.</p>
+	</div>
+	<scrollable-table watch="bridge.somfydevices">
+	<table class="table table-bordered table-striped table-hover">
+		<thead>
+			<tr>
+				<th>Row</th>
+				<th sortable-header col="name"><span><input type="checkbox" name="selectAll"
+					value="{{selectAll}}"
+					ng-checked="selectAll"
+					ng-click="toggleSelectAll()"> Name</span></th>
+				<th sortable-header col="id" comparator-fn="comparatorUniqueId">Id</th>
+				<th sortable-header col="category">Category</th>
+				<th sortable-header col="room">Room</th>
+				<th sortable-header col="somfyname">Somfy</th>
+				<th>Build Actions</th>
+			</tr>
+		</thead>
+		<tr
+			ng-repeat="somfydevice in bridge.somfydevices">
+			<td>{{$index+1}}</td>
+			<td><input type="checkbox" name="bulk.devices[]"
+				value="{{somfydevice.id}}"
+				ng-checked="bulk.devices.indexOf(somfydevice.id) > -1"
+				ng-click="toggleSelection(somfydevice.id)">
+				{{somfydevice.name}}</td>
+			<td>{{somfydevice.id}}</td>
+			<td>{{somfydevice.category}}</td>
+			<td>{{somfydevice.room}}</td>
+			<td>{{somfydevice.somfyname}}</td>
+			<td>
+				<button class="btn btn-success" type="submit"
+					ng-click="buildDeviceUrls(somfydevice, device_somfy_dim_control)">Build Item</button>
+			</td>
+		</tr>
+	</table>
+	</scrollable-table>
+	<div class="panel-footer">
+		<button class="btn btn-success" type="submit"
+			ng-click="bulkAddDevices(device_somfy_dim_control)">Bulk Add
+			({{bulk.devices.length}})</button>
+	</div>
+	</div>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h2 class="panel-title">
+			Already Configured Somfy Devices <a ng-click="toggleButtons()"><span
+				class={{imgButtonsUrl}} aria-hidden="true"></span></a></a>
+		</h2>
+	</div>
+	<div ng-if="buttonsVisible" class="panel-body">
+	<scrollable-table watch="bridge.devices">
+	<table class="table table-bordered table-striped table-hover">
+		<thead>
+			<tr>
+				<th>Row</th>
+				<th sortable-header col="name">Name</th>
+				<th sortable-header col="id">Id</th>
+				<th sortable-header col="category">Category</th>
+				<th sortable-header col="room">Room</th>
+				<th sortable-header col="somfyname">Somfy</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tr
+			ng-repeat="device in bridge.devices |configuredSomfyDevices">
+			<td>{{$index+1}}</td>
+			<td>{{device.name}}</td>
+			<td>{{device.id}}</td>
+			<td>{{device.category}}</td>
+			<td>{{device.room}}</td>
+			<td>{{device.somfyname}}</td>
+			<td>
+				<p>
+					<button class="btn btn-warning" type="submit"
+						ng-click="editDevice(device)">Edit</button>
+					<button class="btn btn-danger" type="submit"
+						ng-click="deleteDevice(device)">Delete</button>
+				</p>
+			</td>
+		</tr>
+	</table>
+	</scrollable-table>
+	</div>
+</div>
+<script type="text/ng-template" id="deleteMapandIdDialog">
+		<div class="ngdialog-message">
+			<h2>Device Map and Id?</h2>
+				<p>{{mapandid.mapType}} with  {{mapandid.id}}</p>
+				<p>Are you Sure?</p>
+		</div>
+		<div class="ngdialog-buttons mt">
+			<button type="button" class="ngdialog-button ngdialog-button-error" ng-click="deleteMapandId(mapandid)">Delete</button>
+		</div>
+	</script>
