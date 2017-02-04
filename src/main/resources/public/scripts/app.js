@@ -20,7 +20,7 @@ app.config (function ($locationProvider, $routeProvider) {
 		controller: 'VeraController'		
 	}).when ('/verascenes', {
 		templateUrl: 'views/verascene.html',
-		controller: 'VeraController'
+		controller: 'VeraController'		
 	}).when ('/harmonydevices', {
 		templateUrl: 'views/harmonydevice.html',
 		controller: 'HarmonyController'		
@@ -41,7 +41,7 @@ app.config (function ($locationProvider, $routeProvider) {
 		controller: 'MQTTController'		
 	}).when ('/hassdevices', {
 		templateUrl: 'views/hassdevice.html',
-		controller: 'HassController'
+		controller: 'HassController'		
 	}).when ('/domoticzdevices', {
 		templateUrl: 'views/domoticzdevice.html',
 		controller: 'DomoticzController'
@@ -167,20 +167,20 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 	this.deviceContainsType = function (device, aType) {
 		if(device.mapType !== undefined && device.mapType !== null && device.mapType.indexOf(aType) >= 0)
 			return true;
-
+		
 		if(device.deviceType !== undefined && device.deviceType !== null && device.deviceType.indexOf(aType) >= 0)
 			return true;
-
+		
 		if(device.onUrl !== undefined && device.onUrl !== null && device.onUrl.indexOf(aType) >= 0)
 			return true;
-
+		
 		if(device.dimUrl !== undefined && device.dimUrl !== null && device.dimUrl.indexOf(aType) >= 0)
 			return true;
-
+		
 		if(device.offUrl !== undefined && device.offUrl !== null && device.offUrl.indexOf(aType) >= 0)
 			return true;
-
-
+		
+		
 		return false;
 	}
 	this.compareHarmonyNumber = function(r1, r2) {
@@ -484,7 +484,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 
 		return currentItem;
 	};
-
+	
 	this.getCallObjects = function (deviceString) {
 		if (deviceString === undefined || deviceString === "")
 			return null;
@@ -504,7 +504,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		}
 		return newDevices
 	}
-
+	
 	this.updateCallObjectsType = function (theDevices) {
 		var i, s, type, len = theDevices.length
 		for (i=0; i<len; ++i) {
@@ -517,9 +517,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 			}
 		}
 		return theDevices
-
+		
 	}
-
+	
 	this.viewMapTypes = function () {
 		return $http.get(this.state.base + "/map/types").then(
 				function (response) {
@@ -805,7 +805,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		);
 		return;        		
 	};
-
+	
 	this.formatUrlItem = function (currentItem) {
 		var formattedItem = "";
 		if (currentItem !== "") {
@@ -832,7 +832,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		if (self.state.device !== undefined && self.state.device !== null && self.state.device.mapType !== undefined && self.state.device.mapType !== null && self.state.device.mapType !== "") {
 			self.state.device.mapId = self.state.device.mapId + "-" + anId;
 			if (dimpayload !== undefined && dimpayload !== null && dimpayload !== "") {
-				self.state.device.dimUrl = self.formatUrlItem(currentDim);
+				self.state.device.dimUrl = self.formatUrlItem(currentDim);					
 			}
 
 			if (onpayload !== undefined && onpayload !== null && onpayload !== "") {
@@ -856,7 +856,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 			if (offpayload !== undefined && offpayload !== null && offpayload !== "")
 				self.state.device.offUrl = "[{\"item\":";
 		}
-
+		
 		if (isObject) {
 			if (dimpayload !== undefined && dimpayload !== null && dimpayload !== "")
 				self.state.device.dimUrl = self.state.device.dimUrl + dimpayload;
@@ -864,7 +864,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 				self.state.device.onUrl = self.state.device.onUrl + onpayload;
 			if (offpayload !== undefined && offpayload !== null && offpayload !== "")
 				self.state.device.offUrl = self.state.device.offUrl + offpayload;
-
+			
 		} else {
 			if (dimpayload !== undefined && dimpayload !== null && dimpayload !== "")
 				self.state.device.dimUrl = self.state.device.dimUrl + "\"" + dimpayload + "\"";
@@ -873,7 +873,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 			if (offpayload !== undefined && offpayload !== null && offpayload !== "")
 				self.state.device.offUrl = self.state.device.offUrl + "\"" + offpayload + "\"";
 		}
-
+		
 		if (count !== undefined && count !== null && count !== "") {
 			if (dimpayload !== undefined && dimpayload !== null && dimpayload !== "")
 				self.state.device.dimUrl = self.state.device.dimUrl + ",\"count\":\"" + count;
@@ -1005,7 +1005,7 @@ app.controller ('SystemController', function ($scope, $location, $http, $window,
     	    if($scope.bridge.settings.hassaddress.devices[i].name === hassname && $scope.bridge.settings.hassaddress.devices[i].ip === hassip) {
     	    	$scope.bridge.settings.hassaddress.devices.splice(i, 1);
     	    }
-    	}
+    	}    	
     };
     $scope.addDomoticztoSettings = function (newdomoticzname, newdomoticzip, newdomoticzport, newdomoticzusername, newdomoticzpassword) {
     	if($scope.bridge.settings.domoticzaddress === undefined || $scope.bridge.settings.domoticzaddress === null) {
@@ -1023,7 +1023,7 @@ app.controller ('SystemController', function ($scope, $location, $http, $window,
     	    if($scope.bridge.settings.domoticzaddress.devices[i].name === domoticzname && $scope.bridge.settings.domoticzaddress.devices[i].ip === domoticzip) {
     	    	$scope.bridge.settings.domoticzaddress.devices.splice(i, 1);
     	    }
-    	}
+    	}    	
     };
     $scope.addSomfytoSettings = function (newsomfyname, newsomfyip, newsomfyusername, newsomfypassword) {
         	if($scope.bridge.settings.somfyaddress == null) {
@@ -1373,7 +1373,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 			className: 'ngdialog-theme-default'
 		});
 	};
-
+	
 	$scope.editDevice = function (device) {
 		bridgeService.editDevice(device);
 		$location.path('/editdevice');
@@ -1398,7 +1398,7 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 
 	$scope.buildActivityUrls = function (harmonyactivity) {
 		onpayload = "{\"name\":\"" + harmonyactivity.activity.id + "\",\"hub\":\"" + harmonyactivity.hub + "\"}";
-		offpayload = "{\"name\":\"-1\",\"hub\":\"" + harmonyactivity.hub + "\"}";
+		offpayload = "{\"name\":\"-1\",\"hub\":\"" + harmonyactivity.hub + "\"}";		
 
 		bridgeService.buildUrls(onpayload, null, offpayload, true, harmonyactivity.activity.id,  harmonyactivity.activity.label, harmonyactivity.hub, "activity", "harmonyActivity", null, null);
 		$scope.device = bridgeService.state.device;
@@ -1434,7 +1434,7 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 			className: 'ngdialog-theme-default'
 		});
 	};
-
+	
 	$scope.editDevice = function (device) {
 		bridgeService.editDevice(device);
 		$location.path('/editdevice');
@@ -1535,7 +1535,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 			className: 'ngdialog-theme-default'
 		});
 	};
-
+	
 	$scope.editDevice = function (device) {
 		bridgeService.editDevice(device);
 		$location.path('/editdevice');
@@ -1652,7 +1652,7 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 			className: 'ngdialog-theme-default'
 		});
 	};
-
+	
 	$scope.editDevice = function (device) {
 		bridgeService.editDevice(device);
 		$location.path('/editdevice');
@@ -1722,7 +1722,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 		+ nameCmd
 		+ haldevice.haldevicename.replaceAll(" ", "%20")
 		+ postCmd;
-		offpayload = "http://" + haldevice.haladdress
+		offpayload = "http://" + haldevice.haladdress 
 		+ preOffCmd
 		+ nameCmd
 		+ haldevice.haldevicename.replaceAll(" ", "%20")
@@ -1755,17 +1755,17 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 	};
 
 	$scope.buildHALHeatUrls = function (haldevice) {
-		onpayload = "http://" + haldevice.haladdress
+		onpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Heat?Token="
 		+ $scope.bridge.settings.haltoken;
-		dimpayload = "http://" + haldevice.haladdress
+		dimpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Heat!HeatSpValue=${intensity.percent}?Token="
 		+ $scope.bridge.settings.haltoken;
-		offpayload = "http://" + haldevice.haladdress
+		offpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Off?Token="
@@ -1777,17 +1777,17 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 	};
 
 	$scope.buildHALCoolUrls = function (haldevice) {
-		onpayload = "http://" + haldevice.haladdress
+		onpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Cool?Token="
 		+ $scope.bridge.settings.haltoken;
-		dimpayload = "http://" + haldevice.haladdress
+		dimpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Cool!CoolSpValue=${intensity.percent}?Token="
 		+ $scope.bridge.settings.haltoken;
-		offpayload = "http://" + haldevice.haladdress
+		offpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Off?Token="
@@ -1799,12 +1799,12 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 	};
 
 	$scope.buildHALAutoUrls = function (haldevice) {
-		onpayload = "http://" + haldevice.haladdress
+		onpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Auto?Token="
 		+ $scope.bridge.settings.haltoken;
-		offpayload = "http://" + haldevice.haladdress
+		offpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Off?Token="
@@ -1815,16 +1815,16 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 	};
 
 	$scope.buildHALOffUrls = function (haldevice) {
-		onpayload = "http://" + haldevice.haladdress
+		onpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Auto?Token="
 		+ $scope.bridge.settings.haltoken;
-		offpayload = "http://" + haldevice.haladdress
+		offpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Off?Token="
-		$scope.device.offUrl = "http://" + haldevice.haladdress
+		$scope.device.offUrl = "http://" + haldevice.haladdress 
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-TurnOff",  haldevice.haldevicename + " Thermostat", haldevice.halname, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
 		bridgeService.editNewDevice($scope.device);
@@ -1832,12 +1832,12 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 	};
 
 	$scope.buildHALFanUrls = function (haldevice) {
-		onpayload = "http://" + haldevice.haladdress
-			+ "/HVACService!HVACCmd=Set!HVACName="
-			+ haldevice.haldevicename.replaceAll(" ", "%20")
+		onpayload = "http://" + haldevice.haladdress 
+			+ "/HVACService!HVACCmd=Set!HVACName=" 
+			+ haldevice.haldevicename.replaceAll(" ", "%20") 
 			+ "!FanMode=On?Token="
 			+ $scope.bridge.settings.haltoken;
-		offpayload = "http://" + haldevice.haladdress
+		offpayload = "http://" + haldevice.haladdress 
 			+ "/HVACService!HVACCmd=Set!HVACName=" 
 			+ haldevice.haldevicename.replaceAll(" ", "%20") 
 			+ "!FanMode=Auto?Token="
@@ -1939,7 +1939,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 			className: 'ngdialog-theme-default'
 		});
 	};
-
+	
 	$scope.editDevice = function (device) {
 		bridgeService.editDevice(device);
 		$location.path('/editdevice');
@@ -1984,7 +1984,7 @@ app.controller('MQTTController', function ($scope, $location, $http, bridgeServi
 			className: 'ngdialog-theme-default'
 		});
 	};
-
+	
 	$scope.editDevice = function (device) {
 		bridgeService.editDevice(device);
 		$location.path('/editdevice');
@@ -2179,7 +2179,7 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 			className: 'ngdialog-theme-default'
 		});
 	};
-
+	
 	$scope.editDevice = function (device) {
 		bridgeService.editDevice(device);
 		$location.path('/editdevice');
@@ -2234,7 +2234,7 @@ app.controller('DomoticzController', function ($scope, $location, $http, bridgeS
 		+ preCmd
 		+ domoticzdevice.idx
 		+ postOnCmd;
-		offpayload = "http://" + domoticzdevice.domoticzaddress
+		offpayload = "http://" + domoticzdevice.domoticzaddress 
 		+ preCmd
 		+ domoticzdevice.idx
 		+ postOffCmd;
@@ -2330,7 +2330,7 @@ app.controller('DomoticzController', function ($scope, $location, $http, bridgeS
 			className: 'ngdialog-theme-default'
 		});
 	};
-
+	
 	$scope.editDevice = function (device) {
 		bridgeService.editDevice(device);
 		$location.path('/editdevice');
@@ -2476,11 +2476,11 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 		if($scope.bridge.device.offUrl !== undefined)
 			$scope.offDevices = bridgeService.getCallObjects($scope.bridge.device.offUrl);
 	}
-
+	
 	$scope.newOnItem = {};
 	$scope.newDimItem = {};
 	$scope.newOffItem = {};
-	$scope.mapTypeSelected = bridgeService.getMapType($scope.device.mapType);
+	$scope.mapTypeSelected = bridgeService.getMapType($scope.device.mapType); 
 	$scope.device_dim_control = "";
 	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	$scope.buttonsVisible = false;
@@ -2546,7 +2546,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
     	    if($scope.onDevices[i].item === anItem.item && $scope.onDevices[i].type === anItem.type) {
     	    	$scope.onDevices.splice(i, 1);
     	    }
-    	}
+    	}    	
     };
 
     $scope.addItemDim = function (anItem) {
@@ -2563,7 +2563,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
     	    if($scope.dimDevices[i].item === anItem.item && $scope.dimDevices[i].type === anItem.type) {
     	    	$scope.dimDevices.splice(i, 1);
     	    }
-    	}
+    	}    	
     };
 
     $scope.addItemOff = function (anItem) {
@@ -2580,7 +2580,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
     	    if($scope.offDevices[i].item === anItem.item && $scope.offDevices[i].type === anItem.type) {
     	    	$scope.offDevices.splice(i, 1);
     	    }
-    	}
+    	}    	
     };
 	$scope.toggleButtons = function () {
 		$scope.buttonsVisible = !$scope.buttonsVisible;

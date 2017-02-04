@@ -329,7 +329,7 @@ public class BridgeSettingsDescriptor {
 	}
 	public Boolean isValidHass() {
 		if(this.getHassaddress() == null || this.getHassaddress().getDevices().size() <= 0)
-			return false;
+			return false;		
 		List<NamedIP> devicesList = this.getHassaddress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
@@ -337,7 +337,7 @@ public class BridgeSettingsDescriptor {
 	}
 	public Boolean isValidDomoticz() {
 		if(this.getDomoticzaddress() == null || this.getDomoticzaddress().getDevices().size() <= 0)
-			return false;
+			return false;		
 		List<NamedIP> devicesList = this.getDomoticzaddress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;

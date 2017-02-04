@@ -65,7 +65,7 @@ public class DeviceMapTypes {
 	public ArrayList<String[]> getDeviceMapTypes() {
 		return deviceMapTypes;
 	}
-
+	
 	public Boolean validateType(String type) {
 		if(type == null || type.trim().isEmpty())
 			return false;
