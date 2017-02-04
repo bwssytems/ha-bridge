@@ -90,6 +90,7 @@ public class HomeManager {
 		//setup the Somfy configuration if available
 		aHome = new SomfyHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.SOMFY_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		resourceList.put(DeviceMapTypes.SOMFY_DEVICE[DeviceMapTypes.typeIndex], aHome);
 	}
 	
 	public Home findHome(String type) {

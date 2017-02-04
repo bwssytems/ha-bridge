@@ -10,8 +10,24 @@ import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
+/**
+ * Support for Somfy Tahoma hub which allows control of IO Homecontrol devices such as Velux windows.
+ * Currently supports 'turn on' for open window, and 'turn off' for close.
+ * 
+ * Known issues:
+ * //TODO - Fix bug on UI where bulk update seems to add the single device twice
+ * //TODO - Fix bug on UI where already configured devices are not shown as such.
+ *
+ * Enhancements:
+ * //TODO - support 'dimming' for partial window opening.
+ *
+ */
 public class SomfyHome implements Home  {
     private static final Logger log = LoggerFactory.getLogger(SomfyHome.class);
 	private Map<String, SomfyInfo> somfys;
