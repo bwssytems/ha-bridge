@@ -65,9 +65,17 @@ public class HueHome implements Home {
 		return deviceList;
 	}
 
-	public DeviceResponse getHueDeviceInfo(HueDeviceIdentifier deviceId, DeviceDescriptor device) {
+	public DeviceResponse getHueDeviceInfo(CallItem anItem, DeviceDescriptor device) {
 		if(!validHue)
 			return null;
+		HueDeviceIdentifier deviceId = null;
+		if(anItem.getItem().isJsonObject())
+			deviceId = aGsonHandler.fromJson(anItem.getItem(), HueDeviceIdentifier.class);
+		else
+			deviceId = aGsonHandler.fromJson(anItem.getItem().getAsString(), HueDeviceIdentifier.class);
+		if(deviceId.getHueName() == null || deviceId.getHueName().isEmpty())
+			deviceId.setHueName(device.getTargetDevice());
+		
 		DeviceResponse deviceResponse = null;
 		HueInfo aHueInfo = hues.get(device.getTargetDevice());
 		deviceResponse = aHueInfo.getHueDeviceInfo(deviceId.getDeviceId(), device);

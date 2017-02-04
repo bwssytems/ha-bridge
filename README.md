@@ -1,11 +1,11 @@
 # ha-bridge
 Emulates Philips Hue api to other home automation gateways such as an Amazon Echo or Google Home.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
 
-**SECURITY RISK: If you are unsure on how this software operates and what it exposes to your netowrk, please make sure you understand that it can allow root access to your sytem. It is best practice to not open this to the itnernet through your router as there are no security protocols in place to protect the system. The Licenese agreement states specifically that you use this at your own risk.**
+**SECURITY RISK: If you are unsure on how this software operates and what it exposes to your network, please make sure you understand that it can allow root access to your system. It is best practice to not open this to the Internet through your router as there are no security protocols in place to protect the system. The License agreement states specifically that you use this at your own risk.**
 
 **ATTENTION: This requires a physical Amazon Echo, Dot or Tap and does not work with prototype devices built using the Alexa Voice Service e.g. Amazon's Alexa AVS Sample App and Sam Machin's AlexaPi. The AVS version does not have any capability for Hue Bridge discovery!**
 
-**NOTE: This software does require the user to have knwoledge on how processes run on Linux or Windows with java. Also, an understanding of networking basics will help as well. This system reveives upnp udp multicast packets from devices to be found, so that is some thing to understand. Please make sure you have all your devices use static IP addresses from your router. Most all questions have been answered already. PLEASE USE GOOGLE TO FIND YOUR ANSWERS!**
+**NOTE: This software does require the user to have knowledge on how processes run on Linux or Windows with java. Also, an understanding of networking basics will help as well. This system receives upnp udp multicast packets from devices to be found, so that is something to understand. Please make sure you have all your devices use static IP addresses from your router. Most all questions have been answered already. PLEASE USE GOOGLE TO FIND YOUR ANSWERS!**
 
 **NOTE: This software does not control Philips Hue devices directly. A physical Philips Hue Hub is required for that, by which the ha-bridge can then proxy all of your real Hue bridges behind this bridge.**
 
@@ -33,23 +33,23 @@ ATTENTION: This requires JDK 1.8 to run
 ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
 
 ```
-java -jar ha-bridge-4.1.0.jar
+java -jar ha-bridge-4.1.2.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
-Create the directory and make sure that ha-bridge-4.1.0.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-4.1.2.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
 
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.1.0/ha-bridge-4.1.0.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.1.2/ha-bridge-4.1.2.jar
 ```
-Create the directory and make sure that ha-bridge-4.1.0.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-4.1.2.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.1.0/ha-bridge-4.1.0.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.1.2/ha-bridge-4.1.2.jar
 ```
 #### System Control Setup on a pi (preferred)
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
@@ -69,7 +69,7 @@ After=network.target
 [Service]
 Type=simple
 
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.1.0.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.1.2.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -104,7 +104,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.1.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.1.2.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
@@ -217,7 +217,7 @@ location /api/ {
 }
 ```
 ## Available Arguments
-Arguments are now deprecated. The ha-bridge will use the old -D arguments and populate the configuration screen, Brisge Control Tab, which can now be saved to a file and will not be needed. There is only one optional argument that overrides and that is the location of the configuration file. The default is the relative path "data/habridge.config".
+Arguments are now deprecated. The ha-bridge will use the old -D arguments and populate the configuration screen, Bridge Control Tab, which can now be saved to a file and will not be needed. There is only one optional argument that overrides and that is the location of the configuration file. The default is the relative path "data/habridge.config".
 ### -Dconfig.file=`<filepath>`
 The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify -Dconfig.file=`<directory>/<filename>` explicitly. The command line example:
 ```
@@ -237,7 +237,7 @@ java -jar -Dserver.ip=192.168.1.1 ha-bridge-W.X.Y.jar
 ```
 ## HA Bridge Usage and Configuration
 This section will cover the basics of configuration and where this configuration can be done. This requires that you have started your bridge process and then have pointed your
-favorite web interface by going to the http://<my ip address>:<port> or http://localhost:<port> with port you have assigned. The default quick link is http://localhost for yoru reference.
+favorite web interface by going to the http://<my ip address>:<port> or http://localhost:<port> with port you have assigned. The default quick link is http://localhost for your reference.
 ### The Bridge Devices Tab
 This screen allows you to see your devices you have configured for the ha-bridge to present to a controller, such as an Amazon Echo/Dot. It gives you a count of devices as there have been reports that the Echo only supports a limited number, but has been growing as of late, YMMV. You can test each device from this page as this calls the ha-bridge just as a controller would, i.e. the Echo. This is useful to make sure your configuration for each device is correct and for trouble shooting. You can also manages your devices as well by editing and making a new device copy as well as deleting it.
 
@@ -265,27 +265,27 @@ Provide IP Addresses of your Veras that you want to utilize with the bridge. Als
 #### Harmony Names and IP Addresses
 Provide IP Addresses of your Harmony Hubs that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the activity or buttons by the call it receives and send it to the target Harmony Hub and activity/button you configure. 
 #### Harmony Username
-depracated
+deprecated
 #### Harmony Password
-depracated
+deprecated
 #### Hue Names and IP Addresses
 Provide IP Addresses of your Hue Bridges that you want to proxy through the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will passthru the call it receives to the target Hue and device you configure.
 
-Don't forget - You will need to push the link button when you got to the Hue Tab the first time ater the process comes up.  (The user name is not persistent when the process comes up.)
+Don't forget - You will need to push the link button when you got to the Hue Tab the first time after the process comes up.  (The user name is not persistent when the process comes up.)
 #### HAL Names and IP Addresses
 Provide IP Addresses of your HAL Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target HAL and device/scene you configure. 
 #### HAL Token
 The token you generate or give to a HAL and must be the same for all HAL's you have identified. This needs to be given if you are using the HAL features.
 #### MQTT Client IDs and IP Addresses	
-Provide Client ID and IP Addresses and ports of your MQTT Brokers that you want to utilize with the bridge. Also, you can provide the username and password if you have secured yourMQTT broker which is optional. When these Client ID and IP's are given, the bridge will be able to publish mqtt messages by the call it receives and send it to the target MQTT Broker you configure. The MQTT Messages Tab will become available to help you build messages.
+Provide Client ID and IP Addresses and ports of your MQTT Brokers that you want to utilize with the bridge. Also, you can provide the username and password if you have secured your MQTT broker which is optional. When these Client ID and IP's are given, the bridge will be able to publish MQTT messages by the call it receives and send it to the target MQTT Broker you configure. The MQTT Messages Tab will become available to help you build messages.
 #### Nest Username
 The user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features. There is no need to give any ip address or host information as this contacts your cloud account.
 #### Nest Password
 The password for the user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features.
-#### Nest Temp Farenheit
-This setting allows the value being sent into the bridge to be interpreted as Farenheit or Celsius. The default is to have Farenheit.
+#### Nest Temp Fahrenheit
+This setting allows the value being sent into the bridge to be interpreted as Fahrenheit or Celsius. The default is to have Fahrenheit.
 #### Button Press/Call Item Loop Sleep Interval (ms)
-This setting is the time used in between button presses when there is multple buttons in a button device. It also controls the time between multiple items in a custom device call. This is defaulted to 100ms and the number represnts milliseonds (1000 milliseconds = 1 second).
+This setting is the time used in between button presses when there is multiple buttons in a button device. It also controls the time between multiple items in a custom device call. This is defaulted to 100ms and the number represents milliseconds (1000 milliseconds = 1 second).
 #### Log Messages to Buffer
 This controls how many log messages will be kept and displayed on the log tab. This does not affect what is written to the standard output for logging. The default is 512. Changing this will incur more memory usage of the process.
 #### UPNP Strict Handling
@@ -299,7 +299,7 @@ This screen displays the last 512 or number of rows defined in the config screen
 
 The bottom part of the Logs Screen has configuration to change the logging levels as it is running. The ROOT is the basic setting and will turn on only top level logging. To set logging at a lower level, select the `Show All Loggers` checkbox and then you can set the explicit level on each of the processes components. The most helpful logger would be setting DEBUG for com.bwssystems.HABridge.hue.HueMulator component. Changing this and then selecting the `Update Log Levels` button applies the new log settings. 
 ### Bridge Device Additions
-You must configure devices before you will have any thing for the Echo or other controller that is connected to the ha-bridge to receive.
+You must configure devices before you will have anything for the Echo or other controller that is connected to the ha-bridge to receive.
 #### Helpers
 The easy way to get devices configured is with the use of the helpers for the Vera or Harmony, Nest and Hue to create devices that the bridge will present.
 
@@ -309,7 +309,7 @@ The helper tabs will also show you what you have already configured for that tar
 #### The Add/Edit Tab
 Another way to add a device is through the Manual Add Tab. This allows you to manually enter the name, the on and off URLs and select if there are custom handling with the type of call that can be made. This allows for control of anything that has a distinct request that can be executed so you are not limited to the Vera, Harmony, Nest or other Hue.
 
-There is a new format for the on/dim/off URL areas. The new editor handles the intricasies of the components, but is broken down here for explanation.
+There is a new format for the on/dim/off URL areas. The new editor handles the intricacies of the components, but is broken down here for explanation.
 
 Here are the fields that can be put into the call item:
 Json Type | field name | What | Use
@@ -324,11 +324,13 @@ String | httpBody | Send this Body with a PUT or POST | Optional
 String | httpHeaders | Send these headers with the http call | Optional
 String | contentType | Define the type of content in the body | Optional
 
-Example:
+Example from device.db:
 ```
 [{"item":<a String that is quoted or another JSON object>,"type":"<atype>"."count":X."delay":X."filterIPs":"<comma separated list of IP addresses that are valid>"."httpVerb":"<GET,PUT,POST>","httpBody":"<body info>","httpHeaders":[{"name":"header name","value":"header value"},{"name":"another header","value":"another value"}],"contentType":"<http content type i.e application/json>"},{"item":<another item>,"type":"<aType>"}]
 ```
 
+The Add/Edit tab will show you the fields to fill in for the above in a form, when you hcae completed putting in the things you want, make sure to hit the `Add` button at the right.
+ 
 The format of the item can be the default HTTP request which executes the URLs formatted as `http://<your stuff here>` as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use `https://<your secure call here>`. When using POST and PUT, you have the ability to specify the body that will be sent with the request as well as the application type for the http call.
 
 The valid device types are: "custom", "veraDevice", "veraScene", "harmonyActivity", "harmonyButton", "nestHomeAway", "nestThermoSet", "hueDevice", "halDevice", 
@@ -373,7 +375,7 @@ Examples:
 ```
 
 #### Multiple Call Construct
-Also available is the ability to specify multiple commands in the On URL, Dim URL and Off URL areas by adding Json constructs listed here. This is only for the types of tcp, udp, http, https or a new exec type. Also within the item format you can specify delay in milliseconds and count per item. These new paramters work on device buttons for the Harmony as well.
+Also available is the ability to specify multiple commands in the On URL, Dim URL and Off URL areas by adding Json constructs listed here. This is only for the types of tcp, udp, http, https or a new exec type. Also within the item format you can specify delay in milliseconds and count per item. These new parameters work on device buttons for the Harmony as well.
 Format Example in the URL areas:
 ```
 [{"item":"http://192.168.1.1:8180/do/this/thing","type":"httpDevice"},
@@ -598,7 +600,7 @@ contentBodyOff | string | This is the content body that you would like to send w
 }
 ```
 ### Update a Device 
-Update an existing device using it's ID that was given when the device was created and the update could contain any of the fields that are used and shown in the previous examples when adding a device. 
+Update an existing device using its ID that was given when the device was created and the update could contain any of the fields that are used and shown in the previous examples when adding a device. 
 
 **Note: You must supply all fields of the device in return as this is a replacement update for the given id.**
 ```
@@ -614,7 +616,7 @@ mapType | string | This identifies what type of source item was used from the he
 deviceType | string | This identifies what type of device entry this is. It is used by the system and should be the values of "switch", "scene", "custom", "activity", "button", "thermo", "passthru", "exec", "UDP", "TCP" or "custom". | Required
 targetDevice | string | A name given to the target when there are multiples of a given type in the configuration | Optional
 onUrl | string | This is the URL or Data Description that is executed for an "on" request. | Required
-dimUrl | string | This is the URL or Data Description that is executed for an "on" request when a intensity value is sent. | Optional
+dimUrl | string | This is the URL or Data Description that is executed for an "on" request when an intensity value is sent. | Optional
 offUrl | string | This is the URL or Data Description that is executed for an "off" request. | Optional
 headers | string | This is a header or list of headers that is used for http/https calls when given. | Optional
 httpVerb | string | This is used for "custom" calls that the user would like to execute. The values can only be "GET, "PUT", "POST". | Optional
@@ -840,7 +842,7 @@ Show the Harmony Hub's current activity.
 GET http://host:port/api/devices/harmony/show
 ```
 #### Response
-Only listing the relevant fields that are needed for identity of an activity. TThe example below is representative of an activity.
+Only listing the relevant fields that are needed for identity of an activity. The example below is representative of an activity.
 
 Name |	Type |	Description
 -----|-------|-------------
@@ -1004,7 +1006,7 @@ Allows the user to set the internal state of the light on and off, modify the br
 PUT	http://host:port/api/<username>/lights/<id>/bridgeupdatestate
 ```
 #### Body arguments
-These are examples that can be used in the control of items iwthin the bridge, but for HUE passthru devices, the complete state object is sent.
+These are examples that can be used in the control of items within the bridge, but for HUE passthru devices, the complete state object is sent.
 Name |	Type |	Description	 
 -----|-------|-------------
 on |	bool |	On/Off state of the light. On=true, Off=false. Optional
@@ -1176,7 +1178,7 @@ Note that `192.168.1.1` and `12345` are replaced with the actual IP address and 
 
 
 ### UPNP description service
-The bridge provides the description service which is used by the calling app to interogate access details after it has decided the upnp multicast response is the correct device.
+The bridge provides the description service which is used by the calling app to interrogate access details after it has decided the upnp multicast response is the correct device.
 #### Get Description
 ```
 GET http://host:80/description.xml
@@ -1231,7 +1233,7 @@ GET http://host:80/description.xml
 </root>\n
 ```
 ## Development Mode
-To turn on development mode so that it will not need an Harmony Hub for testing, use the following extra parm in the command line and the harmony ip and login info will not be needed:
+To turn on development mode so that it will not need a Harmony Hub for testing, use the following extra parameter in the command line and the harmony ip and login info will not be needed:
 ```
 java -jar -Ddev.mode=true ha-bridge-0.X.Y.jar
 ```

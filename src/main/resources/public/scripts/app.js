@@ -789,7 +789,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		$http.put(testUrl, testBody).then(
 				function (response) {
 					if (typeof(response.data[0].success) !== 'undefined') {
-						msgDescription = "success " + angular.toJson(response.data[0].success);
+						msgDescription = "success " + angular.toJson(response.data);
 					}
 					if (typeof(response.data[0].error) !== 'undefined') {
 						msgDescription = "error " + angular.toJson(response.data[0].error);
