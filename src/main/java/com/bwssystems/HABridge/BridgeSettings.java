@@ -46,6 +46,7 @@ public class BridgeSettings extends BackupHandler {
 	public void buildSettings() {
         String addressString = null;
         String theVeraAddress = null;
+        String theSomfyAddress = null;
         String theHarmonyAddress = null;
         String configFileProperty = System.getProperty("config.file");
         if(configFileProperty == null) {
@@ -103,7 +104,24 @@ public class BridgeSettings extends BackupHandler {
 		        }
 	        }
 	        theBridgeSettings.setHarmonyAddress(theHarmonyList);
-	        theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
+
+			theSomfyAddress = System.getProperty("somfy.address");
+			IpList theSomfyList = null;
+			if(theSomfyAddress != null) {
+				try {
+					theSomfyList = new Gson().fromJson(theSomfyAddress, IpList.class);
+				} catch (Exception e) {
+					try {
+						theSomfyList = new Gson().fromJson("{devices:[{name:default,ip:" + theSomfyAddress + "}]}", IpList.class);
+					} catch (Exception et) {
+						log.error("Cannot parse somfy.address, not set with message: " + e.getMessage(), e);
+						theSomfyList = null;
+					}
+				}
+			}
+			theBridgeSettings.setSomfyAddress(theSomfyList);
+
+			theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
 	        theBridgeSettings.setTraceupnp(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
 	        theBridgeSettings.setButtonsleep(Integer.parseInt(System.getProperty("button.sleep", Configuration.DEFAULT_BUTTON_SLEEP)));
 	        theBridgeSettings.setNestuser(System.getProperty("nest.user"));
@@ -148,6 +166,7 @@ public class BridgeSettings extends BackupHandler {
         theBridgeSettings.setMqttconfigured(theBridgeSettings.isValidMQTT());
         theBridgeSettings.setHassconfigured(theBridgeSettings.isValidHass());
         theBridgeSettings.setDomoticzconfigured(theBridgeSettings.isValidDomoticz());
+		theBridgeSettings.setSomfyconfigured(theBridgeSettings.isValidSomfy());
        if(serverPortOverride != null)
         	theBridgeSettings.setServerPort(serverPortOverride);
         if(serverIpOverride != null)
