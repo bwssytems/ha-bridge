@@ -102,7 +102,7 @@ public class SomfyHome implements Home  {
 		validSomfy = bridgeSettings.isValidSomfy();
 		log.info("Vera Home created." + (validSomfy ? "" : " No Veras configured."));
 		if(validSomfy) {
-			somfys = new HashMap<String, SomfyInfo>();
+			somfys = new HashMap<>();
 			Iterator<NamedIP> theList = bridgeSettings.getSomfyAddress().getDevices().iterator();
 			while (theList.hasNext()) {
 				NamedIP aSomfy = theList.next();

@@ -51,34 +51,11 @@ public class SomfyInfo {
 
 	private void initHttpClient() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
 		if(httpClient==null) {
-			httpClient = HttpClients.custom().
-					setHostnameVerifier(new AllowAllHostnameVerifier()).
-					setSslcontext(new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
-						public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-							return true;
-						}
-					}).build()).build();
+			httpClient = HttpClients.createDefault();
 		}
 	}
 
-
-	//	This function executes the url against the vera
-    protected String doHttpGETRequest(String url) {
-    	String theContent = null;
-        log.debug("calling GET on URL: " + url);
-        HttpGet httpGet = new HttpGet(url);
-        try {
-            HttpResponse response = httpClient.execute(httpGet);
-            log.debug("GET on URL responded: " + response.getStatusLine().getStatusCode());
-            if(response.getStatusLine().getStatusCode() == 200){
-                theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); //read content for data
-                EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
-            }
-        } catch (IOException e) {
-            log.error("doHttpGETRequest: Error calling out to HA gateway: " + e.getMessage());
-        }
-        return theContent;
-    }
+	
 
 	public List<SomfyDevice> getSomfyDevices() {
 
@@ -100,72 +77,51 @@ public class SomfyInfo {
 
 		initHttpClient();
 		HttpPost httpPost = new HttpPost(BASE_URL + "json/login");
-
-		//HttpHost proxy = new HttpHost("127.0.0.1", 8888, "http");
-		RequestConfig config = RequestConfig.custom()
-		//		.setProxy(proxy)
-				.build();
-		httpPost.setConfig(config);
 		httpPost.addHeader("User-Agent","mine");
 		List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 		nvps.add(new BasicNameValuePair("userId", username));
 		nvps.add(new BasicNameValuePair("userPassword", password));
 		httpPost.setEntity(new UrlEncodedFormEntity(nvps));
-		System.out.println("Making SOMFY http login call");
+		log.debug("Making SOMFY http login call");
 		HttpResponse response = httpClient.execute(httpPost);
 
-		//try {
-			System.out.println(response.getStatusLine());
-			HttpEntity entity = response.getEntity();
-			EntityUtils.consume(entity);
-		//} finally {
-		//	response.close();
-		//}
+		log.debug(response.getStatusLine().toString());
+		HttpEntity entity = response.getEntity();
+		EntityUtils.consume(entity);
 	}
 
 	public GetSetup getSetup() throws IOException, JSONException {
 		HttpGet httpGet = new HttpGet(BASE_URL + "json/getSetup");
 		httpGet.addHeader("User-Agent","mine");
-		System.out.println("Making SOMFY http setup call");
+		log.info("Making SOMFY http setup call");
 
 		HttpResponse response = httpClient.execute(httpGet);
-		//try {
-			System.out.println(response.getStatusLine());
-			HttpEntity entity = response.getEntity();
+		log.debug(response.getStatusLine().toString());
+		HttpEntity entity = response.getEntity();
 
-			String json = IOUtils.toString(entity.getContent());
-			System.out.println(json);
-			GetSetup setupData = new Gson().fromJson(json, GetSetup.class);
-			return setupData;
-
-		//} finally {
-		//	response.close();
-		//}
+		String json = IOUtils.toString(entity.getContent());
+		log.debug(json);
+		GetSetup setupData = new Gson().fromJson(json, GetSetup.class);
+		return setupData;
 	}
 
 	public void execApply(String jsonToPost) throws Exception {
 		login("house@edonica.com", "drawde123");
 		HttpPost httpPost = new HttpPost(BASE_URL_ENDUSER + "exec/apply");
 
-		//HttpHost proxy = new HttpHost("127.0.0.1", 8888, "http");
-		RequestConfig config = RequestConfig.custom()
-				//        .setProxy(proxy)
-				.build();
+		RequestConfig config = RequestConfig.custom().build();
 		httpPost.setConfig(config);
 		httpPost.addHeader("User-Agent", "mine");
 		httpPost.addHeader("Content-Type", "application/json;charset=UTF-8");
 
 		httpPost.setEntity(new StringEntity(jsonToPost, "UTF-8"));
-		System.out.println("Making SOMFY http exec call");
+		log.info("Making SOMFY http exec call");
 		HttpResponse response = httpClient.execute(httpPost);
-
-		//try {
-			System.out.println(response.getStatusLine());
-			HttpEntity entity = response.getEntity();
-			EntityUtils.consume(entity);
-		//} finally {
-			//response.close();
-		//}
+		
+		log.info(response.getStatusLine().toString());
+		HttpEntity entity = response.getEntity();
+		EntityUtils.consume(entity);
+		
 	}
 
 
