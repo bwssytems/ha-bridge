@@ -104,5 +104,6 @@ public class HomeAssistant {
 	
 	protected void closeClient() {
 		anHttpHandler.closeHandler();
+		anHttpHandler = null;
 	}
 }

@@ -106,7 +106,6 @@ public class VeraHome implements Home {
 
 	@Override
 	public void closeHome() {
-		// TODO Auto-generated method stub
-		
+		veras = null;
 	}
 }

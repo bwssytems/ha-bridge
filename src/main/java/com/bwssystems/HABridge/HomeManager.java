@@ -1,5 +1,6 @@
 package com.bwssystems.HABridge;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -96,6 +97,11 @@ public class HomeManager {
 	}
 
 	public void closeHomes() {
-		
+		Collection<Home> theHomes = homeList.values();
+		for(Home aHome : theHomes) {
+			aHome.closeHome();
+		}
+		homeList.clear();
+		homeList = null;
 	}
 }

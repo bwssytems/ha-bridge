@@ -68,5 +68,6 @@ public class MQTTHandler {
 		} catch (MqttException e) {
 			log.warn("Could not disconnect MQTT client for name: " + myConfig.getName() + " and ip: " + myConfig.getIp());
 		}
+		myClient = null;
 	}
 }

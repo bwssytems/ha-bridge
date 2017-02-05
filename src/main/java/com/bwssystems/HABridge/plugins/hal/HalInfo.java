@@ -185,4 +185,11 @@ public class HalInfo {
 		this.halAddress = halAddress;
 	}
 
+	public void closeInfo() {
+		if(httpClient != null)
+			httpClient.closeHandler();
+		httpClient = null;
+		halAddress = null;
+		theToken = null;
+	}
 }

@@ -87,6 +87,7 @@ public class HABridge {
 		        	bridgeSettings.save(bridgeSettings.getBridgeSettingsDescriptor());
 		        homeManager.closeHomes();
 		        udpSender.closeResponseSocket();
+		        udpSender = null;
 	        }
 	        bridgeSettings.getBridgeControl().setReinit(false);
 	        stop();

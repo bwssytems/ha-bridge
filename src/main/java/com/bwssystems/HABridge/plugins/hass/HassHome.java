@@ -151,10 +151,14 @@ public class HassHome implements Home {
 	public void closeHome() {
 		if(!validHass)
 			return;
+		if(hassMap == null)
+			return;
 		Iterator<String> keys = hassMap.keySet().iterator();
 		while(keys.hasNext()) {
 			String key = keys.next();
 			hassMap.get(key).closeClient();
 		}
+		
+		hassMap = null;
 	}
 }
