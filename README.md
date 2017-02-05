@@ -692,7 +692,7 @@ This call returns a null json "{}".
 ### Get HA Bridge Version 
 Get current version of the HA bridge software. 
 ```
-GET http://host:port/api/devices/habridge/version
+GET http://host:port/system/habridge/version
 ```
 #### Response
 Name |	Type |	Description
