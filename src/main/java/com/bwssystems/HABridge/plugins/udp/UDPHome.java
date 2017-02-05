@@ -51,11 +51,12 @@ public class UDPHome implements Home {
 			return null;
 		}
 
-		theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, true);
 		theUrlBody = TimeDecode.replaceTimeValue(theUrlBody);
 		if (theUrlBody.startsWith("0x")) {
+			theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, true);
 			sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
 		} else {
+			theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, false);
 			sendData = theUrlBody.getBytes();
 		}
 		try {
