@@ -1187,7 +1187,7 @@ app.controller('ValueDialogCtrl', function ($scope, bridgeService, ngDialog) {
 	$scope.slider = {
 		    value: 100,
 		    options: {
-		        floor: 0,
+		        floor: 1,
 		        ceil: 100,
 		        showSelectionBar: true
 		    }
@@ -1196,8 +1196,8 @@ app.controller('ValueDialogCtrl', function ($scope, bridgeService, ngDialog) {
 	$scope.valueType = "percentage";
 	$scope.changeScale = function () {
 		if($scope.valueType === "raw") {
-			$scope.slider.options.ceil = 255; 
-			$scope.slider.value = 255;
+			$scope.slider.options.ceil = 254; 
+			$scope.slider.value = 254;
 		}
 		else {
 			$scope.slider.options.ceil = 100; 
@@ -1206,7 +1206,7 @@ app.controller('ValueDialogCtrl', function ($scope, bridgeService, ngDialog) {
 	};
 	$scope.setValue = function () {
 		ngDialog.close('ngdialog1');
-		var theValue = 0;
+		var theValue = 1;
 		if($scope.valueType === "percentage")
 			theValue = Math.round(($scope.slider.value * .01) * 255);
 		else

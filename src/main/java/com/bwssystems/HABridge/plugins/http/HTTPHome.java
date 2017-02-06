@@ -81,7 +81,9 @@ public class HTTPHome implements Home {
 
 	@Override
 	public void closeHome() {
-		anHttpHandler.closeHandler();
+		if(anHttpHandler != null)
+			anHttpHandler.closeHandler();
+		anHttpHandler = null;
 	}
 
 }
