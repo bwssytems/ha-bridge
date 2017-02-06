@@ -21,9 +21,7 @@ import java.util.HashMap;
  * Currently supports 'turn on' for open window, and 'turn off' for close.
  * 
  * Known issues:
- * //TODO - Fix bug on UI where bulk update seems to add the single device twice
- * //TODO - Fix bug on UI where already configured devices are not shown as such.
- *
+ * //TODO - Fix bug on UI where bulk update seems to add the single device twice if 'update' is clicked (this is a general bug with Vera too I think)
  * Enhancements:
  * //TODO - support 'dimming' for partial window opening.
  *
@@ -76,8 +74,7 @@ public class SomfyHome implements Home  {
 
 				log.debug("executing HUE api request to change activity to Somfy: " + anItem.getItem().getAsString());
 				String jsonToPost = anItem.getItem().getAsString();
-
-				//RunActivity anActivity = new Gson().fromJson(url, RunActivity.class);
+				
 				SomfyInfo somfyHandler = getSomfyHandler(device.getTargetDevice());
 				if(somfyHandler == null) {
 					log.warn("Should not get here, no Somfy configured");
@@ -88,7 +85,9 @@ public class SomfyHome implements Home  {
 					try {
 						somfyHandler.execApply(jsonToPost);
 					} catch (Exception e) {
-						throw new RuntimeException(e);
+						log.warn("Error posting request to Somfy");
+						responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+								+ "\",\"description\": \"Error posting request to SomfyTahoma\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
 					}
 
 				}
@@ -114,6 +113,6 @@ public class SomfyHome implements Home  {
 
 	@Override
 	public void closeHome() {
-
+		somfys = null;
 	}
 }

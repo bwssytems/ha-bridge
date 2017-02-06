@@ -2344,6 +2344,7 @@ app.controller('SomfyController', function ($scope, $location, $http, bridgeServ
 	$scope.bulk = { devices: [] };
 	$scope.selectAll = false;
 	$scope.somfy = {base: "http://", port: "3480", id: ""};
+	bridgeService.viewDevices(); //Needs this if you're navigating to the 'somfy' page directly without going to the home page first..
 	bridgeService.viewSomfyDevices();
 	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	$scope.buttonsVisible = false;
@@ -2354,8 +2355,8 @@ app.controller('SomfyController', function ($scope, $location, $http, bridgeServ
 		$scope.device = bridgeService.state.device;
 	};
 
-	$scope.buildDeviceUrls = function (somfydevice, dim_control) {
-        //TODO - support partial window opening
+	$scope.buildDeviceUrls = function (somfydevice) {
+        //TODO - support partial window opening - add back 'dim_control' second param in here, and in somfydevice.html
         dimpayload = "";
         onpayload = "{\"label\":\"Label that is ignored probably\",\"actions\":[{\"deviceURL\":\""+ somfydevice.deviceUrl+"\",\"commands\":[{\"name\":\"open\",\"parameters\":[]}]}]}";
         offpayload = "{\"label\":\"Label that is ignored probably\",\"actions\":[{\"deviceURL\":\""+ somfydevice.deviceUrl+"\",\"commands\":[{\"name\":\"close\",\"parameters\":[]}]}]}";
@@ -2732,14 +2733,13 @@ app.filter('configuredDomoticzItems', function (bridgeService) {
 	}
 });
 
-
-app.filter('availableSomfyDeviceId', function(bridgeService) {
+app.filter('configuredSomfyDevices', function (bridgeService) {
 	return function(input) {
 		var out = [];
-		if(input == null)
+		if(input === undefined || input === null || input.length === undefined)
 			return out;
 		for (var i = 0; i < input.length; i++) {
-			if(!bridgeService.findDeviceByMapId(input[i].id, input[i].somfyname, "somfyDevice")){
+			if(bridgeService.deviceContainsType(input[i], "somfyDevice")){
 				out.push(input[i]);
 			}
 		}
@@ -2747,19 +2747,7 @@ app.filter('availableSomfyDeviceId', function(bridgeService) {
 	}
 });
 
-app.filter('unavailableSomfyDeviceId', function(bridgeService) {
-	return function(input) {
-		var out = [];
-		if(input == null)
-			return out;
-		for (var i = 0; i < input.length; i++) {
-			if(bridgeService.findDeviceByMapId(input[i].id, input[i].somfyname, "somfyDevice")){
-				out.push(input[i]);
-			}
-		}
-		return out;
-	}
-});
+
 
 
 app.controller('VersionController', function ($scope, bridgeService) {
