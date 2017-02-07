@@ -2374,7 +2374,7 @@ app.controller('LifxController', function ($scope, $location, $http, bridgeServi
 					bridgeService.viewHalDevices();
 				},
 				function (error) {
-					bridgeService.displayWarn("Error adding HAL devices in bulk.", error)
+					bridgeService.displayWarn("Error adding LIFX devices in bulk.", error)
 				}
 			);
 		$scope.bulk = { devices: [] };

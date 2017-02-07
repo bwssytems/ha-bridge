@@ -92,7 +92,7 @@
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="device in bridge.devices | configuredLifxMsgs | orderBy:predicate:reverse">
+			ng-repeat="device in bridge.devices | configuredLifxItems | orderBy:predicate:reverse">
 			<td>{{$index+1}}</td>
 			<td>{{device.name}}</td>
 			<td>{{device.targetDevice}}</td>

@@ -19,15 +19,17 @@ import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.github.besherman.lifx.LFXClient;
 import com.github.besherman.lifx.LFXGroup;
 import com.github.besherman.lifx.LFXGroupCollection;
+import com.github.besherman.lifx.LFXGroupCollectionListener;
 import com.github.besherman.lifx.LFXLight;
 import com.github.besherman.lifx.LFXLightCollection;
+import com.github.besherman.lifx.LFXLightCollectionListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class LifxHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(LifxHome.class);
 	private Map<String, LifxDevice> lifxMap;
-	private LFXClient client = new LFXClient();        
+	private LFXClient client;        
 	private Boolean validLifx;
 	private Gson aGsonHandler;
 	
@@ -45,20 +47,23 @@ public class LifxHome implements Home {
 		if(validLifx) {
 	    	try {
 	    		log.info("Open Lifx client....");
-				client.open(true);
+	    		lifxMap = new HashMap<String, LifxDevice>();
+	    		client = new LFXClient();
+	    		client.getLights().addLightCollectionListener(new MyLightListener(lifxMap));
+	    		client.getGroups().addGroupCollectionListener(new MyGroupListener(lifxMap));
+				client.open(false);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.warn("Could not open LIFX, with IO Exception", e);
+				client = null;
+				return this;
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.warn("Could not open LIFX, with Interruprted Exception", e);
+				client = null;
+				return this;
 			}
 			aGsonHandler =
 					new GsonBuilder()
 					.create();
-			lifxMap = new HashMap<String, LifxDevice>();
-			this.addLifxLights(client.getLights());
-			this.addLifxGroups(client.getGroups());
         }
 		return this;
 	}
@@ -174,4 +179,46 @@ public class LifxHome implements Home {
 			return;
 		client.close();
 	}
+    private static class MyLightListener implements LFXLightCollectionListener {
+        private static final Logger log = LoggerFactory.getLogger(MyLightListener.class);
+        private Map<String, LifxDevice> aLifxMap;
+    	public MyLightListener(Map<String, LifxDevice> theMap) {
+    		aLifxMap = theMap;
+    	}
+        @Override
+        public void lightAdded(LFXLight light) {
+            log.debug("Light added, label: " + light.getLabel() + " and id: " + light.getID());
+			LifxDevice aNewLifxDevice = new LifxDevice(light, LifxDevice.LIGHT_TYPE);
+			aLifxMap.put(aNewLifxDevice.toEntry().getName(), aNewLifxDevice);
+        }
+
+        @Override
+        public void lightRemoved(LFXLight light) {
+        	log.debug("Light removed, label: " + light.getLabel() + " and id: " + light.getID());
+            aLifxMap.remove(light.getLabel());
+        }
+
+        
+    }
+    private static class MyGroupListener implements LFXGroupCollectionListener {
+        private static final Logger log = LoggerFactory.getLogger(MyLightListener.class);
+        private Map<String, LifxDevice> aLifxMap;
+    	public MyGroupListener(Map<String, LifxDevice> theMap) {
+    		aLifxMap = theMap;
+    	}
+
+        @Override
+        public void groupAdded(LFXGroup group) {
+        	log.debug("Group: " + group.getLabel() + " added: " + group.size());
+			LifxDevice aNewLifxDevice = new LifxDevice(group, LifxDevice.GROUP_TYPE);
+			aLifxMap.put(aNewLifxDevice.toEntry().getName(), aNewLifxDevice);
+        }
+
+        @Override
+        public void groupRemoved(LFXGroup group) {
+        	log.debug("Group: " + group.getLabel() + " removed");
+            aLifxMap.remove(group.getLabel());
+        }
+        
+    }
 }
