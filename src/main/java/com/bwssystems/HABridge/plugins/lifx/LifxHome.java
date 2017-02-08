@@ -1,6 +1,10 @@
 package com.bwssystems.HABridge.plugins.lifx;
 
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,6 +32,7 @@ import com.google.gson.GsonBuilder;
 
 public class LifxHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(LifxHome.class);
+    private static final float DIM_DIVISOR = (float)254.00;
 	private Map<String, LifxDevice> lifxMap;
 	private LFXClient client;        
 	private Boolean validLifx;
@@ -47,8 +52,21 @@ public class LifxHome implements Home {
 		if(validLifx) {
 	    	try {
 	    		log.info("Open Lifx client....");
+	    		InetAddress configuredAddress = InetAddress.getByName(bridgeSettings.getUpnpConfigAddress());
+	    		NetworkInterface networkInterface = NetworkInterface.getByInetAddress(configuredAddress);
+	    		InetAddress bcastInetAddr = null;
+	            if (networkInterface != null) {
+	                for (InterfaceAddress ifaceAddr : networkInterface.getInterfaceAddresses()) {
+	                    InetAddress addr = ifaceAddr.getAddress();
+	                    if (addr instanceof Inet4Address) {
+	                    	bcastInetAddr = ifaceAddr.getBroadcast();
+	                    	break;
+	                    }
+	                }
+	            }
 	    		lifxMap = new HashMap<String, LifxDevice>();
-	    		client = new LFXClient();
+	    		log.info("Opening LFX Client with broadcast address: " + bcastInetAddr.getHostAddress());
+	    		client = new LFXClient(bcastInetAddr.getHostAddress());
 	    		client.getLights().addLightCollectionListener(new MyLightListener(lifxMap));
 	    		client.getGroups().addGroupCollectionListener(new MyGroupListener(lifxMap));
 				client.open(false);
@@ -131,6 +149,8 @@ public class LifxHome implements Home {
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
 			Integer targetBri, Integer targetBriInc, DeviceDescriptor device, String body) {
 		String theReturn = null;
+		float aBriValue;
+		float theValue;
 		log.debug("executing HUE api request to send message to LifxDevice: " + anItem.getItem().toString());
 		if(!validLifx) {
 			log.warn("Should not get here, no LifxDevice clients configured");
@@ -144,7 +164,6 @@ public class LifxHome implements Home {
 				lifxCommand = aGsonHandler.fromJson(anItem.getItem(), LifxEntry.class);
 			else
 				lifxCommand = aGsonHandler.fromJson(anItem.getItem().getAsString(), LifxEntry.class);
-			int aBriValue = BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc);
 			LifxDevice theDevice = getLifxDevice(lifxCommand.getName());
 			if (theDevice == null) {
 				log.warn("Should not get here, no LifxDevices available");
@@ -159,8 +178,13 @@ public class LifxHome implements Home {
 							theLight.setPower(true);
 						if(body.contains("false"))
 							theLight.setPower(false);
-						if(targetBri != null || targetBriInc != null)
-							theLight.setBrightness((float)(aBriValue/254));
+						if(targetBri != null || targetBriInc != null) {
+							aBriValue = (float)BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc);
+							theValue = aBriValue/DIM_DIVISOR;
+							if(theValue > (float)1.0)
+								theValue = (float)0.99;
+							theLight.setBrightness(theValue);
+						}
 					} else if (theDevice.getType().equals(LifxDevice.GROUP_TYPE)) {
 						LFXGroup theGroup = (LFXGroup)theDevice.getLifxObject();
 						if(body.contains("true"))
