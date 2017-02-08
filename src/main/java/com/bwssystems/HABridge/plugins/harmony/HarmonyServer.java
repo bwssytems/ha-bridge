@@ -4,7 +4,7 @@ import static java.lang.String.format;
 
 import javax.inject.Inject;
 
-import com.bwssystems.HABridge.HttpRequestHelper;
+import com.bwssystems.HABridge.plugins.http.HTTPHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +35,7 @@ public class HarmonyServer {
     private OAReplyProvider dummyProvider;
     private NamedIP myNameAndIP;
     private Boolean isDevMode;
+    private HTTPHandler httpClient;
     private Logger log = LoggerFactory.getLogger(HarmonyServer.class);
 
     public HarmonyServer(NamedIP theHarmonyAddress) {
@@ -43,6 +44,7 @@ public class HarmonyServer {
         dummyProvider = null;
         myNameAndIP = theHarmonyAddress;
         isDevMode = false;
+        httpClient = new HTTPHandler();
     }
 
     public static HarmonyServer setup(
@@ -96,7 +98,7 @@ public class HarmonyServer {
                             log.info(format("calling webhook: %s", webhook));
 
                             // Calling webhook
-                            HttpRequestHelper.INSTANCE.doHttpRequest(webhook, HttpGet.METHOD_NAME, null, null, null);
+                            httpClient.doHttpRequest(webhook, HttpGet.METHOD_NAME, null, null, null);
                         } catch (Exception e) {
                             log.warn("could not call webhook: " + webhook, e);
                         }
