@@ -9,12 +9,7 @@ import com.bwssystems.HABridge.devicemanagmeent.*;
 import com.bwssystems.HABridge.hue.HueMulator;
 import com.bwssystems.HABridge.upnp.UpnpListener;
 import com.bwssystems.HABridge.upnp.UpnpSettingsResource;
-import com.bwssystems.NestBridge.NestHome;
-import com.bwssystems.hal.HalHome;
-import com.bwssystems.harmony.HarmonyHome;
-import com.bwssystems.hue.HueHome;
-import com.bwssystems.mqtt.MQTTHome;
-import com.bwssystems.util.UDPDatagramSender;
+import com.bwssystems.HABridge.util.UDPDatagramSender;
 
 public class HABridge {
 	
@@ -36,11 +31,7 @@ public class HABridge {
     public static void main(String[] args) {
         Logger log = LoggerFactory.getLogger(HABridge.class);
         DeviceResource theResources;
-        HarmonyHome harmonyHome;
-        NestHome nestHome;
-        HueHome hueHome;
-        HalHome halHome;
-        MQTTHome mqttHome;
+        HomeManager homeManager;
         HueMulator theHueMulator;
         UDPDatagramSender udpSender;
         UpnpSettingsResource theSettingResponder;
@@ -66,29 +57,22 @@ public class HABridge {
 	        // setup system control api first
 	        theSystem = new SystemControl(bridgeSettings, theVersion);
 	        theSystem.setupServer();
-	        //setup the harmony connection if available
-	        harmonyHome = new HarmonyHome(bridgeSettings.getBridgeSettingsDescriptor());
-	        //setup the nest connection if available
-	        nestHome = new NestHome(bridgeSettings.getBridgeSettingsDescriptor());
-	        //setup the hue passtrhu configuration if available
-	        hueHome = new HueHome(bridgeSettings.getBridgeSettingsDescriptor());
-	        //setup the hal configuration if available
-	        halHome = new HalHome(bridgeSettings.getBridgeSettingsDescriptor());
-	        //setup the mqtt handlers if available
-	        mqttHome = new MQTTHome(bridgeSettings.getBridgeSettingsDescriptor());
-	        // setup the class to handle the resource setup rest api
-	        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), harmonyHome, nestHome, hueHome, halHome,  mqttHome);
-	        // setup the class to handle the upnp response rest api
-	        theSettingResponder = new UpnpSettingsResource(bridgeSettings.getBridgeSettingsDescriptor());
-	        theSettingResponder.setupServer();
 	        // setup the UDP Datagram socket to be used by the HueMulator and the upnpListener
 	        udpSender = UDPDatagramSender.createUDPDatagramSender(bridgeSettings.getBridgeSettingsDescriptor().getUpnpResponsePort());
 	        if(udpSender == null) {
 	        	bridgeSettings.getBridgeControl().setStop(true);	        	
 	        }
 	        else {
+		        //Setup the device connection homes through the manager
+		        homeManager = new HomeManager();
+		        homeManager.buildHomes(bridgeSettings.getBridgeSettingsDescriptor(), udpSender);
+		        // setup the class to handle the resource setup rest api
+		        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), homeManager);
+		        // setup the class to handle the upnp response rest api
+		        theSettingResponder = new UpnpSettingsResource(bridgeSettings.getBridgeSettingsDescriptor());
+		        theSettingResponder.setupServer();
 		        // setup the class to handle the hue emulator rest api
-		        theHueMulator = new HueMulator(bridgeSettings.getBridgeSettingsDescriptor(), theResources.getDeviceRepository(), harmonyHome, nestHome, hueHome, mqttHome, udpSender);
+		        theHueMulator = new HueMulator(bridgeSettings.getBridgeSettingsDescriptor(), theResources.getDeviceRepository(), homeManager);
 		        theHueMulator.setupServer();
 		        // wait for the sparkjava initialization of the rest api classes to be complete
 		        awaitInitialization();
@@ -101,16 +85,12 @@ public class HABridge {
 		        	bridgeSettings.getBridgeControl().setStop(true);
 		        if(bridgeSettings.getBridgeSettingsDescriptor().isSettingsChanged())
 		        	bridgeSettings.save(bridgeSettings.getBridgeSettingsDescriptor());
+		        homeManager.closeHomes();
+		        udpSender.closeResponseSocket();
+		        udpSender = null;
 	        }
 	        bridgeSettings.getBridgeControl().setReinit(false);
 	        stop();
-	        nestHome.closeTheNest();
-	        nestHome = null;
-	        harmonyHome.shutdownHarmonyHubs();
-	        harmonyHome = null;
-	        mqttHome.shutdownMQTTClients();
-	        mqttHome = null;
-	        udpSender.closeResponseSocket();
         }
         log.info("HA Bridge (v" + theVersion.getVersion() + ") exiting....");
         System.exit(0);

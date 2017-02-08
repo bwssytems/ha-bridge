@@ -3,6 +3,7 @@ package com.bwssystems.HABridge;
 import java.util.List;
 import java.util.Map;
 
+import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.WhitelistEntry;
 
 public class BridgeSettingsDescriptor {
@@ -34,6 +35,11 @@ public class BridgeSettingsDescriptor {
 	private String webaddress;
 	private IpList mqttaddress;
 	private boolean mqttconfigured;
+	private IpList hassaddress;
+	private boolean hassconfigured;
+	private String hubversion;
+	private IpList domoticzaddress;
+	private boolean domoticzconfigured;
 	
 	public BridgeSettingsDescriptor() {
 		super();
@@ -45,11 +51,13 @@ public class BridgeSettingsDescriptor {
 		this.hueconfigured = false;
 		this.halconfigured = false;
 		this.mqttconfigured = false;
+		this.hassconfigured = false;
 		this.farenheit = true;
 		this.whitelist = null;
 		this.settingsChanged = false;
 		this.myechourl = "echo.amazon.com/#cards";
 		this.webaddress = "0.0.0.0";
+		this.hubversion = HueConstants.HUB_VERSION;
 	}
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -225,6 +233,36 @@ public class BridgeSettingsDescriptor {
 	public void setMqttconfigured(boolean mqttconfigured) {
 		this.mqttconfigured = mqttconfigured;
 	}
+	public IpList getHassaddress() {
+		return hassaddress;
+	}
+	public void setHassaddress(IpList hassaddress) {
+		this.hassaddress = hassaddress;
+	}
+	public boolean isHassconfigured() {
+		return hassconfigured;
+	}
+	public void setHassconfigured(boolean hassconfigured) {
+		this.hassconfigured = hassconfigured;
+	}
+	public String getHubversion() {
+		return hubversion;
+	}
+	public void setHubversion(String hubversion) {
+		this.hubversion = hubversion;
+	}
+	public IpList getDomoticzaddress() {
+		return domoticzaddress;
+	}
+	public void setDomoticzaddress(IpList domoticzaddress) {
+		this.domoticzaddress = domoticzaddress;
+	}
+	public boolean isDomoticzconfigured() {
+		return domoticzconfigured;
+	}
+	public void setDomoticzconfigured(boolean domoticzconfigured) {
+		this.domoticzconfigured = domoticzconfigured;
+	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
 			return false;
@@ -270,6 +308,22 @@ public class BridgeSettingsDescriptor {
 		if(this.getMqttaddress() == null || this.getMqttaddress().getDevices().size() <= 0)
 			return false;		
 		List<NamedIP> devicesList = this.getMqttaddress().getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+		return true;
+	}
+	public Boolean isValidHass() {
+		if(this.getHassaddress() == null || this.getHassaddress().getDevices().size() <= 0)
+			return false;		
+		List<NamedIP> devicesList = this.getHassaddress().getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+		return true;
+	}
+	public Boolean isValidDomoticz() {
+		if(this.getDomoticzaddress() == null || this.getDomoticzaddress().getDevices().size() <= 0)
+			return false;		
+		List<NamedIP> devicesList = this.getDomoticzaddress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
 		return true;

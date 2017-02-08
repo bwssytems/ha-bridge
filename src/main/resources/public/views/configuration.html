@@ -1,46 +1,49 @@
 
 <ul class="nav nav-pills" role="tablist">
-	<li role="presentation" class="active"><a href="#">Bridge
+	<li role="presentation" class="active"><a href="#!/">Bridge
 			Devices</a></li>
-	<li role="presentation"><a href="#/system">Bridge Control</a></li>
-	<li role="presentation"><a href="#/logs">Logs</a></li>
+	<li role="presentation"><a href="#!/system">Bridge Control</a></li>
+	<li role="presentation"><a href="#!/logs">Logs</a></li>
 	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#/veradevices">Vera Devices</a></li>
+		href="#!/veradevices">Vera Devices</a></li>
 	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#/verascenes">Vera Scenes</a></li>
+		href="#!/verascenes">Vera Scenes</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
-		href="#/harmonyactivities">Harmony Activities</a></li>
+		href="#!/harmonyactivities">Harmony Activities</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
-		href="#/harmonydevices">Harmony Devices</a></li>
-	<li ng-if="bridge.showNest" role="presentation"><a href="#/nest">Nest</a></li>
+		href="#!/harmonydevices">Harmony Devices</a></li>
+	<li ng-if="bridge.showNest" role="presentation"><a href="#!/nest">Nest</a></li>
 	<li ng-if="bridge.showHue" role="presentation"><a
-		href="#/huedevices">Hue Devices</a></li>
+		href="#!/huedevices">Hue Devices</a></li>
 	<li ng-if="bridge.showHal" role="presentation"><a
-		href="#/haldevices">HAL Devices</a></li>
-	<li ng-if="bridge.showMqtt" role="presentation"><a href="#/mqttmessages">MQTT Messages</a></li>
-	<li role="presentation"><a href="#/editor">Manual Add</a></li>
+		href="#!/haldevices">HAL Devices</a></li>
+	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
+	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
+	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
+	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">Current devices
-			({{bridge.devices.length}})</h2>
+		<h1 class="panel-title">Current devices ({{bridge.devices.length}})</h1>
 	</div>
-	<form name="form">
+	<div class="panel-body">
+
 		<p>
 			<button class="btn btn-primary" type="submit" ng-click="renumberDevices()">Renumber Devices</button>
 		</p>
-	</form>
+
 	<scrollable-table watch="bridge.devices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<th>Row</th>
-				<th sortable-header col="id">ID</th>
+				<th sortable-header col="id" comparator-fn="comparatorUniqueId">ID</th>
 				<th sortable-header col="name">Name</th>
 				<th sortable-header col="deviceType">Type</th>
 				<th sortable-header col="targetDevice">Target</th>
-				<th sortable-header col="requesterAddress">Requester Address</th>
+				<th sortable-header col="inactive">Inactive</th>
+				<th sortable-header col="noState">No State</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
@@ -50,7 +53,8 @@
 			<td>{{device.name}}</td>
 			<td>{{device.deviceType}}</td>
 			<td>{{device.targetDevice}}</td>
-			<td>{{device.requesterAddress}}</td>
+			<td>{{device.inactive}}</td>
+			<td>{{device.noState}}</td>
 			<td>
 				<p>
 					<button class="btn btn-info" type="submit"
@@ -68,15 +72,16 @@
 		</tr>
 	</table>
 	</scrollable-table>
+	</div>
 </div>
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h1 class="panel-title">
 			Bridge Device DB Backup <a ng-click="toggleBk()"><span
-				class={{imgBkUrl}} aria-hidden="true"></a>
+				class={{imgBkUrl}} aria-hidden="true"></span></a>
 		</h1>
 	</div>
-	<div ng-if="visibleBk" class="animate-if" class="panel-body">
+	<div ng-if="visibleBk" class="panel-body">
 		<p>Control your backups from this area. Use the default name by hitting backup or specify your own.</p>
 		<form class="form-horizontal">
 			<div class="form-group">

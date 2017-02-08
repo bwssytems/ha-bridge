@@ -19,8 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
-import com.bwssystems.util.BackupHandler;
-import com.bwssystems.util.JsonTransformer;
+import com.bwssystems.HABridge.util.BackupHandler;
+import com.bwssystems.HABridge.util.JsonTransformer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -71,6 +71,15 @@ public class DeviceRepository extends BackupHandler {
     
 	public List<DeviceDescriptor> findAll() {
 		List<DeviceDescriptor> list = new ArrayList<DeviceDescriptor>(devices.values());
+		return list;
+	}
+
+	public List<DeviceDescriptor> findActive() {
+		List<DeviceDescriptor> list = new ArrayList<DeviceDescriptor>();
+		for(DeviceDescriptor aDevice : new ArrayList<DeviceDescriptor>(devices.values())) {
+			if(!aDevice.isInactive())
+				list.add(aDevice);
+		}
 		return list;
 	}
 

@@ -18,8 +18,8 @@ import org.apache.http.conn.util.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.util.BackupHandler;
-import com.bwssystems.util.JsonTransformer;
+import com.bwssystems.HABridge.util.BackupHandler;
+import com.bwssystems.HABridge.util.JsonTransformer;
 import com.google.gson.Gson;
 
 public class BridgeSettings extends BackupHandler {
@@ -54,6 +54,7 @@ public class BridgeSettings extends BackupHandler {
         		configFileProperty = Configuration.CONFIG_FILE;
         }
         String serverPortOverride = System.getProperty("server.port");
+        String serverIpOverride = System.getProperty("server.ip");
         if(configFileProperty != null)
         {
         	log.info("reading from config file: " + configFileProperty);
@@ -133,16 +134,10 @@ public class BridgeSettings extends BackupHandler {
         if(theBridgeSettings.getUpnpDeviceDb() == null)
         	theBridgeSettings.setUpnpDeviceDb(Configuration.DEVICE_DB_DIRECTORY);
         
-        if(theBridgeSettings.getNumberoflogmessages() == null)
+        if(theBridgeSettings.getNumberoflogmessages() == null || theBridgeSettings.getNumberoflogmessages() <= 0)
         	theBridgeSettings.setNumberoflogmessages(new Integer(Configuration.NUMBER_OF_LOG_MESSAGES));
 
-        if(theBridgeSettings.getNumberoflogmessages() <= 0)
-        	theBridgeSettings.setNumberoflogmessages(new Integer(Configuration.NUMBER_OF_LOG_MESSAGES));
-
-        if(theBridgeSettings.getButtonsleep() == null)
-        	theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DEFAULT_BUTTON_SLEEP));
-        
-        if(theBridgeSettings.getButtonsleep() < 0)
+        if(theBridgeSettings.getButtonsleep() == null || theBridgeSettings.getButtonsleep() < 0)
         	theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DEFAULT_BUTTON_SLEEP));
 
         theBridgeSettings.setVeraconfigured(theBridgeSettings.isValidVera());
@@ -151,8 +146,12 @@ public class BridgeSettings extends BackupHandler {
         theBridgeSettings.setHueconfigured(theBridgeSettings.isValidHue());
         theBridgeSettings.setHalconfigured(theBridgeSettings.isValidHal());
         theBridgeSettings.setMqttconfigured(theBridgeSettings.isValidMQTT());
-        if(serverPortOverride != null)
+        theBridgeSettings.setHassconfigured(theBridgeSettings.isValidHass());
+        theBridgeSettings.setDomoticzconfigured(theBridgeSettings.isValidDomoticz());
+       if(serverPortOverride != null)
         	theBridgeSettings.setServerPort(serverPortOverride);
+        if(serverIpOverride != null)
+        	theBridgeSettings.setWebaddress(serverIpOverride);
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
 	}
 

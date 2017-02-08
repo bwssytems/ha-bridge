@@ -1,11 +1,15 @@
 # ha-bridge
 Emulates Philips Hue api to other home automation gateways such as an Amazon Echo or Google Home.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
 
+**SECURITY RISK: If you are unsure on how this software operates and what it exposes to your network, please make sure you understand that it can allow root access to your system. It is best practice to not open this to the Internet through your router as there are no security protocols in place to protect the system. The License agreement states specifically that you use this at your own risk.**
+
 **ATTENTION: This requires a physical Amazon Echo, Dot or Tap and does not work with prototype devices built using the Alexa Voice Service e.g. Amazon's Alexa AVS Sample App and Sam Machin's AlexaPi. The AVS version does not have any capability for Hue Bridge discovery!**
 
-**NOTE: This software does require the user to have knwoledge on how processes run on Linux or Windows with java. Also, an understanding of networking basics will help as well. This system reveives upnp udp multicast packets from devices to be found, so that is some thing to understand. Please make sure you have all your devices use static IP addresses from your router. Most all questions have been answered already. PLEASE USE GOOGLE TO FIND YOUR ANSWERS!**
+**NOTE: This software does require the user to have knowledge on how processes run on Linux or Windows with java. Also, an understanding of networking basics will help as well. This system receives upnp udp multicast packets from devices to be found, so that is something to understand. Please make sure you have all your devices use static IP addresses from your router. Most all questions have been answered already. PLEASE USE GOOGLE TO FIND YOUR ANSWERS!**
 
 **NOTE: This software does not control Philips Hue devices directly. A physical Philips Hue Hub is required for that, by which the ha-bridge can then proxy all of your real Hue bridges behind this bridge.**
+
+**FAQ: Please look here for the current FAQs! https://github.com/bwssytems/ha-bridge/wiki/HA-Bridge-FAQs**
 
 In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest and the ability to proxy all of your real Hue bridges behind this bridge.
 
@@ -26,20 +30,36 @@ Then locate the jar and start the server with:
 
 ATTENTION: This requires JDK 1.8 to run
 
+ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
+
 ```
-java -jar ha-bridge-3.5.1.jar
+java -jar ha-bridge-4.1.4.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
-Create the directory and make sure that ha-bridge-3.5.1.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-4.1.4.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v3.5.1/ha-bridge-3.5.1.jar
+
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.1.4/ha-bridge-4.1.4.jar
 ```
+Create the directory and make sure that ha-bridge-4.1.4.jar is in your /home/pi/habridge directory.
+```
+pi@raspberrypi:~ $ mkdir habridge
+pi@raspberrypi:~ $ cd habridge
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.1.4/ha-bridge-4.1.4.jar
+```
+#### System Control Setup on a pi (preferred)
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
 
+Start here to create the habridge.service unit file:
+```
+pi@raspberrypi:~ $ cd /etc/systemd/system
+pi@raspberrypi:~ $ sudo nano habridge.service
+```
+Copy the text below into the editor nano.
 ```
 [Unit]
 Description=HA Bridge
@@ -48,12 +68,31 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-3.5.1.jar
+
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.1.4.jar
 
 [Install]
 WantedBy=multi-user.target
 ```
-Basic script setup to run the bridge on a pi.
+Save the file in the editor by hitting CTL-X and then saying Y to update and save.
+
+Reload the system control config:
+```
+pi@raspberrypi:~ $ sudo systemctl daemon-reload
+```
+To start the bridge:
+```
+pi@raspberrypi:~ $ sudo systemctl start habridge.service
+```
+To start the service at boot, use the `enable` command:
+```
+pi@raspberrypi:~ $ sudo systemctl enable habridge.service
+```
+To look at the log, the output goes into the system log at `/var/log/syslog':
+```
+pi@raspberrypi:~ $ tail -f /var/log/syslog
+```
+#### Basic script setup to run the bridge on a pi.
 
 *NOTE ON RC.LOCAL*: Due to the way network subsystem is brought up on the pi, it uses the new systemctl to start services. The old style runlevel setup, which rc.local is part of does not get the benefit of knowing if the network has been fully realized. Starting ha-bridge from rc.local on next gen systems will cause unexpected results and issues with discovering registered devices. 
 
@@ -65,7 +104,8 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-3.5.1.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.1.4.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
 Exit and save the file with ctrl-X and follow the prompts and then execute on the command line:
@@ -80,8 +120,104 @@ You should now be running the bridge. Check for errors:
 ```
 pi@raspberrypi:~/habridge $ tail -f habridge-log.txt
 ```
+## Run ha-bridge alongside web server already on port 80
+These examples will help you proxy your current webserver requests to the ha-bridge running on a different port, such as 8080.
+### Apache Example
+Reverse proxy with Apache on Ubuntu linux:
+
+a2enmod proxy
+a2enmod proxy_http
+a2enmod headers
+
+Added the following lines to my Apache config file “000-default”
+
+```
+<VirtualHost *:80>
+	ProxyPass         /api  http://localhost:8080/api nocanon
+	ProxyPassReverse  /api  http://localhost:8080/api
+	ProxyRequests     Off
+	AllowEncodedSlashes NoDecode
+
+	# Local reverse proxy authorization override
+	# Most unix distribution deny proxy by default (ie /etc/apache2/mods-enabled/proxy.conf in Ubuntu)
+	<Proxy http://localhost:8080/api*>
+		  Order deny,allow
+		  Allow from all
+	</Proxy>
+
+….. (the rest of the VirtualHost config section) …..
+</VirtualHost>
+```
+
+service apache2 restart
+### lighthttpd Example
+```
+server.modules   += ( "mod_proxy" )
+proxy.server = ( 
+	"/api" =>
+        (
+                ( "host" => "127.0.0.1",
+                  "port" => "8080"
+                )
+        )
+)
+```
+### nginx Example
+```
+location /api/ {
+    proxy_pass http://127.0.0.1:8080/api;
+}
+```
+## Run ha-bridge alongside web server already on port 80
+These examples will help you proxy your current webserver requests to the ha-bridge running on a different port, such as 8080.
+### Apache Example
+Reverse proxy with Apache on Ubuntu linux:
+
+a2enmod proxy
+a2enmod proxy_http
+a2enmod headers
+
+Added the following lines to my Apache config file “000-default”
+
+```
+<VirtualHost *:80>
+	ProxyPass         /api  http://localhost:8080/api nocanon
+	ProxyPassReverse  /api  http://localhost:8080/api
+	ProxyRequests     Off
+	AllowEncodedSlashes NoDecode
+
+	# Local reverse proxy authorization override
+	# Most unix distribution deny proxy by default (ie /etc/apache2/mods-enabled/proxy.conf in Ubuntu)
+	<Proxy http://localhost:8080/api*>
+		  Order deny,allow
+		  Allow from all
+	</Proxy>
+
+….. (the rest of the VirtualHost config section) …..
+</VirtualHost>
+```
+
+service apache2 restart
+### lighthttpd Example
+```
+server.modules   += ( "mod_proxy" )
+proxy.server = ( 
+	"/api" =>
+        (
+                ( "host" => "127.0.0.1",
+                  "port" => "8080"
+                )
+        )
+)
+```
+### nginx Example
+```
+location /api/ {
+    proxy_pass http://127.0.0.1:8080/api;
+}
+```
 ## Available Arguments
-Arguments are now deprecated. The ha-bridge will use the old -D arguments and populate the configuration screen, Brisge Control Tab, which can now be saved to a file and will not be needed. There is only one optional argument that overrides and that is the location of the configuration file. The default is the relative path "data/habridge.config".
+Arguments are now deprecated. The ha-bridge will use the old -D arguments and populate the configuration screen, Bridge Control Tab, which can now be saved to a file and will not be needed. There is only one optional argument that overrides and that is the location of the configuration file. The default is the relative path "data/habridge.config".
 ### -Dconfig.file=`<filepath>`
 The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify -Dconfig.file=`<directory>/<filename>` explicitly. The command line example:
 ```
@@ -94,9 +230,14 @@ java -jar -Dserver.port=80 ha-bridge-W.X.Y.jar
 ```
 Note: if using with a Google Home device, port 80 *must* be used.
 
+### -Dserver.ip=`<ip address>`
+The default ip address for the bridge to listen on is all interfaces (0.0.0.0). To override what the default or what is in the configuration file for this parameter, specify -Dserver.ip=`<ip address>` explicitly. This is especially helpful if you are running the ha-bridge for the first time and have another application on that utilizes the default interface. The command line example:
+```
+java -jar -Dserver.ip=192.168.1.1 ha-bridge-W.X.Y.jar
+```
 ## HA Bridge Usage and Configuration
 This section will cover the basics of configuration and where this configuration can be done. This requires that you have started your bridge process and then have pointed your
-favorite web interface by going to the http://<my ip address>:<port> or http://localhost:<port> with port you have assigned. The default quick link is http://localhost for yoru reference.
+favorite web interface by going to the http://<my ip address>:<port> or http://localhost:<port> with port you have assigned. The default quick link is http://localhost for your reference.
 ### The Bridge Devices Tab
 This screen allows you to see your devices you have configured for the ha-bridge to present to a controller, such as an Amazon Echo/Dot. It gives you a count of devices as there have been reports that the Echo only supports a limited number, but has been growing as of late, YMMV. You can test each device from this page as this calls the ha-bridge just as a controller would, i.e. the Echo. This is useful to make sure your configuration for each device is correct and for trouble shooting. You can also manages your devices as well by editing and making a new device copy as well as deleting it.
 
@@ -124,27 +265,27 @@ Provide IP Addresses of your Veras that you want to utilize with the bridge. Als
 #### Harmony Names and IP Addresses
 Provide IP Addresses of your Harmony Hubs that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the activity or buttons by the call it receives and send it to the target Harmony Hub and activity/button you configure. 
 #### Harmony Username
-depracated
+deprecated
 #### Harmony Password
-depracated
+deprecated
 #### Hue Names and IP Addresses
 Provide IP Addresses of your Hue Bridges that you want to proxy through the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will passthru the call it receives to the target Hue and device you configure.
 
-Don't forget - You will need to push the link button when you got to the Hue Tab the first time ater the process comes up.  (The user name is not persistent when the process comes up.)
+Don't forget - You will need to push the link button when you got to the Hue Tab the first time after the process comes up.  (The user name is not persistent when the process comes up.)
 #### HAL Names and IP Addresses
 Provide IP Addresses of your HAL Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target HAL and device/scene you configure. 
 #### HAL Token
 The token you generate or give to a HAL and must be the same for all HAL's you have identified. This needs to be given if you are using the HAL features.
 #### MQTT Client IDs and IP Addresses	
-Provide Client ID and IP Addresses and ports of your MQTT Brokers that you want to utilize with the bridge. Also, you can provide the username and password if you have secured yourMQTT broker which is optional. When these Client ID and IP's are given, the bridge will be able to publish mqtt messages by the call it receives and send it to the target MQTT Broker you configure. The MQTT Messages Tab will become available to help you build messages.
+Provide Client ID and IP Addresses and ports of your MQTT Brokers that you want to utilize with the bridge. Also, you can provide the username and password if you have secured your MQTT broker which is optional. When these Client ID and IP's are given, the bridge will be able to publish MQTT messages by the call it receives and send it to the target MQTT Broker you configure. The MQTT Messages Tab will become available to help you build messages.
 #### Nest Username
 The user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features. There is no need to give any ip address or host information as this contacts your cloud account.
 #### Nest Password
 The password for the user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features.
-#### Nest Temp Farenheit
-This setting allows the value being sent into the bridge to be interpreted as Farenheit or Celsius. The default is to have Farenheit.
+#### Nest Temp Fahrenheit
+This setting allows the value being sent into the bridge to be interpreted as Fahrenheit or Celsius. The default is to have Fahrenheit.
 #### Button Press/Call Item Loop Sleep Interval (ms)
-This setting is the time used in between button presses when there is multple buttons in a button device. It also controls the time between multiple items in a custom device call. This is defaulted to 100ms and the number represnts milliseonds (1000 milliseconds = 1 second).
+This setting is the time used in between button presses when there is multiple buttons in a button device. It also controls the time between multiple items in a custom device call. This is defaulted to 100ms and the number represents milliseconds (1000 milliseconds = 1 second).
 #### Log Messages to Buffer
 This controls how many log messages will be kept and displayed on the log tab. This does not affect what is written to the standard output for logging. The default is 512. Changing this will incur more memory usage of the process.
 #### UPNP Strict Handling
@@ -158,17 +299,52 @@ This screen displays the last 512 or number of rows defined in the config screen
 
 The bottom part of the Logs Screen has configuration to change the logging levels as it is running. The ROOT is the basic setting and will turn on only top level logging. To set logging at a lower level, select the `Show All Loggers` checkbox and then you can set the explicit level on each of the processes components. The most helpful logger would be setting DEBUG for com.bwssystems.HABridge.hue.HueMulator component. Changing this and then selecting the `Update Log Levels` button applies the new log settings. 
 ### Bridge Device Additions
-You must configure devices before you will have any thing for the Echo or other controller that is connected to the ha-bridge to receive.
+You must configure devices before you will have anything for the Echo or other controller that is connected to the ha-bridge to receive.
 #### Helpers
 The easy way to get devices configured is with the use of the helpers for the Vera or Harmony, Nest and Hue to create devices that the bridge will present.
 
-For the Helpers, each item being presented from the target system has a button such as `Generate Bridge Device`, `Build A Button` or specific tasks such as `Temp` for thermostats that is used to create the specific device parameters and give it a name in the "Add a Bridge Device..." area below. The next thing to check is the name for the bridge device that it is something that makes sense especially if you usign the ha-bridge with an Echo as this is what the Echo will interpret as the device you want. Then select the `Add Bridge Device` button to finalize it.
+For the Helpers, each item being presented from the target system has a button such as `Build Item`, `Build A Button` or specific tasks such as `Temp` for thermostats that is used to create the specific device parameters. The build action buttons will put you into the edit screen. The next thing to check is the name for the bridge device that it is something that makes sense especially if you using the ha-bridge with an Echo or Google Home as this is what the Echo or Google Home will interpret as the device you want. Also, you can go back to any helper tab and click a build action button to add another item for a multi-command. After you are done in the edit tab, click the `Add Bridge Device` to finish that selection setup. 
 
 The helper tabs will also show you what you have already configured for that target type. Click on the `+` and you will see them and be able to delete them.
-#### The Manual Add Tab
+#### The Add/Edit Tab
 Another way to add a device is through the Manual Add Tab. This allows you to manually enter the name, the on and off URLs and select if there are custom handling with the type of call that can be made. This allows for control of anything that has a distinct request that can be executed so you are not limited to the Vera, Harmony, Nest or other Hue.
 
-The format of these can be the default HTTP request which executes the URLs formatted as `http://<your stuff here>` as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use `https://<your secure call here>`. When using POST and PUT, you have the ability to specify the body that will be sent with the request as well as the application type for the http call.
+There is a new format for the on/dim/off URL areas. The new editor handles the intricacies of the components, but is broken down here for explanation.
+
+Here are the fields that can be put into the call item:
+Json Type | field name | What | Use
+----------|------------|------|-----
+String or JsonElement | item| This is the payload that will be called for devices | Required
+Integer | count | This is how many times this items will be executed | Optional
+Integer | delay | This is how long we will wait until the next call after | Optional
+String | type | This is the type of device we are executing | Required
+String | filterIPs | This is used filter on the IPs given in the list | Optional
+String | httpVerb | This is the http command if given, default is GET | Optional
+String | httpBody | Send this Body with a PUT or POST | Optional
+String | httpHeaders | Send these headers with the http call | Optional
+String | contentType | Define the type of content in the body | Optional
+
+Example from device.db:
+```
+[{"item":<a String that is quoted or another JSON object>,"type":"<atype>"."count":X."delay":X."filterIPs":"<comma separated list of IP addresses that are valid>"."httpVerb":"<GET,PUT,POST>","httpBody":"<body info>","httpHeaders":[{"name":"header name","value":"header value"},{"name":"another header","value":"another value"}],"contentType":"<http content type i.e application/json>"},{"item":<another item>,"type":"<aType>"}]
+```
+
+The Add/Edit tab will show you the fields to fill in for the above in a form, when you hcae completed putting in the things you want, make sure to hit the `Add` button at the right.
+ 
+The format of the item can be the default HTTP request which executes the URLs formatted as `http://<your stuff here>` as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use `https://<your secure call here>`. When using POST and PUT, you have the ability to specify the body that will be sent with the request as well as the application type for the http call.
+
+The valid device types are: "custom", "veraDevice", "veraScene", "harmonyActivity", "harmonyButton", "nestHomeAway", "nestThermoSet", "hueDevice", "halDevice", 
+	"halButton", "halHome", "halThermoSet", "mqttMessage", "cmdDevice", "hassDevice", "tcpDevice", "udpDevice", "httpDevice", "domoticzDevice"
+
+Filter Ip example:
+```
+Turn on Lights in Bedroom 1 (http://api.call.here/1) - Restricted to Echo 1 (10.1.1.1)
+Turn on Lights in Bedroom 2 (http://api.call.here/2) - Restricted to Echo 2 (10.2.2.2)
+Turn on Lights in Bedroom 3 (http://api.call.here/3) - Restricted to Echo 3 (10.3.3.3)
+
+Device: "Lights"
+On URL: [{"item":"http://api.call.here/1", "httpVerb":"POST", "httpBody":"value1=1&value2=2","type":"httpDevice","filterIPs":"10.1.1.1"},{"item":"http://api.call.here/2", "httpVerb":"POST", "httpBody":"value1=1&value2=2","type":"httpDevice","filterIPs":"10.2.2.2"},{"item":"http://api.call.here/3", "httpVerb":"POST", "httpBody":"value1=1&value2=2","type":"httpDevice","filterIPs":"10.3.3.3"}]
+```
 
 Headers can be added as well using a Json construct [{"name":"header type name","value":"the header value"}] with the format example:
 ```
@@ -178,44 +354,43 @@ Headers can be added as well using a Json construct [{"name":"header type name",
 
 Another option that is detected by the bridge is to use UDP or TCP direct calls such as `udp://<ip_address>:<port>/<your stuff here>` to send a UDP request. TCP calls are handled the same way as `tcp://<ip_address>:<port>/<your stuff here>`. If your data for the UDP or TCP request is formatted as "0x00F009B9" lexical hex format, the bridge will convert the data into a binary stream to send.
 
-You can also use the value replacement constructs within these statements. Such as using the expressions ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 for straight pass through of the value or items that require special calculated values using ${intensity.math()} i.e. "${intensity.math(X/4)}".
+You can also use the value replacement constructs within these statements. Such as using the expressions "${time.format(Java time format string)}" for inserting a date/time stamp, ${intensity.percent} for 0-100 or ${intensity.byte} for 0-255 for straight pass through of the value or items that require special calculated values using ${intensity.math()} i.e. "${intensity.math(X/4)}". See Value Passing Controls Below.
 Examples:
 ```
-GET
-http://192.168.1.1:8180/set/this/value/${intensity.percent}
 
-PUT
-http://192.168.1.1:8280/set/this
-ContentBody: {"someValue":"${intensity.byte}"}
+[{"item":"http://192.168.1.1:8180/set/this/value/${intensity.percent}","type":"httpDevice","httpVerb":"GET"}]
 
-udp://192.168.1.1:5000/0x45${intensity.percent}55
 
-udp://192.168.2.2:6000/fireoffthismessage\n
+[{"item":"http://192.168.1.1:8280/set/this","type":"httpDevice","httpVerb":"PUT","httpBody":{"someValue":"${intensity.byte}"}}]
 
-tcp://192.168.3.3:9000/sendthismessage
+[{"item":"udp://192.168.1.1:5000/0x45${intensity.percent}55","type":"udpDevice"}]
 
-tcp://192.168.4.4:10000/0x435f12dd${intensity.math((X -4)*50)}438c
+[{"item":"udp://192.168.2.2:6000/fireoffthismessage\n","type":"udpDevice"}]
 
-tcp://192.168.5.5:110000/0x
+[{"item":"tcp://192.168.3.3:9000/sendthismessage","type":"tcpDevice"}]
+
+[{"item":"tcp://192.168.4.4:10000/0x435f12dd${intensity.math((X -4)*50)}438c","type":"tcpDevice"}]
+
+[{"item":"tcp://192.168.5.5:110000/0x","type":"tcpDevice"}]
 ```
 
 #### Multiple Call Construct
-Also available is the ability to specify multiple commands in the On URL, Dim URL and Off URL areas by adding Json constructs listed here. This is only for the types of tcp, udp, http, https or a new exec type. Also within the item format you can specify delay in milliseconds and count per item. These new paramters work on device buttons for the Harmony as well.
+Also available is the ability to specify multiple commands in the On URL, Dim URL and Off URL areas by adding Json constructs listed here. This is only for the types of tcp, udp, http, https or a new exec type. Also within the item format you can specify delay in milliseconds and count per item. These new parameters work on device buttons for the Harmony as well.
 Format Example in the URL areas:
 ```
-[{"item":"http://192.168.1.1:8180/do/this/thing"},
-{"item":"http://192.168.1.1:8180/do/the/next/thing","delay":1000,"count":2},
-"item":"http://192.168.1.1:8180/do/another/thing"}]
+[{"item":"http://192.168.1.1:8180/do/this/thing","type":"httpDevice"},
+{"item":"http://192.168.1.1:8180/do/the/next/thing","delay":1000,"count":2,"type":"httpDevice"},
+{"item":"http://192.168.1.1:8180/do/another/thing","type":"httpDevice"}]
 
 
-[{"item":"udp://192.168.1.1:5000/0x450555"},
-{"item":"udp://192.168.1.1:5000/0x45${intensity.percent}55"}]
+[{"item":"udp://192.168.1.1:5000/0x450555","type":"udpDevice"},
+{"item":"udp://192.168.1.1:5000/0x45${intensity.percent}55","type":"udpDevice"}]
 
-[{"item":"udp://192.168.1.1:5000/0x450555"},
-{"item":"http://192.168.1.1:8180/do/this/thing"},
-{"item":"tcp://192.168.2.1/sendthisdata"},
-{"item":"https://192.168.12.1/do/this/secure/thing"},
-{"item":"exec://notepad.exe"}]
+[{"item":"udp://192.168.1.1:5000/0x450555","type":"udpDevice"},
+{"item":"http://192.168.1.1:8180/do/this/thing","type":"httpDevice"},
+{"item":"tcp://192.168.2.1/sendthisdata","type":"tcpDevice"},
+{"item":"https://192.168.12.1/do/this/secure/thing","type":"httpDevice"},
+{"item":"exec://notepad.exe","type":"cmdDevice"}]
 ```
 #### Script or Command Execution
 The release as of v2.0.0 will now support the execution of a local script or program. This will blindly fire off a process to run and is bound by the privileges of the java process.
@@ -224,20 +399,27 @@ To configure this type of manual add, you will need to select the Device type of
 
 In the URL areas, the format of the execution is just providing what command line you would like to run, or using the multiple call item construct described above.
 ```
-notepad.exe
+[{"item":"C:\\Users\\John\\Documents\\Applications\\putty.exe 192.168.1.1","type":"cmdDevice"},
+{"item":"notepad.exe","type":"cmdDevice"}]
 
 OR
 
-[{"item":"C:\\Users\\John\\Documents\\Applications\\putty.exe 192.168.1.1"},
-{"item":"notepad.exe"}]
+[{"item":"exec://notepad.exe","type":"cmdDevice"}]
 
-OR
+```
+#### Value Passing Controls
+There are multiple replacement constructs available to be put into any of the calls except Harmony items, Net Items and HAL items. These constructs are: "${time.format(Java time format string)}", "${intensity.percent}", "${intensity.byte}" and "${intensity.math(using X in your calc)}".
+You can control items that require special calculated values using ${intensity.math(<your expression using "X" as the value to operate on>)} i.e. "${intensity.math(X/4)}".
+For the items that want to have a date time put into the message, utilize ${time.format(yyyy-MM-ddTHH:mm:ssXXX)} where "yyyy-MM-ddTHH:mm:ssXXX" can be any format from the Java SimpleDateFormat documented here: https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
+e.g.
+```
+[{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=10&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.math(X/4)}","type":"httpDevice"}]
 
-/home/me/startsomething.sh
+[{"item":"udp://192.168.1.1:5000/0x45${intensity.percent}55","type":"udpDevice"}]
 
-OR
+[{"item":"tcp://192.168.1.1:5000/This is the intensity real value ${intensity.byte}","type":"tcpDevice"}]
 
-[{"item":"exec://notepad.exe"}]
+[{"item":{"clientId":"TestClient","topic":"Yep","message":"This is the time ${time.format(yyyy-MM-ddTHH:mm:ssXXX)}"},"type":"mqttDevice"}]
 
 ```
 
@@ -257,7 +439,7 @@ OFF Commands |
  | Alexa, turn off `<Device Name>`
 DIM Commands | 
  | Alexa, brighten `<Device Name>` to `<Position>`
- | Alexa, dim `<Device Name> to <Position>`
+ | Alexa, dim `<Device Name>` to `<Position>`
  | Alexa, brighten `<Device Name>`
  | Alexa, dim `<Device Name>`
  | Alexa, set `<Device Name>` to `<Position>`
@@ -331,8 +513,8 @@ contentBodyOff | string | This is the content body that you would like to send w
 {
 "name" : "bedroom light",
 "deviceType" : "switch",
-  "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
-  "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
+  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
+  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
 }
 ```
 #### Dimming Control Example
@@ -342,8 +524,8 @@ e.g.
 {
     "name": "entry light",
     "deviceType": "switch",
-    "offUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31",
-    "onUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}"
+    "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31","type":"veraDevice"}],
+    "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}","type":"veraDevice"}]
 }
 ```
 See the echo's documentation for the dimming phrase.
@@ -355,8 +537,8 @@ e.g.
 {
     "name": "Thermostat,
     "deviceType": "custom",
-    "offUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=10",
-    "onUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=10&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.math(X/4)}"
+    "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=10","type":"veraDevice"}],
+    "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=10&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.math(X/4)}","type":"veraDevice"}]
 }
 ```
 See the echo's documentation for the dimming phrase.
@@ -368,12 +550,8 @@ e.g:
 {
     "name": "test device",
     "deviceType": "custom",
-    "offUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31",
-    "onUrl": "http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}",
-  "httpVerb":"POST",
-  "contentType" : "application/json",
-  "contentBody" : "{\"fooBar\":\"baz_on\"}"
-  "contentBodyOff" : "{\"fooBar\":\"baz_off\"}"
+    "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31","httpVerb":"POST","contentType" : "application/json","httpBody" : "{\"fooBar\":\"baz_off\"}],
+    "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}","type":"httpDevice","httpVerb":"POST","contentType" : "application/json","httpBody" : "{\"fooBar\":\"baz_on\"}]
 }
 ```
 #### Custom Usage URLs Example
@@ -382,8 +560,8 @@ Anything that takes an action as a result of an HTTP request will probably work 
 {
   "name": "night mode",
   "deviceType": ""custom",
-  "offUrl": "http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=1",
-  "onUrl": "http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=3"
+  "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=1","type":"httpDevice"}],
+  "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=3","type":"httpDevice"}]
 }
 ```
 Here is a UDP example that can send binary data.
@@ -391,8 +569,8 @@ Here is a UDP example that can send binary data.
 {
   "name": "UDPPacket",
   "deviceType": "custom",
-  "offUrl": "udp://192.168.1.1:8899/0x460055",
-  "onUrl": "udp://192.168.1.1:8899/0x450055"
+  "offUrl": [{"item":"udp://192.168.1.1:8899/0x460055","type":"udpDevice"}],
+  "onUrl": [{"item":"udp://192.168.1.1:8899/0x450055","type":"udpDevice"}]
 }
 ```
 #### Response
@@ -417,12 +595,14 @@ contentBodyOff | string | This is the content body that you would like to send w
 "id" : "12345",
 "name" : "bedroom light",
 "deviceType" : "switch",
-  "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
-  "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
+  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
+  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
 }
 ```
 ### Update a Device 
-Update an existing device using it's ID that was given when the device was created and the update could contain any of the fields that are used and shown in the previous examples when adding a device. 
+Update an existing device using its ID that was given when the device was created and the update could contain any of the fields that are used and shown in the previous examples when adding a device. 
+
+**Note: You must supply all fields of the device in return as this is a replacement update for the given id.**
 ```
 PUT http://host:port/api/devices/<id>
 ```
@@ -436,7 +616,7 @@ mapType | string | This identifies what type of source item was used from the he
 deviceType | string | This identifies what type of device entry this is. It is used by the system and should be the values of "switch", "scene", "custom", "activity", "button", "thermo", "passthru", "exec", "UDP", "TCP" or "custom". | Required
 targetDevice | string | A name given to the target when there are multiples of a given type in the configuration | Optional
 onUrl | string | This is the URL or Data Description that is executed for an "on" request. | Required
-dimUrl | string | This is the URL or Data Description that is executed for an "on" request when a intensity value is sent. | Optional
+dimUrl | string | This is the URL or Data Description that is executed for an "on" request when an intensity value is sent. | Optional
 offUrl | string | This is the URL or Data Description that is executed for an "off" request. | Optional
 headers | string | This is a header or list of headers that is used for http/https calls when given. | Optional
 httpVerb | string | This is used for "custom" calls that the user would like to execute. The values can only be "GET, "PUT", "POST". | Optional
@@ -449,8 +629,8 @@ contentBodyOff | string | This is the content body that you would like to send w
 "id" : "6789",
 "name" : "table light",
 "deviceType" : "switch",
-  "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
-  "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
+  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
+  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
 }
 ```
 #### Response
@@ -459,8 +639,8 @@ contentBodyOff | string | This is the content body that you would like to send w
 "id" : "6789",
 "name" : "table light",
 "deviceType" : "switch",
-  "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
-  "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
+  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
+  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
 }
 ```
 ### Get All Devices 
@@ -475,15 +655,15 @@ Individual entries are the same as a single device but in json list format.
 "id" : "12345",
 "name" : "bedroom light",
 "deviceType" : "switch",
-  "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
-  "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
+  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
+  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
 }
 {
 "id" : "6789",
 "name" : "table light",
 "deviceType" : "switch",
-  "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
-  "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
+  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
+  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
 }]
 ```
 ### Get a Specific Device 
@@ -498,8 +678,8 @@ The response is the same layout as defined in the add device response.
 "id" : "6789",
 "name" : "table light",
 "deviceType" : "switch",
-  "onUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41",
-  "offUrl" : "http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41"
+  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
+  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
 }
 ```
 ### Delete a Specific Device 
@@ -512,7 +692,7 @@ This call returns a null json "{}".
 ### Get HA Bridge Version 
 Get current version of the HA bridge software. 
 ```
-GET http://host:port/api/devices/habridge/version
+GET http://host:port/system/habridge/version
 ```
 #### Response
 Name |	Type |	Description
@@ -662,7 +842,7 @@ Show the Harmony Hub's current activity.
 GET http://host:port/api/devices/harmony/show
 ```
 #### Response
-Only listing the relevant fields that are needed for identity of an activity. TThe example below is representative of an activity.
+Only listing the relevant fields that are needed for identity of an activity. The example below is representative of an activity.
 
 Name |	Type |	Description
 -----|-------|-------------
@@ -826,7 +1006,7 @@ Allows the user to set the internal state of the light on and off, modify the br
 PUT	http://host:port/api/<username>/lights/<id>/bridgeupdatestate
 ```
 #### Body arguments
-These are examples that can be used in the control of items iwthin the bridge, but for HUE passthru devices, the complete state object is sent.
+These are examples that can be used in the control of items within the bridge, but for HUE passthru devices, the complete state object is sent.
 Name |	Type |	Description	 
 -----|-------|-------------
 on |	bool |	On/Off state of the light. On=true, Off=false. Optional
@@ -998,7 +1178,7 @@ Note that `192.168.1.1` and `12345` are replaced with the actual IP address and 
 
 
 ### UPNP description service
-The bridge provides the description service which is used by the calling app to interogate access details after it has decided the upnp multicast response is the correct device.
+The bridge provides the description service which is used by the calling app to interrogate access details after it has decided the upnp multicast response is the correct device.
 #### Get Description
 ```
 GET http://host:80/description.xml
@@ -1052,13 +1232,8 @@ GET http://host:80/description.xml
 	</device>\n
 </root>\n
 ```
-## Debugging
-To turn on debugging for the bridge, use the following extra parm in the command line:
-```
--Dorg.slf4j.simpleLogger.defaultLogLevel=DEBUG
-```
 ## Development Mode
-To turn on development mode so that it will not need an Harmony Hub for testing, use the following extra parm in the command line and the harmony ip and login info will not be needed:
+To turn on development mode so that it will not need a Harmony Hub for testing, use the following extra parameter in the command line and the harmony ip and login info will not be needed:
 ```
 java -jar -Ddev.mode=true ha-bridge-0.X.Y.jar
 ```

@@ -18,14 +18,14 @@ public class HuePublicConfig
 	private Boolean factorynew;
 	private String modelid;
 
-	public static HuePublicConfig createConfig(String name, String ipaddress) {
+	public static HuePublicConfig createConfig(String name, String ipaddress, String emulateHubVersion) {
 		HuePublicConfig aConfig = new HuePublicConfig();
 		aConfig.setMac(HuePublicConfig.getMacAddress(ipaddress));
-		aConfig.setApiversion("1.15.0");
-		aConfig.setSwversion("01035934");
+		aConfig.setApiversion(HueConstants.API_VERSION);
+		aConfig.setSwversion(emulateHubVersion);
 		aConfig.setName(name);
 		aConfig.setBridgeid(aConfig.getHueBridgeIdFromMac());
-		aConfig.setModelid("BSB002");
+		aConfig.setModelid(HueConstants.MODEL_ID);
 		aConfig.setFactorynew(false);
 		aConfig.setReplacesbridgeid(null);
 
