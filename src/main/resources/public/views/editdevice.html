@@ -130,6 +130,7 @@
 						<table class="table table-bordered table-striped table-hover">
 							<thead>
 								<tr>
+							<div class="col-xs-12 col-md-4">
 									<th>Type</th>
 									<th>Target Item</th>
 									<th>Delay</th>
@@ -140,19 +141,21 @@
 									<th>Http Headers</th>
 									<th>Content Type</th>
 									<th>Manage</th>
+							</div>
 								</tr>
 							</thead>
 							<tr ng-repeat="onItem in onDevices">
+							<div class="col-xs-12 col-md-4">
 								<td><select
 									ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]"
 									ng-model="onItem.type"></select></td>
-								<td><textarea rows="1" cols="20" class="form-control"
+								<td><textarea rows="1" class="form-control"
 										id="item-target" ng-model="onItem.item" placeholder="The Call"></textarea></td>
-								<td><textarea rows="1" cols="4" class="form-control"
+								<td><textarea rows="1" class="form-control"
 										id="item-delay" ng-model="onItem.delay" placeholder="millis"></textarea></td>
-								<td><textarea rows="1" cols="2" class="form-control"
+								<td><textarea rows="1" class="form-control"
 										id="item-count" ng-model="onItem.count" placeholder="number"></textarea></td>
-								<td><textarea rows="1" cols="16" class="form-control"
+								<td><textarea rows="1" class="form-control"
 										id="item-filterIPs" ng-model="onItem.filterIPs"
 										placeholder="restrict IPs"></textarea></td>
 								<td><select name="item-http-verb" id="item-http-verb"
@@ -163,7 +166,7 @@
 										<option value="PUT">PUT</option>
 										<option value="POST">POST</option>
 								</select></td>
-								<td><textarea rows="1" cols="16" class="form-control"
+								<td><textarea rows="1" class="form-control"
 										id="item-httpBody" ng-model="onItem.httpBody"
 										placeholder="body args"></textarea></td>
 								<td><textarea rows="1" cols="16" class="form-control"
@@ -189,8 +192,10 @@
 								</select></td>
 								<td><button class="btn btn-danger" type="submit"
 										ng-click="removeItemOn(onItem)">Del</button></td>
+							</div>
 							</tr>
 							<tr>
+							<div class="col-xs-12 col-md-4">
 								<td><select
 									ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]"
 									ng-model="newOnItem.type"></select></td>
@@ -240,6 +245,7 @@
 								</select></td>
 								<td><button class="btn btn-success" type="submit"
 										ng-click="addItemOn(newOnItem)">Add</button></td>
+							</div>
 							</tr>
 						</table>
 						</scrollable-table></td>
@@ -251,6 +257,7 @@
 						<table class="table table-bordered table-striped table-hover">
 							<thead>
 								<tr>
+							<div class="col-xs-12 col-md-4">
 									<th>Type</th>
 									<th>Target Item</th>
 									<th>Delay</th>
@@ -261,9 +268,11 @@
 									<th>Http Headers</th>
 									<th>Content Type</th>
 									<th>Manage</th>
+							</div>
 								</tr>
 							</thead>
 							<tr ng-repeat="dimItem in dimDevices">
+							<div class="col-xs-12 col-md-4">
 								<td><select
 									ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]"
 									ng-model="dimItem.type"></select></td>
@@ -311,8 +320,10 @@
 								</select></td>
 								<td><button class="btn btn-danger" type="submit"
 										ng-click="removeItemDim(dimItem)">Del</button></td>
+							</div>
 							</tr>
 							<tr>
+							<div class="col-xs-12 col-md-4">
 								<td><select
 									ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]"
 									ng-model="newDimItem.type"></select></td>
@@ -362,6 +373,7 @@
 								</select></td>
 								<td><button class="btn btn-success" type="submit"
 										ng-click="addItemDim(newDimItem)">Add</button></td>
+							</div>
 							</tr>
 						</table>
 						</scrollable-table></td>
@@ -373,6 +385,7 @@
 						<table class="table table-bordered table-striped table-hover">
 							<thead>
 								<tr>
+							<div class="col-xs-12 col-md-4">
 									<th>Type</th>
 									<th>Target Item</th>
 									<th>Delay</th>
@@ -383,9 +396,11 @@
 									<th>Http Headers</th>
 									<th>Content Type</th>
 									<th>Manage</th>
+							</div>
 								</tr>
 							</thead>
 							<tr ng-repeat="offItem in offDevices">
+							<div class="col-xs-12 col-md-4">
 								<td><select
 									ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]"
 									ng-model="offItem.type"></select></td>
@@ -433,8 +448,10 @@
 								</select></td>
 								<td><button class="btn btn-danger" type="submit"
 										ng-click="removeItemOff(offItem)">Del</button></td>
+							</div>
 							</tr>
 							<tr>
+							<div class="col-xs-12 col-md-4">
 								<td><select
 									ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]"
 									ng-model="newOffItem.type"></select></td>
@@ -484,6 +501,7 @@
 								</select></td>
 								<td><button class="btn btn-success" type="submit"
 										ng-click="addItemOff(newOffItem)">Add</button></td>
+							</div>
 							</tr>
 						</table>
 						</scrollable-table></td>

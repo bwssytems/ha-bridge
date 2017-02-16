@@ -125,8 +125,16 @@ public class HTTPHandler {
 										+ e.getMessage(), e);
 					}
 				}
-				if (theContent == null)
-					theContent = "";
+			} else {
+				log.warn("HTTP response code was not an expected successful response of between 200 - 299, the code was: " + response.getStatusLine());
+				try {
+					EntityUtils.consume(response.getEntity()); // close out
+					// inputstream
+					// ignore
+					// content
+				} catch (Exception e) {
+					//noop
+				}
 			}
 		} catch (IOException e) {
 			log.warn("Error calling out to HA gateway: IOException in log", e);
