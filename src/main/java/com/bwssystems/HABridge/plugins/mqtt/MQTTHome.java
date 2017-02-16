@@ -42,6 +42,7 @@ public class MQTTHome implements Home {
 				handlers.get(key).shutdown();
 			}
 		}
+		handlers = null;
 	}
 
 	public MQTTHandler getMQTTHandler(String aName) {

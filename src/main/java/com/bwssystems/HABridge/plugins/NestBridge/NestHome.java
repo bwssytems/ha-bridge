@@ -94,10 +94,10 @@ public class NestHome implements com.bwssystems.HABridge.Home {
 	public void closeHome() {
 		if(theSession != null) {
 			theNest.endNestSession();
-			theNest = null;
-			theSession = null;
-			nestItems = null;
 		}
+		theNest = null;
+		theSession = null;
+		nestItems = null;
 	}
 
 	@Override

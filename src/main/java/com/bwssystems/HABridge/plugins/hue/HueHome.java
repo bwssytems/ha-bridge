@@ -124,10 +124,13 @@ public class HueHome implements Home {
 	public void closeHome() {
 		if(!validHue)
 			return;
+		if(hues == null)
+			return;
 		Iterator<String> keys = hues.keySet().iterator();
 		while(keys.hasNext()) {
 			String key = keys.next();
 			hues.get(key).closeHue();;
 		}
+		hues = null;
 	}
 }
