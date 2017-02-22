@@ -476,8 +476,8 @@ Dim a light | "Dim the <light name>"
 Brighten a light | "Brighten the <light name>"
 Set a light brightness to a certain percentage | "Set <light name> to 50%"
 Dim/Brighten lights by a certain percentage | "Dim/Brighten <light name> by 50%"
-Turn on/off all lights in room | â€œTurn on/off lights in <room name>" 
-Turn on/off all lights | â€œTurn on/off all of the lightsâ€�
+Turn on/off all lights in room | "Turn on/off lights in <room name>" 
+Turn on/off all lights | "Turn on/off all of the lights"
 
 To see what Home thinks you said, you can ask "Hey Google, What did I say?" or check the history in the app.
 
