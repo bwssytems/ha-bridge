@@ -1,44 +1,32 @@
 package com.bwssystems.HABridge.plugins.somfy;
 
 import com.bwssystems.HABridge.NamedIP;
+import com.bwssystems.HABridge.api.NameValue;
+import com.bwssystems.HABridge.plugins.http.HTTPHandler;
 import com.bwssystems.HABridge.plugins.somfy.jsonschema2pojo.getsetup.Device;
 import com.bwssystems.HABridge.plugins.somfy.jsonschema2pojo.getsetup.GetSetup;
 import com.google.gson.Gson;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.utils.IOUtils;
-import us.monoid.json.JSONException;
-
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SomfyInfo {
     private static final Logger log = LoggerFactory.getLogger(SomfyInfo.class);
 	private final String somfyName;
 	private final NamedIP namedIP;
-	private HttpClient httpClient;
+	private HTTPHandler httpClient;
 	private static final String CONNECT_HOST = "https://www.tahomalink.com/";
 	private static final String BASE_URL = CONNECT_HOST + "enduser-mobile-web/externalAPI/";
 	private static final String BASE_URL_ENDUSER = CONNECT_HOST + "enduser-mobile-web/enduserAPI/";
@@ -51,7 +39,7 @@ public class SomfyInfo {
 
 	private void initHttpClient() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
 		if(httpClient==null) {
-			httpClient = HttpClients.createDefault();
+			httpClient = new HTTPHandler();
 		}
 	}
 
@@ -76,52 +64,40 @@ public class SomfyInfo {
 	public void login(String username, String password) throws Exception {
 
 		initHttpClient();
-		HttpPost httpPost = new HttpPost(BASE_URL + "json/login");
-		httpPost.addHeader("User-Agent","mine");
+		NameValue[] httpHeader = getHttpHeaders();
 		List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 		nvps.add(new BasicNameValuePair("userId", username));
 		nvps.add(new BasicNameValuePair("userPassword", password));
-		httpPost.setEntity(new UrlEncodedFormEntity(nvps));
 		log.debug("Making SOMFY http login call");
-		HttpResponse response = httpClient.execute(httpPost);
-
-		log.debug(response.getStatusLine().toString());
-		HttpEntity entity = response.getEntity();
-		EntityUtils.consume(entity);
+		UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nvps);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		urlEncodedFormEntity.writeTo(bos);
+		String body = bos.toString();
+		String response = httpClient.doHttpRequest(BASE_URL + "json/login",HttpPost.METHOD_NAME, "application/x-www-form-urlencoded", body,httpHeader);
+		log.debug(response);
 	}
 
-	public GetSetup getSetup() throws IOException, JSONException {
-		HttpGet httpGet = new HttpGet(BASE_URL + "json/getSetup");
-		httpGet.addHeader("User-Agent","mine");
+	private NameValue[] getHttpHeaders() {
+		NameValue userAgentHeader = new NameValue();
+		userAgentHeader.setName("User-Agent");
+		userAgentHeader.setValue("mine");
+		return new NameValue[]{userAgentHeader};
+	}
+
+	public GetSetup getSetup() throws IOException {
+		NameValue[] httpHeader = getHttpHeaders();
 		log.info("Making SOMFY http setup call");
-
-		HttpResponse response = httpClient.execute(httpGet);
-		log.debug(response.getStatusLine().toString());
-		HttpEntity entity = response.getEntity();
-
-		String json = IOUtils.toString(entity.getContent());
-		log.debug(json);
-		GetSetup setupData = new Gson().fromJson(json, GetSetup.class);
+		String response = httpClient.doHttpRequest(BASE_URL + "json/getSetup", HttpGet.METHOD_NAME, "", "", httpHeader );
+		log.debug(response);
+		GetSetup setupData = new Gson().fromJson(response, GetSetup.class);
 		return setupData;
 	}
 
 	public void execApply(String jsonToPost) throws Exception {
-		login("house@edonica.com", "drawde123");
-		HttpPost httpPost = new HttpPost(BASE_URL_ENDUSER + "exec/apply");
-
-		RequestConfig config = RequestConfig.custom().build();
-		httpPost.setConfig(config);
-		httpPost.addHeader("User-Agent", "mine");
-		httpPost.addHeader("Content-Type", "application/json;charset=UTF-8");
-
-		httpPost.setEntity(new StringEntity(jsonToPost, "UTF-8"));
+		login(namedIP.getUsername(), namedIP.getPassword());
 		log.info("Making SOMFY http exec call");
-		HttpResponse response = httpClient.execute(httpPost);
-		
-		log.info(response.getStatusLine().toString());
-		HttpEntity entity = response.getEntity();
-		EntityUtils.consume(entity);
-		
+		String response = httpClient.doHttpRequest(BASE_URL_ENDUSER + "exec/apply", HttpPost.METHOD_NAME, "application/json;charset=UTF-8", jsonToPost, getHttpHeaders());
+		log.info(response);
 	}
 
 
