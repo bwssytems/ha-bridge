@@ -73,26 +73,8 @@
 				{{hassdevice.deviceState.entity_id}}</td>
 			<td>{{hassdevice.hassname}}</td>
 			<td>
-				<button ng-if="hassdevice.domain != 'climate' && hassdevice.domain != 'sensor' && hassdevice.domain != 'sun'" class="btn btn-success" type="submit"
-					ng-click="buildDeviceUrls(hassdevice, device_dim_control)">Build Item</button>
-				<ul ng-if="hassdevice.domain == 'climate'" class="list-group">
-					<li class="list-group-item">
-						<p>
-							<button class="btn btn-success" type="submit"
-								ng-click="buildhassHeatUrls(hassdevice)">Heat</button>
-							<button class="btn btn-success" type="submit"
-								ng-click="buildhassCoolUrls(hassdevice)">Cool</button>
-							<button class="btn btn-success" type="submit"
-								ng-click="buildhassAutoUrls(hassdevice)">Auto</button>
-						</p>
-						<p>
-							<button class="btn btn-success" type="submit"
-								ng-click="buildhassOffUrls(hassdevice)">Off</button>
-							<button class="btn btn-success" type="submit"
-								ng-click="buildhassFanUrls(hassdevice)">Fan</button>
-						</p>
-					</li>
-				</ul>
+				<button ng-if="hassdevice.domain != 'sensor' && hassdevice.domain != 'sun'" class="btn btn-success" type="submit"
+					ng-click="buildDeviceUrls(hassdevice, device_dim_control, false)">Build Item</button>
 			</td>
 		</tr>
 	</table>

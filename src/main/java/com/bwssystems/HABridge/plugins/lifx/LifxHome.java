@@ -64,24 +64,33 @@ public class LifxHome implements Home {
 	                    }
 	                }
 	            }
-	    		lifxMap = new HashMap<String, LifxDevice>();
-	    		log.info("Opening LFX Client with broadcast address: " + bcastInetAddr.getHostAddress());
-	    		client = new LFXClient(bcastInetAddr.getHostAddress());
-	    		client.getLights().addLightCollectionListener(new MyLightListener(lifxMap));
-	    		client.getGroups().addGroupCollectionListener(new MyGroupListener(lifxMap));
-				client.open(false);
+	            if(bcastInetAddr != null) {
+		    		lifxMap = new HashMap<String, LifxDevice>();
+		    		log.info("Opening LFX Client with broadcast address: " + bcastInetAddr.getHostAddress());
+		    		client = new LFXClient(bcastInetAddr.getHostAddress());
+		    		client.getLights().addLightCollectionListener(new MyLightListener(lifxMap));
+		    		client.getGroups().addGroupCollectionListener(new MyGroupListener(lifxMap));
+					client.open(false);
+					aGsonHandler =
+							new GsonBuilder()
+							.create();
+	            } else {
+					log.warn("Could not open LIFX, no bcast addr available, check your upnp config address.");
+					client = null;
+					validLifx = false;
+					return this;
+	            }
 			} catch (IOException e) {
 				log.warn("Could not open LIFX, with IO Exception", e);
 				client = null;
+				validLifx = false;
 				return this;
 			} catch (InterruptedException e) {
 				log.warn("Could not open LIFX, with Interruprted Exception", e);
 				client = null;
+				validLifx = false;
 				return this;
 			}
-			aGsonHandler =
-					new GsonBuilder()
-					.create();
         }
 		return this;
 	}

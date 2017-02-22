@@ -1986,7 +1986,7 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 		$scope.device = bridgeService.state.device;
 	};
 
-	$scope.buildDeviceUrls = function (hassdevice, dim_control) {
+	$scope.buildDeviceUrls = function (hassdevice, dim_control, buildonly) {
 		onpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"}";
 		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0))
 			dimpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\",\"bri\":\"" + dim_control + "\"}";
@@ -1996,89 +1996,19 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editNewDevice($scope.device);
-		$location.path('/editdevice');
-	};
-
-	$scope.buildHassHeatUrls = function (hassdevice) {
-		onpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"}";
-		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0))
-			dimpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\",\"bri\":\"" + dim_control + "\"}";
-		else
-			dimpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"}";
-		offpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"off\"}";
-
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
-		$scope.device = bridgeService.state.device;
-		bridgeService.editNewDevice($scope.device);
-		$location.path('/editdevice');
-	};
-
-	$scope.buildHassCoolUrls = function (hassdevice) {
-		onpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"}";
-		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0))
-			dimpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\",\"bri\":\"" + dim_control + "\"}";
-		else
-			dimpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"}";
-		offpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"off\"}";
-
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
-		$scope.device = bridgeService.state.device;
-		bridgeService.editNewDevice($scope.device);
-		$location.path('/editdevice');
-	};
-
-	$scope.buildHassAutoUrls = function (hassdevice) {
-		onpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"}";
-		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0))
-			dimpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\",\"bri\":\"" + dim_control + "\"}";
-		else
-			dimpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"}";
-		offpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"off\"}";
-
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
-		$scope.device = bridgeService.state.device;
-		bridgeService.editNewDevice($scope.device);
-		$location.path('/editdevice');
-	};
-
-	$scope.buildHassOffUrls = function (hassdevice) {
-		onpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"}";
-		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0))
-			dimpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\",\"bri\":\"" + dim_control + "\"}";
-		else
-			dimpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"}";
-		offpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"off\"}";
-
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
-		$scope.device = bridgeService.state.device;
-		bridgeService.editNewDevice($scope.device);
-		$location.path('/editdevice');
-	};
-
-	$scope.buildHassFanUrls = function (hassdevice) {
-		onpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"}";
-		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0))
-			dimpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\",\"bri\":\"" + dim_control + "\"}";
-		else
-			dimpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"}";
-		offpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"off\"}";
-
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain,  "hassDevice", null, null);
-		$scope.device = bridgeService.state.device;
-		bridgeService.editNewDevice($scope.device);
-		$location.path('/editdevice');
+		if (!buildonly) {
+			bridgeService.editNewDevice($scope.device);
+			$location.path('/editdevice');
+		}
 	};
 
 	$scope.bulkAddDevices = function(dim_control) {
 		var devicesList = [];
+		$scope.clearDevice();
 		for(var i = 0; i < $scope.bulk.devices.length; i++) {
 			for(var x = 0; x < bridgeService.state.hassdevices.length; x++) {
-				if(bridgeService.state.hassdevices[x].deviceName === $scope.bulk.devices[i]) {
-					if(bridgeService.state.hassdevices[x].domain === "climate")
-						$scope.buildHassAutoUrls(bridgeService.state.hassdevices[x]);
-					else
-						$scope.buildDeviceUrls(bridgeService.state.hassdevices[x],dim_control);
+				if(bridgeService.state.hassdevices[x].deviceState.entity_id === $scope.bulk.devices[i] && bridgeService.state.hassdevices[x].domain !== "sensor" && bridgeService.state.hassdevices[x].domain !== "sun") {
+					$scope.buildDeviceUrls(bridgeService.state.hassdevices[x],dim_control,true);
 					devicesList[i] = {
 							name: $scope.device.name,
 							mapId: $scope.device.mapId,
@@ -2095,6 +2025,7 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 							contentBodyDim: $scope.device.contentBodyDim,
 							contentBodyOff: $scope.device.contentBodyOff
 					};
+					$scope.clearDevice();
 				}
 			}
 		}
@@ -2102,7 +2033,7 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 				function () {
 					$scope.clearDevice();
 					bridgeService.viewDevices();
-					bridgeService.viewhassdevices();
+					bridgeService.viewHassDevices();
 				},
 				function (error) {
 					bridgeService.displayWarn("Error adding Hass devices in bulk.", error)
@@ -2137,8 +2068,8 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 		else {
 			$scope.selectAll = true;
 			for(var x = 0; x < bridgeService.state.hassdevices.length; x++) {
-				if($scope.bulk.devices.indexOf(bridgeService.state.hassdevices[x]) < 0 && !bridgeService.findDeviceByMapId(bridgeService.state.hassdevices[x].hassdevicename + "-" +  bridgeService.state.hassdevices[x].halname, bridgeService.state.hassdevices[x].halname, "hassdevice"))
-					$scope.bulk.devices.push(bridgeService.state.hassdevices[x].hassdevicename);
+				if($scope.bulk.devices.indexOf(bridgeService.state.hassdevices[x].deviceState.entity_id) < 0 && bridgeService.state.hassdevices[x].domain !== "sensor" && bridgeService.state.hassdevices[x].domain !== "sun")
+					$scope.bulk.devices.push(bridgeService.state.hassdevices[x].deviceState.entity_id);
 			}
 		}
 	};
@@ -2181,7 +2112,7 @@ app.controller('DomoticzController', function ($scope, $location, $http, bridgeS
 		$scope.device = bridgeService.state.device;
 	};
 
-	$scope.buildDeviceUrls = function (domoticzdevice, dim_control) {
+	$scope.buildDeviceUrls = function (domoticzdevice, dim_control, buildonly) {
 		var preCmd = "";
 		var postOnCmd = "";
 		var postDimCmd = "";
@@ -2220,16 +2151,19 @@ app.controller('DomoticzController', function ($scope, $location, $http, bridgeS
 		+ postOffCmd;
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, domoticzdevice.devicename + "-" + domoticzdevice.domoticzname,  domoticzdevice.devicename, domoticzdevice.domoticzname, aDeviceType,  "domoticzDevice", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editNewDevice($scope.device);
-		$location.path('/editdevice');
+		if (!buildonly) {
+			bridgeService.editNewDevice($scope.device);
+			$location.path('/editdevice');
+		}
 	};
 
 	$scope.bulkAddDevices = function(dim_control) {
 		var devicesList = [];
+		$scope.clearDevice();
 		for(var i = 0; i < $scope.bulk.devices.length; i++) {
 			for(var x = 0; x < bridgeService.state.domoticzdevices.length; x++) {
 				if(bridgeService.state.domoticzdevices[x].devicename === $scope.bulk.devices[i]) {
-					$scope.buildDeviceUrls(bridgeService.state.domoticzdevices[x],dim_control);
+					$scope.buildDeviceUrls(bridgeService.state.domoticzdevices[x],dim_control,true);
 					devicesList[i] = {
 							name: $scope.device.name,
 							mapId: $scope.device.mapId,
@@ -2246,6 +2180,7 @@ app.controller('DomoticzController', function ($scope, $location, $http, bridgeS
 							contentBodyDim: $scope.device.contentBodyDim,
 							contentBodyOff: $scope.device.contentBodyOff
 					};
+					$scope.clearDevice();
 				}
 			}
 		}
@@ -2332,14 +2267,16 @@ app.controller('LifxController', function ($scope, $location, $http, bridgeServi
 		$scope.device = bridgeService.state.device;
 	};
 
-	$scope.buildDeviceUrls = function (lifxdevice, dim_control) {
+	$scope.buildDeviceUrls = function (lifxdevice, dim_control, buildonly) {
 		dimpayload = angular.toJson(lifxdevice);
 		onpayload = angular.toJson(lifxdevice);
 		offpayload = angular.toJson(lifxdevice);
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, lifxdevice.name,  lifxdevice.name, lifxdevice.name, null,  "lifxDevice", null, null);
 		$scope.device = bridgeService.state.device;
-		bridgeService.editNewDevice($scope.device);
-		$location.path('/editdevice');
+		if (!buildonly) {
+			bridgeService.editNewDevice($scope.device);
+			$location.path('/editdevice');
+		}
 	};
 
 	$scope.bulkAddDevices = function(dim_control) {
@@ -2347,7 +2284,7 @@ app.controller('LifxController', function ($scope, $location, $http, bridgeServi
 		for(var i = 0; i < $scope.bulk.devices.length; i++) {
 			for(var x = 0; x < bridgeService.state.lifxdevices.length; x++) {
 				if(bridgeService.state.lifxdevices[x].devicename === $scope.bulk.devices[i]) {
-					$scope.buildDeviceUrls(bridgeService.state.lifxdevices[x],dim_control);
+					$scope.buildDeviceUrls(bridgeService.state.lifxdevices[x],dim_control,true);
 					devicesList[i] = {
 							name: $scope.device.name,
 							mapId: $scope.device.mapId,
