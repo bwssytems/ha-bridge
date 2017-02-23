@@ -89,27 +89,27 @@
 			</td>
 			<td>
 				<button ng-if="haldevice.haldevicetype != 'Home' && haldevice.haldevicetype != 'HVAC' && haldevice.haldevicetype != 'IrData'" class="btn btn-success" type="submit"
-					ng-click="buildDeviceUrls(haldevice, device_dim_control)">Build Item</button>
+					ng-click="buildDeviceUrls(haldevice, device_dim_control, false)">Build Item</button>
 				<button ng-if="haldevice.haldevicetype == 'Home'" class="btn btn-success" type="submit"
-					ng-click="buildHALHomeUrls(haldevice)">Build Home/Away</button>
+					ng-click="buildHALHomeUrls(haldevice, false)">Build Home/Away</button>
 				<button ng-if="haldevice.haldevicetype == 'IrData'" class="btn btn-success" type="submit"
-					ng-click="buildButtonUrls(haldevice, button_on, button_off)">Build
+					ng-click="buildButtonUrls(haldevice, button_on, button_off, false)">Build
 					A Button</button>
 				<ul ng-if="haldevice.haldevicetype == 'HVAC'" class="list-group">
 					<li class="list-group-item">
 						<p>
 							<button class="btn btn-success" type="submit"
-								ng-click="buildHALHeatUrls(haldevice)">Heat</button>
+								ng-click="buildHALHeatUrls(haldevice, false)">Heat</button>
 							<button class="btn btn-success" type="submit"
-								ng-click="buildHALCoolUrls(haldevice)">Cool</button>
+								ng-click="buildHALCoolUrls(haldevice, false)">Cool</button>
 							<button class="btn btn-success" type="submit"
-								ng-click="buildHALAutoUrls(haldevice)">Auto</button>
+								ng-click="buildHALAutoUrls(haldevice, false)">Auto</button>
 						</p>
 						<p>
 							<button class="btn btn-success" type="submit"
-								ng-click="buildHALOffUrls(haldevice)">Off</button>
+								ng-click="buildHALOffUrls(haldevice, false)">Off</button>
 							<button class="btn btn-success" type="submit"
-								ng-click="buildHALFanUrls(haldevice)">Fan</button>
+								ng-click="buildHALFanUrls(haldevice, false)">Fan</button>
 						</p>
 					</li>
 				</ul>

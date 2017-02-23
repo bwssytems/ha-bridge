@@ -1,5 +1,6 @@
 package com.bwssystems.HABridge.plugins.domoticz;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,8 +14,11 @@ import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
+import com.bwssystems.HABridge.api.hue.HueError;
+import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
+import com.google.gson.Gson;
 
 public class DomoticzHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(DomoticzHome.class);
@@ -66,8 +70,28 @@ public class DomoticzHome implements Home {
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
 			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
-		// Not a device handler
-		return null;
+		String responseString = null;
+		
+		String theUrl = anItem.getItem().getAsString();
+		if(theUrl != null && !theUrl.isEmpty () && (theUrl.startsWith("http://") || theUrl.startsWith("https://"))) {
+			String intermediate = theUrl.substring(theUrl.indexOf("://") + 3);
+			String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
+			String theUrlBody = intermediate.substring(intermediate.indexOf('/') + 1);
+			String hostAddr = null;
+			String port = null;
+			if (hostPortion.contains(":")) {
+				hostAddr = hostPortion.substring(0, intermediate.indexOf(':'));
+				port = hostPortion.substring(intermediate.indexOf(':') + 1);
+			} else
+				hostAddr = hostPortion;
+			
+		} else {
+			log.warn("Domoticz Call to be presented as http(s)://<ip_address>(:<port>)/payload, format of request unknown: " + theUrl);
+			responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
+					"Error on calling url to change device state", "/lights/"
+					+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+		}
+		return responseString;
 	}
 
 	@Override
@@ -90,6 +114,11 @@ public class DomoticzHome implements Home {
 		return this;
 	}
 
+	private DomoticzHandler findHandlerByAddress(String hostAddress) {
+		DomoticzHandler aHandler = null;
+		
+		return aHandler;
+	}
 	@Override
 	public void closeHome() {
 		// noop
