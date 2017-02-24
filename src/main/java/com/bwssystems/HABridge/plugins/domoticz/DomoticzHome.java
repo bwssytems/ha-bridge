@@ -1,6 +1,5 @@
 package com.bwssystems.HABridge.plugins.domoticz;
 
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,13 +16,16 @@ import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.api.hue.HueError;
 import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
+import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
+import com.bwssystems.HABridge.plugins.http.HTTPHandler;
 import com.google.gson.Gson;
 
 public class DomoticzHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(DomoticzHome.class);
 	private Map<String, DomoticzHandler> domoticzs;
 	private Boolean validDomoticz;
+    private HTTPHandler httpClient;
 
 	public DomoticzHome(BridgeSettingsDescriptor bridgeSettings) {
 		super();
@@ -40,14 +42,14 @@ public class DomoticzHome implements Home {
 		List<DomoticzDevice> deviceList = new ArrayList<DomoticzDevice>();
 		while(keys.hasNext()) {
 			String key = keys.next();
-			theResponse = domoticzs.get(key).getDevices();
+			theResponse = domoticzs.get(key).getDevices(httpClient);
 			if(theResponse != null)
 				addDomoticzDevices(deviceList, theResponse, key);
 			else {
 				log.warn("Cannot get lights for Domoticz with name: " + key + ", skipping this Domoticz.");
 				continue;
 			}
-			theResponse = domoticzs.get(key).getScenes();
+			theResponse = domoticzs.get(key).getScenes(httpClient);
 			if(theResponse != null)
 				addDomoticzDevices(deviceList, theResponse, key);
 			else
@@ -70,6 +72,7 @@ public class DomoticzHome implements Home {
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
 			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
+		Devices theDomoticzApiResponse = null;
 		String responseString = null;
 		
 		String theUrl = anItem.getItem().getAsString();
@@ -78,13 +81,38 @@ public class DomoticzHome implements Home {
 			String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
 			String theUrlBody = intermediate.substring(intermediate.indexOf('/') + 1);
 			String hostAddr = null;
-			String port = null;
 			if (hostPortion.contains(":")) {
 				hostAddr = hostPortion.substring(0, intermediate.indexOf(':'));
-				port = hostPortion.substring(intermediate.indexOf(':') + 1);
 			} else
 				hostAddr = hostPortion;
-			
+			DomoticzHandler theHandler = findHandlerByAddress(hostAddr);
+			if(theHandler != null){
+		    	String theData;
+				String anUrl = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody,
+						intensity, targetBri, targetBriInc, false);
+		   		theData = httpClient.doHttpRequest(theHandler.buildUrl(anUrl), null, null, null, theHandler.buildHeaders());
+		   		try {
+		   			theDomoticzApiResponse = new Gson().fromJson(theData, Devices.class);
+		   			if(theDomoticzApiResponse.getStatus().equals("OK"))
+		   				responseString = null;
+		   			else {
+		    			log.warn("Call failed for Domoticz " + theHandler.getDomoticzAddress().getName() + " with status " + theDomoticzApiResponse.getStatus() + " for item " + theDomoticzApiResponse.getTitle());
+						responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
+								"Error on calling url to change device state", "/lights/"
+								+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+		   			}
+		   		} catch (Exception e) {
+	    			log.warn("Cannot interrpret result from call for Domoticz " + theHandler.getDomoticzAddress().getName() + " as response is not parsable.");
+					responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
+							"Error on calling url to change device state", "/lights/"
+							+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+		    	}
+			} else {
+				log.warn("Domoticz Call could not complete, no address found: " + theUrl);
+				responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
+						"Error on calling url to change device state", "/lights/"
+						+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+			}
 		} else {
 			log.warn("Domoticz Call to be presented as http(s)://<ip_address>(:<port>)/payload, format of request unknown: " + theUrl);
 			responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
@@ -100,6 +128,7 @@ public class DomoticzHome implements Home {
 		log.info("Domoticz Home created." + (validDomoticz ? "" : " No Domoticz devices configured."));
 		if(!validDomoticz)
 			return null;
+        httpClient = new HTTPHandler();
 		domoticzs = new HashMap<String, DomoticzHandler>();
 		Iterator<NamedIP> theList = bridgeSettings.getDomoticzaddress().getDevices().iterator();
 		while(theList.hasNext()) {
@@ -116,12 +145,23 @@ public class DomoticzHome implements Home {
 
 	private DomoticzHandler findHandlerByAddress(String hostAddress) {
 		DomoticzHandler aHandler = null;
-		
+		boolean found = false;
+		Iterator<String> keys = domoticzs.keySet().iterator();
+		while(keys.hasNext()) {
+			String key = keys.next();
+			aHandler = domoticzs.get(key);
+			if(aHandler != null && aHandler.getDomoticzAddress().getIp().equals(hostAddress)) {
+				found = true;
+				break;
+			}	
+		}
+		if(!found)
+			aHandler = null;
 		return aHandler;
 	}
 	@Override
 	public void closeHome() {
-		// noop
+		httpClient.closeHandler();
 		
 	}
 }
