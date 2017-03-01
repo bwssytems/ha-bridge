@@ -74,7 +74,7 @@ String.prototype.replaceAll = function (search, replace)
 
 app.service ('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: window.location.origin + "/api/devices", bridgelocation: window.location.origin, systemsbase: window.location.origin + "/system", huebase: window.location.origin + "/api", configs: [], backups: [], devices: [], device: {}, mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, showDomoticz: false, showLifx: false, habridgeversion: ""};
+	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {}, mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, showDomoticz: false, showLifx: false, habridgeversion: ""};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
