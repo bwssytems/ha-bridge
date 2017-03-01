@@ -1,15 +1,10 @@
 package com.bwssystems.HABridge.hue;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.xml.bind.DatatypeConverter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import net.java.dev.eval.Expression;
 
 public class BrightnessDecode {
@@ -49,9 +44,7 @@ public class BrightnessDecode {
 		}
 		if (request.contains(INTENSITY_BYTE)) {
 			if (isHex) {
-				BigInteger bigInt = BigInteger.valueOf(intensity);
-				byte[] theBytes = bigInt.toByteArray();
-				String hexValue = DatatypeConverter.printHexBinary(theBytes);
+				String hexValue = Integer.toHexString(intensity);
 				request = request.replace(INTENSITY_BYTE, hexValue);
 			} else {
 				String intensityByte = String.valueOf(intensity);
@@ -60,9 +53,7 @@ public class BrightnessDecode {
 		} else if (request.contains(INTENSITY_PERCENT)) {
 			int percentBrightness = (int) Math.round(intensity / 255.0 * 100);
 			if (isHex) {
-				BigInteger bigInt = BigInteger.valueOf(percentBrightness);
-				byte[] theBytes = bigInt.toByteArray();
-				String hexValue = DatatypeConverter.printHexBinary(theBytes);
+				String hexValue = Integer.toHexString(percentBrightness);
 				request = request.replace(INTENSITY_PERCENT, hexValue);
 			} else {
 				String intensityPercent = String.valueOf(percentBrightness);
@@ -81,9 +72,7 @@ public class BrightnessDecode {
 				BigDecimal result = exp.eval(variables);
 				Integer endResult = Math.round(result.floatValue());
 				if (isHex) {
-					BigInteger bigInt = BigInteger.valueOf(endResult);
-					byte[] theBytes = bigInt.toByteArray();
-					String hexValue = DatatypeConverter.printHexBinary(theBytes);
+					String hexValue = Integer.toHexString(endResult);
 					request = request.replace(INTENSITY_MATH + mathDescriptor + INTENSITY_MATH_CLOSE, hexValue);
 				} else {
 					request = request.replace(INTENSITY_MATH + mathDescriptor + INTENSITY_MATH_CLOSE,

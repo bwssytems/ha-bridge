@@ -219,6 +219,12 @@ public class DeviceResource {
 	      	return homeManager.findResource(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
+    	get (API_CONTEXT + "/lifx/devices", "application/json", (request, response) -> {
+	    	log.debug("Get LIFX devices");
+	      	response.status(HttpStatus.SC_OK);
+	      	return homeManager.findResource(DeviceMapTypes.LIFX_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.LIFX_DEVICE[DeviceMapTypes.typeIndex]);
+	    }, new JsonTransformer());
+
     	get (API_CONTEXT + "/map/types", "application/json", (request, response) -> {
 	    	log.debug("Get map types");
 	      	return new DeviceMapTypes().getDeviceMapTypes();

@@ -26,6 +26,7 @@ public class DeviceMapTypes {
 	public final static String[] UDP_DEVICE_COMPAT = { "UDP", "UDP Device"};
 	public final static String[] HTTP_DEVICE = { "httpDevice", "HTTP Device"};
 	public final static String[] DOMOTICZ_DEVICE = { "domoticzDevice", "Domoticz Device"};
+	public final static String[] LIFX_DEVICE = { "lifxDevice", "LIFX Device"};
 
 	public final static int typeIndex = 0;
 	public final static int displayIndex = 1;
@@ -46,6 +47,7 @@ public class DeviceMapTypes {
 		deviceMapTypes.add(HASS_DEVICE);
 		deviceMapTypes.add(HTTP_DEVICE);
 		deviceMapTypes.add(HUE_DEVICE);
+		deviceMapTypes.add(LIFX_DEVICE);
 		deviceMapTypes.add(MQTT_MESSAGE);
 		deviceMapTypes.add(NEST_HOMEAWAY);
 		deviceMapTypes.add(NEST_THERMO_SET);

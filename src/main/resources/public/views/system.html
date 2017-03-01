@@ -19,6 +19,7 @@
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
 	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
+	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
@@ -374,6 +375,12 @@
 					<td><input type="checkbox"
 						ng-model="bridge.settings.farenheit" ng-true-value=true
 						ng-false-value=false> {{bridge.settings.farenheit}}</td>
+				</tr>
+				<tr>
+					<td>LIFX Support</td>
+					<td><input type="checkbox"
+						ng-model="bridge.settings.lifxconfigured" ng-true-value=true
+						ng-false-value=false> {{bridge.settings.lifxconfigured}}</td>
 				</tr>
 				<tr>
 					<td>Emulate Hue Hub Version</td>
