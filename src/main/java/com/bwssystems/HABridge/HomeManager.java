@@ -13,6 +13,7 @@ import com.bwssystems.HABridge.plugins.harmony.HarmonyHome;
 import com.bwssystems.HABridge.plugins.hass.HassHome;
 import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.bwssystems.HABridge.plugins.hue.HueHome;
+import com.bwssystems.HABridge.plugins.lifx.LifxHome;
 import com.bwssystems.HABridge.plugins.mqtt.MQTTHome;
 import com.bwssystems.HABridge.plugins.tcp.TCPHome;
 import com.bwssystems.HABridge.plugins.udp.UDPHome;
@@ -71,7 +72,6 @@ public class HomeManager {
 		homeList.put(DeviceMapTypes.CUSTOM_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.VERA_SCENE[DeviceMapTypes.typeIndex], aHome);
-		homeList.put(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		//setup the tcp handler Home
 		aHome = new TCPHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.TCP_DEVICE[DeviceMapTypes.typeIndex], aHome);
@@ -80,13 +80,18 @@ public class HomeManager {
 		aHome = new UDPHome(bridgeSettings, aUdpDatagramSender);
 		homeList.put(DeviceMapTypes.UDP_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.UDP_DEVICE_COMPAT[DeviceMapTypes.typeIndex], aHome);
-		
+		// Setup Vera Home if available
 		aHome = new VeraHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		resourceList.put(DeviceMapTypes.VERA_SCENE[DeviceMapTypes.typeIndex], aHome);
-        //setup the HomeAssistant configuration if available
+        //setup the Domoticz configuration if available
 		aHome = new DomoticzHome(bridgeSettings);
+		homeList.put(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		resourceList.put(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex], aHome);
+        //setup the Lifx configuration if available
+		aHome = new LifxHome(bridgeSettings);
+		resourceList.put(DeviceMapTypes.LIFX_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.LIFX_DEVICE[DeviceMapTypes.typeIndex], aHome);
 	}
 	
 	public Home findHome(String type) {
