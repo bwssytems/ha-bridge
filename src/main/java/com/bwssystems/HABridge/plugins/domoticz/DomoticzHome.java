@@ -161,7 +161,8 @@ public class DomoticzHome implements Home {
 	}
 	@Override
 	public void closeHome() {
-		httpClient.closeHandler();
+		if(httpClient != null)
+			httpClient.closeHandler();
 		
 	}
 }
