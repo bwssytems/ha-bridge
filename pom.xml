@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>4.2.0c</version>
+	<version>4.2.0d</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
@@ -125,6 +125,11 @@
 		  <groupId>com.github.bwssytems</groupId>
 		  <artifactId>lifx-sdk-java</artifactId>
 		  <version>2.1.6</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.commons</groupId>
+		  <artifactId>commons-lang3</artifactId>
+		  <version>3.5</version>
 		</dependency>
 	</dependencies>
 

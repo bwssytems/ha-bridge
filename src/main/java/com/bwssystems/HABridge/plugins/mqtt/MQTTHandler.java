@@ -1,5 +1,6 @@
 package com.bwssystems.HABridge.plugins.mqtt;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -47,7 +48,7 @@ public class MQTTHandler {
 	}
 
 	public void publishMessage(String topic, String content) {
-        MqttMessage message = new MqttMessage(content.getBytes());
+        MqttMessage message = new MqttMessage(StringEscapeUtils.unescapeJava(content).getBytes());
         message.setQos(qos);
         try {
 			myClient.publish(topic, message);
