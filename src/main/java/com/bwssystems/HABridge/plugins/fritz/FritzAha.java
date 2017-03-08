@@ -117,7 +117,7 @@ public class FritzAha {
 				return sid;
 			}
 		}
-		//	"User " + this.config.getUser() + " has no access to FritzBox home automation functions");
+		log.error("User " + userName + " has no access to FritzBox home automation functions");
 		return null;
 	}
 
