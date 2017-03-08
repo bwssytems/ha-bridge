@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +60,7 @@ public class UDPHome implements Home {
 				sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
 			} else {
 				theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, false);
+				theUrlBody = StringEscapeUtils.unescapeJava(theUrlBody);
 				sendData = theUrlBody.getBytes();
 			}
 			try {

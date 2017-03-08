@@ -5,16 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.ssl.SSLContexts;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -34,21 +24,11 @@ import com.bwssystems.HABridge.api.NameValue;
 
 public class HTTPHandler {
 	private static final Logger log = LoggerFactory.getLogger(HTTPHandler.class);
-//	private HttpClient httpClient;
 	private CloseableHttpClient httpClient;
-//	private SSLContext sslcontext;
-//	private SSLConnectionSocketFactory sslsf;
 	private RequestConfig globalConfig;
 	
 	
 	public HTTPHandler() {
-//		httpClient = HttpClients.createDefault();
-		// Removed Specific SSL as Apache HttpClient automatically uses SSL if the URI starts with https://
-		// Trust own CA and all self-signed certs
-//		sslcontext = SSLContexts.createDefault();
-		// Allow TLSv1 protocol only
-//		sslsf = new SSLConnectionSocketFactory(sslcontext, new String[] { "TLS" }, null,
-//				SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 		globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build();
 		httpClient = HttpClients.custom().setDefaultRequestConfig(globalConfig).build();
 	}
@@ -101,40 +81,55 @@ public class HTTPHandler {
 				request.setHeader(headers[i].getName(), headers[i].getValue());
 			}
 		}
+		HttpResponse response;
 		try {
-			HttpResponse response;
-			// Removed Specific SSL as Apache HttpClient automatically uses SSL if the URI starts with https://
-//			if (url.startsWith("xyzhttps"))
-//				response = httpclientSSL.execute(request);
-//			else
+			for(int retryCount = 0; retryCount < 2; retryCount++) {
 				response = httpClient.execute(request);
-			log.debug((httpVerb == null ? "GET" : httpVerb) + " execute on URL responded: "
-					+ response.getStatusLine().getStatusCode());
-			if (response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
-				if (response.getEntity() != null) {
-					try {
-						theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); // read
-																											// content
-																											// for
-																											// data
-						EntityUtils.consume(response.getEntity()); // close out
-																	// inputstream
-																	// ignore
-																	// content
-					} catch (Exception e) {
-						log.debug("Error ocurred in handling response entity after successful call, still responding success. "
-										+ e.getMessage(), e);
+				log.debug((httpVerb == null ? "GET" : httpVerb) + " execute (" + retryCount + ") on URL responded: "
+						+ response.getStatusLine().getStatusCode());
+				if (response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
+					if (response.getEntity() != null) {
+						try {
+							theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); // read
+																												// content
+																												// for
+																												// data
+							EntityUtils.consume(response.getEntity()); // close out
+																		// inputstream
+																		// ignore
+																		// content
+						} catch (Exception e) {
+							log.debug("Error ocurred in handling response entity after successful call, still responding success. "
+											+ e.getMessage(), e);
+						}
+						log.debug("Successfull response - The http response is <<<" + theContent + ">>>");
 					}
-				}
-			} else {
-				log.warn("HTTP response code was not an expected successful response of between 200 - 299, the code was: " + response.getStatusLine());
-				try {
-					EntityUtils.consume(response.getEntity()); // close out
-					// inputstream
-					// ignore
-					// content
-				} catch (Exception e) {
-					//noop
+					retryCount = 2;
+				} else {
+					log.warn("HTTP response code was not an expected successful response of between 200 - 299, the code was: " + response.getStatusLine());
+					try {
+						String someContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); // read
+						// content
+						// for
+						// data
+						EntityUtils.consume(response.getEntity()); // close out
+						// inputstream
+						// ignore
+						// content
+						log.debug("Unsuccessfull response - The http response is <<<" + someContent + ">>>");
+					} catch (Exception e) {
+						//noop
+					}
+					if (response.getStatusLine().getStatusCode() == 504) {
+						log.warn("HTTP response code was 504, retrying...");
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e1) {
+							// noop
+						}
+					}
+					else
+						retryCount = 2;
 				}
 			}
 		} catch (IOException e) {

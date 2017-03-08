@@ -1,12 +1,17 @@
 package com.bwssystems.HABridge.plugins.tcp;
 
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +26,7 @@ import com.bwssystems.HABridge.hue.TimeDecode;
 public class TCPHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(TCPHome.class);
 	private byte[] sendData;
+	private Map<String, Socket> theSockets;
     
 
 	public TCPHome(BridgeSettingsDescriptor bridgeSettings) {
@@ -31,6 +37,7 @@ public class TCPHome implements Home {
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
 			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
+		Socket dataSendSocket = null;
 		log.debug("executing HUE api request to TCP: " + anItem.getItem().getAsString());
 		String theUrl = anItem.getItem().getAsString();
 		if(theUrl != null && !theUrl.isEmpty () && theUrl.startsWith("tcp://")) {
@@ -40,15 +47,25 @@ public class TCPHome implements Home {
 			String hostAddr = null;
 			String port = null;
 			InetAddress IPAddress = null;
-			if (hostPortion.contains(":")) {
-				hostAddr = hostPortion.substring(0, intermediate.indexOf(':'));
-				port = hostPortion.substring(intermediate.indexOf(':') + 1);
-			} else
-				hostAddr = hostPortion;
-			try {
-				IPAddress = InetAddress.getByName(hostAddr);
-			} catch (UnknownHostException e) {
-				// noop
+			dataSendSocket = theSockets.get(hostPortion);
+			if(dataSendSocket == null) {
+				if (hostPortion.contains(":")) {
+					hostAddr = hostPortion.substring(0, intermediate.indexOf(':'));
+					port = hostPortion.substring(intermediate.indexOf(':') + 1);
+				} else
+					hostAddr = hostPortion;
+				try {
+					IPAddress = InetAddress.getByName(hostAddr);
+				} catch (UnknownHostException e) {
+					// noop
+				}
+		
+				try {
+					dataSendSocket = new Socket(IPAddress, Integer.parseInt(port));
+					theSockets.put(hostPortion, dataSendSocket);
+				} catch (Exception e) {
+					// noop
+				}
 			}
 	
 			theUrlBody = TimeDecode.replaceTimeValue(theUrlBody);
@@ -57,17 +74,21 @@ public class TCPHome implements Home {
 				sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
 			} else {
 				theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, false);
+				theUrlBody = StringEscapeUtils.unescapeJava(theUrlBody);
 				sendData = theUrlBody.getBytes();
 			}
-	
 			try {
-				Socket dataSendSocket = new Socket(IPAddress, Integer.parseInt(port));
 				DataOutputStream outToClient = new DataOutputStream(dataSendSocket.getOutputStream());
 				outToClient.write(sendData);
 				outToClient.flush();
-				dataSendSocket.close();
 			} catch (Exception e) {
-				// noop
+				log.warn("Could not send data to TCP socket <<<" + e.getMessage() + ">>>, closing socket: " + theUrl);
+				try {
+					dataSendSocket.close();
+				} catch (IOException e1) {
+					// noop
+				}
+				theSockets.remove(hostPortion);
 			}
 		} else
 			log.warn("Tcp Call to be presented as tcp://<ip_address>:<port>/payload, format of request unknown: " + theUrl);
@@ -77,6 +98,7 @@ public class TCPHome implements Home {
 	@Override
 	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
 		log.info("TCP Home created.");
+		theSockets = new HashMap<String, Socket>();
 		return this;
 	}
 
@@ -88,8 +110,18 @@ public class TCPHome implements Home {
 
 	@Override
 	public void closeHome() {
-		// noop
-		
+		log.debug("Shutting down TCP sockets.");
+		if(theSockets != null && !theSockets.isEmpty()) {
+			Iterator<String> keys = theSockets.keySet().iterator();
+			while(keys.hasNext()) {
+				String key = keys.next();
+				try {
+					theSockets.get(key).close();
+				} catch (IOException e) {
+					// noop
+				}
+			}
+		}
 	}
 
 }

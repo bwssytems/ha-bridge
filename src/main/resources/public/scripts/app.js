@@ -2447,8 +2447,11 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 			bridgeService.displayWarn("Error adding device. Name has not been changed from original.", null);
 			return;
 		}
-		if (copy)
+		if (copy) {
 			$scope.device.id = null;
+			$scope.device.uniqueid = null;
+			$scope.device.mapId = $scope.device.mapId + "-copy";
+		}
 		if($scope.mapTypeSelected !== undefined && $scope.mapTypeSelected !== null)
 			$scope.device.mapType = $scope.mapTypeSelected[0];
 		else

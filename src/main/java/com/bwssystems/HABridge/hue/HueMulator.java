@@ -668,7 +668,8 @@ public class HueMulator {
 		log.debug("hue lights list requested: " + userId + " from " + requestIp);
 		theErrors = validateWhitelistUser(userId, false);
 		if (theErrors == null) {
-			List<DeviceDescriptor> deviceList = repository.findActive();
+	        List<DeviceDescriptor> deviceList = repository.findAllByRequester(requestIp);
+//			List<DeviceDescriptor> deviceList = repository.findActive();
 			deviceResponseMap = new HashMap<String, DeviceResponse>();
 			for (DeviceDescriptor device : deviceList) {
 				DeviceResponse deviceResponse = null;
@@ -944,8 +945,8 @@ public class HueMulator {
 			}
 			
 			for (int i = 0; callItems != null && i < callItems.length; i++) {
-				if(!filterByRequester(callItems[i].getFilterIPs(), ipAddress)) {
-					log.debug("filter for requester address not present in list: " + callItems[i].getFilterIPs() + " with request ip of: " + ipAddress);
+				if(!filterByRequester(device.getRequesterAddress(), ipAddress) || !filterByRequester(callItems[i].getFilterIPs(), ipAddress)) {
+					log.warn("filter for requester address not present in: (device)" + device.getRequesterAddress() + " OR then (item)" + callItems[i].getFilterIPs() + " with request ip of: " + ipAddress);
 					continue;
 				}
 				if (callItems[i].getCount() != null && callItems[i].getCount() > 0)

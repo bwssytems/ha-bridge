@@ -62,6 +62,9 @@ public class DeviceDescriptor{
     @SerializedName("noState")
     @Expose
     private boolean noState;
+    @SerializedName("requesterAddress")
+    @Expose
+    private String requesterAddress;
 
     private DeviceState deviceState;
     
@@ -217,6 +220,14 @@ public class DeviceDescriptor{
 
 	public void setNoState(boolean noState) {
 		this.noState = noState;
+	}
+
+	public String getRequesterAddress() {
+		return requesterAddress;
+	}
+
+	public void setRequesterAddress(String requesterAddress) {
+		this.requesterAddress = requesterAddress;
 	}
 
 	public boolean containsType(String aType) {
