@@ -1,13 +1,10 @@
 package com.bwssystems.HABridge;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.bwssystems.HABridge.devicemanagmeent.ResourceHandler;
 import com.bwssystems.HABridge.plugins.NestBridge.NestHome;
 import com.bwssystems.HABridge.plugins.domoticz.DomoticzHome;
 import com.bwssystems.HABridge.plugins.exec.CommandHome;
+import com.bwssystems.HABridge.plugins.fritz.FritzHome;
 import com.bwssystems.HABridge.plugins.hal.HalHome;
 import com.bwssystems.HABridge.plugins.harmony.HarmonyHome;
 import com.bwssystems.HABridge.plugins.hass.HassHome;
@@ -19,6 +16,10 @@ import com.bwssystems.HABridge.plugins.tcp.TCPHome;
 import com.bwssystems.HABridge.plugins.udp.UDPHome;
 import com.bwssystems.HABridge.plugins.vera.VeraHome;
 import com.bwssystems.HABridge.util.UDPDatagramSender;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HomeManager {
 	Map<String, Home> homeList;
@@ -66,6 +67,9 @@ public class HomeManager {
 		aHome = new CommandHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.EXEC_DEVICE_COMPAT[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.CMD_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		//setup the fritzBox Home
+		aHome = new FritzHome(bridgeSettings);
+		homeList.put(DeviceMapTypes.FRITZ_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		//setup the http handler Home
 		aHome = new HTTPHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.HTTP_DEVICE[DeviceMapTypes.typeIndex], aHome);
