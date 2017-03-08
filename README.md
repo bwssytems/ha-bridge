@@ -1,6 +1,32 @@
 # ha-bridge
 Emulates Philips Hue api to other home automation gateways such as an Amazon Echo or Google Home.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
 
+Here are some diagrams to put this software in perspective.
+
+The Echo Path looks like this:
+```
+                     +------------------------+    +------------------------+
++-------------+      | H A +------------------|    | A +------------------+ |
+| Amazon Echo |----->| U P | ha-bridge core   |--->| P | Device to control| |
++-------------+      | E I +------------------|    | I +------------------+ |
+                     +------------------------+    +------------------------+
+```
+The Google Home Path looks like this:
+```
+                     +------------------------+    +------------------------+
++-------------+      | H A +------------------|    | A +------------------+ |
+| Google Home |----->| U P | ha-bridge core   |--->| P | Device to control| |
++-------------+      | E I +------------------|    | I +------------------+ |
+                     +------------------------+    +------------------------+
+```
+THe Harmony Hub Path looks like this:
+```
+                     +------------------------+    +------------------------+
++-------------+      | H A +------------------|    | A +------------------+ |
+| Harmony Hub |----->| U P | ha-bridge core   |--->| P | Device to control| |
++-------------+      | E I +------------------|    | I +------------------+ |
+                     +------------------------+    +------------------------+
+```
 **SECURITY RISK: If you are unsure on how this software operates and what it exposes to your network, please make sure you understand that it can allow root access to your system. It is best practice to not open this to the Internet through your router as there are no security protocols in place to protect the system. The License agreement states specifically that you use this at your own risk.**
 
 **ATTENTION: This requires a physical Amazon Echo, Dot or Tap and does not work with prototype devices built using the Alexa Voice Service e.g. Amazon's Alexa AVS Sample App and Sam Machin's AlexaPi. The AVS version does not have any capability for Hue Bridge discovery!**
