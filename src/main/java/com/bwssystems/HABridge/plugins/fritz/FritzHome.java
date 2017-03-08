@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FritzHome implements Home {
 
-	private static String path = "/webservices/homeautoswitch.lua?";
+	private static final String path = "/webservices/homeautoswitch.lua?";
 
 	private static final Logger log = LoggerFactory.getLogger(FritzHome.class);
 	private HTTPHandler myHttpHandler;
