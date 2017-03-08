@@ -8,6 +8,9 @@
  */
 package com.bwssystems.HABridge.plugins.fritz;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -30,13 +33,8 @@ public class FritzAha {
 	private String url;
 	private HttpService httpService;
 
-	private void log(String msg) {
-	    log(msg, null);
-    }
-	private void log(String msg, Throwable twb) {
-        System.out.println("msg = " + msg);
-        if (twb != null) twb.printStackTrace();
-    }
+	private static final Logger log = LoggerFactory.getLogger(FritzHome.class);
+
 	// Uses RegEx to handle bad FritzBox XML
 	/**
 	 * RegEx Pattern to grab the session ID from a login XML response
@@ -70,29 +68,29 @@ public class FritzAha {
 		try {
 			loginXml = httpService.sendGet(getURL("login_sid.lua", addSID("")));
 		} catch (Exception e) {
-			log("Failed to get loginXML {}",e);
+			log.error("Failed to get loginXML {}",e);
 		}
 		if (loginXml == null) {
 
-			log("FRITZ!Box does not respond");
+			log.error("FRITZ!Box does not respond");
 			return null;
 		}
 		Matcher sidmatch = SID_PATTERN.matcher(loginXml);
 		if (!sidmatch.find()) {
-            log("FRITZ!Box does not respond with SID");
+            log.error("FRITZ!Box does not respond with SID");
 			return null;
 		}
 		sid = sidmatch.group(1);
 		Matcher accmatch = ACCESS_PATTERN.matcher(loginXml);
 		if (accmatch.find()) {
 			if ("2".equals(accmatch.group(1))) {
-                log("Resuming FRITZ!Box connection with SID " + sid);
+                log.debug("Resuming FRITZ!Box connection with SID " + sid);
 				return sid;
 			}
 		}
 		Matcher challengematch = CHALLENGE_PATTERN.matcher(loginXml);
 		if (!challengematch.find()) {
-            log("FRITZ!Box does not respond with challenge for authentication");
+            log.error("FRITZ!Box does not respond with challenge for authentication");
 			return null;
 		}
 		String challenge = challengematch.group(1);
@@ -100,22 +98,22 @@ public class FritzAha {
 		try {
 			loginXml = httpService.sendGet(getURL("login_sid.lua","username=" + userName + "&response=" + response));
 		} catch (Exception e) {
-			log("Failed to get loginXML {}",e);
+			log.error("Failed to get loginXML {}",e);
 		}
 		if (loginXml == null) {
-            log("FRITZ!Box does not respond");
+            log.error("FRITZ!Box does not respond");
 			return null;
 		}
 		sidmatch = SID_PATTERN.matcher(loginXml);
 		if (!sidmatch.find()) {
-            log("Resuming FRITZ!Box connection with SID");
+            log.error("Resuming FRITZ!Box connection with SID");
 			return null;
 		}
 		sid = sidmatch.group(1);
 		accmatch = ACCESS_PATTERN.matcher(loginXml);
 		if (accmatch.find()) {
 			if ("2".equals(accmatch.group(1))) {
-                log("Established FRITZ!Box connection with SID " + sid);
+                log.debug("Established FRITZ!Box connection with SID " + sid);
 				return sid;
 			}
 		}
@@ -148,14 +146,14 @@ public class FritzAha {
 		try {
 			md5 = MessageDigest.getInstance("MD5");
 		} catch (NoSuchAlgorithmException e) {
-			log("This version of Java does not support MD5 hashing");
+			log.error("This version of Java does not support MD5 hashing");
 			return "";
 		}
 		byte[] handshakeHash;
 		try {
 			handshakeHash = md5.digest(handshake.getBytes("UTF-16LE"));
 		} catch (UnsupportedEncodingException e) {
-			log("This version of Java does not understand UTF-16LE encoding");
+			log.error("This version of Java does not understand UTF-16LE encoding");
 			return "";
 		}
 		String response = challenge.concat("-");
