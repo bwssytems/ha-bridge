@@ -33,7 +33,7 @@
 			fields the bridge uses. Please use care when updating these fields as
 			you may break the settings used by the bridge to call a specific end
 			point device.</p>
-		<p class="text-muted">This area allows you to create any http or
+		<p class="text-muted">This area allows you to create any http, tcp or
 			udp call to an endpoint. You can use the default GET or select the
 			http verb type below and configure a payload for either on, dim or
 			off methods. For Execution of a
@@ -41,7 +41,7 @@
 			can use Json notation of array with [{&quot;item&quot;:&quot;the
 			payload&quot;},{&quot;item&quot;:&quot;another payload&quot;}] to
 			execute multiple entries. Adding the value replacements
-			(${intensity..byte},${intensity.percent},${intensity.math(X*1)}) will
+			(${intensity.byte},${intensity.percent},${intensity.decimal_percent},${intensity.math(X*1)}) will
 			also work. Also, you can go back to any helper tab and click a build 
 			action button to add another item for a multi-command.</p>
 		<p class="text-muted">When copying, update the name and select the "Add Bridge
@@ -65,16 +65,21 @@
 						ng-model="device.name" placeholder="Device Name"></td>
 				</tr>
 				<tr>
-					<td>Inactive</td>
+					<td><label>Inactive</label></td>
 					<td><input type="checkbox"
 						ng-model="device.inactive" ng-true-value=true
 						ng-false-value=false> {{device.inactive}}</td>
 				</tr>
 				<tr>
-					<td>No State (Do not update state for device)</td>
+					<td><label>No State (Do not update state for device)</label></td>
 					<td><input type="checkbox"
 						ng-model="device.noState" ng-true-value=true
 						ng-false-value=false> {{device.noState}}</td>
+				</tr>
+				<tr>
+					<td><label>Filter Address (comma separated list)</label></td>
+					<td><input type="text" class="form-control" id="device-requester-addr"
+						ng-model="device.requesterAddress" placeholder="Only use if you want to restrict this device to a specific caller(s)"></td>
 				</tr>
 				<tr>
 					<td><label>Target</label></td>

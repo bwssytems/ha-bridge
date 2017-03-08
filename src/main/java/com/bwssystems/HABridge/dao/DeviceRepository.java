@@ -83,6 +83,33 @@ public class DeviceRepository extends BackupHandler {
 		return list;
 	}
 
+	public List<DeviceDescriptor> findAllByRequester(String anAddress) {
+		List<DeviceDescriptor> list = new ArrayList<DeviceDescriptor>(devices.values());
+		List<DeviceDescriptor> theReturnList = new ArrayList<DeviceDescriptor>();
+		Iterator<DeviceDescriptor> anIterator = list.iterator();
+		DeviceDescriptor theDevice;
+		String theRequesterAddress;
+
+		HashMap<String,String > addressMap;
+		while (anIterator.hasNext()) {
+			theDevice = anIterator.next();
+			theRequesterAddress = theDevice.getRequesterAddress();
+			addressMap = new HashMap<String, String>();
+			if(theRequesterAddress != null) {
+				if (theRequesterAddress.contains(",")) {
+					String[] theArray = theRequesterAddress.split(",");
+					for (String v : theArray) {
+						addressMap.put(v.trim(), v.trim());
+					}
+				} else
+					addressMap.put(theRequesterAddress, theRequesterAddress);
+			}
+			if (theRequesterAddress == null || theRequesterAddress.length() == 0 || addressMap.containsKey(anAddress))
+				theReturnList.add(theDevice);
+		}
+		return theReturnList;
+	}
+
 	public DeviceDescriptor findOne(String id) {
     	return devices.get(id);	
     }

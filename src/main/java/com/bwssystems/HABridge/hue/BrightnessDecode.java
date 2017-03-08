@@ -12,6 +12,7 @@ import net.java.dev.eval.Expression;
 public class BrightnessDecode {
 	private static final Logger log = LoggerFactory.getLogger(BrightnessDecode.class);
 	private static final String INTENSITY_PERCENT = "${intensity.percent}";
+	private static final String INTENSITY_DECIMAL_PERCENT = "${intensity.decimal_percent}";
 	private static final String INTENSITY_BYTE = "${intensity.byte}";
 	private static final String INTENSITY_MATH = "${intensity.math(";
 	private static final String INTENSITY_MATH_VALUE = "X";
@@ -61,6 +62,11 @@ public class BrightnessDecode {
 				String intensityPercent = String.valueOf(percentBrightness);
 				request = request.replace(INTENSITY_PERCENT, intensityPercent);
 			}
+		} else if (request.contains(INTENSITY_DECIMAL_PERCENT)) {
+			float decimalBrightness = (float) (intensity / 255.0);
+
+			String intensityPercent = String.format("%1.2f", decimalBrightness);
+			request = request.replace(INTENSITY_DECIMAL_PERCENT, intensityPercent);
 		} else if (request.contains(INTENSITY_MATH)) {
 			Map<String, BigDecimal> variables = new HashMap<String, BigDecimal>();
 			String mathDescriptor = request.substring(request.indexOf(INTENSITY_MATH) + INTENSITY_MATH.length(),

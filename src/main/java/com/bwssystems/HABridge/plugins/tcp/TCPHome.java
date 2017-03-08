@@ -82,7 +82,13 @@ public class TCPHome implements Home {
 				outToClient.write(sendData);
 				outToClient.flush();
 			} catch (Exception e) {
-				// noop
+				log.warn("Could not send data to TCP socket <<<" + e.getMessage() + ">>>, closing socket: " + theUrl);
+				try {
+					dataSendSocket.close();
+				} catch (IOException e1) {
+					// noop
+				}
+				theSockets.remove(hostPortion);
 			}
 		} else
 			log.warn("Tcp Call to be presented as tcp://<ip_address>:<port>/payload, format of request unknown: " + theUrl);
@@ -104,13 +110,16 @@ public class TCPHome implements Home {
 
 	@Override
 	public void closeHome() {
-		Iterator<?> anIterator = theSockets.entrySet().iterator();
-		while(anIterator.hasNext()) {
-			Socket aSocket = (Socket) anIterator.next();
-			try {
-				aSocket.close();
-			} catch (IOException e) {
-				// noop
+		log.debug("Shutting down TCP sockets.");
+		if(theSockets != null && !theSockets.isEmpty()) {
+			Iterator<String> keys = theSockets.keySet().iterator();
+			while(keys.hasNext()) {
+				String key = keys.next();
+				try {
+					theSockets.get(key).close();
+				} catch (IOException e) {
+					// noop
+				}
 			}
 		}
 	}
