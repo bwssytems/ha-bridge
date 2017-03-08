@@ -11,6 +11,7 @@ import com.bwssystems.HABridge.devicemanagmeent.ResourceHandler;
 import com.bwssystems.HABridge.plugins.NestBridge.NestHome;
 import com.bwssystems.HABridge.plugins.domoticz.DomoticzHome;
 import com.bwssystems.HABridge.plugins.exec.CommandHome;
+import com.bwssystems.HABridge.plugins.fritz.FritzHome;
 import com.bwssystems.HABridge.plugins.hal.HalHome;
 import com.bwssystems.HABridge.plugins.harmony.HarmonyHome;
 import com.bwssystems.HABridge.plugins.hass.HassHome;
@@ -72,11 +73,14 @@ public class HomeManager {
 		// Setup the HomeWizard configuration if available
 		aHome = new HomeWizardHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.HOMEWIZARD_DEVICE[DeviceMapTypes.typeIndex], aHome);
-		homeList.put(DeviceMapTypes.HOMEWIZARD_DEVICE[DeviceMapTypes.typeIndex], aHome);		
+		homeList.put(DeviceMapTypes.HOMEWIZARD_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		//setup the command execution Home
 		aHome = new CommandHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.EXEC_DEVICE_COMPAT[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.CMD_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		//setup the fritzBox Home
+		aHome = new FritzHome(bridgeSettings);
+		homeList.put(DeviceMapTypes.FRITZ_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		//setup the http handler Home
 		aHome = new HTTPHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.HTTP_DEVICE[DeviceMapTypes.typeIndex], aHome);

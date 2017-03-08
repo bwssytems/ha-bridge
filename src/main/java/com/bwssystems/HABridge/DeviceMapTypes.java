@@ -21,6 +21,7 @@ public class DeviceMapTypes {
 	public final static String[] MQTT_MESSAGE = { "mqttMessage", "MQTT Message"};
 	public final static String[] EXEC_DEVICE_COMPAT = { "exec", "Execute Script/Program"};
 	public final static String[] CMD_DEVICE = { "cmdDevice", "Execute Command/Script/Program"};
+	public final static String[] FRITZ_DEVICE = { "fritzDevice", "FritzBox"};
 	public final static String[] HASS_DEVICE = { "hassDevice", "HomeAssistant Device"};
 	public final static String[] HOMEWIZARD_DEVICE = { "homewizardDevice", "HomeWizard Device"};
 	public final static String[] TCP_DEVICE = { "tcpDevice", "TCP Device"};
@@ -41,6 +42,7 @@ public class DeviceMapTypes {
 		super();
 		deviceMapTypes = new ArrayList<String[]>();
 		deviceMapTypes.add(CMD_DEVICE);
+		deviceMapTypes.add(FRITZ_DEVICE);
 		deviceMapTypes.add(DOMOTICZ_DEVICE);
 		deviceMapTypes.add(HAL_DEVICE);
 		deviceMapTypes.add(HAL_HOME);
