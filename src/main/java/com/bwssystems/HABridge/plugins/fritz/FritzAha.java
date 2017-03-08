@@ -39,18 +39,18 @@ public class FritzAha {
 	/**
 	 * RegEx Pattern to grab the session ID from a login XML response
 	 */
-	protected static final Pattern SID_PATTERN = Pattern
+	private static final Pattern SID_PATTERN = Pattern
 			.compile("<SID>([a-fA-F0-9]*)</SID>");
 	/**
 	 * RegEx Pattern to grab the challenge from a login XML response
 	 */
-	protected static final Pattern CHALLENGE_PATTERN = Pattern
+	private static final Pattern CHALLENGE_PATTERN = Pattern
 			.compile("<Challenge>(\\w*)</Challenge>");
 	/**
 	 * RegEx Pattern to grab the access privilege for home automation functions
 	 * from a login XML response
 	 */
-	protected static final Pattern ACCESS_PATTERN = Pattern
+	private static final Pattern ACCESS_PATTERN = Pattern
 			.compile("<Name>HomeAuto</Name>\\s*?<Access>([0-9])</Access>");
 
 	interface HttpService {
@@ -62,7 +62,7 @@ public class FritzAha {
 	 *
 	 * @return New session ID
 	 */
-	public String authenticate() {
+	String authenticate() {
 		
 		String loginXml = null;
 		try {
@@ -140,7 +140,7 @@ public class FritzAha {
 	 *            Challenge string as returned by the Fritz!OS login script
 	 * @return Response to the challenge
 	 */
-	protected String createResponse(String challenge) {
+	private String createResponse(String challenge) {
 		String handshake = challenge.concat("-").concat(password);
 		MessageDigest md5;
 		try {
@@ -165,7 +165,7 @@ public class FritzAha {
 	/**
 	 * Constructor to set up interface
 	 */
-	public FritzAha(HttpService httpService, String user, String pass, String url) {
+	FritzAha(HttpService httpService, String user, String pass, String url) {
 		this.httpService = httpService;
 		this.url = url;
 		this.userName = user;
@@ -180,7 +180,7 @@ public class FritzAha {
 	 *            Path to include in URL
 	 * @return URL
 	 */
-	public String getURL(String path) {
+	private String getURL(String path) {
 		return this.url + "/" + path;
 	}
 
@@ -195,11 +195,11 @@ public class FritzAha {
 	 *            (arg1=value1&arg2=value2&...)
 	 * @return URL
 	 */
-	public String getURL(String path, String args) {
+	private String getURL(String path, String args) {
 		return getURL(path + "?" + args);
 	}
 
-	public String addSID(String args) {
+	private String addSID(String args) {
 		if (sid == null)
 			return args;
 		else
