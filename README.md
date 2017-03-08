@@ -424,6 +424,19 @@ e.g.
 ```
 
 Also, you may want to use the REST API's listed below to configure your devices.
+
+#### Fritzbox Usage
+
+You can directly control smarthome devices connected to your fritzbox router.
+```
+[{"item":"fritz://user:pass@fritz.box/ain/command/param","type":"fritzDevice"}]
+```
+
+fritz.box: domain or IP in local network   
+ain: actor id  
+command: one listed in [the avm docs](https://avm.de/fileadmin/user_upload/Global/Service/Schnittstellen/AHA-HTTP-Interface.pdf)    . Additionally, there is a "sethkrkomfort" and a "sethkrabsenk" (set the default temperatures)  
+param: optionally, some commands need a parameter      
+
 ## Ask Alexa
 After this Tell Alexa: "Alexa, discover my devices". If there is an issue you can go to the `Menu / Settings / Connected Home` for the echo on the mobile app or your browser and have Alexa forget all devices and then do the discovery again.
 
