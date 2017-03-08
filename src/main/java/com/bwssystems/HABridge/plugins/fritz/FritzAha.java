@@ -15,8 +15,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Inspired from  https://github.com/openhab/openhab2-addons/blob/master/addons/binding/org.openhab.binding.avmfritz/src/main/java/org/openhab/binding/avmfritz/internal/hardware/FritzahaContentExchange.java
- * @author bs
+ * partially taken from  https://github.com/openhab/openhab2-addons/blob/master/addons/binding/org.openhab.binding.avmfritz/src/main/java/org/openhab/binding/avmfritz/internal/hardware/FritzahaContentExchange.java
+ * see spec @  http://avm.de/fileadmin/user_upload/Global/Service/Schnittstellen/AVM_Technical_Note_-_Session_ID.pdf
+ *
+ * @author Bob Schulze al.ias@gmx.de
  *
  */
 public class FritzAha {

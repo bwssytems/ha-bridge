@@ -12,6 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Control Smart things through a AVM Fritzbox.
+ * Note: for a more holistic approach to your home automation, you may be better off with openhab.
+ *
+ * @author Bob Schulze al.ias@gmx.de
+ *
  * We expect this item String:
  *
  * fritz://<user>:<pass>@<fritzboxhost>/<ain>/<command>[/<param>]
@@ -22,6 +27,7 @@ import org.slf4j.LoggerFactory;
  * ain: the actor id
  * command: one of the supported commands (see below)
  * param: some commands need a parameter
+ *
  */
 public class FritzHome implements Home {
 
@@ -56,7 +62,7 @@ public class FritzHome implements Home {
 	}
 
 	private String doFritzRequest(String anItem, String lightId) {
-		log.info("Executing request: " + anItem);
+		log.debug("Executing request: " + anItem);
 		// disassemble the uri
 		int inx = anItem.indexOf(":");
 		String user = anItem.substring(0, inx);
@@ -80,11 +86,9 @@ public class FritzHome implements Home {
 		} else {
 			cmd = anItem;
 		}
+		log.debug("Fritz call en detail: " + user + ":" + pass + "@" + host + "/ " + ain + "/ " + cmd + "/ " + (param != null ? param : "NO PAR"));
 
-
-		log.info("Fritz call en detail: " + user + ":" + pass + "@" + host + "/ " + ain + "/ " + cmd + "/ " + (param != null ? param : "NO PAR"));
-
-		//
+		// perhaps keeping the session (the FritzAha Object) around may be better; but remember, each call could address another fritz box
 		try {
 			FritzAha fritz = new FritzAha(myHttpService, user, pass, "http://" + host );
 			String sid = fritz.authenticate();
@@ -99,6 +103,7 @@ public class FritzHome implements Home {
 				sendCommand(host, ain, cmd, param, sid);
 			}
 		} catch (Throwable twb) {
+			log.error("Error calling fritz: " + twb.getMessage());
 			twb.printStackTrace();
 		}
 

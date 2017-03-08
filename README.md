@@ -277,6 +277,8 @@ Provide IP Addresses of your Hue Bridges that you want to proxy through the brid
 Don't forget - You will need to push the link button when you got to the Hue Tab the first time after the process comes up.  (The user name is not persistent when the process comes up.)
 #### HAL Names and IP Addresses
 Provide IP Addresses of your HAL Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target HAL and device/scene you configure. 
+#### HAL Token
+The token you generate or give to a HAL and must be the same for all HAL's you have identified. This needs to be given if you are using the HAL features.
 #### MQTT Client IDs and IP Addresses	
 Provide Client ID and IP Addresses and ports of your MQTT Brokers that you want to utilize with the bridge. Also, you can provide the username and password if you have secured your MQTT broker which is optional. When these Client ID and IP's are given, the bridge will be able to publish MQTT messages by the call it receives and send it to the target MQTT Broker you configure. The MQTT Messages Tab will become available to help you build messages.
 #### Home Assistant Names and IP Addresses
@@ -301,6 +303,8 @@ This setting is in bridge-id, uuid, etc. in ha-bridge hue config replies. Leave 
 This setting is the time used in between button presses when there is multiple buttons in a button device. It also controls the time between multiple items in a custom device call. This is defaulted to 100ms and the number represents milliseconds (1000 milliseconds = 1 second).
 #### Log Messages to Buffer
 This controls how many log messages will be kept and displayed on the log tab. This does not affect what is written to the standard output for logging. The default is 512. Changing this will incur more memory usage of the process.
+#### UPNP Strict Handling
+Upnp has been set to be very specific as to respond as a Hue. There may be a need to make this response a little more open for other devices that may want to find the ha-bridge. The default is to be strict which is set as true.
 #### Trace UPNP Calls
 Turn on tracing for upnp discovery messages to the log. The default is false.
 #### My Echo URL
@@ -455,6 +459,20 @@ e.g.
 ```
 
 Also, you may want to use the REST APIs listed below to configure your devices.
+Also, you may want to use the REST API's listed below to configure your devices.
+
+#### Fritzbox Usage
+
+You can directly control smarthome devices connected to your fritzbox router.
+```
+[{"item":"fritz://user:pass@fritz.box/ain/command/param","type":"fritzDevice"}]
+```
+
+fritz.box: domain or IP in local network   
+ain: actor id  
+command: one listed in [the avm docs](https://avm.de/fileadmin/user_upload/Global/Service/Schnittstellen/AHA-HTTP-Interface.pdf)    . Additionally, there is a "sethkrkomfort" and a "sethkrabsenk" (set the default temperatures)  
+param: optionally, some commands need a parameter      
+
 ## Ask Alexa
 After this Tell Alexa: "Alexa, discover my devices". If there is an issue you can go to the `Menu / Settings / Connected Home` for the echo on the mobile app or your browser and have Alexa forget all devices and then do the discovery again.
 
