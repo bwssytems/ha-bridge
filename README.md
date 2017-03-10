@@ -289,11 +289,7 @@ The upnp response port that will be used. The default is 50000.
 #### Vera Names and IP Addresses
 Provide IP Addresses of your Veras that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Vera and device/scene you configure. 
 #### Harmony Names and IP Addresses
-Provide IP Addresses of your Harmony Hubs that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the activity or buttons by the call it receives and send it to the target Harmony Hub and activity/button you configure. 
-#### Harmony Username
-deprecated
-#### Harmony Password
-deprecated
+Provide IP Addresses of your Harmony Hubs that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the activity or buttons by the call it receives and send it to the target Harmony Hub and activity/button you configure. Also, an option of webhook can be called when the activity changes on the harmony hub that will send an HTTP GET call to the the address of your choosing. This can contain the replacement variables of ${activity.id} and/or ${activity.label}. Example : http://192.168.0.1/activity/${activity.id}/${activity.label} OR http://hook?a=${activity.label}
 #### Hue Names and IP Addresses
 Provide IP Addresses of your Hue Bridges that you want to proxy through the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will passthru the call it receives to the target Hue and device you configure.
 
@@ -425,13 +421,9 @@ To configure this type of manual add, you will need to select the Device type of
 
 In the URL areas, the format of the execution is just providing what command line you would like to run, or using the multiple call item construct described above.
 ```
-[{"item":"C:\\Users\\John\\Documents\\Applications\\putty.exe 192.168.1.1","type":"cmdDevice"},
-{"item":"notepad.exe","type":"cmdDevice"}]
+[{"item":"exec://C:\\Users\\John\\Documents\\Applications\\putty.exe 192.168.1.1","type":"cmdDevice"},{"item":"exec://notepad.exe","type":"cmdDevice"}]
 
-OR
-
-[{"item":"exec://notepad.exe","type":"cmdDevice"}]
-
+[{"item":"/home/pi/scripts/dothisscript.sh","type":"cmdDevice"}]
 ```
 #### Value Passing Controls
 There are multiple replacement constructs available to be put into any of the calls except Harmony items, Net Items and HAL items. These constructs are: "${time.format(Java time format string)}", "${intensity.percent}", "${intensity.decimal_percent}", "${intensity.byte}" and "${intensity.math(using X in your calc)}".
