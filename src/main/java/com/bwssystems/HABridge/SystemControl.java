@@ -62,6 +62,13 @@ public class SystemControl {
 	        return "{\"version\":\"" + version.getVersion() + "\"}";
 	    });
 
+	    // http://ip_address:port/system/habridge/testuser gets the valid test user for calling the api
+    	get (SYSTEM_CONTEXT + "/habridge/testuser", "application/json", (request, response) -> {
+	    	log.debug("Get HA Bridge testuser: " + bridgeSettings.getBridgeSettingsDescriptor().getInternalTestUser());
+			response.status(HttpStatus.SC_OK);
+	        return "{\"user\":\"" + bridgeSettings.getBridgeSettingsDescriptor().getInternalTestUser() + "\"}";
+	    });
+
 	    // http://ip_address:port/system/logmsgs gets the log messages for the bridge
     	get (SYSTEM_CONTEXT + "/logmsgs", "application/json", (request, response) -> {
 			log.debug("Get logmsgs.");

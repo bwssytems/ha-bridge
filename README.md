@@ -59,23 +59,23 @@ ATTENTION: This requires JDK 1.8 to run
 ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
 
 ```
-java -jar ha-bridge-4.2.1.jar
+java -jar ha-bridge-4.3.0.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
-Create the directory and make sure that ha-bridge-4.2.1.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-4.3.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
 
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.2.1/ha-bridge-4.2.1.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.3.0/ha-bridge-4.3.0.jar
 ```
-Create the directory and make sure that ha-bridge-4.2.1.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-4.3.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.2.1/ha-bridge-4.2.1.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.3.0/ha-bridge-4.3.0.jar
 ```
 #### System Control Setup on a pi (preferred)
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
@@ -95,7 +95,7 @@ After=network.target
 [Service]
 Type=simple
 
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.2.1.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.3.0.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -130,7 +130,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.2.1.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.3.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
@@ -145,54 +145,6 @@ pi@raspberrypi:~/habridge $ ./starthabridge.sh
 You should now be running the bridge. Check for errors:
 ```
 pi@raspberrypi:~/habridge $ tail -f habridge-log.txt
-```
-## Run ha-bridge alongside web server already on port 80
-These examples will help you proxy your current webserver requests to the ha-bridge running on a different port, such as 8080.
-### Apache Example
-Reverse proxy with Apache on Ubuntu linux:
-
-a2enmod proxy
-a2enmod proxy_http
-a2enmod headers
-
-Added the following lines to my Apache config file “000-default”
-
-```
-<VirtualHost *:80>
-	ProxyPass         /api  http://localhost:8080/api nocanon
-	ProxyPassReverse  /api  http://localhost:8080/api
-	ProxyRequests     Off
-	AllowEncodedSlashes NoDecode
-
-	# Local reverse proxy authorization override
-	# Most unix distribution deny proxy by default (ie /etc/apache2/mods-enabled/proxy.conf in Ubuntu)
-	<Proxy http://localhost:8080/api*>
-		  Order deny,allow
-		  Allow from all
-	</Proxy>
-
-….. (the rest of the VirtualHost config section) …..
-</VirtualHost>
-```
-
-service apache2 restart
-### lighthttpd Example
-```
-server.modules   += ( "mod_proxy" )
-proxy.server = ( 
-	"/api" =>
-        (
-                ( "host" => "127.0.0.1",
-                  "port" => "8080"
-                )
-        )
-)
-```
-### nginx Example
-```
-location /api/ {
-    proxy_pass http://127.0.0.1:8080/api;
-}
 ```
 ## Run ha-bridge alongside web server already on port 80
 These examples will help you proxy your current webserver requests to the ha-bridge running on a different port, such as 8080.

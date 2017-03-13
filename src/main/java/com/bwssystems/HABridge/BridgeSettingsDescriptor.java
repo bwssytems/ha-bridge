@@ -1,12 +1,21 @@
 package com.bwssystems.HABridge;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.UUID;
 
 import com.bwssystems.HABridge.api.hue.HueConstants;
+import com.bwssystems.HABridge.api.hue.HueError;
+import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.api.hue.WhitelistEntry;
 
 public class BridgeSettingsDescriptor {
+	private static final String DEFAULT_INTERNAL_USER = "thehabridgeuser";
+	private static final String DEFAULT_USER_DESCRIPTION = "default_test_user";
 	private String upnpconfigaddress;
 	private Integer serverport;
 	private Integer upnpresponseport;
@@ -337,5 +346,78 @@ public class BridgeSettingsDescriptor {
 	}
 	public Boolean isValidLifx() {
 		return this.isLifxconfigured();
+	}
+
+	public HueError[] validateWhitelistUser(String aUser, String userDescription, boolean strict) {
+		String validUser = null;
+		boolean found = false;
+		if (aUser != null && !aUser.equalsIgnoreCase("undefined") && !aUser.equalsIgnoreCase("null")
+				&& !aUser.equalsIgnoreCase("")) {
+			if (whitelist != null) {
+				Set<String> theUserIds = whitelist.keySet();
+				Iterator<String> userIterator = theUserIds.iterator();
+				while (userIterator.hasNext()) {
+					validUser = userIterator.next();
+					if (validUser.equals(aUser))
+						found = true;
+				}
+			}
+		}
+
+		if(!found && !strict) {
+			newWhitelistUser(aUser, userDescription);
+			
+			found = true;
+		}
+		
+		if (!found) {
+			return HueErrorResponse.createResponse("1", "/api/" + aUser, "unauthorized user", null, null, null).getTheErrors();
+		}
+		
+		return null;
+	}
+	
+	public void newWhitelistUser(String aUser, String userDescription) {
+		if (whitelist == null) {
+			whitelist  = new HashMap<>();
+		}
+		if(userDescription == null)
+			userDescription = "auto insert user";
+		
+		whitelist.put(aUser, WhitelistEntry.createEntry(userDescription));
+		setSettingsChanged(true);
+	}
+
+	public String createWhitelistUser(String userDescription) {
+		String aUser = getNewUserID();
+		newWhitelistUser(aUser, userDescription);
+		return aUser;
+	}
+
+	private String getNewUserID() {
+		UUID uid = UUID.randomUUID();
+		StringTokenizer st = new StringTokenizer(uid.toString(), "-");
+		String newUser = "";
+		while (st.hasMoreTokens()) {
+			newUser = newUser + st.nextToken();
+		}
+
+		return newUser;
+	}
+
+	public String getInternalTestUser() {
+		return DEFAULT_INTERNAL_USER;
+	}
+
+	public void setupInternalTestUser() {
+		boolean found = false;
+		for (String key : whitelist.keySet()) {
+			if(key.equals(DEFAULT_INTERNAL_USER))
+				found = true;
+		}
+		
+		if(!found) {
+			newWhitelistUser(DEFAULT_INTERNAL_USER, DEFAULT_USER_DESCRIPTION);
+		}
 	}
 }

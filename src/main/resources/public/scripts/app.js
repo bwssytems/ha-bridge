@@ -57,6 +57,7 @@ app.config (function ($locationProvider, $routeProvider) {
 app.run( function (bridgeService) {
 	bridgeService.loadBridgeSettings();
 	bridgeService.getHABridgeVersion();
+	bridgeService.getTestUser();
 	bridgeService.viewMapTypes();
 });
 
@@ -156,6 +157,17 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 				},
 				function (error) {
 					self.displayWarn("Cannot get version: ", error);
+				}
+		);
+	};
+
+	this.getTestUser = function () {
+		return $http.get(this.state.systemsbase + "/habridge/testuser").then(
+				function (response) {
+					self.state.testuser = response.data.user;
+				},
+				function (error) {
+					self.displayWarn("Cannot get testuser: ", error);
 				}
 		);
 	};
@@ -774,7 +786,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 
 	this.testUrl = function (device, type, value) {
 		var msgDescription = "unknown";
-		var testUrl = this.state.huebase + "/test/lights/" + device.id + "/state";
+		var testUrl = this.state.huebase + "/" + this.state.testuser + "/lights/" + device.id + "/state";
 		var testBody = "{\"on\":";
 		if (type === "off") {
 			testBody = testBody + "false";
