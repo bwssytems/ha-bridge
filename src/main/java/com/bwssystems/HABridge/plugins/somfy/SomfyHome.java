@@ -72,8 +72,8 @@ public class SomfyHome implements Home  {
 		} else {
 			if (anItem.getType() != null && anItem.getType().trim().equalsIgnoreCase(DeviceMapTypes.SOMFY_DEVICE[DeviceMapTypes.typeIndex])) {
 
-				log.debug("executing HUE api request to change activity to Somfy: " + anItem.getItem().getAsString());
-				String jsonToPost = anItem.getItem().getAsString();
+				log.debug("executing HUE api request to change activity to Somfy: " + anItem.getItem().toString());
+				String jsonToPost = anItem.getItem().toString();
 				
 				SomfyInfo somfyHandler = getSomfyHandler(device.getTargetDevice());
 				if(somfyHandler == null) {

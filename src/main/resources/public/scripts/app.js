@@ -2462,7 +2462,7 @@ app.controller('SomfyController', function ($scope, $location, $http, bridgeServ
 		$scope.device = bridgeService.state.device;
 	};
 
-	$scope.buildDeviceUrls = function (somfydevice) {
+	$scope.buildDeviceUrls = function (somfydevice, dim_control, buildonly) {
         //TODO - support partial window opening - add back 'dim_control' second param in here, and in somfydevice.html
         dimpayload = "";
         onpayload = "{\"label\":\"Label that is ignored probably\",\"actions\":[{\"deviceURL\":\""+ somfydevice.deviceUrl+"\",\"commands\":[{\"name\":\"open\",\"parameters\":[]}]}]}";
@@ -2470,18 +2470,20 @@ app.controller('SomfyController', function ($scope, $location, $http, bridgeServ
 
         bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, somfydevice.id,  somfydevice.name, somfydevice.somfyname, "switch",  "somfyDevice", null, null);
         $scope.device = bridgeService.state.device;
-        bridgeService.editNewDevice($scope.device);
-        $location.path('/editdevice');
-
+        if (!buildonly) {
+        			bridgeService.editNewDevice($scope.device);
+        			$location.path('/editdevice');
+        }
 	};
 
 
 	$scope.bulkAddDevices = function(dim_control) {
 		var devicesList = [];
+		$scope.clearDevice();
 		for(var i = 0; i < $scope.bulk.devices.length; i++) {
 			for(var x = 0; x < bridgeService.state.somfydevices.length; x++) {
 				if(bridgeService.state.somfydevices[x].id === $scope.bulk.devices[i]) {
-					$scope.buildDeviceUrls(bridgeService.state.somfydevices[x],dim_control);
+					$scope.buildDeviceUrls(bridgeService.state.somfydevices[x],dim_control, true);
 					devicesList[i] = {
 							name: $scope.device.name,
 							mapId: $scope.device.mapId,
@@ -2498,6 +2500,7 @@ app.controller('SomfyController', function ($scope, $location, $http, bridgeServ
 							contentBodyDim: $scope.device.contentBodyDim,
 							contentBodyOff: $scope.device.contentBodyOff
 					};
+					$scope.clearDevice();
 				}
 			}
 		}
