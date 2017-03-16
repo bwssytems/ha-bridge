@@ -1,5 +1,5 @@
 .scrollableContainer {
-    max-height: 436px; /* sets max-height value for all standards-compliant browsers */
+    height: 310px;
     position: relative;
     padding-top: 35px;
     overflow: hidden;
@@ -28,17 +28,17 @@
 }
 
 .scrollArea {
- 	_height: expression( this.scrollHeight > 599 ? "600px" : "auto" ); /* sets max-height for IE6 */
-    max-height: 400px; /* sets max-height value for all standards-compliant browsers */
+    height: 100%;
     overflow-x: auto;
     overflow-y: auto;
     border: 1px solid #d5d5d5;
     /*  the implementation of this is still quite buggy; specifically, it doesn't like the 
         absolutely positioned headers within 
     -webkit-overflow-scrolling: touch;  */
+    -webkit-overflow-scrolling: auto; 
 }
 .scrollArea table {
-    overflow-x: hidden;
+    overflow-x: auto;
     overflow-y: auto;
     margin-bottom: 0;
     width: 100%;
@@ -48,7 +48,7 @@
 .scrollArea table th {
     padding: 0 !important;
     border: none !important;
-    min-width: 60px;
+    min-width: 40px;
 }
 .scrollArea table .th-inner {
     overflow: hidden;

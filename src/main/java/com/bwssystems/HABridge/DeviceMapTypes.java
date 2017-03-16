@@ -52,6 +52,7 @@ public class DeviceMapTypes {
 		deviceMapTypes.add(MQTT_MESSAGE);
 		deviceMapTypes.add(NEST_HOMEAWAY);
 		deviceMapTypes.add(NEST_THERMO_SET);
+		deviceMapTypes.add(SOMFY_DEVICE);
 		deviceMapTypes.add(TCP_DEVICE);
 		deviceMapTypes.add(UDP_DEVICE);
 		deviceMapTypes.add(VERA_DEVICE);
