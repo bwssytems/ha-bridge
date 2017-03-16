@@ -99,7 +99,7 @@ public class SomfyHome implements Home  {
 	@Override
 	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
 		validSomfy = bridgeSettings.isValidSomfy();
-		log.info("Vera Home created." + (validSomfy ? "" : " No Veras configured."));
+		log.info("Somfy Home created." + (validSomfy ? "" : " No Somfys configured."));
 		if(validSomfy) {
 			somfys = new HashMap<>();
 			Iterator<NamedIP> theList = bridgeSettings.getSomfyAddress().getDevices().iterator();

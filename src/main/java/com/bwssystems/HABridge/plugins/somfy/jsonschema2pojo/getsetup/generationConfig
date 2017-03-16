@@ -15,3 +15,5 @@ Boxes checked:
     Use double numbers
     Include getters and setters
     Allow additional properties
+    
+Then manually removed all the unused methods so we have minimal json->pojo representation.
