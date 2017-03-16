@@ -167,6 +167,7 @@ public class BridgeSettings extends BackupHandler {
         theBridgeSettings.setHassconfigured(theBridgeSettings.isValidHass());
         theBridgeSettings.setDomoticzconfigured(theBridgeSettings.isValidDomoticz());
 		theBridgeSettings.setSomfyconfigured(theBridgeSettings.isValidSomfy());
+        // Lifx is either configured or not, so it does not need an update.
        if(serverPortOverride != null)
         	theBridgeSettings.setServerPort(serverPortOverride);
         if(serverIpOverride != null)

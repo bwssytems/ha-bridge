@@ -18,6 +18,7 @@
 	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
 	<li ng-if="bridge.showSomfy" role="presentation"><a href="#!/somfydevices">Somfy Devices</a></li>
+	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
@@ -36,17 +37,18 @@
 			 done in the edit tab, click the 'Add Bridge Device' to finish that selection
 			setup. The 'Already Configured Vera Devices' list below will show
 			what is already setup for your Vera.</p>
-		<p>
+		<p class="text-muted">
 			Also, use this select menu for which type of dim control you would
 			like to be generated: <select name="device-dim-control"
 				id="device-dim-control" ng-model="device_dim_control">
 				<option value="">none</option>
 				<option value="${intensity.byte}">Pass-thru Value</option>
 				<option value="${intensity.percent}">Percentage</option>
+				<option value="${intensity.decimal_percent}">Decimal Percentage</option>
 				<option value="${intensity.math(X*1)}">Custom Math</option>
 			</select>
 		</p>
-		<p>Use the check boxes by the names to use the bulk addition
+		<p class="text-muted">Use the check boxes by the names to use the bulk addition
 			feature. Select your items and dim control type if wanted, then click
 			bulk add below. Your items will be added with on and off or dim and
 			off if selected with the name of the device from the Vera.</p>
@@ -80,7 +82,7 @@
 			<td>{{veradevice.veraname}}</td>
 			<td>
 				<button class="btn btn-success" type="submit"
-					ng-click="buildDeviceUrls(veradevice, device_dim_control)">Build Item</button>
+					ng-click="buildDeviceUrls(veradevice, device_dim_control, false)">Build Item</button>
 			</td>
 		</tr>
 	</table>

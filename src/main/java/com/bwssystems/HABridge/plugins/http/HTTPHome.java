@@ -29,23 +29,25 @@ public class HTTPHome implements Home {
 			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
 		String responseString = null;
 		
-		//Backwards Compatibility Items
-		if(anItem.getHttpVerb() == null || anItem.getHttpVerb().isEmpty())
-		{
-			if(device.getHttpVerb() != null && !device.getHttpVerb().isEmpty())
-				anItem.setHttpVerb(device.getHttpVerb());
-		}
+		String theUrl = anItem.getItem().getAsString();
+		if(theUrl != null && !theUrl.isEmpty () && (theUrl.startsWith("http://") || theUrl.startsWith("https://"))) {
+			//Backwards Compatibility Items
+			if(anItem.getHttpVerb() == null || anItem.getHttpVerb().isEmpty())
+			{
+				if(device.getHttpVerb() != null && !device.getHttpVerb().isEmpty())
+					anItem.setHttpVerb(device.getHttpVerb());
+			}
+	
+			if(anItem.getHttpHeaders() == null || anItem.getHttpHeaders().isEmpty()) {
+				if(device.getHeaders() != null && !device.getHeaders().isEmpty() )
+					anItem.setHttpHeaders(device.getHeaders());
+			}
+	
+			log.debug("executing HUE api request to Http "
+					+ (anItem.getHttpVerb() == null ? "GET" : anItem.getHttpVerb()) + ": "
+					+ anItem.getItem().getAsString());
 
-		if(anItem.getHttpHeaders() == null || anItem.getHttpHeaders().isEmpty()) {
-			if(device.getHeaders() != null && !device.getHeaders().isEmpty() )
-				anItem.setHttpHeaders(device.getHeaders());
-		}
-
-		log.debug("executing HUE api request to Http "
-				+ (anItem.getHttpVerb() == null ? "GET" : anItem.getHttpVerb()) + ": "
-				+ anItem.getItem().getAsString());
-
-			String anUrl = BrightnessDecode.calculateReplaceIntensityValue(anItem.getItem().getAsString(),
+			String anUrl = BrightnessDecode.calculateReplaceIntensityValue(theUrl,
 					intensity, targetBri, targetBriInc, false);
 
 			anUrl = TimeDecode.replaceTimeValue(anUrl);
@@ -63,6 +65,13 @@ public class HTTPHome implements Home {
 						"Error on calling url to change device state", "/lights/"
 						+ lightId + "state", null, null).getTheErrors(), HueError[].class);
 			}
+		} else {
+			log.warn("HTTP Call to be presented as http(s)://<ip_address>(:<port>)/payload, format of request unknown: " + theUrl);
+			responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
+					"Error on calling url to change device state", "/lights/"
+					+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+		}
+
 		return responseString;
 	}
 

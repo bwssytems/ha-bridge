@@ -13,12 +13,13 @@
 	<li ng-if="bridge.showNest" role="presentation"><a href="#!/nest">Nest</a></li>
 	<li ng-if="bridge.showHue" role="presentation"><a
 		href="#!/huedevices">Hue Devices</a></li>
-	<li ng-if="bridge.showHal" role="presentation" class="active"><a href="#!/haldevices">HAL
+	<li ng-if="bridge.showHal" role="presentation"><a href="#!/haldevices">HAL
 			Devices</a></li>
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
 	<li role="presentation" class="active"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
 	<li ng-if="bridge.showSomfy" role="presentation"><a href="#!/somfydevices">Somfy Devices</a></li>
+	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
@@ -36,17 +37,18 @@
 			 done in the edit tab, click the 'Add Bridge Device' to finish that selection
 			setup. The 'Already Configured HomeAssistant Devices' list below will show what
 			is already setup for your HomeAssitant.</p>
-		<p>
+		<p class="text-muted">
 			Also, use this select menu for which type of dim control you would
 			like to be generated, BUT for Home Assistant, the selection should be Pass-thru: <select name="device-dim-control"
 				id="device-dim-control" ng-model="device_dim_control">
 				<option value="">none</option>
 				<option value="${intensity.byte}">Pass-thru Value</option>
 				<option value="${intensity.percent}">Percentage</option>
+				<option value="${intensity.decimal_percent}">Decimal Percentage</option>
 				<option value="${intensity.math(X*1)}">Custom Math</option>
 			</select>
 		</p>
-		<p>Use the check boxes by the names to use the bulk addition
+		<p class="text-muted">Use the check boxes by the names to use the bulk addition
 			feature. Select your items and dim control type if wanted, then click
 			bulk add below. Your items will be added with on and off or dim and
 			off if selected with the name of the device from the HomeAssitant.</p>
@@ -73,26 +75,8 @@
 				{{hassdevice.deviceState.entity_id}}</td>
 			<td>{{hassdevice.hassname}}</td>
 			<td>
-				<button ng-if="hassdevice.domain != 'climate' && hassdevice.domain != 'sensor' && hassdevice.domain != 'sun'" class="btn btn-success" type="submit"
-					ng-click="buildDeviceUrls(hassdevice, device_dim_control)">Build Item</button>
-				<ul ng-if="hassdevice.domain == 'climate'" class="list-group">
-					<li class="list-group-item">
-						<p>
-							<button class="btn btn-success" type="submit"
-								ng-click="buildhassHeatUrls(hassdevice)">Heat</button>
-							<button class="btn btn-success" type="submit"
-								ng-click="buildhassCoolUrls(hassdevice)">Cool</button>
-							<button class="btn btn-success" type="submit"
-								ng-click="buildhassAutoUrls(hassdevice)">Auto</button>
-						</p>
-						<p>
-							<button class="btn btn-success" type="submit"
-								ng-click="buildhassOffUrls(hassdevice)">Off</button>
-							<button class="btn btn-success" type="submit"
-								ng-click="buildhassFanUrls(hassdevice)">Fan</button>
-						</p>
-					</li>
-				</ul>
+				<button ng-if="hassdevice.domain != 'sensor' && hassdevice.domain != 'sun'" class="btn btn-success" type="submit"
+					ng-click="buildDeviceUrls(hassdevice, device_dim_control, false)">Build Item</button>
 			</td>
 		</tr>
 	</table>

@@ -43,6 +43,8 @@ public class BridgeSettingsDescriptor {
 	private IpList somfyaddress;
 	private boolean somfyconfigured;
 
+	private boolean lifxconfigured;
+	
 	public BridgeSettingsDescriptor() {
 		super();
 		this.upnpstrict = true;
@@ -278,6 +280,12 @@ public class BridgeSettingsDescriptor {
 	public void setDomoticzconfigured(boolean domoticzconfigured) {
 		this.domoticzconfigured = domoticzconfigured;
 	}
+	public boolean isLifxconfigured() {
+		return lifxconfigured;
+	}
+	public void setLifxconfigured(boolean lifxconfigured) {
+		this.lifxconfigured = lifxconfigured;
+	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
 			return false;
@@ -350,5 +358,8 @@ public class BridgeSettingsDescriptor {
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
 		return true;
+	}
+	public Boolean isValidLifx() {
+		return this.isLifxconfigured();
 	}
 }

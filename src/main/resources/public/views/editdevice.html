@@ -21,6 +21,7 @@
 		href="#!/hassdevices">HomeAssistant Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
 	<li ng-if="bridge.showSomfy" role="presentation"><a href="#!/somfydevices">Somfy Devices</a></li>
+	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
 	<li role="presentation" class="active"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
@@ -33,7 +34,7 @@
 			fields the bridge uses. Please use care when updating these fields as
 			you may break the settings used by the bridge to call a specific end
 			point device.</p>
-		<p class="text-muted">This area allows you to create any http or
+		<p class="text-muted">This area allows you to create any http, tcp or
 			udp call to an endpoint. You can use the default GET or select the
 			http verb type below and configure a payload for either on, dim or
 			off methods. For Execution of a
@@ -41,10 +42,10 @@
 			can use Json notation of array with [{&quot;item&quot;:&quot;the
 			payload&quot;},{&quot;item&quot;:&quot;another payload&quot;}] to
 			execute multiple entries. Adding the value replacements
-			(${intensity..byte},${intensity.percent},${intensity.math(X*1)}) will
+			(${intensity.byte},${intensity.percent},${intensity.decimal_percent},${intensity.math(X*1)}) will
 			also work. Also, you can go back to any helper tab and click a build 
 			action button to add another item for a multi-command.</p>
-		<p>When copying, update the name and select the "Add Bridge
+		<p class="text-muted">When copying, update the name and select the "Add Bridge
 			Device" Button.</p>
 
 		<form name="form">
@@ -65,16 +66,21 @@
 						ng-model="device.name" placeholder="Device Name"></td>
 				</tr>
 				<tr>
-					<td>Inactive</td>
+					<td><label>Inactive</label></td>
 					<td><input type="checkbox"
 						ng-model="device.inactive" ng-true-value=true
 						ng-false-value=false> {{device.inactive}}</td>
 				</tr>
 				<tr>
-					<td>No State (Do not update state for device)</td>
+					<td><label>No State (Do not update state for device)</label></td>
 					<td><input type="checkbox"
 						ng-model="device.noState" ng-true-value=true
 						ng-false-value=false> {{device.noState}}</td>
+				</tr>
+				<tr>
+					<td><label>Filter Address (comma separated list)</label></td>
+					<td><input type="text" class="form-control" id="device-requester-addr"
+						ng-model="device.requesterAddress" placeholder="Only use if you want to restrict this device to a specific caller(s)"></td>
 				</tr>
 				<tr>
 					<td><label>Target</label></td>
@@ -130,6 +136,7 @@
 						<table class="table table-bordered table-striped table-hover">
 							<thead>
 								<tr>
+							<div class="col-xs-12 col-md-4">
 									<th>Type</th>
 									<th>Target Item</th>
 									<th>Delay</th>
@@ -140,19 +147,21 @@
 									<th>Http Headers</th>
 									<th>Content Type</th>
 									<th>Manage</th>
+							</div>
 								</tr>
 							</thead>
 							<tr ng-repeat="onItem in onDevices">
+							<div class="col-xs-12 col-md-4">
 								<td><select
 									ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]"
 									ng-model="onItem.type"></select></td>
-								<td><textarea rows="1" cols="20" class="form-control"
+								<td><textarea rows="1" class="form-control"
 										id="item-target" ng-model="onItem.item" placeholder="The Call"></textarea></td>
-								<td><textarea rows="1" cols="4" class="form-control"
+								<td><textarea rows="1" class="form-control"
 										id="item-delay" ng-model="onItem.delay" placeholder="millis"></textarea></td>
-								<td><textarea rows="1" cols="2" class="form-control"
+								<td><textarea rows="1" class="form-control"
 										id="item-count" ng-model="onItem.count" placeholder="number"></textarea></td>
-								<td><textarea rows="1" cols="16" class="form-control"
+								<td><textarea rows="1" class="form-control"
 										id="item-filterIPs" ng-model="onItem.filterIPs"
 										placeholder="restrict IPs"></textarea></td>
 								<td><select name="item-http-verb" id="item-http-verb"
@@ -163,7 +172,7 @@
 										<option value="PUT">PUT</option>
 										<option value="POST">POST</option>
 								</select></td>
-								<td><textarea rows="1" cols="16" class="form-control"
+								<td><textarea rows="1" class="form-control"
 										id="item-httpBody" ng-model="onItem.httpBody"
 										placeholder="body args"></textarea></td>
 								<td><textarea rows="1" cols="16" class="form-control"
@@ -189,8 +198,10 @@
 								</select></td>
 								<td><button class="btn btn-danger" type="submit"
 										ng-click="removeItemOn(onItem)">Del</button></td>
+							</div>
 							</tr>
 							<tr>
+							<div class="col-xs-12 col-md-4">
 								<td><select
 									ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]"
 									ng-model="newOnItem.type"></select></td>
@@ -240,6 +251,7 @@
 								</select></td>
 								<td><button class="btn btn-success" type="submit"
 										ng-click="addItemOn(newOnItem)">Add</button></td>
+							</div>
 							</tr>
 						</table>
 						</scrollable-table></td>
@@ -251,6 +263,7 @@
 						<table class="table table-bordered table-striped table-hover">
 							<thead>
 								<tr>
+							<div class="col-xs-12 col-md-4">
 									<th>Type</th>
 									<th>Target Item</th>
 									<th>Delay</th>
@@ -261,9 +274,11 @@
 									<th>Http Headers</th>
 									<th>Content Type</th>
 									<th>Manage</th>
+							</div>
 								</tr>
 							</thead>
 							<tr ng-repeat="dimItem in dimDevices">
+							<div class="col-xs-12 col-md-4">
 								<td><select
 									ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]"
 									ng-model="dimItem.type"></select></td>
@@ -311,8 +326,10 @@
 								</select></td>
 								<td><button class="btn btn-danger" type="submit"
 										ng-click="removeItemDim(dimItem)">Del</button></td>
+							</div>
 							</tr>
 							<tr>
+							<div class="col-xs-12 col-md-4">
 								<td><select
 									ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]"
 									ng-model="newDimItem.type"></select></td>
@@ -362,6 +379,7 @@
 								</select></td>
 								<td><button class="btn btn-success" type="submit"
 										ng-click="addItemDim(newDimItem)">Add</button></td>
+							</div>
 							</tr>
 						</table>
 						</scrollable-table></td>
@@ -373,6 +391,7 @@
 						<table class="table table-bordered table-striped table-hover">
 							<thead>
 								<tr>
+							<div class="col-xs-12 col-md-4">
 									<th>Type</th>
 									<th>Target Item</th>
 									<th>Delay</th>
@@ -383,9 +402,11 @@
 									<th>Http Headers</th>
 									<th>Content Type</th>
 									<th>Manage</th>
+							</div>
 								</tr>
 							</thead>
 							<tr ng-repeat="offItem in offDevices">
+							<div class="col-xs-12 col-md-4">
 								<td><select
 									ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]"
 									ng-model="offItem.type"></select></td>
@@ -433,8 +454,10 @@
 								</select></td>
 								<td><button class="btn btn-danger" type="submit"
 										ng-click="removeItemOff(offItem)">Del</button></td>
+							</div>
 							</tr>
 							<tr>
+							<div class="col-xs-12 col-md-4">
 								<td><select
 									ng-options="mapType as mapType[1] for mapType in bridge.mapTypes track by mapType[0]"
 									ng-model="newOffItem.type"></select></td>
@@ -484,6 +507,7 @@
 								</select></td>
 								<td><button class="btn btn-success" type="submit"
 										ng-click="addItemOff(newOffItem)">Add</button></td>
+							</div>
 							</tr>
 						</table>
 						</scrollable-table></td>

@@ -18,12 +18,15 @@ import org.slf4j.LoggerFactory;
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.HomeManager;
+import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.BackupFilename;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
 import com.bwssystems.HABridge.dao.ErrorMessage;
 import com.bwssystems.HABridge.util.JsonTransformer;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 /**
 	spark core server for bridge configuration
@@ -33,11 +36,13 @@ public class DeviceResource {
     private static final Logger log = LoggerFactory.getLogger(DeviceResource.class);
     private DeviceRepository deviceRepository;
     private HomeManager homeManager;
+	private Gson aGsonHandler;
     private static final Set<String> supportedVerbs = new HashSet<>(Arrays.asList("get", "put", "post"));
 
 	public DeviceResource(BridgeSettingsDescriptor theSettings, HomeManager aHomeManager) {
 		this.deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
 		homeManager = aHomeManager;
+		aGsonHandler = new GsonBuilder().create();
 		setupEndpoints();
 	}
 
@@ -65,14 +70,44 @@ public class DeviceResource {
 	    	else {
 	    		devices = new Gson().fromJson("[" + request.body() + "]", DeviceDescriptor[].class);
 	    	}
+			CallItem[] callItems = null;
+			String errorMessage = null;
 	    	for(int i = 0; i < devices.length; i++) {
 		    	if(devices[i].getContentBody() != null ) {
 		            if (devices[i].getContentType() == null || devices[i].getHttpVerb() == null || !supportedVerbs.contains(devices[i].getHttpVerb().toLowerCase())) {
 		            	response.status(HttpStatus.SC_BAD_REQUEST);
-						log.debug("Bad http verb in create a Device(s): " + request.body());
-						return new ErrorMessage("Bad http verb in create a Device(s): " + request.body() + " ");
+		            	errorMessage = "Bad http verb in create device(s) for name: " + devices[i].getName() + " with verb: " + devices[i].getHttpVerb();
+						log.debug(errorMessage);
+						return new ErrorMessage(errorMessage);
 		            }
 		        }
+				try {
+					if(devices[i].getOnUrl() != null && !devices[i].getOnUrl().isEmpty())
+						callItems = aGsonHandler.fromJson(devices[i].getOnUrl(), CallItem[].class);
+				} catch(JsonSyntaxException e) {
+	            	response.status(HttpStatus.SC_BAD_REQUEST);
+	            	errorMessage = "Bad on URL JSON in create device(s) for name: " + devices[i].getName() + " with on URL: " + devices[i].getOnUrl();
+					log.debug(errorMessage);
+					return new ErrorMessage(errorMessage);
+				}
+				try {
+					if(devices[i].getDimUrl() != null && !devices[i].getDimUrl().isEmpty())
+						callItems = aGsonHandler.fromJson(devices[i].getDimUrl(), CallItem[].class);
+				} catch(JsonSyntaxException e) {
+	            	response.status(HttpStatus.SC_BAD_REQUEST);
+	            	errorMessage = "Bad dim URL JSON in create device(s) for name: " + devices[i].getName() + " with dim URL: " + devices[i].getDimUrl();
+					log.debug(errorMessage);
+					return new ErrorMessage(errorMessage);
+				}
+				try {
+					if(devices[i].getOffUrl() != null && !devices[i].getOffUrl().isEmpty())
+						callItems = aGsonHandler.fromJson(devices[i].getOffUrl(), CallItem[].class);
+				} catch(JsonSyntaxException e) {
+	            	response.status(HttpStatus.SC_BAD_REQUEST);
+	            	errorMessage = "Bad off URL JSON in create device(s) for name: " + devices[i].getName() + " with off URL: " + devices[i].getOffUrl();
+					log.debug(errorMessage);
+					return new ErrorMessage(errorMessage);
+				}
 	    	}
 
 	    	deviceRepository.save(devices);
@@ -217,6 +252,12 @@ public class DeviceResource {
 	    	log.debug("Get Domoticz Clients");
 	      	response.status(HttpStatus.SC_OK);
 	      	return homeManager.findResource(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex]);
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/lifx/devices", "application/json", (request, response) -> {
+	    	log.debug("Get LIFX devices");
+	      	response.status(HttpStatus.SC_OK);
+	      	return homeManager.findResource(DeviceMapTypes.LIFX_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.LIFX_DEVICE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
 		get (API_CONTEXT + "/somfy/devices", "application/json", (request, response) -> {

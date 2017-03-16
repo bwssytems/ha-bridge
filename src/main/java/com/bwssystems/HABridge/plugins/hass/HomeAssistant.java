@@ -41,7 +41,12 @@ public class HomeAssistant {
 			aUrl = "https";
 		else
 			aUrl = "http";
-		aUrl = aUrl + "://" + hassAddress.getIp() + ":" + hassAddress.getPort() + "/api/services/" + aCommand.getEntityId().substring(0, aCommand.getEntityId().indexOf("."));
+		String domain = aCommand.getEntityId().substring(0, aCommand.getEntityId().indexOf("."));
+		aUrl = aUrl + "://" + hassAddress.getIp() + ":" + hassAddress.getPort() + "/api/services/";
+		if(domain.equals("group"))
+			aUrl = aUrl + "homeassistant";
+		else
+			aUrl = aUrl + domain;
 		String aBody = "{\"entity_id\":\"" + aCommand.getEntityId() + "\"";
 		NameValue[] headers = null;
 		if(hassAddress.getPassword() != null && !hassAddress.getPassword().isEmpty()) {
@@ -62,6 +67,7 @@ public class HomeAssistant {
 			aUrl = aUrl + "/turn_off";
 			aBody = aBody + "}";			
 		}
+		log.debug("Calling HomeAssistant with url: " + aUrl);
    		String theData = anHttpHandler.doHttpRequest(aUrl, HttpPost.METHOD_NAME, "application/json", aBody, headers);
    		log.debug("call Command return is: <" + theData + ">");
 		return true;

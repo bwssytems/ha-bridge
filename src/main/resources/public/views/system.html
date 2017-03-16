@@ -20,6 +20,7 @@
 	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
 	<li ng-if="bridge.showSomfy" role="presentation"><a href="#!/somfydevices">Somfy Devices</a></li>
+	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
@@ -141,25 +142,30 @@
 							<thead>
 								<tr>
 									<th>Name</th>
-									<th>IP</th>
+                                                                        <th>IP</th>
+                                                                        <th>Webhook</th>
 									<th>Manage</th>
 								</tr>
 							</thead>
 							<tr ng-repeat="harmony in bridge.settings.harmonyaddress.devices">
 								<td>{{harmony.name}}</td>
-								<td>{{harmony.ip}}</td>
+                                                                <td>{{harmony.ip}}</td>
+                                                                <td>{{harmony.webhook}}</td>
 								<td><button class="btn btn-danger" type="submit"
-										ng-click="removeHarmonytoSettings(harmony.name, harmony.ip)">Del</button></td>
+										ng-click="removeHarmonytoSettings(harmony.name, harmony.ip, harmony.webhook)">Del</button></td>
 							</tr>
 							<tr>
 								<td><input id="bridge-settings-next-harmony-name"
 									class="form-control" type="text" ng-model="newharmonyname"
 									placeholder="A Harmony"></td>
-								<td><input id="bridge-settings-next-harmony-ip"
-									class="form-control" type="text" ng-model="newharmonyip"
-									placeholder="192.168.1.3"></td>
+                                                            <td><input id="bridge-settings-next-harmony-ip"
+                                                                       class="form-control" type="text" ng-model="newharmonyip"
+                                                                       placeholder="192.168.1.3"></td>
+                                                            <td><input id="bridge-settings-next-harmony-webhook"
+                                                                       class="form-control" type="text" ng-model="newharmonywebhook"
+                                                                       placeholder="http://hook?a=${activity.label}"></td>
 								<td><button class="btn btn-success" type="submit"
-										ng-click="addHarmonytoSettings(newharmonyname, newharmonyip)">Add</button></td>
+										ng-click="addHarmonytoSettings(newharmonyname, newharmonyip, newharmonywebhook)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>
@@ -415,6 +421,12 @@
 					<td><input type="checkbox"
 						ng-model="bridge.settings.farenheit" ng-true-value=true
 						ng-false-value=false> {{bridge.settings.farenheit}}</td>
+				</tr>
+				<tr>
+					<td>LIFX Support</td>
+					<td><input type="checkbox"
+						ng-model="bridge.settings.lifxconfigured" ng-true-value=true
+						ng-false-value=false> {{bridge.settings.lifxconfigured}}</td>
 				</tr>
 				<tr>
 					<td>Emulate Hue Hub Version</td>

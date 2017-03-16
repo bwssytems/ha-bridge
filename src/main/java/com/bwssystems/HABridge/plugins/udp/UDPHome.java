@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,39 +34,45 @@ public class UDPHome implements Home {
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
 			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
 		log.debug("executing HUE api request to UDP: " + anItem.getItem().getAsString());
-		String intermediate = anItem.getItem().getAsString().substring(anItem.getItem().getAsString().indexOf("://") + 3);
-		String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
-		String theUrlBody = intermediate.substring(intermediate.indexOf('/') + 1);
-		String hostAddr = null;
-		String port = null;
-		InetAddress IPAddress = null;
-		if (hostPortion.contains(":")) {
-			hostAddr = hostPortion.substring(0, intermediate.indexOf(':'));
-			port = hostPortion.substring(intermediate.indexOf(':') + 1);
+		String theUrl = anItem.getItem().getAsString();
+		if(theUrl != null && !theUrl.isEmpty () && theUrl.startsWith("udp://")) {
+			String intermediate = theUrl.substring(theUrl.indexOf("://") + 3);
+			String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
+			String theUrlBody = intermediate.substring(intermediate.indexOf('/') + 1);
+			String hostAddr = null;
+			String port = null;
+			InetAddress IPAddress = null;
+			if (hostPortion.contains(":")) {
+				hostAddr = hostPortion.substring(0, intermediate.indexOf(':'));
+				port = hostPortion.substring(intermediate.indexOf(':') + 1);
+			} else
+				hostAddr = hostPortion;
+			try {
+				IPAddress = InetAddress.getByName(hostAddr);
+			} catch (UnknownHostException e) {
+				log.warn("Udp Call, unknown host, continuing...");
+				return null;
+			}
+	
+			theUrlBody = TimeDecode.replaceTimeValue(theUrlBody);
+			if (theUrlBody.startsWith("0x")) {
+				theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, true);
+				sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
+			} else {
+				theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, false);
+				theUrlBody = StringEscapeUtils.unescapeJava(theUrlBody);
+				sendData = theUrlBody.getBytes();
+			}
+			try {
+				theUDPDatagramSender.sendUDPResponse(sendData, IPAddress, Integer.parseInt(port));
+			} catch (NumberFormatException e) {
+				log.warn("Udp Call, Number format exception on port, continuing...");
+			} catch (IOException e) {
+				log.warn("IO exception on udp call, continuing...");
+			}
 		} else
-			hostAddr = hostPortion;
-		try {
-			IPAddress = InetAddress.getByName(hostAddr);
-		} catch (UnknownHostException e) {
-			log.warn("Udp Call, unknown host, continuing...");
-			return null;
-		}
+			log.warn("Udp Call to be presented as udp://<ip_address>:<port>/payload, format of request unknown: " + theUrl);
 
-		theUrlBody = TimeDecode.replaceTimeValue(theUrlBody);
-		if (theUrlBody.startsWith("0x")) {
-			theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, true);
-			sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
-		} else {
-			theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, false);
-			sendData = theUrlBody.getBytes();
-		}
-		try {
-			theUDPDatagramSender.sendUDPResponse(sendData, IPAddress, Integer.parseInt(port));
-		} catch (NumberFormatException e) {
-			log.warn("Udp Call, Number format exception on port, continuing...");
-		} catch (IOException e) {
-			log.warn("IO exception on udp call, continuing...");
-		}
 		return null;
 	}
 
