@@ -147,7 +147,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 
 	this.clearDevice = function () {
 		self.state.device = {};
-		self.state.olddevicename = "";
+		self.state.olddevicename = null;
 	};
 
 	this.getHABridgeVersion = function () {
@@ -525,6 +525,20 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					type = self.getMapType(s.type[0])
 					s.type = type[0]
 				}
+				if(s.delay === "" || s.delay === null)
+					delete s.delay;
+				if(s.count === "" || s.count === null)
+					delete s.count;
+				if(s.filterIPs === "" || s.filterIPs === null)
+					delete s.filterIPs;
+				if(s.httpVerb === "" || s.httpVerb === null)
+					delete s.httpVerb;
+				if(s.httpBody === "" || s.httpBody === null)
+					delete s.httpBody;
+				if(s.httpHeaders === "" || s.httpHeaders === null)
+					delete s.httpHeaders;
+				if(s.contentType === "" || s.contentType === null)
+					delete s.contentType;
 			}
 		}
 		return theDevices
@@ -2462,18 +2476,21 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 		if (copy) {
 			$scope.device.id = null;
 			$scope.device.uniqueid = null;
-			$scope.device.mapId = $scope.device.mapId + "-copy";
+			if($scope.bridge.olddevicename !== null && $scope.bridge.olddevicename !== "")
+				$scope.device.mapId = $scope.device.mapId + "-copy";
 		}
 		if($scope.mapTypeSelected !== undefined && $scope.mapTypeSelected !== null)
 			$scope.device.mapType = $scope.mapTypeSelected[0];
 		else
 			$scope.device.mapType = null;
+		
 		if ($scope.onDevices !== null)
 			$scope.device.onUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.onDevices));
 		if ($scope.dimDevices !== null)
 			$scope.device.dimUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.dimDevices));
 		if ($scope.offDevices !== null)
 			$scope.device.offUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.offDevices));
+
 		bridgeService.addDevice($scope.device).then(
 				function () {
 					$scope.clearDevice();
@@ -2493,7 +2510,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
     	if ($scope.onDevices === null)
     		$scope.onDevices = [];
     	$scope.onDevices.push(newitem);
-    	$scope.newOnItem = [];
+    	$scope.newOnItem = {};
     };
     $scope.removeItemOn = function (anItem) {
     	for(var i = $scope.onDevices.length - 1; i >= 0; i--) {
@@ -2510,7 +2527,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
     	if ($scope.dimDevices === null)
     		$scope.dimDevices = [];
     	$scope.dimDevices.push(newitem);
-    	$scope.newDimItem = [];
+    	$scope.newDimItem = {};
     };
     $scope.removeItemDim = function (anItem) {
     	for(var i = $scope.dimDevices.length - 1; i >= 0; i--) {
@@ -2527,7 +2544,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
     	if ($scope.offDevices === null)
     		$scope.offDevices = [];
     	$scope.offDevices.push(newitem);
-    	$scope.newOffItem = [];
+    	$scope.newOffItem = {};
     };
     $scope.removeItemOff = function (anItem) {
     	for(var i = $scope.offDevices.length - 1; i >= 0; i--) {
