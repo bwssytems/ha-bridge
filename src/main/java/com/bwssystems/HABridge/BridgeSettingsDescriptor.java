@@ -49,6 +49,9 @@ public class BridgeSettingsDescriptor {
 	private String hubversion;
 	private IpList domoticzaddress;
 	private boolean domoticzconfigured;
+	private IpList somfyaddress;
+	private boolean somfyconfigured;
+
 	private boolean lifxconfigured;
 	
 	public BridgeSettingsDescriptor() {
@@ -57,6 +60,7 @@ public class BridgeSettingsDescriptor {
 		this.traceupnp = false;
 		this.nestconfigured = false;
 		this.veraconfigured = false;
+		this.somfyconfigured = false;
 		this.harmonyconfigured = false;
 		this.hueconfigured = false;
 		this.halconfigured = false;
@@ -102,8 +106,14 @@ public class BridgeSettingsDescriptor {
 	public IpList getVeraAddress() {
 		return veraaddress;
 	}
+	public IpList getSomfyAddress() {
+		return somfyaddress;
+	}
 	public void setVeraAddress(IpList veraAddress) {
 		this.veraaddress = veraAddress;
+	}
+	public void setSomfyAddress(IpList somfyAddress) {
+		this.somfyaddress = somfyAddress;
 	}
 	public IpList getHarmonyAddress() {
 		return harmonyaddress;
@@ -138,8 +148,14 @@ public class BridgeSettingsDescriptor {
 	public boolean isVeraconfigured() {
 		return veraconfigured;
 	}
+	public boolean isSomfyconfigured() {
+		return somfyconfigured;
+	}
 	public void setVeraconfigured(boolean veraconfigured) {
 		this.veraconfigured = veraconfigured;
+	}
+	public void setSomfyconfigured(boolean somfyconfigured) {
+		this.somfyconfigured = somfyconfigured;
 	}
 	public boolean isHarmonyconfigured() {
 		return harmonyconfigured;
@@ -340,6 +356,14 @@ public class BridgeSettingsDescriptor {
 		if(this.getDomoticzaddress() == null || this.getDomoticzaddress().getDevices().size() <= 0)
 			return false;		
 		List<NamedIP> devicesList = this.getDomoticzaddress().getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+		return true;
+	}
+	public Boolean isValidSomfy() {
+		if(this.getSomfyAddress() == null || this.getSomfyAddress().getDevices().size() <= 0)
+			return false;
+		List<NamedIP> devicesList = this.getSomfyAddress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
 		return true;

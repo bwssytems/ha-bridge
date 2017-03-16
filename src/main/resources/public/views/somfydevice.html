@@ -2,46 +2,55 @@
 	<li role="presentation"><a href="#!/">Bridge Devices</a></li>
 	<li role="presentation"><a href="#!/system">Bridge Control</a></li>
 	<li role="presentation"><a href="#!/logs">Logs</a></li>
-	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#!/veradevices">Vera Devices</a></li>
-	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#!/verascenes">Vera Scenes</a></li>
+	<li role="presentation"><a href="#!/veradevices">Vera
+			Devices</a></li>
+	<li role="presentation"><a href="#!/verascenes">Vera Scenes</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
 		href="#!/harmonyactivities">Harmony Activities</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
 		href="#!/harmonydevices">Harmony Devices</a></li>
 	<li ng-if="bridge.showNest" role="presentation"><a href="#!/nest">Nest</a></li>
-	<li role="presentation" class="active"><a href="#!/huedevices">Hue
-			Devices</a></li>
+	<li ng-if="bridge.showHue" role="presentation"><a
+		href="#!/huedevices">Hue Devices</a></li>
 	<li ng-if="bridge.showHal" role="presentation"><a
 		href="#!/haldevices">HAL Devices</a></li>
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
 	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
-	<li ng-if="bridge.showSomfy" role="presentation"><a href="#!/somfydevices">Somfy Devices</a></li>
-	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
+	<li ng-if="bridge.showSomfy" role="presentation" class="active"><a href="#!/somfydevices">Somfy Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">Hue Device List
-			({{bridge.huedevices.length}})</h2>
+		<h2 class="panel-title">Somfy Device List
+			({{bridge.somfydevices.length}})</h2>
 	</div>
 	<div class="panel-body">
-		<p class="text-muted">For any Hue Device, use the build action buttons
-			to generate the item addition information into the ha-bridge device and this will put you into the edit screen. Then
+		<p class="text-muted">For any Somfy Device, use the build action buttons
+			to generate the item addition information into the ha-bridge device
+			and this will put you into the edit screen. Then
 			you can modify the name to anything you want that will be the keyword
-			for the Echo or Google Home. Also, you can go back to any helper tab and click a build 
+			for the Echo or Google Home. Also, you can go back to any helper tab and click a build
 			action button to add another item for a multi-command. After you are
 			 done in the edit tab, click the 'Add Bridge Device' to finish that selection
-			setup. The 'Already Configured Hue Devices' list below will show what
-			is already setup for your Hue.</p>
-		<p class="text-muted">Use the check boxes by the names to use the bulk addition
-			feature. Select your items, then click bulk add below. Your items
-			will be added with on, off and dim with the
-			name of the device from the Hue.</p>
-	<scrollable-table watch="bridge.huedevices">
+			setup. The 'Already Configured Somfy Devices' list below will show
+			what is already setup for your Somfy.</p>
+		<!-- TODO - dim support for partial window opening.. --<p>
+			Also, use this select menu for which type of dim control you would
+			like to be generated: <select name="device-dim-control"
+				id="device-dim-control" ng-model="device_dim_control">
+				<option value="">none</option>
+				<option value="${intensity.byte}">Pass-thru Value</option>
+				<option value="${intensity.percent}">Percentage</option>
+				<option value="${intensity.math(X*1)}">Custom Math</option>
+			</select>
+		</p-->
+		<p>Use the check boxes by the names to use the bulk addition
+			feature. Select your items, then click
+			bulk add below. Your items will be added with the name of the device from the Somfy Tahoma.</p>
+	</div>
+	<scrollable-table watch="bridge.somfydevices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
@@ -50,30 +59,36 @@
 					value="{{selectAll}}"
 					ng-checked="selectAll"
 					ng-click="toggleSelectAll()"> Name</span></th>
-				<th sortable-header col="id">Id</th>
-				<th sortable-header col="huename">Hue</th>
+				<th sortable-header col="id" comparator-fn="comparatorUniqueId">Id</th>
+				<th sortable-header col="category">Category</th>
+				<th sortable-header col="room">Room</th>
+				<th sortable-header col="somfyname">Somfy</th>
 				<th>Build Actions</th>
 			</tr>
 		</thead>
-		<tr ng-repeat="huedevice in bridge.huedevices">
+		<tr
+			ng-repeat="somfydevice in bridge.somfydevices">
 			<td>{{$index+1}}</td>
 			<td><input type="checkbox" name="bulk.devices[]"
-				value="{{huedevice.device.uniqueid}}"
-				ng-checked="bulk.devices.indexOf(huedevice.device.uniqueid) > -1"
-				ng-click="toggleSelection(huedevice.device.uniqueid)">
-				{{huedevice.device.name}}</td>
-			<td>{{huedevice.device.uniqueid}}</td>
-			<td>{{huedevice.huename}}</td>
+				value="{{somfydevice.id}}"
+				ng-checked="bulk.devices.indexOf(somfydevice.id) > -1"
+				ng-click="toggleSelection(somfydevice.id)">
+				{{somfydevice.name}}</td>
+			<td>{{somfydevice.id}}</td>
+			<td>{{somfydevice.category}}</td>
+			<td>{{somfydevice.room}}</td>
+			<td>{{somfydevice.somfyname}}</td>
 			<td>
+				<!--TODO - taken device_dim_control out of here since not yet used-->
 				<button class="btn btn-success" type="submit"
-					ng-click="buildDeviceUrls(huedevice, false)">Build Item</button>
+					ng-click="buildDeviceUrls(somfydevice)">Build Item</button>
 			</td>
 		</tr>
 	</table>
 	</scrollable-table>
 	<div class="panel-footer">
 		<button class="btn btn-success" type="submit"
-			ng-click="bulkAddDevices()">Bulk Add
+			ng-click="bulkAddDevices(device_dim_control)">Bulk Add
 			({{bulk.devices.length}})</button>
 	</div>
 	</div>
@@ -81,24 +96,24 @@
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title">
-			Already Configured Hue Devices <a ng-click="toggleButtons()"><span
-				class={{imgButtonsUrl}} aria-hidden="true"></span></a></a>
+			Already Configured Somfy Devices <a ng-click="toggleButtons()"><span
+				class={{imgButtonsUrl}} aria-hidden="true"></span></a>
 		</h2>
 	</div>
 	<div ng-if="buttonsVisible" class="panel-body">
-	<scrollable-table watch="bridge.huedevices">
+	<scrollable-table watch="bridge.devices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<th>Row</th>
 				<th sortable-header col="name">Name</th>
-				<th sortable-header col="targetDevice">hue</th>
+				<th sortable-header col="targetDevice">Somfy</th>
 				<th>Map Id</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="device in bridge.devices | configuredHueItems">
+			ng-repeat="device in bridge.devices |configuredSomfyDevices">
 			<td>{{$index+1}}</td>
 			<td>{{device.name}}</td>
 			<td>{{device.targetDevice}}</td>

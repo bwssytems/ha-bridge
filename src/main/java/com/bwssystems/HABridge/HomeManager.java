@@ -15,6 +15,7 @@ import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.bwssystems.HABridge.plugins.hue.HueHome;
 import com.bwssystems.HABridge.plugins.lifx.LifxHome;
 import com.bwssystems.HABridge.plugins.mqtt.MQTTHome;
+import com.bwssystems.HABridge.plugins.somfy.SomfyHome;
 import com.bwssystems.HABridge.plugins.tcp.TCPHome;
 import com.bwssystems.HABridge.plugins.udp.UDPHome;
 import com.bwssystems.HABridge.plugins.vera.VeraHome;
@@ -88,6 +89,10 @@ public class HomeManager {
 		aHome = new DomoticzHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		resourceList.put(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		//setup the Somfy configuration if available
+		aHome = new SomfyHome(bridgeSettings);
+		homeList.put(DeviceMapTypes.SOMFY_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		resourceList.put(DeviceMapTypes.SOMFY_DEVICE[DeviceMapTypes.typeIndex], aHome);
         //setup the Lifx configuration if available
 		aHome = new LifxHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.LIFX_DEVICE[DeviceMapTypes.typeIndex], aHome);
