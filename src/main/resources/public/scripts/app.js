@@ -44,6 +44,11 @@ app.config (function ($locationProvider, $routeProvider) {
 		controller: 'HassController'		
 	}).when ('/domoticzdevices', {
 		templateUrl: 'views/domoticzdevice.html',
+		controller: 'DomoticzController'
+	}).when('/somfydevices', {
+           templateUrl: 'views/somfydevice.html',
+           controller: 'SomfyController'
+       }).otherwise ({
 		controller: 'DomoticzController'		
 	}).when ('/lifxdevices', {
 		templateUrl: 'views/lifxdevice.html',
@@ -74,7 +79,7 @@ String.prototype.replaceAll = function (search, replace)
 
 app.service ('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {}, mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, showDomoticz: false, showLifx: false, habridgeversion: ""};
+	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {}, mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: ""};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
@@ -260,6 +265,11 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		return;
 	}
 
+    this.updateShowSomfy = function () {
+        this.state.showSomfy = self.state.settings.somfyconfigured;
+        return;
+    }
+
 	this.updateShowLifx = function () {
 		this.state.showLifx = self.state.settings.lifxconfigured;
 		return;
@@ -277,6 +287,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.updateShowMqtt();
 					self.updateShowHass();
 					self.updateShowDomoticz();
+					self.updateShowSomfy();
 					self.updateShowLifx();
 				},
 				function (error) {
@@ -458,6 +469,20 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 				}
 		);
 	};
+
+	this.viewSomfyDevices = function () {
+    		if(!this.state.showSomfy)
+    			return;
+    		return $http.get(this.state.base + "/somfy/devices").then(
+    				function (response) {
+    					self.state.somfydevices = response.data;
+    				},
+    				function (error) {
+    					self.displayWarn("Get Somfy Devices Error: ", error);
+    				}
+    		);
+    	};
+
 
 	this.viewLifxDevices = function () {
 		if (!this.state.showLifx)
@@ -1024,6 +1049,25 @@ app.controller ('SystemController', function ($scope, $location, $http, $window,
     	    }
     	}    	
     };
+    $scope.addSomfytoSettings = function (newsomfyname, newsomfyip, newsomfyusername, newsomfypassword) {
+        	if($scope.bridge.settings.somfyaddress == null) {
+        		$scope.bridge.settings.somfyaddress = { devices: [] };
+    		}
+        	var newSomfy = {name: newsomfyname, ip: newsomfyip, username: newsomfyusername, password: newsomfypassword }
+        	$scope.bridge.settings.somfyaddress.devices.push(newSomfy);
+        	$scope.newsomfyname = null;
+        	$scope.newsomfyip = null;
+        	$scope.newsomfyusername = null;
+        	$scope.newsomfypassword = null;
+        };
+    $scope.removeSomfytoSettings = function (somfyname, somfyip) {
+        for(var i = $scope.bridge.settings.somfyaddress.devices.length - 1; i >= 0; i--) {
+            if($scope.bridge.settings.somfyaddress.devices[i].name === somfyname && $scope.bridge.settings.somfyaddress.devices[i].ip === somfyip) {
+                $scope.bridge.settings.somfyaddress.devices.splice(i, 1);
+            }
+        }
+    };
+
     $scope.bridgeReinit = function () {
     	bridgeService.reinit();
     };
@@ -2400,6 +2444,134 @@ app.controller('LifxController', function ($scope, $location, $http, bridgeServi
 	};
 });
 
+app.controller('SomfyController', function ($scope, $location, $http, bridgeService, ngDialog) {
+	$scope.bridge = bridgeService.state;
+	$scope.device = bridgeService.state.device;
+	$scope.device_dim_control = "";
+	$scope.bulk = { devices: [] };
+	$scope.selectAll = false;
+	$scope.somfy = {base: "http://", port: "3480", id: ""};
+	bridgeService.viewDevices(); //Needs this if you're navigating to the 'somfy' page directly without going to the home page first..
+	bridgeService.viewSomfyDevices();
+	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	$scope.buttonsVisible = false;
+	$scope.comparatorUniqueId = bridgeService.compareUniqueId;
+
+	$scope.clearDevice = function () {
+		bridgeService.clearDevice();
+		$scope.device = bridgeService.state.device;
+	};
+
+	$scope.buildDeviceUrls = function (somfydevice, dim_control, buildonly) {
+        //TODO - support partial window opening - add back 'dim_control' second param in here, and in somfydevice.html
+        dimpayload = "";
+        onpayload = "{\"label\":\"Label that is ignored probably\",\"actions\":[{\"deviceURL\":\""+ somfydevice.deviceUrl+"\",\"commands\":[{\"name\":\"open\",\"parameters\":[]}]}]}";
+        offpayload = "{\"label\":\"Label that is ignored probably\",\"actions\":[{\"deviceURL\":\""+ somfydevice.deviceUrl+"\",\"commands\":[{\"name\":\"close\",\"parameters\":[]}]}]}";
+
+        bridgeService.buildUrls(onpayload, dimpayload, offpayload, true, somfydevice.id,  somfydevice.name, somfydevice.somfyname, "switch",  "somfyDevice", null, null);
+        $scope.device = bridgeService.state.device;
+        if (!buildonly) {
+        			bridgeService.editNewDevice($scope.device);
+        			$location.path('/editdevice');
+        }
+	};
+
+
+	$scope.bulkAddDevices = function(dim_control) {
+		var devicesList = [];
+		$scope.clearDevice();
+		for(var i = 0; i < $scope.bulk.devices.length; i++) {
+			for(var x = 0; x < bridgeService.state.somfydevices.length; x++) {
+				if(bridgeService.state.somfydevices[x].id === $scope.bulk.devices[i]) {
+					$scope.buildDeviceUrls(bridgeService.state.somfydevices[x],dim_control, true);
+					devicesList[i] = {
+							name: $scope.device.name,
+							mapId: $scope.device.mapId,
+							mapType: $scope.device.mapType,
+							deviceType: $scope.device.deviceType,
+							targetDevice: $scope.device.targetDevice,
+							onUrl: $scope.device.onUrl,
+							dimUrl: $scope.device.dimUrl,
+							offUrl: $scope.device.offUrl,
+							headers: $scope.device.headers,
+							httpVerb: $scope.device.httpVerb,
+							contentType: $scope.device.contentType,
+							contentBody: $scope.device.contentBody,
+							contentBodyDim: $scope.device.contentBodyDim,
+							contentBodyOff: $scope.device.contentBodyOff
+					};
+					$scope.clearDevice();
+				}
+			}
+		}
+		bridgeService.bulkAddDevice(devicesList).then(
+				function () {
+					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewSomfyDevices();
+				},
+				function (error) {
+					bridgeService.displayWarn("Error adding Somfy devices in bulk.", error)
+				}
+			);
+		$scope.bulk = { devices: [] };
+		$scope.selectAll = false;
+	};
+
+	$scope.toggleSelection = function toggleSelection(deviceId) {
+		var idx = $scope.bulk.devices.indexOf(deviceId);
+
+		// is currently selected
+		if (idx > -1) {
+			$scope.bulk.devices.splice(idx, 1);
+			if($scope.bulk.devices.length === 0 && $scope.selectAll)
+				$scope.selectAll = false;
+		}
+
+		// is newly selected
+		else {
+			$scope.bulk.devices.push(deviceId);
+			$scope.selectAll = true;
+		}
+	};
+
+	$scope.toggleSelectAll = function toggleSelectAll() {
+		if($scope.selectAll) {
+			$scope.selectAll = false;
+			$scope.bulk = { devices: [] };
+		}
+		else {
+			$scope.selectAll = true;
+			for(var x = 0; x < bridgeService.state.somfydevices.length; x++) {
+				if($scope.bulk.devices.indexOf(bridgeService.state.somfydevices[x]) < 0 && !bridgeService.findDeviceByMapId(bridgeService.state.somfydevices[x].id, bridgeService.state.somfydevices[x].somfyname, "somfyDevice"))
+					$scope.bulk.devices.push(bridgeService.state.somfydevices[x].id);
+			}
+		}
+	};
+
+	$scope.toggleButtons = function () {
+		$scope.buttonsVisible = !$scope.buttonsVisible;
+		if($scope.buttonsVisible)
+			$scope.imgButtonsUrl = "glyphicon glyphicon-minus";
+		else
+			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	};
+
+	$scope.deleteDevice = function (device) {
+		$scope.bridge.device = device;
+		ngDialog.open({
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
+	};
+
+	$scope.editDevice = function (device) {
+		bridgeService.editDevice(device);
+		$location.path('/editdevice');
+	};
+});
+
 app.controller('EditController', function ($scope, $location, $http, bridgeService) {
 	bridgeService.viewMapTypes();
 	$scope.bridge = bridgeService.state;
@@ -2687,6 +2859,23 @@ app.filter('configuredLifxItems', function (bridgeService) {
 		return out;
 	}
 });
+
+app.filter('configuredSomfyDevices', function (bridgeService) {
+	return function(input) {
+		var out = [];
+		if(input === undefined || input === null || input.length === undefined)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if(bridgeService.deviceContainsType(input[i], "somfyDevice")){
+				out.push(input[i]);
+			}
+		}
+		return out;
+	}
+});
+
+
+
 
 app.controller('VersionController', function ($scope, bridgeService) {
 	$scope.bridge = bridgeService.state;

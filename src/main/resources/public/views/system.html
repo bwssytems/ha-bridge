@@ -19,6 +19,7 @@
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
 	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
+	<li ng-if="bridge.showSomfy" role="presentation"><a href="#!/somfydevices">Somfy Devices</a></li>
 	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
@@ -362,6 +363,46 @@
 										ng-click="addDomoticztoSettings(newdomoticzname, newdomoticzip, newdomoticzport, newdomoticzusername, newdomoticzpassword)">Add</button></td>
 							</tr>
 						</table></td>
+				</tr>
+				<tr>
+					<td>Somfy Names and IP Addresses</td>
+					<td><table
+							class="table table-bordered table-striped table-hover">
+						<thead>
+						<tr>
+							<th>Name</th>
+							<th>IP/hostname</th>
+							<th>Username</th>
+							<th>Password </th>
+							<th>Manage</th>
+						</tr>
+						</thead>
+						<tr ng-repeat="somfy in bridge.settings.somfyaddress.devices">
+							<td>{{somfy.name}}</td>
+							<td>{{somfy.ip}}</td>
+							<td>{{somfy.username}}</td>
+							<td ng-if="somfy.password">*******</td>
+							<td ng-if="!somfy.password"> </td>
+							<td><button class="btn btn-danger" type="submit"
+										ng-click="removeSomfytoSettings(somfy.name, somfy.ip)">Del</button></td>
+						</tr>
+						<tr>
+							<td><input id="bridge-settings-next-somfy-name"
+									   class="form-control" type="text" ng-model="newsomfyname"
+									   placeholder="A Somfy"></td>
+							<td><input id="bridge-settings-next-somfy-ip"
+									   class="form-control" type="text" ng-model="newsomfyip"
+									   placeholder="https://www.tahomalink.com"></td>
+							<td><input id="bridge-settings-next-somfy-username"
+									   class="form-control" type="text" ng-model="newsomfyusername"
+									   placeholder="Somfy username"></td>
+							<td><input id="bridge-settings-next-somfy-password"
+									   class="form-control" type="password" ng-model="newsomfypassword"
+									   placeholder="Somfy password"></td>
+							<td><button class="btn btn-success" type="submit"
+										ng-click="addSomfytoSettings(newsomfyname, newsomfyip, newsomfyusername, newsomfypassword)">Add</button></td>
+						</tr>
+					</table></td>
 				</tr>
 				<tr>
 					<td>Nest Username</td>

@@ -37,7 +37,7 @@ THe Harmony Hub Path looks like this:
 
 **FAQ: Please look here for the current FAQs! https://github.com/bwssytems/ha-bridge/wiki/HA-Bridge-FAQs**
 
-In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest and the ability to proxy all of your real Hue bridges behind this bridge.
+In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest, Somfy Tahoma and the ability to proxy all of your real Hue bridges behind this bridge.
 
 Alternatively the Bridge supports custom calls as well using http/https/udp and tcp such as the LimitlessLED/MiLight bulbs using the UDP protocol. Binary data is supported with UDP/TCP.
 
@@ -287,7 +287,7 @@ The server defaults to running on port 80. To override what the default is, spec
 #### UPNP Response Port
 The upnp response port that will be used. The default is 50000.  
 #### Vera Names and IP Addresses
-Provide IP Addresses of your Veras that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Vera and device/scene you configure. 
+Provide IP Addresses of your Veras that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Vera and device/scene you configure. Note you have to 'turn on' a window to open it, and 'turn off' to close.
 #### Harmony Names and IP Addresses
 Provide IP Addresses of your Harmony Hubs that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the activity or buttons by the call it receives and send it to the target Harmony Hub and activity/button you configure. 
 #### Harmony Username
@@ -310,6 +310,10 @@ The user name of the home.nest.com account for the Nest user. This needs to be g
 The password for the user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features.
 #### Nest Temp Fahrenheit
 This setting allows the value being sent into the bridge to be interpreted as Fahrenheit or Celsius. The default is to have Fahrenheit.
+#### Somfy Tahoma Username
+The user name used to login to www.tahomalink.com.  This needs to be provided if you're using the Somfy Tahoma features (for connecting to IO Homecontrol used by Velux among others). There is no need to give any IP address or host information as this contacts your cloud account
+#### Somfy Tahoma Password
+The password associated with the Somfy Tahoma username above 
 #### Button Press/Call Item Loop Sleep Interval (ms)
 This setting is the time used in between button presses when there is multiple buttons in a button device. It also controls the time between multiple items in a custom device call. This is defaulted to 100ms and the number represents milliseconds (1000 milliseconds = 1 second).
 #### Log Messages to Buffer
@@ -360,7 +364,7 @@ The Add/Edit tab will show you the fields to fill in for the above in a form, wh
 The format of the item can be the default HTTP request which executes the URLs formatted as `http://<your stuff here>` as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use `https://<your secure call here>`. When using POST and PUT, you have the ability to specify the body that will be sent with the request as well as the application type for the http call.
 
 The valid device types are: "custom", "veraDevice", "veraScene", "harmonyActivity", "harmonyButton", "nestHomeAway", "nestThermoSet", "hueDevice", "halDevice", 
-	"halButton", "halHome", "halThermoSet", "mqttMessage", "cmdDevice", "hassDevice", "tcpDevice", "udpDevice", "httpDevice", "domoticzDevice"
+	"halButton", "halHome", "halThermoSet", "mqttMessage", "cmdDevice", "hassDevice", "tcpDevice", "udpDevice", "httpDevice", "domoticzDevice", "somfyDevice"
 
 Filter Ip example:
 ```
