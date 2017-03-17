@@ -24,7 +24,7 @@
 	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
-
+<div   postrender-action="goToRow()">
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h1 class="panel-title">Current devices ({{bridge.devices.length}})</h1>
@@ -34,7 +34,6 @@
 		<p>
 			<button class="btn btn-primary" type="submit" ng-click="renumberDevices()">Renumber Devices</button>
 		</p>
-
 	<scrollable-table watch="bridge.devices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
@@ -42,6 +41,7 @@
 				<th>Row</th>
 				<th sortable-header col="id" comparator-fn="comparatorUniqueId">ID</th>
 				<th sortable-header col="name">Name</th>
+				<th sortable-header col="description">Description</th>
 				<th sortable-header col="deviceType">Type</th>
 				<th sortable-header col="targetDevice">Target</th>
 				<th sortable-header col="inactive">Inactive</th>
@@ -49,10 +49,11 @@
 				<th>Actions</th>
 			</tr>
 		</thead>
-		<tr ng-repeat="device in bridge.devices">
+		<tr ng-repeat="device in bridge.devices" row-id="{{device.id}}" ng-class="{info: bridge.viewDevId == device.id}" >
 			<td>{{$index+1}}</td>
 			<td>{{device.id}}</td>
 			<td>{{device.name}}</td>
+			<td class="cr">{{device.description}}</td>
 			<td>{{device.deviceType}}</td>
 			<td>{{device.targetDevice}}</td>
 			<td>{{device.inactive}}</td>
@@ -75,6 +76,7 @@
 	</table>
 	</scrollable-table>
 	</div>
+</div>
 </div>
 <div class="panel panel-default">
 	<div class="panel-heading">

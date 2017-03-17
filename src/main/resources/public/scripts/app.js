@@ -62,6 +62,7 @@ app.config (function ($locationProvider, $routeProvider) {
 app.run( function (bridgeService) {
 	bridgeService.loadBridgeSettings();
 	bridgeService.getHABridgeVersion();
+	bridgeService.getTestUser();
 	bridgeService.viewMapTypes();
 });
 
@@ -79,7 +80,7 @@ String.prototype.replaceAll = function (search, replace)
 
 app.service ('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {}, mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: ""};
+	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {}, mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: "", viewDevId: "", queueDevId: ""};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
@@ -151,7 +152,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 
 	this.clearDevice = function () {
 		self.state.device = {};
-		self.state.olddevicename = "";
+		self.state.olddevicename = null;
 	};
 
 	this.getHABridgeVersion = function () {
@@ -161,6 +162,17 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 				},
 				function (error) {
 					self.displayWarn("Cannot get version: ", error);
+				}
+		);
+	};
+
+	this.getTestUser = function () {
+		return $http.get(this.state.systemsbase + "/habridge/testuser").then(
+				function (response) {
+					self.state.testuser = response.data.user;
+				},
+				function (error) {
+					self.displayWarn("Cannot get testuser: ", error);
 				}
 		);
 	};
@@ -538,6 +550,20 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					type = self.getMapType(s.type[0])
 					s.type = type[0]
 				}
+				if(s.delay === "" || s.delay === null)
+					delete s.delay;
+				if(s.count === "" || s.count === null)
+					delete s.count;
+				if(s.filterIPs === "" || s.filterIPs === null)
+					delete s.filterIPs;
+				if(s.httpVerb === "" || s.httpVerb === null)
+					delete s.httpVerb;
+				if(s.httpBody === "" || s.httpBody === null)
+					delete s.httpBody;
+				if(s.httpHeaders === "" || s.httpHeaders === null)
+					delete s.httpHeaders;
+				if(s.contentType === "" || s.contentType === null)
+					delete s.contentType;
 			}
 		}
 		return theDevices
@@ -799,7 +825,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 
 	this.testUrl = function (device, type, value) {
 		var msgDescription = "unknown";
-		var testUrl = this.state.huebase + "/test/lights/" + device.id + "/state";
+		var testUrl = this.state.huebase + "/" + this.state.testuser + "/lights/" + device.id + "/state";
 		var testBody = "{\"on\":";
 		if (type === "off") {
 			testBody = testBody + "false";
@@ -1140,6 +1166,26 @@ app.controller('LogsController', function ($scope, $location, $http, $window, br
 	};
 });
 
+app.directive('postrenderAction', postrenderAction);
+/* @ngInject */
+function postrenderAction($timeout) {
+    // ### Directive Interface
+    // Defines base properties for the directive.
+    var directive = {
+        restrict: 'A',
+        priority: 101,
+        link: link
+    };
+    return directive;
+
+    // ### Link Function
+    // Provides functionality for the directive during the DOM building/data binding stage.
+    function link(scope, element, attrs) {
+        $timeout(function() {
+            scope.$evalAsync(attrs.postrenderAction);
+        }, 0);
+    }
+}
 app.controller('ViewingController', function ($scope, $location, $http, $window, bridgeService, ngDialog) {
 
 	bridgeService.viewDevices();
@@ -1205,7 +1251,16 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 		else
 			$scope.imgBkUrl = "glyphicon glyphicon-plus";
 	};
-});
+
+	$scope.goToRow = function() {
+		if (bridgeService.state.queueDevId !== null && bridgeService.state.queueDevId !== "") {
+   		 bridgeService.state.viewDevId = bridgeService.state.queueDevId;
+   		 $scope.$broadcast("rowSelected", bridgeService.state.viewDevId);
+		 console.log("Go to Row selected Id <<" + bridgeService.state.viewDevId + ">>")
+		 bridgeService.state.queueDevId = null;
+   	 }
+    };
+ });
 
 app.controller('ValueDialogCtrl', function ($scope, bridgeService, ngDialog) {
 	$scope.slider = {
@@ -2622,20 +2677,25 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 		if (copy) {
 			$scope.device.id = null;
 			$scope.device.uniqueid = null;
-			$scope.device.mapId = $scope.device.mapId + "-copy";
+			if($scope.bridge.olddevicename !== null && $scope.bridge.olddevicename !== "")
+				$scope.device.mapId = $scope.device.mapId + "-copy";
 		}
 		if($scope.mapTypeSelected !== undefined && $scope.mapTypeSelected !== null)
 			$scope.device.mapType = $scope.mapTypeSelected[0];
 		else
 			$scope.device.mapType = null;
+		
 		if ($scope.onDevices !== null)
 			$scope.device.onUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.onDevices));
 		if ($scope.dimDevices !== null)
 			$scope.device.dimUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.dimDevices));
 		if ($scope.offDevices !== null)
 			$scope.device.offUrl = angular.toJson(bridgeService.updateCallObjectsType($scope.offDevices));
+
 		bridgeService.addDevice($scope.device).then(
 				function () {
+					bridgeService.state.queueDevId = $scope.device.id;
+					console.log("Device updated for Q Id <<" + bridgeService.state.queueDevId + ">>")
 					$scope.clearDevice();
 					$location.path('/');
 				},
@@ -2653,7 +2713,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
     	if ($scope.onDevices === null)
     		$scope.onDevices = [];
     	$scope.onDevices.push(newitem);
-    	$scope.newOnItem = [];
+    	$scope.newOnItem = {};
     };
     $scope.removeItemOn = function (anItem) {
     	for(var i = $scope.onDevices.length - 1; i >= 0; i--) {
@@ -2670,7 +2730,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
     	if ($scope.dimDevices === null)
     		$scope.dimDevices = [];
     	$scope.dimDevices.push(newitem);
-    	$scope.newDimItem = [];
+    	$scope.newDimItem = {};
     };
     $scope.removeItemDim = function (anItem) {
     	for(var i = $scope.dimDevices.length - 1; i >= 0; i--) {
@@ -2687,7 +2747,7 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
     	if ($scope.offDevices === null)
     		$scope.offDevices = [];
     	$scope.offDevices.push(newitem);
-    	$scope.newOffItem = [];
+    	$scope.newOffItem = {};
     };
     $scope.removeItemOff = function (anItem) {
     	for(var i = $scope.offDevices.length - 1; i >= 0; i--) {

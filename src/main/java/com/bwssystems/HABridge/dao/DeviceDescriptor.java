@@ -62,9 +62,18 @@ public class DeviceDescriptor{
     @SerializedName("noState")
     @Expose
     private boolean noState;
+    @SerializedName("offState")
+    @Expose
+    private boolean offState;
     @SerializedName("requesterAddress")
     @Expose
     private String requesterAddress;
+    @SerializedName("description")
+    @Expose
+    private String description;
+    @SerializedName("comments")
+    @Expose
+    private String comments;
 
     private DeviceState deviceState;
     
@@ -222,12 +231,36 @@ public class DeviceDescriptor{
 		this.noState = noState;
 	}
 
+	public boolean isOffState() {
+		return offState;
+	}
+
+	public void setOffState(boolean offState) {
+		this.offState = offState;
+	}
+
 	public String getRequesterAddress() {
 		return requesterAddress;
 	}
 
 	public void setRequesterAddress(String requesterAddress) {
 		this.requesterAddress = requesterAddress;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getComments() {
+		return comments;
+	}
+
+	public void setComments(String comments) {
+		this.comments = comments;
 	}
 
 	public boolean containsType(String aType) {

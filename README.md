@@ -59,23 +59,23 @@ ATTENTION: This requires JDK 1.8 to run
 ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
 
 ```
-java -jar ha-bridge-4.2.1.jar
+java -jar ha-bridge-4.3.0.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
-Create the directory and make sure that ha-bridge-4.2.1.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-4.3.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
 
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.2.1/ha-bridge-4.2.1.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.3.0/ha-bridge-4.3.0.jar
 ```
-Create the directory and make sure that ha-bridge-4.2.1.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-4.3.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.2.1/ha-bridge-4.2.1.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.3.0/ha-bridge-4.3.0.jar
 ```
 #### System Control Setup on a pi (preferred)
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
@@ -95,7 +95,7 @@ After=network.target
 [Service]
 Type=simple
 
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.2.1.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.3.0.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -130,7 +130,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.2.1.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.3.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
@@ -145,54 +145,6 @@ pi@raspberrypi:~/habridge $ ./starthabridge.sh
 You should now be running the bridge. Check for errors:
 ```
 pi@raspberrypi:~/habridge $ tail -f habridge-log.txt
-```
-## Run ha-bridge alongside web server already on port 80
-These examples will help you proxy your current webserver requests to the ha-bridge running on a different port, such as 8080.
-### Apache Example
-Reverse proxy with Apache on Ubuntu linux:
-
-a2enmod proxy
-a2enmod proxy_http
-a2enmod headers
-
-Added the following lines to my Apache config file “000-default”
-
-```
-<VirtualHost *:80>
-	ProxyPass         /api  http://localhost:8080/api nocanon
-	ProxyPassReverse  /api  http://localhost:8080/api
-	ProxyRequests     Off
-	AllowEncodedSlashes NoDecode
-
-	# Local reverse proxy authorization override
-	# Most unix distribution deny proxy by default (ie /etc/apache2/mods-enabled/proxy.conf in Ubuntu)
-	<Proxy http://localhost:8080/api*>
-		  Order deny,allow
-		  Allow from all
-	</Proxy>
-
-….. (the rest of the VirtualHost config section) …..
-</VirtualHost>
-```
-
-service apache2 restart
-### lighthttpd Example
-```
-server.modules   += ( "mod_proxy" )
-proxy.server = ( 
-	"/api" =>
-        (
-                ( "host" => "127.0.0.1",
-                  "port" => "8080"
-                )
-        )
-)
-```
-### nginx Example
-```
-location /api/ {
-    proxy_pass http://127.0.0.1:8080/api;
-}
 ```
 ## Run ha-bridge alongside web server already on port 80
 These examples will help you proxy your current webserver requests to the ha-bridge running on a different port, such as 8080.
@@ -287,13 +239,9 @@ The server defaults to running on port 80. To override what the default is, spec
 #### UPNP Response Port
 The upnp response port that will be used. The default is 50000.  
 #### Vera Names and IP Addresses
-Provide IP Addresses of your Veras that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Vera and device/scene you configure. Note you have to 'turn on' a window to open it, and 'turn off' to close.
+Provide IP Addresses of your Veras that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Vera and device/scene you configure.
 #### Harmony Names and IP Addresses
-Provide IP Addresses of your Harmony Hubs that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the activity or buttons by the call it receives and send it to the target Harmony Hub and activity/button you configure. 
-#### Harmony Username
-deprecated
-#### Harmony Password
-deprecated
+Provide IP Addresses of your Harmony Hubs that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the activity or buttons by the call it receives and send it to the target Harmony Hub and activity/button you configure. Also, an option of webhook can be called when the activity changes on the harmony hub that will send an HTTP GET call to the the address of your choosing. This can contain the replacement variables of ${activity.id} and/or ${activity.label}. Example : http://192.168.0.1/activity/${activity.id}/${activity.label} OR http://hook?a=${activity.label}
 #### Hue Names and IP Addresses
 Provide IP Addresses of your Hue Bridges that you want to proxy through the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will passthru the call it receives to the target Hue and device you configure.
 
@@ -311,7 +259,7 @@ The password for the user name of the home.nest.com account for the Nest user. T
 #### Nest Temp Fahrenheit
 This setting allows the value being sent into the bridge to be interpreted as Fahrenheit or Celsius. The default is to have Fahrenheit.
 #### Somfy Tahoma Username
-The user name used to login to www.tahomalink.com.  This needs to be provided if you're using the Somfy Tahoma features (for connecting to IO Homecontrol used by Velux among others). There is no need to give any IP address or host information as this contacts your cloud account
+The user name used to login to www.tahomalink.com.  This needs to be provided if you're using the Somfy Tahoma features (for connecting to IO Homecontrol used by Velux among others). There is no need to give any IP address or host information as this contacts your cloud account.  *Note:* you have to 'turn on' a window to open it, and 'turn off' to close.
 #### Somfy Tahoma Password
 The password associated with the Somfy Tahoma username above 
 #### Button Press/Call Item Loop Sleep Interval (ms)
@@ -344,7 +292,7 @@ There is a new format for the on/dim/off URL areas. The new editor handles the i
 Here are the fields that can be put into the call item:
 Json Type | field name | What | Use
 ----------|------------|------|-----
-String or JsonElement | item| This is the payload that will be called for devices | Required
+String or JsonElement | item | This is the payload that will be called for devices | Required
 Integer | count | This is how many times this items will be executed | Optional
 Integer | delay | This is how long we will wait until the next call after | Optional
 String | type | This is the type of device we are executing | Required
@@ -384,7 +332,7 @@ Headers can be added as well using a Json construct [{"name":"header type name",
 
 Another option that is detected by the bridge is to use UDP or TCP direct calls such as `udp://<ip_address>:<port>/<your stuff here>` to send a UDP request. TCP calls are handled the same way as `tcp://<ip_address>:<port>/<your stuff here>`. If your data for the UDP or TCP request is formatted as "0x00F009B9" lexical hex format, the bridge will convert the data into a binary stream to send.
 
-You can also use the value replacement constructs within these statements. Such as using the expressions "${time.format(Java time format string)}" for inserting a date/time stamp, ${intensity.percent} for 0-100 or ${intensity.decimal_percent} for 0.00-1.00 or ${intensity.byte} for 0-255 for straight pass through of the value or items that require special calculated values using ${intensity.math()} i.e. "${intensity.math(X/4)}". See Value Passing Controls Below.
+You can also use the value replacement constructs within these statements. Such as using the expressions "${time.format(Java time format string)}" for inserting a date/time stamp, ${intensity.percent} or ${intensity.percent.hex} for 0-100 or ${intensity.decimal_percent} for 0.00-1.00 or ${intensity.byte} or ${intensity.byte.hex} for 0-255 for straight pass through of the value or items that require special calculated values using ${intensity.math()} i.e. "${intensity.math(X/4)}" or "${intensity.math(X/4).hex}". See Value Passing Controls Below.
 Examples:
 ```
 
@@ -429,18 +377,18 @@ To configure this type of manual add, you will need to select the Device type of
 
 In the URL areas, the format of the execution is just providing what command line you would like to run, or using the multiple call item construct described above.
 ```
-[{"item":"C:\\Users\\John\\Documents\\Applications\\putty.exe 192.168.1.1","type":"cmdDevice"},
-{"item":"notepad.exe","type":"cmdDevice"}]
+[{"item":"exec://C:\\Users\\John\\Documents\\Applications\\putty.exe 192.168.1.1","type":"cmdDevice"},{"item":"exec://notepad.exe","type":"cmdDevice"}]
 
-OR
-
-[{"item":"exec://notepad.exe","type":"cmdDevice"}]
-
+[{"item":"/home/pi/scripts/dothisscript.sh","type":"cmdDevice"}]
 ```
 #### Value Passing Controls
-There are multiple replacement constructs available to be put into any of the calls except Harmony items, Net Items and HAL items. These constructs are: "${time.format(Java time format string)}", "${intensity.percent}", "${intensity.decimal_percent}", "${intensity.byte}" and "${intensity.math(using X in your calc)}".
+There are multiple replacement constructs available to be put into any of the calls except Harmony items, Net Items and HAL items. These constructs are: "${time.format(Java time format string)}", "${intensity.percent}", "${intensity.percent.hex}", "${intensity.decimal_percent}", "${intensity.byte}", "${intensity.byte.hex}", "${intensity.math(using X in your calc)}" and "${intensity.math(using X in your calc).hex}".
+
 You can control items that require special calculated values using ${intensity.math(<your expression using "X" as the value to operate on>)} i.e. "${intensity.math(X/4)}".
+
 For the items that want to have a date time put into the message, utilize ${time.format(yyyy-MM-ddTHH:mm:ssXXX)} where "yyyy-MM-ddTHH:mm:ssXXX" can be any format from the Java SimpleDateFormat documented here: https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
+
+Also, device data can be inserted into your payloads by the use of "${device.name}", "${device.id}", "${device.uniqueid}", "${device.targetDevice}", "${device.mapId}", "${device.mapType}" and "${device.deviceType}". These work just like the dimming value replacements.
 e.g.
 ```
 [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=10&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.math(X/4)}","type":"httpDevice"}]

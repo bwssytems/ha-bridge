@@ -14,6 +14,7 @@ import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
 import com.google.gson.Gson;
@@ -89,6 +90,7 @@ public class MQTTHome implements Home {
 				mqttObject =anItem.getItem().getAsString();
 			mqttObject = BrightnessDecode.calculateReplaceIntensityValue(mqttObject,
 					intensity, targetBri, targetBriInc, false);
+			mqttObject = DeviceDataDecode.replaceDeviceData(mqttObject, device);
 			mqttObject = TimeDecode.replaceTimeValue(mqttObject);
 			if (mqttObject.substring(0, 1).equalsIgnoreCase("{"))
 				mqttObject = "[" + mqttObject + "]";

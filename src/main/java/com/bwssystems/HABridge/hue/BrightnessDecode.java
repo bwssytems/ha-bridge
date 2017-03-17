@@ -17,6 +17,9 @@ public class BrightnessDecode {
 	private static final String INTENSITY_MATH = "${intensity.math(";
 	private static final String INTENSITY_MATH_VALUE = "X";
 	private static final String INTENSITY_MATH_CLOSE = ")}";
+	private static final String INTENSITY_MATH_CLOSE_HEX = ").hex}";
+	private static final String INTENSITY_PERCENT_HEX = "${intensity.percent.hex}";
+	private static final String INTENSITY_BYTE_HEX = "${intensity.byte.hex}";
 
 	public static int calculateIntensity(int setIntensity, Integer targetBri, Integer targetBriInc) {
 		if (targetBri != null) {
@@ -45,50 +48,79 @@ public class BrightnessDecode {
 		if (request == null) {
 			return null;
 		}
-		if (request.contains(INTENSITY_BYTE)) {
-			if (isHex) {
-				String hexValue = convertToHex(intensity);
-				request = request.replace(INTENSITY_BYTE, hexValue);
-			} else {
-				String intensityByte = String.valueOf(intensity);
-				request = request.replace(INTENSITY_BYTE, intensityByte);
-			}
-		} else if (request.contains(INTENSITY_PERCENT)) {
-			int percentBrightness = (int) Math.round(intensity / 255.0 * 100);
-			if (isHex) {
-				String hexValue = convertToHex(percentBrightness);
-				request = request.replace(INTENSITY_PERCENT, hexValue);
-			} else {
-				String intensityPercent = String.valueOf(percentBrightness);
-				request = request.replace(INTENSITY_PERCENT, intensityPercent);
-			}
-		} else if (request.contains(INTENSITY_DECIMAL_PERCENT)) {
-			float decimalBrightness = (float) (intensity / 255.0);
-
-			String intensityPercent = String.format("%1.2f", decimalBrightness);
-			request = request.replace(INTENSITY_DECIMAL_PERCENT, intensityPercent);
-		} else if (request.contains(INTENSITY_MATH)) {
-			Map<String, BigDecimal> variables = new HashMap<String, BigDecimal>();
-			String mathDescriptor = request.substring(request.indexOf(INTENSITY_MATH) + INTENSITY_MATH.length(),
-					request.indexOf(INTENSITY_MATH_CLOSE));
-			variables.put(INTENSITY_MATH_VALUE, new BigDecimal(intensity));
-
-			try {
+		boolean notDone = true;
+		String replaceValue = null;
+		String replaceTarget = null;
+		int percentBrightness = (int) Math.round(intensity / 255.0 * 100);
+		float decimalBrightness = (float) (intensity / 255.0);
+		Map<String, BigDecimal> variables = new HashMap<String, BigDecimal>();
+		String mathDescriptor = null;
+		
+		while(notDone) {
+			notDone = false;
+			if (request.contains(INTENSITY_BYTE)) {
+				if (isHex) {
+					replaceValue = convertToHex(intensity);
+				} else {
+					replaceValue = String.valueOf(intensity);
+				}
+				replaceTarget = INTENSITY_BYTE;
+				notDone = true;
+			} else if (request.contains(INTENSITY_BYTE_HEX)) {
+				replaceValue = convertToHex(intensity);
+				replaceTarget = INTENSITY_BYTE_HEX;
+				notDone = true;
+			} else if (request.contains(INTENSITY_PERCENT)) {
+				if (isHex) {
+					replaceValue = convertToHex(percentBrightness);
+				} else {
+					replaceValue = String.valueOf(percentBrightness);
+				}
+				replaceTarget = INTENSITY_PERCENT;
+				notDone = true;
+			} else if (request.contains(INTENSITY_PERCENT_HEX)) {
+				replaceValue = convertToHex(percentBrightness);
+				replaceTarget = INTENSITY_PERCENT_HEX;
+				notDone = true;
+			} else if (request.contains(INTENSITY_DECIMAL_PERCENT)) {
+				replaceValue = String.format("%1.2f", decimalBrightness);
+				replaceTarget = INTENSITY_DECIMAL_PERCENT;
+				notDone = true;
+			} else if (request.contains(INTENSITY_MATH_CLOSE)) {
+				mathDescriptor = request.substring(request.indexOf(INTENSITY_MATH) + INTENSITY_MATH.length(),
+						request.indexOf(INTENSITY_MATH_CLOSE));
+				variables.put(INTENSITY_MATH_VALUE, new BigDecimal(intensity));
+	
 				log.debug("Math eval is: " + mathDescriptor + ", Where " + INTENSITY_MATH_VALUE + " is: "
 						+ String.valueOf(intensity));
-				Expression exp = new Expression(mathDescriptor);
-				BigDecimal result = exp.eval(variables);
-				Integer endResult = Math.round(result.floatValue());
-				if (isHex) {
-					String hexValue = convertToHex(endResult);
-					request = request.replace(INTENSITY_MATH + mathDescriptor + INTENSITY_MATH_CLOSE, hexValue);
-				} else {
-					request = request.replace(INTENSITY_MATH + mathDescriptor + INTENSITY_MATH_CLOSE,
-							endResult.toString());
+				Integer endResult = calculateMath(variables, mathDescriptor);
+				if(endResult != null) {
+					if (isHex) {
+						replaceValue = convertToHex(endResult);
+					} else {
+						replaceValue = endResult.toString();
+					}
+					replaceTarget = INTENSITY_MATH + mathDescriptor + INTENSITY_MATH_CLOSE;
+					notDone = true;
 				}
-			} catch (Exception e) {
-				log.warn("Could not execute Math: " + mathDescriptor, e);
+			} else if (request.contains(INTENSITY_MATH_CLOSE_HEX)) {
+				mathDescriptor = request.substring(request.indexOf(INTENSITY_MATH) + INTENSITY_MATH.length(),
+						request.indexOf(INTENSITY_MATH_CLOSE_HEX));
+				variables.put(INTENSITY_MATH_VALUE, new BigDecimal(intensity));
+	
+				Integer endResult = calculateMath(variables, mathDescriptor);
+				if(endResult != null) {
+					if (isHex) {
+						replaceValue = convertToHex(endResult);
+					} else {
+						replaceValue = endResult.toString();
+					}
+					replaceTarget = INTENSITY_MATH + mathDescriptor + INTENSITY_MATH_CLOSE_HEX;
+					notDone = true;
+				}
 			}
+			if(notDone)
+				request = request.replace(replaceTarget, replaceValue);
 		}
 		return request;
 	}
@@ -107,5 +139,18 @@ public class BrightnessDecode {
 		newBytes[0] = theBytes[1];
 		newBytes[1] = theBytes[0];
 		return new String(newBytes);
+	}
+	
+	private static Integer calculateMath(Map<String, BigDecimal> variables, String mathDescriptor) {
+		Integer endResult = null;
+		try {
+			Expression exp = new Expression(mathDescriptor);
+			BigDecimal result = exp.eval(variables);
+			endResult = Math.round(result.floatValue());
+		} catch (Exception e) {
+			log.warn("Could not execute Math: " + mathDescriptor, e);
+			endResult = null;
+		}
+		return endResult;
 	}
 }

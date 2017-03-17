@@ -121,7 +121,7 @@ public class BridgeSettings extends BackupHandler {
 			}
 			theBridgeSettings.setSomfyAddress(theSomfyList);
 
-			theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
+	        theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
 	        theBridgeSettings.setTraceupnp(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
 	        theBridgeSettings.setButtonsleep(Integer.parseInt(System.getProperty("button.sleep", Configuration.DEFAULT_BUTTON_SLEEP)));
 	        theBridgeSettings.setNestuser(System.getProperty("nest.user"));
@@ -173,6 +173,8 @@ public class BridgeSettings extends BackupHandler {
         if(serverIpOverride != null)
         	theBridgeSettings.setWebaddress(serverIpOverride);
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
+		
+		setupInternalTestUser();
 	}
 
 	public void loadConfig() {
@@ -202,6 +204,16 @@ public class BridgeSettings extends BackupHandler {
 		Path configPath = Paths.get(theBridgeSettings.getConfigfile());
     	JsonTransformer aRenderer = new JsonTransformer();
     	String  jsonValue = aRenderer.render(newBridgeSettings);
+    	configWriter(jsonValue, configPath);
+    	_loadConfig(configPath);
+    }
+    
+
+	public void updateConfigFile() {
+        log.debug("Save HA Bridge settings.");
+		Path configPath = Paths.get(theBridgeSettings.getConfigfile());
+    	JsonTransformer aRenderer = new JsonTransformer();
+    	String  jsonValue = aRenderer.render(theBridgeSettings);
     	configWriter(jsonValue, configPath);
     	_loadConfig(configPath);
     }
@@ -297,5 +309,10 @@ public class BridgeSettings extends BackupHandler {
 			}
 		}
 		return addressString;
+	}
+	private void setupInternalTestUser() {
+		theBridgeSettings.setupInternalTestUser();
+		if(theBridgeSettings.isSettingsChanged())
+			this.updateConfigFile();
 	}
 }

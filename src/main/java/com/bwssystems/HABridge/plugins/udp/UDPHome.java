@@ -15,6 +15,7 @@ import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
 import com.bwssystems.HABridge.util.UDPDatagramSender;
@@ -57,9 +58,11 @@ public class UDPHome implements Home {
 			theUrlBody = TimeDecode.replaceTimeValue(theUrlBody);
 			if (theUrlBody.startsWith("0x")) {
 				theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, true);
+				theUrlBody = DeviceDataDecode.replaceDeviceData(theUrlBody, device);
 				sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
 			} else {
 				theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, false);
+				theUrlBody = DeviceDataDecode.replaceDeviceData(theUrlBody, device);
 				theUrlBody = StringEscapeUtils.unescapeJava(theUrlBody);
 				sendData = theUrlBody.getBytes();
 			}
