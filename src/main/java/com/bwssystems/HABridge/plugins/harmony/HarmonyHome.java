@@ -17,6 +17,7 @@ import com.bwssystems.HABridge.IpList;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
+import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -161,6 +162,8 @@ public class HarmonyHome implements Home {
 				if (url.substring(0, 1).equalsIgnoreCase("{")) {
 					url = "[" + url + "]";
 				}
+				
+				url = BrightnessDecode.calculateReplaceIntensityValue(url, intensity, targetBri, targetBriInc, false);
 				ButtonPress[] deviceButtons = aGsonHandler.fromJson(url, ButtonPress[].class);
 	        	Integer theCount = 1;
         		for(int z = 0; z < deviceButtons.length; z++) {

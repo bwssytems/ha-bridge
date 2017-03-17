@@ -292,7 +292,7 @@ There is a new format for the on/dim/off URL areas. The new editor handles the i
 Here are the fields that can be put into the call item:
 Json Type | field name | What | Use
 ----------|------------|------|-----
-String or JsonElement | item| This is the payload that will be called for devices | Required
+String or JsonElement | item | This is the payload that will be called for devices | Required
 Integer | count | This is how many times this items will be executed | Optional
 Integer | delay | This is how long we will wait until the next call after | Optional
 String | type | This is the type of device we are executing | Required
@@ -332,7 +332,7 @@ Headers can be added as well using a Json construct [{"name":"header type name",
 
 Another option that is detected by the bridge is to use UDP or TCP direct calls such as `udp://<ip_address>:<port>/<your stuff here>` to send a UDP request. TCP calls are handled the same way as `tcp://<ip_address>:<port>/<your stuff here>`. If your data for the UDP or TCP request is formatted as "0x00F009B9" lexical hex format, the bridge will convert the data into a binary stream to send.
 
-You can also use the value replacement constructs within these statements. Such as using the expressions "${time.format(Java time format string)}" for inserting a date/time stamp, ${intensity.percent} for 0-100 or ${intensity.decimal_percent} for 0.00-1.00 or ${intensity.byte} for 0-255 for straight pass through of the value or items that require special calculated values using ${intensity.math()} i.e. "${intensity.math(X/4)}". See Value Passing Controls Below.
+You can also use the value replacement constructs within these statements. Such as using the expressions "${time.format(Java time format string)}" for inserting a date/time stamp, ${intensity.percent} or ${intensity.percent.hex} for 0-100 or ${intensity.decimal_percent} for 0.00-1.00 or ${intensity.byte} or ${intensity.byte.hex} for 0-255 for straight pass through of the value or items that require special calculated values using ${intensity.math()} i.e. "${intensity.math(X/4)}" or "${intensity.math(X/4).hex}". See Value Passing Controls Below.
 Examples:
 ```
 
@@ -382,9 +382,13 @@ In the URL areas, the format of the execution is just providing what command lin
 [{"item":"/home/pi/scripts/dothisscript.sh","type":"cmdDevice"}]
 ```
 #### Value Passing Controls
-There are multiple replacement constructs available to be put into any of the calls except Harmony items, Net Items and HAL items. These constructs are: "${time.format(Java time format string)}", "${intensity.percent}", "${intensity.decimal_percent}", "${intensity.byte}" and "${intensity.math(using X in your calc)}".
+There are multiple replacement constructs available to be put into any of the calls except Harmony items, Net Items and HAL items. These constructs are: "${time.format(Java time format string)}", "${intensity.percent}", "${intensity.percent.hex}", "${intensity.decimal_percent}", "${intensity.byte}", "${intensity.byte.hex}", "${intensity.math(using X in your calc)}" and "${intensity.math(using X in your calc).hex}".
+
 You can control items that require special calculated values using ${intensity.math(<your expression using "X" as the value to operate on>)} i.e. "${intensity.math(X/4)}".
+
 For the items that want to have a date time put into the message, utilize ${time.format(yyyy-MM-ddTHH:mm:ssXXX)} where "yyyy-MM-ddTHH:mm:ssXXX" can be any format from the Java SimpleDateFormat documented here: https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
+
+Also, device data can be inserted into your payloads by the use of "${device.name}", "${device.id}", "${device.uniqueid}", "${device.targetDevice}", "${device.mapId}", "${device.mapType}" and "${device.deviceType}". These work just like the dimming value replacements.
 e.g.
 ```
 [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=10&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.math(X/4)}","type":"httpDevice"}]

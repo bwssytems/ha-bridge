@@ -80,7 +80,7 @@ String.prototype.replaceAll = function (search, replace)
 
 app.service ('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {}, mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: "", viewDevId: ""};
+	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {}, mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: "", viewDevId: "", queueDevId: ""};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
@@ -1166,6 +1166,26 @@ app.controller('LogsController', function ($scope, $location, $http, $window, br
 	};
 });
 
+app.directive('postrenderAction', postrenderAction);
+/* @ngInject */
+function postrenderAction($timeout) {
+    // ### Directive Interface
+    // Defines base properties for the directive.
+    var directive = {
+        restrict: 'A',
+        priority: 101,
+        link: link
+    };
+    return directive;
+
+    // ### Link Function
+    // Provides functionality for the directive during the DOM building/data binding stage.
+    function link(scope, element, attrs) {
+        $timeout(function() {
+            scope.$evalAsync(attrs.postrenderAction);
+        }, 0);
+    }
+}
 app.controller('ViewingController', function ($scope, $location, $http, $window, bridgeService, ngDialog) {
 
 	bridgeService.viewDevices();
@@ -1232,9 +1252,14 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 			$scope.imgBkUrl = "glyphicon glyphicon-plus";
 	};
 
-	$scope.$watch('bridge.devices', function(devId) {
-        $scope.$broadcast("rowSelected", bridgeService.state.viewDevId);
-     });
+	$scope.goToRow = function() {
+		if (bridgeService.state.queueDevId !== null && bridgeService.state.queueDevId !== "") {
+   		 bridgeService.state.viewDevId = bridgeService.state.queueDevId;
+   		 $scope.$broadcast("rowSelected", bridgeService.state.viewDevId);
+		 console.log("Go to Row selected Id <<" + bridgeService.state.viewDevId + ">>")
+		 bridgeService.state.queueDevId = null;
+   	 }
+    };
  });
 
 app.controller('ValueDialogCtrl', function ($scope, bridgeService, ngDialog) {
@@ -2669,6 +2694,8 @@ app.controller('EditController', function ($scope, $location, $http, bridgeServi
 
 		bridgeService.addDevice($scope.device).then(
 				function () {
+					bridgeService.state.queueDevId = $scope.device.id;
+					console.log("Device updated for Q Id <<" + bridgeService.state.queueDevId + ">>")
 					$scope.clearDevice();
 					$location.path('/');
 				},

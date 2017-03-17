@@ -391,7 +391,7 @@ public class HueMulator {
 	}
 	
 	private String formatSuccessHueResponse(StateChangeBody stateChanges, String body, String lightId,
-			DeviceState deviceState, Integer targetBri, Integer targetBriInc) {
+			DeviceState deviceState, Integer targetBri, Integer targetBriInc, boolean offState) {
 
 		String responseString = "[";
 		boolean notFirstChange = false;
@@ -405,6 +405,8 @@ public class HueMulator {
 			if (deviceState != null) {
 				deviceState.setOn(stateChanges.isOn());
 				if(!deviceState.isOn() && deviceState.getBri() == 254)
+					deviceState.setBri(0);
+				if(!deviceState.isOn() && offState)
 					deviceState.setBri(0);
 			}
 			notFirstChange = true;
@@ -824,7 +826,7 @@ public class HueMulator {
 		if (state == null)
 			state = DeviceState.createDeviceState();
 
-		responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc);
+		responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc, device.isOffState());
 		device.setDeviceState(state);
 
 		return responseString;
@@ -964,11 +966,11 @@ public class HueMulator {
 
 		if (responseString == null || !responseString.contains("[{\"error\":")) {
 			if(!device.isNoState()) {
-				responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc);
+				responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc, device.isOffState());
 				device.setDeviceState(state);
 			} else {
 				DeviceState dummyState = DeviceState.createDeviceState();
-				responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, dummyState, targetBri, targetBriInc);
+				responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, dummyState, targetBri, targetBriInc, device.isOffState());
 			}
 		}
 		return responseString;

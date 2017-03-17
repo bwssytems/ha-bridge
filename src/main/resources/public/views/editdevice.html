@@ -66,6 +66,18 @@
 						ng-model="device.name" placeholder="Device Name"></td>
 				</tr>
 				<tr>
+					<td><label>Description</label></td>
+
+					<td><input type="text" class="form-control" id="device-description"
+						ng-model="device.description" placeholder="Device Description"></td>
+				</tr>
+				<tr>
+					<td><label>Comments</label></td>
+
+					<td><input type="text" class="form-control" id="device-comments"
+						ng-model="device.comments" placeholder="Device Comments"></td>
+				</tr>
+				<tr>
 					<td><label>Inactive</label></td>
 					<td><input type="checkbox"
 						ng-model="device.inactive" ng-true-value=true
@@ -76,6 +88,12 @@
 					<td><input type="checkbox"
 						ng-model="device.noState" ng-true-value=true
 						ng-false-value=false> {{device.noState}}</td>
+				</tr>
+				<tr>
+					<td><label>Off State Resets Bri</label></td>
+					<td><input type="checkbox"
+						ng-model="device.offState" ng-true-value=true
+						ng-false-value=false> {{device.offState}}</td>
 				</tr>
 				<tr>
 					<td><label>Filter Address (comma separated list)</label></td>

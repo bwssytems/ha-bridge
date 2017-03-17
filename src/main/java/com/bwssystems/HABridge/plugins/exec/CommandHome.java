@@ -10,6 +10,7 @@ import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
 
@@ -31,6 +32,7 @@ public class CommandHome implements Home {
 		else
 			intermediate = anItem.getItem().getAsString();
 		intermediate = BrightnessDecode.calculateReplaceIntensityValue(intermediate, itensity, targetBri, targetBriInc, false);
+		intermediate = DeviceDataDecode.replaceDeviceData(intermediate, device);
 		intermediate = TimeDecode.replaceTimeValue(intermediate);
 		String anError = doExecRequest(intermediate, lightId);
 		if (anError != null) {

@@ -11,6 +11,7 @@ import com.bwssystems.HABridge.api.hue.HueError;
 import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
 import com.google.gson.Gson;
@@ -49,12 +50,14 @@ public class HTTPHome implements Home {
 
 			String anUrl = BrightnessDecode.calculateReplaceIntensityValue(theUrl,
 					intensity, targetBri, targetBriInc, false);
-
+			anUrl = DeviceDataDecode.replaceDeviceData(anUrl, device);
 			anUrl = TimeDecode.replaceTimeValue(anUrl);
+
 			String aBody = null;
 			if(anItem.getHttpBody()!= null && !anItem.getHttpBody().isEmpty()) {
 				aBody = BrightnessDecode.calculateReplaceIntensityValue(anItem.getHttpBody(),
 						intensity, targetBri, targetBriInc, false);
+				aBody = DeviceDataDecode.replaceDeviceData(aBody, device);
 				aBody = TimeDecode.replaceTimeValue(aBody);
 			}
 			// make call
