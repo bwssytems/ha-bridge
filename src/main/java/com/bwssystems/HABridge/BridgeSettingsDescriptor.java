@@ -435,11 +435,14 @@ public class BridgeSettingsDescriptor {
 
 	public void setupInternalTestUser() {
 		boolean found = false;
-		for (String key : whitelist.keySet()) {
-			if(key.equals(DEFAULT_INTERNAL_USER))
-				found = true;
+		if(whitelist != null) {
+			for (String key : whitelist.keySet()) {
+				if(key.equals(DEFAULT_INTERNAL_USER)) {
+					found = true;
+					break;
+				}
+			}
 		}
-		
 		if(!found) {
 			newWhitelistUser(DEFAULT_INTERNAL_USER, DEFAULT_USER_DESCRIPTION);
 		}
