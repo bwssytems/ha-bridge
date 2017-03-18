@@ -2347,7 +2347,7 @@ app.controller('DomoticzController', function ($scope, $location, $http, bridgeS
 		}
 		else {
 			$scope.selectAll = true;
-			for(var x = 0; x < bridgeService.state.haldevices.length; x++) {
+			for(var x = 0; x < bridgeService.state.domoticzdevices.length; x++) {
 				if($scope.bulk.devices.indexOf(bridgeService.state.domoticzdevices[x]) < 0)
 					$scope.bulk.devices.push(bridgeService.state.domoticzdevices[x].devicename);
 			}
@@ -2469,7 +2469,7 @@ app.controller('LifxController', function ($scope, $location, $http, bridgeServi
 		}
 		else {
 			$scope.selectAll = true;
-			for(var x = 0; x < bridgeService.state.haldevices.length; x++) {
+			for(var x = 0; x < bridgeService.state.lifxdevices.length; x++) {
 				if($scope.bulk.devices.indexOf(bridgeService.state.lifxdevices[x]) < 0)
 					$scope.bulk.devices.push(bridgeService.state.lifxdevices[x].devicename);
 			}
