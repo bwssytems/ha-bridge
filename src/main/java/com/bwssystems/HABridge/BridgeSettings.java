@@ -26,11 +26,13 @@ public class BridgeSettings extends BackupHandler {
 	private static final Logger log = LoggerFactory.getLogger(BridgeSettings.class);
 	private BridgeSettingsDescriptor theBridgeSettings;
 	private BridgeControlDescriptor bridgeControl;
+	private BridgeSecurityDescriptor bridgeSecurity;
 	
 	public BridgeSettings() {
 		super();
 		bridgeControl = new BridgeControlDescriptor();
 		theBridgeSettings = new BridgeSettingsDescriptor();
+		bridgeSecurity = new BridgeSecurityDescriptor();
         String ipV6Stack = System.getProperty("ipV6Stack");
         if(ipV6Stack == null || !ipV6Stack.equalsIgnoreCase("true")) {
         	System.setProperty("java.net.preferIPv4Stack" , "true");
@@ -42,6 +44,9 @@ public class BridgeSettings extends BackupHandler {
 	}
 	public BridgeSettingsDescriptor getBridgeSettingsDescriptor() {
 		return theBridgeSettings;
+	}
+	public BridgeSecurityDescriptor getBridgeSecurity() {
+		return bridgeSecurity;
 	}
 	public void buildSettings() {
         String addressString = null;

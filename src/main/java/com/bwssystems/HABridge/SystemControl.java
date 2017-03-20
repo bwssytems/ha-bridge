@@ -109,6 +109,21 @@ public class SystemControl {
 			return theLogServiceMgr.getConfiguredLoggers();
 	    }, new JsonTransformer());
 
+//      http://ip_address:port/system/presslinkbutton CORS request
+	    options(SYSTEM_CONTEXT + "/presslinkbutton", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+//      http://ip_address:port/system/presslinkbutton which sets the link button for device registration
+		put(SYSTEM_CONTEXT + "/presslinkbutton", "application/json", (request, response) -> {
+			log.info("Link button pressed....");
+            return null;
+        }, new JsonTransformer());
+
 //      http://ip_address:port/system/logmgmt/update CORS request
 	    options(SYSTEM_CONTEXT + "/logmgmt/update", "application/json", (request, response) -> {
 	        response.status(HttpStatus.SC_OK);
