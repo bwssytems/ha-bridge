@@ -3,6 +3,7 @@ package com.bwssystems.HABridge;
 public class BridgeControlDescriptor {
 	private boolean reinit;
 	private boolean stop;
+	private boolean linkButton;
 
 	public BridgeControlDescriptor() {
 		super();
@@ -21,5 +22,13 @@ public class BridgeControlDescriptor {
 	}
 	public void setStop(boolean stop) {
 		this.stop = stop;
+	}
+
+	public boolean isLinkButton() {
+		return linkButton;
+	}
+
+	public void setLinkButton(boolean linkButton) {
+		this.linkButton = linkButton;
 	}
 }

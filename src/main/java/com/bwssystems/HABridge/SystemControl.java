@@ -12,6 +12,7 @@ import java.net.MulticastSocket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Timer;
 
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -121,6 +122,9 @@ public class SystemControl {
 //      http://ip_address:port/system/presslinkbutton which sets the link button for device registration
 		put(SYSTEM_CONTEXT + "/presslinkbutton", "application/json", (request, response) -> {
 			log.info("Link button pressed....");
+			bridgeSettings.getBridgeControl().setLinkButton(true);
+			Timer theTimer = new Timer();
+			theTimer.schedule(new LinkButtonPressed(bridgeSettings.getBridgeControl(), theTimer), 30000);
             return null;
         }, new JsonTransformer());
 

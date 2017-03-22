@@ -576,7 +576,7 @@ public class HueMulator {
 
 	private String basicListHandler(String type, String userId, String requestIp) {
 		log.debug("hue " + type + " list requested: " + userId + " from " + requestIp);
-		HueError[] theErrors = bridgeSettings.validateWhitelistUser(userId, null, false);
+		HueError[] theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors != null) {
 			if(bridgeSettings.isSettingsChanged())
 				bridgeSettingMaster.updateConfigFile();
@@ -590,7 +590,7 @@ public class HueMulator {
 		log.debug("hue group list requested: " + userId + " from " + requestIp);
 		HueError[] theErrors = null;
 		Map<String, GroupResponse> groupResponseMap = null;
-		theErrors = bridgeSettings.validateWhitelistUser(userId, null, false);
+		theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors == null) {
 			if(bridgeSettings.isSettingsChanged())
 				bridgeSettingMaster.updateConfigFile();
@@ -607,7 +607,7 @@ public class HueMulator {
 	private Object groupsIdHandler(String groupId, String userId, String requestIp) {
 		log.debug("hue group id: <" + groupId + "> requested: " + userId + " from " + requestIp);
 		HueError[] theErrors = null;
-		theErrors = bridgeSettings.validateWhitelistUser(userId, null, false);
+		theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors == null) {
 			if(bridgeSettings.isSettingsChanged())
 				bridgeSettingMaster.updateConfigFile();
@@ -632,7 +632,7 @@ public class HueMulator {
 		if (bridgeSettings.isTraceupnp())
 			log.info("Traceupnp: hue lights list requested: " + userId + " from " + requestIp);
 		log.debug("hue lights list requested: " + userId + " from " + requestIp);
-		theErrors = bridgeSettings.validateWhitelistUser(userId, null, false);
+		theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors == null) {
 			if(bridgeSettings.isSettingsChanged())
 				bridgeSettingMaster.updateConfigFile();
@@ -642,28 +642,30 @@ public class HueMulator {
 			deviceResponseMap = new HashMap<String, DeviceResponse>();
 			for (DeviceDescriptor device : deviceList) {
 				DeviceResponse deviceResponse = null;
-				if (device.containsType(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) {
-					CallItem[] callItems = null;
-					try {
-						if(device.getOnUrl() != null)
-							callItems = aGsonHandler.fromJson(device.getOnUrl(), CallItem[].class);
-					} catch(JsonSyntaxException e) {
-						log.warn("Could not decode Json for url items to get Hue state for device: " + device.getName());
-						callItems = null;
-					}
-					
-					for (int i = 0; callItems != null && i < callItems.length; i++) {
-						if((callItems[i].getType() != null && callItems[i].getType().equals(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) ||
-									(callItems[i].getItem().getAsString().contains("hueName"))) {
-							deviceResponse = myHueHome.getHueDeviceInfo(callItems[i], device);
-							i = callItems.length;
+				if(!device.isInactive()) {
+					if (device.containsType(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) {
+						CallItem[] callItems = null;
+						try {
+							if(device.getOnUrl() != null)
+								callItems = aGsonHandler.fromJson(device.getOnUrl(), CallItem[].class);
+						} catch(JsonSyntaxException e) {
+							log.warn("Could not decode Json for url items to get Hue state for device: " + device.getName());
+							callItems = null;
+						}
+						
+						for (int i = 0; callItems != null && i < callItems.length; i++) {
+							if((callItems[i].getType() != null && callItems[i].getType().equals(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) ||
+										(callItems[i].getItem().getAsString().contains("hueName"))) {
+								deviceResponse = myHueHome.getHueDeviceInfo(callItems[i], device);
+								i = callItems.length;
+							}
 						}
 					}
+	
+					if (deviceResponse == null)
+						deviceResponse = DeviceResponse.createResponse(device);
+					deviceResponseMap.put(device.getId(), deviceResponse);
 				}
-
-				if (deviceResponse == null)
-					deviceResponse = DeviceResponse.createResponse(device);
-				deviceResponseMap.put(device.getId(), deviceResponse);
 			}
 		}
 		
@@ -677,43 +679,51 @@ public class HueMulator {
 		UserCreateRequest aNewUser = null;
 		String newUser = null;
 		String aDeviceType = null;
+		boolean toContinue = false;
 
 		if (bridgeSettings.isTraceupnp())
 			log.info("Traceupnp: hue api user create requested: " + body + " from " + ipAddress);
-		log.debug("hue api user create requested: " + body + " from " + ipAddress);
-
-		if (body != null && !body.isEmpty()) {
-			try {
-				aNewUser = aGsonHandler.fromJson(body, UserCreateRequest.class);
-			} catch (Exception e) {
-				log.warn("Could not add user. Request garbled: " + body);
-				return aGsonHandler.toJson(HueErrorResponse.createResponse("2", "/",
-						"Could not add user.", null, null, null).getTheErrors(), HueError[].class);				
-			}
-			newUser = aNewUser.getUsername();
-			aDeviceType = aNewUser.getDevicetype();
-		}
-
-		if (aDeviceType == null)
-			aDeviceType = "<not given>";
-
-		if (newUser == null) {
-			newUser = bridgeSettings.createWhitelistUser(aDeviceType);
-		}
-		else {
-			bridgeSettings.validateWhitelistUser(newUser, aDeviceType, false);
-		}
-
-		if(bridgeSettings.isSettingsChanged())
-			bridgeSettingMaster.updateConfigFile();
-
-		if (bridgeSettings.isTraceupnp())
-			log.info("Traceupnp: hue api user create requested for device type: " + aDeviceType + " and username: "
-					+ newUser + (followingSlash ? " /api/ called" : ""));
-		log.debug("hue api user create requested for device type: " + aDeviceType + " and username: " + newUser + (followingSlash ? " /api/ called" : ""));
-
-		return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";
 		
+		if(bridgeSettingMaster.getBridgeSecurity().isUseLinkButton() && bridgeSettingMaster.getBridgeControl().isLinkButton())
+			toContinue = true;
+		else if(!bridgeSettingMaster.getBridgeSecurity().isUseLinkButton())
+			toContinue = true;
+		
+		if(toContinue) {
+			log.debug("hue api user create requested: " + body + " from " + ipAddress);
+	
+			if (body != null && !body.isEmpty()) {
+				try {
+					aNewUser = aGsonHandler.fromJson(body, UserCreateRequest.class);
+				} catch (Exception e) {
+					log.warn("Could not add user. Request garbled: " + body);
+					return aGsonHandler.toJson(HueErrorResponse.createResponse("2", "/",
+							"Could not add user.", null, null, null).getTheErrors(), HueError[].class);				
+				}
+				newUser = aNewUser.getUsername();
+				aDeviceType = aNewUser.getDevicetype();
+			}
+	
+			if (aDeviceType == null)
+				aDeviceType = "<not given>";
+	
+			if (newUser == null) {
+				newUser = bridgeSettings.createWhitelistUser(aDeviceType);
+			}
+			else {
+				bridgeSettings.validateWhitelistUser(newUser, aDeviceType, false);
+			}
+	
+			if(bridgeSettings.isSettingsChanged())
+				bridgeSettingMaster.updateConfigFile();
+	
+			if (bridgeSettings.isTraceupnp())
+				log.info("Traceupnp: hue api user create requested for device type: " + aDeviceType + " and username: "
+						+ newUser + (followingSlash ? " /api/ called" : ""));
+			log.debug("hue api user create requested for device type: " + aDeviceType + " and username: " + newUser + (followingSlash ? " /api/ called" : ""));
+			return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";
+		}
+		return aGsonHandler.toJson(HueErrorResponse.createResponse("1", "/api/", "unauthorized user", null, null, null).getTheErrors());
 	}
 	
 	private Object getConfig(String userId, String ipAddress) {

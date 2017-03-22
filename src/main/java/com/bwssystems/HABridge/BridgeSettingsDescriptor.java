@@ -51,8 +51,8 @@ public class BridgeSettingsDescriptor {
 	private boolean domoticzconfigured;
 	private IpList somfyaddress;
 	private boolean somfyconfigured;
-
 	private boolean lifxconfigured;
+	private String securityData;
 	
 	public BridgeSettingsDescriptor() {
 		super();
@@ -294,6 +294,12 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setLifxconfigured(boolean lifxconfigured) {
 		this.lifxconfigured = lifxconfigured;
+	}
+	public String getSecurityData() {
+		return securityData;
+	}
+	public void setSecurityData(String securityData) {
+		this.securityData = securityData;
 	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
