@@ -1,33 +1,24 @@
 package com.bwssystems.HABridge;
 
+import java.util.Map;
+
 public class BridgeSecurityDescriptor {
-	private String uiPassword;
-	private boolean passwordSet;
+	private Map<String, User> users;
 	private boolean useLinkButton;
 	private String execGarden;
-	private boolean settingsChanged;
+	private boolean secureHueApi;
 
 	public BridgeSecurityDescriptor() {
 		super();
-		this.setUiPassword(null);
-		this.setPasswordSet(false);
 		this.setUseLinkButton(false);
 	}
 
-	public String getUiPassword() {
-		return uiPassword;
+	public Map<String, User> getUsers() {
+		return users;
 	}
 
-	public void setUiPassword(String uiPassword) {
-		this.uiPassword = uiPassword;
-	}
-
-	public boolean isPasswordSet() {
-		return passwordSet;
-	}
-
-	public void setPasswordSet(boolean passwordSet) {
-		this.passwordSet = passwordSet;
+	public void setUsers(Map<String, User> users) {
+		this.users = users;
 	}
 
 	public boolean isUseLinkButton() {
@@ -46,11 +37,26 @@ public class BridgeSecurityDescriptor {
 		this.execGarden = execGarden;
 	}
 
-	public boolean isSettingsChanged() {
-		return settingsChanged;
+	public boolean isSecureHueApi() {
+		return secureHueApi;
 	}
 
-	public void setSettingsChanged(boolean settingsChanged) {
-		this.settingsChanged = settingsChanged;
+	public void setSecureHueApi(boolean secureHueApi) {
+		this.secureHueApi = secureHueApi;
+	}
+
+	public boolean isSecure() {
+		boolean secureFlag = false;
+		if(users != null && !users.isEmpty()) {
+			for (Map.Entry<String, User> entry : users.entrySet())
+			{
+				if(entry.getValue().getPassword() != null && !entry.getValue().getPassword().isEmpty()) {
+					secureFlag = true;
+					break;
+				}
+			}
+		}
+		return secureFlag;
+		
 	}
 }

@@ -1,5 +1,6 @@
 package com.bwssystems.HABridge.hue;
 
+import com.bwssystems.HABridge.AuthFramework;
 import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.DeviceMapTypes;
@@ -40,7 +41,7 @@ import java.util.Map;
  * Based on Armzilla's HueMulator - a Philips Hue emulator using sparkjava rest server
  */
 
-public class HueMulator {
+public class HueMulator extends AuthFramework {
 	private static final Logger log = LoggerFactory.getLogger(HueMulator.class);
 	private static final String HUE_CONTEXT = "/api";
 

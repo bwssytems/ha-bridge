@@ -31,7 +31,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.read.CyclicBufferAppender;
 
-public class SystemControl {
+public class SystemControl extends AuthFramework {
     private static final Logger log = LoggerFactory.getLogger(SystemControl.class);
     public static final String CYCLIC_BUFFER_APPENDER_NAME = "CYCLIC";
     private LoggerContext lc; 
@@ -110,6 +110,13 @@ public class SystemControl {
 			return theLogServiceMgr.getConfiguredLoggers();
 	    }, new JsonTransformer());
 
+	    // http://ip_address:port/system/securityinfo gets the security info for the bridge
+    	get (SYSTEM_CONTEXT + "/securityinfo", "application/json", (request, response) -> {
+			log.debug("Get security info");
+			response.status(200);
+			return bridgeSettings.getBridgeSecurity().getSecurityInfo();
+	    }, new JsonTransformer());
+
 //      http://ip_address:port/system/presslinkbutton CORS request
 	    options(SYSTEM_CONTEXT + "/presslinkbutton", "application/json", (request, response) -> {
 	        response.status(HttpStatus.SC_OK);
@@ -125,6 +132,55 @@ public class SystemControl {
 			bridgeSettings.getBridgeControl().setLinkButton(true);
 			Timer theTimer = new Timer();
 			theTimer.schedule(new LinkButtonPressed(bridgeSettings.getBridgeControl(), theTimer), 30000);
+            return null;
+        }, new JsonTransformer());
+
+//      http://ip_address:port/system/setpassword CORS request
+	    options(SYSTEM_CONTEXT + "/setpassword", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+//      http://ip_address:port/system/setpassword which sets a password for a given user
+		post(SYSTEM_CONTEXT + "/setpassword", "application/json", (request, response) -> {
+			log.debug("setpassword....");
+            return null;
+        }, new JsonTransformer());
+
+//      http://ip_address:port/system/changesecurityinfo CORS request
+	    options(SYSTEM_CONTEXT + "/changesecurityinfo", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+//      http://ip_address:port/system/changesecurityinfo which sets the security settings other than passwords and users
+		post(SYSTEM_CONTEXT + "/changesecurityinfo", "application/json", (request, response) -> {
+			log.debug("changesecurityinfo....");
+			SecurityInfo theInfo = new Gson().fromJson(request.body(), SecurityInfo.class);
+			if(theInfo.getExecGarden() != null)
+				bridgeSettings.getBridgeSecurity().setExecGarden(theInfo.getExecGarden());
+			bridgeSettings.getBridgeSecurity().setUseLinkButton(theInfo.isUseLinkButton());
+            return null;
+        }, new JsonTransformer());
+
+//      http://ip_address:port/system/login CORS request
+	    options(SYSTEM_CONTEXT + "/login", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+//      http://ip_address:port/system/login validates the login
+		post(SYSTEM_CONTEXT + "/login", "application/json", (request, response) -> {
+			log.debug("login....");
             return null;
         }, new JsonTransformer());
 

@@ -25,10 +25,12 @@ public class BridgeSecurity {
             (byte) 0xde, (byte) 0x33, (byte) 0x10, (byte) 0x12,
         };
     private BridgeSecurityDescriptor securityDescriptor;
+	private boolean settingsChanged;
 
 	public BridgeSecurity(char[] theKey, String theData) {
 		habridgeKey = theKey;
 		securityDescriptor = null;
+		settingsChanged = false;
 		String anError = null;
 		if(theData != null && !theData.isEmpty()) {
 			try {
@@ -56,20 +58,28 @@ public class BridgeSecurity {
 		return securityDescriptor.isUseLinkButton();
 	}
 
-	public void setPassword(String aPassword) throws IOException {
-		if(aPassword != null) {
-			securityDescriptor.setUiPassword(String.valueOf(base64Decode(aPassword)));
-			securityDescriptor.setPasswordSet(true);
-		} else {
-			securityDescriptor.setUiPassword(null);
-			securityDescriptor.setPasswordSet(false);
+	public String setPassword(User aUser) throws IOException {
+		String error = null;
+		if(aUser != null) {
+			error = aUser.validate();
+			if(error == null) {
+				User theUser = securityDescriptor.getUsers().get(aUser.getUsername());
+				if(theUser != null) {
+					theUser.setPassword(aUser.getPassword());
+					theUser.setPassword2(null);
+					settingsChanged = true;
+				}
+			}
 		}
-		securityDescriptor.setSettingsChanged(true);
+		else
+			error = "invalid user object given";
+		
+		return error;
 	}
 
 	public void setExecGarden(String theGarden) {
 		securityDescriptor.setExecGarden(theGarden);
-		securityDescriptor.setSettingsChanged(true);
+		settingsChanged = true;
 	}
 
 	public String getExecGarden() {
@@ -77,22 +87,43 @@ public class BridgeSecurity {
 	}
 	public void setUseLinkButton(boolean useThis) {
 		securityDescriptor.setUseLinkButton(useThis);
-		securityDescriptor.setSettingsChanged(true);
+		settingsChanged = true;
 	}
 
-	public boolean validatePassword(String targetPassword) throws IOException {
-		if(securityDescriptor.isPasswordSet()) {
-			if(securityDescriptor.getUiPassword().equals(String.valueOf(base64Decode(targetPassword)))) 
+	public SecurityInfo getSecurityInfo() {
+		SecurityInfo theInfo = new SecurityInfo();
+		theInfo.setExecGarden(getExecGarden());
+		theInfo.setUseLinkButton(isUseLinkButton());
+		theInfo.setSecure(isSecure());
+		return theInfo;
+	}
+	public boolean validatePassword(User targetUser) throws IOException {
+		if(targetUser != null) {
+			User theUser = securityDescriptor.getUsers().get(targetUser.getUsername());
+			if(theUser.getPassword() != null) {
+				theUser.setPassword2(targetUser.getPassword());
+				if(theUser.validatePassword()) {
+					theUser.setPassword2(null);
+					return true;
+				}
+			} else {
+				log.warn("validating password when password is not set....");
 				return true;
-		} else {
-			log.warn("validating password when password is not set....");
-			return true;
+			}
 		}
 		return false;
 	}
 	
 	public boolean isSecure() {
-		return securityDescriptor.isPasswordSet();
+		return securityDescriptor.isSecure();
+	}
+
+	public boolean isSettingsChanged() {
+		return settingsChanged;
+	}
+
+	public void setSettingsChanged(boolean settingsChanged) {
+		this.settingsChanged = settingsChanged;
 	}
 
 	private String encrypt(String property) throws GeneralSecurityException, UnsupportedEncodingException {

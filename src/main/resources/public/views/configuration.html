@@ -33,6 +33,7 @@
 
 		<p>
 			<button class="btn btn-primary" type="submit" ng-click="renumberDevices()">Renumber Devices</button>
+			<button ng-if="bridge.securityInfo.useLinkButton" class="btn btn-primary" type="submit" ng-click="pushLinkButton()">Link</button>
 		</p>
 	<scrollable-table watch="bridge.devices">
 	<table class="table table-bordered table-striped table-hover">

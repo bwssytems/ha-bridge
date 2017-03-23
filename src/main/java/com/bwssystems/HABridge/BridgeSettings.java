@@ -1,6 +1,7 @@
 package com.bwssystems.HABridge;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -10,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
+import java.security.GeneralSecurityException;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -213,6 +215,18 @@ public class BridgeSettings extends BackupHandler {
         log.debug("Save HA Bridge settings.");
 		Path configPath = Paths.get(theBridgeSettings.getConfigfile());
     	JsonTransformer aRenderer = new JsonTransformer();
+    	if(bridgeSecurity.isSettingsChanged()) {
+    		try {
+				newBridgeSettings.setSecurityData(bridgeSecurity.getSecurityDescriptorData());
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (GeneralSecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		bridgeSecurity.setSettingsChanged(false);
+    	}
     	String  jsonValue = aRenderer.render(newBridgeSettings);
     	configWriter(jsonValue, configPath);
     	_loadConfig(configPath);

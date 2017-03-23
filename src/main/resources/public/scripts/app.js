@@ -63,6 +63,7 @@ app.run( function (bridgeService) {
 	bridgeService.loadBridgeSettings();
 	bridgeService.getHABridgeVersion();
 	bridgeService.getTestUser();
+	bridgeService.getSecurityInfo();
 	bridgeService.viewMapTypes();
 });
 
@@ -80,7 +81,10 @@ String.prototype.replaceAll = function (search, replace)
 
 app.service ('bridgeService', function ($http, $window, ngToast) {
 	var self = this;
-	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {}, mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: "", viewDevId: "", queueDevId: ""};
+	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {},
+			mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false,
+			isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false,
+			showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: "", viewDevId: "", queueDevId: "", securityInfo: {}};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
@@ -120,6 +124,12 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		ngToast.create({
 			className: "success",
 			content: theTitle});
+	};
+	
+	this.displayTimer = function (theTitle, timeMillis) {
+		ngToast.create({
+			className: "success",
+			content: theTitle + " in " + timeMillis + " milliseconds"});
 	};
 	
 	this.viewDevices = function () {
@@ -173,6 +183,28 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 				},
 				function (error) {
 					self.displayWarn("Cannot get testuser: ", error);
+				}
+		);
+	};
+
+	this.getSecurityInfo = function () {
+		return $http.get(this.state.systemsbase + "/securityinfo").then(
+				function (response) {
+					self.state.securityInfo = response.data;
+				},
+				function (error) {
+					self.displayWarn("Cannot get security info: ", error);
+				}
+		);
+	};
+
+	this.pushLinkButton = function () {
+		return $http.put(this.state.systemsbase + "/presslinkbutton").then(
+				function (response) {
+					self.displayTimer("Linnk your device in ", 30000);
+				},
+				function (error) {
+					self.displayWarn("Cannot get security info: ", error);
 				}
 		);
 	};
@@ -1227,6 +1259,9 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 	};
 	$scope.renumberDevices = function() {
 		bridgeService.renumberDevices();
+	};
+	$scope.pushLinkButton = function() {
+		bridgeService.pushLinkButton();
 	};
 	$scope.backupDeviceDb = function (optionalbackupname) {
 		bridgeService.backupDeviceDb(optionalbackupname);
@@ -2933,9 +2968,6 @@ app.filter('configuredSomfyDevices', function (bridgeService) {
 		return out;
 	}
 });
-
-
-
 
 app.controller('VersionController', function ($scope, bridgeService) {
 	$scope.bridge = bridgeService.state;

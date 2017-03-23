@@ -58,6 +58,8 @@
 						location.reload();
 					}
 				</script>
+				<button class="btn btn-warning"
+					type="submit" ng-click="updateSecurity()">Update Security Settings</button>
 			</p>
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
@@ -511,3 +513,19 @@
 		</table>
 	</div>
 </div>
+
+<script type="text/ng-template" id="securityDialog">
+		<div class="ngdialog-message">
+			<h2>Select value</h2>
+				<p>
+					    <input type="radio" ng-model="valueType" value="percentage" ng-change="changeScale()"> Percentage
+					    <input type="radio" ng-model="valueType" value="raw" ng-change="changeScale()"> Raw
+				</p>
+				<p>
+					<rzslider rz-slider-model="slider.value" rz-slider-options="slider.options"></rzslider>
+				</p>
+		</div>
+		<div class="ngdialog-buttons mt">
+			<button type="button" class="ngdialog-button ngdialog-button-primary" ng-click="setValue()">Set</button>
+		</div>
+	</script>
