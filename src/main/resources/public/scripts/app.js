@@ -79,7 +79,7 @@ String.prototype.replaceAll = function (search, replace)
 };
 
 
-app.service ('bridgeService', function ($http, $window, ngToast) {
+app.service ('bridgeService', function ($http, $window, ngToast, zxcvbn) {
 	var self = this;
 	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {},
 			mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false,
@@ -226,6 +226,11 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 				}
 		);
 	};
+
+	this.score = function() {
+        var compute = zxcvbn.apply(null, arguments);
+        return compute && compute.score;
+    }
 
 	this.aContainsB = function (a, b) {
 		return a.indexOf(b) >= 0;
@@ -1189,7 +1194,7 @@ app.controller('SecurityDialogCtrl', function ($scope, bridgeService, ngDialog) 
 
 	$scope.setSecurityInfo = function () {
 		ngDialog.close('ngdialog1');
-		bridgeService.changeSecuritySettings($scope.useLinkButton, $scope.secureHueApi, $scope.execGarden, $scope.aPassword, $scope.aPassword2);
+		bridgeService.changeSecuritySettings($scope.useLinkButton, $scope.secureHueApi, $scope.execGarden, $scope.password, $scope.password2);
 	};
 });
 
@@ -3015,7 +3020,7 @@ app.filter('passwordCount', [function() {
     };
 }]);
 
-app.directive('okPassword', ['zxcvbn', function(zxcvbn) {
+app.directive('okPassword', ['bridgeService', function(bridgeService) {
     return {
         // restrict to only attribute and class
         restrict: 'AC',
@@ -3031,7 +3036,7 @@ app.directive('okPassword', ['zxcvbn', function(zxcvbn) {
                     var pwd = $scope.password = $element.val();
 
                     // resolve password strength score using zxcvbn service
-                    $scope.passwordStrength = pwd ? (pwd.length > 7 && zxcvbn.score(pwd) || 0) : null;
+                    $scope.passwordStrength = pwd ? (pwd.length > 7 && bridgeService.score(pwd) || 0) : null;
 
                     // define the validity criterion for okPassword constraint
                     ngModelCtrl.$setValidity('okPassword', $scope.passwordStrength >= 2);
@@ -3042,14 +3047,6 @@ app.directive('okPassword', ['zxcvbn', function(zxcvbn) {
 }]);
 
 app.controller('FormController', function($scope) {});
-	app.factory('zxcvbn', [function() {
-        return {
-            score: function() {
-                var compute = zxcvbn.apply(null, arguments);
-                return compute && compute.score;
-            }
-        };
-    }]);
 
 app.directive('pwCheck', [function () {
         return {

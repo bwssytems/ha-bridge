@@ -541,7 +541,7 @@
 						<label>Change Password</label>
                         <div class="form-hint">If you are exposing this to the internet, you use a sufficiently strong password. Password must be more than 7 characters.</div>
 
-                        <input type="password" class="form-control ok-password" ng-class="(securityForm.password.$dirty && securityForm.password.$invalid) ? 'error' : ''" id="password" name="password" placeholder="Enter Password" ng-required="true" ng-model="aPassword">
+                        <input type="password" class="form-control ok-password" ng-class="(securityForm.password.$dirty && securityForm.password.$invalid) ? 'error' : ''" id="password" name="password" placeholder="Enter Password" ng-required="true" ng-model="password">
 
                         <div class="label password-count" ng-class="password.length > 7 ? 'label-success' : 'label-danger'" ng-cloak>{{ password | passwordCount:7 }}</div>
 
@@ -551,7 +551,7 @@
                 </div>
                 <div class="form-group">
 						<label>Confirm Password</label>
-						<input id="password-2" class="form-control"	type="password" ng-model="aPassword2" ng-required="true" pw-check="aPassword" />
+						<input id="password-2" class="form-control"	type="password" ng-model="password2" ng-required="true" pw-check="password" />
 						<div class="msg-block" ng-show="securityForm.$error">
 							<span class="msg-error" ng-show="securityForm.pw2.$error.pwmatch">Passwords don't match.</span> 
 						</div>
