@@ -1,4 +1,4 @@
-var app = angular.module ('habridge', ['ngRoute', 'ngToast', 'rzModule', 'ngDialog', 'scrollable-table']);
+var app = angular.module ('habridge', ['ngRoute', 'ngToast', 'rzModule', 'ngDialog', 'zxcvbn', 'scrollable-table']);
 
 app.config (function ($locationProvider, $routeProvider) {
     $locationProvider.hashPrefix('!');
@@ -194,6 +194,24 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 				},
 				function (error) {
 					self.displayWarn("Cannot get security info: ", error);
+				}
+		);
+	};
+	
+	this.changeSecuritySettings = function (useLinkButton, secureHueApi, execGarden, aPassword, aPassword2) {
+		var newSecurityInfo = {};
+		newSecurityInfo = {
+				useLinkButton: useLinkButton,
+				seucreHueApi: secureHueApi,
+				execGarden: execGarden
+				};
+		return $http.post(this.state.systemsbase + "/changesecurityinfo", newSecurityInfo ).then(
+				function (response) {
+					self.state.securityInfo = response.data;
+					self.displaySuccess("Updated security settings.")
+				},
+				function (error) {
+					self.displayWarn("Update ecurity settings Error: ", error);
 				}
 		);
 	};
@@ -981,7 +999,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 	};
 });
 
-app.controller ('SystemController', function ($scope, $location, $http, $window, bridgeService) {
+app.controller ('SystemController', function ($scope, $location, $http, $window, bridgeService, ngDialog) {
     bridgeService.viewConfigs();
     bridgeService.loadBridgeSettings();
     $scope.bridge = bridgeService.state;
@@ -1154,6 +1172,25 @@ app.controller ('SystemController', function ($scope, $location, $http, $window,
         else
             $scope.imgUrl = "glyphicon glyphicon-plus";
     };
+    
+    $scope.changeSeuritySettings = function () {
+		ngDialog.open({
+			template: 'securityDialog',
+			controller: 'SecurityDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
+    };
+});
+
+app.controller('SecurityDialogCtrl', function ($scope, bridgeService, ngDialog) {
+	$scope.useLinkButton = bridgeService.state.securityInfo.useLinkButton;
+	$scope.secureHueApi = bridgeService.state.securityInfo.secureHueApi;
+	$scope.execGarden = bridgeService.state.securityInfo.execGarden;
+
+	$scope.setSecurityInfo = function () {
+		ngDialog.close('ngdialog1');
+		bridgeService.changeSecuritySettings($scope.useLinkButton, $scope.secureHueApi, $scope.execGarden, $scope.aPassword, $scope.aPassword2);
+	};
 });
 
 app.controller('LogsController', function ($scope, $location, $http, $window, bridgeService) {
@@ -2968,6 +3005,66 @@ app.filter('configuredSomfyDevices', function (bridgeService) {
 		return out;
 	}
 });
+
+app.filter('passwordCount', [function() {
+    return function(value, peak) {
+        value = angular.isString(value) ? value : '';
+        peak = isFinite(peak) ? peak : 7;
+
+        return value && (value.length > peak ? peak + '+' : value.length);
+    };
+}]);
+
+app.directive('okPassword', ['zxcvbn', function(zxcvbn) {
+    return {
+        // restrict to only attribute and class
+        restrict: 'AC',
+
+        // use the NgModelController
+        require: 'ngModel',
+
+        // add the NgModelController as a dependency to your link function
+        link: function($scope, $element, $attrs, ngModelCtrl) {
+            $element.on('blur change keydown', function(evt) {
+                $scope.$evalAsync(function($scope) {
+                    // update the $scope.password with the element's value
+                    var pwd = $scope.password = $element.val();
+
+                    // resolve password strength score using zxcvbn service
+                    $scope.passwordStrength = pwd ? (pwd.length > 7 && zxcvbn.score(pwd) || 0) : null;
+
+                    // define the validity criterion for okPassword constraint
+                    ngModelCtrl.$setValidity('okPassword', $scope.passwordStrength >= 2);
+                });
+            });
+        }
+    };
+}]);
+
+app.controller('FormController', function($scope) {});
+	app.factory('zxcvbn', [function() {
+        return {
+            score: function() {
+                var compute = zxcvbn.apply(null, arguments);
+                return compute && compute.score;
+            }
+        };
+    }]);
+
+app.directive('pwCheck', [function () {
+        return {
+            require: 'ngModel',
+            link: function (scope, elem, attrs, ctrl) {
+                var firstPassword = '#' + attrs.pwCheck;
+                elem.add(firstPassword).on('keyup', function () {
+                    scope.$apply(function () {
+                        // console.info(elem.val() === $(firstPassword).val());
+                        ctrl.$setValidity('pwmatch', elem.val() === $(firstPassword).val());
+                    });
+                });
+            }
+        }
+}]);
 
 app.controller('VersionController', function ($scope, bridgeService) {
 	$scope.bridge = bridgeService.state;

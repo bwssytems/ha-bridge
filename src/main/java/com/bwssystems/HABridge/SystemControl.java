@@ -166,7 +166,8 @@ public class SystemControl extends AuthFramework {
 			if(theInfo.getExecGarden() != null)
 				bridgeSettings.getBridgeSecurity().setExecGarden(theInfo.getExecGarden());
 			bridgeSettings.getBridgeSecurity().setUseLinkButton(theInfo.isUseLinkButton());
-            return null;
+			bridgeSettings.getBridgeSecurity().setSecureHueApi(theInfo.isSeucreHueApi());
+            return bridgeSettings.getBridgeSecurity().getSecurityInfo();
         }, new JsonTransformer());
 
 //      http://ip_address:port/system/login CORS request

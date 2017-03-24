@@ -90,6 +90,13 @@ public class BridgeSecurity {
 		settingsChanged = true;
 	}
 
+	public boolean isSecureHueApi() {
+		return securityDescriptor.isSecureHueApi();
+	}
+	
+	public void setSecureHueApi(boolean theState) {
+		securityDescriptor.setSecureHueApi(theState);
+	}
 	public SecurityInfo getSecurityInfo() {
 		SecurityInfo theInfo = new SecurityInfo();
 		theInfo.setExecGarden(getExecGarden());

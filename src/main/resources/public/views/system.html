@@ -59,7 +59,7 @@
 					}
 				</script>
 				<button class="btn btn-warning"
-					type="submit" ng-click="updateSecurity()">Update Security Settings</button>
+					type="submit" ng-click="changeSeuritySettings()">Update Security Settings</button>
 			</p>
 			<table class="table table-bordered table-striped table-hover">
 				<thead>
@@ -515,17 +515,49 @@
 </div>
 
 <script type="text/ng-template" id="securityDialog">
-		<div class="ngdialog-message">
-			<h2>Select value</h2>
-				<p>
-					    <input type="radio" ng-model="valueType" value="percentage" ng-change="changeScale()"> Percentage
-					    <input type="radio" ng-model="valueType" value="raw" ng-change="changeScale()"> Raw
-				</p>
-				<p>
-					<rzslider rz-slider-model="slider.value" rz-slider-options="slider.options"></rzslider>
-				</p>
-		</div>
-		<div class="ngdialog-buttons mt">
-			<button type="button" class="ngdialog-button ngdialog-button-primary" ng-click="setValue()">Set</button>
-		</div>
+        <div class="form-container">
+
+            <form name="securityForm" role="form" ng-controller="FormController">
+               <legend class="form-label">Update Security Settings</legend>
+               <div class="form-group">
+						<label>Use Link Button    </label>
+					    <input type="checkbox"
+						ng-model="useLinkButton" ng-true-value=true
+						ng-false-value=false> {{useLinkButton}}
+                </div>
+                <div class="form-group">
+						<label>Use username/password for HUE Api    </label>
+					    <input type="checkbox"
+						ng-model="secureHueApi" ng-true-value=true
+						ng-false-value=false> {{secureHueApi}}
+                </div>
+                <div class="form-group">
+						<label>Secure Folder for scripts/executables</label>
+						<input id="exec-garden" class="form-control"
+						type="text" ng-model="execGarden"
+						placeholder="/home/pi/protectedscripts">
+                </div>
+                <div class="form-group">
+						<label>Change Password</label>
+                        <div class="form-hint">If you are exposing this to the internet, you use a sufficiently strong password. Password must be more than 7 characters.</div>
+
+                        <input type="password" class="form-control ok-password" ng-class="(securityForm.password.$dirty && securityForm.password.$invalid) ? 'error' : ''" id="password" name="password" placeholder="Enter Password" ng-required="true" ng-model="aPassword">
+
+                        <div class="label password-count" ng-class="password.length > 7 ? 'label-success' : 'label-danger'" ng-cloak>{{ password | passwordCount:7 }}</div>
+
+                        <div class="strength-meter">
+                            <div class="strength-meter-fill" data-strength="{{passwordStrength}}"></div>
+                        </div>
+                </div>
+                <div class="form-group">
+						<label>Confirm Password</label>
+						<input id="password-2" class="form-control"	type="password" ng-model="aPassword2" ng-required="true" pw-check="aPassword" />
+						<div class="msg-block" ng-show="securityForm.$error">
+							<span class="msg-error" ng-show="securityForm.pw2.$error.pwmatch">Passwords don't match.</span> 
+						</div>
+                </div>
+			<button type="button" class="ngdialog-button ngdialog-button-primary" ng-disabled="securityForm.$invalid" ng-click="setSecurityInfo()">Update</button>
+            </form>
+
+        </div>
 	</script>
