@@ -3,7 +3,7 @@ package com.bwssystems.HABridge;
 public class SecurityInfo {
 	private boolean useLinkButton;
 	private String execGarden;
-	private boolean seucreHueApi;
+	private boolean secureHueApi;
 	private boolean isSecure;
 	
 	public boolean isUseLinkButton() {
@@ -18,11 +18,11 @@ public class SecurityInfo {
 	public void setExecGarden(String execGarden) {
 		this.execGarden = execGarden;
 	}
-	public boolean isSeucreHueApi() {
-		return seucreHueApi;
+	public boolean isSecureHueApi() {
+		return secureHueApi;
 	}
-	public void setSeucreHueApi(boolean seucreHueApi) {
-		this.seucreHueApi = seucreHueApi;
+	public void setSecureHueApi(boolean secureHueApi) {
+		this.secureHueApi = secureHueApi;
 	}
 	public boolean isSecure() {
 		return isSecure;

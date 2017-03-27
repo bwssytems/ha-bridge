@@ -1,4 +1,4 @@
-var app = angular.module ('habridge', ['ngRoute', 'ngToast', 'rzModule', 'ngDialog', 'zxcvbn', 'scrollable-table']);
+var app = angular.module ('habridge', ['ngRoute', 'ngToast', 'rzModule', 'ngDialog', 'base64', 'scrollable-table']);
 
 app.config (function ($locationProvider, $routeProvider) {
     $locationProvider.hashPrefix('!');
@@ -79,12 +79,12 @@ String.prototype.replaceAll = function (search, replace)
 };
 
 
-app.service ('bridgeService', function ($http, $window, ngToast, zxcvbn) {
+app.service ('bridgeService', function ($http, $base64, ngToast) {
 	var self = this;
 	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {},
 			mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false,
 			isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false,
-			showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: "", viewDevId: "", queueDevId: "", securityInfo: {}};
+			showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: "", viewDevId: "", queueDevId: "", securityInfo: {}, username: "test"};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
@@ -198,7 +198,7 @@ app.service ('bridgeService', function ($http, $window, ngToast, zxcvbn) {
 		);
 	};
 	
-	this.changeSecuritySettings = function (useLinkButton, secureHueApi, execGarden, aPassword, aPassword2) {
+	this.changeSecuritySettings = function (useLinkButton, secureHueApi, execGarden) {
 		var newSecurityInfo = {};
 		newSecurityInfo = {
 				useLinkButton: useLinkButton,
@@ -216,6 +216,42 @@ app.service ('bridgeService', function ($http, $window, ngToast, zxcvbn) {
 		);
 	};
 
+	this.changePassword = function (aPassword, aPassword2) {
+		var newUserInfo = {};
+		newUserInfo = {
+				username: self.state.username,
+				password: aPassword,
+				password2: aPassword2
+				};
+		var theEncodedPayload = $base64.encode(angular.toJson(newUserInfo));
+		return $http.post(this.state.systemsbase + "/setpassword", theEncodedPayload ).then(
+				function (response) {
+					self.displaySuccess("Password updated")
+				},
+				function (error) {
+					self.displayWarn("Update password Error: ", error);
+				}
+		);
+	};
+
+	this.addUser = function (username, aPassword, aPassword2) {
+		var newUserInfo = {};
+		newUserInfo = {
+				username: username,
+				password: aPassword,
+				password2: aPassword2
+				};
+		var theEncodedPayload = $base64.encode(angular.toJson(newUserInfo));
+		return $http.post(this.state.systemsbase + "/adduser", theEncodedPayload ).then(
+				function (response) {
+					self.displaySuccess("User added")
+				},
+				function (error) {
+					self.displayWarn("User add Error: ", error);
+				}
+		);
+	};
+
 	this.pushLinkButton = function () {
 		return $http.put(this.state.systemsbase + "/presslinkbutton").then(
 				function (response) {
@@ -226,11 +262,6 @@ app.service ('bridgeService', function ($http, $window, ngToast, zxcvbn) {
 				}
 		);
 	};
-
-	this.score = function() {
-        var compute = zxcvbn.apply(null, arguments);
-        return compute && compute.score;
-    }
 
 	this.aContainsB = function (a, b) {
 		return a.indexOf(b) >= 0;
@@ -1004,7 +1035,7 @@ app.service ('bridgeService', function ($http, $window, ngToast, zxcvbn) {
 	};
 });
 
-app.controller ('SystemController', function ($scope, $location, $http, $window, bridgeService, ngDialog) {
+app.controller ('SystemController', function ($scope, $location, bridgeService, ngDialog) {
     bridgeService.viewConfigs();
     bridgeService.loadBridgeSettings();
     $scope.bridge = bridgeService.state;
@@ -1179,26 +1210,58 @@ app.controller ('SystemController', function ($scope, $location, $http, $window,
     };
     
     $scope.changeSeuritySettings = function () {
+    	bridgeService.getSecurityInfo();
 		ngDialog.open({
-			template: 'securityDialog',
+			template: 'views/securityDialog.html',
 			controller: 'SecurityDialogCtrl',
 			className: 'ngdialog-theme-default'
 		});
     };
 });
 
+app.directive('pwCheck', [function () {
+        return {
+            require: 'ngModel',
+            link: function (scope, elem, attrs, ctrl) {
+                var firstPassword = '#' + attrs.pwCheck;
+                elem.add(firstPassword).on('keyup', function () {
+                    scope.$apply(function () {
+                        // console.info(elem.val() === $(firstPassword).val());
+                        ctrl.$setValidity('pwmatch', elem.val() === $(firstPassword).val());
+                        scope.matched = (elem.val() === $(firstPassword).val());
+                    });
+                });
+            }
+        }
+}]);
+
 app.controller('SecurityDialogCtrl', function ($scope, bridgeService, ngDialog) {
-	$scope.useLinkButton = bridgeService.state.securityInfo.useLinkButton;
+	$scope.username = bridgeService.state.username;
 	$scope.secureHueApi = bridgeService.state.securityInfo.secureHueApi;
+	$scope.useLinkButton = bridgeService.state.securityInfo.useLinkButton;
 	$scope.execGarden = bridgeService.state.securityInfo.execGarden;
+	$scope.matched = false;
 
 	$scope.setSecurityInfo = function () {
+		bridgeService.changeSecuritySettings($scope.useLinkButton, $scope.secureHueApi, $scope.execGarden);
+	};
+	
+	$scope.changePassword = function () {
+		bridgeService.changePassword($scope.password, $scope.password2);
+	};
+	
+	$scope.dismissDialog = function () {
 		ngDialog.close('ngdialog1');
-		bridgeService.changeSecuritySettings($scope.useLinkButton, $scope.secureHueApi, $scope.execGarden, $scope.password, $scope.password2);
+	};
+	
+	$scope.setBlankPassword = function (theElementName) {
+		$scope.password = "";
+		var theElement = "#" + theElementName;
+		$(theElement).strength();
 	};
 });
 
-app.controller('LogsController', function ($scope, $location, $http, $window, bridgeService) {
+app.controller('LogsController', function ($scope, $location, bridgeService) {
     bridgeService.viewLogs();
     $scope.bridge = bridgeService.state;
     $scope.levels = ["INFO_INT", "WARN_INT", "DEBUG_INT", "TRACE_INT"];
@@ -1260,7 +1323,8 @@ function postrenderAction($timeout) {
         }, 0);
     }
 }
-app.controller('ViewingController', function ($scope, $location, $http, $window, bridgeService, ngDialog) {
+
+app.controller('ViewingController', function ($scope, $location, bridgeService, ngDialog) {
 
 	bridgeService.viewDevices();
 	bridgeService.viewBackups();
@@ -1385,7 +1449,7 @@ app.controller('DeleteDialogCtrl', function ($scope, bridgeService, ngDialog) {
 	};
 });
 
-app.controller('VeraController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('VeraController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.device_dim_control = "";
@@ -1540,7 +1604,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 	};
 });
 
-app.controller('HarmonyController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('HarmonyController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	bridgeService.viewHarmonyActivities();
@@ -1601,7 +1665,7 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 	};
 });
 
-app.controller('NestController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('NestController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	bridgeService.viewNestItems();
@@ -1702,7 +1766,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 	};
 });
 
-app.controller('HueController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('HueController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.bulk = { devices: [] };
@@ -1823,7 +1887,7 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 	};
 });
 
-app.controller('HalController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('HalController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.device_dim_control = "";
@@ -2128,7 +2192,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 	};
 });
 
-app.controller('MQTTController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('MQTTController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	bridgeService.viewMQTTDevices();
@@ -2173,7 +2237,7 @@ app.controller('MQTTController', function ($scope, $location, $http, bridgeServi
 	};
 });
 
-app.controller('HassController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('HassController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.device_dim_control = "";
@@ -2299,7 +2363,7 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 	};
 });
 
-app.controller('DomoticzController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('DomoticzController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.device_dim_control = "";
@@ -2454,7 +2518,7 @@ app.controller('DomoticzController', function ($scope, $location, $http, bridgeS
 	};
 });
 
-app.controller('LifxController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('LifxController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.device_dim_control = "";
@@ -2576,7 +2640,7 @@ app.controller('LifxController', function ($scope, $location, $http, bridgeServi
 	};
 });
 
-app.controller('SomfyController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('SomfyController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.device_dim_control = "";
@@ -2704,7 +2768,7 @@ app.controller('SomfyController', function ($scope, $location, $http, bridgeServ
 	};
 });
 
-app.controller('EditController', function ($scope, $location, $http, bridgeService) {
+app.controller('EditController', function ($scope, $location, bridgeService) {
 	bridgeService.viewMapTypes();
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
@@ -3010,58 +3074,6 @@ app.filter('configuredSomfyDevices', function (bridgeService) {
 		return out;
 	}
 });
-
-app.filter('passwordCount', [function() {
-    return function(value, peak) {
-        value = angular.isString(value) ? value : '';
-        peak = isFinite(peak) ? peak : 7;
-
-        return value && (value.length > peak ? peak + '+' : value.length);
-    };
-}]);
-
-app.directive('okPassword', ['bridgeService', function(bridgeService) {
-    return {
-        // restrict to only attribute and class
-        restrict: 'AC',
-
-        // use the NgModelController
-        require: 'ngModel',
-
-        // add the NgModelController as a dependency to your link function
-        link: function($scope, $element, $attrs, ngModelCtrl) {
-            $element.on('blur change keydown', function(evt) {
-                $scope.$evalAsync(function($scope) {
-                    // update the $scope.password with the element's value
-                    var pwd = $scope.password = $element.val();
-
-                    // resolve password strength score using zxcvbn service
-                    $scope.passwordStrength = pwd ? (pwd.length > 7 && bridgeService.score(pwd) || 0) : null;
-
-                    // define the validity criterion for okPassword constraint
-                    ngModelCtrl.$setValidity('okPassword', $scope.passwordStrength >= 2);
-                });
-            });
-        }
-    };
-}]);
-
-app.controller('FormController', function($scope) {});
-
-app.directive('pwCheck', [function () {
-        return {
-            require: 'ngModel',
-            link: function (scope, elem, attrs, ctrl) {
-                var firstPassword = '#' + attrs.pwCheck;
-                elem.add(firstPassword).on('keyup', function () {
-                    scope.$apply(function () {
-                        // console.info(elem.val() === $(firstPassword).val());
-                        ctrl.$setValidity('pwmatch', elem.val() === $(firstPassword).val());
-                    });
-                });
-            }
-        }
-}]);
 
 app.controller('VersionController', function ($scope, bridgeService) {
 	$scope.bridge = bridgeService.state;

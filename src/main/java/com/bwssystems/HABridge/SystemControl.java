@@ -13,6 +13,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Timer;
+import java.util.Base64;
 
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -110,12 +111,70 @@ public class SystemControl extends AuthFramework {
 			return theLogServiceMgr.getConfiguredLoggers();
 	    }, new JsonTransformer());
 
-	    // http://ip_address:port/system/securityinfo gets the security info for the bridge
-    	get (SYSTEM_CONTEXT + "/securityinfo", "application/json", (request, response) -> {
-			log.debug("Get security info");
-			response.status(200);
-			return bridgeSettings.getBridgeSecurity().getSecurityInfo();
-	    }, new JsonTransformer());
+//      http://ip_address:port/system/setpassword CORS request
+	    options(SYSTEM_CONTEXT + "/setpassword", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+//      http://ip_address:port/system/setpassword which sets a password for a given user
+		post(SYSTEM_CONTEXT + "/setpassword", "application/json", (request, response) -> {
+			log.debug("setpassword....");
+			String theDecodedPayload = new String(Base64.getDecoder().decode(request.body()));
+			User theUser = new Gson().fromJson(theDecodedPayload, User.class);
+			String errorMessage = bridgeSettings.getBridgeSecurity().setPassword(theUser);
+			if(errorMessage != null) {
+		        response.status(HttpStatus.SC_BAD_REQUEST);
+		        errorMessage = "{\"message\":\"" + errorMessage + "\"}";
+			}
+			else
+		        response.status(HttpStatus.SC_OK);
+
+            return errorMessage;
+        });
+
+//      http://ip_address:port/system/adduser CORS request
+	    options(SYSTEM_CONTEXT + "/adduser", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+//      http://ip_address:port/system/adduser which adds a new user
+		post(SYSTEM_CONTEXT + "/adduser", "application/json", (request, response) -> {
+			log.debug("adduser....");
+			String theDecodedPayload = new String(Base64.getDecoder().decode(request.body()));
+			User theUser = new Gson().fromJson(theDecodedPayload, User.class);
+			String errorMessage = theUser.validate();
+			if(errorMessage != null) {
+		        response.status(HttpStatus.SC_BAD_REQUEST);
+		        errorMessage = "{\"message\":\"" + errorMessage + "\"}";
+			} else {
+		        response.status(HttpStatus.SC_OK);
+			}
+
+            return errorMessage;
+        });
+
+//      http://ip_address:port/system/login CORS request
+	    options(SYSTEM_CONTEXT + "/login", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+//      http://ip_address:port/system/login validates the login
+		post(SYSTEM_CONTEXT + "/login", "application/json", (request, response) -> {
+			log.debug("login....");
+            return null;
+        }, new JsonTransformer());
 
 //      http://ip_address:port/system/presslinkbutton CORS request
 	    options(SYSTEM_CONTEXT + "/presslinkbutton", "application/json", (request, response) -> {
@@ -135,20 +194,12 @@ public class SystemControl extends AuthFramework {
             return null;
         }, new JsonTransformer());
 
-//      http://ip_address:port/system/setpassword CORS request
-	    options(SYSTEM_CONTEXT + "/setpassword", "application/json", (request, response) -> {
-	        response.status(HttpStatus.SC_OK);
-	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
-	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
-	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
-	        response.header("Content-Type", "text/html; charset=utf-8");
-	    	return "";
-	    });
-//      http://ip_address:port/system/setpassword which sets a password for a given user
-		post(SYSTEM_CONTEXT + "/setpassword", "application/json", (request, response) -> {
-			log.debug("setpassword....");
-            return null;
-        }, new JsonTransformer());
+	    // http://ip_address:port/system/securityinfo gets the security info for the bridge
+    	get (SYSTEM_CONTEXT + "/securityinfo", "application/json", (request, response) -> {
+			log.debug("Get security info");
+			response.status(200);
+			return bridgeSettings.getBridgeSecurity().getSecurityInfo();
+	    }, new JsonTransformer());
 
 //      http://ip_address:port/system/changesecurityinfo CORS request
 	    options(SYSTEM_CONTEXT + "/changesecurityinfo", "application/json", (request, response) -> {
@@ -166,23 +217,8 @@ public class SystemControl extends AuthFramework {
 			if(theInfo.getExecGarden() != null)
 				bridgeSettings.getBridgeSecurity().setExecGarden(theInfo.getExecGarden());
 			bridgeSettings.getBridgeSecurity().setUseLinkButton(theInfo.isUseLinkButton());
-			bridgeSettings.getBridgeSecurity().setSecureHueApi(theInfo.isSeucreHueApi());
+			bridgeSettings.getBridgeSecurity().setSecureHueApi(theInfo.isSecureHueApi());
             return bridgeSettings.getBridgeSecurity().getSecurityInfo();
-        }, new JsonTransformer());
-
-//      http://ip_address:port/system/login CORS request
-	    options(SYSTEM_CONTEXT + "/login", "application/json", (request, response) -> {
-	        response.status(HttpStatus.SC_OK);
-	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
-	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
-	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
-	        response.header("Content-Type", "text/html; charset=utf-8");
-	    	return "";
-	    });
-//      http://ip_address:port/system/login validates the login
-		post(SYSTEM_CONTEXT + "/login", "application/json", (request, response) -> {
-			log.debug("login....");
-            return null;
         }, new JsonTransformer());
 
 //      http://ip_address:port/system/logmgmt/update CORS request

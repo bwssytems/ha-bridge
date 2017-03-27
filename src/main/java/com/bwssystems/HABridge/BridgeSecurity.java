@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.util.Base64;
+import java.util.HashMap;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -63,12 +64,39 @@ public class BridgeSecurity {
 		if(aUser != null) {
 			error = aUser.validate();
 			if(error == null) {
-				User theUser = securityDescriptor.getUsers().get(aUser.getUsername());
-				if(theUser != null) {
-					theUser.setPassword(aUser.getPassword());
-					theUser.setPassword2(null);
+				if(securityDescriptor.getUsers() != null) {
+					User theUser = securityDescriptor.getUsers().get(aUser.getUsername());
+					if(theUser != null) {
+						theUser.setPassword(aUser.getPassword());
+						theUser.setPassword2(null);
+						settingsChanged = true;
+					}
+					else
+						error = "User not found";
+				}
+				else
+					error = "User not found";
+			}
+		}
+		else
+			error = "invalid user object given";
+		
+		return error;
+	}
+
+	public String addUser(User aUser) throws IOException {
+		String error = null;
+		if(aUser != null) {
+			error = aUser.validate();
+			if(error == null) {
+				if(securityDescriptor.getUsers() == null)
+					securityDescriptor.setUsers(new HashMap<String, User>());
+				if(securityDescriptor.getUsers().get(aUser.getUsername()) == null) {
+					securityDescriptor.getUsers().put(aUser.getUsername(), aUser);
 					settingsChanged = true;
 				}
+				else
+					error = "Invalid request";
 			}
 		}
 		else
@@ -101,6 +129,7 @@ public class BridgeSecurity {
 		SecurityInfo theInfo = new SecurityInfo();
 		theInfo.setExecGarden(getExecGarden());
 		theInfo.setUseLinkButton(isUseLinkButton());
+		theInfo.setSecureHueApi(isSecureHueApi());
 		theInfo.setSecure(isSecure());
 		return theInfo;
 	}
