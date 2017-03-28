@@ -59,11 +59,12 @@ public class SystemControl extends AuthFramework {
 //	This function sets up the sparkjava rest calls for the hue api
     public void setupServer() {
     	log.info("System control service started....");
-		before(SYSTEM_CONTEXT + "/*", (req, res) -> {
+		before(SYSTEM_CONTEXT + "/*", (request, response) -> {
 			if(bridgeSettings.getBridgeSecurity().isSecure()) {
-				User authUser = getAuthenticatedUser(req);
+				User authUser = getAuthenticatedUser(request);
 				if(authUser == null) {
-					halt(401, "You are not logged in....");
+					response.redirect("/login", 301);
+//					halt(401, "You are not logged in....");
 				}
 			}
 		});
@@ -173,6 +174,7 @@ public class SystemControl extends AuthFramework {
 		        errorMessage = "{\"message\":\"" + errorMessage + "\"}";
 			} else {
 		        response.status(HttpStatus.SC_OK);
+		        bridgeSettings.getBridgeSecurity().addUser(theUser);
 				bridgeSettings.save(bridgeSettings.getBridgeSettingsDescriptor());
 			}
 

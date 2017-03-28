@@ -53,6 +53,9 @@ app.config (function ($locationProvider, $routeProvider) {
 	}).when ('/lifxdevices', {
 		templateUrl: 'views/lifxdevice.html',
 		controller: 'LifxController'		
+	}).when ('/login', {
+		templateUrl: 'views/login.html',
+		controller: 'LoginController'		
 	}).otherwise ({
 		templateUrl: 'views/configuration.html',
 		controller: 'ViewingController'
@@ -248,6 +251,25 @@ app.service ('bridgeService', function ($http, $base64, ngToast) {
 				},
 				function (error) {
 					self.displayWarn("User add Error: ", error);
+				}
+		);
+	};
+
+	this.validateUser = function (username, aPassword) {
+		var newUserInfo = {};
+		newUserInfo = {
+				username: username,
+				password: aPassword
+				};
+		var theEncodedPayload = $base64.encode(angular.toJson(newUserInfo));
+		return $http.post(this.state.systemsbase + "/login", theEncodedPayload ).then(
+				function (response) {
+					var theResult = response.data;
+					self.state.username = theResult.user;
+					self.displaySuccess("Success!")
+				},
+				function (error) {
+					self.displayWarn("Login Error: ", error);
 				}
 		);
 	};
@@ -3113,6 +3135,14 @@ app.filter('configuredSomfyDevices', function (bridgeService) {
 		}
 		return out;
 	}
+});
+
+app.controller('LoginController', function ($scope, bridgeService) {
+	$scope.bridge = bridgeService.state;
+	
+	$scope.login = function(username, password) {
+		bridgeService.validateUser(username,password);
+	};
 });
 
 app.controller('VersionController', function ($scope, bridgeService) {
