@@ -242,7 +242,7 @@ app.service ('bridgeService', function ($http, $base64, ngToast) {
 				password2: aPassword2
 				};
 		var theEncodedPayload = $base64.encode(angular.toJson(newUserInfo));
-		return $http.post(this.state.systemsbase + "/adduser", theEncodedPayload ).then(
+		return $http.put(this.state.systemsbase + "/adduser", theEncodedPayload ).then(
 				function (response) {
 					self.displaySuccess("User added")
 				},
@@ -1212,12 +1212,36 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     $scope.changeSeuritySettings = function () {
     	bridgeService.getSecurityInfo();
 		ngDialog.open({
-			template: 'views/securityDialog.html',
+			template: 'views/securitydialog.html',
 			controller: 'SecurityDialogCtrl',
 			className: 'ngdialog-theme-default'
 		});
     };
 });
+
+app.directive('nuCheck', [function () {
+    return {
+        require: 'ngModel',
+        link: function (scope, elem, attrs, ctrl) {
+            var newUser = '#' + attrs.nuCheck;
+            elem.add(newUser).on('keyup', function () {
+                scope.$apply(function () {
+                    if($(newUser).val().length > 0 ) {
+                    	scope.addingUser = true;
+                    	scope.username = $(newUser).val();
+                    	if(scope.showPassword === false)
+                    		scope.showPassword = true;
+                    }
+                    else {
+                    	scope.addingUser = true;
+                    	scope.username = scope.loggedInUser;
+                    	scope.showPassword = scope.isSecure;
+                    }
+                });
+            });
+        }
+    }
+}]);
 
 app.directive('pwCheck', [function () {
         return {
@@ -1226,9 +1250,11 @@ app.directive('pwCheck', [function () {
                 var firstPassword = '#' + attrs.pwCheck;
                 elem.add(firstPassword).on('keyup', function () {
                     scope.$apply(function () {
-                        // console.info(elem.val() === $(firstPassword).val());
-                        ctrl.$setValidity('pwmatch', elem.val() === $(firstPassword).val());
-                        scope.matched = (elem.val() === $(firstPassword).val());
+                    	var isMatched = false;
+                    	if(elem.val().length > 0 && $(firstPassword).val().length > 0)
+                    		isMatched = (elem.val() === $(firstPassword).val());
+                        ctrl.$setValidity('pwmatch', isMatched);
+                        scope.matched = isMatched;
                     });
                 });
             }
@@ -1237,17 +1263,29 @@ app.directive('pwCheck', [function () {
 
 app.controller('SecurityDialogCtrl', function ($scope, bridgeService, ngDialog) {
 	$scope.username = bridgeService.state.username;
+	$scope.loggedInUser = bridgeService.state.username;
 	$scope.secureHueApi = bridgeService.state.securityInfo.secureHueApi;
 	$scope.useLinkButton = bridgeService.state.securityInfo.useLinkButton;
 	$scope.execGarden = bridgeService.state.securityInfo.execGarden;
+	$scope.isSecure = bridgeService.state.securityInfo.isSecure;
 	$scope.matched = false;
+	$scope.addingUser = false;
+	$scope.showPassword = $scope.isSecure;
+	$scope.firstTime = true;
 
 	$scope.setSecurityInfo = function () {
 		bridgeService.changeSecuritySettings($scope.useLinkButton, $scope.secureHueApi, $scope.execGarden);
 	};
 	
-	$scope.changePassword = function () {
-		bridgeService.changePassword($scope.password, $scope.password2);
+	$scope.changePassword = function (password, password2) {
+		bridgeService.changePassword(password, password2);
+	};
+	
+	$scope.addUser = function (newUser, password, password2) {
+		bridgeService.addUser(newUser, password, password2);
+		$scope.addingUser = false;
+		$scope.username = $scope.loggedInUser;
+		$scope.showPassword = $scope.isSecure;
 	};
 	
 	$scope.dismissDialog = function () {
@@ -1255,9 +1293,11 @@ app.controller('SecurityDialogCtrl', function ($scope, bridgeService, ngDialog) 
 	};
 	
 	$scope.setBlankPassword = function (theElementName) {
-		$scope.password = "";
-		var theElement = "#" + theElementName;
-		$(theElement).strength();
+		if($scope.firstTime) {
+			var theElement = "#" + theElementName;
+			$(theElement).strength();
+			$scope.firstTime = false;
+		}
 	};
 });
 

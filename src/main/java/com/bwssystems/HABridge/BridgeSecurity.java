@@ -133,21 +133,29 @@ public class BridgeSecurity {
 		theInfo.setSecure(isSecure());
 		return theInfo;
 	}
-	public boolean validatePassword(User targetUser) throws IOException {
-		if(targetUser != null) {
-			User theUser = securityDescriptor.getUsers().get(targetUser.getUsername());
-			if(theUser.getPassword() != null) {
-				theUser.setPassword2(targetUser.getPassword());
-				if(theUser.validatePassword()) {
-					theUser.setPassword2(null);
-					return true;
+	public LoginResult validatePassword(User targetUser) throws IOException {
+		LoginResult result = new LoginResult();
+		if(targetUser != null && targetUser.getUsername() != null) {
+			if(securityDescriptor.getUsers() != null && securityDescriptor.getUsers().get(targetUser.getUsername()) != null) {
+				User theUser = securityDescriptor.getUsers().get(targetUser.getUsername());
+				if(theUser.getPassword() != null) {
+					theUser.setPassword2(targetUser.getPassword());
+					if(theUser.validatePassword()) {
+						theUser.setPassword2(null);
+						result.setUser(targetUser);
+					}
+					else
+						result.setError("user or password not correct");
+				} else {
+					result.setError("input password is not set....");
 				}
-			} else {
-				log.warn("validating password when password is not set....");
-				return true;
 			}
+			else
+				result.setError("user or password not correct");
 		}
-		return false;
+		else
+			result.setError("input user not given");
+		return result;
 	}
 	
 	public boolean isSecure() {
