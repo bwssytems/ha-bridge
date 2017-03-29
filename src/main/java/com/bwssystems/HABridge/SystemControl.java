@@ -61,10 +61,12 @@ public class SystemControl extends AuthFramework {
     	log.info("System control service started....");
 		before(SYSTEM_CONTEXT + "/*", (request, response) -> {
 			if(bridgeSettings.getBridgeSecurity().isSecure()) {
+				String pathInfo = request.pathInfo();
+				if(pathInfo == null || !pathInfo.equals(SYSTEM_CONTEXT + "/login")) {
 				User authUser = getAuthenticatedUser(request);
 				if(authUser == null) {
-					response.redirect("/login", 301);
-//					halt(401, "You are not logged in....");
+					halt(401, "{\"message\":\"User not authenticated\"}");
+				}
 				}
 			}
 		});

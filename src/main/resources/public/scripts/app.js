@@ -1,73 +1,99 @@
-var app = angular.module ('habridge', ['ngRoute', 'ngToast', 'rzModule', 'ngDialog', 'base64', 'scrollable-table']);
+var app = angular.module ('habridge', ['ngRoute', 'ngToast', 'rzModule', 'ngDialog', 'base64', 'scrollable-table', 'ngResource', 'ngStorage']);
 
 app.config (function ($locationProvider, $routeProvider) {
     $locationProvider.hashPrefix('!');
 
     $routeProvider.when ('/', {
 		templateUrl: 'views/configuration.html',
-		controller: 'ViewingController'
+		controller: 'ViewingController',
+	    requiresAuthentication: true
 	}).when ('/system', {
 		templateUrl: 'views/system.html',
-		controller: 'SystemController'		
+		controller: 'SystemController',		
+		requiresAuthentication: true
 	}).when ('/logs', {
 		templateUrl: 'views/logs.html',
-		controller: 'LogsController'		
+		controller: 'LogsController',		
+		requiresAuthentication: true
 	}).when ('/editdevice', {
 		templateUrl: 'views/editdevice.html',
-		controller: 'EditController'		
+		controller: 'EditController',		
+		requiresAuthentication: true		
 	}).when ('/veradevices', {
 		templateUrl: 'views/veradevice.html',
-		controller: 'VeraController'		
+		controller: 'VeraController',		
+		requiresAuthentication: true		
 	}).when ('/verascenes', {
 		templateUrl: 'views/verascene.html',
-		controller: 'VeraController'		
+		controller: 'VeraController',		
+		requiresAuthentication: true		
 	}).when ('/harmonydevices', {
 		templateUrl: 'views/harmonydevice.html',
-		controller: 'HarmonyController'		
+		controller: 'HarmonyController',		
+		requiresAuthentication: true		
 	}).when ('/harmonyactivities', {
 		templateUrl: 'views/harmonyactivity.html',
-		controller: 'HarmonyController'		
+		controller: 'HarmonyController',		
+		requiresAuthentication: true		
 	}).when ('/nest', {
 		templateUrl: 'views/nestactions.html',
-		controller: 'NestController'		
+		controller: 'NestController',		
+		requiresAuthentication: true		
 	}).when ('/huedevices', {
 		templateUrl: 'views/huedevice.html',
-		controller: 'HueController'		
+		controller: 'HueController',		
+		requiresAuthentication: true		
 	}).when ('/haldevices', {
 		templateUrl: 'views/haldevice.html',
-		controller: 'HalController'		
+		controller: 'HalController',		
+		requiresAuthentication: true		
 	}).when ('/mqttmessages', {
 		templateUrl: 'views/mqttpublish.html',
-		controller: 'MQTTController'		
+		controller: 'MQTTController',		
+		requiresAuthentication: true		
 	}).when ('/hassdevices', {
 		templateUrl: 'views/hassdevice.html',
-		controller: 'HassController'		
+		controller: 'HassController',		
+		requiresAuthentication: true		
 	}).when ('/domoticzdevices', {
 		templateUrl: 'views/domoticzdevice.html',
-		controller: 'DomoticzController'
+		controller: 'DomoticzController',		
+		requiresAuthentication: true
 	}).when('/somfydevices', {
-           templateUrl: 'views/somfydevice.html',
-           controller: 'SomfyController'
-       }).otherwise ({
-		controller: 'DomoticzController'		
+        templateUrl: 'views/somfydevice.html',
+        controller: 'SomfyController',		
+   		requiresAuthentication: true
 	}).when ('/lifxdevices', {
 		templateUrl: 'views/lifxdevice.html',
-		controller: 'LifxController'		
+		controller: 'LifxController',		
+		requiresAuthentication: true		
 	}).when ('/login', {
 		templateUrl: 'views/login.html',
 		controller: 'LoginController'		
 	}).otherwise ({
 		templateUrl: 'views/configuration.html',
-		controller: 'ViewingController'
+		controller: 'ViewingController',		
+		requiresAuthentication: true
 	})
 });
 
-app.run( function (bridgeService) {
-	bridgeService.loadBridgeSettings();
-	bridgeService.getHABridgeVersion();
-	bridgeService.getTestUser();
-	bridgeService.getSecurityInfo();
-	bridgeService.viewMapTypes();
+app.run( function ($rootScope, $location,  Auth, bridgeService) {
+    Auth.init();
+    
+    $rootScope.$on('$routeChangeStart', function (event, next) {
+        if (!Auth.checkPermissionForView(next)){
+            event.preventDefault();
+            $location.path("/login");
+        }
+    });
+
+    if(Auth.isLoggedIn()) {
+	    bridgeService.loadBridgeSettings();
+		bridgeService.getHABridgeVersion();
+		bridgeService.getTestUser();
+		bridgeService.getSecurityInfo();
+		bridgeService.viewMapTypes();
+    }
 });
 
 String.prototype.replaceAll = function (search, replace)
@@ -3137,14 +3163,132 @@ app.filter('configuredSomfyDevices', function (bridgeService) {
 	}
 });
 
-app.controller('LoginController', function ($scope, bridgeService) {
-	$scope.bridge = bridgeService.state;
-	
+app.controller('LoginController', function ($scope, $location, Auth) {
+    $scope.failed = false;
 	$scope.login = function(username, password) {
-		bridgeService.validateUser(username,password);
+        Auth.login(username, password)
+        .then(function() {
+            $location.path("/");
+        }, function() {
+            $scope.failed = true;
+        });
 	};
 });
 
 app.controller('VersionController', function ($scope, bridgeService) {
 	$scope.bridge = bridgeService.state;
+});
+
+app.directive('permission', ['Auth', function(Auth) {
+	   return {
+	       restrict: 'A',
+	       scope: {
+	          permission: '='
+	       },
+	 
+	       link: function (scope, elem, attrs) {
+	            scope.$watch(Auth.isLoggedIn, function() {
+	                if (Auth.userHasPermission(scope.permission)) {
+	                    elem.show();
+	                } else {
+	                    elem.hide();
+	                }
+	            });                
+	       }
+	   }
+	}]);
+
+app.factory('Auth', function($resource, $rootScope, $sessionStorage, $http, $base64, bridgeService){
+     
+    var auth = {};
+     
+    /**
+     *  Saves the current user in the root scope
+     *  Call this in the app run() method
+     */
+    auth.init = function(){
+        if (auth.isLoggedIn()){
+            $rootScope.user = currentUser();
+        }
+    };
+         
+    auth.login = function(username, password){
+		var newUserInfo = {};
+		newUserInfo = {
+				username: username,
+				password: password
+				};
+		var theEncodedPayload = $base64.encode(angular.toJson(newUserInfo));
+		return $http.post(bridgeService.state.systemsbase + "/login", theEncodedPayload ).then(
+			function (response) {
+				var theResult = response.data;
+                $sessionStorage.user = theResult.user;    
+                $rootScope.user = $sessionStorage.user;
+        	    bridgeService.loadBridgeSettings();
+        		bridgeService.getHABridgeVersion();
+        		bridgeService.getTestUser();
+        		bridgeService.getSecurityInfo();
+        		bridgeService.viewMapTypes();
+            }, function(error) {
+            	bridgeService.displayWarn("Login Error: ", error);
+            });
+    };
+     
+ 
+    auth.logout = function() {
+        delete $sessionStorage.user;
+        delete $rootScope.user;
+    };
+     
+     
+    auth.checkPermissionForView = function(view) {
+        if (!view.requiresAuthentication) {
+            return true;
+        }
+         
+        return userHasPermissionForView(view);
+    };
+     
+     
+    var userHasPermissionForView = function(view){
+        if(!auth.isLoggedIn()){
+            return false;
+        }
+         
+        if(!view.permissions || !view.permissions.length){
+            return true;
+        }
+         
+        return auth.userHasPermission(view.permissions);
+    };
+     
+     
+    auth.userHasPermission = function(permissions){
+        if(!auth.isLoggedIn()){
+            return false;
+        }
+         
+        var found = false;
+        angular.forEach(permissions, function(permission, index){
+            if ($sessionStorage.user.user_permissions.indexOf(permission) >= 0){
+                found = true;
+                return;
+            }                        
+        });
+         
+        return found;
+    };
+     
+     
+    auth.currentUser = function(){
+        return $sessionStorage.user;
+    };
+     
+     
+    auth.isLoggedIn = function(){
+        return $sessionStorage.user != null;
+    };
+     
+ 
+    return auth;
 });
