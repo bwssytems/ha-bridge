@@ -59,23 +59,23 @@ ATTENTION: This requires JDK 1.8 to run
 ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
 
 ```
-java -jar ha-bridge-4.3.1.jar
+java -jar ha-bridge-4.5.0.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
-Create the directory and make sure that ha-bridge-4.3.1.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-4.5.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
 
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.3.1/ha-bridge-4.3.1.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.5.0/ha-bridge-4.5.0.jar
 ```
-Create the directory and make sure that ha-bridge-4.3.1.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-4.5.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.3.1/ha-bridge-4.3.1.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.5.0/ha-bridge-4.5.0.jar
 ```
 #### System Control Setup on a pi (preferred)
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
@@ -94,8 +94,8 @@ After=network.target
 
 [Service]
 Type=simple
-
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.3.1.jar
+WorkingDirectory=/home/pi/habridge
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.5.0.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -130,7 +130,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.3.1.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.5.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
@@ -213,6 +213,11 @@ The default ip address for the bridge to listen on is all interfaces (0.0.0.0). 
 ```
 java -jar -Dserver.ip=192.168.1.1 ha-bridge-W.X.Y.jar
 ```
+### -Dsecurity.key=`<Your Key To Encrypt Security Data>`
+The default security key is encoded into the Java code. This should not be used as anyone with access to the code can decode your passworsd. To override what the default , specify -Dsecurity.key=`<Your Key To Encrypt Security Data>` explicitly on the command line. This is will prevent any issues if your config file gets haced. The command line example:
+```
+java -jar -Dsecurity.key=Xfawer354WertSdf321234asd ha-bridge-W.X.Y.jar
+```
 ## HA Bridge Usage and Configuration
 This section will cover the basics of configuration and where this configuration can be done. This requires that you have started your bridge process and then have pointed your
 favorite web interface by going to the http://<my ip address>:<port> or http://localhost:<port> with port you have assigned. The default quick link is http://localhost for your reference.
@@ -226,6 +231,8 @@ This is where all of the configuration occurs for what ports and IP's the bridge
 This field is used to test the bridge server with the UPNP IP Address and to make sure that the bridge is responding.
 #### Bridge Control Buttons
 These buttons are for managing the bridge. The Save button is enabled when there is a change to the configuration. The Bridge Reinitialize button will recycle the internal running of the bridge in the java process. The Stop button will stop the java process. The Refresh button will refresh the page and settings.
+#### The Security Dialog
+This is where you can set the different security settings for the ha-bridge.
 #### Configuration Path and File
 The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify `<directory>/<filename>` explicitly.
 #### Device DB Path and File
@@ -307,7 +314,9 @@ Example from device.db:
 [{"item":<a String that is quoted or another JSON object>,"type":"<atype>"."count":X."delay":X."filterIPs":"<comma separated list of IP addresses that are valid>"."httpVerb":"<GET,PUT,POST>","httpBody":"<body info>","httpHeaders":[{"name":"header name","value":"header value"},{"name":"another header","value":"another value"}],"contentType":"<http content type i.e application/json>"},{"item":<another item>,"type":"<aType>"}]
 ```
 
-The Add/Edit tab will show you the fields to fill in for the above in a form, when you hcae completed putting in the things you want, make sure to hit the `Add` button at the right.
+The format of the example is in JSON where the JSON tags equate to the UI labels of the On Items/Dim Items/Off Items. i.e.: JSON item = UI Target Item, JSON type = UI Type, etc... 
+
+The Add/Edit tab will show you the fields to fill in for the above in a form, when you have completed putting in the things you want, make sure to hit the `Add` button at the right.
  
 The format of the item can be the default HTTP request which executes the URLs formatted as `http://<your stuff here>` as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use `https://<your secure call here>`. When using POST and PUT, you have the ability to specify the body that will be sent with the request as well as the application type for the http call.
 

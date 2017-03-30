@@ -68,9 +68,9 @@ public class HABridge {
 	        else {
 		        //Setup the device connection homes through the manager
 		        homeManager = new HomeManager();
-		        homeManager.buildHomes(bridgeSettings.getBridgeSettingsDescriptor(), udpSender);
+		        homeManager.buildHomes(bridgeSettings, udpSender);
 		        // setup the class to handle the resource setup rest api
-		        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), homeManager);
+		        theResources = new DeviceResource(bridgeSettings, homeManager);
 		        // setup the class to handle the upnp response rest api
 		        theSettingResponder = new UpnpSettingsResource(bridgeSettings.getBridgeSettingsDescriptor());
 		        theSettingResponder.setupServer();

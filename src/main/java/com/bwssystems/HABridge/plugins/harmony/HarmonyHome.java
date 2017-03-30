@@ -10,7 +10,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.IpList;
@@ -32,7 +32,7 @@ public class HarmonyHome implements Home {
 	private Boolean validHarmony;
 	private Gson aGsonHandler;
 
-	public HarmonyHome(BridgeSettingsDescriptor bridgeSettings) {
+	public HarmonyHome(BridgeSettings bridgeSettings) {
 		super();
 		createHome(bridgeSettings);
 	}
@@ -197,9 +197,9 @@ public class HarmonyHome implements Home {
 	}
 
 	@Override
-	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
+	public Home createHome(BridgeSettings bridgeSettings) {
         isDevMode = Boolean.parseBoolean(System.getProperty("dev.mode", "false"));
-        validHarmony = bridgeSettings.isValidHarmony();
+        validHarmony = bridgeSettings.getBridgeSettingsDescriptor().isValidHarmony();
 		log.info("Harmony Home created." + (validHarmony ? "" : " No Harmony devices configured.") + (isDevMode ? " DevMode is set." : ""));
 		if(validHarmony || isDevMode) {
 			hubs = new HashMap<String, HarmonyServer>();
@@ -214,16 +214,16 @@ public class HarmonyHome implements Home {
 				theList.add(devModeIp);
 				IpList thedevList = new IpList();
 				thedevList.setDevices(theList);
-				bridgeSettings.setHarmonyAddress(thedevList);
+				bridgeSettings.getBridgeSettingsDescriptor().setHarmonyAddress(thedevList);
 			}
-			Iterator<NamedIP> theList = bridgeSettings.getHarmonyAddress().getDevices().iterator();
+			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getHarmonyAddress().getDevices().iterator();
 			while(theList.hasNext() && validHarmony) {
 				NamedIP aHub = theList.next();
 				boolean loopControl = true;
 				int retryCount = 0;
 				while(loopControl) {
 					try {
-			      		hubs.put(aHub.getName(), HarmonyServer.setup(bridgeSettings, isDevMode, aHub));
+			      		hubs.put(aHub.getName(), HarmonyServer.setup(bridgeSettings.getBridgeSettingsDescriptor(), isDevMode, aHub));
 			      		loopControl = false;
 					} catch (Exception e) {
 						if(retryCount > 3) {

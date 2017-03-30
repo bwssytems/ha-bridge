@@ -34,7 +34,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.read.CyclicBufferAppender;
 
-public class SystemControl extends AuthFramework {
+public class SystemControl {
     private static final Logger log = LoggerFactory.getLogger(SystemControl.class);
     public static final String CYCLIC_BUFFER_APPENDER_NAME = "CYCLIC";
     private LoggerContext lc; 
@@ -62,11 +62,11 @@ public class SystemControl extends AuthFramework {
 		before(SYSTEM_CONTEXT + "/*", (request, response) -> {
 			if(bridgeSettings.getBridgeSecurity().isSecure()) {
 				String pathInfo = request.pathInfo();
-				if(pathInfo == null || !pathInfo.equals(SYSTEM_CONTEXT + "/login")) {
-				User authUser = getAuthenticatedUser(request);
-				if(authUser == null) {
-					halt(401, "{\"message\":\"User not authenticated\"}");
-				}
+				if(pathInfo == null || (!pathInfo.equals(SYSTEM_CONTEXT + "/login") && !pathInfo.equals(SYSTEM_CONTEXT + "/habridge/version"))) {
+					User authUser = bridgeSettings.getBridgeSecurity().getAuthenticatedUser(request);
+					if(authUser == null) {
+						halt(401, "{\"message\":\"User not authenticated\"}");
+					}
 				}
 			}
 		});
@@ -75,7 +75,7 @@ public class SystemControl extends AuthFramework {
 	    	log.debug("Get HA Bridge version: v" + version.getVersion());
 			response.status(HttpStatus.SC_OK);
 			response.type("application/json");
-	        return "{\"version\":\"" + version.getVersion() + "\"}";
+	        return "{\"version\":\"" + version.getVersion() + "\",\"isSecure\":" + bridgeSettings.getBridgeSecurity().isSecure() + "}";
 	    });
 
 	    // http://ip_address:port/system/habridge/testuser gets the valid test user for calling the api
@@ -175,8 +175,42 @@ public class SystemControl extends AuthFramework {
 		        response.status(HttpStatus.SC_BAD_REQUEST);
 		        errorMessage = "{\"message\":\"" + errorMessage + "\"}";
 			} else {
+		        errorMessage = bridgeSettings.getBridgeSecurity().addUser(theUser);
+				if(errorMessage == null) {
+			        response.status(HttpStatus.SC_OK);
+			        bridgeSettings.save(bridgeSettings.getBridgeSettingsDescriptor());
+				} else {
+			        response.status(HttpStatus.SC_BAD_REQUEST);
+			        errorMessage = "{\"message\":\"" + errorMessage + "\"}";
+				}
+			}
+
+			if(errorMessage == null)
+				errorMessage = "{}";
+			response.type("application/json");
+            return errorMessage;
+        });
+
+//      http://ip_address:port/system/deluser CORS request
+	    options(SYSTEM_CONTEXT + "/deluser", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+//      http://ip_address:port/system/deluser which dels a user
+		put(SYSTEM_CONTEXT + "/deluser", (request, response) -> {
+			log.debug("deluser....");
+			String theDecodedPayload = new String(Base64.getDecoder().decode(request.body()));
+			User theUser = new Gson().fromJson(theDecodedPayload, User.class);
+	        String errorMessage = bridgeSettings.getBridgeSecurity().delUser(theUser);
+			if(errorMessage != null) {
+		        response.status(HttpStatus.SC_BAD_REQUEST);
+		        errorMessage = "{\"message\":\"" + errorMessage + "\"}";
+			} else {
 		        response.status(HttpStatus.SC_OK);
-		        bridgeSettings.getBridgeSecurity().addUser(theUser);
 				bridgeSettings.save(bridgeSettings.getBridgeSettingsDescriptor());
 			}
 
@@ -202,7 +236,7 @@ public class SystemControl extends AuthFramework {
 			User theUser = new Gson().fromJson(theDecodedPayload, User.class);
 			LoginResult result = bridgeSettings.getBridgeSecurity().validatePassword(theUser);
 			if(result.getUser() != null)
-				addAuthenticatedUser(request, theUser);
+				bridgeSettings.getBridgeSecurity().addAuthenticatedUser(request, theUser);
 	        response.status(HttpStatus.SC_OK);
 			response.type("application/json");
             return result;

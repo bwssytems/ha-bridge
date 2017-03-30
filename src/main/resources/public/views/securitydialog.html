@@ -24,10 +24,13 @@
  					<button type="button" class="btn btn-primary" ng-click="setSecurityInfo()">Update</button>
 	 			</div>
                 <div class="form-group">
-						<label>New User</label>
+						<label>Add/Delete User</label>
 						<input id="new-user" name="new-user" class="form-control"
 						type="text" ng-model="newUser"
 						placeholder="someone" nu-check="new-user">
+	 			</div>
+                <div class="form-group">
+	 				<button type="button" class="btn btn-danger" ng-click="delUser(newUser)">Delete</button>
                 </div>
 	 			<div ng-if="showPassword" postrender-action="setBlankPassword('password-1')">
 	                <div class="form-group">

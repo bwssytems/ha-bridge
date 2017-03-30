@@ -1,9 +1,11 @@
 package com.bwssystems.HABridge.devicemanagmeent;
 
 import static spark.Spark.get;
+import static spark.Spark.halt;
 import static spark.Spark.options;
 import static spark.Spark.post;
 import static spark.Spark.put;
+import static spark.Spark.before;
 import static spark.Spark.delete;
 
 import java.util.Arrays;
@@ -15,9 +17,10 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.HomeManager;
+import com.bwssystems.HABridge.User;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.BackupFilename;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
@@ -36,11 +39,13 @@ public class DeviceResource {
     private static final Logger log = LoggerFactory.getLogger(DeviceResource.class);
     private DeviceRepository deviceRepository;
     private HomeManager homeManager;
+    private BridgeSettings bridgeSettings;
 	private Gson aGsonHandler;
     private static final Set<String> supportedVerbs = new HashSet<>(Arrays.asList("get", "put", "post"));
 
-	public DeviceResource(BridgeSettingsDescriptor theSettings, HomeManager aHomeManager) {
-		this.deviceRepository = new DeviceRepository(theSettings.getUpnpDeviceDb());
+	public DeviceResource(BridgeSettings theSettings, HomeManager aHomeManager) {
+		bridgeSettings = theSettings;
+		this.deviceRepository = new DeviceRepository(bridgeSettings.getBridgeSettingsDescriptor().getUpnpDeviceDb());
 		homeManager = aHomeManager;
 		aGsonHandler = new GsonBuilder().create();
 		setupEndpoints();
@@ -52,6 +57,14 @@ public class DeviceResource {
 
     private void setupEndpoints() {
     	log.info("HABridge device management service started.... ");
+		before(API_CONTEXT + "/*", (request, response) -> {
+			if(bridgeSettings.getBridgeSecurity().isSecure()) {
+					User authUser = bridgeSettings.getBridgeSecurity().getAuthenticatedUser(request);
+					if(authUser == null) {
+						halt(401, "{\"message\":\"User not authenticated\"}");
+					}
+			}
+		});
 	    // http://ip_address:port/api/devices CORS request
 	    options(API_CONTEXT, "application/json", (request, response) -> {
 	        response.status(HttpStatus.SC_OK);

@@ -14,7 +14,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
@@ -38,21 +38,21 @@ public class LifxHome implements Home {
 	private Boolean validLifx;
 	private Gson aGsonHandler;
 	
-	public LifxHome(BridgeSettingsDescriptor bridgeSettings) {
+	public LifxHome(BridgeSettings bridgeSettings) {
 		super();
 		createHome(bridgeSettings);
 	}
 
 	@Override
-	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
+	public Home createHome(BridgeSettings bridgeSettings) {
 		lifxMap = null;
 		aGsonHandler = null;
-		validLifx = bridgeSettings.isValidLifx();
+		validLifx = bridgeSettings.getBridgeSettingsDescriptor().isValidLifx();
 		log.info("LifxDevice Home created." + (validLifx ? "" : " No LifxDevices configured."));
 		if(validLifx) {
 	    	try {
 	    		log.info("Open Lifx client....");
-	    		InetAddress configuredAddress = InetAddress.getByName(bridgeSettings.getUpnpConfigAddress());
+	    		InetAddress configuredAddress = InetAddress.getByName(bridgeSettings.getBridgeSettingsDescriptor().getUpnpConfigAddress());
 	    		NetworkInterface networkInterface = NetworkInterface.getByInetAddress(configuredAddress);
 	    		InetAddress bcastInetAddr = null;
 	            if (networkInterface != null) {

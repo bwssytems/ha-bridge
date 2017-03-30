@@ -8,7 +8,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
@@ -26,7 +26,7 @@ public class MQTTHome implements Home {
 	private Boolean validMqtt;
 	private Gson aGsonHandler;
 
-	public MQTTHome(BridgeSettingsDescriptor bridgeSettings) {
+	public MQTTHome(BridgeSettings bridgeSettings) {
 		super();
 		createHome(bridgeSettings);
 	}
@@ -123,15 +123,15 @@ public class MQTTHome implements Home {
 	}
 
 	@Override
-	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
-		validMqtt = bridgeSettings.isValidMQTT();
+	public Home createHome(BridgeSettings bridgeSettings) {
+		validMqtt = bridgeSettings.getBridgeSettingsDescriptor().isValidMQTT();
 		log.info("MQTT Home created." + (validMqtt ? "" : " No MQTT Clients configured."));
 		if(validMqtt) {
 			aGsonHandler =
 					new GsonBuilder()
 					.create();
 			handlers = new HashMap<String, MQTTHandler>();
-			Iterator<NamedIP> theList = bridgeSettings.getMqttaddress().getDevices().iterator();
+			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getMqttaddress().getDevices().iterator();
 			while(theList.hasNext()) {
 				NamedIP aClientConfig = theList.next();
 				MQTTHandler aHandler = new MQTTHandler(aClientConfig);

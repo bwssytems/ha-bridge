@@ -9,17 +9,17 @@ public abstract class AuthFramework {
 		// TODO Auto-generated constructor stub
 	}
 
-	protected void addAuthenticatedUser(Request request, User u) {
+	public void addAuthenticatedUser(Request request, User u) {
 		request.session().attribute(USER_SESSION_ID, u);
 		
 	}
 
-	protected void removeAuthenticatedUser(Request request) {
+	public void removeAuthenticatedUser(Request request) {
 		request.session().removeAttribute(USER_SESSION_ID);
 		
 	}
 
-	protected User getAuthenticatedUser(Request request) {
+	public User getAuthenticatedUser(Request request) {
 		return request.session().attribute(USER_SESSION_ID);
 	}
 }

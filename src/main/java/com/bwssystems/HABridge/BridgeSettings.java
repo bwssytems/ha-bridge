@@ -185,7 +185,7 @@ public class BridgeSettings extends BackupHandler {
 		
 		String theKey = System.getProperty("security.key");
 		if(theKey == null)
-			theKey = "";
+			theKey = "IWantMyPasswordsToBeAbleToBeDecodedPleaseSeeTheReadme";
 		bridgeSecurity = new BridgeSecurity(theKey.toCharArray(), theBridgeSettings.getSecurityData());
 	}
 

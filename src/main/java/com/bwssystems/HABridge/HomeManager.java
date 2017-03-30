@@ -31,7 +31,7 @@ public class HomeManager {
 	}
 
 	// factory method
-	public void buildHomes(BridgeSettingsDescriptor bridgeSettings, UDPDatagramSender aUdpDatagramSender) {
+	public void buildHomes(BridgeSettings bridgeSettings, UDPDatagramSender aUdpDatagramSender) {
 		Home aHome = null;
         //setup the harmony connection if available
 		aHome = new HarmonyHome(bridgeSettings);

@@ -1,10 +1,10 @@
 package com.bwssystems.HABridge.hue;
 
-import com.bwssystems.HABridge.AuthFramework;
 import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.HomeManager;
+import com.bwssystems.HABridge.User;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.api.UserCreateRequest;
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
@@ -23,7 +23,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
+import static spark.Spark.before;
 import static spark.Spark.get;
+import static spark.Spark.halt;
 import static spark.Spark.options;
 import static spark.Spark.post;
 import static spark.Spark.put;
@@ -41,7 +43,7 @@ import java.util.Map;
  * Based on Armzilla's HueMulator - a Philips Hue emulator using sparkjava rest server
  */
 
-public class HueMulator extends AuthFramework {
+public class HueMulator {
 	private static final Logger log = LoggerFactory.getLogger(HueMulator.class);
 	private static final String HUE_CONTEXT = "/api";
 
@@ -66,6 +68,14 @@ public class HueMulator extends AuthFramework {
 	// This function sets up the sparkjava rest calls for the hue api
 	public void setupServer() {
 		log.info("Hue emulator service started....");
+		before(HUE_CONTEXT + "/*", (request, response) -> {
+			if(bridgeSettingMaster.getBridgeSecurity().isSecureHueApi()) {
+					User authUser = bridgeSettingMaster.getBridgeSecurity().getAuthenticatedUser(request);
+					if(authUser == null) {
+						halt(401, "{\"message\":\"User not authenticated\"}");
+					}
+			}
+		});
 		// http://ip_address:port/api/{userId}/groups returns json objects of
 		// all groups configured
 		get(HUE_CONTEXT + "/:userid/groups", "application/json", (request, response) -> {
@@ -731,7 +741,7 @@ public class HueMulator extends AuthFramework {
 		if (bridgeSettings.isTraceupnp())
 			log.info("Traceupnp: hue api/:userid/config config requested: " + userId + " from " + ipAddress);
 		log.debug("hue api config requested: " + userId + " from " + ipAddress);
-		if (bridgeSettings.validateWhitelistUser(userId, null, true) != null) {
+		if (bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton()) != null) {
 			log.debug("hue api config requested, No User supplied, returning public config");
 			HuePublicConfig apiResponse = HuePublicConfig.createConfig("Philips hue",
 					bridgeSettings.getUpnpConfigAddress(), bridgeSettings.getHubversion());
@@ -747,7 +757,7 @@ public class HueMulator extends AuthFramework {
 	@SuppressWarnings("unchecked")
 	private Object getFullState(String userId, String ipAddress) {
 		log.debug("hue api full state requested: " + userId + " from " + ipAddress);
-		HueError[] theErrors = bridgeSettings.validateWhitelistUser(userId, null, true);
+		HueError[] theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors != null)
 			return theErrors;
 
@@ -761,7 +771,7 @@ public class HueMulator extends AuthFramework {
 	
 	private Object getLight(String userId, String lightId, String ipAddress) {
 		log.debug("hue light requested: " + lightId + " for user: " + userId + " from " + ipAddress);
-		HueError[] theErrors = bridgeSettings.validateWhitelistUser(userId, null, true);
+		HueError[] theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors != null)
 			return theErrors;
 
@@ -805,7 +815,7 @@ public class HueMulator extends AuthFramework {
 		Integer targetBri = null;
 		Integer targetBriInc = null;
 		log.debug("Update state requested: " + userId + " from " + ipAddress + " body: " + body);
-		HueError[] theErrors = bridgeSettings.validateWhitelistUser(userId, null, true);
+		HueError[] theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors != null)
 			return aGsonHandler.toJson(theErrors);
 		try {
@@ -855,7 +865,7 @@ public class HueMulator extends AuthFramework {
 		aMultiUtil.setDelayDefault(bridgeSettings.getButtonsleep());
 		aMultiUtil.setSetCount(1);
 		log.debug("hue state change requested: " + userId + " from " + ipAddress + " body: " + body);
-		HueError[] theErrors = bridgeSettings.validateWhitelistUser(userId, null, true);
+		HueError[] theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors != null)
 			return aGsonHandler.toJson(theErrors);
 		try {

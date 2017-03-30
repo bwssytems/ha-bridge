@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.api.hue.HueErrorResponse;
@@ -34,7 +34,7 @@ public class TCPHome implements Home {
 	private Gson aGsonHandler;
     
 
-	public TCPHome(BridgeSettingsDescriptor bridgeSettings) {
+	public TCPHome(BridgeSettings bridgeSettings) {
 		super();
 		createHome(bridgeSettings);
 	}
@@ -122,7 +122,7 @@ public class TCPHome implements Home {
 	}
 
 	@Override
-	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
+	public Home createHome(BridgeSettings bridgeSettings) {
 		log.info("TCP Home created.");
 		theSockets = new HashMap<String, Socket>();
 		aGsonHandler = new GsonBuilder().create();

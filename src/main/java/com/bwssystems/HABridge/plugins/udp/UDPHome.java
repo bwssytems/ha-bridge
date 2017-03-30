@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
@@ -25,7 +25,7 @@ public class UDPHome implements Home {
     private UDPDatagramSender theUDPDatagramSender;
 	private byte[] sendData;
     
-	public UDPHome(BridgeSettingsDescriptor bridgeSettings, UDPDatagramSender aUDPDatagramSender) {
+	public UDPHome(BridgeSettings bridgeSettings, UDPDatagramSender aUDPDatagramSender) {
 		super();
 		theUDPDatagramSender = aUDPDatagramSender;
 		createHome(bridgeSettings);
@@ -80,7 +80,7 @@ public class UDPHome implements Home {
 	}
 
 	@Override
-	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
+	public Home createHome(BridgeSettings bridgeSettings) {
 		log.info("UDP Home created.");
 		return this;
 	}

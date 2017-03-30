@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
@@ -16,8 +16,9 @@ import com.bwssystems.HABridge.hue.TimeDecode;
 
 public class CommandHome implements Home {
 	private static final Logger log = LoggerFactory.getLogger(CommandHome.class);
+	private String execGarden;;
 
-	public CommandHome(BridgeSettingsDescriptor bridgeSettings) {
+	public CommandHome(BridgeSettings bridgeSettings) {
 		super();
 		createHome(bridgeSettings);
 	}
@@ -34,6 +35,13 @@ public class CommandHome implements Home {
 		intermediate = BrightnessDecode.calculateReplaceIntensityValue(intermediate, itensity, targetBri, targetBriInc, false);
 		intermediate = DeviceDataDecode.replaceDeviceData(intermediate, device);
 		intermediate = TimeDecode.replaceTimeValue(intermediate);
+		if(execGarden != null) {
+			if(System.getProperty("os.name").toLowerCase().indexOf("win") > 0)
+				intermediate = execGarden + "\\" + intermediate;
+			else
+				intermediate = execGarden + "/" + intermediate;
+		}
+
 		String anError = doExecRequest(intermediate, lightId);
 		if (anError != null) {
 			responseString = anError;
@@ -65,8 +73,9 @@ public class CommandHome implements Home {
 	}
 
 	@Override
-	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
+	public Home createHome(BridgeSettings bridgeSettings) {
 		log.info("Command Home for system program execution created.");
+		this.execGarden = bridgeSettings.getBridgeSecurity().getExecGarden(); 
 		return this;
 	}
 

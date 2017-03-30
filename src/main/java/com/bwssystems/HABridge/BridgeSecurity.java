@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-public class BridgeSecurity {
+public class BridgeSecurity extends AuthFramework {
 	private static final Logger log = LoggerFactory.getLogger(BridgeSecurity.class);
 	private char[] habridgeKey;
     private static final byte[] SALT = {
@@ -98,6 +98,24 @@ public class BridgeSecurity {
 				else
 					error = "Invalid request";
 			}
+		}
+		else
+			error = "invalid user object given";
+		
+		return error;
+	}
+
+	public String delUser(User aUser) throws IOException {
+		String error = null;
+		if(aUser != null) {
+				if(securityDescriptor.getUsers() != null) {
+				if(securityDescriptor.getUsers().get(aUser.getUsername()) != null) {
+					securityDescriptor.getUsers().remove(aUser.getUsername());
+					settingsChanged = true;
+				}
+				else
+					error = "User not found";
+				}
 		}
 		else
 			error = "invalid user object given";

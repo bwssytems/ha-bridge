@@ -77,7 +77,9 @@ app.config (function ($locationProvider, $routeProvider) {
 	})
 });
 
-app.run( function ($rootScope, $location,  Auth, bridgeService) {
+app.run( async function ($rootScope, $location, Auth, bridgeService) {
+	bridgeService.getHABridgeVersion();
+	await bridgeService.sleep(4000);
     Auth.init();
     
     $rootScope.$on('$routeChangeStart', function (event, next) {
@@ -88,11 +90,11 @@ app.run( function ($rootScope, $location,  Auth, bridgeService) {
     });
 
     if(Auth.isLoggedIn()) {
-	    bridgeService.loadBridgeSettings();
-		bridgeService.getHABridgeVersion();
-		bridgeService.getTestUser();
-		bridgeService.getSecurityInfo();
-		bridgeService.viewMapTypes();
+    	bridgeService.loadBridgeSettings();
+    	bridgeService.getTestUser();
+    	bridgeService.getSecurityInfo();
+    	bridgeService.viewMapTypes();
+    	await bridgeService.sleep(2000);
     }
 });
 
@@ -108,13 +110,18 @@ String.prototype.replaceAll = function (search, replace)
 };
 
 
-app.service ('bridgeService', function ($http, $base64, ngToast) {
+app.service ('bridgeService', function ($http, $base64, $location, ngToast) {
 	var self = this;
 	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {},
 			mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false,
 			isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false,
-			showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: "", viewDevId: "", queueDevId: "", securityInfo: {}, username: "test"};
+			showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: {}, viewDevId: "", queueDevId: "", securityInfo: {}, username: "test"};
 
+	this.sleep = function (ms) {
+		  return new Promise(resolve => setTimeout(resolve, ms));
+		};
+
+	
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
 		if (error !== null && typeof(error) !== 'undefined') {
@@ -197,7 +204,10 @@ app.service ('bridgeService', function ($http, $base64, ngToast) {
 	this.getHABridgeVersion = function () {
 		return $http.get(this.state.systemsbase + "/habridge/version").then(
 				function (response) {
-					self.state.habridgeversion = response.data.version;
+					self.state.habridgeversion = {
+							version: response.data.version,
+							isSecure: response.data.isSecure
+					};
 				},
 				function (error) {
 					self.displayWarn("Cannot get version: ", error);
@@ -245,6 +255,26 @@ app.service ('bridgeService', function ($http, $base64, ngToast) {
 		);
 	};
 
+	this.isSecure = function () {
+		if(self.state.habridgeversion === undefined)
+			return true;
+		if(self.state.habridgeversion.isSecure === undefined)
+			return true;
+		
+		return self.state.habridgeversion.isSecure;
+	};
+
+	this.initA = async function() {
+		self.getHABridgeVersion();
+		await self.sleep(4000);
+	};
+	this.initB = async function() {
+		self.loadBridgeSettings();
+		self.getTestUser();
+		self.getSecurityInfo();
+		self.viewMapTypes();
+		await self.sleep(4000);
+	};
 	this.changePassword = function (aPassword, aPassword2) {
 		var newUserInfo = {};
 		newUserInfo = {
@@ -274,6 +304,26 @@ app.service ('bridgeService', function ($http, $base64, ngToast) {
 		return $http.put(this.state.systemsbase + "/adduser", theEncodedPayload ).then(
 				function (response) {
 					self.displaySuccess("User added")
+					if(!self.isSecure()) {
+						self.initA();
+						$location.path('/login');
+					}
+				},
+				function (error) {
+					self.displayWarn("User add Error: ", error);
+				}
+		);
+	};
+
+	this.delUser = function (username) {
+		var newUserInfo = {};
+		newUserInfo = {
+				username: username
+				};
+		var theEncodedPayload = $base64.encode(angular.toJson(newUserInfo));
+		return $http.put(this.state.systemsbase + "/deluser", theEncodedPayload ).then(
+				function (response) {
+					self.displaySuccess("User deleted")
 				},
 				function (error) {
 					self.displayWarn("User add Error: ", error);
@@ -1333,6 +1383,12 @@ app.controller('SecurityDialogCtrl', function ($scope, bridgeService, ngDialog) 
 		bridgeService.addUser(newUser, password, password2);
 		$scope.addingUser = false;
 		$scope.username = $scope.loggedInUser;
+		$scope.showPassword = $scope.isSecure;
+	};
+	
+	$scope.delUser = function (newUser) {
+		bridgeService.delUser(newUser);
+		$scope.addingUser = false;
 		$scope.showPassword = $scope.isSecure;
 	};
 	
@@ -3208,7 +3264,7 @@ app.factory('Auth', function($resource, $rootScope, $sessionStorage, $http, $bas
      */
     auth.init = function(){
         if (auth.isLoggedIn()){
-            $rootScope.user = currentUser();
+            $rootScope.user = auth.currentUser();
         }
     };
          
@@ -3264,6 +3320,8 @@ app.factory('Auth', function($resource, $rootScope, $sessionStorage, $http, $bas
      
      
     auth.userHasPermission = function(permissions){
+    	if(!bridgeService.isSecure())
+    		return true;
         if(!auth.isLoggedIn()){
             return false;
         }
@@ -3281,11 +3339,15 @@ app.factory('Auth', function($resource, $rootScope, $sessionStorage, $http, $bas
      
      
     auth.currentUser = function(){
+    	if(!bridgeService.isSecure())
+    		return "nouser";
         return $sessionStorage.user;
     };
      
      
     auth.isLoggedIn = function(){
+    	if(!bridgeService.isSecure())
+    		return true;
         return $sessionStorage.user != null;
     };
      

@@ -9,7 +9,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
@@ -25,7 +25,7 @@ public class VeraHome implements Home {
 	private Map<String, VeraInfo> veras;
 	private Boolean validVera;
 	
-	public VeraHome(BridgeSettingsDescriptor bridgeSettings) {
+	public VeraHome(BridgeSettings bridgeSettings) {
 		super();
 		createHome(bridgeSettings);
 	}
@@ -90,12 +90,12 @@ public class VeraHome implements Home {
 	}
 
 	@Override
-	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
-		validVera = bridgeSettings.isValidVera();
+	public Home createHome(BridgeSettings bridgeSettings) {
+		validVera = bridgeSettings.getBridgeSettingsDescriptor().isValidVera();
 		log.info("Vera Home created." + (validVera ? "" : " No Veras configured."));
 		if(validVera) {
 			veras = new HashMap<String, VeraInfo>();
-			Iterator<NamedIP> theList = bridgeSettings.getVeraAddress().getDevices().iterator();
+			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getVeraAddress().getDevices().iterator();
 			while(theList.hasNext()) {
 				NamedIP aVera = theList.next();
 	      		veras.put(aVera.getName(), new VeraInfo(aVera));
