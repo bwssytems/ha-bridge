@@ -58,6 +58,7 @@ public class DeviceResource {
     private void setupEndpoints() {
     	log.info("HABridge device management service started.... ");
 		before(API_CONTEXT + "/*", (request, response) -> {
+			// This never gets called as the HueMulator class covers this path. This is here for backup
 			if(bridgeSettings.getBridgeSecurity().isSecure()) {
 					User authUser = bridgeSettings.getBridgeSecurity().getAuthenticatedUser(request);
 					if(authUser == null) {

@@ -273,7 +273,8 @@ public class BridgeSettings extends BackupHandler {
 	        perms.add(PosixFilePermission.OWNER_WRITE);
 	        
 	        try {
-	        	Files.setPosixFilePermissions(filePath, perms);
+	        	if(System.getProperty("os.name").toLowerCase().indexOf("win") <= 0)
+	        		Files.setPosixFilePermissions(filePath, perms);
 	        } catch(UnsupportedOperationException e) {
 	        	log.info("Cannot set permissions for config file on this system as it is not supported. Continuing");
 	        }

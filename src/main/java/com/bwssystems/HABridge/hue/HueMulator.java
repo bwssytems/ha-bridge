@@ -69,11 +69,19 @@ public class HueMulator {
 	public void setupServer() {
 		log.info("Hue emulator service started....");
 		before(HUE_CONTEXT + "/*", (request, response) -> {
-			if(bridgeSettingMaster.getBridgeSecurity().isSecureHueApi()) {
+			if(bridgeSettingMaster.getBridgeSecurity().isSecure()) {
+				String pathInfo = request.pathInfo();
+				if(pathInfo != null && pathInfo.contains(HUE_CONTEXT + "/devices")) {
 					User authUser = bridgeSettingMaster.getBridgeSecurity().getAuthenticatedUser(request);
 					if(authUser == null) {
 						halt(401, "{\"message\":\"User not authenticated\"}");
 					}
+				} else if (bridgeSettingMaster.getBridgeSecurity().isSecureHueApi()) {
+					User authUser = bridgeSettingMaster.getBridgeSecurity().getAuthenticatedUser(request);
+					if(authUser == null) {
+						halt(401, "{\"message\":\"User not authenticated\"}");
+					}
+				}
 			}
 		});
 		// http://ip_address:port/api/{userId}/groups returns json objects of
