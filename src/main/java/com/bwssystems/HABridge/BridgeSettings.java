@@ -35,6 +35,10 @@ public class BridgeSettings extends BackupHandler {
 		bridgeControl = new BridgeControlDescriptor();
 		theBridgeSettings = new BridgeSettingsDescriptor();
 		bridgeSecurity = null;
+		String theKey = System.getProperty("security.key");
+		if(theKey == null)
+			theKey = "IWantMyPasswordsToBeAbleToBeDecodedPleaseSeeTheReadme";
+		bridgeSecurity = new BridgeSecurity(theKey.toCharArray());
 		String ipV6Stack = System.getProperty("ipV6Stack");
         if(ipV6Stack == null || !ipV6Stack.equalsIgnoreCase("true")) {
         	System.setProperty("java.net.preferIPv4Stack" , "true");
@@ -183,10 +187,7 @@ public class BridgeSettings extends BackupHandler {
 		
 		setupInternalTestUser();
 		
-		String theKey = System.getProperty("security.key");
-		if(theKey == null)
-			theKey = "IWantMyPasswordsToBeAbleToBeDecodedPleaseSeeTheReadme";
-		bridgeSecurity = new BridgeSecurity(theKey.toCharArray(), theBridgeSettings.getSecurityData());
+		bridgeSecurity.setSecurityData(theBridgeSettings.getSecurityData());
 	}
 
 	public void loadConfig() {
@@ -273,7 +274,8 @@ public class BridgeSettings extends BackupHandler {
 	        perms.add(PosixFilePermission.OWNER_WRITE);
 	        
 	        try {
-	        	if(System.getProperty("os.name").toLowerCase().indexOf("win") <= 0)
+	        	String osName = System.getProperty("os.name");
+	        	if(osName.toLowerCase().indexOf("win") < 0)
 	        		Files.setPosixFilePermissions(filePath, perms);
 	        } catch(UnsupportedOperationException e) {
 	        	log.info("Cannot set permissions for config file on this system as it is not supported. Continuing");

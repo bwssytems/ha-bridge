@@ -3,7 +3,7 @@
 		<h2 class="panel-title">Login</h2>
 	</div>
 	<div class="panel-body">
-		<div class="form-container">
+		<div ng-if="!loggedIn" class="form-container">
 
 			<form name="loginForm" role="form">
 				<legend class="form-label">Enter Credentials</legend>
@@ -18,10 +18,12 @@
 				</div>
 				<div class="form-group">
 					<button type="button" class="btn btn-success" ng-click="login(username, password)">Submit</button>
-					<button type="button" class="btn btn-danger" ng-click="logout()">Logout</button>
 				</div>
 			</form>
 
+		</div>
+		<div ng-if="loggedIn">
+			<button type="button" class="btn btn-danger" ng-click="logout()">Logout</button>
 		</div>
 	</div>
 </div>

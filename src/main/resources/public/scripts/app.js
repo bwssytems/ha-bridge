@@ -87,11 +87,32 @@ app.run( async function ($rootScope, $location, Auth, bridgeService) {
         	bridgeService.getTestUser();
         	bridgeService.getSecurityInfo();
         	bridgeService.viewMapTypes();
+        	bridgeService.viewConfigs();
             $location.path("/");        	
         } else {
             event.preventDefault();
             $location.path("/login");        	
         }
+    });
+    
+    $rootScope.$on('securityReview', function(event, data) {
+        if(Auth.isLoggedIn()) {
+        	bridgeService.loadBridgeSettings();
+        	bridgeService.getTestUser();
+        	bridgeService.getSecurityInfo();
+        	bridgeService.viewMapTypes();
+        	bridgeService.viewConfigs();
+            $location.path("/");        	
+        } else {
+            event.preventDefault();
+            $location.path("/login");        	
+        }
+    });
+    
+    $rootScope.$on('securityReinit', function(event, data) {
+        event.preventDefault();
+    	Auth.logout();
+        $location.path("/login");        	
     });
     
     $rootScope.$on('$routeChangeStart', function (event, next) {
@@ -100,6 +121,7 @@ app.run( async function ($rootScope, $location, Auth, bridgeService) {
         	bridgeService.getTestUser();
         	bridgeService.getSecurityInfo();
         	bridgeService.viewMapTypes();
+        	bridgeService.viewConfigs();
         }
         if (!Auth.checkPermissionForView(next)){
             event.preventDefault();
@@ -870,10 +892,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 		return $http.get(this.state.bridgelocation + "/description.xml").then(
 				function (response) {
 					ngToast.dismiss(self.state.myToastMsg);
-					self.viewConfigs();
 					self.state.myToastMsg = null;
 					self.state.isInControl = false;
-					window.location.reload();
+					$rootScope.$broadcast('securityReinit', 'done');
 				},
 				function (error) {
 					setTimeout(function(){
@@ -3213,6 +3234,7 @@ app.filter('configuredSomfyDevices', function (bridgeService) {
 
 app.controller('LoginController', function ($scope, $location, Auth) {
     $scope.failed = false;
+    $scope.loggedIn = Auth.isLoggedIn();
 	$scope.login = function(username, password) {
         Auth.login(username, password)
         .then(function() {
@@ -3224,6 +3246,8 @@ app.controller('LoginController', function ($scope, $location, Auth) {
 
 	$scope.logout = function() {
         Auth.logout();
+        $scope.loggedIn = Auth.isLoggedIn();
+        $location.path("/login");
 	};
 });
 

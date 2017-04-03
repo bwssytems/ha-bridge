@@ -18,20 +18,26 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-public class BridgeSecurity extends AuthFramework {
+import spark.Request;
+
+public class BridgeSecurity {
 	private static final Logger log = LoggerFactory.getLogger(BridgeSecurity.class);
-	private char[] habridgeKey;
+	private static final String USER_SESSION_ID = "user";
     private static final byte[] SALT = {
             (byte) 0xde, (byte) 0x33, (byte) 0x10, (byte) 0x12,
             (byte) 0xde, (byte) 0x33, (byte) 0x10, (byte) 0x12,
         };
+	private char[] habridgeKey;
     private BridgeSecurityDescriptor securityDescriptor;
 	private boolean settingsChanged;
 
-	public BridgeSecurity(char[] theKey, String theData) {
+	public BridgeSecurity(char[] theKey) {
 		habridgeKey = theKey;
 		securityDescriptor = null;
 		settingsChanged = false;
+	}
+
+	public void setSecurityData(String theData) {
 		String anError = null;
 		if(theData != null && !theData.isEmpty()) {
 			try {
@@ -211,4 +217,47 @@ public class BridgeSecurity extends AuthFramework {
     private static byte[] base64Decode(String property) throws IOException {
         return Base64.getDecoder().decode(property);
     }
+
+    public void addAuthenticatedUser(Request request, User u) {
+		request.session().attribute(USER_SESSION_ID, u);
+		
+	}
+
+	public void removeAuthenticatedUser(Request request) {
+		request.session().removeAttribute(USER_SESSION_ID);
+		
+	}
+
+	public User getAuthenticatedUser(Request request) {
+		User theUser = request.session().attribute(USER_SESSION_ID);
+		if(theUser == null) {
+			String authHeader = request.headers("Authorization");
+			if(authHeader != null) {
+			    byte[] authData;
+				try {
+					authData = base64Decode(authHeader.substring(6));
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					return theUser;
+				}
+			    String[] credentials = new String(authData).split(":");
+			    String username = credentials[0];
+			    String password = credentials[1];
+			    theUser = new User();
+			    theUser.setUsername(username);
+			    theUser.setPassword(password);
+			    LoginResult theResult = null;
+				try {
+					theResult = validatePassword(theUser);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					return null;
+				}
+				if(theResult != null && theResult.getError() == null) {
+					addAuthenticatedUser(request, theUser);
+				}
+			}
+		}
+		return theUser;
+	}
 }
