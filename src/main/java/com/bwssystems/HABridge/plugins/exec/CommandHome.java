@@ -16,7 +16,7 @@ import com.bwssystems.HABridge.hue.TimeDecode;
 
 public class CommandHome implements Home {
 	private static final Logger log = LoggerFactory.getLogger(CommandHome.class);
-	private String execGarden;;
+	private BridgeSettings theSettings;
 
 	public CommandHome(BridgeSettings bridgeSettings) {
 		super();
@@ -25,7 +25,7 @@ public class CommandHome implements Home {
 
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int itensity, Integer targetBri, Integer targetBriInc, DeviceDescriptor device, String body) {
-		log.debug("Exec Request called with url: " +  anItem.getItem().getAsString());
+		log.debug("Exec Request called with url: " +  anItem.getItem().getAsString() + " and exec Garden: "  + (theSettings.getBridgeSecurity().getExecGarden() == null ? "not given" : theSettings.getBridgeSecurity().getExecGarden()));
 		String responseString = null;
 		String intermediate;
 		if (anItem.getItem().getAsString().contains("exec://"))
@@ -35,8 +35,10 @@ public class CommandHome implements Home {
 		intermediate = BrightnessDecode.calculateReplaceIntensityValue(intermediate, itensity, targetBri, targetBriInc, false);
 		intermediate = DeviceDataDecode.replaceDeviceData(intermediate, device);
 		intermediate = TimeDecode.replaceTimeValue(intermediate);
-		if(execGarden != null) {
-			if(System.getProperty("os.name").toLowerCase().indexOf("win") > 0)
+		String execGarden = theSettings.getBridgeSecurity().getExecGarden();
+		execGarden = execGarden.trim();
+		if(execGarden != null && !execGarden.isEmpty()) {
+			if(System.getProperty("os.name").toLowerCase().indexOf("win") >= 0)
 				intermediate = execGarden + "\\" + intermediate;
 			else
 				intermediate = execGarden + "/" + intermediate;
@@ -57,7 +59,7 @@ public class CommandHome implements Home {
 				Process p = Runtime.getRuntime().exec(anItem);
 				log.debug("Process running: " + p.isAlive());
 			} catch (IOException e) {
-				log.warn("Could not execute request: " + anItem, e);
+				log.warn("Could not execute request: " + anItem + " with message: " + e.getMessage());
 				responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 						+ "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId
 						+ "state\"}}]";
@@ -75,7 +77,7 @@ public class CommandHome implements Home {
 	@Override
 	public Home createHome(BridgeSettings bridgeSettings) {
 		log.info("Command Home for system program execution created.");
-		this.execGarden = bridgeSettings.getBridgeSecurity().getExecGarden(); 
+		this.theSettings = bridgeSettings; 
 		return this;
 	}
 

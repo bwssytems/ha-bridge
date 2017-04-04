@@ -87,7 +87,6 @@ app.run( async function ($rootScope, $location, Auth, bridgeService) {
         	bridgeService.getTestUser();
         	bridgeService.getSecurityInfo();
         	bridgeService.viewMapTypes();
-        	bridgeService.viewConfigs();
             $location.path("/");        	
         } else {
             event.preventDefault();
@@ -97,11 +96,6 @@ app.run( async function ($rootScope, $location, Auth, bridgeService) {
     
     $rootScope.$on('securityReview', function(event, data) {
         if(Auth.isLoggedIn()) {
-        	bridgeService.loadBridgeSettings();
-        	bridgeService.getTestUser();
-        	bridgeService.getSecurityInfo();
-        	bridgeService.viewMapTypes();
-        	bridgeService.viewConfigs();
             $location.path("/");        	
         } else {
             event.preventDefault();
@@ -116,13 +110,6 @@ app.run( async function ($rootScope, $location, Auth, bridgeService) {
     });
     
     $rootScope.$on('$routeChangeStart', function (event, next) {
-        if(Auth.isLoggedIn()) {
-        	bridgeService.loadBridgeSettings();
-        	bridgeService.getTestUser();
-        	bridgeService.getSecurityInfo();
-        	bridgeService.viewMapTypes();
-        	bridgeService.viewConfigs();
-        }
         if (!Auth.checkPermissionForView(next)){
             event.preventDefault();
             $location.path("/login");
@@ -2926,7 +2913,6 @@ app.controller('SomfyController', function ($scope, $location, bridgeService, ng
 });
 
 app.controller('EditController', function ($scope, $location, bridgeService) {
-	bridgeService.viewMapTypes();
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.onDevices = null;

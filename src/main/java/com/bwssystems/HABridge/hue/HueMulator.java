@@ -983,6 +983,9 @@ public class HueMulator {
 						else
 							aMultiUtil.setTheDelay(aMultiUtil.getDelayDefault());
 						responseString = homeManager.findHome(callItems[i].getType().trim()).deviceHandler(callItems[i], aMultiUtil, lightId, state.getBri(), targetBri, targetBriInc, device, body);
+						if(responseString != null && responseString.contains("{\"error\":")) {
+							x = aMultiUtil.getSetCount();
+						}
 					}
 				}
 			}
