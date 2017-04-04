@@ -244,7 +244,7 @@ public class BridgeSettings extends BackupHandler {
     }
     
 
-	private void configWriter(String content, Path filePath) {
+	private synchronized void configWriter(String content, Path filePath) {
 		if(Files.exists(filePath) && !Files.isWritable(filePath)){
 			log.error("Error file is not writable: " + filePath);
 			return;
