@@ -54,13 +54,6 @@ legend.form-label {
     font-size: 8pt;
 }
 
-.password-count {
-    float: right;
-    position: relative;
-    bottom: 24px;
-    right: 10px;
-}
-
 .msg-block {
     margin-top:5px;
 }

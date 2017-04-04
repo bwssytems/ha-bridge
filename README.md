@@ -214,9 +214,14 @@ The default ip address for the bridge to listen on is all interfaces (0.0.0.0). 
 java -jar -Dserver.ip=192.168.1.1 ha-bridge-W.X.Y.jar
 ```
 ### -Dsecurity.key=`<Your Key To Encrypt Security Data>`
-The default security key is encoded into the Java code. This should not be used as anyone with access to the code can decode your passworsd. To override what the default , specify -Dsecurity.key=`<Your Key To Encrypt Security Data>` explicitly on the command line. This is will prevent any issues if your config file gets haced. The command line example:
+The default security key is encoded into the Java code. The default should not be used as anyone with access to the code can decode your password. To override what the default , specify -Dsecurity.key=`<Your Key To Encrypt Security Data>` explicitly on the command line. This is will prevent any issues if your config file gets hacked. The command line example:
 ```
 java -jar -Dsecurity.key=Xfawer354WertSdf321234asd ha-bridge-W.X.Y.jar
+```
+### -Dexec.garden=`<The path to your scripts and program directory>`
+The default exec garden path is not set which allows any program or script to be called. The default should not be used as anyone with access to the your system can create a exec command call and execute it from the api. To override what the default , specify -Dexec.garden=`<The path to your scripts and program directory>` explicitly on the command line. This is will prevent any issues if your system file gets hacked. The command line example:
+```
+java -jar -Dexec.garden=C:\Users\John\bin
 ```
 ## HA Bridge Usage and Configuration
 This section will cover the basics of configuration and where this configuration can be done. This requires that you have started your bridge process and then have pointed your
@@ -225,6 +230,10 @@ favorite web interface by going to the http://<my ip address>:<port> or http://l
 This screen allows you to see your devices you have configured for the ha-bridge to present to a controller, such as an Amazon Echo/Dot. It gives you a count of devices as there have been reports that the Echo only supports a limited number, but has been growing as of late, YMMV. You can test each device from this page as this calls the ha-bridge just as a controller would, i.e. the Echo. This is useful to make sure your configuration for each device is correct and for trouble shooting. You can also manages your devices as well by editing and making a new device copy as well as deleting it.
 
 At the bottom of the screen is the "Bridge Device DB Backup" which can be accessed with clicking on the `+` to expand this frame. Here you can backup and restore configurations that you have saved. These configs can be named or by clicking the `Backup Device DB' button will create a backup and name it for you. You can manage these backups by restoring them or deleting them.
+#### Renumber Devices
+This changes the numbering of the added devices to start at 1 and goes up from there. It was originally intended for a conversion from the previous system version that used large numbers and was not necessary. This also allows the system to try and number sequentially. If you use this button, you will need to re-discover your devices as their ID's will have changed.
+#### Link
+If this is present, you have enabled the ue link button feature for the ha-bridge. If you want a new system to recognize the ha-bridge, you will need to press this button when you are doign a discovery.
 ### The Bridge Control Tab
 This is where all of the configuration occurs for what ports and IP's the bridge runs on. It also contains the configurations for target devices so that Helper Tabs for configuration can be added as well as the connection information to control those devices.
 #### Bridge server
@@ -232,7 +241,7 @@ This field is used to test the bridge server with the UPNP IP Address and to mak
 #### Bridge Control Buttons
 These buttons are for managing the bridge. The Save button is enabled when there is a change to the configuration. The Bridge Reinitialize button will recycle the internal running of the bridge in the java process. The Stop button will stop the java process. The Refresh button will refresh the page and settings.
 #### The Security Dialog
-This is where you can set the different security settings for the ha-bridge.
+This is where you can set the different security settings for the ha-bridge. There are two settings, one for enabling Hue like operation to secure the Hue api with the internally generated user for the calls that are done after the link button. The other is to secure the hue api with a username/password that is created as well. The other fields are to add and delete users and to set and change passwords for those users. If there are no users in the system, the system will not require a username/password to operate.
 #### Configuration Path and File
 The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify `<directory>/<filename>` explicitly.
 #### Device DB Path and File

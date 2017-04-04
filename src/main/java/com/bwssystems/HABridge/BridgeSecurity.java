@@ -28,11 +28,13 @@ public class BridgeSecurity {
             (byte) 0xde, (byte) 0x33, (byte) 0x10, (byte) 0x12,
         };
 	private char[] habridgeKey;
+	private String execGarden;
     private BridgeSecurityDescriptor securityDescriptor;
 	private boolean settingsChanged;
 
-	public BridgeSecurity(char[] theKey) {
+	public BridgeSecurity(char[] theKey, String theExecGarden) {
 		habridgeKey = theKey;
+		execGarden = theExecGarden;
 		securityDescriptor = null;
 		settingsChanged = false;
 	}
@@ -129,13 +131,8 @@ public class BridgeSecurity {
 		return error;
 	}
 
-	public void setExecGarden(String theGarden) {
-		securityDescriptor.setExecGarden(theGarden);
-		settingsChanged = true;
-	}
-
 	public String getExecGarden() {
-		return securityDescriptor.getExecGarden();
+		return execGarden;
 	}
 	public void setUseLinkButton(boolean useThis) {
 		securityDescriptor.setUseLinkButton(useThis);
@@ -151,7 +148,6 @@ public class BridgeSecurity {
 	}
 	public SecurityInfo getSecurityInfo() {
 		SecurityInfo theInfo = new SecurityInfo();
-		theInfo.setExecGarden(getExecGarden());
 		theInfo.setUseLinkButton(isUseLinkButton());
 		theInfo.setSecureHueApi(isSecureHueApi());
 		theInfo.setSecure(isSecure());

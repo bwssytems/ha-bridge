@@ -38,7 +38,8 @@ public class BridgeSettings extends BackupHandler {
 		String theKey = System.getProperty("security.key");
 		if(theKey == null)
 			theKey = "IWantMyPasswordsToBeAbleToBeDecodedPleaseSeeTheReadme";
-		bridgeSecurity = new BridgeSecurity(theKey.toCharArray());
+		String execGarden = System.getProperty("exec.garden");
+		bridgeSecurity = new BridgeSecurity(theKey.toCharArray(), execGarden);
 		String ipV6Stack = System.getProperty("ipV6Stack");
         if(ipV6Stack == null || !ipV6Stack.equalsIgnoreCase("true")) {
         	System.setProperty("java.net.preferIPv4Stack" , "true");

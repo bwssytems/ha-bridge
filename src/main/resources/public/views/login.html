@@ -5,19 +5,19 @@
 	<div class="panel-body">
 		<div ng-if="!loggedIn" class="form-container">
 
-			<form name="loginForm" role="form">
+			<form name="loginForm" role="form" ng-submit="login(username, password)">
 				<legend class="form-label">Enter Credentials</legend>
 				<div class="form-group">
 					<label>User</label> <input id="username" name="username"
 						class="form-control" type="text" ng-model="username"
-						placeholder="someone" />
+						placeholder="someone" autofocus/>
 				</div>
 				<div class="form-group">
 					<label>Password</label> <input id="password" name="password"
 						class="form-control" type="password" ng-model="password" />
 				</div>
 				<div class="form-group">
-					<button type="button" class="btn btn-success" ng-click="login(username, password)">Submit</button>
+					<button type="submit" class="btn btn-success" value="Submit">Submit</button>
 				</div>
 			</form>
 

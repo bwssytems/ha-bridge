@@ -36,8 +36,7 @@ public class CommandHome implements Home {
 		intermediate = DeviceDataDecode.replaceDeviceData(intermediate, device);
 		intermediate = TimeDecode.replaceTimeValue(intermediate);
 		String execGarden = theSettings.getBridgeSecurity().getExecGarden();
-		execGarden = execGarden.trim();
-		if(execGarden != null && !execGarden.isEmpty()) {
+		if(execGarden != null && !execGarden.trim().isEmpty()) {
 			if(System.getProperty("os.name").toLowerCase().indexOf("win") >= 0)
 				intermediate = execGarden + "\\" + intermediate;
 			else

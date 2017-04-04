@@ -1306,6 +1306,17 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     };
 });
 
+app.directive('autofocus', ['$timeout', function($timeout) {
+	  return {
+	    restrict: 'A',
+	    link : function($scope, $element) {
+	      $timeout(function() {
+	        $element[0].focus();
+	      });
+	    }
+	  }
+	}]);
+
 app.directive('nuCheck', [function () {
     return {
         require: 'ngModel',
