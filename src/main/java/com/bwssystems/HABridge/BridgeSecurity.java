@@ -51,7 +51,8 @@ public class BridgeSecurity {
 			} catch (IOException e) {
 				anError = e.getMessage();
 			}
-			log.warn("Cound not get security data, using default security (none): " + anError);
+			if(anError != null)
+				log.warn("Cound not get security data, using default security (none): " + anError);
 		}
 		
 		if(theData == null || anError != null) {

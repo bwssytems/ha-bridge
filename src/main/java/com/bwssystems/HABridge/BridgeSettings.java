@@ -186,8 +186,6 @@ public class BridgeSettings extends BackupHandler {
         	theBridgeSettings.setWebaddress(serverIpOverride);
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
 		
-		setupInternalTestUser();
-		
 		bridgeSecurity.setSecurityData(theBridgeSettings.getSecurityData());
 	}
 
@@ -337,10 +335,5 @@ public class BridgeSettings extends BackupHandler {
 			}
 		}
 		return addressString;
-	}
-	private void setupInternalTestUser() {
-		theBridgeSettings.setupInternalTestUser();
-		if(theBridgeSettings.isSettingsChanged())
-			this.updateConfigFile();
 	}
 }

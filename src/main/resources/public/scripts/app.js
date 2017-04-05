@@ -84,7 +84,6 @@ app.run( async function ($rootScope, $location, Auth, bridgeService) {
         Auth.init();
         if(Auth.isLoggedIn()) {
         	bridgeService.loadBridgeSettings();
-        	bridgeService.getTestUser();
         	bridgeService.getSecurityInfo();
         	bridgeService.viewMapTypes();
             $location.path("/");        	
@@ -237,12 +236,25 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 	};
 
 	this.getTestUser = function () {
-		return $http.get(this.state.systemsbase + "/habridge/testuser").then(
+		if(self.state.testuser === undefined || self.state.testuser === "") {
+			return $http.put(this.state.systemsbase + "/presslinkbutton").then(
+					function (response) {
+						self.getAUser();
+					},
+					function (error) {
+						self.displayWarn("Cannot get testuser: ", error);
+					}
+			);
+		}
+	};
+
+	this.getAUser = function () {
+		return $http.post(this.state.huebase, "{\"devicetype\":\"test_ha_bridge\"}").then(
 				function (response) {
-					self.state.testuser = response.data.user;
+					self.state.testuser = response.data[0].success.username;
 				},
 				function (error) {
-					self.displayWarn("Cannot get testuser: ", error);
+					self.displayWarn("Cannot get a user: ", error);
 				}
 		);
 	};
@@ -251,6 +263,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 		return $http.get(this.state.systemsbase + "/securityinfo").then(
 				function (response) {
 					self.state.securityInfo = response.data;
+			    	self.getTestUser();
 				},
 				function (error) {
 					self.displayWarn("Cannot get security info: ", error);

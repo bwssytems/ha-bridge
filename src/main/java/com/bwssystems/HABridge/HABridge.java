@@ -102,6 +102,9 @@ public class HABridge {
 				}
 	        }
         }
+        bridgeSettings.getBridgeSettingsDescriptor().removeTestUsers();
+        if(bridgeSettings.getBridgeSettingsDescriptor().isSettingsChanged())
+        	bridgeSettings.updateConfigFile();
         log.info("HA Bridge (v" + theVersion.getVersion() + ") exiting....");
         System.exit(0);
     }

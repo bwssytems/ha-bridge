@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
@@ -14,8 +15,8 @@ import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.api.hue.WhitelistEntry;
 
 public class BridgeSettingsDescriptor {
-	private static final String DEFAULT_INTERNAL_USER = "thehabridgeuser";
-	private static final String DEFAULT_USER_DESCRIPTION = "default_test_user";
+	private static final String DEPRACATED_INTERNAL_USER = "thehabridgeuser";
+	private static final String TEST_USER_TYPE = "test_ha_bridge";
 	private String upnpconfigaddress;
 	private Integer serverport;
 	private Integer upnpresponseport;
@@ -403,11 +404,17 @@ public class BridgeSettingsDescriptor {
 		if (!found) {
 			return HueErrorResponse.createResponse("1", "/api/" + aUser, "unauthorized user", null, null, null).getTheErrors();
 		}
+
+		Object anUser = whitelist.remove(DEPRACATED_INTERNAL_USER);
+		if(anUser != null)
+			setSettingsChanged(true);
 		
 		return null;
 	}
 	
 	public void newWhitelistUser(String aUser, String userDescription) {
+		if(aUser.equals(DEPRACATED_INTERNAL_USER))
+			return;
 		if (whitelist == null) {
 			whitelist  = new HashMap<>();
 		}
@@ -434,23 +441,22 @@ public class BridgeSettingsDescriptor {
 
 		return newUser;
 	}
+	
+	public void removeTestUsers() {
+		if (whitelist != null) {
+			Object anUser = whitelist.remove(DEPRACATED_INTERNAL_USER);
+			if(anUser != null)
+				setSettingsChanged(true);
 
-	public String getInternalTestUser() {
-		return DEFAULT_INTERNAL_USER;
-	}
-
-	public void setupInternalTestUser() {
-		boolean found = false;
-		if(whitelist != null) {
-			for (String key : whitelist.keySet()) {
-				if(key.equals(DEFAULT_INTERNAL_USER)) {
-					found = true;
-					break;
-				}
-			}
-		}
-		if(!found) {
-			newWhitelistUser(DEFAULT_INTERNAL_USER, DEFAULT_USER_DESCRIPTION);
+		    Iterator<Entry<String, WhitelistEntry>> it = whitelist.entrySet().iterator();
+		    while (it.hasNext()) {
+		        Map.Entry<String, WhitelistEntry> pair = it.next();
+		        it.remove(); // avoids a ConcurrentModificationException
+		        if(pair.getValue().getName().equals(TEST_USER_TYPE)) {
+			        whitelist.remove(pair.getKey());
+					setSettingsChanged(true);
+		        }
+		    }
 		}
 	}
 }
