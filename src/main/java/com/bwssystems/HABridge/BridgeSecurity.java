@@ -5,6 +5,12 @@ import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.UUID;
+import java.util.Map.Entry;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -15,6 +21,9 @@ import javax.crypto.spec.PBEParameterSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.bwssystems.HABridge.api.hue.HueError;
+import com.bwssystems.HABridge.api.hue.HueErrorResponse;
+import com.bwssystems.HABridge.api.hue.WhitelistEntry;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
@@ -23,6 +32,8 @@ import spark.Request;
 public class BridgeSecurity {
 	private static final Logger log = LoggerFactory.getLogger(BridgeSecurity.class);
 	private static final String USER_SESSION_ID = "user";
+	private static final String DEPRACATED_INTERNAL_USER = "thehabridgeuser";
+	private static final String TEST_USER_TYPE = "test_ha_bridge";
     private static final byte[] SALT = {
             (byte) 0xde, (byte) 0x33, (byte) 0x10, (byte) 0x12,
             (byte) 0xde, (byte) 0x33, (byte) 0x10, (byte) 0x12,
@@ -189,6 +200,91 @@ public class BridgeSecurity {
 
 	public void setSettingsChanged(boolean settingsChanged) {
 		this.settingsChanged = settingsChanged;
+	}
+
+	public HueError[] validateWhitelistUser(String aUser, String userDescription, boolean strict) {
+		String validUser = null;
+		boolean found = false;
+		if (aUser != null && !aUser.equalsIgnoreCase("undefined") && !aUser.equalsIgnoreCase("null")
+				&& !aUser.equalsIgnoreCase("")) {
+			if (securityDescriptor.getWhitelist() != null) {
+				Set<String> theUserIds = securityDescriptor.getWhitelist().keySet();
+				Iterator<String> userIterator = theUserIds.iterator();
+				while (userIterator.hasNext()) {
+					validUser = userIterator.next();
+					if (validUser.equals(aUser))
+						found = true;
+				}
+			}
+		}
+
+		if(!found && !strict) {
+			newWhitelistUser(aUser, userDescription);
+			
+			found = true;
+		}
+		
+		if (!found) {
+			return HueErrorResponse.createResponse("1", "/api/" + aUser, "unauthorized user", null, null, null).getTheErrors();
+		}
+
+		Object anUser = securityDescriptor.getWhitelist().remove(DEPRACATED_INTERNAL_USER);
+		if(anUser != null)
+			setSettingsChanged(true);
+		
+		return null;
+	}
+	
+	public void newWhitelistUser(String aUser, String userDescription) {
+		if(aUser.equals(DEPRACATED_INTERNAL_USER))
+			return;
+		if (securityDescriptor.getWhitelist() == null) {
+			securityDescriptor.setWhitelist(new HashMap<>());
+		}
+		if(userDescription == null)
+			userDescription = "auto insert user";
+		
+		securityDescriptor.getWhitelist().put(aUser, WhitelistEntry.createEntry(userDescription));
+		setSettingsChanged(true);
+	}
+
+	public String createWhitelistUser(String userDescription) {
+		String aUser = getNewUserID();
+		newWhitelistUser(aUser, userDescription);
+		return aUser;
+	}
+
+	public void convertWhitelist(Map<String, WhitelistEntry> whitelist) {
+		securityDescriptor.setWhitelist(whitelist);
+	}
+
+	private String getNewUserID() {
+		UUID uid = UUID.randomUUID();
+		StringTokenizer st = new StringTokenizer(uid.toString(), "-");
+		String newUser = "";
+		while (st.hasMoreTokens()) {
+			newUser = newUser + st.nextToken();
+		}
+
+		return newUser;
+	}
+	
+	public void removeTestUsers() {
+		if (securityDescriptor.getWhitelist() != null) {
+			Object anUser = securityDescriptor.getWhitelist().remove(DEPRACATED_INTERNAL_USER);
+			if(anUser != null)
+				setSettingsChanged(true);
+
+		    Iterator<Entry<String, WhitelistEntry>> it = securityDescriptor.getWhitelist().entrySet().iterator();
+		    while (it.hasNext()) {
+		        Map.Entry<String, WhitelistEntry> pair = it.next();
+		        it.remove(); // avoids a ConcurrentModificationException
+		        if(pair.getValue().getName().equals(TEST_USER_TYPE)) {
+		        	securityDescriptor.getWhitelist().remove(pair.getKey());
+					setSettingsChanged(true);
+		        }
+		    }
+		}
 	}
 
 	private String encrypt(String property) throws GeneralSecurityException, UnsupportedEncodingException {

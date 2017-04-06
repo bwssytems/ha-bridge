@@ -595,9 +595,9 @@ public class HueMulator {
 
 	private String basicListHandler(String type, String userId, String requestIp) {
 		log.debug("hue " + type + " list requested: " + userId + " from " + requestIp);
-		HueError[] theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
+		HueError[] theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors != null) {
-			if(bridgeSettings.isSettingsChanged())
+			if(bridgeSettingMaster.getBridgeSecurity().isSettingsChanged())
 				bridgeSettingMaster.updateConfigFile();
 
 			return aGsonHandler.toJson(theErrors);
@@ -609,9 +609,9 @@ public class HueMulator {
 		log.debug("hue group list requested: " + userId + " from " + requestIp);
 		HueError[] theErrors = null;
 		Map<String, GroupResponse> groupResponseMap = null;
-		theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
+		theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors == null) {
-			if(bridgeSettings.isSettingsChanged())
+			if(bridgeSettingMaster.getBridgeSecurity().isSettingsChanged())
 				bridgeSettingMaster.updateConfigFile();
 
 			groupResponseMap = new HashMap<String, GroupResponse>();
@@ -626,9 +626,9 @@ public class HueMulator {
 	private Object groupsIdHandler(String groupId, String userId, String requestIp) {
 		log.debug("hue group id: <" + groupId + "> requested: " + userId + " from " + requestIp);
 		HueError[] theErrors = null;
-		theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
+		theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors == null) {
-			if(bridgeSettings.isSettingsChanged())
+			if(bridgeSettingMaster.getBridgeSecurity().isSettingsChanged())
 				bridgeSettingMaster.updateConfigFile();
 
 			if (groupId.equalsIgnoreCase("0")) {
@@ -651,9 +651,9 @@ public class HueMulator {
 		if (bridgeSettings.isTraceupnp())
 			log.info("Traceupnp: hue lights list requested: " + userId + " from " + requestIp);
 		log.debug("hue lights list requested: " + userId + " from " + requestIp);
-		theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
+		theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors == null) {
-			if(bridgeSettings.isSettingsChanged())
+			if(bridgeSettingMaster.getBridgeSecurity().isSettingsChanged())
 				bridgeSettingMaster.updateConfigFile();
 
 	        List<DeviceDescriptor> deviceList = repository.findAllByRequester(requestIp);
@@ -727,13 +727,13 @@ public class HueMulator {
 				aDeviceType = "<not given>";
 	
 			if (newUser == null) {
-				newUser = bridgeSettings.createWhitelistUser(aDeviceType);
+				newUser = bridgeSettingMaster.getBridgeSecurity().createWhitelistUser(aDeviceType);
 			}
 			else {
-				bridgeSettings.validateWhitelistUser(newUser, aDeviceType, false);
+				bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(newUser, aDeviceType, false);
 			}
 	
-			if(bridgeSettings.isSettingsChanged())
+			if(bridgeSettingMaster.getBridgeSecurity().isSettingsChanged())
 				bridgeSettingMaster.updateConfigFile();
 	
 			if (bridgeSettings.isTraceupnp())
@@ -749,7 +749,7 @@ public class HueMulator {
 		if (bridgeSettings.isTraceupnp())
 			log.info("Traceupnp: hue api/:userid/config config requested: " + userId + " from " + ipAddress);
 		log.debug("hue api config requested: " + userId + " from " + ipAddress);
-		if (bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton()) != null) {
+		if (bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton()) != null) {
 			log.debug("hue api config requested, No User supplied, returning public config");
 			HuePublicConfig apiResponse = HuePublicConfig.createConfig("Philips hue",
 					bridgeSettings.getUpnpConfigAddress(), bridgeSettings.getHubversion());
@@ -765,7 +765,7 @@ public class HueMulator {
 	@SuppressWarnings("unchecked")
 	private Object getFullState(String userId, String ipAddress) {
 		log.debug("hue api full state requested: " + userId + " from " + ipAddress);
-		HueError[] theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
+		HueError[] theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors != null)
 			return theErrors;
 
@@ -779,7 +779,7 @@ public class HueMulator {
 	
 	private Object getLight(String userId, String lightId, String ipAddress) {
 		log.debug("hue light requested: " + lightId + " for user: " + userId + " from " + ipAddress);
-		HueError[] theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
+		HueError[] theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors != null)
 			return theErrors;
 
@@ -823,7 +823,7 @@ public class HueMulator {
 		Integer targetBri = null;
 		Integer targetBriInc = null;
 		log.debug("Update state requested: " + userId + " from " + ipAddress + " body: " + body);
-		HueError[] theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
+		HueError[] theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors != null)
 			return aGsonHandler.toJson(theErrors);
 		try {
@@ -873,7 +873,7 @@ public class HueMulator {
 		aMultiUtil.setDelayDefault(bridgeSettings.getButtonsleep());
 		aMultiUtil.setSetCount(1);
 		log.debug("hue state change requested: " + userId + " from " + ipAddress + " body: " + body);
-		HueError[] theErrors = bridgeSettings.validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
+		HueError[] theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors != null)
 			return aGsonHandler.toJson(theErrors);
 		try {

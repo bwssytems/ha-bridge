@@ -12,6 +12,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.security.GeneralSecurityException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,6 +31,7 @@ public class BridgeSettings extends BackupHandler {
 	private BridgeSettingsDescriptor theBridgeSettings;
 	private BridgeControlDescriptor bridgeControl;
 	private BridgeSecurity bridgeSecurity;
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
 	
 	public BridgeSettings() {
 		super();
@@ -55,6 +58,10 @@ public class BridgeSettings extends BackupHandler {
 	public BridgeSecurity getBridgeSecurity() {
 		return bridgeSecurity;
 	}
+	 public static String getCurrentDate() {
+		 return dateFormat.format(new Date());
+	 }
+	
 	public void buildSettings() {
         String addressString = null;
         String theVeraAddress = null;
@@ -140,7 +147,7 @@ public class BridgeSettings extends BackupHandler {
 	        theBridgeSettings.setNestpwd(System.getProperty("nest.pwd"));
         }
 
-        if(theBridgeSettings.getUpnpConfigAddress() == null || theBridgeSettings.getUpnpConfigAddress().equals("")) {
+        if(theBridgeSettings.getUpnpConfigAddress() == null || theBridgeSettings.getUpnpConfigAddress().trim().equals("") || theBridgeSettings.getUpnpConfigAddress().trim().equals("0.0.0.0")) {
         	addressString = checkIpAddress(null, true);
         	if(addressString != null) {
         		theBridgeSettings.setUpnpConfigAddress(addressString);
@@ -187,6 +194,11 @@ public class BridgeSettings extends BackupHandler {
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
 		
 		bridgeSecurity.setSecurityData(theBridgeSettings.getSecurityData());
+		if(theBridgeSettings.getWhitelist() != null) {
+			bridgeSecurity.convertWhitelist(theBridgeSettings.getWhitelist());
+			theBridgeSettings.removeWhitelist();
+			updateConfigFile();
+		}
 	}
 
 	public void loadConfig() {
@@ -219,11 +231,11 @@ public class BridgeSettings extends BackupHandler {
     		try {
 				newBridgeSettings.setSecurityData(bridgeSecurity.getSecurityDescriptorData());
 			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.warn("could not get encoded security data: " + e.getMessage());
+				return;
 			} catch (GeneralSecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.warn("could not get encoded security data: " + e.getMessage());
+				return;
 			}
     		bridgeSecurity.setSettingsChanged(false);
     	}
@@ -237,6 +249,18 @@ public class BridgeSettings extends BackupHandler {
         log.debug("Save HA Bridge settings.");
 		Path configPath = Paths.get(theBridgeSettings.getConfigfile());
     	JsonTransformer aRenderer = new JsonTransformer();
+    	if(bridgeSecurity.isSettingsChanged()) {
+    		try {
+				theBridgeSettings.setSecurityData(bridgeSecurity.getSecurityDescriptorData());
+			} catch (UnsupportedEncodingException e) {
+				log.warn("could not get encoded security data: " + e.getMessage());
+				return;
+			} catch (GeneralSecurityException e) {
+				log.warn("could not get encoded security data: " + e.getMessage());
+				return;
+			}
+    		bridgeSecurity.setSettingsChanged(false);
+    	}
     	String  jsonValue = aRenderer.render(theBridgeSettings);
     	configWriter(jsonValue, configPath);
     	_loadConfig(configPath);
@@ -260,7 +284,7 @@ public class BridgeSettings extends BackupHandler {
 		try {
 			Path target = null;
 			if(Files.exists(filePath)) {
-				target = FileSystems.getDefault().getPath(filePath.getParent().toString(), "habridge.config.old");
+				target = FileSystems.getDefault().getPath(filePath.getParent().toString(), "habridge.config.old." + getCurrentDate());
 				Files.move(filePath, target);
 			}
 			Files.write(filePath, content.getBytes(), StandardOpenOption.CREATE);
@@ -310,6 +334,7 @@ public class BridgeSettings extends BackupHandler {
 	        log.error("checkIpAddress cannot get ip address of this host, Exiting with message: " + e.getMessage(), e);
 	        return null;			
 		}
+		
 		String addressString = null;
         InetAddress address = null;
 		while (ifs.hasMoreElements() && addressString == null) {

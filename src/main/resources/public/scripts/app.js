@@ -93,13 +93,10 @@ app.run( async function ($rootScope, $location, Auth, bridgeService) {
         }
     });
     
-    $rootScope.$on('securityReview', function(event, data) {
-        if(Auth.isLoggedIn()) {
-            $location.path("/");        	
-        } else {
-            event.preventDefault();
-            $location.path("/login");        	
-        }
+    $rootScope.$on('securityError', function(event, data) {
+        Auth.logout();
+        event.preventDefault();
+        $location.path("/login");        	
     });
     
     $rootScope.$on('securityReinit', function(event, data) {
@@ -193,7 +190,10 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.devices = response.data;
 				},
 				function (error) {
-					self.displayError("Cannot get devices from habridge: ", error);
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
+						self.displayError("Cannot get devices from habridge: ", error);
 				}
 		);
 	};
@@ -204,6 +204,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.viewDevices();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayError("Cannot renumber devices from habridge: ", error);
 				}
 		);
@@ -242,6 +245,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 						self.getAUser();
 					},
 					function (error) {
+						if (error.status === 401)
+							$rootScope.$broadcast('securityReinit', 'done');
+						else
 						self.displayWarn("Cannot get testuser: ", error);
 					}
 			);
@@ -254,6 +260,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.testuser = response.data[0].success.username;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Cannot get a user: ", error);
 				}
 		);
@@ -266,6 +275,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 			    	self.getTestUser();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Cannot get security info: ", error);
 				}
 		);
@@ -284,6 +296,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.displaySuccess("Updated security settings.")
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Update ecurity settings Error: ", error);
 				}
 		);
@@ -311,6 +326,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.displaySuccess("Password updated")
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Update password Error: ", error);
 				}
 		);
@@ -332,6 +350,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					}
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("User add Error: ", error);
 				}
 		);
@@ -348,6 +369,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.displaySuccess("User deleted")
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("User add Error: ", error);
 				}
 		);
@@ -359,6 +383,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.displayTimer("Link your device", 30000);
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Cannot get security info: ", error);
 				}
 		);
@@ -490,6 +517,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.updateShowLifx();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Load Bridge Settings Error: ", error);
 				}
 		);
@@ -501,6 +531,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.backups = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Backups Error: ", error);
 				}
 		);
@@ -512,6 +545,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.configs = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Configs Error: ", error);
 				}
 		);
@@ -523,6 +559,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.logMsgs = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get log messages Error: ", error);
 				}
 		);
@@ -534,6 +573,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.loggerInfo = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get logger info Error: ", error);
 				}
 		);
@@ -547,6 +589,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.nestitems = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Nest Items Error: ", error);
 				}
 		);
@@ -560,6 +605,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.huedevices = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Hue Items Error: ", error);
 				}
 		);
@@ -573,6 +621,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.veradevices = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Vera Devices Error: ", error);
 				}
 		);
@@ -586,6 +637,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.verascenes = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Vera Scenes Error: ", error);
 				}
 		);
@@ -599,6 +653,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.harmonyactivities = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Harmony Activities Error: ", error);
 				}
 		);
@@ -612,6 +669,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.harmonydevices = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Harmony Devices Error: ", error);
 				}
 		);
@@ -625,6 +685,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.haldevices = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Hal Devices Error: ", error);
 				}
 		);
@@ -638,6 +701,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.mqttbrokers = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get MQTT Devices Error: ", error);
 				}
 		);
@@ -651,6 +717,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.hassdevices = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Hass Devices Error: ", error);
 				}
 		);
@@ -664,6 +733,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.domoticzdevices = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Domoticz Devices Error: ", error);
 				}
 		);
@@ -677,6 +749,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
     					self.state.somfydevices = response.data;
     				},
     				function (error) {
+    					if (error.status === 401)
+    						$rootScope.$broadcast('securityReinit', 'done');
+    					else
     					self.displayWarn("Get Somfy Devices Error: ", error);
     				}
     		);
@@ -691,6 +766,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.lifxdevices = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Lifx Devices Error: ", error);
 				}
 		);
@@ -763,6 +841,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.state.mapTypes = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get mapTypes Error: ", error);
 				}
 		);
@@ -786,6 +867,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.displaySuccess("Updated " + logComponents.length + " loggers for log levels.")
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Update Log components Error: ", error);
 				}
 		);
@@ -814,6 +898,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.displaySuccess("Bulk device add successful.");
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Bulk Add new Device Error: ", error);
 				}
 		);
@@ -832,6 +919,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					function (response) {
 					},
 					function (error) {
+						if (error.status === 401)
+							$rootScope.$broadcast('securityReinit', 'done');
+						else
 						self.displayWarn("Edit Device Error: ", error);
 					}
 			);
@@ -842,6 +932,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					function (response) {
 					},
 					function (error) {
+						if (error.status === 401)
+							$rootScope.$broadcast('securityReinit', 'done');
+						else
 						self.displayWarn("Add new Device Error: ", error);
 					}
 			);
@@ -856,6 +949,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.viewBackups();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Backup Device Db Error: ", error);
 				}
 		);
@@ -870,6 +966,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.viewDevices();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Backup Db Restore Error: ", error);
 				}
 		);
@@ -883,6 +982,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.viewBackups();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Delete Backup Db File Error:", error);
 				}
 		);
@@ -912,6 +1014,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.displayError("HABridge is now stopped. Restart must occur from the server.", null);
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayError("HABRidge Stop Error: ", error);
 				}
 		);
@@ -931,6 +1036,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					}, 2000);
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("HABRidge Reinit Error: ", error);
 				}
 		);
@@ -942,6 +1050,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.reinit();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Save Settings Error: ", error);
 				}
 		);
@@ -956,6 +1067,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.viewConfigs();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Backup Settings Error: ", error);
 				}
 		);
@@ -971,6 +1085,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.viewDevices();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Backup Settings Restore Error: ", error);
 				}
 		);
@@ -984,6 +1101,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.viewConfigs();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Delete Backup Settings File Error: ", error);
 				}
 		);
@@ -995,6 +1115,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.viewDevices();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Delete Device Error: ", error);
 				}
 		);
@@ -1036,6 +1159,9 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.displaySuccess("Request Executed: " + msgDescription);
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Request Error, Pleae look in your habridge log: ", error);
 				}
 		);
@@ -3257,6 +3383,7 @@ app.controller('LoginController', function ($scope, $location, Auth) {
 	$scope.logout = function() {
         Auth.logout();
         $scope.loggedIn = Auth.isLoggedIn();
+    	bridgeService.displaySuccess("User Logged Out");
         $location.path("/login");
 	};
 });
@@ -3322,7 +3449,6 @@ app.factory('Auth', function($resource, $rootScope, $sessionStorage, $http, $bas
         delete $sessionStorage.user;
         delete $rootScope.user;
         delete bridgeService.state.loggedInUser;
-    	bridgeService.displaySuccess("User Logged Out");
     };
      
      

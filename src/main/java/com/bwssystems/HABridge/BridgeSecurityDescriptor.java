@@ -1,12 +1,14 @@
 package com.bwssystems.HABridge;
 
 import java.util.Map;
+import com.bwssystems.HABridge.api.hue.WhitelistEntry;
 
 public class BridgeSecurityDescriptor {
 	private Map<String, User> users;
 	private boolean useLinkButton;
 	private String execGarden;
 	private boolean secureHueApi;
+	private Map<String, WhitelistEntry> whitelist;
 
 	public BridgeSecurityDescriptor() {
 		super();
@@ -43,6 +45,12 @@ public class BridgeSecurityDescriptor {
 
 	public void setSecureHueApi(boolean secureHueApi) {
 		this.secureHueApi = secureHueApi;
+	}
+	public Map<String, WhitelistEntry> getWhitelist() {
+		return whitelist;
+	}
+	public void setWhitelist(Map<String, WhitelistEntry> whitelist) {
+		this.whitelist = whitelist;
 	}
 
 	public boolean isSecure() {
