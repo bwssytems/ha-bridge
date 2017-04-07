@@ -214,12 +214,12 @@ The default ip address for the bridge to listen on is all interfaces (0.0.0.0). 
 java -jar -Dserver.ip=192.168.1.1 ha-bridge-W.X.Y.jar
 ```
 ### -Dsecurity.key=`<Your Key To Encrypt Security Data>`
-The default security key is encoded into the Java code. The default should not be used as anyone with access to the code can decode your password. To override what the default , specify -Dsecurity.key=`<Your Key To Encrypt Security Data>` explicitly on the command line. This is will prevent any issues if your config file gets hacked. The command line example:
+This option is very important to set if you will be using username/passwords to secure the ha-bridge. The ha-bridge needs to encrypt the settings in the config file and to make sure they are secured specifically to you is to provide this key. Otherwise a default key is used and it is available in the code on github for the ha-bridge here, so not very secure in that sense. **It is very important provide this if you are using username/password.** To override the default, specify -Dsecurity.key=`<Your Key To Encrypt Security Data>` explicitly on the command line. This is will prevent any issues if your config file gets hacked. The command line example:
 ```
 java -jar -Dsecurity.key=Xfawer354WertSdf321234asd ha-bridge-W.X.Y.jar
 ```
 ### -Dexec.garden=`<The path to your scripts and program directory>`
-The default exec garden path is not set which allows any program or script to be called. The default should not be used as anyone with access to the your system can create a exec command call and execute it from the api. To override what the default , specify -Dexec.garden=`<The path to your scripts and program directory>` explicitly on the command line. This is will prevent any issues if your system file gets hacked. The command line example:
+This sets a directory of your choosing to have a walled area for what can be executed by the Exec Command type. This is a good feature to use if you use the capabilities of executing a script or program from the ha-bridge. The default is not set which allows any program or script to be called and anyone with access to the your system could create an exec command call and execute it from the api. This is will prevent any issues if your system gets hacked.  To override the default, specify -Dexec.garden=`<The path to your scripts and program directory>` explicitly on the command line. The command line example:
 ```
 java -jar -Dexec.garden=C:\Users\John\bin
 ```
