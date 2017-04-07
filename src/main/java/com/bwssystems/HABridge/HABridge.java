@@ -45,6 +45,8 @@ public class HABridge {
         log.info("HA Bridge (v" + theVersion.getVersion() + ") starting....");
         
         bridgeSettings = new BridgeSettings();
+    	// sparkjava config directive to set html static file location for Jetty
+    	staticFileLocation("/public");
         while(!bridgeSettings.getBridgeControl().isStop()) {
         	bridgeSettings.buildSettings();
             log.info("HA Bridge initializing....");
@@ -52,8 +54,9 @@ public class HABridge {
 	        ipAddress(bridgeSettings.getBridgeSettingsDescriptor().getWebaddress());
 	        // sparkjava config directive to set port for the web server to listen on
 	        port(bridgeSettings.getBridgeSettingsDescriptor().getServerPort());
-	        // sparkjava config directive to set html static file location for Jetty
-	        staticFileLocation("/public");
+	        if(!bridgeSettings.getBridgeControl().isReinit())
+	        	init();
+	        bridgeSettings.getBridgeControl().setReinit(false);
 	        // setup system control api first
 	        theSystem = new SystemControl(bridgeSettings, theVersion);
 	        theSystem.setupServer();
@@ -65,9 +68,9 @@ public class HABridge {
 	        else {
 		        //Setup the device connection homes through the manager
 		        homeManager = new HomeManager();
-		        homeManager.buildHomes(bridgeSettings.getBridgeSettingsDescriptor(), udpSender);
+		        homeManager.buildHomes(bridgeSettings, udpSender);
 		        // setup the class to handle the resource setup rest api
-		        theResources = new DeviceResource(bridgeSettings.getBridgeSettingsDescriptor(), homeManager);
+		        theResources = new DeviceResource(bridgeSettings, homeManager);
 		        // setup the class to handle the upnp response rest api
 		        theSettingResponder = new UpnpSettingsResource(bridgeSettings.getBridgeSettingsDescriptor());
 		        theSettingResponder.setupServer();
@@ -89,9 +92,19 @@ public class HABridge {
 		        udpSender.closeResponseSocket();
 		        udpSender = null;
 	        }
-	        bridgeSettings.getBridgeControl().setReinit(false);
 	        stop();
+	        if(!bridgeSettings.getBridgeControl().isStop()) {
+	        	try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        }
         }
+        bridgeSettings.getBridgeSecurity().removeTestUsers();
+        if(bridgeSettings.getBridgeSecurity().isSettingsChanged())
+        	bridgeSettings.updateConfigFile();
         log.info("HA Bridge (v" + theVersion.getVersion() + ") exiting....");
         System.exit(0);
     }

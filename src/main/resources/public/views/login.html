@@ -1,0 +1,29 @@
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h2 class="panel-title">Login</h2>
+	</div>
+	<div class="panel-body">
+		<div ng-if="!loggedIn" class="form-container">
+
+			<form name="loginForm" role="form" ng-submit="login(username, password)">
+				<legend class="form-label">Enter Credentials</legend>
+				<div class="form-group">
+					<label>User</label> <input id="username" name="username"
+						class="form-control" type="text" ng-model="username"
+						placeholder="someone" autofocus/>
+				</div>
+				<div class="form-group">
+					<label>Password</label> <input id="password" name="password"
+						class="form-control" type="password" ng-model="password" />
+				</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-success" value="Submit">Submit</button>
+				</div>
+			</form>
+
+		</div>
+		<div ng-if="loggedIn">
+			<button type="button" class="btn btn-danger" ng-click="logout()">Logout</button>
+		</div>
+	</div>
+</div>

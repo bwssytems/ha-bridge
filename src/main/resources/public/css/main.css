@@ -1,3 +1,11 @@
+[ng\:cloak],
+[ng-cloak],
+[data-ng-cloak],
+[x-ng-cloak],
+.ng-cloak,
+.x-ng-cloak {
+    display: none !important;
+}
 body {
             padding-top: 60px;
             padding-bottom: 20px;
@@ -9,3 +17,47 @@ body {
 .sortorder.reverse:after {
 	    content: '\25bc';
 	  }
+.form-container {
+    position: relative;
+    bottom: 0;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.form-container form > div {
+    padding: 0 15px;
+}
+
+.form-container form > button {
+    margin-left: 15px;
+}
+
+legend.form-label {
+    font-size: 24pt;
+    padding: 0 15px;
+}
+
+.form-control.error {
+    border-color: red;
+}
+
+.form-hint {
+    font-size: 10pt;
+    line-height: 12pt;
+    margin: -5px auto 5px;
+    color: #999;
+}
+
+.form-hint.error {
+    color: #C00;
+    font-weight: bold;
+    font-size: 8pt;
+}
+
+.msg-block {
+    margin-top:5px;
+}
+.msg-error {
+    color:#F00;
+    font-size:14px;
+}

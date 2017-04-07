@@ -1,69 +1,120 @@
-var app = angular.module ('habridge', ['ngRoute', 'ngToast', 'rzModule', 'ngDialog', 'scrollable-table']);
+var app = angular.module ('habridge', ['ngRoute', 'ngToast', 'rzModule', 'ngDialog', 'base64', 'scrollable-table', 'ngResource', 'ngStorage']);
 
 app.config (function ($locationProvider, $routeProvider) {
     $locationProvider.hashPrefix('!');
 
     $routeProvider.when ('/', {
 		templateUrl: 'views/configuration.html',
-		controller: 'ViewingController'
+		controller: 'ViewingController',
+	    requiresAuthentication: true
 	}).when ('/system', {
 		templateUrl: 'views/system.html',
-		controller: 'SystemController'		
+		controller: 'SystemController',		
+		requiresAuthentication: true
 	}).when ('/logs', {
 		templateUrl: 'views/logs.html',
-		controller: 'LogsController'		
+		controller: 'LogsController',		
+		requiresAuthentication: true
 	}).when ('/editdevice', {
 		templateUrl: 'views/editdevice.html',
-		controller: 'EditController'		
+		controller: 'EditController',		
+		requiresAuthentication: true		
 	}).when ('/veradevices', {
 		templateUrl: 'views/veradevice.html',
-		controller: 'VeraController'		
+		controller: 'VeraController',		
+		requiresAuthentication: true		
 	}).when ('/verascenes', {
 		templateUrl: 'views/verascene.html',
-		controller: 'VeraController'		
+		controller: 'VeraController',		
+		requiresAuthentication: true		
 	}).when ('/harmonydevices', {
 		templateUrl: 'views/harmonydevice.html',
-		controller: 'HarmonyController'		
+		controller: 'HarmonyController',		
+		requiresAuthentication: true		
 	}).when ('/harmonyactivities', {
 		templateUrl: 'views/harmonyactivity.html',
-		controller: 'HarmonyController'		
+		controller: 'HarmonyController',		
+		requiresAuthentication: true		
 	}).when ('/nest', {
 		templateUrl: 'views/nestactions.html',
-		controller: 'NestController'		
+		controller: 'NestController',		
+		requiresAuthentication: true		
 	}).when ('/huedevices', {
 		templateUrl: 'views/huedevice.html',
-		controller: 'HueController'		
+		controller: 'HueController',		
+		requiresAuthentication: true		
 	}).when ('/haldevices', {
 		templateUrl: 'views/haldevice.html',
-		controller: 'HalController'		
+		controller: 'HalController',		
+		requiresAuthentication: true		
 	}).when ('/mqttmessages', {
 		templateUrl: 'views/mqttpublish.html',
-		controller: 'MQTTController'		
+		controller: 'MQTTController',		
+		requiresAuthentication: true		
 	}).when ('/hassdevices', {
 		templateUrl: 'views/hassdevice.html',
-		controller: 'HassController'		
+		controller: 'HassController',		
+		requiresAuthentication: true		
 	}).when ('/domoticzdevices', {
 		templateUrl: 'views/domoticzdevice.html',
-		controller: 'DomoticzController'
+		controller: 'DomoticzController',		
+		requiresAuthentication: true
 	}).when('/somfydevices', {
-           templateUrl: 'views/somfydevice.html',
-           controller: 'SomfyController'
-       }).otherwise ({
-		controller: 'DomoticzController'		
+        templateUrl: 'views/somfydevice.html',
+        controller: 'SomfyController',		
+   		requiresAuthentication: true
 	}).when ('/lifxdevices', {
 		templateUrl: 'views/lifxdevice.html',
-		controller: 'LifxController'		
+		controller: 'LifxController',		
+		requiresAuthentication: true		
+	}).when ('/login', {
+		templateUrl: 'views/login.html',
+		controller: 'LoginController'		
 	}).otherwise ({
 		templateUrl: 'views/configuration.html',
-		controller: 'ViewingController'
+		controller: 'ViewingController',		
+		requiresAuthentication: true
 	})
 });
 
-app.run( function (bridgeService) {
-	bridgeService.loadBridgeSettings();
+app.run( async function ($rootScope, $location, Auth, bridgeService) {
 	bridgeService.getHABridgeVersion();
-	bridgeService.getTestUser();
-	bridgeService.viewMapTypes();
+
+    $rootScope.$on('securitySetupReceived', function(event, data) {
+        Auth.init();
+        if(Auth.isLoggedIn()) {
+        	bridgeService.loadBridgeSettings();
+        	bridgeService.getSecurityInfo();
+        	bridgeService.viewMapTypes();
+            $location.path("/");        	
+        } else {
+            event.preventDefault();
+            $location.path("/login");        	
+        }
+    });
+    
+    $rootScope.$on('securityError', function(event, data) {
+        Auth.logout();
+        event.preventDefault();
+        $location.path("/login");        	
+    });
+    
+    $rootScope.$on('securityReinit', function(event, data) {
+        event.preventDefault();
+    	Auth.logout();
+        $location.path("/login");        	
+    });
+    
+    $rootScope.$on('$routeChangeStart', function (event, next) {
+        if (!Auth.checkPermissionForView(next)){
+            event.preventDefault();
+            $location.path("/login");
+        } else {
+            $location.path(next.originalPath);
+        	
+        }
+    });
+
 });
 
 String.prototype.replaceAll = function (search, replace)
@@ -78,9 +129,12 @@ String.prototype.replaceAll = function (search, replace)
 };
 
 
-app.service ('bridgeService', function ($http, $window, ngToast) {
+app.service ('bridgeService', function ($rootScope, $http, $base64, $location, ngToast) {
 	var self = this;
-	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {}, mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false, isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false, showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: "", viewDevId: "", queueDevId: ""};
+	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {},
+			mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false,
+			isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false,
+			showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: {}, viewDevId: "", queueDevId: "", securityInfo: {}};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
@@ -122,13 +176,24 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 			content: theTitle});
 	};
 	
+	this.displayTimer = function (theTitle, timeMillis) {
+		ngToast.create({
+			className: "success",
+			timeout: timeMillis,
+			dismissOnClick: false,
+			content: theTitle + " in " + timeMillis/1000 + " seconds"});
+	};
+	
 	this.viewDevices = function () {
 		return $http.get(this.state.base).then(
 				function (response) {
 					self.state.devices = response.data;
 				},
 				function (error) {
-					self.displayError("Cannot get devices from habridge: ", error);
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
+						self.displayError("Cannot get devices from habridge: ", error);
 				}
 		);
 	};
@@ -139,6 +204,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.viewDevices();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayError("Cannot renumber devices from habridge: ", error);
 				}
 		);
@@ -158,7 +226,11 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 	this.getHABridgeVersion = function () {
 		return $http.get(this.state.systemsbase + "/habridge/version").then(
 				function (response) {
-					self.state.habridgeversion = response.data.version;
+					self.state.habridgeversion = {
+							version: response.data.version,
+							isSecure: response.data.isSecure
+					};
+					$rootScope.$broadcast('securitySetupReceived', 'done');
 				},
 				function (error) {
 					self.displayWarn("Cannot get version: ", error);
@@ -167,12 +239,154 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 	};
 
 	this.getTestUser = function () {
-		return $http.get(this.state.systemsbase + "/habridge/testuser").then(
+		if(self.state.testuser === undefined || self.state.testuser === "") {
+			return $http.put(this.state.systemsbase + "/presslinkbutton").then(
+					function (response) {
+						self.getAUser();
+					},
+					function (error) {
+						if (error.status === 401)
+							$rootScope.$broadcast('securityReinit', 'done');
+						else
+						self.displayWarn("Cannot get testuser: ", error);
+					}
+			);
+		}
+	};
+
+	this.getAUser = function () {
+		return $http.post(this.state.huebase, "{\"devicetype\":\"test_ha_bridge\"}").then(
 				function (response) {
-					self.state.testuser = response.data.user;
+					self.state.testuser = response.data[0].success.username;
 				},
 				function (error) {
-					self.displayWarn("Cannot get testuser: ", error);
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
+					self.displayWarn("Cannot get a user: ", error);
+				}
+		);
+	};
+
+	this.getSecurityInfo = function () {
+		return $http.get(this.state.systemsbase + "/securityinfo").then(
+				function (response) {
+					self.state.securityInfo = response.data;
+			    	self.getTestUser();
+				},
+				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
+					self.displayWarn("Cannot get security info: ", error);
+				}
+		);
+	};
+	
+	this.changeSecuritySettings = function (useLinkButton, secureHueApi, execGarden) {
+		var newSecurityInfo = {};
+		newSecurityInfo = {
+				useLinkButton: useLinkButton,
+				secureHueApi: secureHueApi,
+				execGarden: execGarden
+				};
+		return $http.post(this.state.systemsbase + "/changesecurityinfo", newSecurityInfo ).then(
+				function (response) {
+					self.state.securityInfo = response.data;
+					self.displaySuccess("Updated security settings.")
+				},
+				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
+					self.displayWarn("Update ecurity settings Error: ", error);
+				}
+		);
+	};
+
+	this.isSecure = function () {
+		if(self.state.habridgeversion === undefined)
+			return true;
+		if(self.state.habridgeversion.isSecure === undefined)
+			return true;
+		
+		return self.state.habridgeversion.isSecure;
+	};
+
+	this.changePassword = function (aPassword, aPassword2) {
+		var newUserInfo = {};
+		newUserInfo = {
+				username: self.state.loggedInUser,
+				password: aPassword,
+				password2: aPassword2
+				};
+		var theEncodedPayload = $base64.encode(angular.toJson(newUserInfo));
+		return $http.post(this.state.systemsbase + "/setpassword", theEncodedPayload ).then(
+				function (response) {
+					self.displaySuccess("Password updated")
+				},
+				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
+					self.displayWarn("Update password Error: ", error);
+				}
+		);
+	};
+
+	this.addUser = function (username, aPassword, aPassword2) {
+		var newUserInfo = {};
+		newUserInfo = {
+				username: username,
+				password: aPassword,
+				password2: aPassword2
+				};
+		var theEncodedPayload = $base64.encode(angular.toJson(newUserInfo));
+		return $http.put(this.state.systemsbase + "/adduser", theEncodedPayload ).then(
+				function (response) {
+					self.displaySuccess("User added")
+					if(!self.isSecure()) {
+						self.getHABridgeVersion();
+					}
+				},
+				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
+					self.displayWarn("User add Error: ", error);
+				}
+		);
+	};
+
+	this.delUser = function (username) {
+		var newUserInfo = {};
+		newUserInfo = {
+				username: username
+				};
+		var theEncodedPayload = $base64.encode(angular.toJson(newUserInfo));
+		return $http.put(this.state.systemsbase + "/deluser", theEncodedPayload ).then(
+				function (response) {
+					self.displaySuccess("User deleted")
+				},
+				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
+					self.displayWarn("User add Error: ", error);
+				}
+		);
+	};
+
+	this.pushLinkButton = function () {
+		return $http.put(this.state.systemsbase + "/presslinkbutton").then(
+				function (response) {
+					self.displayTimer("Link your device", 30000);
+				},
+				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
+					self.displayWarn("Cannot get security info: ", error);
 				}
 		);
 	};
@@ -303,6 +517,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.updateShowLifx();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Load Bridge Settings Error: ", error);
 				}
 		);
@@ -314,6 +531,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.backups = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Backups Error: ", error);
 				}
 		);
@@ -325,6 +545,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.configs = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Configs Error: ", error);
 				}
 		);
@@ -336,6 +559,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.logMsgs = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get log messages Error: ", error);
 				}
 		);
@@ -347,6 +573,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.loggerInfo = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get logger info Error: ", error);
 				}
 		);
@@ -360,6 +589,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.nestitems = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Nest Items Error: ", error);
 				}
 		);
@@ -373,6 +605,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.huedevices = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Hue Items Error: ", error);
 				}
 		);
@@ -386,6 +621,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.veradevices = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Vera Devices Error: ", error);
 				}
 		);
@@ -399,6 +637,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.verascenes = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Vera Scenes Error: ", error);
 				}
 		);
@@ -412,6 +653,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.harmonyactivities = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Harmony Activities Error: ", error);
 				}
 		);
@@ -425,6 +669,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.harmonydevices = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Harmony Devices Error: ", error);
 				}
 		);
@@ -438,6 +685,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.haldevices = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Hal Devices Error: ", error);
 				}
 		);
@@ -451,6 +701,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.mqttbrokers = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get MQTT Devices Error: ", error);
 				}
 		);
@@ -464,6 +717,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.hassdevices = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Hass Devices Error: ", error);
 				}
 		);
@@ -477,6 +733,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.domoticzdevices = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Domoticz Devices Error: ", error);
 				}
 		);
@@ -490,6 +749,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
     					self.state.somfydevices = response.data;
     				},
     				function (error) {
+    					if (error.status === 401)
+    						$rootScope.$broadcast('securityReinit', 'done');
+    					else
     					self.displayWarn("Get Somfy Devices Error: ", error);
     				}
     		);
@@ -504,6 +766,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.lifxdevices = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get Lifx Devices Error: ", error);
 				}
 		);
@@ -576,6 +841,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.state.mapTypes = response.data;
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Get mapTypes Error: ", error);
 				}
 		);
@@ -599,6 +867,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.displaySuccess("Updated " + logComponents.length + " loggers for log levels.")
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Update Log components Error: ", error);
 				}
 		);
@@ -627,6 +898,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.displaySuccess("Bulk device add successful.");
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Bulk Add new Device Error: ", error);
 				}
 		);
@@ -645,6 +919,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					function (response) {
 					},
 					function (error) {
+						if (error.status === 401)
+							$rootScope.$broadcast('securityReinit', 'done');
+						else
 						self.displayWarn("Edit Device Error: ", error);
 					}
 			);
@@ -655,6 +932,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					function (response) {
 					},
 					function (error) {
+						if (error.status === 401)
+							$rootScope.$broadcast('securityReinit', 'done');
+						else
 						self.displayWarn("Add new Device Error: ", error);
 					}
 			);
@@ -669,6 +949,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.viewBackups();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Backup Device Db Error: ", error);
 				}
 		);
@@ -683,6 +966,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.viewDevices();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Backup Db Restore Error: ", error);
 				}
 		);
@@ -696,6 +982,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.viewBackups();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Delete Backup Db File Error:", error);
 				}
 		);
@@ -705,10 +994,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 		return $http.get(this.state.bridgelocation + "/description.xml").then(
 				function (response) {
 					ngToast.dismiss(self.state.myToastMsg);
-					self.viewConfigs();
 					self.state.myToastMsg = null;
 					self.state.isInControl = false;
-					window.location.reload();
+					$rootScope.$broadcast('securityReinit', 'done');
 				},
 				function (error) {
 					setTimeout(function(){
@@ -726,6 +1014,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.displayError("HABridge is now stopped. Restart must occur from the server.", null);
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayError("HABRidge Stop Error: ", error);
 				}
 		);
@@ -745,6 +1036,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					}, 2000);
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("HABRidge Reinit Error: ", error);
 				}
 		);
@@ -756,6 +1050,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.reinit();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Save Settings Error: ", error);
 				}
 		);
@@ -770,6 +1067,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.viewConfigs();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Backup Settings Error: ", error);
 				}
 		);
@@ -785,6 +1085,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.viewDevices();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Backup Settings Restore Error: ", error);
 				}
 		);
@@ -798,6 +1101,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.viewConfigs();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Delete Backup Settings File Error: ", error);
 				}
 		);
@@ -809,6 +1115,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.viewDevices();
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Delete Device Error: ", error);
 				}
 		);
@@ -850,6 +1159,9 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 					self.displaySuccess("Request Executed: " + msgDescription);
 				},
 				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
 					self.displayWarn("Request Error, Pleae look in your habridge log: ", error);
 				}
 		);
@@ -949,7 +1261,7 @@ app.service ('bridgeService', function ($http, $window, ngToast) {
 	};
 });
 
-app.controller ('SystemController', function ($scope, $location, $http, $window, bridgeService) {
+app.controller ('SystemController', function ($scope, $location, bridgeService, ngDialog) {
     bridgeService.viewConfigs();
     bridgeService.loadBridgeSettings();
     $scope.bridge = bridgeService.state;
@@ -1122,9 +1434,128 @@ app.controller ('SystemController', function ($scope, $location, $http, $window,
         else
             $scope.imgUrl = "glyphicon glyphicon-plus";
     };
+    
+    $scope.changeSeuritySettings = function () {
+    	bridgeService.getSecurityInfo();
+		ngDialog.open({
+			template: 'views/securitydialog.html',
+			controller: 'SecurityDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
+    };
 });
 
-app.controller('LogsController', function ($scope, $location, $http, $window, bridgeService) {
+app.directive('autofocus', ['$timeout', function($timeout) {
+	  return {
+	    restrict: 'A',
+	    link : function($scope, $element) {
+	      $timeout(function() {
+	        $element[0].focus();
+	      });
+	    }
+	  }
+	}]);
+
+app.directive('nuCheck', [function () {
+    return {
+        require: 'ngModel',
+        link: function (scope, elem, attrs, ctrl) {
+            var newUser = '#' + attrs.nuCheck;
+            elem.add(newUser).on('keyup', function () {
+                scope.$apply(function () {
+                    if($(newUser).val().length > 0 ) {
+                    	scope.addingUser = true;
+                    	scope.username = $(newUser).val();
+                    	if(scope.showPassword === false)
+                    		scope.showPassword = true;
+                    }
+                    else {
+                    	scope.addingUser = false;
+                    	if(scope.loggedInUser !== undefined)
+                    		scope.username = scope.loggedInUser;
+                    	scope.showPassword = scope.isSecure;
+                    }
+                });
+            });
+        }
+    }
+}]);
+
+app.directive('pwCheck', [function () {
+        return {
+            require: 'ngModel',
+            link: function (scope, elem, attrs, ctrl) {
+                var firstPassword = '#' + attrs.pwCheck;
+                elem.add(firstPassword).on('keyup', function () {
+                    scope.$apply(function () {
+                    	var isMatched = false;
+                    	if(elem.val().length > 0 && $(firstPassword).val().length > 0)
+                    		isMatched = (elem.val() === $(firstPassword).val());
+                        ctrl.$setValidity('pwmatch', isMatched);
+                        scope.matched = isMatched;
+                    });
+                });
+            }
+        }
+}]);
+
+app.controller('SecurityDialogCtrl', function ($scope, bridgeService, ngDialog) {
+	$scope.loggedInUser = bridgeService.state.loggedInUser;
+	if(bridgeService.state.loggedInUser !== undefined)
+		$scope.username = bridgeService.state.loggedInUser;
+	else
+		$scope.username = ""
+	$scope.secureHueApi = bridgeService.state.securityInfo.secureHueApi;
+	$scope.useLinkButton = bridgeService.state.securityInfo.useLinkButton;
+	$scope.execGarden = bridgeService.state.securityInfo.execGarden;
+	$scope.isSecure = bridgeService.state.securityInfo.isSecure;
+	$scope.matched = false;
+	$scope.addingUser = false;
+	$scope.showPassword = $scope.isSecure;
+	$scope.firstTime = true;
+
+	$scope.setSecurityInfo = function () {
+		bridgeService.changeSecuritySettings($scope.useLinkButton, $scope.secureHueApi, $scope.execGarden);
+	};
+	
+	$scope.changePassword = function (password, password2) {
+		bridgeService.changePassword(password, password2);
+	};
+	
+	$scope.addUser = function (newUser, password, password2) {
+		bridgeService.addUser(newUser, password, password2);
+		$scope.addingUser = false;
+		if(bridgeService.staet.loggedInUser !== undefined)
+			$scope.username = bridgeService.state.loggedInUser;
+		else
+			$scope.username = ""
+		$scope.showPassword = $scope.isSecure;
+	};
+	
+	$scope.delUser = function (newUser) {
+		bridgeService.delUser(newUser);
+		$scope.addingUser = false;
+		if(bridgeService.state.loggedInUser !== undefined)
+			$scope.username = bridgeService.state.loggedInUser;
+		else
+			$scope.username = ""
+		$scope.showPassword = $scope.isSecure;
+	};
+	
+	$scope.dismissDialog = function () {
+		ngDialog.close('ngdialog1');
+	};
+	
+	$scope.setBlankPassword = function (theElementName) {
+		if($scope.firstTime) {
+			var theElement = "#" + theElementName;
+			$(theElement).strength();
+			$scope.firstTime = false;
+		}
+	};
+});
+
+app.controller('LogsController', function ($scope, $location, bridgeService) {
     bridgeService.viewLogs();
     $scope.bridge = bridgeService.state;
     $scope.levels = ["INFO_INT", "WARN_INT", "DEBUG_INT", "TRACE_INT"];
@@ -1186,7 +1617,8 @@ function postrenderAction($timeout) {
         }, 0);
     }
 }
-app.controller('ViewingController', function ($scope, $location, $http, $window, bridgeService, ngDialog) {
+
+app.controller('ViewingController', function ($scope, $location, bridgeService, ngDialog) {
 
 	bridgeService.viewDevices();
 	bridgeService.viewBackups();
@@ -1227,6 +1659,9 @@ app.controller('ViewingController', function ($scope, $location, $http, $window,
 	};
 	$scope.renumberDevices = function() {
 		bridgeService.renumberDevices();
+	};
+	$scope.pushLinkButton = function() {
+		bridgeService.pushLinkButton();
 	};
 	$scope.backupDeviceDb = function (optionalbackupname) {
 		bridgeService.backupDeviceDb(optionalbackupname);
@@ -1308,7 +1743,7 @@ app.controller('DeleteDialogCtrl', function ($scope, bridgeService, ngDialog) {
 	};
 });
 
-app.controller('VeraController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('VeraController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.device_dim_control = "";
@@ -1463,7 +1898,7 @@ app.controller('VeraController', function ($scope, $location, $http, bridgeServi
 	};
 });
 
-app.controller('HarmonyController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('HarmonyController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	bridgeService.viewHarmonyActivities();
@@ -1524,7 +1959,7 @@ app.controller('HarmonyController', function ($scope, $location, $http, bridgeSe
 	};
 });
 
-app.controller('NestController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('NestController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	bridgeService.viewNestItems();
@@ -1625,7 +2060,7 @@ app.controller('NestController', function ($scope, $location, $http, bridgeServi
 	};
 });
 
-app.controller('HueController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('HueController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.bulk = { devices: [] };
@@ -1746,7 +2181,7 @@ app.controller('HueController', function ($scope, $location, $http, bridgeServic
 	};
 });
 
-app.controller('HalController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('HalController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.device_dim_control = "";
@@ -2051,7 +2486,7 @@ app.controller('HalController', function ($scope, $location, $http, bridgeServic
 	};
 });
 
-app.controller('MQTTController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('MQTTController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	bridgeService.viewMQTTDevices();
@@ -2096,7 +2531,7 @@ app.controller('MQTTController', function ($scope, $location, $http, bridgeServi
 	};
 });
 
-app.controller('HassController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('HassController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.device_dim_control = "";
@@ -2222,7 +2657,7 @@ app.controller('HassController', function ($scope, $location, $http, bridgeServi
 	};
 });
 
-app.controller('DomoticzController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('DomoticzController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.device_dim_control = "";
@@ -2377,7 +2812,7 @@ app.controller('DomoticzController', function ($scope, $location, $http, bridgeS
 	};
 });
 
-app.controller('LifxController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('LifxController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.device_dim_control = "";
@@ -2499,7 +2934,7 @@ app.controller('LifxController', function ($scope, $location, $http, bridgeServi
 	};
 });
 
-app.controller('SomfyController', function ($scope, $location, $http, bridgeService, ngDialog) {
+app.controller('SomfyController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.device_dim_control = "";
@@ -2627,8 +3062,7 @@ app.controller('SomfyController', function ($scope, $location, $http, bridgeServ
 	};
 });
 
-app.controller('EditController', function ($scope, $location, $http, bridgeService) {
-	bridgeService.viewMapTypes();
+app.controller('EditController', function ($scope, $location, bridgeService) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
 	$scope.onDevices = null;
@@ -2934,9 +3368,144 @@ app.filter('configuredSomfyDevices', function (bridgeService) {
 	}
 });
 
+app.controller('LoginController', function ($scope, $location, Auth) {
+    $scope.failed = false;
+    $scope.loggedIn = Auth.isLoggedIn();
+	$scope.login = function(username, password) {
+        Auth.login(username, password)
+        .then(function() {
+            $location.path("/");
+        }, function() {
+            $scope.failed = true;
+        });
+	};
 
-
+	$scope.logout = function() {
+        Auth.logout();
+        $scope.loggedIn = Auth.isLoggedIn();
+    	bridgeService.displaySuccess("User Logged Out");
+        $location.path("/login");
+	};
+});
 
 app.controller('VersionController', function ($scope, bridgeService) {
 	$scope.bridge = bridgeService.state;
+});
+
+app.directive('permission', ['Auth', function(Auth) {
+	   return {
+	       restrict: 'A',
+	       scope: {
+	          permission: '='
+	       },
+	 
+	       link: function (scope, elem, attrs) {
+	            scope.$watch(Auth.isLoggedIn, function() {
+	                if (Auth.userHasPermission(scope.permission)) {
+	                    elem.show();
+	                } else {
+	                    elem.hide();
+	                }
+	            });                
+	       }
+	   }
+	}]);
+
+app.factory('Auth', function($resource, $rootScope, $sessionStorage, $http, $base64, bridgeService){
+     
+    var auth = {};
+     
+    /**
+     *  Saves the current user in the root scope
+     *  Call this in the app run() method
+     */
+    auth.init = function(){
+        if (auth.isLoggedIn()){
+            $rootScope.user = auth.currentUser();
+        }
+    };
+         
+    auth.login = function(username, password){
+		var newUserInfo = {};
+		newUserInfo = {
+				username: username,
+				password: password
+				};
+		var theEncodedPayload = $base64.encode(angular.toJson(newUserInfo));
+		return $http.post(bridgeService.state.systemsbase + "/login", theEncodedPayload ).then(
+			function (response) {
+				var theResult = response.data;
+                $sessionStorage.user = theResult.user;    
+                $rootScope.user = $sessionStorage.user;
+                bridgeService.state.loggedInUser = $sessionStorage.user.username;
+        		bridgeService.getHABridgeVersion();
+            }, function(error) {
+            	bridgeService.displayWarn("Login Error: ", error);
+            });
+    };
+     
+ 
+    auth.logout = function() {
+        delete $sessionStorage.user;
+        delete $rootScope.user;
+        delete bridgeService.state.loggedInUser;
+    };
+     
+     
+    auth.checkPermissionForView = function(view) {
+        if (!view.requiresAuthentication) {
+            return true;
+        }
+         
+        return userHasPermissionForView(view);
+    };
+     
+     
+    var userHasPermissionForView = function(view){
+        if(!auth.isLoggedIn()){
+            return false;
+        }
+         
+        if(!view.permissions || !view.permissions.length){
+            return true;
+        }
+         
+        return auth.userHasPermission(view.permissions);
+    };
+     
+     
+    auth.userHasPermission = function(permissions){
+    	if(!bridgeService.isSecure())
+    		return true;
+        if(!auth.isLoggedIn()){
+            return false;
+        }
+         
+        var found = false;
+        angular.forEach(permissions, function(permission, index){
+            if ($sessionStorage.user.user_permissions.indexOf(permission) >= 0){
+                found = true;
+                return;
+            }                        
+        });
+         
+        return found;
+    };
+     
+     
+    auth.currentUser = function(){
+    	if(!bridgeService.isSecure())
+    		return "nouser";
+        return $sessionStorage.user;
+    };
+     
+     
+    auth.isLoggedIn = function(){
+    	if(!bridgeService.isSecure())
+    		return true;
+        return $sessionStorage.user != null;
+    };
+     
+ 
+    return auth;
 });

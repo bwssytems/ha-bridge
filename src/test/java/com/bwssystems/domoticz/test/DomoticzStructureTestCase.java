@@ -1,4 +1,4 @@
-package com.bwssystems.hass.test;
+package com.bwssystems.domoticz.test;
 
 import org.junit.Assert;
 import org.junit.Test;

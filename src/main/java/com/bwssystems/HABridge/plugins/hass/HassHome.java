@@ -9,7 +9,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
@@ -26,23 +26,23 @@ public class HassHome implements Home {
 	private Boolean validHass;
 	private Gson aGsonHandler;
 	
-	public HassHome(BridgeSettingsDescriptor bridgeSettings) {
+	public HassHome(BridgeSettings bridgeSettings) {
 		super();
 		createHome(bridgeSettings);
 	}
 
 	@Override
-	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
+	public Home createHome(BridgeSettings bridgeSettings) {
 		hassMap = null;
 		aGsonHandler = null;
-		validHass = bridgeSettings.isValidHass();
+		validHass = bridgeSettings.getBridgeSettingsDescriptor().isValidHass();
 		log.info("HomeAssistant Home created." + (validHass ? "" : " No HomeAssistants configured."));
 		if(validHass) {
 			hassMap = new HashMap<String,HomeAssistant>();
 			aGsonHandler =
 					new GsonBuilder()
 					.create();
-			Iterator<NamedIP> theList = bridgeSettings.getHassaddress().getDevices().iterator();
+			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getHassaddress().getDevices().iterator();
 			while(theList.hasNext() && validHass) {
 				NamedIP aHass = theList.next();
 		      	try {

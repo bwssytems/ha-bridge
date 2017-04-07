@@ -8,7 +8,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
@@ -25,7 +25,7 @@ public class HueHome implements Home {
 	private Boolean validHue;
 	private Gson aGsonHandler;
 	
-	public HueHome(BridgeSettingsDescriptor bridgeSettings) {
+	public HueHome(BridgeSettings bridgeSettings) {
 		super();
 		createHome(bridgeSettings);
 	}
@@ -105,12 +105,12 @@ public class HueHome implements Home {
 	}
 
 	@Override
-	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
-		validHue = bridgeSettings.isValidHue();
+	public Home createHome(BridgeSettings bridgeSettings) {
+		validHue = bridgeSettings.getBridgeSettingsDescriptor().isValidHue();
 		log.info("Hue passthru Home created." + (validHue ? "" : " No Hue passtrhu systems configured."));
 		if(validHue) {
 			hues = new HashMap<String, HueInfo>();
-			Iterator<NamedIP> theList = bridgeSettings.getHueaddress().getDevices().iterator();
+			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getHueaddress().getDevices().iterator();
 			while(theList.hasNext()) {
 				NamedIP aHue = theList.next();
 	      		hues.put(aHue.getName(), new HueInfo(aHue));

@@ -1,57 +1,104 @@
 package com.bwssystems.HABridge;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.UUID;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 import com.bwssystems.HABridge.api.hue.HueConstants;
-import com.bwssystems.HABridge.api.hue.HueError;
-import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.api.hue.WhitelistEntry;
 
 public class BridgeSettingsDescriptor {
-	private static final String DEFAULT_INTERNAL_USER = "thehabridgeuser";
-	private static final String DEFAULT_USER_DESCRIPTION = "default_test_user";
+	@SerializedName("upnpconfigaddress")
+	@Expose
 	private String upnpconfigaddress;
+	@SerializedName("serverport")
+	@Expose
 	private Integer serverport;
+	@SerializedName("upnpresponseport")
+	@Expose
 	private Integer upnpresponseport;
+	@SerializedName("upnpdevicedb")
+	@Expose
 	private String upnpdevicedb;
+	@SerializedName("veraaddress")
+	@Expose
 	private IpList veraaddress;
+	@SerializedName("harmonyaddress")
+	@Expose
 	private IpList harmonyaddress;
+	@SerializedName("buttonsleep")
+	@Expose
 	private Integer buttonsleep;
+	@SerializedName("upnpstrict")
+	@Expose
 	private boolean upnpstrict;
+	@SerializedName("traceupnp")
+	@Expose
 	private boolean traceupnp;
+	@SerializedName("nestuser")
+	@Expose
 	private String nestuser;
+	@SerializedName("nestpwd")
+	@Expose
 	private String nestpwd;
+	@SerializedName("farenheit")
+	@Expose
+	private boolean farenheit;
+	@SerializedName("configfile")
+	@Expose
+	private String configfile;
+	@SerializedName("numberoflogmessages")
+	@Expose
+	private Integer numberoflogmessages;
+	@SerializedName("hueaddress")
+	@Expose
+	private IpList hueaddress;
+	@SerializedName("haladdress")
+	@Expose
+	private IpList haladdress;
+	@SerializedName("haltoken")
+	@Expose
+	private String haltoken;
+	@SerializedName("whitelist")
+	@Expose
+	private Map<String, WhitelistEntry> whitelist;
+	@SerializedName("myechourl")
+	@Expose
+	private String myechourl;
+	@SerializedName("webaddress")
+	@Expose
+	private String webaddress;
+	@SerializedName("mqttaddress")
+	@Expose
+	private IpList mqttaddress;
+	@SerializedName("hassaddress")
+	@Expose
+	private IpList hassaddress;
+	@SerializedName("domoticzaddress")
+	@Expose
+	private IpList domoticzaddress;
+	@SerializedName("somfyaddress")
+	@Expose
+	private IpList somfyaddress;
+	@SerializedName("hubversion")
+	@Expose
+	private String hubversion;
+	@SerializedName("securityData")
+	@Expose
+	private String securityData;
+
+	
+	private boolean settingsChanged;
 	private boolean veraconfigured;
 	private boolean harmonyconfigured;
-	private boolean nestconfigured;
-	private boolean farenheit;
-	private String configfile;
-	private Integer numberoflogmessages;
-	private IpList hueaddress;
 	private boolean hueconfigured;
-	private IpList haladdress;
-	private String haltoken;
+	private boolean nestconfigured;
 	private boolean halconfigured;
-	private Map<String, WhitelistEntry> whitelist;
-	private boolean settingsChanged;
-	private String myechourl;
-	private String webaddress;
-	private IpList mqttaddress;
 	private boolean mqttconfigured;
-	private IpList hassaddress;
 	private boolean hassconfigured;
-	private String hubversion;
-	private IpList domoticzaddress;
 	private boolean domoticzconfigured;
-	private IpList somfyaddress;
 	private boolean somfyconfigured;
-
 	private boolean lifxconfigured;
 	
 	public BridgeSettingsDescriptor() {
@@ -226,8 +273,8 @@ public class BridgeSettingsDescriptor {
 	public Map<String, WhitelistEntry> getWhitelist() {
 		return whitelist;
 	}
-	public void setWhitelist(Map<String, WhitelistEntry> whitelist) {
-		this.whitelist = whitelist;
+	protected void removeWhitelist() {
+		whitelist = null;
 	}
 	public boolean isSettingsChanged() {
 		return settingsChanged;
@@ -294,6 +341,12 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setLifxconfigured(boolean lifxconfigured) {
 		this.lifxconfigured = lifxconfigured;
+	}
+	public String getSecurityData() {
+		return securityData;
+	}
+	public void setSecurityData(String securityData) {
+		this.securityData = securityData;
 	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
@@ -370,81 +423,5 @@ public class BridgeSettingsDescriptor {
 	}
 	public Boolean isValidLifx() {
 		return this.isLifxconfigured();
-	}
-
-	public HueError[] validateWhitelistUser(String aUser, String userDescription, boolean strict) {
-		String validUser = null;
-		boolean found = false;
-		if (aUser != null && !aUser.equalsIgnoreCase("undefined") && !aUser.equalsIgnoreCase("null")
-				&& !aUser.equalsIgnoreCase("")) {
-			if (whitelist != null) {
-				Set<String> theUserIds = whitelist.keySet();
-				Iterator<String> userIterator = theUserIds.iterator();
-				while (userIterator.hasNext()) {
-					validUser = userIterator.next();
-					if (validUser.equals(aUser))
-						found = true;
-				}
-			}
-		}
-
-		if(!found && !strict) {
-			newWhitelistUser(aUser, userDescription);
-			
-			found = true;
-		}
-		
-		if (!found) {
-			return HueErrorResponse.createResponse("1", "/api/" + aUser, "unauthorized user", null, null, null).getTheErrors();
-		}
-		
-		return null;
-	}
-	
-	public void newWhitelistUser(String aUser, String userDescription) {
-		if (whitelist == null) {
-			whitelist  = new HashMap<>();
-		}
-		if(userDescription == null)
-			userDescription = "auto insert user";
-		
-		whitelist.put(aUser, WhitelistEntry.createEntry(userDescription));
-		setSettingsChanged(true);
-	}
-
-	public String createWhitelistUser(String userDescription) {
-		String aUser = getNewUserID();
-		newWhitelistUser(aUser, userDescription);
-		return aUser;
-	}
-
-	private String getNewUserID() {
-		UUID uid = UUID.randomUUID();
-		StringTokenizer st = new StringTokenizer(uid.toString(), "-");
-		String newUser = "";
-		while (st.hasMoreTokens()) {
-			newUser = newUser + st.nextToken();
-		}
-
-		return newUser;
-	}
-
-	public String getInternalTestUser() {
-		return DEFAULT_INTERNAL_USER;
-	}
-
-	public void setupInternalTestUser() {
-		boolean found = false;
-		if(whitelist != null) {
-			for (String key : whitelist.keySet()) {
-				if(key.equals(DEFAULT_INTERNAL_USER)) {
-					found = true;
-					break;
-				}
-			}
-		}
-		if(!found) {
-			newWhitelistUser(DEFAULT_INTERNAL_USER, DEFAULT_USER_DESCRIPTION);
-		}
 	}
 }

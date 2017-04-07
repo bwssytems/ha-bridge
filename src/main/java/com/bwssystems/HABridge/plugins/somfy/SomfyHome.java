@@ -1,6 +1,6 @@
 package com.bwssystems.HABridge.plugins.somfy;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
@@ -31,7 +31,7 @@ public class SomfyHome implements Home  {
 	private Map<String, SomfyInfo> somfys;
 	private Boolean validSomfy;
 
-	public SomfyHome(BridgeSettingsDescriptor bridgeSettings) {
+	public SomfyHome(BridgeSettings bridgeSettings) {
 		createHome(bridgeSettings);
 
 	}
@@ -97,12 +97,12 @@ public class SomfyHome implements Home  {
 	}
 
 	@Override
-	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
-		validSomfy = bridgeSettings.isValidSomfy();
+	public Home createHome(BridgeSettings bridgeSettings) {
+		validSomfy = bridgeSettings.getBridgeSettingsDescriptor().isValidSomfy();
 		log.info("Somfy Home created." + (validSomfy ? "" : " No Somfys configured."));
 		if(validSomfy) {
 			somfys = new HashMap<>();
-			Iterator<NamedIP> theList = bridgeSettings.getSomfyAddress().getDevices().iterator();
+			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getSomfyAddress().getDevices().iterator();
 			while (theList.hasNext()) {
 				NamedIP aSomfy = theList.next();
 				somfys.put(aSomfy.getName(), new SomfyInfo(aSomfy, aSomfy.getName()));

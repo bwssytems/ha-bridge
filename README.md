@@ -59,23 +59,23 @@ ATTENTION: This requires JDK 1.8 to run
 ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
 
 ```
-java -jar ha-bridge-4.3.1.jar
+java -jar ha-bridge-4.5.0.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
-Create the directory and make sure that ha-bridge-4.3.1.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-4.5.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
 
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.3.1/ha-bridge-4.3.1.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.5.0/ha-bridge-4.5.0.jar
 ```
-Create the directory and make sure that ha-bridge-4.3.1.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-4.5.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.3.1/ha-bridge-4.3.1.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.5.0/ha-bridge-4.5.0.jar
 ```
 #### System Control Setup on a pi (preferred)
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
@@ -94,8 +94,8 @@ After=network.target
 
 [Service]
 Type=simple
-
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.3.1.jar
+WorkingDirectory=/home/pi/habridge
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.5.0.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -130,7 +130,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.3.1.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.5.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
@@ -213,6 +213,16 @@ The default ip address for the bridge to listen on is all interfaces (0.0.0.0). 
 ```
 java -jar -Dserver.ip=192.168.1.1 ha-bridge-W.X.Y.jar
 ```
+### -Dsecurity.key=`<Your Key To Encrypt Security Data>`
+This option is very important to set if you will be using username/passwords to secure the ha-bridge. The ha-bridge needs to encrypt the settings in the config file and to make sure they are secured specifically to you is to provide this key. Otherwise a default key is used and it is available in the code on github for the ha-bridge here, so not very secure in that sense. **It is very important provide this if you are using username/password.** To override the default, specify -Dsecurity.key=`<Your Key To Encrypt Security Data>` explicitly on the command line. This is will prevent any issues if your config file gets hacked. The command line example:
+```
+java -jar -Dsecurity.key=Xfawer354WertSdf321234asd ha-bridge-W.X.Y.jar
+```
+### -Dexec.garden=`<The path to your scripts and program directory>`
+This sets a directory of your choosing to have a walled area for what can be executed by the Exec Command type. This is a good feature to use if you use the capabilities of executing a script or program from the ha-bridge. The default is not set which allows any program or script to be called and anyone with access to the your system could create an exec command call and execute it from the api. This is will prevent any issues if your system gets hacked.  To override the default, specify -Dexec.garden=`<The path to your scripts and program directory>` explicitly on the command line. The command line example:
+```
+java -jar -Dexec.garden=C:\Users\John\bin
+```
 ## HA Bridge Usage and Configuration
 This section will cover the basics of configuration and where this configuration can be done. This requires that you have started your bridge process and then have pointed your
 favorite web interface by going to the http://<my ip address>:<port> or http://localhost:<port> with port you have assigned. The default quick link is http://localhost for your reference.
@@ -220,12 +230,18 @@ favorite web interface by going to the http://<my ip address>:<port> or http://l
 This screen allows you to see your devices you have configured for the ha-bridge to present to a controller, such as an Amazon Echo/Dot. It gives you a count of devices as there have been reports that the Echo only supports a limited number, but has been growing as of late, YMMV. You can test each device from this page as this calls the ha-bridge just as a controller would, i.e. the Echo. This is useful to make sure your configuration for each device is correct and for trouble shooting. You can also manages your devices as well by editing and making a new device copy as well as deleting it.
 
 At the bottom of the screen is the "Bridge Device DB Backup" which can be accessed with clicking on the `+` to expand this frame. Here you can backup and restore configurations that you have saved. These configs can be named or by clicking the `Backup Device DB' button will create a backup and name it for you. You can manage these backups by restoring them or deleting them.
+#### Renumber Devices
+This changes the numbering of the added devices to start at 1 and goes up from there. It was originally intended for a conversion from the previous system version that used large numbers and was not necessary. This also allows the system to try and number sequentially. If you use this button, you will need to re-discover your devices as their ID's will have changed.
+#### Link
+If this is present, you have enabled the ue link button feature for the ha-bridge. If you want a new system to recognize the ha-bridge, you will need to press this button when you are doign a discovery.
 ### The Bridge Control Tab
 This is where all of the configuration occurs for what ports and IP's the bridge runs on. It also contains the configurations for target devices so that Helper Tabs for configuration can be added as well as the connection information to control those devices.
 #### Bridge server
 This field is used to test the bridge server with the UPNP IP Address and to make sure that the bridge is responding.
 #### Bridge Control Buttons
 These buttons are for managing the bridge. The Save button is enabled when there is a change to the configuration. The Bridge Reinitialize button will recycle the internal running of the bridge in the java process. The Stop button will stop the java process. The Refresh button will refresh the page and settings.
+#### The Security Dialog
+This is where you can set the different security settings for the ha-bridge. There are two settings, one for enabling Hue like operation to secure the Hue api with the internally generated user for the calls that are done after the link button. The other is to secure the hue api with a username/password that is created as well. The other fields are to add and delete users and to set and change passwords for those users. If there are no users in the system, the system will not require a username/password to operate.
 #### Configuration Path and File
 The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify `<directory>/<filename>` explicitly.
 #### Device DB Path and File
@@ -307,7 +323,9 @@ Example from device.db:
 [{"item":<a String that is quoted or another JSON object>,"type":"<atype>"."count":X."delay":X."filterIPs":"<comma separated list of IP addresses that are valid>"."httpVerb":"<GET,PUT,POST>","httpBody":"<body info>","httpHeaders":[{"name":"header name","value":"header value"},{"name":"another header","value":"another value"}],"contentType":"<http content type i.e application/json>"},{"item":<another item>,"type":"<aType>"}]
 ```
 
-The Add/Edit tab will show you the fields to fill in for the above in a form, when you hcae completed putting in the things you want, make sure to hit the `Add` button at the right.
+The format of the example is in JSON where the JSON tags equate to the UI labels of the On Items/Dim Items/Off Items. i.e.: JSON item = UI Target Item, JSON type = UI Type, etc... 
+
+The Add/Edit tab will show you the fields to fill in for the above in a form, when you have completed putting in the things you want, make sure to hit the `Add` button at the right.
  
 The format of the item can be the default HTTP request which executes the URLs formatted as `http://<your stuff here>` as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use `https://<your secure call here>`. When using POST and PUT, you have the ability to specify the body that will be sent with the request as well as the application type for the http call.
 

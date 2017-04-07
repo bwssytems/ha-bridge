@@ -9,7 +9,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
@@ -21,7 +21,7 @@ public class HalHome implements Home {
 	private Map<String, HalInfo> hals;
 	private Boolean validHal;
 
-	public HalHome(BridgeSettingsDescriptor bridgeSettings) {
+	public HalHome(BridgeSettings bridgeSettings) {
 		super();
 		createHome(bridgeSettings);
 	}
@@ -111,17 +111,17 @@ public class HalHome implements Home {
 	}
 
 	@Override
-	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
-		validHal = bridgeSettings.isValidHal();
+	public Home createHome(BridgeSettings bridgeSettings) {
+		validHal = bridgeSettings.getBridgeSettingsDescriptor().isValidHal();
 		log.info("HAL Home created." + (validHal ? "" : " No HAL devices configured."));
 		if(!validHal)
 			return null;
 		hals = new HashMap<String, HalInfo>();
-		Iterator<NamedIP> theList = bridgeSettings.getHaladdress().getDevices().iterator();
+		Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getHaladdress().getDevices().iterator();
 		while(theList.hasNext()) {
 			NamedIP aHal = theList.next();
 	      	try {
-	      		hals.put(aHal.getName(), new HalInfo(aHal, bridgeSettings.getHaltoken()));
+	      		hals.put(aHal.getName(), new HalInfo(aHal, bridgeSettings.getBridgeSettingsDescriptor().getHaltoken()));
 			} catch (Exception e) {
 		        log.error("Cannot get hal client (" + aHal.getName() + ") setup, Exiting with message: " + e.getMessage(), e);
 		        return null;

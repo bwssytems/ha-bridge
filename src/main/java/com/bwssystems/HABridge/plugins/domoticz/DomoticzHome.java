@@ -9,7 +9,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
@@ -27,7 +27,7 @@ public class DomoticzHome implements Home {
 	private Boolean validDomoticz;
     private HTTPHandler httpClient;
 
-	public DomoticzHome(BridgeSettingsDescriptor bridgeSettings) {
+	public DomoticzHome(BridgeSettings bridgeSettings) {
 		super();
 		createHome(bridgeSettings);
 	}
@@ -123,14 +123,14 @@ public class DomoticzHome implements Home {
 	}
 
 	@Override
-	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
-		validDomoticz = bridgeSettings.isValidDomoticz();
+	public Home createHome(BridgeSettings bridgeSettings) {
+		validDomoticz = bridgeSettings.getBridgeSettingsDescriptor().isValidDomoticz();
 		log.info("Domoticz Home created." + (validDomoticz ? "" : " No Domoticz devices configured."));
 		if(!validDomoticz)
 			return null;
         httpClient = new HTTPHandler();
 		domoticzs = new HashMap<String, DomoticzHandler>();
-		Iterator<NamedIP> theList = bridgeSettings.getDomoticzaddress().getDevices().iterator();
+		Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getDomoticzaddress().getDevices().iterator();
 		while(theList.hasNext()) {
 			NamedIP aDomoticz = theList.next();
 	      	try {

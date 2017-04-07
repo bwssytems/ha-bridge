@@ -15,22 +15,26 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.api.CallItem;
+import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class TCPHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(TCPHome.class);
 	private byte[] sendData;
 	private Map<String, Socket> theSockets;
+	private Gson aGsonHandler;
     
 
-	public TCPHome(BridgeSettingsDescriptor bridgeSettings) {
+	public TCPHome(BridgeSettings bridgeSettings) {
 		super();
 		createHome(bridgeSettings);
 	}
@@ -41,8 +45,12 @@ public class TCPHome implements Home {
 		Socket dataSendSocket = null;
 		log.debug("executing HUE api request to TCP: " + anItem.getItem().getAsString());
 		String theUrl = anItem.getItem().getAsString();
-		if(theUrl != null && !theUrl.isEmpty () && theUrl.startsWith("tcp://")) {
-			String intermediate = theUrl.substring(theUrl.indexOf("://") + 3);
+
+		if(theUrl != null && !theUrl.isEmpty () && theUrl.contains("tcp://")) {
+			if(!theUrl.startsWith("{\"tcpDevice\""))
+				theUrl = "{\"tcpDevice\":\"" + theUrl + "\"}";
+			TcpDevice theDevice = aGsonHandler.fromJson(theUrl, TcpDevice.class);
+			String intermediate = theDevice.getTcpDevice().substring(theDevice.getTcpDevice().indexOf("://") + 3);
 			String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
 			String theUrlBody = intermediate.substring(intermediate.indexOf('/') + 1);
 			String hostAddr = null;
@@ -58,14 +66,15 @@ public class TCPHome implements Home {
 				try {
 					IPAddress = InetAddress.getByName(hostAddr);
 				} catch (UnknownHostException e) {
-					// noop
+					return aGsonHandler.toJson(HueErrorResponse.createResponse("901", null, "Cannot connect, Unknown Host", null, "/lights/" + device.getId(), null).getTheErrors());
 				}
 		
 				try {
 					dataSendSocket = new Socket(IPAddress, Integer.parseInt(port));
-					theSockets.put(hostPortion, dataSendSocket);
+					if(theDevice.isPersistent())
+						theSockets.put(hostPortion, dataSendSocket);
 				} catch (Exception e) {
-					// noop
+					return aGsonHandler.toJson(HueErrorResponse.createResponse("901", null, "Cannot connect, Socket Creation issue", null, "/lights/" + device.getId(), null).getTheErrors());
 				}
 			}
 	
@@ -80,18 +89,32 @@ public class TCPHome implements Home {
 				theUrlBody = StringEscapeUtils.unescapeJava(theUrlBody);
 				sendData = theUrlBody.getBytes();
 			}
+
 			try {
-				DataOutputStream outToClient = new DataOutputStream(dataSendSocket.getOutputStream());
-				outToClient.write(sendData);
-				outToClient.flush();
-			} catch (Exception e) {
+					DataOutputStream outToClient = new DataOutputStream(dataSendSocket.getOutputStream());
+					outToClient.write(sendData);
+					outToClient.flush();
+			} catch (IOException e) {
 				log.warn("Could not send data to TCP socket <<<" + e.getMessage() + ">>>, closing socket: " + theUrl);
 				try {
 					dataSendSocket.close();
 				} catch (IOException e1) {
 					// noop
 				}
-				theSockets.remove(hostPortion);
+				dataSendSocket = null;
+				if(theDevice.isPersistent())
+					theSockets.remove(hostPortion);
+				return aGsonHandler.toJson(HueErrorResponse.createResponse("901", null, "Cannot send data", null, "/lights/" + device.getId(), null).getTheErrors());
+			}
+
+			if(!theDevice.isPersistent()) {
+				try {
+					if(dataSendSocket != null)
+						dataSendSocket.close();
+				} catch (IOException e1) {
+					// noop
+				}
+				dataSendSocket = null;
 			}
 		} else
 			log.warn("Tcp Call to be presented as tcp://<ip_address>:<port>/payload, format of request unknown: " + theUrl);
@@ -99,9 +122,10 @@ public class TCPHome implements Home {
 	}
 
 	@Override
-	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
+	public Home createHome(BridgeSettings bridgeSettings) {
 		log.info("TCP Home created.");
 		theSockets = new HashMap<String, Socket>();
+		aGsonHandler = new GsonBuilder().create();
 		return this;
 	}
 

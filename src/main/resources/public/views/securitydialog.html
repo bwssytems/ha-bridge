@@ -1,0 +1,51 @@
+        <div class="form-container ngdialog-message" ng-controller="SecurityDialogCtrl">
+
+            <form name="securityForm" role="form">
+               <legend class="form-label">Update Security Settings</legend>
+               <div class="form-group">
+						<label>Use Link Button</label>
+					    <input type="checkbox"
+						ng-model="useLinkButton" ng-true-value=true
+						ng-false-value=false /> {{useLinkButton}}
+                </div>
+                <div class="form-group">
+						<label>Use username/password for HUE Api</label>
+					    <input type="checkbox"
+						ng-model="secureHueApi" ng-true-value=true
+						ng-false-value=false /> {{secureHueApi}}
+                </div>
+                <div class="form-group">
+ 					<button type="button" class="btn btn-primary" ng-click="setSecurityInfo()">Update</button>
+	 			</div>
+                <div class="form-group">
+						<label>Add/Delete User</label>
+						<input id="new-user" name="new-user" class="form-control"
+						type="text" ng-model="newUser"
+						placeholder="someone" nu-check="new-user" />
+	 			</div>
+                <div ng-if="isSecure" class="form-group">
+	 				<button type="button" class="btn btn-danger" ng-click="delUser(newUser)">Delete</button>
+                </div>
+	 			<div ng-if="showPassword" postrender-action="setBlankPassword('password-1')">
+	                <div class="form-group">
+							<label>Change Password for {{username}}</label>
+	                        <input id="password-1" name="password-1" type="password" class="form-control strength" ng-model="password" data-toggle-title="Display Password" />
+		 			</div>
+	                <div class="form-group">
+	 						<label>Confirm Password</label>
+							<input id="password-2" name="password-2" class="form-control" type="password" ng-model="password2" pw-check="password-1" />
+							<div class="msg-block" ng-show="securityForm.$error">
+								<span class="msg-error" ng-show="securityForm.$error.pwmatch">Passwords don't match.</span> 
+							</div>
+		 			</div>
+	                <div ng-if="matched" class="form-group">
+			            <button ng-if="!addingUser" class="btn btn-warning" ng-click="changePassword(password, password2)">Change Password</button>
+		 				<button ng-if="addingUser" class="btn btn-success" ng-click="addUser(newUser, password, password2)">Add User</button>
+			        </div>
+	 			</div>
+	            <div class="form-group">
+	 				<button type="button" class="btn btn-success" ng-click="dismissDialog()" autofocus>Dismiss</button>
+		 		</div>
+            </form>
+
+        </div>

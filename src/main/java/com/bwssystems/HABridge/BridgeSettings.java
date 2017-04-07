@@ -1,6 +1,7 @@
 package com.bwssystems.HABridge;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -10,6 +11,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
+import java.security.GeneralSecurityException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,12 +30,20 @@ public class BridgeSettings extends BackupHandler {
 	private static final Logger log = LoggerFactory.getLogger(BridgeSettings.class);
 	private BridgeSettingsDescriptor theBridgeSettings;
 	private BridgeControlDescriptor bridgeControl;
+	private BridgeSecurity bridgeSecurity;
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
 	
 	public BridgeSettings() {
 		super();
 		bridgeControl = new BridgeControlDescriptor();
 		theBridgeSettings = new BridgeSettingsDescriptor();
-        String ipV6Stack = System.getProperty("ipV6Stack");
+		bridgeSecurity = null;
+		String theKey = System.getProperty("security.key");
+		if(theKey == null)
+			theKey = "IWantMyPasswordsToBeAbleToBeDecodedPleaseSeeTheReadme";
+		String execGarden = System.getProperty("exec.garden");
+		bridgeSecurity = new BridgeSecurity(theKey.toCharArray(), execGarden);
+		String ipV6Stack = System.getProperty("ipV6Stack");
         if(ipV6Stack == null || !ipV6Stack.equalsIgnoreCase("true")) {
         	System.setProperty("java.net.preferIPv4Stack" , "true");
         }
@@ -43,6 +55,13 @@ public class BridgeSettings extends BackupHandler {
 	public BridgeSettingsDescriptor getBridgeSettingsDescriptor() {
 		return theBridgeSettings;
 	}
+	public BridgeSecurity getBridgeSecurity() {
+		return bridgeSecurity;
+	}
+	 public static String getCurrentDate() {
+		 return dateFormat.format(new Date());
+	 }
+	
 	public void buildSettings() {
         String addressString = null;
         String theVeraAddress = null;
@@ -128,7 +147,7 @@ public class BridgeSettings extends BackupHandler {
 	        theBridgeSettings.setNestpwd(System.getProperty("nest.pwd"));
         }
 
-        if(theBridgeSettings.getUpnpConfigAddress() == null || theBridgeSettings.getUpnpConfigAddress().equals("")) {
+        if(theBridgeSettings.getUpnpConfigAddress() == null || theBridgeSettings.getUpnpConfigAddress().trim().equals("") || theBridgeSettings.getUpnpConfigAddress().trim().equals("0.0.0.0")) {
         	addressString = checkIpAddress(null, true);
         	if(addressString != null) {
         		theBridgeSettings.setUpnpConfigAddress(addressString);
@@ -174,7 +193,12 @@ public class BridgeSettings extends BackupHandler {
         	theBridgeSettings.setWebaddress(serverIpOverride);
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
 		
-		setupInternalTestUser();
+		bridgeSecurity.setSecurityData(theBridgeSettings.getSecurityData());
+		if(theBridgeSettings.getWhitelist() != null) {
+			bridgeSecurity.convertWhitelist(theBridgeSettings.getWhitelist());
+			theBridgeSettings.removeWhitelist();
+			updateConfigFile();
+		}
 	}
 
 	public void loadConfig() {
@@ -203,6 +227,18 @@ public class BridgeSettings extends BackupHandler {
         log.debug("Save HA Bridge settings.");
 		Path configPath = Paths.get(theBridgeSettings.getConfigfile());
     	JsonTransformer aRenderer = new JsonTransformer();
+    	if(bridgeSecurity.isSettingsChanged()) {
+    		try {
+				newBridgeSettings.setSecurityData(bridgeSecurity.getSecurityDescriptorData());
+			} catch (UnsupportedEncodingException e) {
+				log.warn("could not get encoded security data: " + e.getMessage());
+				return;
+			} catch (GeneralSecurityException e) {
+				log.warn("could not get encoded security data: " + e.getMessage());
+				return;
+			}
+    		bridgeSecurity.setSettingsChanged(false);
+    	}
     	String  jsonValue = aRenderer.render(newBridgeSettings);
     	configWriter(jsonValue, configPath);
     	_loadConfig(configPath);
@@ -213,13 +249,25 @@ public class BridgeSettings extends BackupHandler {
         log.debug("Save HA Bridge settings.");
 		Path configPath = Paths.get(theBridgeSettings.getConfigfile());
     	JsonTransformer aRenderer = new JsonTransformer();
+    	if(bridgeSecurity.isSettingsChanged()) {
+    		try {
+				theBridgeSettings.setSecurityData(bridgeSecurity.getSecurityDescriptorData());
+			} catch (UnsupportedEncodingException e) {
+				log.warn("could not get encoded security data: " + e.getMessage());
+				return;
+			} catch (GeneralSecurityException e) {
+				log.warn("could not get encoded security data: " + e.getMessage());
+				return;
+			}
+    		bridgeSecurity.setSettingsChanged(false);
+    	}
     	String  jsonValue = aRenderer.render(theBridgeSettings);
     	configWriter(jsonValue, configPath);
     	_loadConfig(configPath);
     }
     
 
-	private void configWriter(String content, Path filePath) {
+	private synchronized void configWriter(String content, Path filePath) {
 		if(Files.exists(filePath) && !Files.isWritable(filePath)){
 			log.error("Error file is not writable: " + filePath);
 			return;
@@ -236,7 +284,7 @@ public class BridgeSettings extends BackupHandler {
 		try {
 			Path target = null;
 			if(Files.exists(filePath)) {
-				target = FileSystems.getDefault().getPath(filePath.getParent().toString(), "habridge.config.old");
+				target = FileSystems.getDefault().getPath(filePath.getParent().toString(), "habridge.config.old." + getCurrentDate());
 				Files.move(filePath, target);
 			}
 			Files.write(filePath, content.getBytes(), StandardOpenOption.CREATE);
@@ -249,7 +297,9 @@ public class BridgeSettings extends BackupHandler {
 	        perms.add(PosixFilePermission.OWNER_WRITE);
 	        
 	        try {
-	        	Files.setPosixFilePermissions(filePath, perms);
+	        	String osName = System.getProperty("os.name");
+	        	if(osName.toLowerCase().indexOf("win") < 0)
+	        		Files.setPosixFilePermissions(filePath, perms);
 	        } catch(UnsupportedOperationException e) {
 	        	log.info("Cannot set permissions for config file on this system as it is not supported. Continuing");
 	        }
@@ -284,6 +334,7 @@ public class BridgeSettings extends BackupHandler {
 	        log.error("checkIpAddress cannot get ip address of this host, Exiting with message: " + e.getMessage(), e);
 	        return null;			
 		}
+		
 		String addressString = null;
         InetAddress address = null;
 		while (ifs.hasMoreElements() && addressString == null) {
@@ -309,10 +360,5 @@ public class BridgeSettings extends BackupHandler {
 			}
 		}
 		return addressString;
-	}
-	private void setupInternalTestUser() {
-		theBridgeSettings.setupInternalTestUser();
-		if(theBridgeSettings.isSettingsChanged())
-			this.updateConfigFile();
 	}
 }

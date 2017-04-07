@@ -7,7 +7,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
@@ -32,7 +32,7 @@ public class NestHome implements com.bwssystems.HABridge.Home {
 	private Boolean isFarenheit;
     private Boolean validNest;
     
-	public NestHome(BridgeSettingsDescriptor bridgeSettings) {
+	public NestHome(BridgeSettings bridgeSettings) {
 		super();
 		createHome(bridgeSettings);
 	}
@@ -164,20 +164,20 @@ public class NestHome implements com.bwssystems.HABridge.Home {
 	}
 
 	@Override
-	public com.bwssystems.HABridge.Home createHome(BridgeSettingsDescriptor bridgeSettings) {
+	public com.bwssystems.HABridge.Home createHome(BridgeSettings bridgeSettings) {
         theSession = null;
         theNest = null;
         nestItems = null;
-        validNest = bridgeSettings.isValidNest();
+        validNest = bridgeSettings.getBridgeSettingsDescriptor().isValidNest();
 		aGsonHandler = null;
 		log.info("Nest Home created." + (validNest ? "" : " No Nest configured."));
         
         if(validNest) {
     		aGsonHandler = new GsonBuilder().create();
 	
-    		isFarenheit = bridgeSettings.isFarenheit();
+    		isFarenheit = bridgeSettings.getBridgeSettingsDescriptor().isFarenheit();
 	       try {
-	            theSession = new NestSession(bridgeSettings.getNestuser(), bridgeSettings.getNestpwd());
+	            theSession = new NestSession(bridgeSettings.getBridgeSettingsDescriptor().getNestuser(), bridgeSettings.getBridgeSettingsDescriptor().getNestpwd());
 	        	theNest = new Nest(theSession);
 	        } catch (LoginException e) {
 	            log.error("Caught Login Exception, setting Nest to invalid....");

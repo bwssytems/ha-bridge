@@ -3,7 +3,7 @@ package com.bwssystems.HABridge.plugins.http;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.api.NameValue;
@@ -20,7 +20,7 @@ public class HTTPHome implements Home {
 	private static final Logger log = LoggerFactory.getLogger(HTTPHome.class);
 	private HTTPHandler anHttpHandler;
 
-	public HTTPHome(BridgeSettingsDescriptor bridgeSettings) {
+	public HTTPHome(BridgeSettings bridgeSettings) {
 		super();
 		createHome(bridgeSettings);
 	}
@@ -79,7 +79,7 @@ public class HTTPHome implements Home {
 	}
 
 	@Override
-	public Home createHome(BridgeSettingsDescriptor bridgeSettings) {
+	public Home createHome(BridgeSettings bridgeSettings) {
 		anHttpHandler = new HTTPHandler();
 		log.info("Http Home created.");
 		return this;
