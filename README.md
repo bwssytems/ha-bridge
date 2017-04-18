@@ -429,16 +429,13 @@ Here is the table of items to use to tell Alexa what you want to do, this has ch
 
 To do this... |	Say this...
 --------------|------------
-ON Commands | 
- | Alexa, turn on `<Device Name>`
-OFF Commands | 
- | Alexa, turn off `<Device Name>`
-DIM Commands | 
- | Alexa, brighten `<Device Name>` to `<Position>`
- | Alexa, dim `<Device Name>` to `<Position>`
- | Alexa, brighten `<Device Name>`
- | Alexa, dim `<Device Name>`
- | Alexa, set `<Device Name>` to `<Position>`
+ON Commands | Alexa, turn on `<Device Name>`
+OFF Commands | Alexa, turn off `<Device Name>`
+DIM Commands | Alexa, brighten `<Device Name>` to `<Position>`
+DIM Commands| Alexa, dim `<Device Name>` to `<Position>`
+DIM Commands| Alexa, brighten `<Device Name>`
+DIM Commands| Alexa, dim `<Device Name>`
+DIM Commands| Alexa, set `<Device Name>` to `<Position>`
 
 To see what Alexa thinks you said, you can check in the home page for your Alexa.
 
