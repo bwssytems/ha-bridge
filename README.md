@@ -1,5 +1,5 @@
 # ha-bridge
-Emulates Philips Hue api to other home automation gateways such as an Amazon Echo or Google Home.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
+Emulates Philips Hue api to other home automation gateways such as an Amazon Echo or other systmes that support Philips Hue.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
 
 Here are some diagrams to put this software in perspective.
 
@@ -34,6 +34,8 @@ THe Harmony Hub Path looks like this:
 **NOTE: This software does require the user to have knowledge on how processes run on Linux or Windows with java. Also, an understanding of networking basics will help as well. This system receives upnp udp multicast packets from devices to be found, so that is something to understand. Please make sure you have all your devices use static IP addresses from your router. Most all questions have been answered already. PLEASE USE GOOGLE TO FIND YOUR ANSWERS!**
 
 **NOTE: This software does not control Philips Hue devices directly. A physical Philips Hue Hub is required for that, by which the ha-bridge can then proxy all of your real Hue bridges behind this bridge.**
+
+**ISSUE: Google Home now seems to not support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local APi, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
 
 **FAQ: Please look here for the current FAQs! https://github.com/bwssytems/ha-bridge/wiki/HA-Bridge-FAQs**
 
@@ -443,6 +445,8 @@ To view or remove devices that Alexa knows about, you can use the mobile app `Me
 
 ## Google Assistant
 Google Home is supported as of v3.2.0 and forward, but only if the bridge is running on port 80.
+
+**ISSUE: Google Home now seems to not support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local APi, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
 
 Use the Google Home app on a phone to add new "home control" devices by going into `Settings / Home Control / +`
 as described [here](https://support.google.com/googlehome/answer/7124115?hl=en&ref_topic=7125624#homecontrol).
