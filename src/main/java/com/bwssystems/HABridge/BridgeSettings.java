@@ -65,6 +65,7 @@ public class BridgeSettings extends BackupHandler {
 	public void buildSettings() {
         String addressString = null;
         String theVeraAddress = null;
+        String theFibaroAddress = null;
         String theSomfyAddress = null;
         String theHarmonyAddress = null;
         String configFileProperty = System.getProperty("config.file");
@@ -107,6 +108,22 @@ public class BridgeSettings extends BackupHandler {
 		        }
 	        }
 	        theBridgeSettings.setVeraAddress(theVeraList);
+	        
+	        theFibaroAddress = System.getProperty("fibaro.address");
+        	IpList theFibaroList = null;	
+	        if(theFibaroAddress != null) {
+		        try {
+		        	theFibaroList = new Gson().fromJson(theFibaroAddress, IpList.class);
+		        } catch (Exception e) {
+		        	try {
+		        		theFibaroList = new Gson().fromJson("{devices:[{name:default,ip:" + theFibaroAddress + "}]}", IpList.class);
+		        	} catch (Exception et) {
+		    	        log.error("Cannot parse fibaro.address, not set with message: " + e.getMessage(), e);
+		    	        theFibaroList = null;
+		        	}
+		        }
+	        }
+	        theBridgeSettings.setFibaroAddress(theFibaroList);
 
 	        theHarmonyAddress = System.getProperty("harmony.address");
 	        IpList theHarmonyList = null;	
@@ -178,6 +195,7 @@ public class BridgeSettings extends BackupHandler {
         	theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DEFAULT_BUTTON_SLEEP));
 
         theBridgeSettings.setVeraconfigured(theBridgeSettings.isValidVera());
+        theBridgeSettings.setFibaroconfigured(theBridgeSettings.isValidFibaro());
         theBridgeSettings.setHarmonyconfigured(theBridgeSettings.isValidHarmony());
         theBridgeSettings.setNestConfigured(theBridgeSettings.isValidNest());
         theBridgeSettings.setHueconfigured(theBridgeSettings.isValidHue());

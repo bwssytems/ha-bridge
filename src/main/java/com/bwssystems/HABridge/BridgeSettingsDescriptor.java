@@ -24,6 +24,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("veraaddress")
 	@Expose
 	private IpList veraaddress;
+	@SerializedName("fibaroaddress")
+	@Expose
+	private IpList fibaroaddress;
 	@SerializedName("harmonyaddress")
 	@Expose
 	private IpList harmonyaddress;
@@ -91,6 +94,7 @@ public class BridgeSettingsDescriptor {
 	
 	private boolean settingsChanged;
 	private boolean veraconfigured;
+	private boolean fibaroconfigured;
 	private boolean harmonyconfigured;
 	private boolean hueconfigured;
 	private boolean nestconfigured;
@@ -107,6 +111,7 @@ public class BridgeSettingsDescriptor {
 		this.traceupnp = false;
 		this.nestconfigured = false;
 		this.veraconfigured = false;
+		this.fibaroconfigured = false;
 		this.somfyconfigured = false;
 		this.harmonyconfigured = false;
 		this.hueconfigured = false;
@@ -153,11 +158,17 @@ public class BridgeSettingsDescriptor {
 	public IpList getVeraAddress() {
 		return veraaddress;
 	}
+	public IpList getFibaroAddress() {
+		return fibaroaddress;
+	}
 	public IpList getSomfyAddress() {
 		return somfyaddress;
 	}
 	public void setVeraAddress(IpList veraAddress) {
 		this.veraaddress = veraAddress;
+	}
+	public void setFibaroAddress(IpList fibaroAddress) {
+		this.fibaroaddress = fibaroAddress;
 	}
 	public void setSomfyAddress(IpList somfyAddress) {
 		this.somfyaddress = somfyAddress;
@@ -195,11 +206,17 @@ public class BridgeSettingsDescriptor {
 	public boolean isVeraconfigured() {
 		return veraconfigured;
 	}
+	public boolean isFibaroconfigured() {
+		return fibaroconfigured;
+	}
 	public boolean isSomfyconfigured() {
 		return somfyconfigured;
 	}
 	public void setVeraconfigured(boolean veraconfigured) {
 		this.veraconfigured = veraconfigured;
+	}
+	public void setFibaroconfigured(boolean fibaroconfigured) {
+		this.fibaroconfigured = fibaroconfigured;
 	}
 	public void setSomfyconfigured(boolean somfyconfigured) {
 		this.somfyconfigured = somfyconfigured;
@@ -352,6 +369,14 @@ public class BridgeSettingsDescriptor {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
 			return false;
 		List<NamedIP> devicesList = this.getVeraAddress().getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+		return true;
+	}
+	public Boolean isValidFibaro() {
+		if(this.getFibaroAddress() == null || this.getFibaroAddress().getDevices().size() <= 0)
+			return false;
+		List<NamedIP> devicesList = this.getFibaroAddress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
 		return true;

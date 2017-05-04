@@ -2,22 +2,19 @@
 	<li role="presentation"><a href="#!/">Bridge Devices</a></li>
 	<li role="presentation"><a href="#!/system">Bridge Control</a></li>
 	<li role="presentation"><a href="#!/logs">Logs</a></li>
-	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#!/veradevices">Vera Devices</a></li>
-	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#!/verascenes">Vera Scenes</a></li>
-	<li ng-if="bridge.showFibaro" role="presentation"><a
-		href="#!/fibarodevices">Fibaro Devices</a></li>
-	<li ng-if="bridge.showFibaro" role="presentation"><a
-		href="#!/fibaroscenes">Fibaro Scenes</a></li>
+	<li role="presentation"><a href="#!/veradevices">Vera Devices</a></li>
+	<li role="presentation"><a href="#!/verascenes">Vera Scenes</a></li>
+	<li role="presentation" class="active"><a href="#!/fibarodevices">Fibaro Devices</a></li>
+	<li role="presentation"><a href="#!/fibaroscenes">Fibaro Scenes</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
 		href="#!/harmonyactivities">Harmony Activities</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
 		href="#!/harmonydevices">Harmony Devices</a></li>
+	<li ng-if="bridge.showNest" role="presentation"><a href="#!/nest">Nest</a></li>
 	<li ng-if="bridge.showHue" role="presentation"><a
 		href="#!/huedevices">Hue Devices</a></li>
-	<li role="presentation" class="active"><a href="#!/haldevices">HAL
-			Devices</a></li>
+	<li ng-if="bridge.showHal" role="presentation"><a
+		href="#!/haldevices">HAL Devices</a></li>
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
 	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
@@ -28,18 +25,19 @@
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">HAL Device List
-			({{bridge.haldevices.length}})</h2>
+		<h2 class="panel-title">Fibaro Device List
+			({{bridge.fibarodevices.length}})</h2>
 	</div>
 	<div class="panel-body">
-		<p class="text-muted">For any HAL Device, use the build action buttons
-			to generate the item addition information into the ha-bridge device and this will put you into the edit screen. Then
+		<p class="text-muted">For any Fibaro Device, use the build action buttons
+			to generate the item addition information into the ha-bridge device
+			and this will put you into the edit screen. Then
 			you can modify the name to anything you want that will be the keyword
 			for the Echo or Google Home. Also, you can go back to any helper tab and click a build 
 			action button to add another item for a multi-command. After you are
 			 done in the edit tab, click the 'Add Bridge Device' to finish that selection
-			setup. The 'Already Configured HAL Devices' list below will show what
-			is already setup for your HAL.</p>
+			setup. The 'Already Configured Fibaro Devices' list below will show
+			what is already setup for your Fibaro.</p>
 		<p class="text-muted">
 			Also, use this select menu for which type of dim control you would
 			like to be generated: <select name="device-dim-control"
@@ -54,71 +52,38 @@
 		<p class="text-muted">Use the check boxes by the names to use the bulk addition
 			feature. Select your items and dim control type if wanted, then click
 			bulk add below. Your items will be added with on and off or dim and
-			off if selected with the name of the device from the HAL.</p>
-	<scrollable-table watch="bridge.haldevices">
+			off if selected with the name of the device from the Fibaro.</p>
+	<scrollable-table watch="bridge.fibarodevices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<th>Row</th>
-				<th sortable-header col="name">
-					<span><input type="checkbox" name="selectAll"
+				<th sortable-header col="name"><span><input type="checkbox" name="selectAll"
 					value="{{selectAll}}"
 					ng-checked="selectAll"
 					ng-click="toggleSelectAll()"> Name</span></th>
+				<th sortable-header col="id" comparator-fn="comparatorUniqueId">Id</th>
 				<th sortable-header col="category">Category</th>
-				<th sortable-header col="halname">HAL</th>
-				<th>On Button</th>
-				<th>Off Button</th>
+				<th sortable-header col="room">Room</th>
+				<th sortable-header col="fibaroname">Fibaro</th>
 				<th>Build Actions</th>
 			</tr>
 		</thead>
-		<tr ng-repeat="haldevice in bridge.haldevices">
+		<tr
+			ng-repeat="fibarodevice in bridge.fibarodevices">
 			<td>{{$index+1}}</td>
 			<td><input type="checkbox" name="bulk.devices[]"
-				value="{{haldevice.haldevicename}}"
-				ng-checked="bulk.devices.indexOf(haldevice.haldevicename) > -1"
-				ng-click="toggleSelection(haldevice.haldevicename)">
-				{{haldevice.haldevicename}}</td>
-			<td>{{haldevice.haldevicetype}}</td>
-			<td>{{haldevice.halname}}</td>
+				value="{{fibarodevice.id}}"
+				ng-checked="bulk.devices.indexOf(fibarodevice.id) > -1"
+				ng-click="toggleSelection(fibarodevice.id)">
+				{{fibarodevice.name}}</td>
+			<td>{{fibarodevice.id}}</td>
+			<td>{{fibarodevice.category}}</td>
+			<td>{{fibarodevice.room}}</td>
+			<td>{{fibarodevice.fibaroname}}</td>
 			<td>
-				<select name="button-on" id="button-on"	ng-model="button_on">
-						<option ng-repeat="aButtonOn in haldevice.buttons.DeviceElements"
-							value="{{aButtonOn}}">{{aButtonOn.DeviceName}}</option>
-				</select>
-			</td>
-			<td>
-				<select name="button-off" id="button-off" ng-model="button_off">
-						<option ng-repeat="aButtonOff in haldevice.buttons.DeviceElements"
-							value="{{aButtonOff}}">{{aButtonOff.DeviceName}}</option>
-				</select>
-			</td>
-			<td>
-				<button ng-if="haldevice.haldevicetype != 'Home' && haldevice.haldevicetype != 'HVAC' && haldevice.haldevicetype != 'IrData'" class="btn btn-success" type="submit"
-					ng-click="buildDeviceUrls(haldevice, device_dim_control, false)">Build Item</button>
-				<button ng-if="haldevice.haldevicetype == 'Home'" class="btn btn-success" type="submit"
-					ng-click="buildHALHomeUrls(haldevice, false)">Build Home/Away</button>
-				<button ng-if="haldevice.haldevicetype == 'IrData'" class="btn btn-success" type="submit"
-					ng-click="buildButtonUrls(haldevice, button_on, button_off, false)">Build
-					A Button</button>
-				<ul ng-if="haldevice.haldevicetype == 'HVAC'" class="list-group">
-					<li class="list-group-item">
-						<p>
-							<button class="btn btn-success" type="submit"
-								ng-click="buildHALHeatUrls(haldevice, false)">Heat</button>
-							<button class="btn btn-success" type="submit"
-								ng-click="buildHALCoolUrls(haldevice, false)">Cool</button>
-							<button class="btn btn-success" type="submit"
-								ng-click="buildHALAutoUrls(haldevice, false)">Auto</button>
-						</p>
-						<p>
-							<button class="btn btn-success" type="submit"
-								ng-click="buildHALOffUrls(haldevice, false)">Off</button>
-							<button class="btn btn-success" type="submit"
-								ng-click="buildHALFanUrls(haldevice, false)">Fan</button>
-						</p>
-					</li>
-				</ul>
+				<button class="btn btn-success" type="submit"
+					ng-click="buildDeviceUrls(fibarodevice, device_dim_control, false)">Build Item</button>
 			</td>
 		</tr>
 	</table>
@@ -133,29 +98,26 @@
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title">
-			Already Configured HAL Devices <a ng-click="toggleButtons()"><span
+			Already Configured Fibaro Devices <a ng-click="toggleButtons()"><span
 				class={{imgButtonsUrl}} aria-hidden="true"></span></a></a>
 		</h2>
 	</div>
 	<div ng-if="buttonsVisible" class="panel-body">
-	
-	<scrollable-table watch="bridge.haldevices">
+	<scrollable-table watch="bridge.devices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<th>Row</th>
 				<th sortable-header col="name">Name</th>
-				<th sortable-header col="category">Category</th>
-				<th sortable-header col="halname">HAL</th>
+				<th sortable-header col="targetDevice">Fibaro</th>
 				<th>Map Id</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="device in bridge.devices | configuredHalItems">
+			ng-repeat="device in bridge.devices | configuredFibaroDevices">
 			<td>{{$index+1}}</td>
 			<td>{{device.name}}</td>
-			<td>{{device.deviceType}}</td>
 			<td>{{device.targetDevice}}</td>
 			<td>{{device.mapId}}</td>
 			<td>

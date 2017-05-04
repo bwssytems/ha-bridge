@@ -19,6 +19,7 @@ import com.bwssystems.HABridge.plugins.somfy.SomfyHome;
 import com.bwssystems.HABridge.plugins.tcp.TCPHome;
 import com.bwssystems.HABridge.plugins.udp.UDPHome;
 import com.bwssystems.HABridge.plugins.vera.VeraHome;
+import com.bwssystems.HABridge.plugins.fibaro.FibaroHome;
 import com.bwssystems.HABridge.util.UDPDatagramSender;
 
 public class HomeManager {
@@ -73,6 +74,8 @@ public class HomeManager {
 		homeList.put(DeviceMapTypes.CUSTOM_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.VERA_SCENE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.FIBARO_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.FIBARO_SCENE[DeviceMapTypes.typeIndex], aHome);
 		//setup the tcp handler Home
 		aHome = new TCPHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.TCP_DEVICE[DeviceMapTypes.typeIndex], aHome);
@@ -85,7 +88,11 @@ public class HomeManager {
 		aHome = new VeraHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		resourceList.put(DeviceMapTypes.VERA_SCENE[DeviceMapTypes.typeIndex], aHome);
-        //setup the Domoticz configuration if available
+		// Setup Fibaro Home if available
+		aHome = new FibaroHome(bridgeSettings);
+		resourceList.put(DeviceMapTypes.FIBARO_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		resourceList.put(DeviceMapTypes.FIBARO_SCENE[DeviceMapTypes.typeIndex], aHome);
+    //setup the Domoticz configuration if available
 		aHome = new DomoticzHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		resourceList.put(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex], aHome);
