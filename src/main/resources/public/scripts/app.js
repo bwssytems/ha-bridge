@@ -1979,39 +1979,25 @@ app.controller('FibaroController', function ($scope, $location, bridgeService, n
 	};
 
 	$scope.buildDeviceUrls = function (fibarodevice, dim_control, buildonly) {
-		if(dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0) {
-				dimpayload = "http://" + fibarodevice.fibaroaddress + ":" + $scope.fibaro.port
-				+ "/data_request?id=action&output_format=json&DeviceNum="
-				+ fibarodevice.id
-				+ "&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget="
-				+ dim_control;
-			}
-			else
-				dimpayload = "http://" + fibarodevice.fibaroaddress + ":" + $scope.fibaro.port
-				+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
-				+ fibarodevice.id;
-			onpayload = "http://" + fibarodevice.fibaroaddress + ":" + $scope.fibaro.port
-				+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum="
-				+ fibarodevice.id;
-			offpayload = "http://" + fibarodevice.fibaroaddress + ":" + $scope.fibaro.port
-			+ "/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum="
-			+ fibarodevice.id;
+		if(dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)
+			dimpayload = "http://" + fibarodevice.fibaroaddress + ":" + $scope.fibaro.port + "/api/callAction?deviceID=" + fibarodevice.id + "&name=setValue&arg1=" + dim_control;
+		else
+			dimpayload = "http://" + fibarodevice.fibaroaddress + ":" + $scope.fibaro.port + "/api/callAction?deviceID=" + fibarodevice.id + "&name=turnOn";
+				
+		onpayload = "http://" + fibarodevice.fibaroaddress + ":" + $scope.fibaro.port + "/api/callAction?deviceID=" + fibarodevice.id + "&name=turnOn";
+		offpayload = "http://" + fibarodevice.fibaroaddress + ":" + $scope.fibaro.port + "/api/callAction?deviceID=" + fibarodevice.id + "&name=turnOff";
 
-			bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, fibarodevice.id, fibarodevice.name, fibarodevice.fibaroname, "switch", "fibaroDevice", null, null);
-			$scope.device = bridgeService.state.device;
-			if (!buildonly) {
-				bridgeService.editNewDevice($scope.device);
-				$location.path('/editdevice');
-			}
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, fibarodevice.id, fibarodevice.name, fibarodevice.fibaroname, "switch", "fibaroDevice", null, null);
+		$scope.device = bridgeService.state.device;
+		if (!buildonly) {
+			bridgeService.editNewDevice($scope.device);
+			$location.path('/editdevice');
+		}
 	};
 
 	$scope.buildSceneUrls = function (fibaroscene) {
-		onpayload = "http://" + fibaroscene.fibaroaddress + ":" + $scope.fibaro.port
-			+ "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
-			+ fibaroscene.id;
-		offpayload = "http://" + fibaroscene.fibaroaddress + ":" + $scope.fibaro.port
-			+ "/data_request?id=action&output_format=json&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum="
-			+ fibarocene.id;
+		onpayload = "http://" + fibaroscene.fibaroaddress + ":" + $scope.fibaro.port + "/api/sceneControl?id=" + fibaroscene.id + "&action=start";
+		offpayload = "http://" + fibaroscene.fibaroaddress + ":" + $scope.fibaro.port + "/api/sceneControl?id=" + fibaroscene.id + "&action=stop";
 
 		bridgeService.buildUrls(onpayload, null, offpayload, false, fibaroscene.id, fibaroscene.name, fibaroscene.fibaroname, "scene", "fibaroScene", null, null);
 		$scope.device = bridgeService.state.device;
