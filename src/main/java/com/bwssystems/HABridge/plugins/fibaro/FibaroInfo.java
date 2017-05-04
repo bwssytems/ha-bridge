@@ -1,16 +1,20 @@
 package com.bwssystems.HABridge.plugins.fibaro;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.NamedIP;
-import com.bwssystems.HABridge.plugins.http.HTTPHandler;
 import com.google.gson.Gson;
 
 public class FibaroInfo
 {
 	private static final Logger log = LoggerFactory.getLogger(FibaroInfo.class);
-	private HTTPHandler httpClient;
 	private NamedIP fibaroAddress;
 
 	// You can disable it if you want
@@ -22,7 +26,6 @@ public class FibaroInfo
 	public FibaroInfo(NamedIP addressName)
 	{
 		super();
-		httpClient = new HTTPHandler();
 		fibaroAddress = addressName;
 	}
 
@@ -35,10 +38,8 @@ public class FibaroInfo
 		Device[] all_devices = getAllDevices();
 		int count = 0;
 		for(Device d : all_devices)
-		{
 			if(d.roomID > 0 && useSaveLogs ? "true".equals(d.properties.saveLogs) : true)
 				count++;
-		}
 
 		Device[] devices = new Device[count];
 		int i = 0;
@@ -62,7 +63,7 @@ public class FibaroInfo
 				d.fibaroname = fibaroAddress.getName();
 			}
 
-		log.debug("Founded: " + devices.length + " devices");
+		log.info("Founded: " + devices.length + " devices");
 
 		return devices;
 	}
@@ -92,7 +93,7 @@ public class FibaroInfo
 				s.fibaroaddress = fibaroAddress.getIp();
 				s.fibaroname = fibaroAddress.getName();
 			}
-		System.out.println("Founded: " + count + " scenes");
+		log.info("Founded: " + count + " scenes");
 		return result;
 	}
 
@@ -125,7 +126,35 @@ public class FibaroInfo
 	private String request(String theUrl)
 	{
 		theUrl = "http://" + fibaroAddress.getIp() + "/api/" + theUrl;
-		return httpClient.doHttpRequest(theUrl, null, null, null, null);
+		String auth = new String(Base64.encodeBase64((fibaroAddress.getUsername() + ":" + fibaroAddress.getPassword()).getBytes()));
+		java.net.URL url;
+		java.net.HttpURLConnection connection;
+		String result = null;
+		try
+		{
+			url = new URL(theUrl);
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("GET");
+			connection.setRequestProperty("Authorization", "Basic " + auth);
+			connection.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+			connection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
+			connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
+			connection.connect();
+			BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+			StringBuilder buffer = new StringBuilder();
+			String line;
+			while((line = br.readLine()) != null)
+				buffer.append(line).append("\n");
+			br.close();
+			result = buffer.toString();
+		}
+		catch(Exception e)
+		{
+			log.info("Error while get getJson: " + theUrl);
+			e.printStackTrace();
+			return null;
+		}
+		return result;
 	}
 
 	private String replaceDigits(String name)

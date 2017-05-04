@@ -110,7 +110,7 @@ public class BridgeSettings extends BackupHandler {
 	        theBridgeSettings.setVeraAddress(theVeraList);
 	        
 	        theFibaroAddress = System.getProperty("fibaro.address");
-        	IpList theFibaroList = null;	
+        	IpList theFibaroList = null;
 	        if(theFibaroAddress != null) {
 		        try {
 		        	theFibaroList = new Gson().fromJson(theFibaroAddress, IpList.class);

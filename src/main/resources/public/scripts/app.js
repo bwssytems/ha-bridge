@@ -1331,14 +1331,16 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     	    }
     	}    	
     };
-    $scope.addFibarotoSettings = function (newfibaroname, newfibaroip) {
+    $scope.addFibarotoSettings = function (newfibaroname, newfibaroip, newfibarousername, newfibaropassword) {
     	if($scope.bridge.settings.fibaroaddress === undefined || $scope.bridge.settings.fibaroaddress === null) {
     		$scope.bridge.settings.fibaroaddress = { devices: [] };
 		}
-    	var newFibaro = {name: newfibaroname, ip: newfibaroip }
+    	var newFibaro = {name: newfibaroname, ip: newfibaroip, username: newfibarousername, password: newfibaropassword }
     	$scope.bridge.settings.fibaroaddress.devices.push(newFibaro);
     	$scope.newfibaroname = null;
     	$scope.newfibaroip = null;
+    	$scope.newfibarousername = null;
+    	$scope.newfibaropassword = null;
     };
     $scope.removeFibarotoSettings = function (fibaroname, fibaroip) {
     	for(var i = $scope.bridge.settings.fibaroaddress.devices.length - 1; i >= 0; i--) {
