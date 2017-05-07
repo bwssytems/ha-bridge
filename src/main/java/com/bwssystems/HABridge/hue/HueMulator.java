@@ -118,6 +118,17 @@ public class HueMulator {
 			log.debug("group add requested from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
 			return "[{\"success\":{\"id\":\"1\"}}]";
 		});
+		// http://ip_address:port/api/:userid/groups/<groupid>/action
+		// Dummy handler
+		// Error forces Logitech Pop to fall back to individual light control
+		// instead of scene-based control.
+		put(HUE_CONTEXT + "/:userid/groups/:groupid/action", "application/json", (request, response) -> {
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.type("application/json");
+			response.status(HttpStatus.SC_OK);
+			log.debug("put to groups API from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
+			return "[{\"error\":{\"address\": \"/groups/0/action/scene\", \"type\":7, \"description\": \"invalid value, dummy for parameter, scene\"}}]";
+		});		
 		// http://ip_address:port/api/{userId}/scenes returns json objects of
 		// all scenes configured
 		get(HUE_CONTEXT + "/:userid/scenes", "application/json", (request, response) -> {
