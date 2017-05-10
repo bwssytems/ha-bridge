@@ -66,19 +66,17 @@ java -jar ha-bridge-4.5.0.jar
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
+Or if not using docker:
+
 Create the directory and make sure that ha-bridge-4.5.0.jar is in your /home/pi/habridge directory.
+
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
 
 pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.5.0/ha-bridge-4.5.0.jar
 ```
-Create the directory and make sure that ha-bridge-4.5.0.jar is in your /home/pi/habridge directory.
-```
-pi@raspberrypi:~ $ mkdir habridge
-pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.5.0/ha-bridge-4.5.0.jar
-```
+
 #### System Control Setup on a pi (preferred)
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
 
@@ -150,12 +148,14 @@ pi@raspberrypi:~/habridge $ tail -f habridge-log.txt
 ```
 ## Run ha-bridge alongside web server already on port 80
 These examples will help you proxy your current webserver requests to the ha-bridge running on a different port, such as 8080.
+
 ### Apache Example
+
 Reverse proxy with Apache on Ubuntu linux:
 
-a2enmod proxy
-a2enmod proxy_http
-a2enmod headers
+Enable the required Apache modules: 
+
+`a2enmod proxy proxy_http headers`
 
 Added the following lines to my Apache config file “000-default”
 
@@ -177,7 +177,10 @@ Added the following lines to my Apache config file “000-default”
 </VirtualHost>
 ```
 
-service apache2 restart
+Restart apache for the changes to take effect. 
+
+`service apache2 restart`
+
 ### lighthttpd Example
 ```
 server.modules   += ( "mod_proxy" )
