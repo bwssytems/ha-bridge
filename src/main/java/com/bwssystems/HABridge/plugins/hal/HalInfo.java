@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.NamedIP;
+import com.bwssystems.HABridge.api.hue.HueError;
+import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.plugins.http.HTTPHandler;
 import com.bwssystems.HABridge.util.TextStringFormatter;
 import com.google.gson.Gson;
@@ -177,6 +179,12 @@ public class HalInfo {
 		return deviceList;
 	}
 
+	public String deviceCommand(String theUrl) {
+		String theData = null;
+		theData = httpClient.doHttpRequest(theUrl, null, null, null, null);
+		return theData;
+	}
+	
 	public NamedIP getHalAddress() {
 		return halAddress;
 	}

@@ -1285,11 +1285,11 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     	    }
     	}    	
     };
-    $scope.addHarmonytoSettings = function (newharmonyname, newharmonyip) {
+    $scope.addHarmonytoSettings = function (newharmonyname, newharmonyip, newharmonywebhook) {
     	if($scope.bridge.settings.harmonyaddress === undefined || $scope.bridge.settings.harmonyaddress === null) {
 			$scope.bridge.settings.harmonyaddress = { devices: [] };
 		}
-    	var newharmony = {name: newharmonyname, ip: newharmonyip }
+    	var newharmony = {name: newharmonyname, ip: newharmonyip, webhook: newharmonywebhook}
     	$scope.bridge.settings.harmonyaddress.devices.push(newharmony);
     	$scope.newharmonyname = null;
     	$scope.newharmonyip = null;

@@ -126,7 +126,7 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			log.debug("put to groups API from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
+			log.debug("put action to groups API from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
 			return "[{\"error\":{\"address\": \"/groups/0/action/scene\", \"type\":7, \"description\": \"invalid value, dummy for parameter, scene\"}}]";
 		});		
 		// http://ip_address:port/api/{userId}/scenes returns json objects of

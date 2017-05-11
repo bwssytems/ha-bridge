@@ -513,8 +513,8 @@ contentBodyOff | string | This is the content body that you would like to send w
 {
 "name" : "bedroom light",
 "deviceType" : "switch",
-  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
-  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
+  "onUrl" : "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41\",\"type\":\"veraDevice\"}]",
+  "offUrl" : "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41\",\"type\":\"veraDevice\"}]"
 }
 ```
 #### Dimming Control Example
@@ -524,8 +524,8 @@ e.g.
 {
     "name": "entry light",
     "deviceType": "switch",
-    "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31","type":"veraDevice"}],
-    "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}","type":"veraDevice"}]
+    "offUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31\",\"type\":\"veraDevice\"}]",
+    "onUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}\",\"type\":\"veraDevice\"}]"
 }
 ```
 See the echo's documentation for the dimming phrase.
@@ -537,8 +537,8 @@ e.g.
 {
     "name": "Thermostat,
     "deviceType": "custom",
-    "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=10","type":"veraDevice"}],
-    "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=10&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.math(X/4)}","type":"veraDevice"}]
+    "offUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=10\",\"type\":\"veraDevice\"}]",
+    "onUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=10&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.math(X/4)}\",\"type\":\"veraDevice\"}]"
 }
 ```
 See the echo's documentation for the dimming phrase.
@@ -550,8 +550,8 @@ e.g:
 {
     "name": "test device",
     "deviceType": "custom",
-    "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31","httpVerb":"POST","contentType" : "application/json","httpBody" : "{\"fooBar\":\"baz_off\"}],
-    "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}","type":"httpDevice","httpVerb":"POST","contentType" : "application/json","httpBody" : "{\"fooBar\":\"baz_on\"}]
+    "offUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31\",\"httpVerb\":\"POST\",\"contentType\" : \"application/json\",\"httpBody\" : \"{\"fooBar\":\"baz_off\"}]",
+    "onUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}\",\"type\":\"httpDevice\",\"httpVerb\":\"POST\",\"contentType\" : \"application/json\",\"httpBody\" : \"{\"fooBar\":\"baz_on\"}]"
 }
 ```
 #### Custom Usage URLs Example
@@ -560,8 +560,8 @@ Anything that takes an action as a result of an HTTP request will probably work 
 {
   "name": "night mode",
   "deviceType": ""custom",
-  "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=1","type":"httpDevice"}],
-  "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=3","type":"httpDevice"}]
+  "offUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=1\",\"type\":\"httpDevice\"}]",
+  "onUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=3\",\"type\":\"httpDevice\"}]"
 }
 ```
 Here is a UDP example that can send binary data.
@@ -569,8 +569,8 @@ Here is a UDP example that can send binary data.
 {
   "name": "UDPPacket",
   "deviceType": "custom",
-  "offUrl": [{"item":"udp://192.168.1.1:8899/0x460055","type":"udpDevice"}],
-  "onUrl": [{"item":"udp://192.168.1.1:8899/0x450055","type":"udpDevice"}]
+  "offUrl": "[{\"item\":\"udp://192.168.1.1:8899/0x460055\",\"type\":\"udpDevice\"}]",
+  "onUrl": "[{\"item\":\"udp://192.168.1.1:8899/0x450055\",\"type\":\"udpDevice\"}]"
 }
 ```
 #### Response
@@ -629,8 +629,8 @@ contentBodyOff | string | This is the content body that you would like to send w
 "id" : "6789",
 "name" : "table light",
 "deviceType" : "switch",
-  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
-  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
+  "onUrl" : "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41\",\"type\":\"veraDevice\"}]",
+  "offUrl" : "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41\",\"type\":\"veraDevice\"}]"
 }
 ```
 #### Response
