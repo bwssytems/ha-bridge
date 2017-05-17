@@ -1,5 +1,5 @@
 # ha-bridge
-Emulates Philips Hue api to other home automation gateways such as an Amazon Echo or other systmes that support Philips Hue.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
+Emulates Philips Hue API to other home automation gateways such as an Amazon Echo or other systems that support Philips Hue.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
 
 Here are some diagrams to put this software in perspective.
 
@@ -35,11 +35,11 @@ THe Harmony Hub Path looks like this:
 
 **NOTE: This software does not control Philips Hue devices directly. A physical Philips Hue Hub is required for that, by which the ha-bridge can then proxy all of your real Hue bridges behind this bridge.**
 
-**ISSUE: Google Home now seems to not support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local APi, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
+**ISSUE: Google Home now seems to not support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local API, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
 
 **FAQ: Please look here for the current FAQs! https://github.com/bwssytems/ha-bridge/wiki/HA-Bridge-FAQs**
 
-In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest, Somfy Tahoma and the ability to proxy all of your real Hue bridges behind this bridge.
+In the cases of systems that require authorization and/or have APIs that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest, Somfy Tahoma and the ability to proxy all of your real Hue bridges behind this bridge.
 
 Alternatively the Bridge supports custom calls as well using http/https/udp and tcp such as the LimitlessLED/MiLight bulbs using the UDP protocol. Binary data is supported with UDP/TCP.
 
@@ -221,7 +221,7 @@ This option is very important to set if you will be using username/passwords to 
 java -jar -Dsecurity.key=Xfawer354WertSdf321234asd ha-bridge-W.X.Y.jar
 ```
 ### -Dexec.garden=`<The path to your scripts and program directory>`
-This sets a directory of your choosing to have a walled area for what can be executed by the Exec Command type. This is a good feature to use if you use the capabilities of executing a script or program from the ha-bridge. The default is not set which allows any program or script to be called and anyone with access to the your system could create an exec command call and execute it from the api. This is will prevent any issues if your system gets hacked.  To override the default, specify -Dexec.garden=`<The path to your scripts and program directory>` explicitly on the command line. The command line example:
+This sets a directory of your choosing to have a walled area for what can be executed by the Exec Command type. This is a good feature to use if you use the capabilities of executing a script or program from the ha-bridge. The default is not set which allows any program or script to be called and anyone with access to the your system could create an exec command call and execute it from the API. This is will prevent any issues if your system gets hacked.  To override the default, specify -Dexec.garden=`<The path to your scripts and program directory>` explicitly on the command line. The command line example:
 ```
 java -jar -Dexec.garden=C:\Users\John\bin
 ```
@@ -243,7 +243,7 @@ This field is used to test the bridge server with the UPNP IP Address and to mak
 #### Bridge Control Buttons
 These buttons are for managing the bridge. The Save button is enabled when there is a change to the configuration. The Bridge Reinitialize button will recycle the internal running of the bridge in the java process. The Stop button will stop the java process. The Refresh button will refresh the page and settings.
 #### The Security Dialog
-This is where you can set the different security settings for the ha-bridge. There are two settings, one for enabling Hue like operation to secure the Hue api with the internally generated user for the calls that are done after the link button. The other is to secure the hue api with a username/password that is created as well. The other fields are to add and delete users and to set and change passwords for those users. If there are no users in the system, the system will not require a username/password to operate.
+This is where you can set the different security settings for the ha-bridge. There are two settings, one for enabling Hue like operation to secure the Hue API with the internally generated user for the calls that are done after the link button. The other is to secure the hue API with a username/password that is created as well. The other fields are to add and delete users and to set and change passwords for those users. If there are no users in the system, the system will not require a username/password to operate.
 #### Configuration Path and File
 The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify `<directory>/<filename>` explicitly.
 #### Device DB Path and File
@@ -421,7 +421,7 @@ e.g.
 
 ```
 
-Also, you may want to use the REST API's listed below to configure your devices.
+Also, you may want to use the REST APIs listed below to configure your devices.
 ## Ask Alexa
 After this Tell Alexa: "Alexa, discover my devices". If there is an issue you can go to the `Menu / Settings / Connected Home` for the echo on the mobile app or your browser and have Alexa forget all devices and then do the discovery again.
 
@@ -446,7 +446,7 @@ To view or remove devices that Alexa knows about, you can use the mobile app `Me
 ## Google Assistant
 Google Home is supported as of v3.2.0 and forward, but only if the bridge is running on port 80.
 
-**ISSUE: Google Home now seems to not support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local APi, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
+**ISSUE: Google Home now seems to not support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local API, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
 
 Use the Google Home app on a phone to add new "home control" devices by going into `Settings / Home Control / +`
 as described [here](https://support.google.com/googlehome/answer/7124115?hl=en&ref_topic=7125624#homecontrol).
@@ -478,7 +478,7 @@ New or removed devices are picked up automatically as soon as they are added/rem
 No re-discovery step is necessary.
 
 ## Configuration REST API Usage
-This section will describe the REST api available for configuration. The REST body examples are all formatted for easy reading, the actual body usage should be like this:
+This section will describe the REST API available for configuration. The REST body examples are all formatted for easy reading, the actual body usage should be like this:
 ```
 {"var1":"value1","var2":"value2","var3:"value3"}
 ```
@@ -880,7 +880,7 @@ The example below is representative of some HUE device responses.
 
 Name |	Type |	Description
 -----|-------|-------------
-device | HUE lights object | The HUE light detail descriptor, see api for lights response below.
+device | HUE lights object | The HUE light detail descriptor, see API for lights response below.
 huedeviceid | string | The id of the actual passthru HUE light id.
 hueaddress | string | The address of the target HUE bridge.
 huename | string | A name given to the target HUE bridge.
@@ -889,7 +889,7 @@ huename | string | A name given to the target HUE bridge.
 [{"device":{"state":{"on":true,"bri":254,"hue":4444,"sat":254,"effect":"none","ct":0,"alert":"none","colormode":"hs","reachable":true,"xy":[0.0,0.0]},"type":"Extended color light","name":"Hue Lamp 1","modelid":"LCT001","uniqueid":"00:17:88:01:00:d4:12:08-0a","swversion":"65003148"},"huedeviceid":"1","hueaddress":"192.168.0.118:8000","huename":"HueEmul"},{"device":{"state":{"on":true,"bri":254,"hue":23536,"sat":144,"effect":"none","ct":201,"alert":"none","colormode":"hs","reachable":true,"xy":[0.346,0.3568]},"type":"Extended color light","name":"Hue Lamp 2","modelid":"LCT001","uniqueid":"00:17:88:01:00:d4:12:08-0b","swversion":"65003148"},"huedeviceid":"2","hueaddress":"192.168.0.118:8000","huename":"HueEmul"},{"device":{"state":{"on":true,"bri":254,"hue":65136,"sat":254,"effect":"none","ct":201,"alert":"none","colormode":"hs","reachable":true,"xy":[0.346,0.3568]},"type":"Extended color light","name":"Hue Lamp 3","modelid":"LCT001","uniqueid":"00:17:88:01:00:d4:12:08-0c","swversion":"65003148"},"huedeviceid":"3","hueaddress":"192.168.0.118:8000","huename":"HueEmul"}]
 ```
 ## HUE REST API usage
-This section will describe the REST api available for controlling the bridge based off of the HUE API. This Bridge does not support the full HUE API, only the calls that are supported with the HA Bridge are shown. The REST body examples are all formatted for easy reading, the actual body usage should be like this:
+This section will describe the REST API available for controlling the bridge based off of the HUE API. This Bridge does not support the full HUE API, only the calls that are supported with the HA Bridge are shown. The REST body examples are all formatted for easy reading, the actual body usage should be like this:
 ```
 {"var1":"value1","var2":"value2","var3:"value3"}
 ```
@@ -998,7 +998,7 @@ A response to a successful PUT request contains confirmation of the arguments pa
 ]
 ```
 ### Update bridge internal light state
-Allows the user to set the internal state of the light on and off, modify the brightness. This is not a HUE API call and is special to the bridge as it keeps track of the state changes to the light from the api. It is intended to allow you to sync the bridge state with your HA system state.
+Allows the user to set the internal state of the light on and off, modify the brightness. This is not a HUE API call and is special to the bridge as it keeps track of the state changes to the light from the API. It is intended to allow you to sync the bridge state with your HA system state.
 ```
 PUT	http://host:port/api/<username>/lights/<id>/bridgeupdatestate
 ```
