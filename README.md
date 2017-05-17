@@ -70,13 +70,6 @@ Create the directory and make sure that ha-bridge-4.5.0.jar is in your /home/pi/
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
-
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.5.0/ha-bridge-4.5.0.jar
-```
-Create the directory and make sure that ha-bridge-4.5.0.jar is in your /home/pi/habridge directory.
-```
-pi@raspberrypi:~ $ mkdir habridge
-pi@raspberrypi:~ $ cd habridge
 pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.5.0/ha-bridge-4.5.0.jar
 ```
 #### System Control Setup on a pi (preferred)
