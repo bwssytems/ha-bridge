@@ -212,26 +212,26 @@ public class BridgeSecurity {
 				Iterator<String> userIterator = theUserIds.iterator();
 				while (userIterator.hasNext()) {
 					validUser = userIterator.next();
-					if (validUser.equals(aUser))
+					if (validUser.equals(aUser)) {
 						found = true;
+						log.debug("validateWhitelistUser: found a user <" + aUser + ">");
+					}
 				}
 			}
 		}
 
 		if(!found && !strict) {
+			log.debug("validateWhitelistUser: a user was not found and it is not strict rules <" + aUser + "> being created");
 			newWhitelistUser(aUser, userDescription);
 			
 			found = true;
 		}
 		
 		if (!found) {
-			return HueErrorResponse.createResponse("1", "/api/" + aUser, "unauthorized user", null, null, null).getTheErrors();
+			log.debug("validateWhitelistUser: a user was not found and it is strict rules <" + aUser + ">");
+			return HueErrorResponse.createResponse("1", "/api/" + aUser == null ? "" : aUser, "unauthorized user", null, null, null).getTheErrors();
 		}
 
-		Object anUser = securityDescriptor.getWhitelist().remove(DEPRACATED_INTERNAL_USER);
-		if(anUser != null)
-			setSettingsChanged(true);
-		
 		return null;
 	}
 	

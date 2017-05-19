@@ -8,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.NamedIP;
-import com.bwssystems.HABridge.api.hue.HueError;
-import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.plugins.http.HTTPHandler;
 import com.bwssystems.HABridge.util.TextStringFormatter;
 import com.google.gson.Gson;
@@ -100,7 +98,11 @@ public class HalInfo {
 
 		String theUrl = null;
     	String theData;
-   		theUrl = "http://" + halAddress.getIp() + apiType + theToken;
+    	if(halAddress.getSecure())
+    		theUrl = "https://";
+    	else
+    		theUrl = "http://";
+   		theUrl = theUrl + halAddress.getIp() + apiType + theToken;
    		theData = httpClient.doHttpRequest(theUrl, null, null, null, null);
     	if(theData != null) {
     		log.debug("GET " + deviceType + " HalApiResponse - data: " + theData);
@@ -125,6 +127,7 @@ public class HalInfo {
 				aNewHalDevice.setHaldevicename(theDevice.getDeviceName());
 				aNewHalDevice.setHaladdress(halAddress.getIp());
 				aNewHalDevice.setHalname(halAddress.getName());
+				aNewHalDevice.setSecure(halAddress.getSecure());
 				deviceList.add(aNewHalDevice);
 	    		
 	    	}
@@ -147,7 +150,11 @@ public class HalInfo {
 		deviceList = new ArrayList<HalDevice>();
 		while (theHalDevices.hasNext()) {
 			HalDevice theHalDevice = theHalDevices.next();
-			theUrl = "http://" + halAddress.getIp() + IRBUTTON_REQUEST + TextStringFormatter.forQuerySpaceUrl(theHalDevice.getHaldevicename()) + TOKEN_REQUEST + theToken;
+	    	if(halAddress.getSecure())
+	    		theUrl = "https://";
+	    	else
+	    		theUrl = "http://";
+			theUrl = theUrl + halAddress.getIp() + IRBUTTON_REQUEST + TextStringFormatter.forQuerySpaceUrl(theHalDevice.getHaldevicename()) + TOKEN_REQUEST + theToken;
 			theData = httpClient.doHttpRequest(theUrl, null, null, null, null);
 			if (theData != null) {
 				log.debug("GET IrData for IR Device " + theHalDevice.getHaldevicename() + " HalApiResponse - data: " + theData);

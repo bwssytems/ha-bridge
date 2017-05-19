@@ -69,6 +69,7 @@ public class HueMulator {
 	public void setupServer() {
 		log.info("Hue emulator service started....");
 		before(HUE_CONTEXT + "/*", (request, response) -> {
+			log.debug("HueMulator GET called on api/* with request <" + request.pathInfo() + ">");
 			if(bridgeSettingMaster.getBridgeSecurity().isSecure()) {
 				String pathInfo = request.pathInfo();
 				if(pathInfo != null && pathInfo.contains(HUE_CONTEXT + "/devices")) {

@@ -49,6 +49,7 @@ public class HABridge {
     	staticFileLocation("/public");
         while(!bridgeSettings.getBridgeControl().isStop()) {
         	bridgeSettings.buildSettings();
+            bridgeSettings.getBridgeSecurity().removeTestUsers();
             log.info("HA Bridge initializing....");
 	        // sparkjava config directive to set ip address for the web server to listen on
 	        ipAddress(bridgeSettings.getBridgeSettingsDescriptor().getWebaddress());

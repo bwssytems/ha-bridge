@@ -5,6 +5,7 @@ public class HalDevice {
 	private String haldevicename;
 	private String haladdress;
 	private String halname;
+	private Boolean secure;
 	private DeviceElements buttons;
 	public String getHaldevicetype() {
 		return haldevicetype;
@@ -29,6 +30,12 @@ public class HalDevice {
 	}
 	public void setHalname(String halname) {
 		this.halname = halname;
+	}
+	public Boolean getSecure() {
+		return secure;
+	}
+	public void setSecure(Boolean secure) {
+		this.secure = secure;
 	}
 	public DeviceElements getButtons() {
 		return buttons;
