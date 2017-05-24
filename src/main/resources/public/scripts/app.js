@@ -77,7 +77,7 @@ app.config (function ($locationProvider, $routeProvider) {
 	})
 });
 
-app.run( async function ($rootScope, $location, Auth, bridgeService) {
+app.run(function ($rootScope, $location, Auth, bridgeService) {
 	bridgeService.getHABridgeVersion();
 
     $rootScope.$on('securitySetupReceived', function(event, data) {
@@ -1317,15 +1317,14 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     	    }
     	}    	
     };
-    $scope.addHaltoSettings = function (newhalname, newhalip, newhasssecure) {
+    $scope.addHaltoSettings = function (newhalname, newhalip) {
     	if($scope.bridge.settings.haladdress === undefined || $scope.bridge.settings.haladdress === null) {
 			$scope.bridge.settings.haladdress = { devices: [] };
 		}
-    	var newhal = {name: newhalname, ip: newhalip, secure: newhasssecure}
+    	var newhal = {name: newhalname, ip: newhalip }
     	$scope.bridge.settings.haladdress.devices.push(newhal);
     	$scope.newhalname = null;
     	$scope.newhalip = null;
-    	$scope.newhasssecure = false;
     };
     $scope.removeHaltoSettings = function (halname, halip) {
     	for(var i = $scope.bridge.settings.haladdress.devices.length - 1; i >= 0; i--) {
@@ -2203,10 +2202,6 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 		var preOffCmd = "";
 		var nameCmd = "";
 		var aDeviceType;
-		var httpType = "http://";
-		if(haldevice.secure)
-			httpType = "https://";
-
 		var postCmd = "?Token=" + $scope.bridge.settings.haltoken;
 		if(haldevice.haldevicetype === "Group") {
 			aDeviceType = "group";
@@ -2232,24 +2227,24 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 			nameCmd = "!DeviceName=";
 		}
 		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0) && aDeviceType === "switch")
-			dimpayload = httpType + haldevice.haladdress
+			dimpayload = "http://" + haldevice.haladdress
 			+ preDimCmd
 			+ dim_control
 			+ nameCmd
 			+ haldevice.haldevicename.replaceAll(" ", "%20")
 			+ postCmd;
 		else
-			dimpayload = httpType + haldevice.haladdress
+			dimpayload = "http://" + haldevice.haladdress
 			+ preOnCmd
 			+ nameCmd
 			+ haldevice.haldevicename.replaceAll(" ", "%20")
 			+ postCmd;
-		onpayload = httpType + haldevice.haladdress
+		onpayload = "http://" + haldevice.haladdress
 		+ preOnCmd
 		+ nameCmd
 		+ haldevice.haldevicename.replaceAll(" ", "%20")
 		+ postCmd;
-		offpayload = httpType + haldevice.haladdress 
+		offpayload = "http://" + haldevice.haladdress 
 		+ preOffCmd
 		+ nameCmd
 		+ haldevice.haldevicename.replaceAll(" ", "%20")
@@ -2265,11 +2260,8 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	$scope.buildButtonUrls = function (haldevice, onbutton, offbutton, buildonly) {
 		var actionOn = angular.fromJson(onbutton);
 		var actionOff = angular.fromJson(offbutton);
-		var httpType = "http://";
-		if(haldevice.secure)
-			httpType = "https://";
-		onpayload = httpType + haldevice.haladdress + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOn.DeviceName.replaceAll(" ", "%20") + "?Token=" + $scope.bridge.settings.haltoken;
-		offpayload = httpType + haldevice.haladdress + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOff.DeviceName.replaceAll(" ", "%20") + "?Token=" + $scope.bridge.settings.haltoken;
+		onpayload = "http://" + haldevice.haladdress + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOn.DeviceName.replaceAll(" ", "%20") + "?Token=" + $scope.bridge.settings.haltoken;
+		offpayload = "http://" + haldevice.haladdress + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOff.DeviceName.replaceAll(" ", "%20") + "?Token=" + $scope.bridge.settings.haltoken;
 
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-" + actionOn.DeviceName,  haldevice.haldevicename, haldevice.halname, "button",  "halButton", null, null);
 		$scope.device = bridgeService.state.device;
@@ -2280,11 +2272,8 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALHomeUrls = function (haldevice, buildonly) {
-		var httpType = "http://";
-		if(haldevice.secure)
-			httpType = "https://";
-		onpayload = httpType + haldevice.haladdress + "/ModeService!ModeCmd=Set!ModeName=Home?Token=" + $scope.bridge.settings.haltoken;
-		offpayload = httpType + haldevice.haladdress	+ "/ModeService!ModeCmd=Set!ModeName=Away?Token=" + $scope.bridge.settings.haltoken;
+		onpayload = "http://" + haldevice.haladdress + "/ModeService!ModeCmd=Set!ModeName=Home?Token=" + $scope.bridge.settings.haltoken;
+		offpayload = "http://" + haldevice.haladdress	+ "/ModeService!ModeCmd=Set!ModeName=Away?Token=" + $scope.bridge.settings.haltoken;
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-HomeAway",  haldevice.haldevicename, haldevice.halname, "home",  "halHome", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
@@ -2294,20 +2283,17 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALHeatUrls = function (haldevice, buildonly) {
-		var httpType = "http://";
-		if(haldevice.secure)
-			httpType = "https://";
-		onpayload = httpType + haldevice.haladdress 
+		onpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Heat?Token="
 		+ $scope.bridge.settings.haltoken;
-		dimpayload = httpType + haldevice.haladdress 
+		dimpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Heat!HeatSpValue=${intensity.percent}?Token="
 		+ $scope.bridge.settings.haltoken;
-		offpayload = httpType + haldevice.haladdress 
+		offpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Off?Token="
@@ -2321,20 +2307,17 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALCoolUrls = function (haldevice, buildonly) {
-		var httpType = "http://";
-		if(haldevice.secure)
-			httpType = "https://";
-		onpayload = httpType + haldevice.haladdress 
+		onpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Cool?Token="
 		+ $scope.bridge.settings.haltoken;
-		dimpayload = httpType + haldevice.haladdress 
+		dimpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Cool!CoolSpValue=${intensity.percent}?Token="
 		+ $scope.bridge.settings.haltoken;
-		offpayload = httpType + haldevice.haladdress 
+		offpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Off?Token="
@@ -2348,15 +2331,12 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALAutoUrls = function (haldevice, buildonly) {
-		var httpType = "http://";
-		if(haldevice.secure)
-			httpType = "https://";
-		onpayload = httpType + haldevice.haladdress 
+		onpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Auto?Token="
 		+ $scope.bridge.settings.haltoken;
-		offpayload = httpType + haldevice.haladdress 
+		offpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Off?Token="
@@ -2369,18 +2349,16 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALOffUrls = function (haldevice, buildonly) {
-		var httpType = "http://";
-		if(haldevice.secure)
-			httpType = "https://";
-		onpayload = httpType + haldevice.haladdress 
+		onpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Auto?Token="
 		+ $scope.bridge.settings.haltoken;
-		offpayload = httpType + haldevice.haladdress 
+		offpayload = "http://" + haldevice.haladdress 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
 		+ "!HVACMode=Off?Token="
+		$scope.device.offUrl = "http://" + haldevice.haladdress 
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-TurnOff",  haldevice.haldevicename + " Thermostat", haldevice.halname, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
@@ -2390,15 +2368,12 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALFanUrls = function (haldevice, buildonly) {
-		var httpType = "http://";
-		if(haldevice.secure)
-			httpType = "https://";
-		onpayload = httpType + haldevice.haladdress 
+		onpayload = "http://" + haldevice.haladdress 
 			+ "/HVACService!HVACCmd=Set!HVACName=" 
 			+ haldevice.haldevicename.replaceAll(" ", "%20") 
 			+ "!FanMode=On?Token="
 			+ $scope.bridge.settings.haltoken;
-		offpayload = httpType + haldevice.haladdress 
+		offpayload = "http://" + haldevice.haladdress 
 			+ "/HVACService!HVACCmd=Set!HVACName=" 
 			+ haldevice.haldevicename.replaceAll(" ", "%20") 
 			+ "!FanMode=Auto?Token="
@@ -3408,7 +3383,6 @@ app.controller('LoginController', function ($scope, $location, Auth) {
 	$scope.logout = function() {
         Auth.logout();
         $scope.loggedIn = Auth.isLoggedIn();
-    	bridgeService.displaySuccess("User Logged Out");
         $location.path("/login");
 	};
 });
