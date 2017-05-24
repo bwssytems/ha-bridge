@@ -77,7 +77,7 @@ app.config (function ($locationProvider, $routeProvider) {
 	})
 });
 
-app.run( async function ($rootScope, $location, Auth, bridgeService) {
+app.run(function ($rootScope, $location, Auth, bridgeService) {
 	bridgeService.getHABridgeVersion();
 
     $rootScope.$on('securitySetupReceived', function(event, data) {
@@ -1285,11 +1285,11 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     	    }
     	}    	
     };
-    $scope.addHarmonytoSettings = function (newharmonyname, newharmonyip) {
+    $scope.addHarmonytoSettings = function (newharmonyname, newharmonyip, newharmonywebhook) {
     	if($scope.bridge.settings.harmonyaddress === undefined || $scope.bridge.settings.harmonyaddress === null) {
 			$scope.bridge.settings.harmonyaddress = { devices: [] };
 		}
-    	var newharmony = {name: newharmonyname, ip: newharmonyip }
+    	var newharmony = {name: newharmonyname, ip: newharmonyip, webhook: newharmonywebhook}
     	$scope.bridge.settings.harmonyaddress.devices.push(newharmony);
     	$scope.newharmonyname = null;
     	$scope.newharmonyip = null;
@@ -3383,7 +3383,6 @@ app.controller('LoginController', function ($scope, $location, Auth) {
 	$scope.logout = function() {
         Auth.logout();
         $scope.loggedIn = Auth.isLoggedIn();
-    	bridgeService.displaySuccess("User Logged Out");
         $location.path("/login");
 	};
 });

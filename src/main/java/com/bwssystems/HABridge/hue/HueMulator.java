@@ -69,6 +69,7 @@ public class HueMulator {
 	public void setupServer() {
 		log.info("Hue emulator service started....");
 		before(HUE_CONTEXT + "/*", (request, response) -> {
+			log.debug("HueMulator GET called on api/* with request <" + request.pathInfo() + ">");
 			if(bridgeSettingMaster.getBridgeSecurity().isSecure()) {
 				String pathInfo = request.pathInfo();
 				if(pathInfo != null && pathInfo.contains(HUE_CONTEXT + "/devices")) {
@@ -118,6 +119,17 @@ public class HueMulator {
 			log.debug("group add requested from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
 			return "[{\"success\":{\"id\":\"1\"}}]";
 		});
+		// http://ip_address:port/api/:userid/groups/<groupid>/action
+		// Dummy handler
+		// Error forces Logitech Pop to fall back to individual light control
+		// instead of scene-based control.
+		put(HUE_CONTEXT + "/:userid/groups/:groupid/action", "application/json", (request, response) -> {
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.type("application/json");
+			response.status(HttpStatus.SC_OK);
+			log.debug("put action to groups API from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
+			return "[{\"error\":{\"address\": \"/groups/0/action/scene\", \"type\":7, \"description\": \"invalid value, dummy for parameter, scene\"}}]";
+		});		
 		// http://ip_address:port/api/{userId}/scenes returns json objects of
 		// all scenes configured
 		get(HUE_CONTEXT + "/:userid/scenes", "application/json", (request, response) -> {
