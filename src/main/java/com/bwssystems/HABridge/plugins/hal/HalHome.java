@@ -114,7 +114,7 @@ public class HalHome implements Home {
 			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
 		String responseString = null;
 		String theUrl = anItem.getItem().getAsString();
-		if(theUrl != null && !theUrl.isEmpty () && theUrl.contains("http://")) {
+		if(theUrl != null && !theUrl.isEmpty () && theUrl.contains("http")) {
 			String intermediate = theUrl.substring(theUrl.indexOf("://") + 3);
 			String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
 //			String theUrlBody = intermediate.substring(intermediate.indexOf('/') + 1);
@@ -129,7 +129,9 @@ public class HalHome implements Home {
 					+ (anItem.getHttpVerb() == null ? "GET" : anItem.getHttpVerb()) + ": "
 					+ anItem.getItem().getAsString());
 
-			String anUrl = BrightnessDecode.calculateReplaceIntensityValue(theUrl,
+			String anUrl = intermediate;
+			
+			anUrl = BrightnessDecode.calculateReplaceIntensityValue(anUrl,
 					intensity, targetBri, targetBriInc, false);
 			anUrl = DeviceDataDecode.replaceDeviceData(anUrl, device);
 			anUrl = TimeDecode.replaceTimeValue(anUrl);
@@ -137,6 +139,10 @@ public class HalHome implements Home {
 			for (Map.Entry<String, HalInfo> entry : hals.entrySet())
 			{
 				if(entry.getValue().getHalAddress().getIp().equals(hostAddr)) {
+			    	if(entry.getValue().getHalAddress().getSecure()!= null && entry.getValue().getHalAddress().getSecure())
+			    		anUrl = "https://" + anUrl;
+			    	else
+			    		anUrl = "http://" + anUrl;
 					if (entry.getValue().deviceCommand(anUrl) == null) {
 						log.warn("Error on calling hal to change device state: " + anUrl);
 						responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,

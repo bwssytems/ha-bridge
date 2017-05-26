@@ -98,7 +98,7 @@ public class HalInfo {
 
 		String theUrl = null;
     	String theData;
-    	if(halAddress.getSecure())
+    	if(halAddress.getSecure()!= null && halAddress.getSecure())
     		theUrl = "https://";
     	else
     		theUrl = "http://";
@@ -150,7 +150,7 @@ public class HalInfo {
 		deviceList = new ArrayList<HalDevice>();
 		while (theHalDevices.hasNext()) {
 			HalDevice theHalDevice = theHalDevices.next();
-	    	if(halAddress.getSecure())
+	    	if(halAddress.getSecure()!= null && halAddress.getSecure())
 	    		theUrl = "https://";
 	    	else
 	    		theUrl = "http://";
