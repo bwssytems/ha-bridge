@@ -1,11 +1,11 @@
 package com.bwssystems.HABridge.plugins.hal;
 
+import com.bwssystems.HABridge.NamedIP;
+
 public class HalDevice {
 	private String haldevicetype;
 	private String haldevicename;
-	private String haladdress;
-	private String halname;
-	private Boolean secure;
+	private NamedIP haladdress;
 	private DeviceElements buttons;
 	public String getHaldevicetype() {
 		return haldevicetype;
@@ -19,23 +19,11 @@ public class HalDevice {
 	public void setHaldevicename(String haldevicename) {
 		this.haldevicename = haldevicename;
 	}
-	public String getHaladdress() {
+	public NamedIP getHaladdress() {
 		return haladdress;
 	}
-	public void setHaladdress(String haladdress) {
+	public void setHaladdress(NamedIP haladdress) {
 		this.haladdress = haladdress;
-	}
-	public String getHalname() {
-		return halname;
-	}
-	public void setHalname(String halname) {
-		this.halname = halname;
-	}
-	public Boolean getSecure() {
-		return secure;
-	}
-	public void setSecure(Boolean secure) {
-		this.secure = secure;
 	}
 	public DeviceElements getButtons() {
 		return buttons;

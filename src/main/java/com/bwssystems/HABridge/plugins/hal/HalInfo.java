@@ -35,13 +35,13 @@ public class HalInfo {
     private static final String IRDATA_TYPE = "IrData";
     private HTTPHandler httpClient;
     private NamedIP halAddress;
-	private String theToken;
 
     public HalInfo(NamedIP addressName, String aGivenToken) {
 		super();
         httpClient = new HTTPHandler();
         halAddress = addressName;
-        theToken = aGivenToken;
+        if(halAddress.getPassword() == null || halAddress.getPassword().trim().isEmpty())
+        	halAddress.setPassword(aGivenToken);
 	}
 
 	public List<HalDevice> getLights() {
@@ -102,12 +102,12 @@ public class HalInfo {
     		theUrl = "https://";
     	else
     		theUrl = "http://";
-   		theUrl = theUrl + halAddress.getIp() + apiType + theToken;
+   		theUrl = theUrl + halAddress.getIp() + apiType + halAddress.getPassword();
    		theData = httpClient.doHttpRequest(theUrl, null, null, null, null);
     	if(theData != null) {
     		log.debug("GET " + deviceType + " HalApiResponse - data: " + theData);
 	    	theHalApiResponse = new Gson().fromJson(theData, DeviceElements.class);
-	    	if(theHalApiResponse.getDeviceElements() == null) {
+	    	if(theHalApiResponse == null || theHalApiResponse.getDeviceElements() == null) {
 	    		StatusDescription theStatus = new Gson().fromJson(theData, StatusDescription.class);
 	    		if(theStatus.getStatus() == null) {
 	    			log.warn("Cannot get an devices for type " + deviceType + " for hal " + halAddress.getName() + " as response is not parsable.");
@@ -125,9 +125,7 @@ public class HalInfo {
 				HalDevice aNewHalDevice = new HalDevice();
 				aNewHalDevice.setHaldevicetype(deviceType);
 				aNewHalDevice.setHaldevicename(theDevice.getDeviceName());
-				aNewHalDevice.setHaladdress(halAddress.getIp());
-				aNewHalDevice.setHalname(halAddress.getName());
-				aNewHalDevice.setSecure(halAddress.getSecure());
+				aNewHalDevice.setHaladdress(halAddress);
 				deviceList.add(aNewHalDevice);
 	    		
 	    	}
@@ -154,7 +152,7 @@ public class HalInfo {
 	    		theUrl = "https://";
 	    	else
 	    		theUrl = "http://";
-			theUrl = theUrl + halAddress.getIp() + IRBUTTON_REQUEST + TextStringFormatter.forQuerySpaceUrl(theHalDevice.getHaldevicename()) + TOKEN_REQUEST + theToken;
+			theUrl = theUrl + halAddress.getIp() + IRBUTTON_REQUEST + TextStringFormatter.forQuerySpaceUrl(theHalDevice.getHaldevicename()) + TOKEN_REQUEST + halAddress.getPassword();
 			theData = httpClient.doHttpRequest(theUrl, null, null, null, null);
 			if (theData != null) {
 				log.debug("GET IrData for IR Device " + theHalDevice.getHaldevicename() + " HalApiResponse - data: " + theData);
@@ -205,6 +203,5 @@ public class HalInfo {
 			httpClient.closeHandler();
 		httpClient = null;
 		halAddress = null;
-		theToken = null;
 	}
 }
