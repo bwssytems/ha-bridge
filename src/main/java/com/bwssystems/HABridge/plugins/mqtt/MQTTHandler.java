@@ -13,11 +13,12 @@ import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.NamedIP;
 
+import java.util.Optional;
+
 public class MQTTHandler {
     private static final Logger log = LoggerFactory.getLogger(MQTTHandler.class);
 	private NamedIP myConfig;
 	private MqttClient myClient;
-    private int qos             = 1;
 
 	public MQTTHandler(NamedIP aConfig) {
 		super();
@@ -40,20 +41,19 @@ public class MQTTHandler {
         }
         try {
 			myClient.connect(connOpts);
-		} catch (MqttSecurityException e) {
-			log.error("Could not connect MQTT client for name: " + myConfig.getName() + " and ip: " + myConfig.getIp() + " with message: " + e.getMessage());
 		} catch (MqttException e) {
 			log.error("Could not connect MQTT client for name: " + myConfig.getName() + " and ip: " + myConfig.getIp() + " with message: " + e.getMessage());
 		}
 	}
 
-	public void publishMessage(String topic, String content) {
+	public void publishMessage(String topic, String content, Integer qos, Boolean retain) {
         MqttMessage message = new MqttMessage(StringEscapeUtils.unescapeJava(content).getBytes());
-        message.setQos(qos);
+
+		message.setQos(Optional.ofNullable(qos).orElse(1));
+        message.setRetained(Optional.ofNullable(retain).orElse(false));
+
         try {
 			myClient.publish(topic, message);
-		} catch (MqttPersistenceException e) {
-			log.error("Could not publish to MQTT client for name: " + myConfig.getName() + " and ip: " + myConfig.getIp() + " with message: " + e.getMessage());
 		} catch (MqttException e) {
 			log.error("Could not publish to MQTT client for name: " + myConfig.getName() + " and ip: " + myConfig.getIp() + " with message: " + e.getMessage());
 		}

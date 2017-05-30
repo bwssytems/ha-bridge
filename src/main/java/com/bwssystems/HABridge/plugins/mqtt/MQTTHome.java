@@ -37,9 +37,7 @@ public class MQTTHome implements Home {
 			return;
 		log.debug("Shutting down MQTT handlers.");
 		if(handlers != null && !handlers.isEmpty()) {
-			Iterator<String> keys = handlers.keySet().iterator();
-			while(keys.hasNext()) {
-				String key = keys.next();
+			for (String key : handlers.keySet()) {
 				handlers.get(key).shutdown();
 			}
 		}
@@ -108,7 +106,7 @@ public class MQTTHome implements Home {
 					if (mqttHandler == null) {
 						log.warn("Should not get here, no mqtt hanlder available");
 					} else {
-						mqttHandler.publishMessage(mqttMessages[y].getTopic(), mqttMessages[y].getMessage());
+						mqttHandler.publishMessage(mqttMessages[y].getTopic(), mqttMessages[y].getMessage(), mqttMessages[y].getQos(), mqttMessages[y].getRetain());
 					}
         		}
  			}
@@ -130,13 +128,10 @@ public class MQTTHome implements Home {
 			aGsonHandler =
 					new GsonBuilder()
 					.create();
-			handlers = new HashMap<String, MQTTHandler>();
-			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getMqttaddress().getDevices().iterator();
-			while(theList.hasNext()) {
-				NamedIP aClientConfig = theList.next();
+			handlers = new HashMap<>();
+			for (NamedIP aClientConfig : bridgeSettings.getBridgeSettingsDescriptor().getMqttaddress().getDevices()) {
 				MQTTHandler aHandler = new MQTTHandler(aClientConfig);
-				if(aHandler != null)
-					handlers.put(aClientConfig.getName(), aHandler);
+				handlers.put(aClientConfig.getName(), aHandler);
 			}
 		}
 		return this;
