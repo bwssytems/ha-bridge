@@ -385,8 +385,10 @@ public class BridgeSettingsDescriptor {
 		List<NamedIP> devicesList = this.getHaladdress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
-		if(this.getHaltoken() == null || this.getHaltoken().equals(""))
-			return false;
+		if(devicesList.get(0).getPassword() == null || devicesList.get(0).getPassword().trim().isEmpty()) {
+			if(this.getHaltoken() == null || this.getHaltoken().equals(""))
+				return false;
+		}
 		return true;
 	}
 	public Boolean isValidMQTT() {

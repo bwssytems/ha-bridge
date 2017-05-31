@@ -125,7 +125,10 @@ public class HalInfo {
 				HalDevice aNewHalDevice = new HalDevice();
 				aNewHalDevice.setHaldevicetype(deviceType);
 				aNewHalDevice.setHaldevicename(theDevice.getDeviceName());
-				aNewHalDevice.setHaladdress(halAddress);
+				NamedIP theaddress = new NamedIP();
+				theaddress.setIp(halAddress.getIp());
+				theaddress.setName(halAddress.getName());
+				aNewHalDevice.setHaladdress(theaddress);
 				deviceList.add(aNewHalDevice);
 	    		
 	    	}

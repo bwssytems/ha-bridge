@@ -129,10 +129,9 @@ public class HalHome implements Home {
 					+ (anItem.getHttpVerb() == null ? "GET" : anItem.getHttpVerb()) + ": "
 					+ anItem.getItem().getAsString());
 
-			String anUrl = intermediate;
+			String anUrl = null;
 			
-			anUrl = BrightnessDecode.calculateReplaceIntensityValue(anUrl,
-					intensity, targetBri, targetBriInc, false);
+			anUrl = BrightnessDecode.calculateReplaceIntensityValue(intermediate, intensity, targetBri, targetBriInc, false);
 			anUrl = DeviceDataDecode.replaceDeviceData(anUrl, device);
 			anUrl = TimeDecode.replaceTimeValue(anUrl);
 			
@@ -143,6 +142,10 @@ public class HalHome implements Home {
 			    		anUrl = "https://" + anUrl;
 			    	else
 			    		anUrl = "http://" + anUrl;
+
+			    	if(!anUrl.contains("?Token="))
+						anUrl = anUrl + "?Token=" + entry.getValue().getHalAddress().getPassword();
+					
 					if (entry.getValue().deviceCommand(anUrl) == null) {
 						log.warn("Error on calling hal to change device state: " + anUrl);
 						responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,

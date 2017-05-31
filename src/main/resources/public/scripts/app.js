@@ -248,7 +248,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 						if (error.status === 401)
 							$rootScope.$broadcast('securityReinit', 'done');
 						else
-						self.displayWarn("Cannot get testuser: ", error);
+							self.displayWarn("Cannot get testuser: ", error);
 					}
 			);
 		}
@@ -263,7 +263,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					if (error.status === 401)
 						$rootScope.$broadcast('securityReinit', 'done');
 					else
-					self.displayWarn("Cannot get a user: ", error);
+						self.displayWarn("Cannot get a user: ", error);
 				}
 		);
 	};
@@ -1134,6 +1134,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 
 	this.testUrl = function (device, type, value) {
 		var msgDescription = "unknown";
+		self.getTestUser();
 		var testUrl = this.state.huebase + "/" + this.state.testuser + "/lights/" + device.id + "/state";
 		var testBody = "{\"on\":";
 		if (type === "off") {
@@ -1151,8 +1152,13 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 						msgDescription = "success " + angular.toJson(response.data);
 					}
 					if (typeof(response.data[0].error) !== 'undefined') {
-						msgDescription = "error " + angular.toJson(response.data[0].error);
-						self.displayErrorMessage("Request Error, Pleae look in your habridge log: ", msgDescription);
+						if(reponse.data[0].error.indexOf("unauthorized") > -1) {
+							self.displayWarn("Authorization error, please retry...", null);
+						}
+						else {
+							msgDescription = "error " + angular.toJson(response.data[0].error);
+							self.displayErrorMessage("Request Error, Please look in your habridge log: ", msgDescription);
+						}
 						return;
 					}
 						
@@ -2202,11 +2208,6 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 		var preOffCmd = "";
 		var nameCmd = "";
 		var aDeviceType;
-		var postCmd = "?Token=";
-		if(haldevice.haladdress.password === undefined || haldevice.haladdress.password === null || haldevice.haladdress.password.lenght === 0)
-			postCmd = postCmd + $scope.bridge.settings.haltoken;
-		else
-			postCmd = postCmd + haldevice.haladdress.password;
 		if(haldevice.haldevicetype === "Group") {
 			aDeviceType = "group";
 			preOnCmd = "/GroupService!GroupCmd=On";
@@ -2235,24 +2236,20 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 			+ preDimCmd
 			+ dim_control
 			+ nameCmd
-			+ haldevice.haldevicename.replaceAll(" ", "%20")
-			+ postCmd;
+			+ haldevice.haldevicename.replaceAll(" ", "%20");
 		else
 			dimpayload = "http://" + haldevice.haladdress.ip
 			+ preOnCmd
 			+ nameCmd
-			+ haldevice.haldevicename.replaceAll(" ", "%20")
-			+ postCmd;
+			+ haldevice.haldevicename.replaceAll(" ", "%20");
 		onpayload = "http://" + haldevice.haladdress.ip
 		+ preOnCmd
 		+ nameCmd
-		+ haldevice.haldevicename.replaceAll(" ", "%20")
-		+ postCmd;
+		+ haldevice.haldevicename.replaceAll(" ", "%20");
 		offpayload = "http://" + haldevice.haladdress.ip 
 		+ preOffCmd
 		+ nameCmd
-		+ haldevice.haldevicename.replaceAll(" ", "%20")
-		+ postCmd;
+		+ haldevice.haldevicename.replaceAll(" ", "%20");
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name,  haldevice.haldevicename, haldevice.haladdress.name, aDeviceType,  "halDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
@@ -2264,13 +2261,8 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	$scope.buildButtonUrls = function (haldevice, onbutton, offbutton, buildonly) {
 		var actionOn = angular.fromJson(onbutton);
 		var actionOff = angular.fromJson(offbutton);
-		var postCmd = "?Token=";
-		if(haldevice.haladdress.password === undefined || haldevice.haladdress.password === null || haldevice.haladdress.password.lenght === 0)
-			postCmd = postCmd + $scope.bridge.settings.haltoken;
-		else
-			postCmd = postCmd + haldevice.haladdress.password;
-		onpayload = "http://" + haldevice.haladdress.ip + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOn.DeviceName.replaceAll(" ", "%20") + postCmd;
-		offpayload = "http://" + haldevice.haladdress.ip + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOff.DeviceName.replaceAll(" ", "%20") + postCmd;
+		onpayload = "http://" + haldevice.haladdress.ip + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOn.DeviceName.replaceAll(" ", "%20");
+		offpayload = "http://" + haldevice.haladdress.ip + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOff.DeviceName.replaceAll(" ", "%20");
 
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name + "-" + actionOn.DeviceName,  haldevice.haldevicename, haldevice.haladdress.name, "button",  "halButton", null, null);
 		$scope.device = bridgeService.state.device;
@@ -2281,13 +2273,8 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALHomeUrls = function (haldevice, buildonly) {
-		var postCmd = "?Token=";
-		if(haldevice.haladdress.password === undefined || haldevice.haladdress.password === null || haldevice.haladdress.password.lenght === 0)
-			postCmd = postCmd + $scope.bridge.settings.haltoken;
-		else
-			postCmd = postCmd + haldevice.haladdress.password;
-		onpayload = "http://" + haldevice.haladdress.ip + "/ModeService!ModeCmd=Set!ModeName=Home" + postCmd;
-		offpayload = "http://" + haldevice.haladdress.ip + "/ModeService!ModeCmd=Set!ModeName=Away" + postCmd;
+		onpayload = "http://" + haldevice.haladdress.ip + "/ModeService!ModeCmd=Set!ModeName=Home";
+		offpayload = "http://" + haldevice.haladdress.ip + "/ModeService!ModeCmd=Set!ModeName=Away";
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name + "-HomeAway",  haldevice.haldevicename, haldevice.haladdress.name, "home",  "halHome", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
@@ -2297,23 +2284,18 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALHeatUrls = function (haldevice, buildonly) {
-		var postCmd = "?Token=";
-		if(haldevice.haladdress.password === undefined || haldevice.haladdress.password === null || haldevice.haladdress.password.lenght === 0)
-			postCmd = postCmd + $scope.bridge.settings.haltoken;
-		else
-			postCmd = postCmd + haldevice.haladdress.password;
 		onpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Heat" + postCmd;
+		+ "!HVACMode=Heat";
 		dimpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Heat!HeatSpValue=${intensity.percent}" + postCmd;
+		+ "!HVACMode=Heat!HeatSpValue=${intensity.percent}";
 		offpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Off" + postCmd;
+		+ "!HVACMode=Off";
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name + "-SetHeat",  haldevice.haldevicename + " Heat", haldevice.haladdress.name, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
@@ -2323,23 +2305,18 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALCoolUrls = function (haldevice, buildonly) {
-		var postCmd = "?Token=";
-		if(haldevice.haladdress.password === undefined || haldevice.haladdress.password === null || haldevice.haladdress.password.lenght === 0)
-			postCmd = postCmd + $scope.bridge.settings.haltoken;
-		else
-			postCmd = postCmd + haldevice.haladdress.password;
 		onpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Cool" + postCmd;
+		+ "!HVACMode=Cool";
 		dimpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Cool!CoolSpValue=${intensity.percent}" + postCmd;
+		+ "!HVACMode=Cool!CoolSpValue=${intensity.percent}";
 		offpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Off" + postCmd;
+		+ "!HVACMode=Off";
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name + "-SetCool",  haldevice.haldevicename + " Cool", haldevice.haladdress.name, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
@@ -2349,19 +2326,14 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALAutoUrls = function (haldevice, buildonly) {
-		var postCmd = "?Token=";
-		if(haldevice.haladdress.password === undefined || haldevice.haladdress.password === null || haldevice.haladdress.password.lenght === 0)
-			postCmd = postCmd + $scope.bridge.settings.haltoken;
-		else
-			postCmd = postCmd + haldevice.haladdress.password;
 		onpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Auto" + postCmd;
+		+ "!HVACMode=Auto";
 		offpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Off" + postCmd;
+		+ "!HVACMode=Off";
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name + "-SetAuto",  haldevice.haldevicename + " Auto", haldevice.haladdress.name, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
@@ -2371,19 +2343,14 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALOffUrls = function (haldevice, buildonly) {
-		var postCmd = "?Token=";
-		if(haldevice.haladdress.password === undefined || haldevice.haladdress.password === null || haldevice.haladdress.password.lenght === 0)
-			postCmd = postCmd + $scope.bridge.settings.haltoken;
-		else
-			postCmd = postCmd + haldevice.haladdress.password;
 		onpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Auto" + postCmd;
+		+ "!HVACMode=Auto";
 		offpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Off" + postCmd;
+		+ "!HVACMode=Off";
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name + "-TurnOff",  haldevice.haldevicename + " Thermostat", haldevice.haladdress.name, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
@@ -2393,19 +2360,14 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALFanUrls = function (haldevice, buildonly) {
-		var postCmd = "?Token=";
-		if(haldevice.haladdress.password === undefined || haldevice.haladdress.password === null || haldevice.haladdress.password.lenght === 0)
-			postCmd = postCmd + $scope.bridge.settings.haltoken;
-		else
-			postCmd = postCmd + haldevice.haladdress.password;
 		onpayload = "http://" + haldevice.haladdress.ip 
 			+ "/HVACService!HVACCmd=Set!HVACName=" 
 			+ haldevice.haldevicename.replaceAll(" ", "%20") 
-			+ "!FanMode=On" + postCmd;
+			+ "!FanMode=On";
 		offpayload = "http://" + haldevice.haladdress.ip 
 			+ "/HVACService!HVACCmd=Set!HVACName=" 
 			+ haldevice.haldevicename.replaceAll(" ", "%20") 
-			+ "!FanMode=Auto" + postCmd;
+			+ "!FanMode=Auto";
 		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name + "-SetFan",  haldevice.haldevicename + " Fan", haldevice.haladdress.name, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
