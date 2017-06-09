@@ -83,6 +83,12 @@
 						placeholder="192.168.1.1"></td>
 				</tr>
 				<tr>
+					<td>Use UPNP Address Interface Only</td>
+					<td><input type="checkbox"
+						ng-model="bridge.settings.useupnpiface" ng-true-value=true
+						ng-false-value=false> {{bridge.settings.useupnpiface}}</td>
+				</tr>
+				<tr>
 					<td>Web Server IP Address</td>
 					<td><input id="bridge-settings-webaddress"
 						class="form-control" type="text"

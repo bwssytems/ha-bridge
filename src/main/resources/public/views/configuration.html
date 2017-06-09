@@ -43,6 +43,7 @@
 				<th sortable-header col="id" comparator-fn="comparatorUniqueId">ID</th>
 				<th sortable-header col="name">Name</th>
 				<th sortable-header col="description">Description</th>
+				<th sortable-header col="devicestate">Device State</th>
 				<th sortable-header col="deviceType">Type</th>
 				<th sortable-header col="targetDevice">Target</th>
 				<th sortable-header col="inactive">Inactive</th>
@@ -55,6 +56,7 @@
 			<td>{{device.id}}</td>
 			<td>{{device.name}}</td>
 			<td class="cr">{{device.description}}</td>
+			<td class="cr">on={{device.deviceState.on}},bri={{device.deviceState.on}},hue={{device.deviceState.hue}},sat={{device.deviceState.sat}},effect={{device.deviceState.effect}},ct={{device.deviceState.ct}},alert={{device.deviceState.alert}},colormode={{device.deviceState.colormode}},reachable={{device.deviceState.reachable}},XYList={{device.deviceState.xy}}</td>
 			<td>{{device.deviceType}}</td>
 			<td>{{device.targetDevice}}</td>
 			<td>{{device.inactive}}</td>

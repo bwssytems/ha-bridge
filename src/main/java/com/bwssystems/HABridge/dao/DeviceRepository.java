@@ -61,6 +61,7 @@ public class DeviceRepository extends BackupHandler {
 		{
 			DeviceDescriptor list[] = gson.fromJson(jsonContent, DeviceDescriptor[].class);
 			for(int i = 0; i < list.length; i++) {
+				list[i].setDeviceState(null);
 				put(list[i].getId(), list[i]);
 				if(Integer.decode(list[i].getId()) > nextId) {
 					nextId = Integer.decode(list[i].getId());

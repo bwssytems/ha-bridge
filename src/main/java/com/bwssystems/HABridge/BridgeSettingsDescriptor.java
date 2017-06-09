@@ -12,6 +12,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("upnpconfigaddress")
 	@Expose
 	private String upnpconfigaddress;
+	@SerializedName("useupnpiface")
+	@Expose
+	private boolean useupnpiface;
 	@SerializedName("serverport")
 	@Expose
 	private Integer serverport;
@@ -104,6 +107,7 @@ public class BridgeSettingsDescriptor {
 	public BridgeSettingsDescriptor() {
 		super();
 		this.upnpstrict = true;
+		this.useupnpiface = false;
 		this.traceupnp = false;
 		this.nestconfigured = false;
 		this.veraconfigured = false;
@@ -113,8 +117,12 @@ public class BridgeSettingsDescriptor {
 		this.halconfigured = false;
 		this.mqttconfigured = false;
 		this.hassconfigured = false;
+		this.domoticzconfigured = false;
+		this.somfyconfigured = false;
+		this.lifxconfigured = false;
 		this.farenheit = true;
 		this.whitelist = null;
+		this.securityData = null;
 		this.settingsChanged = false;
 		this.myechourl = "echo.amazon.com/#cards";
 		this.webaddress = "0.0.0.0";
@@ -125,6 +133,12 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setUpnpConfigAddress(String upnpConfigAddress) {
 		this.upnpconfigaddress = upnpConfigAddress;
+	}
+	public boolean isUseupnpiface() {
+		return useupnpiface;
+	}
+	public void setUseupnpiface(boolean useupnpiface) {
+		this.useupnpiface = useupnpiface;
 	}
 	public Integer  getServerPort() {
 		return serverport;

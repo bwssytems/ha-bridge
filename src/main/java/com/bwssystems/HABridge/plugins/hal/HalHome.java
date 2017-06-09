@@ -112,19 +112,20 @@ public class HalHome implements Home {
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
 			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
+		boolean halFound = false;
 		String responseString = null;
 		String theUrl = anItem.getItem().getAsString();
 		if(theUrl != null && !theUrl.isEmpty () && theUrl.contains("http")) {
 			String intermediate = theUrl.substring(theUrl.indexOf("://") + 3);
 			String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
 //			String theUrlBody = intermediate.substring(intermediate.indexOf('/') + 1);
-			String hostAddr = null;
+//			String hostAddr = null;
 //			String port = null;
-			if (hostPortion.contains(":")) {
-				hostAddr = hostPortion.substring(0, intermediate.indexOf(':'));
+//			if (hostPortion.contains(":")) {
+//				hostAddr = hostPortion.substring(0, intermediate.indexOf(':'));
 //				port = hostPortion.substring(intermediate.indexOf(':') + 1);
-			} else
-				hostAddr = hostPortion;
+//			} else
+//				hostAddr = hostPortion;
 			log.debug("executing HUE api request to Http "
 					+ (anItem.getHttpVerb() == null ? "GET" : anItem.getHttpVerb()) + ": "
 					+ anItem.getItem().getAsString());
@@ -137,7 +138,8 @@ public class HalHome implements Home {
 			
 			for (Map.Entry<String, HalInfo> entry : hals.entrySet())
 			{
-				if(entry.getValue().getHalAddress().getIp().equals(hostAddr)) {
+				if(entry.getValue().getHalAddress().getIp().equals(hostPortion)) {
+					halFound = true;
 			    	if(entry.getValue().getHalAddress().getSecure()!= null && entry.getValue().getHalAddress().getSecure())
 			    		anUrl = "https://" + anUrl;
 			    	else
@@ -146,6 +148,10 @@ public class HalHome implements Home {
 			    	if(!anUrl.contains("?Token="))
 						anUrl = anUrl + "?Token=" + entry.getValue().getHalAddress().getPassword();
 					
+					log.debug("executing HUE api request to Http "
+							+ (anItem.getHttpVerb() == null ? "GET" : anItem.getHttpVerb()) + ": "
+							+ anUrl);
+
 					if (entry.getValue().deviceCommand(anUrl) == null) {
 						log.warn("Error on calling hal to change device state: " + anUrl);
 						responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
@@ -154,6 +160,13 @@ public class HalHome implements Home {
 					}
 				}
 			}
+		}
+		
+		if(!halFound) {
+			log.warn("No HAL found to call: " + theUrl);
+			responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
+					"No HAL found.", "/lights/"
+					+ lightId + "state", null, null).getTheErrors(), HueError[].class);
 		}
 		return responseString;
 	}

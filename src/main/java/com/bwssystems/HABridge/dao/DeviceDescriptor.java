@@ -74,7 +74,8 @@ public class DeviceDescriptor{
     @SerializedName("comments")
     @Expose
     private String comments;
-
+    @SerializedName("deviceState")
+    @Expose
     private DeviceState deviceState;
     
     public String getName() {

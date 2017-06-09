@@ -250,6 +250,8 @@ The default location for the configuration file to contain the settings for the 
 The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify `<directory>/<filename>  explicitly.
 #### UPNP IP Address
 The server defaults to the first available address on the host if this is not given. This default may NOT be the correct IP that is your public IP for your host on the network. It is best to set this parameter to not have discovery issues. Replace this value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery. 
+#### Use UPNP Address Interface
+The server tries to bind to all interfaces to respond to UPNP request. Setting this to `true` will make the binding to the interface that has the `UPNP IP Address`. The default is to be all interfaces which is set as false.
 #### Web Server IP Address
 The server defaults to all interfaces on the machine (0.0.0.0). Replace this value with the server ipv4 address you would like to use as the address that will bind to a specific ip address on an interface if you would like. This is only necessary if you want to isolate how access is handled to the web UI. 
 #### Web Server Port
@@ -408,7 +410,7 @@ You can control items that require special calculated values using ${intensity.m
 
 For the items that want to have a date time put into the message, utilize ${time.format(yyyy-MM-ddTHH:mm:ssXXX)} where "yyyy-MM-ddTHH:mm:ssXXX" can be any format from the Java SimpleDateFormat documented here: https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
 
-Also, device data can be inserted into your payloads by the use of "${device.name}", "${device.id}", "${device.uniqueid}", "${device.targetDevice}", "${device.mapId}", "${device.mapType}" and "${device.deviceType}". These work just like the dimming value replacements.
+Also, device data can be inserted into your payloads by the use of "${device.name}", "${device.id}", "${device.uniqueid}", "${device.targetDevice}", "${device.mapId}", "${device.mapType}", "${device.deviceType}", "${device.requesterAddress}", "${device.description}" and "${device.comments}". These work just like the dimming value replacements.
 e.g.
 ```
 [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=10&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.math(X/4)}","type":"httpDevice"}]
