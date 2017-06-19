@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
@@ -67,73 +68,67 @@ public class HTTPHandler {
 				if (requestBody != null)
 					putRequest.setEntity(requestBody);
 				request = putRequest;
-			}
-			else
+			} else
 				request = new HttpGet(theURI);
 
 		} catch (IllegalArgumentException e) {
 			log.warn("Error creating outbound http request: IllegalArgumentException in log", e);
 			return null;
 		}
-		log.debug("Making outbound call in doHttpRequest: " + request);
+		log.debug("Making outbound call in doHttpRequest: <<<" + request.toString() + ">>>");
 		if (headers != null && headers.length > 0) {
 			for (int i = 0; i < headers.length; i++) {
 				request.setHeader(headers[i].getName(), headers[i].getValue());
 			}
 		}
-		HttpResponse response;
-		try {
-			for(int retryCount = 0; retryCount < 2; retryCount++) {
+		HttpResponse response = null;
+		for (int retryCount = 0; retryCount < 2; retryCount++) {
+			try {
 				response = httpClient.execute(request);
-				log.debug((httpVerb == null ? "GET" : httpVerb) + " execute (" + retryCount + ") on URL responded: "
-						+ response.getStatusLine().getStatusCode());
-				if (response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
-					if (response.getEntity() != null) {
-						try {
-							theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); // read
-																												// content
-																												// for
-																												// data
-							EntityUtils.consume(response.getEntity()); // close out
-																		// inputstream
-																		// ignore
-																		// content
-						} catch (Exception e) {
-							log.debug("Error ocurred in handling response entity after successful call, still responding success. "
-											+ e.getMessage(), e);
-						}
-						log.debug("Successfull response - The http response is <<<" + theContent + ">>>");
-					}
+			} catch (ClientProtocolException e) {
+				log.warn("Client Protocol Exception received, retyring....");
+			} catch (IOException e) {
+				log.warn("Error calling out to HA gateway: IOException in log", e);
+				retryCount = 2;
+			}
+			log.debug((httpVerb == null ? "GET" : httpVerb) + " execute (" + retryCount + ") on URL responded: "
+					+ response.getStatusLine().getStatusCode());
+			if (response != null && response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
+				log.debug("Successfull response - The http response is <<<" + theContent + ">>>");
+				retryCount = 2;
+			} else if (response != null) {
+				log.warn("HTTP response code was not an expected successful response of between 200 - 299, the code was: "
+								+ response.getStatusLine());
+				if (response.getStatusLine().getStatusCode() == 504) {
+					log.warn("HTTP response code was 504, retrying...");
+				} else
 					retryCount = 2;
-				} else {
-					log.warn("HTTP response code was not an expected successful response of between 200 - 299, the code was: " + response.getStatusLine());
-					try {
-						String someContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); // read
-						// content
-						// for
-						// data
-						EntityUtils.consume(response.getEntity()); // close out
-						// inputstream
-						// ignore
-						// content
-						log.debug("Unsuccessfull response - The http response is <<<" + someContent + ">>>");
-					} catch (Exception e) {
-						//noop
-					}
-					if (response.getStatusLine().getStatusCode() == 504) {
-						log.warn("HTTP response code was 504, retrying...");
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e1) {
-							// noop
-						}
-					}
-					else
-						retryCount = 2;
+			}
+			
+			if (response != null && response.getEntity() != null) {
+				try {
+					theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); // read
+																										// content
+																										// for
+																										// data
+					EntityUtils.consume(response.getEntity()); // close out
+																// inputstream
+																// ignore
+																// content
+				} catch (Exception e) {
+					log.debug("Error ocurred in handling response entity after successful call, still responding success. "
+									+ e.getMessage(), e);
 				}
 			}
-		} catch (IOException e) {
-			log.warn("Error calling out to HA gateway: IOException in log", e);
+
+			if(retryCount < 2) {
+				theContent = null;
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e1) {
+					// noop
+				}
+			}
 		}
 		return theContent;
 	}

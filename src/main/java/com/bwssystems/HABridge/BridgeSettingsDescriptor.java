@@ -440,4 +440,15 @@ public class BridgeSettingsDescriptor {
 	public Boolean isValidLifx() {
 		return this.isLifxconfigured();
 	}
+	public void updateHue(NamedIP aHue) {
+		int indexHue = -1;
+		for( int i = 0; i < hueaddress.getDevices().size(); i++) {
+			if(hueaddress.getDevices().get(i).getName().equals(aHue.getName()))
+				indexHue = i;
+		}
+		if(indexHue >= 0) {
+			hueaddress.getDevices().set(indexHue, aHue);
+			this.setSettingsChanged(true);
+		}
+	}
 }

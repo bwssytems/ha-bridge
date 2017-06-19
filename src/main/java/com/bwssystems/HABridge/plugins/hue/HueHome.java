@@ -24,9 +24,11 @@ public class HueHome implements Home {
 	private Map<String, HueInfo> hues;
 	private Boolean validHue;
 	private Gson aGsonHandler;
+	private BridgeSettings theBridgeSettings;
 	
 	public HueHome(BridgeSettings bridgeSettings) {
 		super();
+		theBridgeSettings = bridgeSettings;
 		createHome(bridgeSettings);
 	}
 
@@ -113,11 +115,18 @@ public class HueHome implements Home {
 			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getHueaddress().getDevices().iterator();
 			while(theList.hasNext()) {
 				NamedIP aHue = theList.next();
-	      		hues.put(aHue.getName(), new HueInfo(aHue));
+	      		hues.put(aHue.getName(), new HueInfo(aHue, this));
 			}
 			aGsonHandler = new GsonBuilder().create();
 		}
 		return this;
+	}
+	
+	protected void updateHue(NamedIP aHue) {
+		theBridgeSettings.getBridgeSettingsDescriptor().updateHue(aHue);
+		if(theBridgeSettings.getBridgeSettingsDescriptor().isSettingsChanged()) {
+			theBridgeSettings.updateConfigFile();
+		}
 	}
 
 	@Override
