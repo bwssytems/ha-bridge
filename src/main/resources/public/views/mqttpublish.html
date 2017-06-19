@@ -43,6 +43,8 @@
 				<th sortable-header col="ip">IP</th>
 				<th>Topic</th>
 				<th>Content</th>
+				<th>QoS</th>
+				<th>Retain</th>
 				<th>Build Actions</th>
 			</tr>
 		</thead>
@@ -59,8 +61,16 @@
 							ng-model="mqttcontent" placeholder="The MQTT Message Content"></textarea>
 			</td>
 			<td>
+				<input type="number" rows="1" class="form-control" id="mqtt-qos"
+					   ng-model="mqttqos" placeholder="1"/>
+			</td>
+			<td>
+				<input type="checkbox" rows="1" class="form-control" id="mqtt-retain"
+					   ng-model="mqttretain"/>
+			</td>
+			<td>
 				<button class="btn btn-success" type="submit"
-					ng-click="buildMQTTPublish(mqttbroker, mqtttopic, mqttcontent)">Build
+					ng-click="buildMQTTPublish(mqttbroker, mqtttopic, mqttcontent, mqttqos, mqttretain)">Build
 					publish Message</button>
 			</td>
 		</tr>

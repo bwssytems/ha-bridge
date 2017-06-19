@@ -6,6 +6,8 @@ public class MQTTMessage {
 	private String message;
 	private Integer delay;
 	private Integer count;
+	private Integer qos;
+	private Boolean retain;
 	public String getClientId() {
 		return clientId;
 	}
@@ -35,5 +37,20 @@ public class MQTTMessage {
 	}
 	public void setCount(Integer count) {
 		this.count = count;
+	}
+	public Integer getQos() {
+		return qos;
+	}
+
+	public void setQos(Integer qos) {
+		this.qos = qos;
+	}
+
+	public Boolean getRetain() {
+		return retain;
+	}
+
+	public void setRetain(Boolean retain) {
+		this.retain = retain;
 	}
 }
