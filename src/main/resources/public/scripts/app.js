@@ -2080,7 +2080,7 @@ app.controller('HueController', function ($scope, $location, bridgeService, ngDi
 		$scope.device = bridgeService.state.device;
 	};
 
-	$scope.buildDeviceUrls = function (huedevice) {
+	$scope.buildDeviceUrls = function (huedevice, buildonly) {
 		onpayload = "{\"ipAddress\":\"" + huedevice.hueaddress + "\",\"deviceId\":\"" + huedevice.huedeviceid +"\",\"hueName\":\"" + huedevice.huename + "\"}";
 		offpayload = "{\"ipAddress\":\"" + huedevice.hueaddress + "\",\"deviceId\":\"" + huedevice.huedeviceid +"\",\"hueName\":\"" + huedevice.huename + "\"}";
 		bridgeService.buildUrls(onpayload, null, offpayload, true, huedevice.device.uniqueid,  huedevice.device.name, huedevice.huename, "passthru",  "hueDevice", null, null);
