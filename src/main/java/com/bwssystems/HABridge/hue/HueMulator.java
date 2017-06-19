@@ -60,6 +60,7 @@ public class HueMulator {
 		validMapTypes = new DeviceMapTypes();
 		bridgeSettingMaster = bridgeMaster;
 		bridgeSettings = bridgeSettingMaster.getBridgeSettingsDescriptor();
+		
 		homeManager= aHomeManager;
 		myHueHome = (HueHome) homeManager.findHome(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]);
 		aGsonHandler = new GsonBuilder().create();
@@ -769,8 +770,8 @@ public class HueMulator {
 		}
 
 		HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(),
-				bridgeSettings.getWhitelist(), bridgeSettings.getHubversion());
-
+				bridgeSettings.getWhitelist(), bridgeSettings.getHubversion(), bridgeSettingMaster.getBridgeControl().isLinkButton());
+		log.debug("api response config <<<" + aGsonHandler.toJson(apiResponse.getConfig()) + ">>>");
 		return apiResponse.getConfig();
 	}
 	
@@ -782,7 +783,7 @@ public class HueMulator {
 			return theErrors;
 
 		HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(),
-				bridgeSettings.getWhitelist(), bridgeSettings.getHubversion());
+				bridgeSettings.getWhitelist(), bridgeSettings.getHubversion(), bridgeSettingMaster.getBridgeControl().isLinkButton());
 		apiResponse.setLights((Map<String, DeviceResponse>) this.lightsListHandler(userId, ipAddress));
 		apiResponse.setGroups((Map<String, GroupResponse>) this.groupsListHandler(userId, ipAddress));
 

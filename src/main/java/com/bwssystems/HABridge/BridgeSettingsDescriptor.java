@@ -121,7 +121,6 @@ public class BridgeSettingsDescriptor {
 		this.somfyconfigured = false;
 		this.lifxconfigured = false;
 		this.farenheit = true;
-		this.whitelist = null;
 		this.securityData = null;
 		this.settingsChanged = false;
 		this.myechourl = "echo.amazon.com/#cards";

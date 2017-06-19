@@ -34,7 +34,7 @@ public class HueConfig
 	private String replacesbridgeid;
 	private Map<String, WhitelistEntry> whitelist;
 
-	public static HueConfig createConfig(String name, String ipaddress, Map<String, WhitelistEntry> awhitelist, String emulateHubVersion) {
+	public static HueConfig createConfig(String name, String ipaddress, Map<String, WhitelistEntry> awhitelist, String emulateHubVersion, boolean isLinkButtonPressed) {
 		HueConfig aConfig = new HueConfig();
 	    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	    SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -44,7 +44,7 @@ public class HueConfig
 		aConfig.setPortalservices(false);
 		aConfig.setGateway(ipaddress);
 		aConfig.setSwversion(emulateHubVersion);
-		aConfig.setLinkbutton(true);
+		aConfig.setLinkbutton(isLinkButtonPressed);
 		aConfig.setIpaddress(ipaddress);
 		aConfig.setProxyport(0);
 		aConfig.setSwupdate(Swupdate.createSwupdate());
