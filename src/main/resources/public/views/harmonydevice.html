@@ -37,6 +37,7 @@
 			'Add Bridge Device' to finish that selection setup. The 'Already
 			Configured Harmony Buttons' list below will show what is already
 			setup for your Harmony Hubs.</p>
+		<p>Note: The press time areas are for adding a press time in milliseconds to handle various long press scenarios. If left alone it will default to the original 200ms.</p>
 
 	<scrollable-table watch="bridge.harmonydevices">
 	<table class="table table-bordered table-striped table-hover">
@@ -47,7 +48,9 @@
 				<th sortable-header col="id" comparator-fn="comparatorNumber">Id</th>
 				<th sortable-header col="hub" comparator-fn="comparatorHub">Hub</th>
 				<th>On Button</th>
+				<th>On Press Time</th>
 				<th>Off Button</th>
+				<th>Off Press Time</th>
 				<th>Build Actions</th>
 			</tr>
 		</thead>
@@ -64,6 +67,10 @@
 							value="{{funcon.action}}">{{funcon.label}}</option>
 					</optgroup>
 			</select></td>
+			<td>
+				<textarea class="form-control" id="onpresstime"
+							ng-model="onpresstime" placeholder="On Press Time in ms"></textarea>
+			</td>
 			<td><select name="device-ctrloff" id="device-ctrloff"
 				ng-model="devicectrloff">
 					<optgroup ng-repeat="ctrloff in harmonydevice.device.controlGroup"
@@ -73,8 +80,12 @@
 					</optgroup>
 			</select></td>
 			<td>
+				<textarea class="form-control" id="offpresstime"
+							ng-model="offpresstime" placeholder="Off Press Time in ms"></textarea>
+			</td>
+			<td>
 				<button class="btn btn-success" type="submit"
-					ng-click="buildButtonUrls(harmonydevice, devicectrlon, devicectrloff)">Build
+					ng-click="buildButtonUrls(harmonydevice, devicectrlon, devicectrloff, onpresstime, offpresstime)">Build
 					A Button</button>
 			</td>
 		</tr>

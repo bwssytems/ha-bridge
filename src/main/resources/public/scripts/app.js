@@ -1930,10 +1930,17 @@ app.controller('HarmonyController', function ($scope, $location, bridgeService, 
 		$location.path('/editdevice');
 	};
 
-	$scope.buildButtonUrls = function (harmonydevice, onbutton, offbutton) {
+	$scope.buildButtonUrls = function (harmonydevice, onbutton, offbutton, onpresstime, offpresstime) {
 		var actionOn = angular.fromJson(onbutton);
 		var actionOff = angular.fromJson(offbutton);
+		var postCmd = "\"}";
+		if(onpresstime !== undefined && onpresstime !== "0")
+			postCmd = "\",\"pressTime\":" + onpresstime + "}"; 
 		onpayload = "{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOn.command + "\",\"hub\":\"" + harmonydevice.hub + "\"}";
+		if(offpresstime !== undefined && offpresstime !== "0")
+			postCmd = "\",\"pressTime\":" + offpresstime + "}"; 
+		else
+			postCmd = "\"}";
 		offpayload = "{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOff.command + "\",\"hub\":\"" + harmonydevice.hub + "\"}";
 
 		bridgeService.buildUrls(onpayload, null, offpayload, true, actionOn.command,  harmonydevice.device.label, harmonydevice.hub, "button", "harmonyButton", null, null);
@@ -3058,7 +3065,7 @@ app.controller('EditController', function ($scope, $location, bridgeService) {
 	$scope.onDevices = null;
 	$scope.dimDevices = null;
 	$scope.offDevices = null;
-	if ($scope.device !== undefined && $scope.device.name !== undefined) {
+	if ($scope.devicec && $scope.device.name !== undefined) {
 		if($scope.bridge.device.onUrl !== undefined)
 			$scope.onDevices = bridgeService.getCallObjects($scope.bridge.device.onUrl);
 		if($scope.bridge.device.dimUrl !== undefined)

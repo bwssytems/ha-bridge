@@ -201,12 +201,15 @@ public class BridgeSecurity {
 	public void setSettingsChanged(boolean settingsChanged) {
 		this.settingsChanged = settingsChanged;
 	}
+	public Map<String, WhitelistEntry> getWhitelist() {
+		return securityDescriptor.getWhitelist();
+	}
 
 	public HueError[] validateWhitelistUser(String aUser, String userDescription, boolean strict) {
 		String validUser = null;
 		boolean found = false;
 		if (aUser != null && !aUser.equalsIgnoreCase("undefined") && !aUser.equalsIgnoreCase("null")
-				&& !aUser.equalsIgnoreCase("")) {
+				&& !aUser.equalsIgnoreCase("") && !aUser.equals(DEPRACATED_INTERNAL_USER)) {
 			if (securityDescriptor.getWhitelist() != null) {
 				Set<String> theUserIds = securityDescriptor.getWhitelist().keySet();
 				Iterator<String> userIterator = theUserIds.iterator();
@@ -218,26 +221,24 @@ public class BridgeSecurity {
 					}
 				}
 			}
-		}
 
-		if(!found && !strict) {
-			log.debug("validateWhitelistUser: a user was not found and it is not strict rules <" + aUser + "> being created");
-			newWhitelistUser(aUser, userDescription);
-			
-			found = true;
+			if(!found && !strict) {
+				log.debug("validateWhitelistUser: a user was not found and it is not strict rules <" + aUser + "> being created");
+				newWhitelistUser(aUser, userDescription);
+				
+				found = true;
+			}
 		}
 		
 		if (!found) {
-			log.debug("validateWhitelistUser: a user was not found and it is strict rules <" + aUser + ">");
+			log.debug("validateWhitelistUser: a user was not found and strict rules is set to: " + strict + "for user <" + aUser + ">");
 			return HueErrorResponse.createResponse("1", "/api/" + aUser == null ? "" : aUser, "unauthorized user", null, null, null).getTheErrors();
 		}
 
 		return null;
 	}
 	
-	public void newWhitelistUser(String aUser, String userDescription) {
-		if(aUser.equals(DEPRACATED_INTERNAL_USER))
-			return;
+	private void newWhitelistUser(String aUser, String userDescription) {
 		if (securityDescriptor.getWhitelist() == null) {
 			securityDescriptor.setWhitelist(new HashMap<>());
 		}
@@ -278,9 +279,8 @@ public class BridgeSecurity {
 		    Iterator<Entry<String, WhitelistEntry>> it = securityDescriptor.getWhitelist().entrySet().iterator();
 		    while (it.hasNext()) {
 		        Map.Entry<String, WhitelistEntry> pair = it.next();
-		        it.remove(); // avoids a ConcurrentModificationException
 		        if(pair.getValue().getName().equals(TEST_USER_TYPE)) {
-		        	securityDescriptor.getWhitelist().remove(pair.getKey());
+			        it.remove(); // avoids a ConcurrentModificationException
 					setSettingsChanged(true);
 		        }
 		    }
