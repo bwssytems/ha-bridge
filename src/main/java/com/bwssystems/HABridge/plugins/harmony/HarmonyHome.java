@@ -181,7 +181,7 @@ public class HarmonyHome implements Home {
 								aMultiUtil.setTheDelay(anItem.getDelay());
 							else
 								aMultiUtil.setTheDelay(aMultiUtil.getDelayDefault());
-	    	        	log.debug("pressing button: " + deviceButtons[z].getDevice() + " - " + deviceButtons[z].getButton() + " - iteration: " + String.valueOf(z) + " - count: " + String.valueOf(y));
+	    	        	log.debug("pressing button: " + deviceButtons[z].getDevice() + " - " + deviceButtons[z].getButton() + " with pressTime of: " + deviceButtons[z].getPressTime() + " - iteration: " + String.valueOf(z) + " - count: " + String.valueOf(y));
 	    				if(deviceButtons[z].getHub() == null || deviceButtons[z].getHub().isEmpty())
 	    					deviceButtons[z].setHub(device.getTargetDevice());
 	    				HarmonyHandler myHarmony = getHarmonyHandler(deviceButtons[z].getHub());
