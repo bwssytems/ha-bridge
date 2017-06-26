@@ -198,6 +198,11 @@ location /api/ {
 ```
 ## Available Arguments
 Arguments are now deprecated. The ha-bridge will use the old -D arguments and populate the configuration screen, Bridge Control Tab, which can now be saved to a file and will not be needed. There is only one optional argument that overrides and that is the location of the configuration file. The default is the relative path "data/habridge.config".
+### -Djava.net.preferIPv4Stack=true
+This will guarantee that the ha-bridge will not use an IPV6 address. This cannot be automatically set inside the code.
+```
+java -jar -Djava.net.preferIPv4Stack=true ha-bridge-W.X.Y.jar
+```
 ### -Dconfig.file=`<filepath>`
 The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify -Dconfig.file=`<directory>/<filename>` explicitly. The command line example:
 ```
