@@ -79,13 +79,14 @@ public class ColorDecode {
 	    	g = 0;
 	    if(b < 0.0)
 	    	b = 0;
-	    r = Math.round(r * 255);
-	    g = Math.round(g * 255);
-	    b = Math.round(b * 255);
+
 	    rgb = new ArrayList<Double>();
 	    rgb.add(0, r);
 	    rgb.add(1, g);
 	    rgb.add(2, b);
+	    rgb.add(3, Math.round(r * 255));
+	    rgb.add(4, Math.round(g * 255));
+	    rgb.add(5, Math.round(b * 255));
 		return rgb;
 	}
 
