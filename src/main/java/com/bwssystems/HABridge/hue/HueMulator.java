@@ -467,16 +467,6 @@ public class HueMulator {
 			notFirstChange = true;
 		}
 
-		if (body.contains("\"ct\"")) {
-			if (notFirstChange)
-				responseString = responseString + ",";
-			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/ct\":" + stateChanges.getCt()
-					+ "}}";
-			if (deviceState != null)
-				deviceState.setCt(stateChanges.getCt());
-			notFirstChange = true;
-		}
-
 		if (body.contains("\"xy\"")) {
 			if (notFirstChange)
 				responseString = responseString + ",";
@@ -485,36 +475,34 @@ public class HueMulator {
 			if (deviceState != null)
 				deviceState.setXy(stateChanges.getXy());
 			notFirstChange = true;
-		}
-
-		if (body.contains("\"hue\"")) {
+		} else if (body.contains("\"ct\"")) {
 			if (notFirstChange)
 				responseString = responseString + ",";
-			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/hue\":" + stateChanges.getHue()
+			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/ct\":" + stateChanges.getCt()
 					+ "}}";
 			if (deviceState != null)
-				deviceState.setHue(stateChanges.getHue());
+				deviceState.setCt(stateChanges.getCt());
 			notFirstChange = true;
-		}
+		} else {
+			if (body.contains("\"hue\"")) {
+				if (notFirstChange)
+					responseString = responseString + ",";
+				responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/hue\":" + stateChanges.getHue()
+						+ "}}";
+				if (deviceState != null)
+					deviceState.setHue(stateChanges.getHue());
+				notFirstChange = true;
+			}
 
-		if (body.contains("\"sat\"")) {
-			if (notFirstChange)
-				responseString = responseString + ",";
-			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/sat\":" + stateChanges.getSat()
-					+ "}}";
-			if (deviceState != null)
-				deviceState.setSat(stateChanges.getSat());
-			notFirstChange = true;
-		}
-
-		if (body.contains("\"ct_inc\"")) {
-			if (notFirstChange)
-				responseString = responseString + ",";
-			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/ct_inc\":"
-					+ stateChanges.getCt_inc() + "}}";
-			if (deviceState != null)
-				deviceState.setCt(deviceState.getCt() + stateChanges.getCt_inc());
-			notFirstChange = true;
+			if (body.contains("\"sat\"")) {
+				if (notFirstChange)
+					responseString = responseString + ",";
+				responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/sat\":" + stateChanges.getSat()
+						+ "}}";
+				if (deviceState != null)
+					deviceState.setSat(stateChanges.getSat());
+				notFirstChange = true;
+			}	
 		}
 
 		if (body.contains("\"xy_inc\"")) {
@@ -525,26 +513,34 @@ public class HueMulator {
 			if (deviceState != null)
 				deviceState.setXy(stateChanges.getXy());
 			notFirstChange = true;
-		}
-
-		if (body.contains("\"hue_inc\"")) {
+		} else if (body.contains("\"ct_inc\"")) {
 			if (notFirstChange)
 				responseString = responseString + ",";
-			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/hue_inc\":"
-					+ stateChanges.getHue_inc() + "}}";
+			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/ct_inc\":"
+					+ stateChanges.getCt_inc() + "}}";
 			if (deviceState != null)
-				deviceState.setHue(deviceState.getHue() + stateChanges.getHue_inc());
+				deviceState.setCt(deviceState.getCt() + stateChanges.getCt_inc());
 			notFirstChange = true;
-		}
+		} else {
+			if (body.contains("\"hue_inc\"")) {
+				if (notFirstChange)
+					responseString = responseString + ",";
+				responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/hue_inc\":"
+						+ stateChanges.getHue_inc() + "}}";
+				if (deviceState != null)
+					deviceState.setHue(deviceState.getHue() + stateChanges.getHue_inc());
+				notFirstChange = true;
+			}
 
-		if (body.contains("\"sat_inc\"")) {
-			if (notFirstChange)
-				responseString = responseString + ",";
-			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/sat_inc\":"
-					+ stateChanges.getSat_inc() + "}}";
-			if (deviceState != null)
-				deviceState.setSat(deviceState.getSat() + stateChanges.getSat_inc());
-			notFirstChange = true;
+			if (body.contains("\"sat_inc\"")) {
+				if (notFirstChange)
+					responseString = responseString + ",";
+				responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/sat_inc\":"
+						+ stateChanges.getSat_inc() + "}}";
+				if (deviceState != null)
+					deviceState.setSat(deviceState.getSat() + stateChanges.getSat_inc());
+				notFirstChange = true;
+			}	
 		}
 
 		if (body.contains("\"effect\"")) {
@@ -931,7 +927,9 @@ public class HueMulator {
 			if (url == null || url.length() == 0)
 				url = device.getOnUrl();
 		} else {
-			if (theStateChanges.isOn()) {
+			if (body.contains("\"xy\"") || body.contains("\"ct\"") || body.contains("\"hue\"")) {
+				url = device.getColorUrl();
+			} else if (theStateChanges.isOn()) {
 				url = device.getOnUrl();
 			} else if (!theStateChanges.isOn()) {
 				url = device.getOffUrl();

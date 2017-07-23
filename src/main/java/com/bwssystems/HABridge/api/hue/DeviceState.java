@@ -1,6 +1,6 @@
 package com.bwssystems.HABridge.api.hue;
 
-// import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,11 +12,12 @@ public class DeviceState {
     private int hue;
     private int sat;
     private String effect;
+    private List<Double> xy;
     private int ct;
     private String alert;
     private String colormode;
     private boolean reachable;
-    private List<Double> xy;
+    
 //    private int transitiontime;
 
     public boolean isOn() {
@@ -41,6 +42,7 @@ public class DeviceState {
 
     public void setHue(int hue) {
         this.hue = hue;
+        this.colormode = "hs";
     }
 
     public int getSat() {
@@ -49,6 +51,7 @@ public class DeviceState {
 
     public void setSat(int sat) {
         this.sat = sat;
+        this.colormode = "hs";
     }
 
     public String getEffect() {
@@ -65,6 +68,7 @@ public class DeviceState {
 
     public void setCt(int ct) {
         this.ct = ct;
+        this.colormode = "ct";
     }
 
     public String getAlert() {
@@ -97,6 +101,7 @@ public class DeviceState {
 
     public void setXy(List<Double> xy) {
         this.xy = xy;
+        this.colormode = "xy";
     }
 //    public int getTransitiontime() {
 //		return transitiontime;
@@ -109,11 +114,12 @@ public class DeviceState {
 	public static DeviceState createDeviceState() {
     	DeviceState newDeviceState = new DeviceState();
     	newDeviceState.fillIn();
-//    	newDeviceState.setColormode("none");
-//    	ArrayList<Double> doubleArray = new ArrayList<Double>();
-//    	doubleArray.add(new Double(0));
-//    	doubleArray.add(new Double(0));
-//    	newDeviceState.setXy(doubleArray);
+    	newDeviceState.setColormode("ct");
+    	newDeviceState.setCt(200);
+    	ArrayList<Double> doubleArray = new ArrayList<Double>();
+    	doubleArray.add(new Double(0));
+    	doubleArray.add(new Double(0));
+    	newDeviceState.setXy(doubleArray);
     	
     	return newDeviceState;
     }

@@ -38,6 +38,9 @@ public class DeviceDescriptor{
     @SerializedName("onUrl")
     @Expose
     private String onUrl;
+    @SerializedName("colorUrl")
+    @Expose
+    private String colorUrl;
     @SerializedName("headers")
     @Expose
     private String headers;
@@ -140,6 +143,14 @@ public class DeviceDescriptor{
 
     public void setOnUrl(String onUrl) {
         this.onUrl = onUrl;
+    }
+
+    public String getColorUrl() {
+        return colorUrl;
+    }
+
+    public void setColorUrl(String colorUrl) {
+        this.colorUrl = colorUrl;
     }
 
     public String getId() {
@@ -281,6 +292,9 @@ public class DeviceDescriptor{
 			return true;
 		
 		if(this.offUrl != null && this.offUrl.contains(aType))
+			return true;
+
+		if(this.colorUrl != null && this.colorUrl.contains(aType))
 			return true;
 		
 		return false;
