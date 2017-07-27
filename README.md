@@ -315,6 +315,7 @@ Another way to add a device is through the Manual Add Tab. This allows you to ma
 There is a new format for the on/dim/off URL areas. The new editor handles the intricacies of the components, but is broken down here for explanation.
 
 Here are the fields that can be put into the call item:
+
 Json Type | field name | What | Use
 ----------|------------|------|-----
 String or JsonElement | item | This is the payload that will be called for devices | Required
