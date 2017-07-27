@@ -18,13 +18,21 @@ import javax.xml.bind.DatatypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.bwssystems.HABridge.DeviceMapTypes;
+import com.bwssystems.HABridge.api.CallItem;
+import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
+import com.bwssystems.HABridge.plugins.hue.HueHome;
 import com.bwssystems.HABridge.util.BackupHandler;
 import com.bwssystems.HABridge.util.JsonTransformer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Arrays;
+import java.util.ArrayList;
 /*
  * This is an in memory list to manage the configured devices and saves the list as a JSON string to a file for later  
  * loading.
@@ -86,6 +94,10 @@ public class DeviceRepository extends BackupHandler {
 
 	public List<DeviceDescriptor> findAllByRequester(String anAddress) {
 		List<DeviceDescriptor> list = new ArrayList<DeviceDescriptor>(devices.values());
+		return findAllByRequester(anAddress, list);
+	}
+
+	private List<DeviceDescriptor> findAllByRequester(String anAddress, Collection<DeviceDescriptor> list) {
 		List<DeviceDescriptor> theReturnList = new ArrayList<DeviceDescriptor>();
 		Iterator<DeviceDescriptor> anIterator = list.iterator();
 		DeviceDescriptor theDevice;
@@ -109,6 +121,41 @@ public class DeviceRepository extends BackupHandler {
 				theReturnList.add(theDevice);
 		}
 		return theReturnList;
+	}
+
+	public Map<String, DeviceResponse> findAllByGroupWithState(String[] lightsInGroup, String anAddress, HueHome myHueHome, Gson aGsonBuilder) {
+		Map<String, DeviceResponse> deviceResponseMap = new HashMap<String, DeviceResponse>();
+		Map<String, DeviceDescriptor> lights = new HashMap<String, DeviceDescriptor>(devices);
+		lights.keySet().retainAll(Arrays.asList(lightsInGroup));
+		for (DeviceDescriptor light : findAllByRequester(anAddress, lights.values())) {
+			DeviceResponse deviceResponse = null;
+			if(!light.isInactive()) {
+				if (light.containsType(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) {
+					CallItem[] callItems = null;
+					try {
+						if(light.getOnUrl() != null)
+							callItems = aGsonBuilder.fromJson(light.getOnUrl(), CallItem[].class);
+					} catch(JsonSyntaxException e) {
+						log.warn("Could not decode Json for url items to get Hue state for device: " + light.getName());
+						callItems = null;
+					}
+
+					for (int i = 0; callItems != null && i < callItems.length; i++) {
+						if((callItems[i].getType() != null && callItems[i].getType().equals(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) ||
+									(callItems[i].getItem() != null && callItems[i].getItem().getAsString() != null && callItems[i].getItem().getAsString().contains("hueName"))) {
+							deviceResponse = myHueHome.getHueDeviceInfo(callItems[i], light);
+							i = callItems.length;
+						}
+					}
+				}
+				
+				if (deviceResponse == null) {
+					deviceResponse = DeviceResponse.createResponse(light);
+				}
+				deviceResponseMap.put(light.getId(), deviceResponse);	
+			}
+		}
+		return (deviceResponseMap.size() == 0) ? null : deviceResponseMap;
 	}
 
 	public DeviceDescriptor findOne(String id) {

@@ -1,8 +1,12 @@
 package com.bwssystems.HABridge.api.hue;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
+import com.bwssystems.HABridge.dao.GroupDescriptor;
 import com.google.gson.annotations.SerializedName;
 
 public class GroupResponse {
@@ -16,6 +20,8 @@ public class GroupResponse {
 	private String type;
     @SerializedName("class")
     String class_name;
+    @SerializedName("state")
+    private GroupState state;
 
 	public DeviceState getAction() {
 		return action;
@@ -23,6 +29,14 @@ public class GroupResponse {
 	public void setAction(DeviceState action) {
 		this.action = action;
 	}
+
+	public GroupState getState() {
+		return state;
+	}
+	public void setState(GroupState state) {
+		this.state = state;
+	}
+
 	public String[] getLights() {
 		return lights;
 	}
@@ -48,34 +62,49 @@ public class GroupResponse {
 	public void setClass_name(String class_name) {
 		this.class_name = class_name;
 	}
-	public static GroupResponse createDefaultGroupResponse(List<DeviceDescriptor> deviceList) {
-	        String[] theList = new String[deviceList.size()];
-	        int i = 0;
-	        for (DeviceDescriptor device : deviceList) {
-             theList[i] = device.getId();
-             i++;
-	        }
-		 GroupResponse theResponse = new GroupResponse();
-		 theResponse.setAction(DeviceState.createDeviceState());
-		 theResponse.setName("Lightset 0");
-		 theResponse.setLights(theList);
-		 theResponse.setType("LightGroup");
-		 return theResponse;
-	 }
-	public static GroupResponse createOtherGroupResponse(List<DeviceDescriptor> deviceList) {
-        String[] theList = new String[deviceList.size()];
-        int i = 0;
-        for (DeviceDescriptor device : deviceList) {
-         theList[i] = device.getId();
-         i++;
-        }
-	 GroupResponse theResponse = new GroupResponse();
-	 theResponse.setAction(DeviceState.createDeviceState());
-	 theResponse.setName("AGroup");
-	 theResponse.setLights(theList);
-	 theResponse.setType("Room");
-	 theResponse.setClass_name("Other");
+	
+	public static GroupResponse createDefaultGroupResponse(Map<String, DeviceResponse> deviceList) {
+		String[] theList = new String[deviceList.size()];
+		Boolean all_on = true;
+		Boolean any_on = false;
+		int i = 0;
+		for (Map.Entry<String, DeviceResponse> device : deviceList.entrySet()) {
+		    theList[i] = device.getKey();
+		    Boolean is_on = device.getValue().getState().isOn();
+		    if (is_on)
+		    	any_on = true;
+		    else
+		    	all_on = false;
+		    i++;
+		}
+		GroupResponse theResponse = new GroupResponse();
+		theResponse.setAction(DeviceState.createDeviceState());
+		theResponse.setState(new GroupState(all_on, any_on));
+		theResponse.setName("Group 0");
+		theResponse.setLights(theList);
+		theResponse.setType("LightGroup");
+		return theResponse;
+	}
 
-	 return theResponse;
- }
+	public static GroupResponse createResponse(GroupDescriptor group, Map<String, DeviceResponse> lights){
+        GroupResponse response = new GroupResponse();
+        Boolean all_on = true;
+		Boolean any_on = false;
+		for (DeviceResponse light : lights.values()) {
+		    Boolean is_on = light.getState().isOn();
+		    if (is_on)
+		    	any_on = true;
+		    else
+		    	all_on = false;
+		}
+
+        response.setState(new GroupState(all_on, any_on));
+        response.setAction(group.getAction());
+        response.setName(group.getName());
+        response.setType(group.getGroupType());
+        response.setLights(group.getLights());
+        response.setClass_name(group.getGroupClass());
+
+        return response;
+    }
 }

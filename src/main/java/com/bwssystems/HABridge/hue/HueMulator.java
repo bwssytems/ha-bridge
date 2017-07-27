@@ -10,6 +10,7 @@ import com.bwssystems.HABridge.api.UserCreateRequest;
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.bwssystems.HABridge.api.hue.GroupResponse;
+import com.bwssystems.HABridge.api.hue.GroupClassTypes;
 import com.bwssystems.HABridge.api.hue.HueApiResponse;
 import com.bwssystems.HABridge.api.hue.HueConfig;
 import com.bwssystems.HABridge.api.hue.HueError;
@@ -29,6 +30,7 @@ import static spark.Spark.halt;
 import static spark.Spark.options;
 import static spark.Spark.post;
 import static spark.Spark.put;
+import static spark.Spark.delete;
 
 import org.apache.http.HttpStatus;
 
@@ -38,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 /**
  * Based on Armzilla's HueMulator - a Philips Hue emulator using sparkjava rest server
@@ -48,6 +51,7 @@ public class HueMulator {
 	private static final String HUE_CONTEXT = "/api";
 
 	private DeviceRepository repository;
+	private GroupRepository groupRepository;
 	private HomeManager homeManager;
 	private HueHome myHueHome;
 	private BridgeSettingsDescriptor bridgeSettings;
@@ -55,8 +59,9 @@ public class HueMulator {
 	private Gson aGsonHandler;
 	private DeviceMapTypes validMapTypes;
 
-	public HueMulator(BridgeSettings bridgeMaster, DeviceRepository aDeviceRepository, HomeManager aHomeManager) {
+	public HueMulator(BridgeSettings bridgeMaster, DeviceRepository aDeviceRepository, GroupRepository aGroupRepository, HomeManager aHomeManager) {
 		repository = aDeviceRepository;
+		groupRepository = aGroupRepository;
 		validMapTypes = new DeviceMapTypes();
 		bridgeSettingMaster = bridgeMaster;
 		bridgeSettings = bridgeSettingMaster.getBridgeSettingsDescriptor();
@@ -100,7 +105,7 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			return  groupsIdHandler(request.params(":groupid"), request.params(":userid"),  request.ip());
+			return  groupsIdHandler(request.params(":groupid"), request.params(":userid"), request.ip());
 		} , new JsonTransformer());
 		// http://ip_address:port/:userid/groups CORS request
 		options(HUE_CONTEXT + "/:userid/groups", "application/json", (request, response) -> {
@@ -117,8 +122,19 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			log.debug("group add requested from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
-			return "[{\"success\":{\"id\":\"1\"}}]";
+			return addGroup(request.params(":userid"), request.ip(), request.body());
+		});
+		delete(HUE_CONTEXT + "/:userid/groups/:groupid", "application/json", (request, response) -> {
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.type("application/json");
+			response.status(HttpStatus.SC_OK);
+			return deleteGroup(request.params(":userid"), request.params(":groupid"), request.ip());
+		});
+		put(HUE_CONTEXT + "/:userid/groups/:groupid", "application/json", (request, response) -> {
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.type("application/json");
+			response.status(HttpStatus.SC_OK);
+			return modifyGroup(request.params(":userid"), request.params(":groupid"), request.ip(), request.body());
 		});
 		// http://ip_address:port/api/:userid/groups/<groupid>/action
 		// Dummy handler
@@ -128,8 +144,7 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			log.debug("put action to groups API from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
-			return "[{\"error\":{\"address\": \"/groups/0/action/scene\", \"type\":7, \"description\": \"invalid value, dummy for parameter, scene\"}}]";
+			return changeGroupState(request.params(":userid"), request.params(":groupid"), request.body(), request.ip());
 		});		
 		// http://ip_address:port/api/{userId}/scenes returns json objects of
 		// all scenes configured
@@ -614,21 +629,189 @@ public class HueMulator {
 
 		return "{}";
 	}
-	private Object groupsListHandler(String userId, String requestIp) {
-		log.debug("hue group list requested: " + userId + " from " + requestIp);
+
+	private Object addGroup(String userId, String ip, String body) {
 		HueError[] theErrors = null;
-		Map<String, GroupResponse> groupResponseMap = null;
+		log.debug("group add requested from " + ip + " user " + userId + " with body " + body);
 		theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors == null) {
 			if(bridgeSettingMaster.getBridgeSecurity().isSettingsChanged())
 				bridgeSettingMaster.updateConfigFile();
 
-			groupResponseMap = new HashMap<String, GroupResponse>();
-			groupResponseMap.put("1", (GroupResponse) this.groupsIdHandler("1", userId, requestIp));
-			return groupResponseMap;
+			GroupResponse theGroup = null;
+			try {
+				theGroup = aGsonHandler.fromJson(body, GroupResponse.class);
+			} catch (Exception e) {
+				theGroup = null;
+			}
+			if (theGroup == null) {
+				log.warn("Could not parse add group body. No group created.");
+				return aGsonHandler.toJson(HueErrorResponse.createResponse("5", "/groups/lights",
+						"invalid/missing parameters in body", null, null, null).getTheErrors(), HueError[].class);
+			}
+			
+			List<GroupDescriptor> groups = groupRepository.findAll();
+			GroupDescriptor newGroup = new GroupDescriptor();
+			
+			String type = theGroup.getType();
+			String groupClass = theGroup.getClass_name();
+
+			// check type
+			if (type == null || type.trim().equals("")) {
+				type = (groupClass == null || groupClass.trim().equals("")) ? "LightGroup" : "Room";
+			} else if (!type.equals("LightGroup") && !type.equals("Room")) {
+				type = "LightGroup";
+			}
+			// Everything else than a room must contain lights
+			if (!type.equals("Room")) {
+				if (theGroup.getLights() == null || theGroup.getLights().length == 0) {
+					return aGsonHandler.toJson(HueErrorResponse.createResponse("5", "/groups/lights",
+						"invalid/missing parameters in body", null, null, null).getTheErrors(), HueError[].class);
+				}
+			} else { // check room class if it's a room
+				if (groupClass == null || groupClass.trim().equals("")) {
+					groupClass = GroupClassTypes.OTHER;
+				} else if (!new GroupClassTypes().validateType(groupClass)) {
+					return aGsonHandler.toJson(HueErrorResponse.createResponse("7", "/groups/class",
+						"invalid value, " + groupClass + ", for parameter, class", null, null, null).getTheErrors(), HueError[].class);	
+				}
+			}
+			String name = theGroup.getName();
+			Integer newId = groupRepository.getNewId();
+			if (name == null || name.trim().equals("")) {
+				name = type + " " + newId;
+			}
+			newGroup.setGroupType(type);
+			newGroup.setGroupClass(groupClass);
+			newGroup.setName(name);
+			newGroup.setLights(theGroup.getLights());
+			groups.add(newGroup);
+			groupRepository.save(groups.toArray(new GroupDescriptor[0]));
+			
+			return "[{\"success\":{\"id\":\"" + newId + "\"}}]";
 		}
 
 		return theErrors;
+	}
+
+	private Object deleteGroup(String userId, String groupId, String ip) {
+		HueError[] theErrors = null;
+		log.debug("group delete requested from " + ip + " user " + userId);
+		theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
+		if (theErrors == null) {
+			if(bridgeSettingMaster.getBridgeSecurity().isSettingsChanged())
+				bridgeSettingMaster.updateConfigFile();
+
+			GroupDescriptor group = groupRepository.findOne(groupId);
+			if (group == null || group.isInactive()) {
+				return aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/groups/" + groupId,
+					"resource, /groups/" + groupId + ", not available", null, null, null).getTheErrors(), HueError[].class);	
+			} else {
+				groupRepository.delete(group);
+				return "[{\"success\":\"/groups/" + groupId + " deleted\"}}]";
+			}
+		}
+		return theErrors;
+	}
+
+	private Object modifyGroup(String userId, String groupId, String ip, String body) {
+		HueError[] theErrors = null;
+		log.debug("group modify requested from " + ip + " user " + userId + " with body " + body);
+		theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
+		if (theErrors == null) {
+			if(bridgeSettingMaster.getBridgeSecurity().isSettingsChanged())
+				bridgeSettingMaster.updateConfigFile();
+
+			GroupDescriptor group = groupRepository.findOne(groupId);
+			if (group == null || group.isInactive()) {
+				return aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/groups/" + groupId,
+					"resource, /groups/" + groupId + ", not available", null, null, null).getTheErrors(), HueError[].class);	
+			} else {
+				String successString = "[";
+				GroupResponse theGroup = null;
+				try {
+					theGroup = aGsonHandler.fromJson(body, GroupResponse.class);
+				} catch (Exception e) {
+					theGroup = null;
+				}
+				if (theGroup == null) {
+					log.warn("Could not parse modify group body. Group unchanged.");
+					return aGsonHandler.toJson(HueErrorResponse.createResponse("5", "/groups/lights",
+							"invalid/missing parameters in body", null, null, null).getTheErrors(), HueError[].class);
+				}
+
+				String type = theGroup.getType();
+				String groupClass = theGroup.getClass_name();
+				String name = theGroup.getName();
+				if (!(name == null || name.trim().equals(""))) {
+					group.setName(name);
+					successString += "{\"success\":{\"/groups/" + groupId + "/name\":\"" + name + "\"}},";
+				}
+				if (!group.getGroupType().equals("Room")) {
+					if (!(groupClass == null || groupClass.trim().equals(""))) {
+						return aGsonHandler.toJson(HueErrorResponse.createResponse("6", "/groups/" + groupId + "/class",
+							"parameter, /groups/" + groupId + "/class, not available", null, null, null).getTheErrors(), HueError[].class);
+					}
+					if (theGroup.getLights() != null) {
+						if (theGroup.getLights().length == 0) {
+							return aGsonHandler.toJson(HueErrorResponse.createResponse("7", "/groups/" + groupId + "/lights",
+							"invalid value, " + Arrays.toString(theGroup.getLights()) + ", for parameter, /groups" + groupId + "/lights", null, null, null).getTheErrors(), HueError[].class);		
+						} else {
+							group.setLights(theGroup.getLights());
+							successString += "{\"success\":{\"/groups/" + groupId + "/lights\":\"" +  Arrays.toString(theGroup.getLights()) + "\"}},";
+						}
+					}
+				} else { // check room class if it's a room
+					if (!(groupClass == null || groupClass.trim().equals(""))) {
+						if (!new GroupClassTypes().validateType(groupClass)) {
+							return aGsonHandler.toJson(HueErrorResponse.createResponse("7", "/groups/class",
+							"invalid value, " + groupClass + ", for parameter, class", null, null, null).getTheErrors(), HueError[].class);		
+						} else {
+							group.setGroupClass(groupClass);
+							successString += "{\"success\":{\"/groups/" + groupId + "/class\":\"" + groupClass + "\"}},";
+						}
+					}
+
+					if (theGroup.getLights() != null) {
+						group.setLights(theGroup.getLights());
+							successString += "{\"success\":{\"/groups/" + groupId + "/lights\":\"" +  Arrays.toString(theGroup.getLights()) + "\"}},";
+					}
+				}
+				
+				groupRepository.save();
+				return (successString.length() == 1) ? "[]" : successString.substring(0, successString.length()-1) + "]";
+			}
+		}
+		return theErrors;
+	}
+
+	private Object groupsListHandler(String userId, String requestIp) {
+		HueError[] theErrors = null;
+		Map<String, GroupResponse> groupResponseMap = null;
+		if (bridgeSettings.isTraceupnp())
+			log.info("Traceupnp: hue group list requested: " + userId + " from " + requestIp);
+		log.debug("hue group list requested: " + userId + " from " + requestIp);
+		theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
+		if (theErrors == null) {
+			if(bridgeSettingMaster.getBridgeSecurity().isSettingsChanged())
+				bridgeSettingMaster.updateConfigFile();
+
+	        List<GroupDescriptor> groupList = groupRepository.findAllByRequester(requestIp);
+			groupResponseMap = new HashMap<String, GroupResponse>();
+			for (GroupDescriptor group : groupList) {
+				GroupResponse groupResponse = null;
+				if(!group.isInactive()) {
+					Map<String, DeviceResponse> lights = repository.findAllByGroupWithState(group.getLights(), requestIp, myHueHome, aGsonHandler);
+					groupResponse = GroupResponse.createResponse(group, lights);
+					groupResponseMap.put(group.getId(), groupResponse);
+				}
+			}
+		}
+
+		if (theErrors != null)
+			return theErrors;
+
+		return groupResponseMap;
 	}
 
 
@@ -641,14 +824,20 @@ public class HueMulator {
 				bridgeSettingMaster.updateConfigFile();
 
 			if (groupId.equalsIgnoreCase("0")) {
-				GroupResponse theResponse = GroupResponse.createDefaultGroupResponse(repository.findActive());
+				GroupResponse theResponse = GroupResponse.createDefaultGroupResponse((Map<String, DeviceResponse>)lightsListHandler(userId, requestIp));
 				return theResponse;
+			} else {
+				GroupDescriptor group = groupRepository.findOne(groupId);
+				if (group == null || group.isInactive()) {
+					return aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/groups/" + groupId,
+						"resource, /groups/" + groupId + ", not available", null, null, null).getTheErrors(), HueError[].class);	
+				} else {
+					Map<String, DeviceResponse> lights = repository.findAllByGroupWithState(group.getLights(), requestIp, myHueHome, aGsonHandler);
+					GroupResponse theResponse = GroupResponse.createResponse(group, lights);
+					return theResponse;	
+				}
+				
 			}
-			if (!groupId.equalsIgnoreCase("0")) {
-				GroupResponse theResponse = GroupResponse.createOtherGroupResponse(repository.findActive());
-				return theResponse;
-			}
-			theErrors = HueErrorResponse.createResponse("3", userId + "/groups/" + groupId, "Object not found", null, null, null).getTheErrors();
 		}
 
 		return theErrors;
@@ -666,7 +855,6 @@ public class HueMulator {
 				bridgeSettingMaster.updateConfigFile();
 
 	        List<DeviceDescriptor> deviceList = repository.findAllByRequester(requestIp);
-//			List<DeviceDescriptor> deviceList = repository.findActive();
 			deviceResponseMap = new HashMap<String, DeviceResponse>();
 			for (DeviceDescriptor device : deviceList) {
 				DeviceResponse deviceResponse = null;
@@ -1022,5 +1210,64 @@ public class HueMulator {
 		}
 		return responseString;
 		
+	}
+
+
+	private Object changeGroupState(String userId, String groupId, String body, String ipAddress) {
+		log.debug("PUT action to group  " + groupId + " from " + ipAddress + " user " + userId + " with body " + body);
+		HueError[] theErrors = null;
+		theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
+		if (theErrors == null) {
+			if(bridgeSettingMaster.getBridgeSecurity().isSettingsChanged())
+				bridgeSettingMaster.updateConfigFile();
+
+			Map<String, DeviceResponse> lights = null;
+			if (groupId.equalsIgnoreCase("0")) {
+				lights = (Map<String, DeviceResponse>)lightsListHandler(userId, ipAddress);
+			} else {
+				GroupDescriptor group = groupRepository.findOne(groupId);
+				if (group == null || group.isInactive()) {
+					return aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/groups/" + groupId,
+						"resource, /groups/" + groupId + ", not available", null, null, null).getTheErrors(), HueError[].class);	
+				} else {
+					lights = repository.findAllByGroupWithState(group.getLights(), ipAddress, myHueHome, aGsonHandler);
+				}
+			}
+
+			if (lights != null) {
+				StateChangeBody theStateChanges = null;
+				try {
+					theStateChanges = aGsonHandler.fromJson(body, StateChangeBody.class);
+				} catch (Exception e) {
+					theStateChanges = null;
+				}
+				if (theStateChanges == null) {
+					log.warn("Could not parse state change body. Light state not changed.");
+					return aGsonHandler.toJson(HueErrorResponse.createResponse("2", "/groups/" + groupId + "/action",
+							"Could not parse state change body.", null, null, null).getTheErrors(), HueError[].class);
+				}
+				boolean turnOn = false;
+				boolean turnOff = false;
+				if (!(body.contains("\"bri_inc\"") || body.contains("\"bri\""))) {
+					if (!(body.contains("\"xy\"") || body.contains("\"ct\"") || body.contains("\"hue\""))) {
+						if (theStateChanges.isOn()) {
+							turnOn = true;
+						} else if (!theStateChanges.isOn()) {
+							turnOff = true;
+						}
+					}
+				}
+				for (Map.Entry<String, DeviceResponse> light : lights.entrySet()) {
+					if (turnOff && !light.getValue().getState().isOn())
+						continue;
+					if (turnOn && light.getValue().getState().isOn())
+						continue;
+					changeState(userId, light.getKey(), body, ipAddress);
+				}
+				return "[]";
+			}
+		}
+
+		return theErrors;
 	}
 }

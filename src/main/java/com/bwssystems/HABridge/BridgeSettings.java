@@ -90,6 +90,7 @@ public class BridgeSettings extends BackupHandler {
         	theBridgeSettings.setServerPort(System.getProperty("server.port", Configuration.DEFAULT_WEB_PORT));
         	theBridgeSettings.setUpnpConfigAddress(System.getProperty("upnp.config.address"));
         	theBridgeSettings.setUpnpDeviceDb(System.getProperty("upnp.device.db"));
+        	theBridgeSettings.setUpnpGroupDb(System.getProperty("upnp.group.db"));
         	theBridgeSettings.setUpnpResponsePort(System.getProperty("upnp.response.port", Configuration.UPNP_RESPONSE_PORT));
 	        
 	        theVeraAddress = System.getProperty("vera.address");
