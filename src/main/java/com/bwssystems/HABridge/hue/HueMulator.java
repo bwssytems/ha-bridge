@@ -1258,13 +1258,20 @@ public class HueMulator {
 					}
 				}
 				for (Map.Entry<String, DeviceResponse> light : lights.entrySet()) {
+					// ignore on/off for devices that are already on/off
 					if (turnOff && !light.getValue().getState().isOn())
 						continue;
 					if (turnOn && light.getValue().getState().isOn())
 						continue;
 					changeState(userId, light.getKey(), body, ipAddress);
 				}
-				return "[]";
+				// construct success response: one success message per changed property, but not per light
+				String successString = "[";
+				for (String pairStr : body.replaceAll("[{|}]", "").split(",")) {
+					String[] pair = pairStr.split(":");
+					successString += "{\"success\":{ \"address\": \"/groups/" + groupId + "/action/" + pair[0].replaceAll("\"", "").trim() + "\", \"value\": " + pair[1].trim() + "}},";
+				}
+				return (successString.length() == 1) ? "[]" : successString.substring(0, successString.length()-1) + "]";
 			}
 		}
 
