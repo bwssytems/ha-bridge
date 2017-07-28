@@ -31,10 +31,14 @@
 	</div>
 	<div class="panel-body">
 
-		<p>
-			<button class="btn btn-primary" type="submit" ng-click="renumberDevices()">Renumber Devices</button>
-			<button ng-if="bridge.securityInfo.useLinkButton" class="btn btn-primary" type="submit" ng-click="pushLinkButton()">Link</button>
-		</p>
+			<div class="form-group">
+				<button class="btn btn-primary" type="submit" ng-click="renumberDevices()">Renumber Devices</button>
+				<button ng-if="bridge.securityInfo.useLinkButton" class="btn btn-primary" type="submit" ng-click="pushLinkButton()">Link</button>
+				<label for="device-ip-filter">Show devices visible to: </label>
+				<input type="text" id="device-ip-filter" style="width:150px"
+							ng-model="bridge.state.filterDevicesByIpAddress" placeholder="">
+			</div>
+		
 	<scrollable-table watch="bridge.devices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
@@ -51,7 +55,7 @@
 				<th>Actions</th>
 			</tr>
 		</thead>
-		<tr ng-repeat="device in bridge.devices" row-id="{{device.id}}" ng-class="{info: bridge.viewDevId == device.id}" >
+		<tr ng-repeat="device in bridge.devices | orderBy:'name' | filterDevicesByRequester:bridge.state.filterDevicesByIpAddress" row-id="{{device.id}}" ng-class="{info: bridge.viewDevId == device.id}" >
 			<td>{{$index+1}}</td>
 			<td>{{device.id}}</td>
 			<td>{{device.name}}</td>

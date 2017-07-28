@@ -134,7 +134,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {},
 			mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false,
 			isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false,
-			showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: {}, viewDevId: "", queueDevId: "", securityInfo: {}};
+			showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: {}, viewDevId: "", queueDevId: "", securityInfo: {}, filterDevicesByIpAddress: null};
 
 	this.displayWarn = function(errorTitle, error) {
 		var toastContent = errorTitle;
@@ -3455,6 +3455,21 @@ app.filter('configuredSomfyDevices', function (bridgeService) {
 			return out;
 		for (var i = 0; i < input.length; i++) {
 			if(bridgeService.deviceContainsType(input[i], "somfyDevice")){
+				out.push(input[i]);
+			}
+		}
+		return out;
+	}
+});
+
+app.filter('filterDevicesByRequester', function () {
+	return function(input,search) {
+		var out = [];
+		if(input === undefined || input === null || input.length === undefined)
+			return out;
+		var pattern = new RegExp(search);
+		for (var i = 0; i < input.length; i++) {
+			if(pattern.test(input[i].requesterAddress) || !input[i].requesterAddress || input[i].requesterAddress.length === 0){
 				out.push(input[i]);
 			}
 		}
