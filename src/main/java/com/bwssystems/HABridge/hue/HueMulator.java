@@ -18,6 +18,7 @@ import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.api.hue.HuePublicConfig;
 import com.bwssystems.HABridge.api.hue.StateChangeBody;
 import com.bwssystems.HABridge.dao.*;
+import com.bwssystems.HABridge.hue.ColorData;
 import com.bwssystems.HABridge.plugins.hue.HueHome;
 import com.bwssystems.HABridge.util.JsonTransformer;
 import com.google.gson.Gson;
@@ -1185,7 +1186,26 @@ public class HueMulator {
 							aMultiUtil.setTheDelay(callItems[i].getDelay());
 						else
 							aMultiUtil.setTheDelay(aMultiUtil.getDelayDefault());
-						responseString = homeManager.findHome(callItems[i].getType().trim()).deviceHandler(callItems[i], aMultiUtil, lightId, state.getBri(), targetBri, targetBriInc, device, body);
+
+						ColorData colorData = null;
+						List<Double> xy = theStateChanges.getXy();
+						List<Double> xyInc = theStateChanges.getXy_inc();
+						Integer ct = theStateChanges.getCt();
+						Integer ctInc = theStateChanges.getCt_inc();
+						if (xy != null && xy.size() == 2) {
+							colorData = new ColorData(ColorData.ColorMode.XY, xy);
+						} else if (xyInc != null && xyInc.size() == 2) { 
+							List<Double> current = state.getXy();
+							current.set(0, current.get(0) + xyInc.get(0));
+							current.set(1, current.get(1) + xyInc.get(1));
+							colorData = new ColorData(ColorData.ColorMode.XY, current);
+						} else if (ct != null && ct != 0) {
+							colorData = new ColorData(ColorData.ColorMode.CT, ct);
+						} else if (ctInc != null && ctInc != 0) {
+							colorData = new ColorData(ColorData.ColorMode.CT, state.getCt() + ctInc);
+						}
+
+						responseString = homeManager.findHome(callItems[i].getType().trim()).deviceHandler(callItems[i], aMultiUtil, lightId, state.getBri(), targetBri, targetBriInc, colorData, device, body);
 						if(responseString != null && responseString.contains("{\"error\":")) {
 							x = aMultiUtil.getSetCount();
 						}
@@ -1267,7 +1287,7 @@ public class HueMulator {
 				}
 				// construct success response: one success message per changed property, but not per light
 				String successString = "[";
-				for (String pairStr : body.replaceAll("[{|}]", "").split(",")) {
+				for (String pairStr : body.replaceAll("[{|}]", "").split(",\\s*\"")) {
 					String[] pair = pairStr.split(":");
 					successString += "{\"success\":{ \"address\": \"/groups/" + groupId + "/action/" + pair[0].replaceAll("\"", "").trim() + "\", \"value\": " + pair[1].trim() + "}},";
 				}

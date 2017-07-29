@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.DatatypeConverter;
@@ -21,6 +22,8 @@ import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.ColorData;
+import com.bwssystems.HABridge.hue.ColorDecode;
 import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
@@ -41,7 +44,7 @@ public class TCPHome implements Home {
 
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
-			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
+			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		Socket dataSendSocket = null;
 		log.debug("executing HUE api request to TCP: " + anItem.getItem().getAsString());
 		String theUrl = anItem.getItem().getAsString();
@@ -81,10 +84,16 @@ public class TCPHome implements Home {
 			theUrlBody = TimeDecode.replaceTimeValue(theUrlBody);
 			if (theUrlBody.startsWith("0x")) {
 				theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, true);
+				if (colorData != null) {
+					theUrlBody = ColorDecode.replaceColorData(theUrlBody, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), true);	
+				}
 				theUrlBody = DeviceDataDecode.replaceDeviceData(theUrlBody, device);
 				sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
 			} else {
 				theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, false);
+				if (colorData != null) {
+					theUrlBody = ColorDecode.replaceColorData(theUrlBody, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);	
+				}
 				theUrlBody = DeviceDataDecode.replaceDeviceData(theUrlBody, device);
 				theUrlBody = StringEscapeUtils.unescapeJava(theUrlBody);
 				sendData = theUrlBody.getBytes();

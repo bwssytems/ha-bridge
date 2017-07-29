@@ -45,7 +45,6 @@ public class GroupRepository extends BackupHandler {
         nextId = 0;
 		try {
 			repositoryPath = null;
-			log.info("loading group.db from " + groupDb);
 			repositoryPath = Paths.get(groupDb);
 			setupParams(repositoryPath, ".bk", "group.db-");
 			_loadRepository(repositoryPath);
