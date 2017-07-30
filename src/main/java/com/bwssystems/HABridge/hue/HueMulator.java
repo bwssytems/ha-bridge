@@ -76,6 +76,10 @@ public class HueMulator {
 	public void setupServer() {
 		log.info("Hue emulator service started....");
 		before(HUE_CONTEXT + "/*", (request, response) -> {
+			String path = request.pathInfo();
+			if (path.endsWith("/")) { // it should work with or without a trailing slash
+        		response.redirect(path.substring(0, path.length() - 1));
+			}
 			log.debug("HueMulator " + request.requestMethod() + " called on api/* with request <<<" + request.pathInfo() + ">>>, and body <<<" + request.body() + ">>>");
 			if(bridgeSettingMaster.getBridgeSecurity().isSecure()) {
 				String pathInfo = request.pathInfo();
@@ -101,7 +105,7 @@ public class HueMulator {
 			return groupsListHandler(request.params(":userid"),  request.ip());
 		} , new JsonTransformer());
 		// http://ip_address:port/api/{userId}/groups/{groupId} returns json
-		// object for specified group. Only 0 is supported
+		// object for specified group.
 		get(HUE_CONTEXT + "/:userid/groups/:groupid", "application/json", (request, response) -> {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
@@ -118,19 +122,23 @@ public class HueMulator {
 			return "";
 		});
 		// http://ip_address:port/:userid/groups
-		// dummy handler
+		// add a group
 		post(HUE_CONTEXT + "/:userid/groups", "application/json", (request, response) -> {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
 			return addGroup(request.params(":userid"), request.ip(), request.body());
 		});
+		// http://ip_address:port/api/:userid/groups/<groupid>
+		// delete a group
 		delete(HUE_CONTEXT + "/:userid/groups/:groupid", "application/json", (request, response) -> {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
 			return deleteGroup(request.params(":userid"), request.params(":groupid"), request.ip());
 		});
+		// http://ip_address:port/api/:userid/groups/<groupid>
+		// modify a single group
 		put(HUE_CONTEXT + "/:userid/groups/:groupid", "application/json", (request, response) -> {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
@@ -138,9 +146,7 @@ public class HueMulator {
 			return modifyGroup(request.params(":userid"), request.params(":groupid"), request.ip(), request.body());
 		});
 		// http://ip_address:port/api/:userid/groups/<groupid>/action
-		// Dummy handler
-		// Error forces Logitech Pop to fall back to individual light control
-		// instead of scene-based control.
+		// group acions
 		put(HUE_CONTEXT + "/:userid/groups/:groupid/action", "application/json", (request, response) -> {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
@@ -951,12 +957,12 @@ public class HueMulator {
 		log.debug("hue api config requested: " + userId + " from " + ipAddress);
 		if (bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton()) != null) {
 			log.debug("hue api config requested, User invalid, returning public config");
-			HuePublicConfig apiResponse = HuePublicConfig.createConfig("Philips hue",
+			HuePublicConfig apiResponse = HuePublicConfig.createConfig("HA-Bridge",
 					bridgeSettings.getUpnpConfigAddress(), bridgeSettings.getHubversion());
 			return apiResponse;
 		}
 
-		HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(),
+		HueApiResponse apiResponse = new HueApiResponse("HA-Bridge", bridgeSettings.getUpnpConfigAddress(),
 				bridgeSettingMaster.getBridgeSecurity().getWhitelist(), bridgeSettings.getHubversion(), bridgeSettingMaster.getBridgeControl().isLinkButton());
 		log.debug("api response config <<<" + aGsonHandler.toJson(apiResponse.getConfig()) + ">>>");
 		return apiResponse.getConfig();
@@ -971,7 +977,7 @@ public class HueMulator {
 			return theErrors;
 		}
 
-		HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(),
+		HueApiResponse apiResponse = new HueApiResponse("HA-Bridge", bridgeSettings.getUpnpConfigAddress(),
 				bridgeSettingMaster.getBridgeSecurity().getWhitelist(), bridgeSettings.getHubversion(), bridgeSettingMaster.getBridgeControl().isLinkButton());
 		apiResponse.setLights((Map<String, DeviceResponse>) this.lightsListHandler(userId, ipAddress));
 		apiResponse.setGroups((Map<String, GroupResponse>) this.groupsListHandler(userId, ipAddress));

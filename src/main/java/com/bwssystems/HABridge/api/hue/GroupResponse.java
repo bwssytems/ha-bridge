@@ -3,6 +3,7 @@ package com.bwssystems.HABridge.api.hue;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
@@ -90,19 +91,36 @@ public class GroupResponse {
         GroupResponse response = new GroupResponse();
         Boolean all_on = true;
 		Boolean any_on = false;
-		for (DeviceResponse light : lights.values()) {
+		String[] groupLights = null; 
+		if (lights == null) {
+			all_on = false;
+			groupLights = group.getLights();
+		} else {
+			for (DeviceResponse light : lights.values()) {
 		    Boolean is_on = light.getState().isOn();
 		    if (is_on)
 		    	any_on = true;
 		    else
 		    	all_on = false;
-		}
+			}	
 
+			// group.getLights() is not filtered by requester, lights is
+			// we want the filtered version but keep the order from group.getLights()
+			groupLights = new String[lights.size()];
+			int i = 0;
+			for (String light : group.getLights()) {
+				if (lights.keySet().contains(light)) {
+					groupLights[i] = light;
+					i++;
+				}
+			}
+		}
+		
         response.setState(new GroupState(all_on, any_on));
         response.setAction(group.getAction());
         response.setName(group.getName());
         response.setType(group.getGroupType());
-        response.setLights(group.getLights());
+        response.setLights(groupLights);
         response.setClass_name(group.getGroupClass());
 
         return response;
