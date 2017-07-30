@@ -115,6 +115,17 @@ public class GroupRepository extends BackupHandler {
 		return theReturnList;
 	}
 
+	public List<GroupDescriptor> findVirtualLights(String anAddress) {
+		List<GroupDescriptor> list = new ArrayList<GroupDescriptor>();
+		for (GroupDescriptor group : groups.values()) {
+			String expose = group.getExposeAsLight();
+			if (expose != null && expose.contains(anAddress)) {
+				list.add(group);
+			}
+		}
+		return list;
+	}
+
 	public GroupDescriptor findOne(String id) {
     	return groups.get(id);	
     }

@@ -70,6 +70,9 @@ public class GroupResponse {
 		Boolean any_on = false;
 		int i = 0;
 		for (Map.Entry<String, DeviceResponse> device : deviceList.entrySet()) {
+			if (Integer.parseInt(device.getKey()) >= 10000) { // don't show fake lights for other groups
+				continue;
+			}
 		    theList[i] = device.getKey();
 		    Boolean is_on = device.getValue().getState().isOn();
 		    if (is_on)

@@ -34,15 +34,16 @@ public class GroupDescriptor{
     @SerializedName("comments")
     @Expose
     private String comments;
-    @SerializedName("action")
-    @Expose
+    
     private DeviceState action;
-    @SerializedName("groupState")
-    @Expose
     private GroupState groupState;
+    
     @SerializedName("lights")
     @Expose
     private String[] lights;
+    @SerializedName("exposeAsLight")
+    @Expose
+    private String exposeAsLight;
     
     
     public String getName() {
@@ -135,5 +136,13 @@ public class GroupDescriptor{
 
 	public void setLights(String[] lights) {
 		this.lights = lights;
+	}
+
+	public void setExposeAsLight(String exposeFor) {
+		this.exposeAsLight = exposeFor;
+	}
+
+	public String getExposeAsLight() {
+		return exposeAsLight;
 	}
 }

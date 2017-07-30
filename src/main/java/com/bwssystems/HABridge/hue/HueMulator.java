@@ -151,7 +151,7 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			return changeGroupState(request.params(":userid"), request.params(":groupid"), request.body(), request.ip());
+			return changeGroupState(request.params(":userid"), request.params(":groupid"), request.body(), request.ip(), false);
 		});		
 		// http://ip_address:port/api/{userId}/scenes returns json objects of
 		// all scenes configured
@@ -440,7 +440,7 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			return changeState(request.params(":userid"), request.params(":id"), request.body(), request.ip());
+			return changeState(request.params(":userid"), request.params(":id"), request.body(), request.ip(), false);
 		});
 	}
 	
@@ -890,6 +890,13 @@ public class HueMulator {
 					deviceResponseMap.put(device.getId(), deviceResponse);
 				}
 			}
+
+			// handle groups which shall be exposed as fake lights to selected devices like amazon echos
+			List<GroupDescriptor> groups = groupRepository.findVirtualLights(requestIp);
+			for (GroupDescriptor group : groups) {
+				deviceResponseMap.put(String.valueOf(Integer.parseInt(group.getId()) + 10000), 
+					DeviceResponse.createResponseForVirtualLight(group));
+			}
 		}
 		
 		if (theErrors != null)
@@ -991,6 +998,11 @@ public class HueMulator {
 		if (theErrors != null)
 			return theErrors;
 
+		if (Integer.parseInt(lightId) >= 10000) {
+			GroupDescriptor group = groupRepository.findOne(String.valueOf(Integer.parseInt(lightId) - 10000));
+			return DeviceResponse.createResponseForVirtualLight(group);
+		}
+
 		DeviceDescriptor device = repository.findOne(lightId);
 		if (device == null) {
 //			response.status(HttpStatus.SC_NOT_FOUND);
@@ -1069,7 +1081,10 @@ public class HueMulator {
 		return responseString;
 	}
 
-	private String changeState(String userId, String lightId, String body, String ipAddress) {
+	private String changeState(String userId, String lightId, String body, String ipAddress, boolean ignoreRequester) {
+		if (Integer.parseInt(lightId) >= 10000) {
+			return changeGroupState(userId, String.valueOf(Integer.parseInt(lightId) - 10000), body, ipAddress, true);
+		}
 		String responseString = null;
 		String url = null;
 		StateChangeBody theStateChanges = null;
@@ -1161,10 +1176,13 @@ public class HueMulator {
 			}
 			
 			for (int i = 0; callItems != null && i < callItems.length; i++) {
-				if(!filterByRequester(device.getRequesterAddress(), ipAddress) || !filterByRequester(callItems[i].getFilterIPs(), ipAddress)) {
-					log.warn("filter for requester address not present in: (device)" + device.getRequesterAddress() + " OR then (item)" + callItems[i].getFilterIPs() + " with request ip of: " + ipAddress);
-					continue;
+				if (!ignoreRequester) {
+					if(!filterByRequester(device.getRequesterAddress(), ipAddress) || !filterByRequester(callItems[i].getFilterIPs(), ipAddress)) {
+						log.warn("filter for requester address not present in: (device)" + device.getRequesterAddress() + " OR then (item)" + callItems[i].getFilterIPs() + " with request ip of: " + ipAddress);
+						continue;
+					}	
 				}
+				
 				if (callItems[i].getCount() != null && callItems[i].getCount() > 0)
 					aMultiUtil.setSetCount(callItems[i].getCount());
 				else
@@ -1239,7 +1257,7 @@ public class HueMulator {
 	}
 
 
-	private Object changeGroupState(String userId, String groupId, String body, String ipAddress) {
+	private String changeGroupState(String userId, String groupId, String body, String ipAddress, boolean fakeLightResponse) {
 		log.debug("PUT action to group  " + groupId + " from " + ipAddress + " user " + userId + " with body " + body);
 		HueError[] theErrors = null;
 		theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
@@ -1247,16 +1265,24 @@ public class HueMulator {
 			if(bridgeSettingMaster.getBridgeSecurity().isSettingsChanged())
 				bridgeSettingMaster.updateConfigFile();
 
+			GroupDescriptor group = null;
+			Integer targetBriInc = null;
+			Integer targetBri = null;
+			DeviceState state = null;
 			Map<String, DeviceResponse> lights = null;
 			if (groupId.equalsIgnoreCase("0")) {
 				lights = (Map<String, DeviceResponse>)lightsListHandler(userId, ipAddress);
 			} else {
-				GroupDescriptor group = groupRepository.findOne(groupId);
+				group = groupRepository.findOne(groupId);
 				if (group == null || group.isInactive()) {
 					return aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/groups/" + groupId,
 						"resource, /groups/" + groupId + ", not available", null, null, null).getTheErrors(), HueError[].class);	
 				} else {
-					lights = repository.findAllByGroupWithState(group.getLights(), ipAddress, myHueHome, aGsonHandler);
+					if (fakeLightResponse) {
+						lights = repository.findAllByGroupWithState(group.getLights(), ipAddress, myHueHome, aGsonHandler, true);
+					} else {
+						lights = repository.findAllByGroupWithState(group.getLights(), ipAddress, myHueHome, aGsonHandler);	
+					}
 				}
 			}
 
@@ -1272,6 +1298,23 @@ public class HueMulator {
 					return aGsonHandler.toJson(HueErrorResponse.createResponse("2", "/groups/" + groupId + "/action",
 							"Could not parse state change body.", null, null, null).getTheErrors(), HueError[].class);
 				}
+
+				if (group != null) {
+					if (body.contains("\"bri_inc\"")) {
+						targetBriInc = new Integer(theStateChanges.getBri_inc());
+					}
+					else if (body.contains("\"bri\"")) {
+						targetBri = new Integer(theStateChanges.getBri());
+					}
+
+					state = group.getAction();
+					if (state == null) {
+						state = DeviceState.createDeviceState();
+						group.setAction(state);
+					}	
+				}
+				
+
 				boolean turnOn = false;
 				boolean turnOff = false;
 				if (!(body.contains("\"bri_inc\"") || body.contains("\"bri\""))) {
@@ -1284,23 +1327,38 @@ public class HueMulator {
 					}
 				}
 				for (Map.Entry<String, DeviceResponse> light : lights.entrySet()) {
+					log.debug("Processing light" + light.getKey() + ": " + turnOn + " " + turnOff + " " + light.getValue().getState().isOn());
 					// ignore on/off for devices that are already on/off
 					if (turnOff && !light.getValue().getState().isOn())
 						continue;
 					if (turnOn && light.getValue().getState().isOn())
 						continue;
-					changeState(userId, light.getKey(), body, ipAddress);
+					changeState(userId, light.getKey(), body, ipAddress, fakeLightResponse);
 				}
 				// construct success response: one success message per changed property, but not per light
+				if (group != null) { // if not group 0
+					 String response = formatSuccessHueResponse(theStateChanges, body, String.valueOf(Integer.parseInt(groupId) + 10000),
+						state, targetBri, targetBriInc, true);
+					 group.setAction(state);
+					 if (fakeLightResponse) {
+					 	return response;
+					 }
+				}
+
 				String successString = "[";
 				for (String pairStr : body.replaceAll("[{|}]", "").split(",\\s*\"")) {
 					String[] pair = pairStr.split(":");
-					successString += "{\"success\":{ \"address\": \"/groups/" + groupId + "/action/" + pair[0].replaceAll("\"", "").trim() + "\", \"value\": " + pair[1].trim() + "}},";
+					if (fakeLightResponse) {
+						successString += "{\"success\":{ \"/lights/" + String.valueOf(Integer.parseInt(groupId) + 10000) + "/state/" + pair[0].replaceAll("\"", "").trim() + "\": " + pair[1].trim() + "}},";
+					} else {
+						successString += "{\"success\":{ \"address\": \"/groups/" + groupId + "/action/" + pair[0].replaceAll("\"", "").trim() + "\", \"value\": " + pair[1].trim() + "}},";	
+					}
+					
 				}
 				return (successString.length() == 1) ? "[]" : successString.substring(0, successString.length()-1) + "]";
 			}
 		}
 
-		return theErrors;
+		return aGsonHandler.toJson(theErrors);
 	}
 }

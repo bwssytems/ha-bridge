@@ -1,6 +1,7 @@
 package com.bwssystems.HABridge.api.hue;
 
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
+import com.bwssystems.HABridge.dao.GroupDescriptor;
 
 /**
  * Created by arm on 4/14/15.
@@ -129,4 +130,24 @@ public class DeviceResponse {
 
         return response;
     }
+
+    public static DeviceResponse createResponseForVirtualLight(GroupDescriptor group){
+        DeviceResponse response = new DeviceResponse();
+        response.setState(group.getAction());
+
+        response.setName(group.getName());
+        response.setUniqueid("00:17:88:5E:D3:FF-" + String.format("%02X", Integer.parseInt(group.getId())));
+        response.setManufacturername("Philips");
+        response.setType("Extended color light");
+        response.setModelid("LCT010");
+        response.setSwversion("1.15.2_r19181");
+        response.setSwconfigid("F921C859");
+        response.setProductid("Philips-LCT010-1-A19ECLv4");    
+        
+        response.setLuminaireuniqueid(null);
+
+        return response;
+    }
+
+
 }

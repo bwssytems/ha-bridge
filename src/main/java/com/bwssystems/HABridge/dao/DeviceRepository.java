@@ -124,10 +124,14 @@ public class DeviceRepository extends BackupHandler {
 	}
 
 	public Map<String, DeviceResponse> findAllByGroupWithState(String[] lightsInGroup, String anAddress, HueHome myHueHome, Gson aGsonBuilder) {
+		return findAllByGroupWithState(lightsInGroup, anAddress, myHueHome, aGsonBuilder, false);
+	}
+
+	public Map<String, DeviceResponse> findAllByGroupWithState(String[] lightsInGroup, String anAddress, HueHome myHueHome, Gson aGsonBuilder, boolean ignoreAddress) {
 		Map<String, DeviceResponse> deviceResponseMap = new HashMap<String, DeviceResponse>();
 		Map<String, DeviceDescriptor> lights = new HashMap<String, DeviceDescriptor>(devices);
 		lights.keySet().retainAll(Arrays.asList(lightsInGroup));
-		for (DeviceDescriptor light : findAllByRequester(anAddress, lights.values())) {
+		for (DeviceDescriptor light : (ignoreAddress ? lights.values() : findAllByRequester(anAddress, lights.values()))) {
 			DeviceResponse deviceResponse = null;
 			if(!light.isInactive()) {
 				if (light.containsType(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) {
