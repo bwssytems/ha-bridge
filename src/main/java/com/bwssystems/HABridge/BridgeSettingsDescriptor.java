@@ -24,6 +24,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("upnpdevicedb")
 	@Expose
 	private String upnpdevicedb;
+	@SerializedName("upnpgroupdb")
+	@Expose
+	private String upnpgroupdb;
 	@SerializedName("veraaddress")
 	@Expose
 	private IpList veraaddress;
@@ -162,6 +165,12 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setUpnpDeviceDb(String upnpDeviceDb) {
 		this.upnpdevicedb = upnpDeviceDb;
+	}
+	public String getUpnpGroupDb() {
+		return upnpgroupdb;
+	}
+	public void setUpnpGroupDb(String upnpGroupDb) {
+		this.upnpgroupdb = upnpGroupDb;
 	}
 	public IpList getVeraAddress() {
 		return veraaddress;

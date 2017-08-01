@@ -1,5 +1,7 @@
 package com.bwssystems.HABridge.plugins.http;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +13,8 @@ import com.bwssystems.HABridge.api.hue.HueError;
 import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.ColorData;
+import com.bwssystems.HABridge.hue.ColorDecode;
 import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
@@ -27,7 +31,7 @@ public class HTTPHome implements Home {
 
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
-			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
+			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		String responseString = null;
 		
 		String theUrl = anItem.getItem().getAsString();
@@ -50,6 +54,9 @@ public class HTTPHome implements Home {
 
 			String anUrl = BrightnessDecode.calculateReplaceIntensityValue(theUrl,
 					intensity, targetBri, targetBriInc, false);
+			if (colorData != null) {
+				anUrl = ColorDecode.replaceColorData(anUrl, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);	
+			}
 			anUrl = DeviceDataDecode.replaceDeviceData(anUrl, device);
 			anUrl = TimeDecode.replaceTimeValue(anUrl);
 
@@ -57,6 +64,9 @@ public class HTTPHome implements Home {
 			if(anItem.getHttpBody()!= null && !anItem.getHttpBody().isEmpty()) {
 				aBody = BrightnessDecode.calculateReplaceIntensityValue(anItem.getHttpBody(),
 						intensity, targetBri, targetBriInc, false);
+				if (colorData != null) {
+					aBody = ColorDecode.replaceColorData(aBody, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);	
+				}
 				aBody = DeviceDataDecode.replaceDeviceData(aBody, device);
 				aBody = TimeDecode.replaceTimeValue(aBody);
 			}

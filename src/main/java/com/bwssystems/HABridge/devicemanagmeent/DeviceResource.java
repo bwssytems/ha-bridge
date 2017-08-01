@@ -25,6 +25,8 @@ import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.BackupFilename;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
+import com.bwssystems.HABridge.dao.GroupDescriptor;
+import com.bwssystems.HABridge.dao.GroupRepository;
 import com.bwssystems.HABridge.dao.ErrorMessage;
 import com.bwssystems.HABridge.util.JsonTransformer;
 import com.google.gson.Gson;
@@ -38,6 +40,7 @@ public class DeviceResource {
     private static final String API_CONTEXT = "/api/devices";
     private static final Logger log = LoggerFactory.getLogger(DeviceResource.class);
     private DeviceRepository deviceRepository;
+    private GroupRepository groupRepository;
     private HomeManager homeManager;
     private BridgeSettings bridgeSettings;
 	private Gson aGsonHandler;
@@ -46,6 +49,7 @@ public class DeviceResource {
 	public DeviceResource(BridgeSettings theSettings, HomeManager aHomeManager) {
 		bridgeSettings = theSettings;
 		this.deviceRepository = new DeviceRepository(bridgeSettings.getBridgeSettingsDescriptor().getUpnpDeviceDb());
+		this.groupRepository = new GroupRepository(bridgeSettings.getBridgeSettingsDescriptor().getUpnpGroupDb());
 		homeManager = aHomeManager;
 		aGsonHandler = new GsonBuilder().create();
 		setupEndpoints();
@@ -53,6 +57,10 @@ public class DeviceResource {
 
 	public DeviceRepository getDeviceRepository() {
 		return deviceRepository;
+	}
+
+	public GroupRepository getGroupRepository() {
+		return groupRepository;
 	}
 
     private void setupEndpoints() {
@@ -119,6 +127,15 @@ public class DeviceResource {
 				} catch(JsonSyntaxException e) {
 	            	response.status(HttpStatus.SC_BAD_REQUEST);
 	            	errorMessage = "Bad off URL JSON in create device(s) for name: " + devices[i].getName() + " with off URL: " + devices[i].getOffUrl();
+					log.debug(errorMessage);
+					return new ErrorMessage(errorMessage);
+				}
+				try {
+					if(devices[i].getColorUrl() != null && !devices[i].getColorUrl().isEmpty())
+						callItems = aGsonHandler.fromJson(devices[i].getColorUrl(), CallItem[].class);
+				} catch(JsonSyntaxException e) {
+	            	response.status(HttpStatus.SC_BAD_REQUEST);
+	            	errorMessage = "Bad color URL JSON in create device(s) for name: " + devices[i].getName() + " with color URL: " + devices[i].getColorUrl();
 					log.debug(errorMessage);
 					return new ErrorMessage(errorMessage);
 				}

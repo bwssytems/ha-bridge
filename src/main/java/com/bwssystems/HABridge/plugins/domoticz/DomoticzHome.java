@@ -17,6 +17,7 @@ import com.bwssystems.HABridge.api.hue.HueError;
 import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.ColorData;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.plugins.http.HTTPHandler;
 import com.google.gson.Gson;
@@ -71,7 +72,7 @@ public class DomoticzHome implements Home {
 
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
-			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
+			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		Devices theDomoticzApiResponse = null;
 		String responseString = null;
 		
