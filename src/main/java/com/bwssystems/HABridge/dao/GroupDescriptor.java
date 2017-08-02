@@ -90,7 +90,7 @@ public class GroupDescriptor{
 
 	public DeviceState getAction() {
 		if(action == null)
-			action = DeviceState.createDeviceState();
+			action = DeviceState.createDeviceState(true);
 		return action;
 	}
 

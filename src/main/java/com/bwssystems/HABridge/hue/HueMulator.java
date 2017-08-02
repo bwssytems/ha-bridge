@@ -1073,7 +1073,7 @@ public class HueMulator {
 
 		state = device.getDeviceState();
 		if (state == null)
-			state = DeviceState.createDeviceState();
+			state = DeviceState.createDeviceState(device.isColorDevice());
 
 		responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc, device.isOffState());
 		device.setDeviceState(state);
@@ -1127,7 +1127,7 @@ public class HueMulator {
 
 		state = device.getDeviceState();
 		if (state == null) {
-			state = DeviceState.createDeviceState();
+			state = DeviceState.createDeviceState(device.isColorDevice());
 			device.setDeviceState(state);
 		}
 
@@ -1248,7 +1248,7 @@ public class HueMulator {
 				responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc, device.isOffState());
 				device.setDeviceState(state);
 			} else {
-				DeviceState dummyState = DeviceState.createDeviceState();
+				DeviceState dummyState = DeviceState.createDeviceState(device.isColorDevice());
 				responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, dummyState, targetBri, targetBriInc, device.isOffState());
 			}
 		}
@@ -1309,7 +1309,7 @@ public class HueMulator {
 
 					state = group.getAction();
 					if (state == null) {
-						state = DeviceState.createDeviceState();
+						state = DeviceState.createDeviceState(true);
 						group.setAction(state);
 					}	
 				}
