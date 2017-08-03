@@ -74,7 +74,7 @@
 				<th>Actions</th>
 			</tr>
 		</thead>
-		<tr ng-repeat="device in bridge.devices | orderBy:'name' | filterDevicesByRequester:bridge.state.filterDevicesByIpAddress:bridge.state.filterDevicesOnlyFiltered:bridge.state.filterDeviceType" row-id="{{device.id}}" ng-class="{info: bridge.viewDevId == device.id}" >
+		<tr ng-repeat="device in bridge.devices | filterDevicesByRequester:bridge.state.filterDevicesByIpAddress:bridge.state.filterDevicesOnlyFiltered:bridge.state.filterDeviceType" row-id="{{device.id}}" ng-class="{info: bridge.viewDevId == device.id}" >
 			<td>{{$index+1}}</td>
 			<td>{{device.id}}</td>
 			<td>{{device.name}}</td>

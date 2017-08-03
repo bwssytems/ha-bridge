@@ -32,7 +32,7 @@ import com.google.gson.JsonSyntaxException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Arrays;
-import java.util.ArrayList;
+
 /*
  * This is an in memory list to manage the configured devices and saves the list as a JSON string to a file for later  
  * loading.

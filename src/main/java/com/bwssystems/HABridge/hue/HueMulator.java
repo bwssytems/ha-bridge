@@ -747,7 +747,6 @@ public class HueMulator {
 							"invalid/missing parameters in body", null, null, null).getTheErrors(), HueError[].class);
 				}
 
-				String type = theGroup.getType();
 				String groupClass = theGroup.getClass_name();
 				String name = theGroup.getName();
 				if (!(name == null || name.trim().equals(""))) {
@@ -831,6 +830,7 @@ public class HueMulator {
 				bridgeSettingMaster.updateConfigFile();
 
 			if (groupId.equalsIgnoreCase("0")) {
+				@SuppressWarnings("unchecked")
 				GroupResponse theResponse = GroupResponse.createDefaultGroupResponse((Map<String, DeviceResponse>)lightsListHandler(userId, requestIp));
 				return theResponse;
 			} else {
@@ -1257,6 +1257,7 @@ public class HueMulator {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	private String changeGroupState(String userId, String groupId, String body, String ipAddress, boolean fakeLightResponse) {
 		log.debug("PUT action to group  " + groupId + " from " + ipAddress + " user " + userId + " with body " + body);
 		HueError[] theErrors = null;

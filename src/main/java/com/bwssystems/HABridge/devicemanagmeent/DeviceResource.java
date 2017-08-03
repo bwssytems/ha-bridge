@@ -25,7 +25,6 @@ import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.BackupFilename;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.DeviceRepository;
-import com.bwssystems.HABridge.dao.GroupDescriptor;
 import com.bwssystems.HABridge.dao.GroupRepository;
 import com.bwssystems.HABridge.dao.ErrorMessage;
 import com.bwssystems.HABridge.util.JsonTransformer;
@@ -92,6 +91,7 @@ public class DeviceResource {
 	    	else {
 	    		devices = new Gson().fromJson("[" + request.body() + "]", DeviceDescriptor[].class);
 	    	}
+			@SuppressWarnings("unused")
 			CallItem[] callItems = null;
 			String errorMessage = null;
 	    	for(int i = 0; i < devices.length; i++) {

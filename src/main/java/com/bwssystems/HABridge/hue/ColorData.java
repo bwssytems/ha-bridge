@@ -1,7 +1,5 @@
 package com.bwssystems.HABridge.hue;
 
-import java.util.List;
-
 public class ColorData {
 	public enum ColorMode { XY, CT, HS}
 

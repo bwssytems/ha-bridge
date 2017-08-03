@@ -1,8 +1,5 @@
 package com.bwssystems.HABridge.api.hue;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by Florian Foerderreuther on 07/23/17
  */

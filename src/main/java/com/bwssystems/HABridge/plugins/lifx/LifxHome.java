@@ -131,6 +131,7 @@ public class LifxHome implements Home {
 		return deviceList;
 	}
 
+	@SuppressWarnings("unused")
 	private Boolean addLifxLights(LFXLightCollection theDeviceList) {
 		if(!validLifx)
 			return false;
@@ -143,6 +144,7 @@ public class LifxHome implements Home {
 		return true;
 	}
 	
+	@SuppressWarnings("unused")
 	private Boolean addLifxGroups(LFXGroupCollection theDeviceList) {
 		if(!validLifx)
 			return false;

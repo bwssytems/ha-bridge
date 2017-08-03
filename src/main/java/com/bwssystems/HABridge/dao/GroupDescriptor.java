@@ -4,7 +4,6 @@ import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.bwssystems.HABridge.api.hue.GroupState;
-import com.bwssystems.HABridge.dao.DeviceDescriptor;
 
 /*
  * Object to handle the device configuration

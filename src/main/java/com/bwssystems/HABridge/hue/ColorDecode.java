@@ -141,6 +141,7 @@ public class ColorDecode {
         return value;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static String replaceColorData(String request, ColorData colorData, int setIntensity, boolean isHex) {
 		if (request == null) {
 			return null;

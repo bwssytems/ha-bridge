@@ -1,12 +1,7 @@
 package com.bwssystems.HABridge.api.hue;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-
-import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.dao.GroupDescriptor;
 import com.google.gson.annotations.SerializedName;
 
