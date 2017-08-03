@@ -82,7 +82,7 @@ public class GroupResponse {
 		    i++;
 		}
 		GroupResponse theResponse = new GroupResponse();
-		theResponse.setAction(DeviceState.createDeviceState());
+		theResponse.setAction(DeviceState.createDeviceState(true));
 		theResponse.setState(new GroupState(all_on, any_on));
 		theResponse.setName("Group 0");
 		theResponse.setLights(theList);

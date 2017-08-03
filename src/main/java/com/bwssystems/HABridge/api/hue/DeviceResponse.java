@@ -105,26 +105,19 @@ public class DeviceResponse {
 
         response.setName(device.getName());
         response.setUniqueid(device.getUniqueid());
-        //if (device.getColorUrl() == null || device.getColorUrl().trim().equals("")) {
-        //    if (device.getDimUrl() == null || device.getDimUrl().trim().equals("")) {
-        //        response.setType("On/Off light");
-        //        response.setModelid("Plug - LIGHTIFY");
-        //        response.setManufacturername("OSRAM");
-        //        response.setSwversion("V1.04.12");
-        //    } else {
-        //        response.setManufacturername("Philips");
-        //        response.setType("Dimmable light");
-        //        response.setModelid("LWB007");
-        //        response.setSwversion("66012040");
-        //    }       
-        //} else {
-            response.setManufacturername("Philips");
+        response.setManufacturername("Philips");
+            
+        if (device.isColorDevice()) {
             response.setType("Extended color light");
             response.setModelid("LCT010");
             response.setSwversion("1.15.2_r19181");
             response.setSwconfigid("F921C859");
             response.setProductid("Philips-LCT010-1-A19ECLv4");    
-        //}
+        } else {
+            response.setType("Dimmable light");
+            response.setModelid("LWB007");
+            response.setSwversion("66012040");
+        }
         
         response.setLuminaireuniqueid(null);
 

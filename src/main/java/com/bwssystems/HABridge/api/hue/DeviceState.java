@@ -9,11 +9,11 @@ import java.util.List;
 public class DeviceState {
     private boolean on;
     private int bri;
-    private int hue;
-    private int sat;
+    private Integer hue;
+    private Integer sat;
     private String effect;
     private List<Double> xy;
-    private int ct;
+    private Integer ct;
     private String alert;
     private String colormode;
     private boolean reachable;
@@ -37,7 +37,7 @@ public class DeviceState {
     }
 
     public int getHue() {
-        return hue;
+        return hue != null ? hue.intValue() : 0;
     }
 
     public void setHue(int hue) {
@@ -46,7 +46,7 @@ public class DeviceState {
     }
 
     public int getSat() {
-        return sat;
+        return sat != null ? sat.intValue() : 0;
     }
 
     public void setSat(int sat) {
@@ -63,7 +63,7 @@ public class DeviceState {
     }
 
     public int getCt() {
-        return ct;
+        return ct != null ? ct.intValue() : 0;
     }
 
     public void setCt(int ct) {
@@ -111,23 +111,28 @@ public class DeviceState {
 //		this.transitiontime = transitiontime;
 //	}
 
-	public static DeviceState createDeviceState() {
+	public static DeviceState createDeviceState(boolean color) {
     	DeviceState newDeviceState = new DeviceState();
-    	newDeviceState.fillIn();
-    	newDeviceState.setColormode("ct");
-    	newDeviceState.setCt(200);
-    	ArrayList<Double> doubleArray = new ArrayList<Double>();
-    	doubleArray.add(new Double(0));
-    	doubleArray.add(new Double(0));
-    	newDeviceState.setXy(doubleArray);
-    	
+    	newDeviceState.fillIn(color);
+        if (color) {
+            newDeviceState.setColormode("xy");
+            newDeviceState.setHue(0);
+            newDeviceState.setSat(0);
+            newDeviceState.setCt(153);
+            ArrayList<Double> doubleArray = new ArrayList<Double>();
+            doubleArray.add(0.3146);
+            doubleArray.add(0.3303);
+            newDeviceState.setXy(doubleArray);    
+        }
     	return newDeviceState;
     }
-    public void fillIn() {
+    public void fillIn(boolean color) {
     	if(this.getAlert() == null)
     		this.setAlert("none");
-    	if(this.getEffect() == null)
-    		this.setEffect("none");
+        if (color) {
+            if(this.getEffect() == null)
+                this.setEffect("none");
+        }
     	this.setReachable(true);
     }
     @Override
