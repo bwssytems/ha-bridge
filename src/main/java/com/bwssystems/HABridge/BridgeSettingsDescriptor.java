@@ -126,7 +126,7 @@ public class BridgeSettingsDescriptor {
 		this.farenheit = true;
 		this.securityData = null;
 		this.settingsChanged = false;
-		this.myechourl = "echo.amazon.com/#cards";
+		this.myechourl = "alexa.amazon.com/spa/index.html#cards";
 		this.webaddress = "0.0.0.0";
 		this.hubversion = HueConstants.HUB_VERSION;
 	}
