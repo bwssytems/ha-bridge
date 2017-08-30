@@ -25,14 +25,14 @@ import com.google.gson.Gson;
 
 public class HueInfo {
     private static final Logger log = LoggerFactory.getLogger(HueInfo.class);
-    private HTTPHandler httpClient;
+    private HTTPHandler httpHandler;
     private NamedIP hueAddress;
     private HueHome myHome;
 	public static final String HUE_REQUEST = "/api";
 
     public HueInfo(NamedIP addressName, HueHome theHome) {
 		super();
-        httpClient = new HTTPHandler();
+        httpHandler = new HTTPHandler();
         hueAddress = addressName;
         myHome = theHome;
  	}
@@ -65,7 +65,7 @@ public class HueInfo {
 				}
     		}
     		theUrl = "http://" + hueAddress.getIp() + HUE_REQUEST + "/" + hueAddress.getUsername();
-    		theData = httpClient.doHttpRequest(theUrl, null, null, null, null);
+    		theData = httpHandler.doHttpRequest(theUrl, null, null, null, null);
 	    	if(theData != null) {
 	    		log.debug("GET HueApiResponse - data: " + theData);
 	    		if(theData.contains("[{\"error\":")) {
@@ -98,35 +98,25 @@ public class HueInfo {
 	public String registerWithHue() {
     	UserCreateRequest theLogin = new UserCreateRequest();
         theLogin.setDevicetype("HABridge#MyMachine");
-        HttpPost postRequest = new HttpPost("http://" + hueAddress.getIp() + HUE_REQUEST);
-        ContentType parsedContentType = ContentType.parse("application/json");
-        StringEntity requestBody = new StringEntity(new Gson().toJson(theLogin), parsedContentType);
-        HttpResponse response = null;
-        postRequest.setEntity(requestBody);
-        HttpClient anHttpClient = httpClient.getHttpClient();
-        try {
-            response = anHttpClient.execute(postRequest);
-            log.debug("registerWithHue - POST execute on " + hueAddress.getName() + "URL responded: " + response.getStatusLine().getStatusCode());
-            if(response.getStatusLine().getStatusCode() >= 200  && response.getStatusLine().getStatusCode() < 300){
-            	String theBody = EntityUtils.toString(response.getEntity());
-                log.debug("registerWithHue response data: " + theBody);
-                if(theBody.contains("[{\"error\":")) {
-                	if(theBody.contains("link button not")) {
+ 
+        	String aMessage = httpHandler.doHttpRequest("http://" + hueAddress.getIp() + HUE_REQUEST, HttpPost.METHOD_NAME, "application/json", new Gson().toJson(theLogin), null);
+
+            log.debug("registerWithHue - POST execute on " + hueAddress.getName() + "URL responded: " + aMessage);
+            if(!aMessage.isEmpty()){
+                log.debug("registerWithHue response data: " + aMessage);
+                if(aMessage.contains("[{\"error\":")) {
+                	if(aMessage.contains("link button not")) {
                 		log.warn("registerWithHue needs link button pressed on HUE bridge: " + hueAddress.getName());
                 	}
                 	else
-                		log.warn("registerWithHue returned an unexpected error: " + theBody);
+                		log.warn("registerWithHue returned an unexpected error: " + aMessage);
                 }
                 else {
-	            	SuccessUserResponse[] theResponses = new Gson().fromJson(theBody, SuccessUserResponse[].class); //read content for data, SuccessUserResponse[].class);
+	            	SuccessUserResponse[] theResponses = new Gson().fromJson(aMessage, SuccessUserResponse[].class); //read content for data, SuccessUserResponse[].class);
 	            	hueAddress.setUsername(theResponses[0].getSuccess().getUsername());
 	            	myHome.updateHue(hueAddress);
                 }
             }
-            EntityUtils.consume(response.getEntity()); //close out inputstream ignore content
-        } catch (IOException e) {
-        	log.warn("Error logging into HUE: IOException in log", e);
-        }
         return hueAddress.getUsername();
     }
 
@@ -138,7 +128,7 @@ public class HueInfo {
 			registerWithHue();
 		if (hueAddress.getUsername() != null) {
 			// make call
-			responseString = httpClient.doHttpRequest(
+			responseString = httpHandler.doHttpRequest(
 					"http://" + hueAddress.getIp() + "/api/" + hueAddress.getUsername()
 							+ "/lights/" + hueDeviceId,
 					HttpGet.METHOD_NAME, "application/json", null, null);
@@ -167,7 +157,7 @@ public class HueInfo {
 		if(hueAddress.getUsername() == null)
 			registerWithHue();
 		if (hueAddress.getUsername() != null) {
-			responseString = httpClient.doHttpRequest(
+			responseString = httpHandler.doHttpRequest(
 					"http://" + deviceId.getIpAddress() + "/api/" + hueAddress.getUsername()
 							+ "/lights/" + deviceId.getDeviceId() + "/state",
 					HttpPut.METHOD_NAME, "application/json", body, null);
@@ -188,8 +178,8 @@ public class HueInfo {
 	}
 
 	public void closeHue() {
-		httpClient.closeHandler();
-		httpClient = null;
+		httpHandler.closeHandler();
+		httpHandler = null;
 	}
 	
 	public NamedIP getHueAddress() {
