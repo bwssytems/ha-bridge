@@ -13,8 +13,14 @@ import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
+import com.bwssystems.HABridge.api.hue.HueError;
+import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
+import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
+import com.bwssystems.HABridge.hue.TimeDecode;
+import com.google.gson.Gson;
 
 public class HalHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(HalHome.class);
@@ -30,7 +36,7 @@ public class HalHome implements Home {
 	public Object getItems(String type) {
 		if(!validHal)
 			return null;
-		log.debug("consolidating devices for hues");
+		log.debug("consolidating devices for HALs");
 		List<HalDevice> theResponse = null;
 		Iterator<String> keys = hals.keySet().iterator();
 		List<HalDevice> deviceList = new ArrayList<HalDevice>();
@@ -106,8 +112,63 @@ public class HalHome implements Home {
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
 			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
-		// Not a device handler
-		return null;
+		boolean halFound = false;
+		String responseString = null;
+		String theUrl = anItem.getItem().getAsString();
+		if(theUrl != null && !theUrl.isEmpty () && theUrl.contains("http")) {
+			String intermediate = theUrl.substring(theUrl.indexOf("://") + 3);
+			String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
+//			String theUrlBody = intermediate.substring(intermediate.indexOf('/') + 1);
+//			String hostAddr = null;
+//			String port = null;
+//			if (hostPortion.contains(":")) {
+//				hostAddr = hostPortion.substring(0, intermediate.indexOf(':'));
+//				port = hostPortion.substring(intermediate.indexOf(':') + 1);
+//			} else
+//				hostAddr = hostPortion;
+			log.debug("executing HUE api request to Http "
+					+ (anItem.getHttpVerb() == null ? "GET" : anItem.getHttpVerb()) + ": "
+					+ anItem.getItem().getAsString());
+
+			String anUrl = null;
+			
+			anUrl = BrightnessDecode.calculateReplaceIntensityValue(intermediate, intensity, targetBri, targetBriInc, false);
+			anUrl = DeviceDataDecode.replaceDeviceData(anUrl, device);
+			anUrl = TimeDecode.replaceTimeValue(anUrl);
+			
+			for (Map.Entry<String, HalInfo> entry : hals.entrySet())
+			{
+				if(entry.getValue().getHalAddress().getIp().equals(hostPortion)) {
+					halFound = true;
+			    	if(entry.getValue().getHalAddress().getSecure()!= null && entry.getValue().getHalAddress().getSecure())
+			    		anUrl = "https://" + anUrl;
+			    	else
+			    		anUrl = "http://" + anUrl;
+
+			    	if(!anUrl.contains("?Token="))
+						anUrl = anUrl + "?Token=" + entry.getValue().getHalAddress().getPassword();
+					
+					log.debug("executing HUE api request to Http "
+							+ (anItem.getHttpVerb() == null ? "GET" : anItem.getHttpVerb()) + ": "
+							+ anUrl);
+
+					if (entry.getValue().deviceCommand(anUrl) == null) {
+						log.warn("Error on calling hal to change device state: " + anUrl);
+						responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
+								"Error on calling url to change device state", "/lights/"
+								+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+					}
+				}
+			}
+		}
+		
+		if(!halFound) {
+			log.warn("No HAL found to call: " + theUrl);
+			responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
+					"No HAL found.", "/lights/"
+					+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+		}
+		return responseString;
 	}
 
 	@Override

@@ -14,6 +14,9 @@ public class DeviceDataDecode {
 	private static final String DEVICE_MAPTYPE = "${device.mapType}";
 	private static final String DEVICE_DEVICETYPE = "${device.deviceType}";
 	private static final String DEVICE_TARGETDEVICE = "${device.targetDevice}";
+	private static final String DEVICE_REQUESTERADDRESS = "${device.requesterAddress}";
+	private static final String DEVICE_DESCRIPTION = "${device.description}";
+	private static final String DEVICE_COMMENTS = "${device.comments}";
 	
 	public static String replaceDeviceData(String request, DeviceDescriptor device) {
 		if (request == null) {
@@ -58,6 +61,21 @@ public class DeviceDataDecode {
 				notDone = true;
 			}
 			
+			if (request.contains(DEVICE_REQUESTERADDRESS)) {
+				request = request.replace(DEVICE_REQUESTERADDRESS, device.getRequesterAddress());
+				notDone = true;
+			}
+
+			if (request.contains(DEVICE_DESCRIPTION)) {
+				request = request.replace(DEVICE_DESCRIPTION, device.getDescription());
+				notDone = true;
+			}
+
+			if (request.contains(DEVICE_COMMENTS)) {
+				request = request.replace(DEVICE_COMMENTS, device.getComments());
+				notDone = true;
+			}
+
 			log.debug("Request <<" + request + ">>, not done: " + notDone);
 		}
 		return request;

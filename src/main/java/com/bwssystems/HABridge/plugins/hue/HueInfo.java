@@ -27,12 +27,14 @@ public class HueInfo {
     private static final Logger log = LoggerFactory.getLogger(HueInfo.class);
     private HTTPHandler httpClient;
     private NamedIP hueAddress;
+    private HueHome myHome;
 	public static final String HUE_REQUEST = "/api";
 
-    public HueInfo(NamedIP addressName) {
+    public HueInfo(NamedIP addressName, HueHome theHome) {
 		super();
         httpClient = new HTTPHandler();
         hueAddress = addressName;
+        myHome = theHome;
  	}
     
 	public HueApiResponse getHueApiResponse() {
@@ -62,7 +64,7 @@ public class HueInfo {
 					// ignore
 				}
     		}
-    		theUrl = "http://" + hueAddress.getIp() + HueUtil.HUE_REQUEST + "/" + hueAddress.getUsername();
+    		theUrl = "http://" + hueAddress.getIp() + HUE_REQUEST + "/" + hueAddress.getUsername();
     		theData = httpClient.doHttpRequest(theUrl, null, null, null, null);
 	    	if(theData != null) {
 	    		log.debug("GET HueApiResponse - data: " + theData);
@@ -118,6 +120,7 @@ public class HueInfo {
                 else {
 	            	SuccessUserResponse[] theResponses = new Gson().fromJson(theBody, SuccessUserResponse[].class); //read content for data, SuccessUserResponse[].class);
 	            	hueAddress.setUsername(theResponses[0].getSuccess().getUsername());
+	            	myHome.updateHue(hueAddress);
                 }
             }
             EntityUtils.consume(response.getEntity()); //close out inputstream ignore content

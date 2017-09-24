@@ -2,6 +2,7 @@ package com.bwssystems.HABridge.hue;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.Conversion;
@@ -83,7 +84,7 @@ public class BrightnessDecode {
 				replaceTarget = INTENSITY_PERCENT_HEX;
 				notDone = true;
 			} else if (request.contains(INTENSITY_DECIMAL_PERCENT)) {
-				replaceValue = String.format("%1.2f", decimalBrightness);
+				replaceValue = String.format(Locale.ROOT, "%1.2f", decimalBrightness);
 				replaceTarget = INTENSITY_DECIMAL_PERCENT;
 				notDone = true;
 			} else if (request.contains(INTENSITY_MATH_CLOSE)) {

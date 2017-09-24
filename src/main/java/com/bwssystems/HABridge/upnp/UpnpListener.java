@@ -25,6 +25,7 @@ public class UpnpListener {
 	private String responseAddress;
 	private boolean strict;
 	private boolean traceupnp;
+	private boolean useUpnpIface;
 	private BridgeControlDescriptor bridgeControl;
 	private String bridgeId;
 	private String bridgeSNUUID;
@@ -74,6 +75,7 @@ public class UpnpListener {
 		responseAddress = theSettings.getUpnpConfigAddress();
 		strict = theSettings.isUpnpStrict();
 		traceupnp = theSettings.isTraceupnp();
+		useUpnpIface = theSettings.isUseupnpiface();
 		bridgeControl = theControl;
 		aHueConfig = HuePublicConfig.createConfig("temp", responseAddress, HueConstants.HUB_VERSION);
 		bridgeId = aHueConfig.getBridgeid();
@@ -114,7 +116,10 @@ public class UpnpListener {
 				else
 					log.debug(name + " ... has addr " + addr);
 				if (InetAddressUtils.isIPv4Address(addr.getHostAddress())) {
-					IPsPerNic++;
+					if(!useUpnpIface)
+						IPsPerNic++;
+					else if(addr.getHostAddress().equals(responseAddress))
+						IPsPerNic++;						
 				}
 			}
 			log.debug("Checking " + name + " to our interface set");

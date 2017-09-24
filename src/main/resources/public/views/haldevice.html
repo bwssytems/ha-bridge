@@ -80,7 +80,7 @@
 				ng-click="toggleSelection(haldevice.haldevicename)">
 				{{haldevice.haldevicename}}</td>
 			<td>{{haldevice.haldevicetype}}</td>
-			<td>{{haldevice.halname}}</td>
+			<td>{{haldevice.haladdress.name}}</td>
 			<td>
 				<select name="button-on" id="button-on"	ng-model="button_on">
 						<option ng-repeat="aButtonOn in haldevice.buttons.DeviceElements"

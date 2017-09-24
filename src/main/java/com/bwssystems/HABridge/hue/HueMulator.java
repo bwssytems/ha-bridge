@@ -60,6 +60,7 @@ public class HueMulator {
 		validMapTypes = new DeviceMapTypes();
 		bridgeSettingMaster = bridgeMaster;
 		bridgeSettings = bridgeSettingMaster.getBridgeSettingsDescriptor();
+		
 		homeManager= aHomeManager;
 		myHueHome = (HueHome) homeManager.findHome(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex]);
 		aGsonHandler = new GsonBuilder().create();
@@ -69,6 +70,7 @@ public class HueMulator {
 	public void setupServer() {
 		log.info("Hue emulator service started....");
 		before(HUE_CONTEXT + "/*", (request, response) -> {
+			log.debug("HueMulator " + request.requestMethod() + " called on api/* with request <<<" + request.pathInfo() + ">>>, and body <<<" + request.body() + ">>>");
 			if(bridgeSettingMaster.getBridgeSecurity().isSecure()) {
 				String pathInfo = request.pathInfo();
 				if(pathInfo != null && pathInfo.contains(HUE_CONTEXT + "/devices")) {
@@ -118,6 +120,17 @@ public class HueMulator {
 			log.debug("group add requested from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
 			return "[{\"success\":{\"id\":\"1\"}}]";
 		});
+		// http://ip_address:port/api/:userid/groups/<groupid>/action
+		// Dummy handler
+		// Error forces Logitech Pop to fall back to individual light control
+		// instead of scene-based control.
+		put(HUE_CONTEXT + "/:userid/groups/:groupid/action", "application/json", (request, response) -> {
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.type("application/json");
+			response.status(HttpStatus.SC_OK);
+			log.debug("put action to groups API from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
+			return "[{\"error\":{\"address\": \"/groups/0/action/scene\", \"type\":7, \"description\": \"invalid value, dummy for parameter, scene\"}}]";
+		});		
 		// http://ip_address:port/api/{userId}/scenes returns json objects of
 		// all scenes configured
 		get(HUE_CONTEXT + "/:userid/scenes", "application/json", (request, response) -> {
@@ -742,7 +755,9 @@ public class HueMulator {
 			log.debug("hue api user create requested for device type: " + aDeviceType + " and username: " + newUser + (followingSlash ? " /api/ called" : ""));
 			return "[{\"success\":{\"username\":\"" + newUser + "\"}}]";
 		}
-		return aGsonHandler.toJson(HueErrorResponse.createResponse("1", "/api/", "unauthorized user", null, null, null).getTheErrors());
+		else
+			log.debug("user add toContinue was false, returning not authorized");
+		return aGsonHandler.toJson(HueErrorResponse.createResponse("101", "/api/", "link button not pressed", null, null, null).getTheErrors());
 	}
 	
 	private Object getConfig(String userId, String ipAddress) {
@@ -750,15 +765,15 @@ public class HueMulator {
 			log.info("Traceupnp: hue api/:userid/config config requested: " + userId + " from " + ipAddress);
 		log.debug("hue api config requested: " + userId + " from " + ipAddress);
 		if (bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton()) != null) {
-			log.debug("hue api config requested, No User supplied, returning public config");
+			log.debug("hue api config requested, User invalid, returning public config");
 			HuePublicConfig apiResponse = HuePublicConfig.createConfig("Philips hue",
 					bridgeSettings.getUpnpConfigAddress(), bridgeSettings.getHubversion());
 			return apiResponse;
 		}
 
 		HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(),
-				bridgeSettings.getWhitelist(), bridgeSettings.getHubversion());
-
+				bridgeSettingMaster.getBridgeSecurity().getWhitelist(), bridgeSettings.getHubversion(), bridgeSettingMaster.getBridgeControl().isLinkButton());
+		log.debug("api response config <<<" + aGsonHandler.toJson(apiResponse.getConfig()) + ">>>");
 		return apiResponse.getConfig();
 	}
 	
@@ -766,11 +781,13 @@ public class HueMulator {
 	private Object getFullState(String userId, String ipAddress) {
 		log.debug("hue api full state requested: " + userId + " from " + ipAddress);
 		HueError[] theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
-		if (theErrors != null)
+		if (theErrors != null) {
+			log.debug("full state error occurred <<<" + aGsonHandler.toJson(theErrors) + ">>>");
 			return theErrors;
+		}
 
 		HueApiResponse apiResponse = new HueApiResponse("Philips hue", bridgeSettings.getUpnpConfigAddress(),
-				bridgeSettings.getWhitelist(), bridgeSettings.getHubversion());
+				bridgeSettingMaster.getBridgeSecurity().getWhitelist(), bridgeSettings.getHubversion(), bridgeSettingMaster.getBridgeControl().isLinkButton());
 		apiResponse.setLights((Map<String, DeviceResponse>) this.lightsListHandler(userId, ipAddress));
 		apiResponse.setGroups((Map<String, GroupResponse>) this.groupsListHandler(userId, ipAddress));
 

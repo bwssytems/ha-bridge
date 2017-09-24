@@ -62,7 +62,7 @@ public class HarmonyHandler {
 	}
 
 	public Boolean startActivity(RunActivity anActivity) {
-		log.debug("Harmony api start activity requested for: " + anActivity.getName() + " noop mode: " + noopCalls);
+		log.debug("Harmony api start activity requested for: " + anActivity.getName() + " for a hub: " + anActivity.getHub() + " noop mode: " + noopCalls);
 		if (anActivity.isValid()) {
 			try {
 				if (noopCalls || devMode) {
@@ -72,7 +72,7 @@ public class HarmonyHandler {
             				devResponse.setCurrentActivity(devResponse.getConfig().getActivityByName(anActivity.getName()));
             		}
 
-					log.info("noop mode: Harmony api start activity requested for: " + anActivity.getName());
+					log.info("noop mode: Harmony api start activity requested for: " + anActivity.getName() + " for a hub: " + anActivity.getHub());
 				}
 				else
 					harmonyClient.startActivity(Integer.parseInt(anActivity.getName()));
@@ -81,12 +81,12 @@ public class HarmonyHandler {
 					if (!noopCalls)
 						harmonyClient.startActivityByName(anActivity.getName());
 				} catch (IllegalArgumentException ei) {
-					log.error("Error in finding activity: " + anActivity.getName());
+					log.error("Error in finding activity: " + anActivity.getName() + " for a hub: " + anActivity.getHub());
 					return false;
 				}
 			}
 		} else {
-			log.error("Error in finding activity: " + anActivity.getName());
+			log.error("Error in finding activity: " + anActivity.getName() + " for a hub: " + anActivity.getHub());
 			return false;
 		}
 
@@ -94,26 +94,30 @@ public class HarmonyHandler {
 	}
 
 	public Boolean pressButton(ButtonPress aDeviceButton) {
-		log.debug("Harmony api press a button requested for device: " + aDeviceButton.getDevice() + " and a for button: " + aDeviceButton.getButton() + " noop mode: " + noopCalls);
+		log.debug("Harmony api press a button requested for device: " + aDeviceButton.getDevice() + " and a for button: " + aDeviceButton.getButton() + " with pressTime of: " + aDeviceButton.getPressTime() + " for a hub: " + aDeviceButton.getHub() + " noop mode: " + noopCalls);
 		if (aDeviceButton.isValid()) {
 			try {
 				if (noopCalls || devMode) {
-					log.info("noop mode: Harmony api press a button requested for device: " + aDeviceButton.getDevice() + " and a for button: " + aDeviceButton.getButton());
+					log.info("noop mode: Harmony api press a button requested for device: " + aDeviceButton.getDevice() + " and a for button: " + aDeviceButton.getButton() +
+							" with a pressTime of: " + aDeviceButton.getPressTime() + " for a hub: " + aDeviceButton.getHub());
 				}
-            	else
-					harmonyClient.pressButton(Integer.parseInt(aDeviceButton.getDevice()), aDeviceButton.getButton());
-				
+            	else {
+            		if(aDeviceButton.getPressTime() != null && aDeviceButton.getPressTime() > 0)
+            			harmonyClient.pressButton(Integer.parseInt(aDeviceButton.getDevice()), aDeviceButton.getButton(), aDeviceButton.getPressTime());
+            		else
+            			harmonyClient.pressButton(Integer.parseInt(aDeviceButton.getDevice()), aDeviceButton.getButton());
+            	}
 			} catch (IllegalArgumentException e) {
 				try {
 					if (!noopCalls)
 						harmonyClient.pressButton(aDeviceButton.getDevice(), aDeviceButton.getButton());
 				} catch (IllegalArgumentException ei) {
-					log.error("Error in finding device: " + aDeviceButton.getDevice() +" and a button: " + aDeviceButton.getButton());
+					log.error("Error in finding device: " + aDeviceButton.getDevice() +" and a button: " + aDeviceButton.getButton() + " for a hub: " + aDeviceButton.getHub());
 					return false;
 				}
 			}
 		} else {
-			log.error("Error in finding device: " + aDeviceButton.getDevice() +" and a button: " + aDeviceButton.getButton());
+			log.error("Error in finding device: " + aDeviceButton.getDevice() +" and a button: " + aDeviceButton.getButton() + " for a hub: " + aDeviceButton.getHub());
 			return false;
 		}
 

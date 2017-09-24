@@ -87,6 +87,12 @@
 						placeholder="192.168.1.1"></td>
 				</tr>
 				<tr>
+					<td>Use UPNP Address Interface Only</td>
+					<td><input type="checkbox"
+						ng-model="bridge.settings.useupnpiface" ng-true-value=true
+						ng-false-value=false> {{bridge.settings.useupnpiface}}</td>
+				</tr>
+				<tr>
 					<td>Web Server IP Address</td>
 					<td><input id="bridge-settings-webaddress"
 						class="form-control" type="text"
@@ -117,16 +123,20 @@
 								</tr>
 							</thead>
 							<tr ng-repeat="vera in bridge.settings.veraaddress.devices">
-								<td>{{vera.name}}</td>
-								<td>{{vera.ip}}</td>
+								<td><input id="bridge-settings-next-vera-name"
+									class="form-control" type="text" ng-model="vera.name"
+									placeholder="A Vera"></td>
+								<td><input id="bridge-settings-next-vera-ip"
+									class="form-control" type="text" ng-model="vera.ip"
+									placeholder="192.168.1.2"></td>
 								<td><button class="btn btn-danger" type="submit"
 										ng-click="removeVeratoSettings(vera.name, vera.ip)">Del</button></td>
 							</tr>
 							<tr>
-								<td><input id="bridge-settings-next-vera-name"
+								<td><input id="bridge-settings-new-vera-name"
 									class="form-control" type="text" ng-model="newveraname"
 									placeholder="A Vera"></td>
-								<td><input id="bridge-settings-next-vera-ip"
+								<td><input id="bridge-settings-new-vera-ip"
 									class="form-control" type="text" ng-model="newveraip"
 									placeholder="192.168.1.2"></td>
 								<td><button class="btn btn-success" type="submit"
@@ -181,30 +191,36 @@
 							<thead>
 								<tr>
 									<th>Name</th>
-                                                                        <th>IP</th>
-                                                                        <th>Webhook</th>
+                                    <th>IP</th>
+                                    <th>Webhook</th>
 									<th>Manage</th>
 								</tr>
 							</thead>
 							<tr ng-repeat="harmony in bridge.settings.harmonyaddress.devices">
-								<td>{{harmony.name}}</td>
-                                                                <td>{{harmony.ip}}</td>
-                                                                <td>{{harmony.webhook}}</td>
+								<td><input id="bridge-settings-next-harmony-name"
+									class="form-control" type="text" ng-model="harmony.name"
+									placeholder="A Harmony"></td>
+                                <td><input id="bridge-settings-next-harmony-ip"
+                                    class="form-control" type="text" ng-model="harmony.ip"
+                                    placeholder="192.168.1.3"></td>
+                                <td><input id="bridge-settings-next-harmony-webhook"
+                                    class="form-control" type="text" ng-model="harmony.webhook"
+                                    placeholder="http://hook?a=${activity.label}"></td>
 								<td><button class="btn btn-danger" type="submit"
-										ng-click="removeHarmonytoSettings(harmony.name, harmony.ip, harmony.webhook)">Del</button></td>
+										ng-click="removeHarmonytoSettings(harmony.name, harmony.ip)">Del</button></td>
 							</tr>
 							<tr>
-								<td><input id="bridge-settings-next-harmony-name"
+								<td><input id="bridge-settings-new-harmony-name"
 									class="form-control" type="text" ng-model="newharmonyname"
 									placeholder="A Harmony"></td>
-                                                            <td><input id="bridge-settings-next-harmony-ip"
-                                                                       class="form-control" type="text" ng-model="newharmonyip"
-                                                                       placeholder="192.168.1.3"></td>
-                                                            <td><input id="bridge-settings-next-harmony-webhook"
-                                                                       class="form-control" type="text" ng-model="newharmonywebhook"
-                                                                       placeholder="http://hook?a=${activity.label}"></td>
+                                <td><input id="bridge-settings-new-harmony-ip"
+                                    class="form-control" type="text" ng-model="newharmonyip"
+                                    placeholder="192.168.1.3"></td>
+                                <td><input id="bridge-settings-new-harmony-webhook"
+                                    class="form-control" type="text" ng-model="newharmonywebhook"
+                                    placeholder="http://hook?a=${activity.label}"></td>
 								<td><button class="btn btn-success" type="submit"
-										ng-click="addHarmonytoSettings(newharmonyname, newharmonyip, newharmonywebhook)">Add</button></td>
+									ng-click="addHarmonytoSettings(newharmonyname, newharmonyip, newharmonywebhook)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>
@@ -220,20 +236,24 @@
 								</tr>
 							</thead>
 							<tr ng-repeat="hue in bridge.settings.hueaddress.devices">
-								<td>{{hue.name}}</td>
-								<td>{{hue.ip}}</td>
-								<td><button class="btn btn-danger" type="submit"
-										ng-click="removeHuetoSettings(hue.name, hue.ip)">Del</button></td>
-							</tr>
-							<tr>
 								<td><input id="bridge-settings-next-hue-name"
-									class="form-control" type="text" ng-model="newhuename"
+									class="form-control" type="text" ng-model="hue.name"
 									placeholder="A Hue"></td>
 								<td><input id="bridge-settings-next-hue-ip"
+									class="form-control" type="text" ng-model="hue.ip"
+									placeholder="192.168.1.3"></td>
+								<td><button class="btn btn-danger" type="submit"
+									ng-click="removeHuetoSettings(hue.name, hue.ip)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-new-hue-name"
+									class="form-control" type="text" ng-model="newhuename"
+									placeholder="A Hue"></td>
+								<td><input id="bridge-settings-new-hue-ip"
 									class="form-control" type="text" ng-model="newhueip"
 									placeholder="192.168.1.3"></td>
 								<td><button class="btn btn-success" type="submit"
-										ng-click="addHuetoSettings(newhuename, newhueip)">Add</button></td>
+									ng-click="addHuetoSettings(newhuename, newhueip)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>
@@ -245,29 +265,47 @@
 								<tr>
 									<th>Name</th>
 									<th>IP</th>
+									<th>Token</th>
+									<th>Use SSL</th>
 									<th>Manage</th>
 								</tr>
 							</thead>
 							<tr ng-repeat="hal in bridge.settings.haladdress.devices">
-								<td>{{hal.name}}</td>
-								<td>{{hal.ip}}</td>
+								<td><input id="bridge-settings-next-hal-name"
+									class="form-control" type="text" ng-model="hal.name"
+									placeholder="A Hal"></td>
+								<td><input id="bridge-settings-next-hal-ip"
+									class="form-control" type="text" ng-model="hal.ip"
+									placeholder="192.168.1.3:82"></td>
+								<td><input id="bridge-settings-next-haltoken" class="form-control"
+									type="password" ng-model="hal.password"
+									placeholder="thetoken"></td>
+								<td><input type="checkbox"
+										ng-model="hal.secure" ng-true-value=true
+										ng-false-value=false></td>
 								<td><button class="btn btn-danger" type="submit"
 										ng-click="removeHaltoSettings(hal.name, hal.ip)">Del</button></td>
 							</tr>
 							<tr>
-								<td><input id="bridge-settings-next-hal-name"
+								<td><input id="bridge-settings-new-hal-name"
 									class="form-control" type="text" ng-model="newhalname"
 									placeholder="A Hal"></td>
-								<td><input id="bridge-settings-next-hal-ip"
+								<td><input id="bridge-settings-new-hal-ip"
 									class="form-control" type="text" ng-model="newhalip"
 									placeholder="192.168.1.3:82"></td>
+								<td><input id="bridge-settings-new-haltoken" class="form-control"
+									type="password" ng-model="newhaltoken"
+									placeholder="thetoken"></td>
+								<td><input type="checkbox"
+										ng-model="newhalsecure" ng-true-value=true
+										ng-false-value=false></td>
 								<td><button class="btn btn-success" type="submit"
-										ng-click="addHaltoSettings(newhalname, newhalip)">Add</button></td>
+										ng-click="addHaltoSettings(newhalname, newhalip, newhalsecure, newhaltoken)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>
 				<tr>
-					<td>HAL Token</td>
+					<td>HAL Token (please use token on individual HAL entry)</td>
 					<td><input id="bridge-settings-haltoken" class="form-control"
 						type="password" ng-model="bridge.settings.haltoken"
 						placeholder="thetoken"></td>
@@ -286,26 +324,32 @@
 								</tr>
 							</thead>
 							<tr ng-repeat="mqtt in bridge.settings.mqttaddress.devices">
-								<td>{{mqtt.name}}</td>
-								<td>{{mqtt.ip}}</td>
-								<td>{{mqtt.username}}</td>
-								<td ng-if="mqtt.password">*******</td>
-								<td ng-if="!mqtt.password"> </td>
-								
+								<td><input id="bridge-settings-next-mqtt-name"
+									class="form-control" type="text" ng-model="mqtt.name"
+									placeholder="A MQTT Client ID"></td>
+								<td><input id="bridge-settings-next-mqtt-ip"
+									class="form-control" type="text" ng-model="mqtt.ip"
+									placeholder="MQTT Broker IP and port"></td>
+								<td><input id="bridge-settings-next-mqtt-username"
+									class="form-control" type="text" ng-model="mqtt.username"
+									placeholder="MQTT Broker username (optional)"></td>
+								<td><input id="bridge-settings-next-mqtt-password"
+									class="form-control" type="password" ng-model="mqtt.password"
+									placeholder="MQTT Broker password (opt)"></td>
 								<td><button class="btn btn-danger" type="submit"
 										ng-click="removeMQTTtoSettings(mqtt.name, mqtt.ip)">Del</button></td>
 							</tr>
 							<tr>
-								<td><input id="bridge-settings-next-mqtt-name"
+								<td><input id="bridge-settings-new-mqtt-name"
 									class="form-control" type="text" ng-model="newmqttname"
 									placeholder="A MQTT Client ID"></td>
-								<td><input id="bridge-settings-next-mqtt-ip"
+								<td><input id="bridge-settings-new-mqtt-ip"
 									class="form-control" type="text" ng-model="newmqttip"
 									placeholder="MQTT Broker IP and port"></td>
-								<td><input id="bridge-settings-next-mqtt-username"
+								<td><input id="bridge-settings-new-mqtt-username"
 									class="form-control" type="text" ng-model="newmqttusername"
 									placeholder="MQTT Broker username (optional)"></td>
-								<td><input id="bridge-settings-next-mqtt-password"
+								<td><input id="bridge-settings-new-mqtt-password"
 									class="form-control" type="password" ng-model="newmqttpassword"
 									placeholder="MQTT Broker password (opt)"></td>
 								<td><button class="btn btn-success" type="submit"
@@ -328,26 +372,35 @@
 								</tr>
 							</thead>
 							<tr ng-repeat="hass in bridge.settings.hassaddress.devices">
-								<td>{{hass.name}}</td>
-								<td>{{hass.ip}}</td>
-								<td>{{hass.port}}</td>
-								<td ng-if="hass.password">*******</td>
-								<td ng-if="!hass.password"> </td>
-								<td>{{hass.secure}}</td>
+								<td><input id="bridge-settings-next-hass-name"
+									class="form-control" type="text" ng-model="hass.name"
+									placeholder="A HomeAssistant"></td>
+								<td><input id="bridge-settings-next-hass-ip"
+									class="form-control" type="text" ng-model="hass.ip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-next-hass-port"
+									class="form-control" type="text" ng-model="hass.port"
+									placeholder="8123"></td>
+								<td><input id="bridge-settings-next-hass-password"
+									class="form-control" type="password" ng-model="hass.password"
+									placeholder="Home Assistant password (opt)"></td>
+								<td><input type="checkbox"
+										ng-model="hass.secure" ng-true-value=true
+										ng-false-value=false></td>
 								<td><button class="btn btn-danger" type="submit"
 										ng-click="removeHasstoSettings(hass.name, hass.ip)">Del</button></td>
 							</tr>
 							<tr>
-								<td><input id="bridge-settings-next-hass-name"
+								<td><input id="bridge-settings-new-hass-name"
 									class="form-control" type="text" ng-model="newhassname"
 									placeholder="A HomeAssistant"></td>
-								<td><input id="bridge-settings-next-hass-ip"
+								<td><input id="bridge-settings-new-hass-ip"
 									class="form-control" type="text" ng-model="newhassip"
 									placeholder="192.168.1.3"></td>
-								<td><input id="bridge-settings-next-hass-port"
+								<td><input id="bridge-settings-new-hass-port"
 									class="form-control" type="text" ng-model="newhassport"
 									placeholder="8123"></td>
-								<td><input id="bridge-settings-next-hass-password"
+								<td><input id="bridge-settings-new-hass-password"
 									class="form-control" type="password" ng-model="newhasspassword"
 									placeholder="Home Assistant password (opt)"></td>
 								<td><input type="checkbox"
@@ -373,29 +426,38 @@
 								</tr>
 							</thead>
 							<tr ng-repeat="domoticz in bridge.settings.domoticzaddress.devices">
-								<td>{{domoticz.name}}</td>
-								<td>{{domoticz.ip}}</td>
-								<td>{{domoticz.port}}</td>
-								<td>{{domoticz.username}}</td>
-								<td ng-if="domoticz.password">*******</td>
-								<td ng-if="!domoticz.password"> </td>
+								<td><input id="bridge-settings-next-domoticz-name"
+									class="form-control" type="text" ng-model="domoticz.name"
+									placeholder="A Domoticz"></td>
+								<td><input id="bridge-settings-next-domoticz-ip"
+									class="form-control" type="text" ng-model="domoticz.ip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-next-domoticz-port"
+									class="form-control" type="text" ng-model="domoticz.port"
+									placeholder="8080"></td>
+								<td><input id="bridge-settings-next-domoticz-username"
+									class="form-control" type="text" ng-model="domoticz.username"
+									placeholder="Domoticz username"></td>
+								<td><input id="bridge-settings-next-domoticz-password"
+									class="form-control" type="password" ng-model="domoticz.password"
+									placeholder="Domoticz password (opt)"></td>
 								<td><button class="btn btn-danger" type="submit"
 										ng-click="removeDomoticztoSettings(domoticz.name, domoticz.ip)">Del</button></td>
 							</tr>
 							<tr>
-								<td><input id="bridge-settings-next-domoticz-name"
+								<td><input id="bridge-settings-new-domoticz-name"
 									class="form-control" type="text" ng-model="newdomoticzname"
 									placeholder="A Domoticz"></td>
-								<td><input id="bridge-settings-next-domoticz-ip"
+								<td><input id="bridge-settings-new-domoticz-ip"
 									class="form-control" type="text" ng-model="newdomoticzip"
 									placeholder="192.168.1.3"></td>
-								<td><input id="bridge-settings-next-domoticz-port"
+								<td><input id="bridge-settings-new-domoticz-port"
 									class="form-control" type="text" ng-model="newdomoticzport"
 									placeholder="8080"></td>
-								<td><input id="bridge-settings-next-domoticz-username"
+								<td><input id="bridge-settings-new-domoticz-username"
 									class="form-control" type="text" ng-model="newdomoticzusername"
 									placeholder="Domoticz username"></td>
-								<td><input id="bridge-settings-next-domoticz-password"
+								<td><input id="bridge-settings-new-domoticz-password"
 									class="form-control" type="password" ng-model="newdomoticzpassword"
 									placeholder="Domoticz password (opt)"></td>
 								<td><button class="btn btn-success" type="submit"
@@ -417,25 +479,32 @@
 						</tr>
 						</thead>
 						<tr ng-repeat="somfy in bridge.settings.somfyaddress.devices">
-							<td>{{somfy.name}}</td>
-							<td>{{somfy.ip}}</td>
-							<td>{{somfy.username}}</td>
-							<td ng-if="somfy.password">*******</td>
-							<td ng-if="!somfy.password"> </td>
+							<td><input id="bridge-settings-next-somfy-name"
+									   class="form-control" type="text" ng-model="somfy.name"
+									   placeholder="A Somfy"></td>
+							<td><input id="bridge-settings-next-somfy-ip"
+									   class="form-control" type="text" ng-model="somfy.ip"
+									   placeholder="https://www.tahomalink.com"></td>
+							<td><input id="bridge-settings-next-somfy-username"
+									   class="form-control" type="text" ng-model="somfy.username"
+									   placeholder="Somfy username"></td>
+							<td><input id="bridge-settings-next-somfy-password"
+									   class="form-control" type="password" ng-model="somfy.password"
+									   placeholder="Somfy password"></td>
 							<td><button class="btn btn-danger" type="submit"
 										ng-click="removeSomfytoSettings(somfy.name, somfy.ip)">Del</button></td>
 						</tr>
 						<tr>
-							<td><input id="bridge-settings-next-somfy-name"
+							<td><input id="bridge-settings-new-somfy-name"
 									   class="form-control" type="text" ng-model="newsomfyname"
 									   placeholder="A Somfy"></td>
-							<td><input id="bridge-settings-next-somfy-ip"
+							<td><input id="bridge-settings-new-somfy-ip"
 									   class="form-control" type="text" ng-model="newsomfyip"
 									   placeholder="https://www.tahomalink.com"></td>
-							<td><input id="bridge-settings-next-somfy-username"
+							<td><input id="bridge-settings-new-somfy-username"
 									   class="form-control" type="text" ng-model="newsomfyusername"
 									   placeholder="Somfy username"></td>
-							<td><input id="bridge-settings-next-somfy-password"
+							<td><input id="bridge-settings-new-somfy-password"
 									   class="form-control" type="password" ng-model="newsomfypassword"
 									   placeholder="Somfy password"></td>
 							<td><button class="btn btn-success" type="submit"

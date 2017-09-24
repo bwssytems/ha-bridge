@@ -85,7 +85,7 @@ app.config (function ($locationProvider, $routeProvider) {
 	})
 });
 
-app.run( async function ($rootScope, $location, Auth, bridgeService) {
+app.run(function ($rootScope, $location, Auth, bridgeService) {
 	bridgeService.getHABridgeVersion();
 
     $rootScope.$on('securitySetupReceived', function(event, data) {
@@ -256,7 +256,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 						if (error.status === 401)
 							$rootScope.$broadcast('securityReinit', 'done');
 						else
-						self.displayWarn("Cannot get testuser: ", error);
+							self.displayWarn("Cannot get testuser: ", error);
 					}
 			);
 		}
@@ -271,7 +271,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					if (error.status === 401)
 						$rootScope.$broadcast('securityReinit', 'done');
 					else
-					self.displayWarn("Cannot get a user: ", error);
+						self.displayWarn("Cannot get a user: ", error);
 				}
 		);
 	};
@@ -1180,6 +1180,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 
 	this.testUrl = function (device, type, value) {
 		var msgDescription = "unknown";
+		self.getTestUser();
 		var testUrl = this.state.huebase + "/" + this.state.testuser + "/lights/" + device.id + "/state";
 		var testBody = "{\"on\":";
 		if (type === "off") {
@@ -1197,8 +1198,13 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 						msgDescription = "success " + angular.toJson(response.data);
 					}
 					if (typeof(response.data[0].error) !== 'undefined') {
-						msgDescription = "error " + angular.toJson(response.data[0].error);
-						self.displayErrorMessage("Request Error, Pleae look in your habridge log: ", msgDescription);
+						if(reponse.data[0].error.indexOf("unauthorized") > -1) {
+							self.displayWarn("Authorization error, please retry...", null);
+						}
+						else {
+							msgDescription = "error " + angular.toJson(response.data[0].error);
+							self.displayErrorMessage("Request Error, Please look in your habridge log: ", msgDescription);
+						}
 						return;
 					}
 						
@@ -1349,11 +1355,11 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     	    }
     	}    	
     };
-    $scope.addHarmonytoSettings = function (newharmonyname, newharmonyip) {
+    $scope.addHarmonytoSettings = function (newharmonyname, newharmonyip, newharmonywebhook) {
     	if($scope.bridge.settings.harmonyaddress === undefined || $scope.bridge.settings.harmonyaddress === null) {
 			$scope.bridge.settings.harmonyaddress = { devices: [] };
 		}
-    	var newharmony = {name: newharmonyname, ip: newharmonyip }
+    	var newharmony = {name: newharmonyname, ip: newharmonyip, webhook: newharmonywebhook}
     	$scope.bridge.settings.harmonyaddress.devices.push(newharmony);
     	$scope.newharmonyname = null;
     	$scope.newharmonyip = null;
@@ -1381,11 +1387,11 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     	    }
     	}    	
     };
-    $scope.addHaltoSettings = function (newhalname, newhalip) {
+    $scope.addHaltoSettings = function (newhalname, newhalip, newhalsecure, newhaltoken) {
     	if($scope.bridge.settings.haladdress === undefined || $scope.bridge.settings.haladdress === null) {
 			$scope.bridge.settings.haladdress = { devices: [] };
 		}
-    	var newhal = {name: newhalname, ip: newhalip }
+    	var newhal = {name: newhalname, ip: newhalip, secure: newhalsecure, password: newhaltoken }
     	$scope.bridge.settings.haladdress.devices.push(newhal);
     	$scope.newhalname = null;
     	$scope.newhalip = null;
@@ -2130,11 +2136,18 @@ app.controller('HarmonyController', function ($scope, $location, bridgeService, 
 		$location.path('/editdevice');
 	};
 
-	$scope.buildButtonUrls = function (harmonydevice, onbutton, offbutton) {
+	$scope.buildButtonUrls = function (harmonydevice, onbutton, offbutton, onpresstime, offpresstime) {
 		var actionOn = angular.fromJson(onbutton);
 		var actionOff = angular.fromJson(offbutton);
-		onpayload = "{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOn.command + "\",\"hub\":\"" + harmonydevice.hub + "\"}";
-		offpayload = "{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOff.command + "\",\"hub\":\"" + harmonydevice.hub + "\"}";
+		var postCmd = "\"}";
+		if(onpresstime !== undefined && onpresstime !== "0")
+			postCmd = "\",\"pressTime\":" + onpresstime + "}"; 
+		onpayload = "{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOn.command + "\",\"hub\":\"" + harmonydevice.hub + postCmd;
+		if(offpresstime !== undefined && offpresstime !== "0")
+			postCmd = "\",\"pressTime\":" + offpresstime + "}"; 
+		else
+			postCmd = "\"}";
+		offpayload = "{\"device\":\"" + harmonydevice.device.id + "\",\"button\":\"" + actionOff.command + "\",\"hub\":\"" + harmonydevice.hub + postCmd;
 
 		bridgeService.buildUrls(onpayload, null, offpayload, true, actionOn.command,  harmonydevice.device.label, harmonydevice.hub, "button", "harmonyButton", null, null);
 		$scope.device = bridgeService.state.device;
@@ -2280,7 +2293,7 @@ app.controller('HueController', function ($scope, $location, bridgeService, ngDi
 		$scope.device = bridgeService.state.device;
 	};
 
-	$scope.buildDeviceUrls = function (huedevice) {
+	$scope.buildDeviceUrls = function (huedevice, buildonly) {
 		onpayload = "{\"ipAddress\":\"" + huedevice.hueaddress + "\",\"deviceId\":\"" + huedevice.huedeviceid +"\",\"hueName\":\"" + huedevice.huename + "\"}";
 		offpayload = "{\"ipAddress\":\"" + huedevice.hueaddress + "\",\"deviceId\":\"" + huedevice.huedeviceid +"\",\"hueName\":\"" + huedevice.huename + "\"}";
 		bridgeService.buildUrls(onpayload, null, offpayload, true, huedevice.device.uniqueid,  huedevice.device.name, huedevice.huename, "passthru",  "hueDevice", null, null);
@@ -2408,7 +2421,6 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 		var preOffCmd = "";
 		var nameCmd = "";
 		var aDeviceType;
-		var postCmd = "?Token=" + $scope.bridge.settings.haltoken;
 		if(haldevice.haldevicetype === "Group") {
 			aDeviceType = "group";
 			preOnCmd = "/GroupService!GroupCmd=On";
@@ -2433,29 +2445,25 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 			nameCmd = "!DeviceName=";
 		}
 		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0) && aDeviceType === "switch")
-			dimpayload = "http://" + haldevice.haladdress
+			dimpayload = "http://" + haldevice.haladdress.ip
 			+ preDimCmd
 			+ dim_control
 			+ nameCmd
-			+ haldevice.haldevicename.replaceAll(" ", "%20")
-			+ postCmd;
+			+ haldevice.haldevicename.replaceAll(" ", "%20");
 		else
-			dimpayload = "http://" + haldevice.haladdress
+			dimpayload = "http://" + haldevice.haladdress.ip
 			+ preOnCmd
 			+ nameCmd
-			+ haldevice.haldevicename.replaceAll(" ", "%20")
-			+ postCmd;
-		onpayload = "http://" + haldevice.haladdress
+			+ haldevice.haldevicename.replaceAll(" ", "%20");
+		onpayload = "http://" + haldevice.haladdress.ip
 		+ preOnCmd
 		+ nameCmd
-		+ haldevice.haldevicename.replaceAll(" ", "%20")
-		+ postCmd;
-		offpayload = "http://" + haldevice.haladdress 
+		+ haldevice.haldevicename.replaceAll(" ", "%20");
+		offpayload = "http://" + haldevice.haladdress.ip 
 		+ preOffCmd
 		+ nameCmd
-		+ haldevice.haldevicename.replaceAll(" ", "%20")
-		+ postCmd;
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname,  haldevice.haldevicename, haldevice.halname, aDeviceType,  "halDevice", null, null);
+		+ haldevice.haldevicename.replaceAll(" ", "%20");
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name,  haldevice.haldevicename, haldevice.haladdress.name, aDeviceType,  "halDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -2466,10 +2474,10 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	$scope.buildButtonUrls = function (haldevice, onbutton, offbutton, buildonly) {
 		var actionOn = angular.fromJson(onbutton);
 		var actionOff = angular.fromJson(offbutton);
-		onpayload = "http://" + haldevice.haladdress + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOn.DeviceName.replaceAll(" ", "%20") + "?Token=" + $scope.bridge.settings.haltoken;
-		offpayload = "http://" + haldevice.haladdress + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOff.DeviceName.replaceAll(" ", "%20") + "?Token=" + $scope.bridge.settings.haltoken;
+		onpayload = "http://" + haldevice.haladdress.ip + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOn.DeviceName.replaceAll(" ", "%20");
+		offpayload = "http://" + haldevice.haladdress.ip + "/IrService!IrCmd=Set!IrDevice=" + haldevice.haldevicename.replaceAll(" ", "%20") + "!IrButton=" + actionOff.DeviceName.replaceAll(" ", "%20");
 
-		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-" + actionOn.DeviceName,  haldevice.haldevicename, haldevice.halname, "button",  "halButton", null, null);
+		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name + "-" + actionOn.DeviceName,  haldevice.haldevicename, haldevice.haladdress.name, "button",  "halButton", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -2478,9 +2486,9 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALHomeUrls = function (haldevice, buildonly) {
-		onpayload = "http://" + haldevice.haladdress + "/ModeService!ModeCmd=Set!ModeName=Home?Token=" + $scope.bridge.settings.haltoken;
-		offpayload = "http://" + haldevice.haladdress	+ "/ModeService!ModeCmd=Set!ModeName=Away?Token=" + $scope.bridge.settings.haltoken;
-		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-HomeAway",  haldevice.haldevicename, haldevice.halname, "home",  "halHome", null, null);
+		onpayload = "http://" + haldevice.haladdress.ip + "/ModeService!ModeCmd=Set!ModeName=Home";
+		offpayload = "http://" + haldevice.haladdress.ip + "/ModeService!ModeCmd=Set!ModeName=Away";
+		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name + "-HomeAway",  haldevice.haldevicename, haldevice.haladdress.name, "home",  "halHome", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -2489,22 +2497,19 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALHeatUrls = function (haldevice, buildonly) {
-		onpayload = "http://" + haldevice.haladdress 
+		onpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Heat?Token="
-		+ $scope.bridge.settings.haltoken;
-		dimpayload = "http://" + haldevice.haladdress 
+		+ "!HVACMode=Heat";
+		dimpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Heat!HeatSpValue=${intensity.percent}?Token="
-		+ $scope.bridge.settings.haltoken;
-		offpayload = "http://" + haldevice.haladdress 
+		+ "!HVACMode=Heat!HeatSpValue=${intensity.percent}";
+		offpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Off?Token="
-		+ $scope.bridge.settings.haltoken;
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-SetHeat",  haldevice.haldevicename + " Heat", haldevice.halname, "thermo",  "halThermoSet", null, null);
+		+ "!HVACMode=Off";
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name + "-SetHeat",  haldevice.haldevicename + " Heat", haldevice.haladdress.name, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -2513,22 +2518,19 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALCoolUrls = function (haldevice, buildonly) {
-		onpayload = "http://" + haldevice.haladdress 
+		onpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Cool?Token="
-		+ $scope.bridge.settings.haltoken;
-		dimpayload = "http://" + haldevice.haladdress 
+		+ "!HVACMode=Cool";
+		dimpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Cool!CoolSpValue=${intensity.percent}?Token="
-		+ $scope.bridge.settings.haltoken;
-		offpayload = "http://" + haldevice.haladdress 
+		+ "!HVACMode=Cool!CoolSpValue=${intensity.percent}";
+		offpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Off?Token="
-		+ $scope.bridge.settings.haltoken;
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-SetCool",  haldevice.haldevicename + " Cool", haldevice.halname, "thermo",  "halThermoSet", null, null);
+		+ "!HVACMode=Off";
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name + "-SetCool",  haldevice.haldevicename + " Cool", haldevice.haladdress.name, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -2537,16 +2539,15 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALAutoUrls = function (haldevice, buildonly) {
-		onpayload = "http://" + haldevice.haladdress 
+		onpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Auto?Token="
-		+ $scope.bridge.settings.haltoken;
-		offpayload = "http://" + haldevice.haladdress 
+		+ "!HVACMode=Auto";
+		offpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Off?Token="
-		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-SetAuto",  haldevice.haldevicename + " Auto", haldevice.halname, "thermo",  "halThermoSet", null, null);
+		+ "!HVACMode=Off";
+		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name + "-SetAuto",  haldevice.haldevicename + " Auto", haldevice.haladdress.name, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -2555,17 +2556,15 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALOffUrls = function (haldevice, buildonly) {
-		onpayload = "http://" + haldevice.haladdress 
+		onpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Auto?Token="
-		+ $scope.bridge.settings.haltoken;
-		offpayload = "http://" + haldevice.haladdress 
+		+ "!HVACMode=Auto";
+		offpayload = "http://" + haldevice.haladdress.ip 
 		+ "/HVACService!HVACCmd=Set!HVACName=" 
 		+ haldevice.haldevicename.replaceAll(" ", "%20") 
-		+ "!HVACMode=Off?Token="
-		$scope.device.offUrl = "http://" + haldevice.haladdress 
-		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-TurnOff",  haldevice.haldevicename + " Thermostat", haldevice.halname, "thermo",  "halThermoSet", null, null);
+		+ "!HVACMode=Off";
+		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name + "-TurnOff",  haldevice.haldevicename + " Thermostat", haldevice.haladdress.name, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -2574,17 +2573,15 @@ app.controller('HalController', function ($scope, $location, bridgeService, ngDi
 	};
 
 	$scope.buildHALFanUrls = function (haldevice, buildonly) {
-		onpayload = "http://" + haldevice.haladdress 
+		onpayload = "http://" + haldevice.haladdress.ip 
 			+ "/HVACService!HVACCmd=Set!HVACName=" 
 			+ haldevice.haldevicename.replaceAll(" ", "%20") 
-			+ "!FanMode=On?Token="
-			+ $scope.bridge.settings.haltoken;
-		offpayload = "http://" + haldevice.haladdress 
+			+ "!FanMode=On";
+		offpayload = "http://" + haldevice.haladdress.ip 
 			+ "/HVACService!HVACCmd=Set!HVACName=" 
 			+ haldevice.haldevicename.replaceAll(" ", "%20") 
-			+ "!FanMode=Auto?Token="
-			+ $scope.bridge.settings.haltoken;
-		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.halname + "-SetFan",  haldevice.haldevicename + " Fan", haldevice.halname, "thermo",  "halThermoSet", null, null);
+			+ "!FanMode=Auto";
+		bridgeService.buildUrls(onpayload, null, offpayload, false, haldevice.haldevicename + "-" + haldevice.haladdress.name + "-SetFan",  haldevice.haldevicename + " Fan", haldevice.haladdress.name, "thermo",  "halThermoSet", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -2704,9 +2701,9 @@ app.controller('MQTTController', function ($scope, $location, bridgeService, ngD
 		$scope.device = bridgeService.state.device;
 	};
 
-	$scope.buildMQTTPublish = function (mqttbroker, mqtttopic, mqttmessage) {
-		onpayload = "{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\"}";
-		offpayload = "{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\"}";
+	$scope.buildMQTTPublish = function (mqttbroker, mqtttopic, mqttmessage, mqttqos, mqttretain) {
+		onpayload = "{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\",\"qos\":\"" + mqttqos + "\",\"retain\":\"" + mqttretain + "\"}";
+		offpayload = "{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\",\"qos\":\"" + mqttqos + "\",\"retain\":\"" + mqttretain + "\"}";
 
 		bridgeService.buildUrls(onpayload, null, offpayload, true, mqttbroker.clientId + "-" + mqtttopic, mqttbroker.clientId + mqtttopic, mqttbroker.clientId, "mqtt",  "mqttMessage", null, null);
 		$scope.device = bridgeService.state.device;
@@ -3617,7 +3614,6 @@ app.controller('LoginController', function ($scope, $location, Auth) {
 	$scope.logout = function() {
         Auth.logout();
         $scope.loggedIn = Auth.isLoggedIn();
-    	bridgeService.displaySuccess("User Logged Out");
         $location.path("/login");
 	};
 });

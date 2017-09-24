@@ -1,5 +1,5 @@
 # ha-bridge
-Emulates Philips Hue api to other home automation gateways such as an Amazon Echo or other systmes that support Philips Hue.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
+Emulates Philips Hue API to other home automation gateways such as an Amazon Echo or other systems that support Philips Hue.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
 
 Here are some diagrams to put this software in perspective.
 
@@ -35,11 +35,11 @@ THe Harmony Hub Path looks like this:
 
 **NOTE: This software does not control Philips Hue devices directly. A physical Philips Hue Hub is required for that, by which the ha-bridge can then proxy all of your real Hue bridges behind this bridge.**
 
-**ISSUE: Google Home now seems to not support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local APi, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
+**ISSUE: Google Home now seems to not support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local API, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
 
 **FAQ: Please look here for the current FAQs! https://github.com/bwssytems/ha-bridge/wiki/HA-Bridge-FAQs**
 
-In the cases of systems that require authorization and/or have API's that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest, Somfy Tahoma and the ability to proxy all of your real Hue bridges behind this bridge.
+In the cases of systems that require authorization and/or have APIs that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest, Somfy Tahoma and the ability to proxy all of your real Hue bridges behind this bridge.
 
 Alternatively the Bridge supports custom calls as well using http/https/udp and tcp such as the LimitlessLED/MiLight bulbs using the UDP protocol. Binary data is supported with UDP/TCP.
 
@@ -61,24 +61,19 @@ ATTENTION: This requires JDK 1.8 to run
 ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
 
 ```
-java -jar ha-bridge-4.5.0.jar
+java -jar ha-bridge-4.5.6.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
-Create the directory and make sure that ha-bridge-4.5.0.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-4.5.6.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
 
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.5.0/ha-bridge-4.5.0.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.5.6/ha-bridge-4.5.6.jar
 ```
-Create the directory and make sure that ha-bridge-4.5.0.jar is in your /home/pi/habridge directory.
-```
-pi@raspberrypi:~ $ mkdir habridge
-pi@raspberrypi:~ $ cd habridge
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v4.5.0/ha-bridge-4.5.0.jar
-```
+
 #### System Control Setup on a pi (preferred)
 For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
 
@@ -97,7 +92,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/home/pi/habridge
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.5.0.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.5.6.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -132,7 +127,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.5.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-4.5.6.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
@@ -150,12 +145,14 @@ pi@raspberrypi:~/habridge $ tail -f habridge-log.txt
 ```
 ## Run ha-bridge alongside web server already on port 80
 These examples will help you proxy your current webserver requests to the ha-bridge running on a different port, such as 8080.
+
 ### Apache Example
+
 Reverse proxy with Apache on Ubuntu linux:
 
-a2enmod proxy
-a2enmod proxy_http
-a2enmod headers
+Enable the required Apache modules: 
+
+`a2enmod proxy proxy_http headers`
 
 Added the following lines to my Apache config file “000-default”
 
@@ -177,7 +174,10 @@ Added the following lines to my Apache config file “000-default”
 </VirtualHost>
 ```
 
-service apache2 restart
+Restart apache for the changes to take effect. 
+
+`service apache2 restart`
+
 ### lighthttpd Example
 ```
 server.modules   += ( "mod_proxy" )
@@ -198,6 +198,11 @@ location /api/ {
 ```
 ## Available Arguments
 Arguments are now deprecated. The ha-bridge will use the old -D arguments and populate the configuration screen, Bridge Control Tab, which can now be saved to a file and will not be needed. There is only one optional argument that overrides and that is the location of the configuration file. The default is the relative path "data/habridge.config".
+### -Djava.net.preferIPv4Stack=true
+This will guarantee that the ha-bridge will not use an IPV6 address. This cannot be automatically set inside the code.
+```
+java -jar -Djava.net.preferIPv4Stack=true ha-bridge-W.X.Y.jar
+```
 ### -Dconfig.file=`<filepath>`
 The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify -Dconfig.file=`<directory>/<filename>` explicitly. The command line example:
 ```
@@ -221,7 +226,7 @@ This option is very important to set if you will be using username/passwords to 
 java -jar -Dsecurity.key=Xfawer354WertSdf321234asd ha-bridge-W.X.Y.jar
 ```
 ### -Dexec.garden=`<The path to your scripts and program directory>`
-This sets a directory of your choosing to have a walled area for what can be executed by the Exec Command type. This is a good feature to use if you use the capabilities of executing a script or program from the ha-bridge. The default is not set which allows any program or script to be called and anyone with access to the your system could create an exec command call and execute it from the api. This is will prevent any issues if your system gets hacked.  To override the default, specify -Dexec.garden=`<The path to your scripts and program directory>` explicitly on the command line. The command line example:
+This sets a directory of your choosing to have a walled area for what can be executed by the Exec Command type. This is a good feature to use if you use the capabilities of executing a script or program from the ha-bridge. The default is not set which allows any program or script to be called and anyone with access to the your system could create an exec command call and execute it from the API. This is will prevent any issues if your system gets hacked.  To override the default, specify -Dexec.garden=`<The path to your scripts and program directory>` explicitly on the command line. The command line example:
 ```
 java -jar -Dexec.garden=C:\Users\John\bin
 ```
@@ -243,13 +248,15 @@ This field is used to test the bridge server with the UPNP IP Address and to mak
 #### Bridge Control Buttons
 These buttons are for managing the bridge. The Save button is enabled when there is a change to the configuration. The Bridge Reinitialize button will recycle the internal running of the bridge in the java process. The Stop button will stop the java process. The Refresh button will refresh the page and settings.
 #### The Security Dialog
-This is where you can set the different security settings for the ha-bridge. There are two settings, one for enabling Hue like operation to secure the Hue api with the internally generated user for the calls that are done after the link button. The other is to secure the hue api with a username/password that is created as well. The other fields are to add and delete users and to set and change passwords for those users. If there are no users in the system, the system will not require a username/password to operate.
+This is where you can set the different security settings for the ha-bridge. There are two settings, one for enabling Hue like operation to secure the Hue API with the internally generated user for the calls that are done after the link button. The other is to secure the hue API with a username/password that is created as well. The other fields are to add and delete users and to set and change passwords for those users. If there are no users in the system, the system will not require a username/password to operate.
 #### Configuration Path and File
 The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify `<directory>/<filename>` explicitly.
 #### Device DB Path and File
 The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify `<directory>/<filename>  explicitly.
 #### UPNP IP Address
 The server defaults to the first available address on the host if this is not given. This default may NOT be the correct IP that is your public IP for your host on the network. It is best to set this parameter to not have discovery issues. Replace this value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery. 
+#### Use UPNP Address Interface
+The server tries to bind to all interfaces to respond to UPNP request. Setting this to `true` will make the binding to the interface that has the `UPNP IP Address`. The default is to be all interfaces which is set as false.
 #### Web Server IP Address
 The server defaults to all interfaces on the machine (0.0.0.0). Replace this value with the server ipv4 address you would like to use as the address that will bind to a specific ip address on an interface if you would like. This is only necessary if you want to isolate how access is handled to the web UI. 
 #### Web Server Port
@@ -408,7 +415,7 @@ You can control items that require special calculated values using ${intensity.m
 
 For the items that want to have a date time put into the message, utilize ${time.format(yyyy-MM-ddTHH:mm:ssXXX)} where "yyyy-MM-ddTHH:mm:ssXXX" can be any format from the Java SimpleDateFormat documented here: https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
 
-Also, device data can be inserted into your payloads by the use of "${device.name}", "${device.id}", "${device.uniqueid}", "${device.targetDevice}", "${device.mapId}", "${device.mapType}" and "${device.deviceType}". These work just like the dimming value replacements.
+Also, device data can be inserted into your payloads by the use of "${device.name}", "${device.id}", "${device.uniqueid}", "${device.targetDevice}", "${device.mapId}", "${device.mapType}", "${device.deviceType}", "${device.requesterAddress}", "${device.description}" and "${device.comments}". These work just like the dimming value replacements.
 e.g.
 ```
 [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=10&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.math(X/4)}","type":"httpDevice"}]
@@ -421,7 +428,7 @@ e.g.
 
 ```
 
-Also, you may want to use the REST API's listed below to configure your devices.
+Also, you may want to use the REST APIs listed below to configure your devices.
 ## Ask Alexa
 After this Tell Alexa: "Alexa, discover my devices". If there is an issue you can go to the `Menu / Settings / Connected Home` for the echo on the mobile app or your browser and have Alexa forget all devices and then do the discovery again.
 
@@ -446,7 +453,7 @@ To view or remove devices that Alexa knows about, you can use the mobile app `Me
 ## Google Assistant
 Google Home is supported as of v3.2.0 and forward, but only if the bridge is running on port 80.
 
-**ISSUE: Google Home now seems to not support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local APi, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
+**ISSUE: Google Home now seems to not support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local API, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
 
 Use the Google Home app on a phone to add new "home control" devices by going into `Settings / Home Control / +`
 as described [here](https://support.google.com/googlehome/answer/7124115?hl=en&ref_topic=7125624#homecontrol).
@@ -478,7 +485,7 @@ New or removed devices are picked up automatically as soon as they are added/rem
 No re-discovery step is necessary.
 
 ## Configuration REST API Usage
-This section will describe the REST api available for configuration. The REST body examples are all formatted for easy reading, the actual body usage should be like this:
+This section will describe the REST API available for configuration. The REST body examples are all formatted for easy reading, the actual body usage should be like this:
 ```
 {"var1":"value1","var2":"value2","var3:"value3"}
 ```
@@ -510,8 +517,8 @@ contentBodyOff | string | This is the content body that you would like to send w
 {
 "name" : "bedroom light",
 "deviceType" : "switch",
-  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
-  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
+  "onUrl" : "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41\",\"type\":\"veraDevice\"}]",
+  "offUrl" : "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41\",\"type\":\"veraDevice\"}]"
 }
 ```
 #### Dimming Control Example
@@ -521,8 +528,8 @@ e.g.
 {
     "name": "entry light",
     "deviceType": "switch",
-    "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31","type":"veraDevice"}],
-    "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}","type":"veraDevice"}]
+    "offUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31\",\"type\":\"veraDevice\"}]",
+    "onUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}\",\"type\":\"veraDevice\"}]"
 }
 ```
 See the echo's documentation for the dimming phrase.
@@ -534,8 +541,8 @@ e.g.
 {
     "name": "Thermostat,
     "deviceType": "custom",
-    "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=10","type":"veraDevice"}],
-    "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=10&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.math(X/4)}","type":"veraDevice"}]
+    "offUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=10\",\"type\":\"veraDevice\"}]",
+    "onUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=10&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.math(X/4)}\",\"type\":\"veraDevice\"}]"
 }
 ```
 See the echo's documentation for the dimming phrase.
@@ -547,8 +554,8 @@ e.g:
 {
     "name": "test device",
     "deviceType": "custom",
-    "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31","httpVerb":"POST","contentType" : "application/json","httpBody" : "{\"fooBar\":\"baz_off\"}],
-    "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}","type":"httpDevice","httpVerb":"POST","contentType" : "application/json","httpBody" : "{\"fooBar\":\"baz_on\"}]
+    "offUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=31\",\"httpVerb\":\"POST\",\"contentType\" : \"application/json\",\"httpBody\" : \"{\"fooBar\":\"baz_off\"}]",
+    "onUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&DeviceNum=31&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget=${intensity.percent}\",\"type\":\"httpDevice\",\"httpVerb\":\"POST\",\"contentType\" : \"application/json\",\"httpBody\" : \"{\"fooBar\":\"baz_on\"}]"
 }
 ```
 #### Custom Usage URLs Example
@@ -557,8 +564,8 @@ Anything that takes an action as a result of an HTTP request will probably work 
 {
   "name": "night mode",
   "deviceType": ""custom",
-  "offUrl": [{"item":"http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=1","type":"httpDevice"}],
-  "onUrl": [{"item":"http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=3","type":"httpDevice"}]
+  "offUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=1\",\"type\":\"httpDevice\"}]",
+  "onUrl": "[{\"item\":\"http://192.168.1.201:3480/data_request?id=lu_action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SetHouseMode&Mode=3\",\"type\":\"httpDevice\"}]"
 }
 ```
 Here is a UDP example that can send binary data.
@@ -566,8 +573,8 @@ Here is a UDP example that can send binary data.
 {
   "name": "UDPPacket",
   "deviceType": "custom",
-  "offUrl": [{"item":"udp://192.168.1.1:8899/0x460055","type":"udpDevice"}],
-  "onUrl": [{"item":"udp://192.168.1.1:8899/0x450055","type":"udpDevice"}]
+  "offUrl": "[{\"item\":\"udp://192.168.1.1:8899/0x460055\",\"type\":\"udpDevice\"}]",
+  "onUrl": "[{\"item\":\"udp://192.168.1.1:8899/0x450055\",\"type\":\"udpDevice\"}]"
 }
 ```
 #### Response
@@ -626,8 +633,8 @@ contentBodyOff | string | This is the content body that you would like to send w
 "id" : "6789",
 "name" : "table light",
 "deviceType" : "switch",
-  "onUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41","type":"veraDevice"}],
-  "offUrl" : [{"item":"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41","type":"veraDevice"}]
+  "onUrl" : "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=1&DeviceNum=41\",\"type\":\"veraDevice\"}]",
+  "offUrl" : "[{\"item\":\"http://192.168.1.201:3480/data_request?id=action&output_format=json&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue=0&DeviceNum=41\",\"type\":\"veraDevice\"}]"
 }
 ```
 #### Response
@@ -880,7 +887,7 @@ The example below is representative of some HUE device responses.
 
 Name |	Type |	Description
 -----|-------|-------------
-device | HUE lights object | The HUE light detail descriptor, see api for lights response below.
+device | HUE lights object | The HUE light detail descriptor, see API for lights response below.
 huedeviceid | string | The id of the actual passthru HUE light id.
 hueaddress | string | The address of the target HUE bridge.
 huename | string | A name given to the target HUE bridge.
@@ -889,7 +896,7 @@ huename | string | A name given to the target HUE bridge.
 [{"device":{"state":{"on":true,"bri":254,"hue":4444,"sat":254,"effect":"none","ct":0,"alert":"none","colormode":"hs","reachable":true,"xy":[0.0,0.0]},"type":"Extended color light","name":"Hue Lamp 1","modelid":"LCT001","uniqueid":"00:17:88:01:00:d4:12:08-0a","swversion":"65003148"},"huedeviceid":"1","hueaddress":"192.168.0.118:8000","huename":"HueEmul"},{"device":{"state":{"on":true,"bri":254,"hue":23536,"sat":144,"effect":"none","ct":201,"alert":"none","colormode":"hs","reachable":true,"xy":[0.346,0.3568]},"type":"Extended color light","name":"Hue Lamp 2","modelid":"LCT001","uniqueid":"00:17:88:01:00:d4:12:08-0b","swversion":"65003148"},"huedeviceid":"2","hueaddress":"192.168.0.118:8000","huename":"HueEmul"},{"device":{"state":{"on":true,"bri":254,"hue":65136,"sat":254,"effect":"none","ct":201,"alert":"none","colormode":"hs","reachable":true,"xy":[0.346,0.3568]},"type":"Extended color light","name":"Hue Lamp 3","modelid":"LCT001","uniqueid":"00:17:88:01:00:d4:12:08-0c","swversion":"65003148"},"huedeviceid":"3","hueaddress":"192.168.0.118:8000","huename":"HueEmul"}]
 ```
 ## HUE REST API usage
-This section will describe the REST api available for controlling the bridge based off of the HUE API. This Bridge does not support the full HUE API, only the calls that are supported with the HA Bridge are shown. The REST body examples are all formatted for easy reading, the actual body usage should be like this:
+This section will describe the REST API available for controlling the bridge based off of the HUE API. This Bridge does not support the full HUE API, only the calls that are supported with the HA Bridge are shown. The REST body examples are all formatted for easy reading, the actual body usage should be like this:
 ```
 {"var1":"value1","var2":"value2","var3:"value3"}
 ```
@@ -998,7 +1005,7 @@ A response to a successful PUT request contains confirmation of the arguments pa
 ]
 ```
 ### Update bridge internal light state
-Allows the user to set the internal state of the light on and off, modify the brightness. This is not a HUE API call and is special to the bridge as it keeps track of the state changes to the light from the api. It is intended to allow you to sync the bridge state with your HA system state.
+Allows the user to set the internal state of the light on and off, modify the brightness. This is not a HUE API call and is special to the bridge as it keeps track of the state changes to the light from the API. It is intended to allow you to sync the bridge state with your HA system state.
 ```
 PUT	http://host:port/api/<username>/lights/<id>/bridgeupdatestate
 ```
