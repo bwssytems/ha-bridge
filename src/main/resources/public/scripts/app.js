@@ -26,7 +26,15 @@ app.config (function ($locationProvider, $routeProvider) {
 	}).when ('/verascenes', {
 		templateUrl: 'views/verascene.html',
 		controller: 'VeraController',		
+		requiresAuthentication: true
+	}).when ('/fibarodevices', {
+		templateUrl: 'views/fibarodevice.html',
+		controller: 'FibaroController',		
 		requiresAuthentication: true		
+	}).when ('/fibaroscenes', {
+		templateUrl: 'views/fibaroscene.html',
+		controller: 'FibaroController',		
+		requiresAuthentication: true
 	}).when ('/harmonydevices', {
 		templateUrl: 'views/harmonydevice.html',
 		controller: 'HarmonyController',		
@@ -133,7 +141,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 	var self = this;
 	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {},
 			mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false,
-			isInControl: false, showVera: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false,
+			isInControl: false, showVera: false, showFibaro: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false,
 			showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: {}, viewDevId: "", queueDevId: "", securityInfo: {}};
 
 	this.displayWarn = function(errorTitle, error) {
@@ -455,6 +463,11 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 		this.state.showVera = self.state.settings.veraconfigured;
 		return;
 	}
+	
+	this.updateShowFibaro = function () {
+		this.state.showFibaro = self.state.settings.fibaroconfigured;
+		return;
+	}
 
 	this.updateShowNest = function () {
 		this.state.showNest = self.state.settings.nestconfigured;
@@ -506,6 +519,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 				function (response) {
 					self.state.settings = response.data;
 					self.updateShowVera();
+					self.updateShowFibaro();
 					self.updateShowHarmony();
 					self.updateShowNest();
 					self.updateShowHue();
@@ -641,6 +655,38 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 						$rootScope.$broadcast('securityReinit', 'done');
 					else
 					self.displayWarn("Get Vera Scenes Error: ", error);
+				}
+		);
+	};
+	
+	this.viewFibaroDevices = function () {
+		if(!this.state.showFibaro)
+			return;
+		return $http.get(this.state.base + "/fibaro/devices").then(
+				function (response) {
+					self.state.fibarodevices = response.data;
+				},
+				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
+					self.displayWarn("Get Fibaro Devices Error: ", error);
+				}
+		);
+	};
+
+	this.viewFibaroScenes = function () {
+		if(!this.state.showFibaro)
+			return;
+		return $http.get(this.state.base + "/fibaro/scenes").then(
+				function (response) {
+					self.state.fibaroscenes = response.data;
+				},
+				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
+					self.displayWarn("Get Fibaro Scenes Error: ", error);
 				}
 		);
 	};
@@ -1291,6 +1337,25 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     	    }
     	}    	
     };
+    $scope.addFibarotoSettings = function (newfibaroname, newfibaroip, newfibaroport, newfibarousername, newfibaropassword) {
+    	if($scope.bridge.settings.fibaroaddress === undefined || $scope.bridge.settings.fibaroaddress === null) {
+    		$scope.bridge.settings.fibaroaddress = { devices: [] };
+		}
+    	var newFibaro = {name: newfibaroname, ip: newfibaroip, port: newfibaroport, username: newfibarousername, password: newfibaropassword }
+    	$scope.bridge.settings.fibaroaddress.devices.push(newFibaro);
+    	$scope.newfibaroname = null;
+    	$scope.newfibaroip = null;
+    	$scope.newfibaroport = null;
+    	$scope.newfibarousername = null;
+    	$scope.newfibaropassword = null;
+    };
+    $scope.removeFibarotoSettings = function (fibaroname, fibaroip, fibaroport) {
+    	for(var i = $scope.bridge.settings.fibaroaddress.devices.length - 1; i >= 0; i--) {
+    	    if($scope.bridge.settings.fibaroaddress.devices[i].name === fibaroname && $scope.bridge.settings.fibaroaddress.devices[i].ip === fibaroip && $scope.bridge.settings.fibaroaddress.devices[i].port === fibaroport) {
+    	    	$scope.bridge.settings.fibaroaddress.devices.splice(i, 1);
+    	    }
+    	}    	
+    };
     $scope.addHarmonytoSettings = function (newharmonyname, newharmonyip, newharmonywebhook) {
     	if($scope.bridge.settings.harmonyaddress === undefined || $scope.bridge.settings.harmonyaddress === null) {
 			$scope.bridge.settings.harmonyaddress = { devices: [] };
@@ -1903,6 +1968,148 @@ app.controller('VeraController', function ($scope, $location, bridgeService, ngD
 		$location.path('/editdevice');
 	};
 });
+
+app.controller('FibaroController', function ($scope, $location, bridgeService, ngDialog) {
+	$scope.bridge = bridgeService.state;
+	$scope.device = bridgeService.state.device;
+	$scope.device_dim_control = "";
+	$scope.bulk = { devices: [] };
+	$scope.selectAll = false;
+	$scope.fibaro = {base: "http://", port: "80", id: ""};
+	bridgeService.viewFibaroDevices();
+	bridgeService.viewFibaroScenes();
+	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	$scope.buttonsVisible = false;
+	$scope.comparatorUniqueId = bridgeService.compareUniqueId;
+
+	$scope.clearDevice = function () {
+		bridgeService.clearDevice();
+		$scope.device = bridgeService.state.device;
+	};
+
+	$scope.buildDeviceUrls = function (fibarodevice, dim_control, buildonly) {
+		if(dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)
+			dimpayload = "http://" + fibarodevice.fibaroaddress + ":" + fibarodevice.fibaroport + "/api/callAction?deviceID=" + fibarodevice.id + "&name=setValue&arg1=" + dim_control;
+				
+		onpayload = "http://" + fibarodevice.fibaroaddress + ":" + fibarodevice.fibaroport + "/api/callAction?deviceID=" + fibarodevice.id + "&name=turnOn";
+		offpayload = "http://" + fibarodevice.fibaroaddress + ":" + fibarodevice.fibaroport + "/api/callAction?deviceID=" + fibarodevice.id + "&name=turnOff";
+
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, fibarodevice.id, fibarodevice.name, fibarodevice.fibaroname, "switch", "fibaroDevice", null, null);
+		bridgeService.state.device.headers = "[{\"name\":\"Authorization\",\"value\":\"" + fibarodevice.fibaroAuth + "\"}]";
+		$scope.device = bridgeService.state.device;
+		if (!buildonly) {
+			bridgeService.editNewDevice($scope.device);
+			$location.path('/editdevice');
+		}
+	};
+
+	$scope.buildSceneUrls = function (fibaroscene) {
+		onpayload = "http://" + fibaroscene.fibaroaddress + ":" + fibaroscene.fibaroport + "/api/sceneControl?id=" + fibaroscene.id + "&action=start";
+		offpayload = "http://" + fibaroscene.fibaroaddress + ":" + fibaroscene.fibaroport + "/api/sceneControl?id=" + fibaroscene.id + "&action=stop";
+
+		bridgeService.buildUrls(onpayload, null, offpayload, false, fibaroscene.id, fibaroscene.name, fibaroscene.fibaroname, "scene", "fibaroScene", null, null);
+		bridgeService.state.device.headers = "[{\"name\":\"Authorization\",\"value\":\"" + fibaroscene.fibaroAuth + "\"}]";
+		$scope.device = bridgeService.state.device;
+		bridgeService.editNewDevice($scope.device);
+		$location.path('/editdevice');
+	};
+
+	$scope.bulkAddDevices = function(dim_control) {
+		var devicesList = [];
+		$scope.clearDevice();
+		for(var i = 0; i < $scope.bulk.devices.length; i++) {
+			for(var x = 0; x < bridgeService.state.fibarodevices.length; x++) {
+				if(bridgeService.state.fibarodevices[x].id === $scope.bulk.devices[i]) {
+					$scope.buildDeviceUrls(bridgeService.state.fibarodevices[x],dim_control,true);
+					devicesList[i] = {
+							name: $scope.device.name,
+							mapId: $scope.device.mapId,
+							mapType: $scope.device.mapType,
+							deviceType: $scope.device.deviceType,
+							targetDevice: $scope.device.targetDevice,
+							onUrl: $scope.device.onUrl,
+							dimUrl: $scope.device.dimUrl,
+							offUrl: $scope.device.offUrl,
+							headers: $scope.device.headers,
+							httpVerb: $scope.device.httpVerb,
+							contentType: $scope.device.contentType,
+							contentBody: $scope.device.contentBody,
+							contentBodyDim: $scope.device.contentBodyDim,
+							contentBodyOff: $scope.device.contentBodyOff
+					};
+					$scope.clearDevice();
+				}
+			}
+		}
+		bridgeService.bulkAddDevice(devicesList).then(
+				function () {
+					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewfibaroDevices();
+					bridgeService.viewfibaroScenes();
+				},
+				function (error) {
+					bridgeService.displayWarn("Error adding fibaro devices in bulk.", error)
+				}
+			);
+		$scope.bulk = { devices: [] };
+		$scope.selectAll = false;
+	};
+
+	$scope.toggleSelection = function toggleSelection(deviceId) {
+		var idx = $scope.bulk.devices.indexOf(deviceId);
+
+		// is currently selected
+		if (idx > -1) {
+			$scope.bulk.devices.splice(idx, 1);
+			if($scope.bulk.devices.length === 0 && $scope.selectAll)
+				$scope.selectAll = false;
+		}
+
+		// is newly selected
+		else {
+			$scope.bulk.devices.push(deviceId);
+			$scope.selectAll = true;
+		}
+	};
+
+	$scope.toggleSelectAll = function toggleSelectAll() {
+		if($scope.selectAll) {
+			$scope.selectAll = false;
+			$scope.bulk = { devices: [] };
+		}
+		else {
+			$scope.selectAll = true;
+			for(var x = 0; x < bridgeService.state.fibarodevices.length; x++) {
+				if($scope.bulk.devices.indexOf(bridgeService.state.fibarodevices[x]) < 0)
+					$scope.bulk.devices.push(bridgeService.state.fibarodevices[x].id);
+			}
+		}
+	};
+
+	$scope.toggleButtons = function () {
+		$scope.buttonsVisible = !$scope.buttonsVisible;
+		if($scope.buttonsVisible)
+			$scope.imgButtonsUrl = "glyphicon glyphicon-minus";
+		else
+			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	};
+
+	$scope.deleteDevice = function (device) {
+		$scope.bridge.device = device;
+		ngDialog.open({
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
+	};
+	
+	$scope.editDevice = function (device) {
+		bridgeService.editDevice(device);
+		$location.path('/editdevice');
+	};
+});
+
 
 app.controller('HarmonyController', function ($scope, $location, bridgeService, ngDialog) {
 	$scope.bridge = bridgeService.state;
@@ -3218,6 +3425,34 @@ app.filter('configuredVeraScenes', function (bridgeService) {
 			return out;
 		for (var i = 0; i < input.length; i++) {
 			if(bridgeService.deviceContainsType(input[i], "veraScene")){
+				out.push(input[i]);
+			}
+		}
+		return out;
+	}
+});
+
+app.filter('configuredFibaroDevices', function (bridgeService) {
+	return function(input) {
+		var out = [];
+		if(input === undefined || input === null || input.length === undefined)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if(bridgeService.deviceContainsType(input[i], "fibaroDevice")){
+				out.push(input[i]);
+			}
+		}
+		return out;
+	}
+});
+
+app.filter('configuredFibaroScenes', function (bridgeService) {
+	return function(input) {
+		var out = [];
+		if(input === undefined || input === null || input.length === undefined)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if(bridgeService.deviceContainsType(input[i], "fibaroScene")){
 				out.push(input[i]);
 			}
 		}

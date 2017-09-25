@@ -7,6 +7,8 @@ public class DeviceMapTypes {
 	public final static String[] CUSTOM_DEVICE = { "custom", "Custom"};
 	public final static String[] VERA_DEVICE = { "veraDevice", "Vera Device"};
 	public final static String[] VERA_SCENE = { "veraScene", "Vera Scene"};
+	public final static String[] FIBARO_DEVICE = { "fibaroDevice", "Fibaro Device"};
+	public final static String[] FIBARO_SCENE = { "fibaroScene", "Fibaro Scene"};
 	public final static String[] HARMONY_ACTIVITY = { "harmonyActivity", "Harmony Activity"};
 	public final static String[] HARMONY_BUTTON = { "harmonyButton", "Harmony Button"};
 	public final static String[] NEST_HOMEAWAY = { "nestHomeAway", "Nest Home Status"};
@@ -57,6 +59,8 @@ public class DeviceMapTypes {
 		deviceMapTypes.add(UDP_DEVICE);
 		deviceMapTypes.add(VERA_DEVICE);
 		deviceMapTypes.add(VERA_SCENE);
+		deviceMapTypes.add(FIBARO_DEVICE);
+		deviceMapTypes.add(FIBARO_SCENE);
 		deviceMapTypes.add(SOMFY_DEVICE);
 	}
 	public static int getTypeIndex() {

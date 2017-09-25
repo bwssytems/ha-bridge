@@ -2,8 +2,8 @@ package com.bwssystems.HABridge;
 
 public class NamedIP {
 	private String name;
-        private String ip;
-        private String webhook;
+	private String ip;
+	private String webhook;
 	private String port;
 	private String username;
 	private String password;
