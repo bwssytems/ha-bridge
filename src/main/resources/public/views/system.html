@@ -152,6 +152,7 @@
 								<tr>
 									<th>Name</th>
 									<th>IP</th>
+									<th>Port</th>
 									<th>Username</th>
 									<th>Password </th>
 									<th>Manage</th>
@@ -160,11 +161,12 @@
 							<tr ng-repeat="fibaro in bridge.settings.fibaroaddress.devices">
 								<td>{{fibaro.name}}</td>
 								<td>{{fibaro.ip}}</td>
+								<td>{{fibaro.port}}</td>
 								<td>{{fibaro.username}}</td>
 								<td ng-if="fibaro.password">*******</td>
 								<td ng-if="!fibaro.password"> </td>
 								<td><button class="btn btn-danger" type="submit"
-										ng-click="removeFibarotoSettings(fibaro.name, fibaro.ip)">Del</button></td>
+										ng-click="removeFibarotoSettings(fibaro.name, fibaro.ip, fibaro.port)">Del</button></td>
 							</tr>
 							<tr>
 								<td><input id="bridge-settings-next-fibaro-name"
@@ -173,6 +175,9 @@
 								<td><input id="bridge-settings-next-fibaro-ip"
 									class="form-control" type="text" ng-model="newfibaroip"
 									placeholder="192.168.1.2"></td>
+								<td><input id="bridge-settings-next-fibaro-port"
+									class="form-control" type="text" ng-model="newfibaroport"
+									placeholder="80"></td>
 								<td><input id="bridge-settings-next-fibaro-username"
 									class="form-control" type="text" ng-model="newfibarousername"
 									placeholder="Fibaro username"></td>
@@ -180,7 +185,7 @@
 									class="form-control" type="password" ng-model="newfibaropassword"
 									placeholder="Fibaro password"></td>
 								<td><button class="btn btn-success" type="submit"
-										ng-click="addFibarotoSettings(newfibaroname, newfibaroip, newfibarousername, newfibaropassword)">Add</button></td>
+										ng-click="addFibarotoSettings(newfibaroname, newfibaroip, newfibaroport, newfibarousername, newfibaropassword)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>

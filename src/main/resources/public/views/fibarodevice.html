@@ -63,9 +63,9 @@
 					ng-checked="selectAll"
 					ng-click="toggleSelectAll()"> Name</span></th>
 				<th sortable-header col="id" comparator-fn="comparatorUniqueId">Id</th>
-				<th sortable-header col="category">Category</th>
 				<th sortable-header col="room">Room</th>
 				<th sortable-header col="fibaroname">Fibaro</th>
+				<th sortable-header col="value">Value</th>
 				<th>Build Actions</th>
 			</tr>
 		</thead>
@@ -78,9 +78,9 @@
 				ng-click="toggleSelection(fibarodevice.id)">
 				{{fibarodevice.name}}</td>
 			<td>{{fibarodevice.id}}</td>
-			<td>{{fibarodevice.category}}</td>
-			<td>{{fibarodevice.room}}</td>
+			<td>{{fibarodevice.roomName}}</td>
 			<td>{{fibarodevice.fibaroname}}</td>
+			<td>{{fibarodevice.properties.value}}</td>
 			<td>
 				<button class="btn btn-success" type="submit"
 					ng-click="buildDeviceUrls(fibarodevice, device_dim_control, false)">Build Item</button>

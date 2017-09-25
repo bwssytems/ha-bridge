@@ -1,6 +1,7 @@
 package com.bwssystems.HABridge.plugins.fibaro;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -10,60 +11,133 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.NamedIP;
+import com.bwssystems.HABridge.plugins.fibaro.json.Device;
+import com.bwssystems.HABridge.plugins.fibaro.json.Room;
+import com.bwssystems.HABridge.plugins.fibaro.json.Scene;
 import com.google.gson.Gson;
 
 public class FibaroInfo
 {
 	private static final Logger log = LoggerFactory.getLogger(FibaroInfo.class);
-	private NamedIP fibaroAddress;
 
-	// You can disable it if you want
+	private final NamedIP fibaroAddress;
+	private final String fibaroAuth;
+	private final Gson gson;
+
+	// You can disable it if you want TODO config
 	boolean useSaveLogs = true; // This can be used to exclude some devices from list
 	boolean useUserDescription = true;
-	boolean removeDigits = true;
+	boolean replaceTrash = true;
 	boolean scenesWithLiliCommandOnly = true;
 
 	public FibaroInfo(NamedIP addressName)
 	{
 		super();
 		fibaroAddress = addressName;
+		fibaroAuth = "Basic " + new String(Base64.encodeBase64((addressName.getUsername() + ":" + addressName.getPassword()).getBytes()));
+		gson = new Gson();
+	}
+
+	private String request(String request)
+	{
+		String result = null;
+		try
+		{
+			URL url = new URL("http://" + fibaroAddress.getIp() + ":" + fibaroAddress.getPort() + request);
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("GET");
+			connection.setRequestProperty("Authorization", fibaroAuth);
+			connection.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+			connection.connect();
+			BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			StringBuilder buffer = new StringBuilder();
+			String line;
+			while((line = br.readLine()) != null)
+			{
+				buffer.append(line).append("\n");
+			}
+			br.close();
+			result = buffer.toString();
+		}
+		catch(IOException e)
+		{
+			log.warn("Error while get getJson: {} ", request, e);
+		}
+		return result;
+	}
+
+	private boolean sendCommand(String request)
+	{
+		try
+		{
+			URL url = new URL("http://" + fibaroAddress.getIp() + ":" + fibaroAddress.getPort() + request);
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("GET");
+			connection.setRequestProperty("Authorization", fibaroAuth);
+			connection.getResponseMessage();
+		}
+		catch(IOException e)
+		{
+			log.warn("Error while get getJson: {} ", request, e);
+			return false;
+		}
+		return true;
+	}
+
+	private String replaceTrash(String name)
+	{
+		String sanitizedName = name.replaceAll("[0-9:/-]", "");
+		sanitizedName = name.replaceAll("\\s+", " ");
+		return sanitizedName.trim();
+	}
+	
+	private Room[] getRooms()
+	{
+		String result = request("/api/rooms");
+		Room[] rooms = result == null ? new Room[0] : gson.fromJson(result, Room[].class);
+		if(replaceTrash)
+			for(Room r : rooms)
+				r.setName(replaceTrash(r.getName()));
+		return rooms;
 	}
 
 	public Device[] getDevices()
 	{
 		Room[] rooms = getRooms();
 
-		log.debug("Founded: " + rooms.length + ", rooms");
+		log.info("Found: " + rooms.length + " rooms");
 
-		Device[] all_devices = getAllDevices();
+		String result = request("/api/devices?enabled=true&visible=true");
+		Device[] all_devices = result == null ? new Device[0] : gson.fromJson(result, Device[].class);
+
 		int count = 0;
 		for(Device d : all_devices)
-			if(d.roomID > 0 && useSaveLogs ? "true".equals(d.properties.saveLogs) : true)
+			if(d.getRoomID() > 0 && (useSaveLogs ? "true".equals(d.getProperties().getSaveLogs()) : true))
 				count++;
 
 		Device[] devices = new Device[count];
 		int i = 0;
 		for(Device d : all_devices)
-			if(d.roomID > 0 && useSaveLogs ? "true".equals(d.properties.saveLogs) : true)
+			if(d.getRoomID() > 0 && (useSaveLogs ? "true".equals(d.getProperties().getSaveLogs()) : true))
 			{
-				if(useUserDescription && d.properties.userDescription != null && !d.properties.userDescription.isEmpty())
-					d.name = d.properties.userDescription;
-				if(removeDigits)
-					d.name = replaceDigits(d.name);
+				if(useUserDescription && d.getProperties().getUserDescription() != null && !d.getProperties().getUserDescription().isEmpty())
+					d.setName(d.getProperties().getUserDescription());
+				if(replaceTrash)
+					d.setName(replaceTrash(d.getName()));
+				
 				devices[i++] = d;
 
 				for(Room room : rooms)
-					if(d.roomID == room.id)
-					{
-						d.room = room.name.trim();
-						d.category = String.valueOf(room.sectionID); // TODO load name of section
-					}
+					if(d.getRoomID() == room.getId())
+						d.setRoomName(room.getName());
 
 				d.fibaroaddress = fibaroAddress.getIp();
+				d.fibaroport = fibaroAddress.getPort();
+				d.fibaroAuth = fibaroAuth;
 				d.fibaroname = fibaroAddress.getName();
 			}
 
-		log.info("Founded: " + devices.length + " devices");
+		log.info("Found: " + devices.length + " devices");
 
 		return devices;
 	}
@@ -71,105 +145,34 @@ public class FibaroInfo
 	public Scene[] getScenes()
 	{
 		Room[] rooms = getRooms();
+		
+		String result = request("/api/scenes?enabled=true&visible=true");
+		Scene[] all_scenes = result == null ? new Scene[0] : gson.fromJson(result, Scene[].class);
+		
 		int count = 0;
-		Scene[] scenes = getAllScenes();
-		for(Scene s : scenes)
-			if(!scenesWithLiliCommandOnly || s.liliStartCommand != null && !s.liliStartCommand.isEmpty())
+		for(Scene s : all_scenes)
+			if(!scenesWithLiliCommandOnly || s.getLiliStartCommand() != null && !s.getLiliStartCommand().isEmpty())
 				count++;
-		Scene[] result = new Scene[count];
+		Scene[] scenes = new Scene[count];
 		int i = 0;
-		for(Scene s : scenes)
-			if(!scenesWithLiliCommandOnly || s.liliStartCommand != null && !s.liliStartCommand.isEmpty())
+		for(Scene s : all_scenes)
+			if(!scenesWithLiliCommandOnly || s.getLiliStartCommand() != null && !s.getLiliStartCommand().isEmpty())
 			{
-				result[i++] = s;
+				if(replaceTrash)
+					s.setName(replaceTrash(s.getName()));
+				
+				scenes[i++] = s;
 
 				for(Room room : rooms)
-					if(s.roomID == room.id)
-					{
-						s.room = room.name.trim();
-						s.category = String.valueOf(room.sectionID); // TODO load name of section
-					}
+					if(s.getRoomID() == room.getId())
+						s.setRoomName(room.getName());
 
 				s.fibaroaddress = fibaroAddress.getIp();
+				s.fibaroport = fibaroAddress.getPort();
+				s.fibaroAuth = fibaroAuth;
 				s.fibaroname = fibaroAddress.getName();
 			}
-		log.info("Founded: " + count + " scenes");
-		return result;
-	}
-
-	private Device[] getAllDevices()
-	{
-		String result = request("devices?enabled=true&visible=true");
-		if(result == null)
-			return new Device[0];
-		Device[] devices = new Gson().fromJson(result, Device[].class);
-		return devices;
-	}
-
-	private Scene[] getAllScenes()
-	{
-		String result = request("scenes?enabled=true&visible=true");
-		if(result == null)
-			return new Scene[0];
-		Scene[] scenes = new Gson().fromJson(result, Scene[].class);
+		log.info("Found: " + count + " scenes");
 		return scenes;
-	}
-
-	private Room[] getRooms()
-	{
-		String result = request("rooms");
-		if(result == null)
-			return new Room[0];
-		return new Gson().fromJson(result, Room[].class);
-	}
-
-	private String request(String theUrl)
-	{
-		theUrl = "http://" + fibaroAddress.getIp() + "/api/" + theUrl;
-		String auth = new String(Base64.encodeBase64((fibaroAddress.getUsername() + ":" + fibaroAddress.getPassword()).getBytes()));
-		java.net.URL url;
-		java.net.HttpURLConnection connection;
-		String result = null;
-		try
-		{
-			url = new URL(theUrl);
-			connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod("GET");
-			connection.setRequestProperty("Authorization", "Basic " + auth);
-			connection.setRequestProperty("Content-Type", "application/json;charset=utf-8");
-			connection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-			connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
-			connection.connect();
-			BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
-			StringBuilder buffer = new StringBuilder();
-			String line;
-			while((line = br.readLine()) != null)
-				buffer.append(line).append("\n");
-			br.close();
-			result = buffer.toString();
-		}
-		catch(Exception e)
-		{
-			log.info("Error while get getJson: " + theUrl);
-			e.printStackTrace();
-			return null;
-		}
-		return result;
-	}
-
-	private String replaceDigits(String name)
-	{
-		name = name.replaceAll("1", "");
-		name = name.replaceAll("2", "");
-		name = name.replaceAll("3", "");
-		name = name.replaceAll("4", "");
-		name = name.replaceAll("5", "");
-		name = name.replaceAll("6", "");
-		name = name.replaceAll("7", "");
-		name = name.replaceAll("8", "");
-		name = name.replaceAll("9", "");
-		name = name.replaceAll("0", "");
-		name = name.trim();
-		return name;
 	}
 }

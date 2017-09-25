@@ -16,6 +16,8 @@ import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
+import com.bwssystems.HABridge.plugins.fibaro.json.Device;
+import com.bwssystems.HABridge.plugins.fibaro.json.Scene;
 
 public class FibaroHome implements Home
 {
