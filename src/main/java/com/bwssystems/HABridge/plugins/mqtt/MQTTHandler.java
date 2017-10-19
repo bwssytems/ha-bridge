@@ -5,6 +5,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +52,17 @@ public class MQTTHandler {
         message.setRetained(Optional.ofNullable(retain).orElse(false));
 
         try {
+			if(!myClient.isConnected()) {
+				try {
+					myClient.connect();
+				} catch (MqttSecurityException e1) {
+					log.error("Could not retry connect to MQTT client for name: " + myConfig.getName() + " and ip: " + myConfig.getIp() + " with message: " + e1.getMessage());
+					return;
+				} catch (MqttException e1) {
+					log.error("Could not retry connect to MQTT client for name: " + myConfig.getName() + " and ip: " + myConfig.getIp() + " with message: " + e1.getMessage());
+					return;
+				}
+			}
 			myClient.publish(topic, message);
 		} catch (MqttException e) {
 			log.error("Could not publish to MQTT client for name: " + myConfig.getName() + " and ip: " + myConfig.getIp() + " with message: " + e.getMessage());
