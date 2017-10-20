@@ -20,7 +20,7 @@ import org.apache.http.conn.util.*;
 
 public class UpnpListener {
 	private Logger log = LoggerFactory.getLogger(UpnpListener.class);
-	private UDPDatagramSender theUDPDatagramSender;
+	private MulticastSocket upnpMulticastSocket;
 	private int httpServerPort;
 	private String responseAddress;
 	private boolean strict;
@@ -68,9 +68,9 @@ public class UpnpListener {
 			"NT: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n" +
 			"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 
-	public UpnpListener(BridgeSettingsDescriptor theSettings, BridgeControlDescriptor theControl, UDPDatagramSender aUdpDatagramSender) {
+	public UpnpListener(BridgeSettingsDescriptor theSettings, BridgeControlDescriptor theControl, UDPDatagramSender aUdpDatagramSender) throws IOException {
 		super();
-		theUDPDatagramSender = aUdpDatagramSender;
+		upnpMulticastSocket = null;
 		httpServerPort = Integer.valueOf(theSettings.getServerPort());
 		responseAddress = theSettings.getUpnpConfigAddress();
 		strict = theSettings.isUpnpStrict();
@@ -80,21 +80,19 @@ public class UpnpListener {
 		aHueConfig = HuePublicConfig.createConfig("temp", responseAddress, HueConstants.HUB_VERSION);
 		bridgeId = aHueConfig.getBridgeid();
 		bridgeSNUUID = aHueConfig.getSNUUIDFromMac();
-	}
-
-	@SuppressWarnings("resource")
-	public boolean startListening(){
-		log.info("UPNP Discovery Listener starting....");
-		MulticastSocket upnpMulticastSocket = null;
-		Enumeration<NetworkInterface> ifs = null;
-
 		try {
 			upnpMulticastSocket  = new MulticastSocket(Configuration.UPNP_DISCOVERY_PORT);
 		} catch(IOException e){
 			log.error("Upnp Discovery Port is in use, or restricted by admin (try running with sudo or admin privs): " + Configuration.UPNP_DISCOVERY_PORT + " with message: " + e.getMessage());
-			return false;
+			throw(e);
 		}
 		
+	}
+
+	public boolean startListening(){
+		log.info("UPNP Discovery Listener starting....");
+		Enumeration<NetworkInterface> ifs = null;
+
 		InetSocketAddress socketAddress = new InetSocketAddress(Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT);
 		try {
 			ifs =	NetworkInterface.getNetworkInterfaces();
@@ -163,12 +161,12 @@ public class UpnpListener {
 
 				current = Instant.now();
 				if(ChronoUnit.MILLIS.between(previous, current) > Configuration.UPNP_NOTIFY_TIMEOUT) {
-					sendUpnpNotify(socketAddress.getAddress(), upnpMulticastSocket);
+					sendUpnpNotify(socketAddress.getAddress());
 					previous = Instant.now();
 				}
 
 			} catch (SocketTimeoutException e) {
-				sendUpnpNotify(socketAddress.getAddress(), upnpMulticastSocket);
+				sendUpnpNotify(socketAddress.getAddress());
 			} catch (IOException e) {
 				log.error("UpnpListener encountered an error reading socket. Shutting down", e);
 				error = true;
@@ -242,7 +240,7 @@ public class UpnpListener {
 		}
 		else
 			log.debug("sendUpnpResponse discovery responseTemplate1 is <<<" + discoveryResponse + ">>>");
-		theUDPDatagramSender.sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
+		sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
 
 		discoveryResponse = String.format(responseTemplate2, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
 		if(traceupnp) {
@@ -250,7 +248,7 @@ public class UpnpListener {
 		}
 		else
 			log.debug("sendUpnpResponse discovery responseTemplate2 is <<<" + discoveryResponse + ">>>");
-		theUDPDatagramSender.sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
+		sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
 
 		discoveryResponse = String.format(responseTemplate3, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID);
 		if(traceupnp) {
@@ -258,10 +256,18 @@ public class UpnpListener {
 		}
 		else
 			log.debug("sendUpnpResponse discovery responseTemplate3 is <<<" + discoveryResponse + ">>>");
-		theUDPDatagramSender.sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
+		sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
+	}
+
+	private void sendUDPResponse(byte[] udpMessage, InetAddress requester, int sourcePort) throws IOException {
+		log.debug("Sending response string: <<<" + new String(udpMessage) + ">>>");
+		if(upnpMulticastSocket == null)
+			throw new IOException("Socket not initialized");
+		DatagramPacket response = new DatagramPacket(udpMessage, udpMessage.length, requester, sourcePort);
+		upnpMulticastSocket.send(response);
 	}
 	
-	protected void sendUpnpNotify(InetAddress aSocketAddress, MulticastSocket theUpnpMulticastSocket) {
+	protected void sendUpnpNotify(InetAddress aSocketAddress) {
 		String notifyData = null;
 		log.debug("Sending notify packet for upnp.");
 		notifyData = String.format(notifyTemplate, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
@@ -270,7 +276,7 @@ public class UpnpListener {
 		}
 		DatagramPacket notifyPacket = new DatagramPacket(notifyData.getBytes(), notifyData.length(), aSocketAddress, Configuration.UPNP_DISCOVERY_PORT);
 		try {
-			theUpnpMulticastSocket.send(notifyPacket);
+			upnpMulticastSocket.send(notifyPacket);
 		} catch (IOException e1) {
 			log.warn("UpnpListener encountered an error sending upnp notify packet. IP: " + notifyPacket.getAddress().getHostAddress() + " with message: " + e1.getMessage());
 			log.debug("UpnpListener send upnp notify exception: ", e1);

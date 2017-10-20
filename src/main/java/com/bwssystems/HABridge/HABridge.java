@@ -2,6 +2,8 @@ package com.bwssystems.HABridge;
 
 import static spark.Spark.*;
 
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,8 +84,14 @@ public class HABridge {
 		        awaitInitialization();
 		
 		        // start the upnp ssdp discovery listener
-		        theUpnpListener = new UpnpListener(bridgeSettings.getBridgeSettingsDescriptor(), bridgeSettings.getBridgeControl(), udpSender);
-		        if(theUpnpListener.startListening())
+		        theUpnpListener = null;
+		        try {
+					theUpnpListener = new UpnpListener(bridgeSettings.getBridgeSettingsDescriptor(), bridgeSettings.getBridgeControl(), udpSender);
+				} catch (IOException e) {
+					log.error("Could not initialize UpnpListener, exiting....", e);
+					theUpnpListener = null;
+				}
+		        if(theUpnpListener != null && theUpnpListener.startListening())
 		        	log.info("HA Bridge (v" + theVersion.getVersion() + ") reinitialization requessted....");
 		        else
 		        	bridgeSettings.getBridgeControl().setStop(true);

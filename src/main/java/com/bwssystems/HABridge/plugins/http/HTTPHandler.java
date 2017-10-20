@@ -208,7 +208,8 @@ public class HTTPHandler {
 	public void closeHandler() {
 		try {
 //			httpClient.close();
-			conn.close();
+			if(conn != null)
+				conn.close();
 			connMgr.closeExpiredConnections();
 			connMgr.shutdown();
 		} catch (IOException e) {
