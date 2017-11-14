@@ -66,7 +66,7 @@ public class FibaroInfo
 		return result;
 	}
 
-	private boolean sendCommand(String request)
+	protected boolean sendCommand(String request)
 	{
 		try
 		{
