@@ -965,12 +965,12 @@ public class HueMulator {
 		if (bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton()) != null) {
 			log.debug("hue api config requested, User invalid, returning public config");
 			HuePublicConfig apiResponse = HuePublicConfig.createConfig("HA-Bridge",
-					bridgeSettings.getUpnpConfigAddress(), bridgeSettings.getHubversion());
+					bridgeSettings.getUpnpConfigAddress(), bridgeSettings.getHubversion(), bridgeSettings.getHubmac());
 			return apiResponse;
 		}
 
 		HueApiResponse apiResponse = new HueApiResponse("HA-Bridge", bridgeSettings.getUpnpConfigAddress(),
-				bridgeSettingMaster.getBridgeSecurity().getWhitelist(), bridgeSettings.getHubversion(), bridgeSettingMaster.getBridgeControl().isLinkButton());
+				bridgeSettingMaster.getBridgeSecurity().getWhitelist(), bridgeSettings.getHubversion(), bridgeSettingMaster.getBridgeControl().isLinkButton(), bridgeSettings.getHubmac());
 		log.debug("api response config <<<" + aGsonHandler.toJson(apiResponse.getConfig()) + ">>>");
 		return apiResponse.getConfig();
 	}
@@ -985,7 +985,7 @@ public class HueMulator {
 		}
 
 		HueApiResponse apiResponse = new HueApiResponse("HA-Bridge", bridgeSettings.getUpnpConfigAddress(),
-				bridgeSettingMaster.getBridgeSecurity().getWhitelist(), bridgeSettings.getHubversion(), bridgeSettingMaster.getBridgeControl().isLinkButton());
+				bridgeSettingMaster.getBridgeSecurity().getWhitelist(), bridgeSettings.getHubversion(), bridgeSettingMaster.getBridgeControl().isLinkButton(), bridgeSettings.getHubmac());
 		apiResponse.setLights((Map<String, DeviceResponse>) this.lightsListHandler(userId, ipAddress));
 		apiResponse.setGroups((Map<String, GroupResponse>) this.groupsListHandler(userId, ipAddress));
 

@@ -76,6 +76,7 @@ public class BridgeSettings extends BackupHandler {
         }
         String serverPortOverride = System.getProperty("server.port");
         String serverIpOverride = System.getProperty("server.ip");
+        String upnpStrictOverride = System.getProperty("upnp.strict", "true");
         if(configFileProperty != null)
         {
         	log.info("reading from config file: " + configFileProperty);
@@ -213,6 +214,8 @@ public class BridgeSettings extends BackupHandler {
         	theBridgeSettings.setServerPort(serverPortOverride);
         if(serverIpOverride != null)
         	theBridgeSettings.setWebaddress(serverIpOverride);
+        if(upnpStrictOverride != null)
+        	theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(upnpStrictOverride));
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
 		
 		bridgeSecurity.setSecurityData(theBridgeSettings.getSecurityData());

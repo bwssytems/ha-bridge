@@ -77,7 +77,7 @@ public class UpnpListener {
 		traceupnp = theSettings.isTraceupnp();
 		useUpnpIface = theSettings.isUseupnpiface();
 		bridgeControl = theControl;
-		aHueConfig = HuePublicConfig.createConfig("temp", responseAddress, HueConstants.HUB_VERSION);
+		aHueConfig = HuePublicConfig.createConfig("temp", responseAddress, HueConstants.HUB_VERSION, theSettings.getHubmac());
 		bridgeId = aHueConfig.getBridgeid();
 		bridgeSNUUID = aHueConfig.getSNUUIDFromMac();
 		try {

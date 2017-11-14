@@ -317,12 +317,6 @@
 						</table></td>
 				</tr>
 				<tr>
-					<td>HAL Token (please use token on individual HAL entry)</td>
-					<td><input id="bridge-settings-haltoken" class="form-control"
-						type="password" ng-model="bridge.settings.haltoken"
-						placeholder="thetoken"></td>
-				</tr>
-				<tr>
 					<td>MQTT Client IDs and IP Addresses</td>
 					<td><table
 							class="table table-bordered table-striped table-hover">
@@ -555,7 +549,12 @@
 						placeholder="01036562"></td>
 				</tr>
 				<tr>
-					<td>Button Press/Call Item Loop Sleep Interval (ms)</td>
+					<td>Emulate MAC<br />(used in bridge-id, uuid, etc.<br /> - leave blank unless needed)</td>
+					<td><input id="bridge-settings-hubmac" class="form-control"
+						type="text" ng-model="bridge.settings.hubmac"></td>
+				</tr>
+				<tr>
+					<td>Button Press/Call Item<br />Loop Sleep Interval (ms)</td>
 					<td><input id="bridge-settings-buttonsleep"
 						class="form-control" type="number" name="input"
 						ng-model="bridge.settings.buttonsleep" min="100" max="9999"></td>
@@ -566,12 +565,6 @@
 						class="form-control" type="number"
 						ng-model="bridge.settings.numberoflogmessages" min="100"
 						max="65535"></td>
-				</tr>
-				<tr>
-					<td>UPNP Strict Handling</td>
-					<td><input type="checkbox"
-						ng-model="bridge.settings.upnpstrict" ng-true-value=true
-						ng-false-value=false> {{bridge.settings.upnpstrict}}</td>
 				</tr>
 				<tr>
 					<td>Trace UPNP Calls</td>

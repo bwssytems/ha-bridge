@@ -39,9 +39,6 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("buttonsleep")
 	@Expose
 	private Integer buttonsleep;
-	@SerializedName("upnpstrict")
-	@Expose
-	private boolean upnpstrict;
 	@SerializedName("traceupnp")
 	@Expose
 	private boolean traceupnp;
@@ -66,9 +63,6 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("haladdress")
 	@Expose
 	private IpList haladdress;
-	@SerializedName("haltoken")
-	@Expose
-	private String haltoken;
 	@SerializedName("whitelist")
 	@Expose
 	private Map<String, WhitelistEntry> whitelist;
@@ -93,6 +87,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("hubversion")
 	@Expose
 	private String hubversion;
+	@SerializedName("hubmac")
+	@Expose
+	private String hubmac;
 	@SerializedName("securityData")
 	@Expose
 	private String securityData;
@@ -110,6 +107,10 @@ public class BridgeSettingsDescriptor {
 	private boolean domoticzconfigured;
 	private boolean somfyconfigured;
 	private boolean lifxconfigured;
+
+	// Deprecated settings
+	private String haltoken;
+	private boolean upnpstrict;
 	
 	public BridgeSettingsDescriptor() {
 		super();
@@ -134,6 +135,7 @@ public class BridgeSettingsDescriptor {
 		this.myechourl = "alexa.amazon.com/spa/index.html#cards";
 		this.webaddress = "0.0.0.0";
 		this.hubversion = HueConstants.HUB_VERSION;
+		this.hubmac = null;
 	}
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -362,6 +364,12 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setHubversion(String hubversion) {
 		this.hubversion = hubversion;
+	}
+	public String getHubmac() {
+		return hubmac;
+	}
+	public void setHubmac(String hubmac) {
+		this.hubmac = hubmac;
 	}
 	public IpList getDomoticzaddress() {
 		return domoticzaddress;

@@ -24,6 +24,7 @@ import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpRequestExecutor;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -36,14 +37,21 @@ public class HTTPHandler {
 //	private CloseableHttpClient httpClient;
 //	private RequestConfig globalConfig;
 	private HttpClientContext context;
-	private HttpClientConnectionManager connMgr;
+	private PoolingHttpClientConnectionManager connMgr;
 	private HttpRoute route;
 	private HttpClientConnection conn;
 	private HttpHost theHost;
 	
 	public HTTPHandler() {
 		context = HttpClientContext.create();
-		connMgr = new BasicHttpClientConnectionManager();
+		connMgr = new PoolingHttpClientConnectionManager();
+		// Increase max total connection to 200
+		connMgr.setMaxTotal(200);
+		// Increase default max connection per route to 20
+		connMgr.setDefaultMaxPerRoute(20);
+		// Increase max connections for localhost:80 to 50
+		HttpHost localhost = new HttpHost("locahost", 80);
+		connMgr.setMaxPerRoute(new HttpRoute(localhost), 50);
 		route = null;
 		conn = null;
 		theHost = null;
@@ -62,6 +70,7 @@ public class HTTPHandler {
 		ContentType parsedContentType = null;
 		ConnectionRequest connRequest = null;
 		StringEntity requestBody = null;
+		boolean badResponse = false;
 		if (contentType != null && !contentType.trim().isEmpty()) {
 			parsedContentType = ContentType.parse(contentType);
 			if (body != null && body.length() > 0)
@@ -143,43 +152,48 @@ public class HTTPHandler {
 		for (int retryCount = 0; retryCount < 2; retryCount++) {
 			try {
 				response = exeRequest.execute(request, conn, context);
+				log.debug((httpVerb == null ? "GET" : httpVerb) + " execute (" + retryCount + ") on URL responded: "
+						+ response.getStatusLine().getStatusCode());
+				if (response != null && response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
+					log.debug("Successfull response - The http response is <<<" + theContent + ">>>");
+					retryCount = 2;
+				} else if (response != null) {
+					log.warn("HTTP response code was not an expected successful response of between 200 - 299, the code was: "
+									+ response.getStatusLine());
+					if (response.getStatusLine().getStatusCode() == 504) {
+						log.warn("HTTP response code was 504, retrying...");
+					} else
+						retryCount = 2;
+					
+					badResponse = true;
+				}
+				
+				if (response != null && response.getEntity() != null) {
+					try {
+
+						theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); // read
+																											// content
+																											// for
+																											// data
+
+						EntityUtils.consume(response.getEntity()); // close out
+																	// inputstream
+																	// ignore
+																	// content
+						if(!badResponse)
+							theContent = null;
+					} catch (Exception e) {
+						log.debug("Error ocurred in handling response entity after successful call, still responding success. "
+										+ e.getMessage(), e);
+					}
+				}
 			} catch (ClientProtocolException e) {
 				log.warn("Client Protocol Exception received, retyring....");
-			} catch (IOException e) {
-				log.warn("Error calling out to HA gateway: IOException in log", e);
-				retryCount = 2;
 			} catch (HttpException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			log.debug((httpVerb == null ? "GET" : httpVerb) + " execute (" + retryCount + ") on URL responded: "
-					+ response.getStatusLine().getStatusCode());
-			if (response != null && response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
-				log.debug("Successfull response - The http response is <<<" + theContent + ">>>");
+				log.warn("Error calling out to HA gateway: HttpException in log", e);
+			} catch (IOException e) {
+				log.warn("Error calling out to HA gateway: IOException in log: " + e.getMessage());
 				retryCount = 2;
-			} else if (response != null) {
-				log.warn("HTTP response code was not an expected successful response of between 200 - 299, the code was: "
-								+ response.getStatusLine());
-				if (response.getStatusLine().getStatusCode() == 504) {
-					log.warn("HTTP response code was 504, retrying...");
-				} else
-					retryCount = 2;
-			}
-			
-			if (response != null && response.getEntity() != null) {
-				try {
-					theContent = EntityUtils.toString(response.getEntity(), Charset.forName("UTF-8")); // read
-																										// content
-																										// for
-																										// data
-					EntityUtils.consume(response.getEntity()); // close out
-																// inputstream
-																// ignore
-																// content
-				} catch (Exception e) {
-					log.debug("Error ocurred in handling response entity after successful call, still responding success. "
-									+ e.getMessage(), e);
-				}
 			}
 
 			if(retryCount < 2) {
