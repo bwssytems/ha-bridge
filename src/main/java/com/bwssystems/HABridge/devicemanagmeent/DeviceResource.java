@@ -231,6 +231,18 @@ public class DeviceResource {
 	        response.status(HttpStatus.SC_OK);
 	        return homeManager.findResource(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.VERA_SCENE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
+    	
+    	get (API_CONTEXT + "/fibaro/devices", "application/json", (request, response) -> {
+	    	log.debug("Get fibaro devices");
+        	response.status(HttpStatus.SC_OK);
+	        return homeManager.findResource(DeviceMapTypes.FIBARO_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.FIBARO_DEVICE[DeviceMapTypes.typeIndex]);
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/fibaro/scenes", "application/json", (request, response) -> {
+	    	log.debug("Get fibaro scenes");
+	        response.status(HttpStatus.SC_OK);
+	        return homeManager.findResource(DeviceMapTypes.FIBARO_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.FIBARO_SCENE[DeviceMapTypes.typeIndex]);
+	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/harmony/activities", "application/json", (request, response) -> {
 	    	log.debug("Get harmony activities");

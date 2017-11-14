@@ -7,6 +7,10 @@
 		href="#!/veradevices">Vera Devices</a></li>
 	<li ng-if="bridge.showVera" role="presentation"><a
 		href="#!/verascenes">Vera Scenes</a></li>
+	<li ng-if="bridge.showFibaro" role="presentation"><a
+		href="#!/fibarodevices">Fibaro Devices</a></li>
+	<li ng-if="bridge.showFibaro" role="presentation"><a
+		href="#!/fibaroscenes">Fibaro Scenes</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
 		href="#!/harmonyactivities">Harmony Activities</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
@@ -144,6 +148,51 @@
 									placeholder="192.168.1.2"></td>
 								<td><button class="btn btn-success" type="submit"
 										ng-click="addVeratoSettings(newveraname, newveraip)">Add</button></td>
+							</tr>
+						</table></td>
+				</tr>
+				<tr>
+					<td>Fibaro Names and IP Addresses</td>
+					<td><table
+							class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>IP</th>
+									<th>Port</th>
+									<th>Username</th>
+									<th>Password </th>
+									<th>Manage</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="fibaro in bridge.settings.fibaroaddress.devices">
+								<td>{{fibaro.name}}</td>
+								<td>{{fibaro.ip}}</td>
+								<td>{{fibaro.port}}</td>
+								<td>{{fibaro.username}}</td>
+								<td ng-if="fibaro.password">*******</td>
+								<td ng-if="!fibaro.password"> </td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removeFibarotoSettings(fibaro.name, fibaro.ip, fibaro.port)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-next-fibaro-name"
+									class="form-control" type="text" ng-model="newfibaroname"
+									placeholder="A Fibaro"></td>
+								<td><input id="bridge-settings-next-fibaro-ip"
+									class="form-control" type="text" ng-model="newfibaroip"
+									placeholder="192.168.1.2"></td>
+								<td><input id="bridge-settings-next-fibaro-port"
+									class="form-control" type="text" ng-model="newfibaroport"
+									placeholder="80"></td>
+								<td><input id="bridge-settings-next-fibaro-username"
+									class="form-control" type="text" ng-model="newfibarousername"
+									placeholder="Fibaro username"></td>
+								<td><input id="bridge-settings-next-fibaro-password"
+									class="form-control" type="password" ng-model="newfibaropassword"
+									placeholder="Fibaro password"></td>
+								<td><button class="btn btn-success" type="submit"
+										ng-click="addFibarotoSettings(newfibaroname, newfibaroip, newfibaroport, newfibarousername, newfibaropassword)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>
