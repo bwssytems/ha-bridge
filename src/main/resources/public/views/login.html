@@ -20,10 +20,13 @@
 					<button type="submit" class="btn btn-success" value="Submit">Submit</button>
 				</div>
 			</form>
+			<div ng-if="failed">
+				<p><font color="red">Login failed! Username or passowrd incorrect.</font></p>
+			</div>
 
 		</div>
 		<div ng-if="loggedIn">
-			<button type="button" class="btn btn-danger" ng-click="logout()">Logout</button>
+			<button type="button" class="btn btn-danger" ng-click="logout()">Are you sure you want to Logout?</button>
 		</div>
 	</div>
 </div>
