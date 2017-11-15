@@ -27,10 +27,13 @@ public class DomoticzHome implements Home {
 	private Map<String, DomoticzHandler> domoticzs;
 	private Boolean validDomoticz;
     private HTTPHandler httpClient;
+	private boolean closed;
 
 	public DomoticzHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
@@ -162,8 +165,15 @@ public class DomoticzHome implements Home {
 	}
 	@Override
 	public void closeHome() {
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
+
 		if(httpClient != null)
 			httpClient.closeHandler();
-		
+
+		closed = true;		
 	}
 }

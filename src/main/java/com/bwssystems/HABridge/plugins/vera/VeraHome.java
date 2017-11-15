@@ -25,10 +25,13 @@ public class VeraHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(VeraHome.class);
 	private Map<String, VeraInfo> veras;
 	private Boolean validVera;
+	private boolean closed;
 	
 	public VeraHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	public List<Device> getDevices() {
@@ -107,6 +110,12 @@ public class VeraHome implements Home {
 
 	@Override
 	public void closeHome() {
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		veras = null;
+		closed = true;
 	}
 }

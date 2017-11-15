@@ -1,5 +1,7 @@
 package com.bwssystems.HABridge.plugins.http;
 
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +23,15 @@ import com.google.gson.Gson;
 public class HTTPHome implements Home {
 	private static final Logger log = LoggerFactory.getLogger(HTTPHome.class);
 	private HTTPHandler anHttpHandler;
+	protected HttpClientPool thePool;
+	private boolean closed;
 
 	public HTTPHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
+		thePool = new HttpClientPool();
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
@@ -101,9 +108,22 @@ public class HTTPHome implements Home {
 
 	@Override
 	public void closeHome() {
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		if(anHttpHandler != null)
 			anHttpHandler.closeHandler();
 		anHttpHandler = null;
+		try {
+			HttpClientPool.shutdown();
+		} catch (InterruptedException e) {
+			log.warn("Error shutting down http pool: " + e.getMessage());;
+		} catch (IOException e) {
+			log.warn("Error shutting down http pool: " + e.getMessage());;
+		}
+		closed = true;
 	}
 
 }

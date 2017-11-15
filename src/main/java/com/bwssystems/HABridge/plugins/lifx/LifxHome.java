@@ -38,10 +38,13 @@ public class LifxHome implements Home {
 	private LFXClient client;        
 	private Boolean validLifx;
 	private Gson aGsonHandler;
+	private boolean closed;
 	
 	public LifxHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
@@ -213,7 +216,13 @@ public class LifxHome implements Home {
 	public void closeHome() {
 		if(!validLifx)
 			return;
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		client.close();
+		closed = true;
 	}
     private static class MyLightListener implements LFXLightCollectionListener {
         private static final Logger log = LoggerFactory.getLogger(MyLightListener.class);

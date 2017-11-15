@@ -26,10 +26,13 @@ public class HassHome implements Home {
 	private Map<String, HomeAssistant> hassMap;
 	private Boolean validHass;
 	private Gson aGsonHandler;
+	private boolean closed;
 	
 	public HassHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
@@ -152,6 +155,11 @@ public class HassHome implements Home {
 	public void closeHome() {
 		if(!validHass)
 			return;
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		if(hassMap == null)
 			return;
 		Iterator<String> keys = hassMap.keySet().iterator();
@@ -161,5 +169,6 @@ public class HassHome implements Home {
 		}
 		
 		hassMap = null;
+		closed = true;
 	}
 }

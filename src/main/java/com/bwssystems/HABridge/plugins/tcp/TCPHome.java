@@ -34,11 +34,13 @@ public class TCPHome implements Home {
 	private byte[] sendData;
 	private Map<String, Socket> theSockets;
 	private Gson aGsonHandler;
-    
+	private boolean closed;
 
 	public TCPHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
@@ -145,6 +147,11 @@ public class TCPHome implements Home {
 
 	@Override
 	public void closeHome() {
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		log.debug("Shutting down TCP sockets.");
 		if(theSockets != null && !theSockets.isEmpty()) {
 			Iterator<String> keys = theSockets.keySet().iterator();
@@ -157,6 +164,7 @@ public class TCPHome implements Home {
 				}
 			}
 		}
+		closed = true;
 	}
 
 }

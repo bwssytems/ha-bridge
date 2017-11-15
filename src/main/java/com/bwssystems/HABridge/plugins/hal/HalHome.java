@@ -27,10 +27,13 @@ public class HalHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(HalHome.class);
 	private Map<String, HalInfo> hals;
 	private Boolean validHal;
+	private boolean closed;
 
 	public HalHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
@@ -194,7 +197,13 @@ public class HalHome implements Home {
 
 	@Override
 	public void closeHome() {
-		// noop
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		
+		hals = null;
+		closed = true;
 	}
 }

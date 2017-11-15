@@ -97,6 +97,7 @@ public class HABridge {
 		        	bridgeSettings.getBridgeControl().setStop(true);
 		        if(bridgeSettings.getBridgeSettingsDescriptor().isSettingsChanged())
 		        	bridgeSettings.save(bridgeSettings.getBridgeSettingsDescriptor());
+		        log.info("Going to close all homes");
 		        homeManager.closeHomes();
 		        udpSender.closeResponseSocket();
 		        udpSender = null;

@@ -19,10 +19,13 @@ import com.bwssystems.HABridge.hue.TimeDecode;
 public class CommandHome implements Home {
 	private static final Logger log = LoggerFactory.getLogger(CommandHome.class);
 	private BridgeSettings theSettings;
+	private boolean closed;
 
 	public CommandHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
@@ -93,8 +96,13 @@ public class CommandHome implements Home {
 
 	@Override
 	public void closeHome() {
-		// noop
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		
+		closed = true;
 	}
 
 }

@@ -31,10 +31,13 @@ public class SomfyHome implements Home  {
     private static final Logger log = LoggerFactory.getLogger(SomfyHome.class);
 	private Map<String, SomfyInfo> somfys;
 	private Boolean validSomfy;
+	private boolean closed;
 
 	public SomfyHome(BridgeSettings bridgeSettings) {
+		super();
+		closed = true;
 		createHome(bridgeSettings);
-
+		closed = false;
 	}
 
 	public SomfyInfo getSomfyHandler(String somfyName) {
@@ -114,6 +117,12 @@ public class SomfyHome implements Home  {
 
 	@Override
 	public void closeHome() {
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		somfys = null;
+		closed = true;
 	}
 }

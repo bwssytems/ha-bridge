@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.bwssystems.HABridge.devicemanagmeent.ResourceHandler;
 import com.bwssystems.HABridge.plugins.NestBridge.NestHome;
 import com.bwssystems.HABridge.plugins.domoticz.DomoticzHome;
@@ -23,6 +26,7 @@ import com.bwssystems.HABridge.plugins.fibaro.FibaroHome;
 import com.bwssystems.HABridge.util.UDPDatagramSender;
 
 public class HomeManager {
+	private static final Logger log = LoggerFactory.getLogger(HomeManager.class);
 	Map<String, Home> homeList;
 	Map<String, Home> resourceList;
 	
@@ -114,8 +118,10 @@ public class HomeManager {
 	}
 
 	public void closeHomes() {
+		log.info("Manager close homes called....");
 		Collection<Home> theHomes = homeList.values();
 		for(Home aHome : theHomes) {
+			log.info("Closing home: " + aHome.getClass().getCanonicalName());
 			aHome.closeHome();
 		}
 		homeList.clear();

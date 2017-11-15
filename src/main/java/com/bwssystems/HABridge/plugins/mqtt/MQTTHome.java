@@ -26,16 +26,24 @@ public class MQTTHome implements Home {
 	private Map<String, MQTTHandler> handlers;
 	private Boolean validMqtt;
 	private Gson aGsonHandler;
+	private boolean closed;
 
 	public MQTTHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
 	public void closeHome() {
 		if(!validMqtt)
 			return;
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		log.debug("Shutting down MQTT handlers.");
 		if(handlers != null && !handlers.isEmpty()) {
 			for (String key : handlers.keySet()) {
@@ -43,6 +51,7 @@ public class MQTTHome implements Home {
 			}
 		}
 		handlers = null;
+		closed = false;
 	}
 
 	public MQTTHandler getMQTTHandler(String aName) {

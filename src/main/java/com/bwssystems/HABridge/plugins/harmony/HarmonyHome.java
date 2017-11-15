@@ -32,16 +32,24 @@ public class HarmonyHome implements Home {
 	private Boolean isDevMode;
 	private Boolean validHarmony;
 	private Gson aGsonHandler;
+	private boolean closed;
 
 	public HarmonyHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
 	public void closeHome() {
 		if(!validHarmony)
 			return;
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		if(isDevMode || hubs == null)
 			return;
 		Iterator<String> keys = hubs.keySet().iterator();
@@ -51,6 +59,7 @@ public class HarmonyHome implements Home {
 		}
 		
 		hubs = null;
+		closed = true;
 	}
 
 	public HarmonyHandler getHarmonyHandler(String aName) {

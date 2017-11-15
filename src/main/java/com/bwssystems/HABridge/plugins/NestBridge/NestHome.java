@@ -32,10 +32,13 @@ public class NestHome implements com.bwssystems.HABridge.Home {
 	private Gson aGsonHandler;
 	private Boolean isFarenheit;
     private Boolean validNest;
+	private boolean closed;
     
 	public NestHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 	
 	@Override
@@ -93,12 +96,18 @@ public class NestHome implements com.bwssystems.HABridge.Home {
 	
 	@Override
 	public void closeHome() {
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		if(theSession != null) {
 			theNest.endNestSession();
 		}
 		theNest = null;
 		theSession = null;
 		nestItems = null;
+		closed = true;
 	}
 
 	@Override

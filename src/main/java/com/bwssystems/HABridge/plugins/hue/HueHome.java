@@ -27,11 +27,14 @@ public class HueHome implements Home {
 	private Boolean validHue;
 	private Gson aGsonHandler;
 	private BridgeSettings theBridgeSettings;
+	private boolean closed;
 	
 	public HueHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		theBridgeSettings = bridgeSettings;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
@@ -135,6 +138,11 @@ public class HueHome implements Home {
 	public void closeHome() {
 		if(!validHue)
 			return;
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		if(hues == null)
 			return;
 		Iterator<String> keys = hues.keySet().iterator();
@@ -143,5 +151,6 @@ public class HueHome implements Home {
 			hues.get(key).closeHue();;
 		}
 		hues = null;
+		closed = true;
 	}
 }

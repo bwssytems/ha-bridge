@@ -25,11 +25,14 @@ public class FibaroHome implements Home
 	private static final Logger log = LoggerFactory.getLogger(FibaroHome.class);
 	private Map<String, FibaroInfo> fibaros;
 	private Boolean validFibaro;
+	private boolean closed;
 
 	public FibaroHome(BridgeSettings bridgeSettings)
 	{
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	public List<Device> getDevices()
@@ -102,6 +105,12 @@ public class FibaroHome implements Home
 	@Override
 	public void closeHome()
 	{
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		fibaros = null;
+		closed = true;
 	}
 }

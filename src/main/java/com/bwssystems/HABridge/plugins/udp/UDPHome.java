@@ -26,11 +26,14 @@ public class UDPHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(UDPHome.class);
     private UDPDatagramSender theUDPDatagramSender;
 	private byte[] sendData;
+	private boolean closed;
     
 	public UDPHome(BridgeSettings bridgeSettings, UDPDatagramSender aUDPDatagramSender) {
 		super();
 		theUDPDatagramSender = aUDPDatagramSender;
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
@@ -104,8 +107,12 @@ public class UDPHome implements Home {
 
 	@Override
 	public void closeHome() {
-		// TODO Auto-generated method stub
-		
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
+		closed = true;
 	}
 
 }
