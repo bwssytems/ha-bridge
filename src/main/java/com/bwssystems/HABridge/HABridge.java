@@ -57,6 +57,7 @@ public class HABridge {
 	        ipAddress(bridgeSettings.getBridgeSettingsDescriptor().getWebaddress());
 	        // sparkjava config directive to set port for the web server to listen on
 	        port(bridgeSettings.getBridgeSettingsDescriptor().getServerPort());
+	    	initExceptionHandler((e) -> HABridge.theExceptionHandler(e, bridgeSettings.getBridgeSettingsDescriptor().getServerPort()));
 	        if(!bridgeSettings.getBridgeControl().isReinit())
 	        	init();
 	        bridgeSettings.getBridgeControl().setReinit(false);
@@ -107,8 +108,7 @@ public class HABridge {
 	        	try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.error("Sleep error: " + e.getMessage());
 				}
 	        }
         }
@@ -117,5 +117,11 @@ public class HABridge {
         	bridgeSettings.updateConfigFile();
         log.info("HA Bridge (v" + theVersion.getVersion() + ") exiting....");
         System.exit(0);
+    }
+    
+    private static void theExceptionHandler(Exception e, Integer thePort) {
+        Logger log = LoggerFactory.getLogger(HABridge.class);
+    	log.error("Could not start ha-bridge webservice on port [" + thePort + "] due to: " + e.getMessage());
+    	System.exit(0);
     }
 }
