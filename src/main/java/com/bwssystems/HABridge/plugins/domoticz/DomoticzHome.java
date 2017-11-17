@@ -20,6 +20,7 @@ import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.ColorData;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.plugins.http.HTTPHandler;
+import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.google.gson.Gson;
 
 public class DomoticzHome implements Home {
@@ -132,7 +133,7 @@ public class DomoticzHome implements Home {
 		log.info("Domoticz Home created." + (validDomoticz ? "" : " No Domoticz devices configured."));
 		if(!validDomoticz)
 			return null;
-        httpClient = new HTTPHandler();
+        httpClient = HTTPHome.getHandler();
 		domoticzs = new HashMap<String, DomoticzHandler>();
 		Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getDomoticzaddress().getDevices().iterator();
 		while(theList.hasNext()) {

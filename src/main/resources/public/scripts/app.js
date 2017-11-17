@@ -110,6 +110,7 @@ app.run(function ($rootScope, $location, Auth, bridgeService) {
     $rootScope.$on('securityReinit', function(event, data) {
         event.preventDefault();
     	Auth.logout();
+    	bridgeService.state.testuser = "";
         $location.path("/login");        	
     });
     
@@ -216,7 +217,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					if (error.status === 401)
 						$rootScope.$broadcast('securityReinit', 'done');
 					else
-					self.displayError("Cannot renumber devices from habridge: ", error);
+						self.displayError("Cannot renumber devices from habridge: ", error);
 				}
 		);
 	};
@@ -249,7 +250,12 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 
 	this.getTestUser = function () {
 		if(self.state.testuser === undefined || self.state.testuser === "") {
-			return $http.put(this.state.systemsbase + "/presslinkbutton").then(
+			var linkParams = {};
+			linkParams = {
+					seconds: 3,
+					silent: true
+					};
+			return $http.put(this.state.systemsbase + "/presslinkbutton", linkParams).then(
 					function (response) {
 						self.getAUser();
 					},
@@ -287,7 +293,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					if (error.status === 401)
 						$rootScope.$broadcast('securityReinit', 'done');
 					else
-					self.displayWarn("Cannot get security info: ", error);
+						self.displayWarn("Cannot get security info: ", error);
 				}
 		);
 	};
@@ -1202,7 +1208,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 						msgDescription = "success " + angular.toJson(response.data);
 					}
 					if (typeof(response.data[0].error) !== 'undefined') {
-						if(reponse.data[0].error.indexOf("unauthorized") > -1) {
+						if(response.data[0].error.description.indexOf("unauthorized") > -1) {
 							self.displayWarn("Authorization error, please retry...", null);
 						}
 						else {

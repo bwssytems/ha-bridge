@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.plugins.http.HTTPHandler;
+import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.bwssystems.HABridge.util.TextStringFormatter;
 import com.google.gson.Gson;
 
@@ -38,7 +39,7 @@ public class HalInfo {
 
     public HalInfo(NamedIP addressName, String aGivenToken) {
 		super();
-        httpClient = new HTTPHandler();
+        httpClient = HTTPHome.getHandler();
         halAddress = addressName;
         if(halAddress.getPassword() == null || halAddress.getPassword().trim().isEmpty())
         	halAddress.setPassword(aGivenToken);

@@ -3,6 +3,7 @@ package com.bwssystems.HABridge.plugins.somfy;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.NameValue;
 import com.bwssystems.HABridge.plugins.http.HTTPHandler;
+import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.bwssystems.HABridge.plugins.somfy.jsonschema2pojo.getsetup.Device;
 import com.bwssystems.HABridge.plugins.somfy.jsonschema2pojo.getsetup.GetSetup;
 import com.google.gson.Gson;
@@ -39,7 +40,7 @@ public class SomfyInfo {
 
 	private void initHttpClient() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
 		if(httpClient==null) {
-			httpClient = new HTTPHandler();
+			httpClient = HTTPHome.getHandler();
 		}
 	}
 

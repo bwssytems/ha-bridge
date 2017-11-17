@@ -1097,8 +1097,10 @@ public class HueMulator {
 		aMultiUtil.setSetCount(1);
 		log.debug("hue state change requested: " + userId + " from " + ipAddress + " body: " + body);
 		HueError[] theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
-		if (theErrors != null)
+		if (theErrors != null) {
+			log.warn("Errors in security: <<<" + aGsonHandler.toJson(theErrors) + ">>>");
 			return aGsonHandler.toJson(theErrors);
+		}
 		try {
 			theStateChanges = aGsonHandler.fromJson(body, StateChangeBody.class);
 		} catch (Exception e) {
@@ -1228,14 +1230,19 @@ public class HueMulator {
 						} else if (ctInc != null && ctInc != 0) {
 							colorData = new ColorData(ColorData.ColorMode.CT, state.getCt() + ctInc);
 						}
-
+						log.debug("Calling Home device handler for type : " + callItems[i].getType().trim());
 						responseString = homeManager.findHome(callItems[i].getType().trim()).deviceHandler(callItems[i], aMultiUtil, lightId, state.getBri(), targetBri, targetBriInc, colorData, device, body);
 						if(responseString != null && responseString.contains("{\"error\":")) {
 							x = aMultiUtil.getSetCount();
 						}
 					}
 				}
+				else
+					log.warn("Call Items type is null <<<" + callItems[i] + ">>>");
 			}
+			
+			if(callItems.length == 0)
+				log.warn("No call items were available: <<<" + url + ">>>");
 		} else {
 			log.warn("Could not find url: " + lightId + " for hue state change request: " + userId + " from "
 					+ ipAddress + " body: " + body);
@@ -1244,6 +1251,7 @@ public class HueMulator {
 		}
 
 		if (responseString == null || !responseString.contains("[{\"error\":")) {
+			log.debug("Response is in error: " + ((responseString == null) ? "null" : responseString));
 			if(!device.isNoState()) {
 				responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc, device.isOffState());
 				device.setDeviceState(state);

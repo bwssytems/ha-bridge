@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.devicemanagmeent.*;
 import com.bwssystems.HABridge.hue.HueMulator;
+import com.bwssystems.HABridge.plugins.http.HttpClientPool;
 import com.bwssystems.HABridge.upnp.UpnpListener;
 import com.bwssystems.HABridge.upnp.UpnpSettingsResource;
 import com.bwssystems.HABridge.util.UDPDatagramSender;
@@ -41,14 +42,17 @@ public class HABridge {
         SystemControl theSystem;
         BridgeSettings bridgeSettings;
         Version theVersion;
-        
+    	@SuppressWarnings("unused")
+		HttpClientPool thePool;
+       
         theVersion = new Version();
+        // Singleton initialization
+        thePool = new HttpClientPool();
 
         log.info("HA Bridge (v" + theVersion.getVersion() + ") starting....");
         
         bridgeSettings = new BridgeSettings();
     	// sparkjava config directive to set html static file location for Jetty
-    	staticFileLocation("/public");
         while(!bridgeSettings.getBridgeControl().isStop()) {
         	bridgeSettings.buildSettings();
             bridgeSettings.getBridgeSecurity().removeTestUsers();
@@ -57,6 +61,7 @@ public class HABridge {
 	        ipAddress(bridgeSettings.getBridgeSettingsDescriptor().getWebaddress());
 	        // sparkjava config directive to set port for the web server to listen on
 	        port(bridgeSettings.getBridgeSettingsDescriptor().getServerPort());
+	    	staticFileLocation("/public");
 	    	initExceptionHandler((e) -> HABridge.theExceptionHandler(e, bridgeSettings.getBridgeSettingsDescriptor().getServerPort()));
 	        if(!bridgeSettings.getBridgeControl().isReinit())
 	        	init();
@@ -115,6 +120,14 @@ public class HABridge {
         bridgeSettings.getBridgeSecurity().removeTestUsers();
         if(bridgeSettings.getBridgeSecurity().isSettingsChanged())
         	bridgeSettings.updateConfigFile();
+		try {
+			HttpClientPool.shutdown();
+			thePool = null;
+		} catch (InterruptedException e) {
+			log.warn("Error shutting down http pool: " + e.getMessage());;
+		} catch (IOException e) {
+			log.warn("Error shutting down http pool: " + e.getMessage());;
+		}
         log.info("HA Bridge (v" + theVersion.getVersion() + ") exiting....");
         System.exit(0);
     }

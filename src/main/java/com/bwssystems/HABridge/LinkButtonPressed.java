@@ -10,15 +10,18 @@ public class LinkButtonPressed extends TimerTask {
     private static final Logger log = LoggerFactory.getLogger(LinkButtonPressed.class);
 	private BridgeControlDescriptor linkDescriptor;
 	private Timer myTimer;
+	private boolean isSilent;
 
-	public LinkButtonPressed(BridgeControlDescriptor theDescriptor, Timer aTimer) {
+	public LinkButtonPressed(BridgeControlDescriptor theDescriptor, Timer aTimer, boolean keepSilent) {
 		linkDescriptor = theDescriptor;
 		myTimer = aTimer;
+		isSilent = keepSilent;
 	}
 
 	@Override
 	public void run() {
-		log.info("Link button time ended....");
+		if(!isSilent)
+			log.info("Link button time ended....");
 		linkDescriptor.setLinkButton(false);
 		myTimer.cancel();
 	}

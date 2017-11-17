@@ -13,6 +13,7 @@ import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.HueApiResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.plugins.http.HTTPHandler;
+import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.google.gson.Gson;
 
 
@@ -25,7 +26,7 @@ public class HueInfo {
 
     public HueInfo(NamedIP addressName, HueHome theHome) {
 		super();
-        httpHandler = new HTTPHandler();
+        httpHandler = HTTPHome.getHandler();
         hueAddress = addressName;
         myHome = theHome;
  	}
