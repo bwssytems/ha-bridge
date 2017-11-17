@@ -3,7 +3,7 @@
 		<h2 class="panel-title">Login</h2>
 	</div>
 	<div class="panel-body">
-		<div ng-if="!loggedIn" class="form-container">
+		<div ng-if="!loggedIn && isSecure" class="form-container">
 
 			<form name="loginForm" role="form" ng-submit="login(username, password)">
 				<legend class="form-label">Enter Credentials</legend>
@@ -25,8 +25,11 @@
 			</div>
 
 		</div>
-		<div ng-if="loggedIn">
+		<div ng-if="loggedIn && isSecure">
 			<button type="button" class="btn btn-danger" ng-click="logout()">Are you sure you want to Logout?</button>
+		</div>
+		<div ng-if="!isSecure">
+			<p>This ha-bridge instance is not secured!</p>
 		</div>
 	</div>
 </div>

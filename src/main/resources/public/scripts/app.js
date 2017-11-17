@@ -109,9 +109,9 @@ app.run(function ($rootScope, $location, Auth, bridgeService) {
     
     $rootScope.$on('securityReinit', function(event, data) {
         event.preventDefault();
-    	Auth.logout();
     	bridgeService.state.testuser = "";
-        $location.path("/login");        	
+    	Auth.logout();
+		$location.path("/");
     });
     
     $rootScope.$on('$routeChangeStart', function (event, next) {
@@ -1637,7 +1637,8 @@ app.controller('SecurityDialogCtrl', function ($scope, bridgeService, ngDialog) 
 		if(bridgeService.state.loggedInUser !== undefined)
 			$scope.username = bridgeService.state.loggedInUser;
 		else
-			$scope.username = ""
+			$scope.username = "";
+		bridgeService.getHABridgeVersion();
 		$scope.showPassword = $scope.isSecure;
 	};
 	
@@ -3745,8 +3746,9 @@ app.filter('filterDevicesByRequester', function () {
 	}
 });
 
-app.controller('LoginController', function ($scope, $location, Auth) {
+app.controller('LoginController', function ($scope, $location, Auth, bridgeService) {
     $scope.failed = false;
+    $scope.isSecure = bridgeService.isSecure();
     $scope.loggedIn = Auth.isLoggedIn();
 	$scope.login = function(username, password) {
         Auth.login(username, password)
@@ -3759,8 +3761,12 @@ app.controller('LoginController', function ($scope, $location, Auth) {
 
 	$scope.logout = function() {
         Auth.logout();
+        $scope.isSecure = bridgeService.isSecure();
         $scope.loggedIn = Auth.isLoggedIn();
-        $location.path("/login");
+        if($scope.isSecure)
+        	$location.path("/login");
+        else
+        	$location.path("/");
 	};
 });
 
