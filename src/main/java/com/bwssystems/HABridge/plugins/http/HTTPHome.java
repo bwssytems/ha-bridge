@@ -11,6 +11,8 @@ import com.bwssystems.HABridge.api.hue.HueError;
 import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.ColorData;
+import com.bwssystems.HABridge.hue.ColorDecode;
 import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
@@ -18,16 +20,25 @@ import com.google.gson.Gson;
 
 public class HTTPHome implements Home {
 	private static final Logger log = LoggerFactory.getLogger(HTTPHome.class);
-	private HTTPHandler anHttpHandler;
+	private static HTTPHandler anHttpHandler = null;
+	private boolean closed;
 
 	public HTTPHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
+	}
+	
+	public static HTTPHandler getHandler() {
+		if(anHttpHandler == null)
+			anHttpHandler = new HTTPHandler();
+		return anHttpHandler;
 	}
 
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
-			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
+			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		String responseString = null;
 		
 		String theUrl = anItem.getItem().getAsString();
@@ -50,6 +61,9 @@ public class HTTPHome implements Home {
 
 			String anUrl = BrightnessDecode.calculateReplaceIntensityValue(theUrl,
 					intensity, targetBri, targetBriInc, false);
+			if (colorData != null) {
+				anUrl = ColorDecode.replaceColorData(anUrl, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);	
+			}
 			anUrl = DeviceDataDecode.replaceDeviceData(anUrl, device);
 			anUrl = TimeDecode.replaceTimeValue(anUrl);
 
@@ -57,6 +71,9 @@ public class HTTPHome implements Home {
 			if(anItem.getHttpBody()!= null && !anItem.getHttpBody().isEmpty()) {
 				aBody = BrightnessDecode.calculateReplaceIntensityValue(anItem.getHttpBody(),
 						intensity, targetBri, targetBriInc, false);
+				if (colorData != null) {
+					aBody = ColorDecode.replaceColorData(aBody, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);	
+				}
 				aBody = DeviceDataDecode.replaceDeviceData(aBody, device);
 				aBody = TimeDecode.replaceTimeValue(aBody);
 			}
@@ -80,7 +97,8 @@ public class HTTPHome implements Home {
 
 	@Override
 	public Home createHome(BridgeSettings bridgeSettings) {
-		anHttpHandler = new HTTPHandler();
+		if(anHttpHandler == null)
+			anHttpHandler = new HTTPHandler();
 		log.info("Http Home created.");
 		return this;
 	}
@@ -93,9 +111,15 @@ public class HTTPHome implements Home {
 
 	@Override
 	public void closeHome() {
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		if(anHttpHandler != null)
 			anHttpHandler.closeHandler();
 		anHttpHandler = null;
+		closed = true;
 	}
 
 }

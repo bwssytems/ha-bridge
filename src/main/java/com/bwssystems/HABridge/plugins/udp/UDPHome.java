@@ -15,6 +15,8 @@ import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.ColorData;
+import com.bwssystems.HABridge.hue.ColorDecode;
 import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
@@ -24,16 +26,19 @@ public class UDPHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(UDPHome.class);
     private UDPDatagramSender theUDPDatagramSender;
 	private byte[] sendData;
+	private boolean closed;
     
 	public UDPHome(BridgeSettings bridgeSettings, UDPDatagramSender aUDPDatagramSender) {
 		super();
 		theUDPDatagramSender = aUDPDatagramSender;
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
-			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
+			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		log.debug("executing HUE api request to UDP: " + anItem.getItem().getAsString());
 		String theUrl = anItem.getItem().getAsString();
 		if(theUrl != null && !theUrl.isEmpty () && theUrl.startsWith("udp://")) {
@@ -59,9 +64,18 @@ public class UDPHome implements Home {
 			if (theUrlBody.startsWith("0x")) {
 				theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, true);
 				theUrlBody = DeviceDataDecode.replaceDeviceData(theUrlBody, device);
+
+				if (colorData != null) {
+					theUrlBody = ColorDecode.replaceColorData(theUrlBody, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), true);	
+				}
 				sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
 			} else {
 				theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, false);
+
+				if (colorData != null) {
+					theUrlBody = ColorDecode.replaceColorData(theUrlBody, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);	
+				}
+
 				theUrlBody = DeviceDataDecode.replaceDeviceData(theUrlBody, device);
 				theUrlBody = StringEscapeUtils.unescapeJava(theUrlBody);
 				sendData = theUrlBody.getBytes();
@@ -93,8 +107,12 @@ public class UDPHome implements Home {
 
 	@Override
 	public void closeHome() {
-		// TODO Auto-generated method stub
-		
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
+		closed = true;
 	}
 
 }

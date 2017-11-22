@@ -5,6 +5,8 @@ import static java.lang.String.format;
 import javax.inject.Inject;
 
 import com.bwssystems.HABridge.plugins.http.HTTPHandler;
+import com.bwssystems.HABridge.plugins.http.HTTPHome;
+
 import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +46,7 @@ public class HarmonyServer {
         dummyProvider = null;
         myNameAndIP = theHarmonyAddress;
         isDevMode = false;
-        httpClient = new HTTPHandler();
+        httpClient = HTTPHome.getHandler();
     }
 
     public static HarmonyServer setup(

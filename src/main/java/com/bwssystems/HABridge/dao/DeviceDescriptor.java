@@ -38,6 +38,9 @@ public class DeviceDescriptor{
     @SerializedName("onUrl")
     @Expose
     private String onUrl;
+    @SerializedName("colorUrl")
+    @Expose
+    private String colorUrl;
     @SerializedName("headers")
     @Expose
     private String headers;
@@ -142,6 +145,14 @@ public class DeviceDescriptor{
         this.onUrl = onUrl;
     }
 
+    public String getColorUrl() {
+        return colorUrl;
+    }
+
+    public void setColorUrl(String colorUrl) {
+        this.colorUrl = colorUrl;
+    }
+
     public String getId() {
         return id;
     }
@@ -208,7 +219,7 @@ public class DeviceDescriptor{
 
 	public DeviceState getDeviceState() {
 		if(deviceState == null)
-			deviceState = DeviceState.createDeviceState();
+			deviceState = DeviceState.createDeviceState(this.isColorDevice());
 		return deviceState;
 	}
 
@@ -282,7 +293,22 @@ public class DeviceDescriptor{
 		
 		if(this.offUrl != null && this.offUrl.contains(aType))
 			return true;
+
+		if(this.colorUrl != null && this.colorUrl.contains(aType))
+			return true;
 		
 		return false;
+	}
+
+	public boolean isColorDevice() {
+        boolean color = true;
+        if ((deviceType == null || !deviceType.trim().equals("passthru")) && (colorUrl == null || colorUrl.trim().equals(""))) {
+            color = false;
+        } else if (deviceType != null && deviceType.trim().equals("passthru")) {
+            if (deviceState != null && (deviceState.getColormode() == null || deviceState.getColormode().equals(""))) {
+                color = false;
+            }
+        }
+        return color;
 	}
 }

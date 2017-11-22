@@ -17,6 +17,7 @@ import com.bwssystems.HABridge.api.hue.HueError;
 import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.ColorData;
 import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
@@ -26,10 +27,13 @@ public class HalHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(HalHome.class);
 	private Map<String, HalInfo> hals;
 	private Boolean validHal;
+	private boolean closed;
 
 	public HalHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
@@ -111,7 +115,7 @@ public class HalHome implements Home {
 
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
-			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
+			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		boolean halFound = false;
 		String responseString = null;
 		String theUrl = anItem.getItem().getAsString();
@@ -193,7 +197,13 @@ public class HalHome implements Home {
 
 	@Override
 	public void closeHome() {
-		// noop
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		
+		hals = null;
+		closed = true;
 	}
 }

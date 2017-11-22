@@ -17,8 +17,10 @@ import com.bwssystems.HABridge.api.hue.HueError;
 import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.ColorData;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.plugins.http.HTTPHandler;
+import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.google.gson.Gson;
 
 public class DomoticzHome implements Home {
@@ -26,10 +28,13 @@ public class DomoticzHome implements Home {
 	private Map<String, DomoticzHandler> domoticzs;
 	private Boolean validDomoticz;
     private HTTPHandler httpClient;
+	private boolean closed;
 
 	public DomoticzHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
@@ -71,7 +76,7 @@ public class DomoticzHome implements Home {
 
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
-			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
+			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		Devices theDomoticzApiResponse = null;
 		String responseString = null;
 		
@@ -128,7 +133,7 @@ public class DomoticzHome implements Home {
 		log.info("Domoticz Home created." + (validDomoticz ? "" : " No Domoticz devices configured."));
 		if(!validDomoticz)
 			return null;
-        httpClient = new HTTPHandler();
+        httpClient = HTTPHome.getHandler();
 		domoticzs = new HashMap<String, DomoticzHandler>();
 		Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getDomoticzaddress().getDevices().iterator();
 		while(theList.hasNext()) {
@@ -161,8 +166,15 @@ public class DomoticzHome implements Home {
 	}
 	@Override
 	public void closeHome() {
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
+
 		if(httpClient != null)
 			httpClient.closeHandler();
-		
+
+		closed = true;		
 	}
 }

@@ -65,6 +65,7 @@ public class BridgeSettings extends BackupHandler {
 	public void buildSettings() {
         String addressString = null;
         String theVeraAddress = null;
+        String theFibaroAddress = null;
         String theSomfyAddress = null;
         String theHarmonyAddress = null;
         String configFileProperty = System.getProperty("config.file");
@@ -75,6 +76,7 @@ public class BridgeSettings extends BackupHandler {
         }
         String serverPortOverride = System.getProperty("server.port");
         String serverIpOverride = System.getProperty("server.ip");
+        String upnpStrictOverride = System.getProperty("upnp.strict", "true");
         if(configFileProperty != null)
         {
         	log.info("reading from config file: " + configFileProperty);
@@ -90,6 +92,7 @@ public class BridgeSettings extends BackupHandler {
         	theBridgeSettings.setServerPort(System.getProperty("server.port", Configuration.DEFAULT_WEB_PORT));
         	theBridgeSettings.setUpnpConfigAddress(System.getProperty("upnp.config.address"));
         	theBridgeSettings.setUpnpDeviceDb(System.getProperty("upnp.device.db"));
+        	theBridgeSettings.setUpnpGroupDb(System.getProperty("upnp.group.db"));
         	theBridgeSettings.setUpnpResponsePort(System.getProperty("upnp.response.port", Configuration.UPNP_RESPONSE_PORT));
 	        
 	        theVeraAddress = System.getProperty("vera.address");
@@ -107,6 +110,22 @@ public class BridgeSettings extends BackupHandler {
 		        }
 	        }
 	        theBridgeSettings.setVeraAddress(theVeraList);
+	        
+	        theFibaroAddress = System.getProperty("fibaro.address");
+        	IpList theFibaroList = null;
+	        if(theFibaroAddress != null) {
+		        try {
+		        	theFibaroList = new Gson().fromJson(theFibaroAddress, IpList.class);
+		        } catch (Exception e) {
+		        	try {
+		        		theFibaroList = new Gson().fromJson("{devices:[{name:default,ip:" + theFibaroAddress + "}]}", IpList.class);
+		        	} catch (Exception et) {
+		    	        log.error("Cannot parse fibaro.address, not set with message: " + e.getMessage(), e);
+		    	        theFibaroList = null;
+		        	}
+		        }
+	        }
+	        theBridgeSettings.setFibaroAddress(theFibaroList);
 
 	        theHarmonyAddress = System.getProperty("harmony.address");
 	        IpList theHarmonyList = null;	
@@ -170,6 +189,9 @@ public class BridgeSettings extends BackupHandler {
         
         if(theBridgeSettings.getUpnpDeviceDb() == null)
         	theBridgeSettings.setUpnpDeviceDb(Configuration.DEVICE_DB_DIRECTORY);
+
+        if(theBridgeSettings.getUpnpGroupDb() == null)
+        	theBridgeSettings.setUpnpGroupDb(Configuration.GROUP_DB_DIRECTORY);
         
         if(theBridgeSettings.getNumberoflogmessages() == null || theBridgeSettings.getNumberoflogmessages() <= 0)
         	theBridgeSettings.setNumberoflogmessages(new Integer(Configuration.NUMBER_OF_LOG_MESSAGES));
@@ -178,6 +200,7 @@ public class BridgeSettings extends BackupHandler {
         	theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DEFAULT_BUTTON_SLEEP));
 
         theBridgeSettings.setVeraconfigured(theBridgeSettings.isValidVera());
+        theBridgeSettings.setFibaroconfigured(theBridgeSettings.isValidFibaro());
         theBridgeSettings.setHarmonyconfigured(theBridgeSettings.isValidHarmony());
         theBridgeSettings.setNestConfigured(theBridgeSettings.isValidNest());
         theBridgeSettings.setHueconfigured(theBridgeSettings.isValidHue());
@@ -191,6 +214,8 @@ public class BridgeSettings extends BackupHandler {
         	theBridgeSettings.setServerPort(serverPortOverride);
         if(serverIpOverride != null)
         	theBridgeSettings.setWebaddress(serverIpOverride);
+        if(upnpStrictOverride != null)
+        	theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(upnpStrictOverride));
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
 		
 		bridgeSecurity.setSecurityData(theBridgeSettings.getSecurityData());

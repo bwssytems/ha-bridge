@@ -1,7 +1,6 @@
 
 package com.bwssystems.HABridge.plugins.somfy.jsonschema2pojo.getsetup;
 
-import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 

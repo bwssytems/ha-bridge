@@ -24,18 +24,21 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("upnpdevicedb")
 	@Expose
 	private String upnpdevicedb;
+	@SerializedName("upnpgroupdb")
+	@Expose
+	private String upnpgroupdb;
 	@SerializedName("veraaddress")
 	@Expose
 	private IpList veraaddress;
+	@SerializedName("fibaroaddress")
+	@Expose
+	private IpList fibaroaddress;
 	@SerializedName("harmonyaddress")
 	@Expose
 	private IpList harmonyaddress;
 	@SerializedName("buttonsleep")
 	@Expose
 	private Integer buttonsleep;
-	@SerializedName("upnpstrict")
-	@Expose
-	private boolean upnpstrict;
 	@SerializedName("traceupnp")
 	@Expose
 	private boolean traceupnp;
@@ -60,9 +63,6 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("haladdress")
 	@Expose
 	private IpList haladdress;
-	@SerializedName("haltoken")
-	@Expose
-	private String haltoken;
 	@SerializedName("whitelist")
 	@Expose
 	private Map<String, WhitelistEntry> whitelist;
@@ -87,6 +87,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("hubversion")
 	@Expose
 	private String hubversion;
+	@SerializedName("hubmac")
+	@Expose
+	private String hubmac;
 	@SerializedName("securityData")
 	@Expose
 	private String securityData;
@@ -94,6 +97,7 @@ public class BridgeSettingsDescriptor {
 	
 	private boolean settingsChanged;
 	private boolean veraconfigured;
+	private boolean fibaroconfigured;
 	private boolean harmonyconfigured;
 	private boolean hueconfigured;
 	private boolean nestconfigured;
@@ -103,6 +107,10 @@ public class BridgeSettingsDescriptor {
 	private boolean domoticzconfigured;
 	private boolean somfyconfigured;
 	private boolean lifxconfigured;
+
+	// Deprecated settings
+	private String haltoken;
+	private boolean upnpstrict;
 	
 	public BridgeSettingsDescriptor() {
 		super();
@@ -111,6 +119,7 @@ public class BridgeSettingsDescriptor {
 		this.traceupnp = false;
 		this.nestconfigured = false;
 		this.veraconfigured = false;
+		this.fibaroconfigured = false;
 		this.somfyconfigured = false;
 		this.harmonyconfigured = false;
 		this.hueconfigured = false;
@@ -123,9 +132,10 @@ public class BridgeSettingsDescriptor {
 		this.farenheit = true;
 		this.securityData = null;
 		this.settingsChanged = false;
-		this.myechourl = "echo.amazon.com/#cards";
+		this.myechourl = "alexa.amazon.com/spa/index.html#cards";
 		this.webaddress = "0.0.0.0";
 		this.hubversion = HueConstants.HUB_VERSION;
+		this.hubmac = null;
 	}
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -163,14 +173,26 @@ public class BridgeSettingsDescriptor {
 	public void setUpnpDeviceDb(String upnpDeviceDb) {
 		this.upnpdevicedb = upnpDeviceDb;
 	}
+	public String getUpnpGroupDb() {
+		return upnpgroupdb;
+	}
+	public void setUpnpGroupDb(String upnpGroupDb) {
+		this.upnpgroupdb = upnpGroupDb;
+	}
 	public IpList getVeraAddress() {
 		return veraaddress;
+	}
+	public IpList getFibaroAddress() {
+		return fibaroaddress;
 	}
 	public IpList getSomfyAddress() {
 		return somfyaddress;
 	}
 	public void setVeraAddress(IpList veraAddress) {
 		this.veraaddress = veraAddress;
+	}
+	public void setFibaroAddress(IpList fibaroAddress) {
+		this.fibaroaddress = fibaroAddress;
 	}
 	public void setSomfyAddress(IpList somfyAddress) {
 		this.somfyaddress = somfyAddress;
@@ -208,11 +230,17 @@ public class BridgeSettingsDescriptor {
 	public boolean isVeraconfigured() {
 		return veraconfigured;
 	}
+	public boolean isFibaroconfigured() {
+		return fibaroconfigured;
+	}
 	public boolean isSomfyconfigured() {
 		return somfyconfigured;
 	}
 	public void setVeraconfigured(boolean veraconfigured) {
 		this.veraconfigured = veraconfigured;
+	}
+	public void setFibaroconfigured(boolean fibaroconfigured) {
+		this.fibaroconfigured = fibaroconfigured;
 	}
 	public void setSomfyconfigured(boolean somfyconfigured) {
 		this.somfyconfigured = somfyconfigured;
@@ -337,6 +365,12 @@ public class BridgeSettingsDescriptor {
 	public void setHubversion(String hubversion) {
 		this.hubversion = hubversion;
 	}
+	public String getHubmac() {
+		return hubmac;
+	}
+	public void setHubmac(String hubmac) {
+		this.hubmac = hubmac;
+	}
 	public IpList getDomoticzaddress() {
 		return domoticzaddress;
 	}
@@ -365,6 +399,14 @@ public class BridgeSettingsDescriptor {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
 			return false;
 		List<NamedIP> devicesList = this.getVeraAddress().getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+		return true;
+	}
+	public Boolean isValidFibaro() {
+		if(this.getFibaroAddress() == null || this.getFibaroAddress().getDevices().size() <= 0)
+			return false;
+		List<NamedIP> devicesList = this.getFibaroAddress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
 		return true;

@@ -8,6 +8,10 @@
 		href="#!/veradevices">Vera Devices</a></li>
 	<li ng-if="bridge.showVera" role="presentation"><a
 		href="#!/verascenes">Vera Scenes</a></li>
+	<li ng-if="bridge.showFibaro" role="presentation"><a
+		href="#!/fibarodevices">Fibaro Devices</a></li>
+	<li ng-if="bridge.showFibaro" role="presentation"><a
+		href="#!/fibaroscenes">Fibaro Scenes</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
 		href="#!/harmonyactivities">Harmony Activities</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
@@ -31,10 +35,33 @@
 	</div>
 	<div class="panel-body">
 
-		<p>
-			<button class="btn btn-primary" type="submit" ng-click="renumberDevices()">Renumber Devices</button>
-			<button ng-if="bridge.securityInfo.useLinkButton" class="btn btn-primary" type="submit" ng-click="pushLinkButton()">Link</button>
-		</p>
+			<div class="form-group">
+				<button class="btn btn-primary" type="submit" ng-click="renumberDevices()">Renumber Devices</button>
+				<button ng-if="bridge.securityInfo.useLinkButton" class="btn btn-primary" type="submit" ng-click="pushLinkButton()">Link</button>
+				<label for="device-ip-filter">Show devices visible to: </label>
+				<input type="text" id="device-ip-filter" style="width:150px"
+							ng-model="bridge.state.filterDevicesByIpAddress" placeholder="">
+				<input type="checkbox" id="device-ip-filter-mode" ng-model="bridge.state.filterDevicesOnlyFiltered" ng-true-value=true ng-false-value=false style="margin-right: 3px">Must contain filter
+				<label for="device-type-filter" style="margin-left:50px">Filter device type: </label>
+				<select name="device-type" id="device-type-filter" 
+						ng-model="bridge.state.filterDeviceType">
+							<option value="">---No Filter---</option>
+							<!-- not selected / blank option -->
+							<option value="custom">Custom</option>
+							<option value="UDP">UDP</option>
+							<option value="TCP">TCP</option>
+							<option value="exec">Execute Script/Program</option>
+							<option value="switch">Switch</option>
+							<option value="scene">Scene</option>
+							<option value="macro">Macro</option>
+							<option value="group">Group</option>
+							<option value="activity">Activity</option>
+							<option value="button">Button</option>
+							<option value="thermo">Thermo</option>
+							<option value="passthru">Pass Thru</option>
+					</select>
+			</div>
+		
 	<scrollable-table watch="bridge.devices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
@@ -51,7 +78,7 @@
 				<th>Actions</th>
 			</tr>
 		</thead>
-		<tr ng-repeat="device in bridge.devices" row-id="{{device.id}}" ng-class="{info: bridge.viewDevId == device.id}" >
+		<tr ng-repeat="device in bridge.devices | filterDevicesByRequester:bridge.state.filterDevicesByIpAddress:bridge.state.filterDevicesOnlyFiltered:bridge.state.filterDeviceType" row-id="{{device.id}}" ng-class="{info: bridge.viewDevId == device.id}" >
 			<td>{{$index+1}}</td>
 			<td>{{device.id}}</td>
 			<td>{{device.name}}</td>

@@ -10,6 +10,8 @@ import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.ColorData;
+import com.bwssystems.HABridge.hue.ColorDecode;
 import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
@@ -17,14 +19,17 @@ import com.bwssystems.HABridge.hue.TimeDecode;
 public class CommandHome implements Home {
 	private static final Logger log = LoggerFactory.getLogger(CommandHome.class);
 	private BridgeSettings theSettings;
+	private boolean closed;
 
 	public CommandHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
-	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int itensity, Integer targetBri, Integer targetBriInc, DeviceDescriptor device, String body) {
+	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity, Integer targetBri, Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		log.debug("Exec Request called with url: " +  anItem.getItem().getAsString() + " and exec Garden: "  + (theSettings.getBridgeSecurity().getExecGarden() == null ? "not given" : theSettings.getBridgeSecurity().getExecGarden()));
 		String responseString = null;
 		String intermediate;
@@ -32,7 +37,10 @@ public class CommandHome implements Home {
 			intermediate = anItem.getItem().getAsString().substring(anItem.getItem().getAsString().indexOf("://") + 3);
 		else
 			intermediate = anItem.getItem().getAsString();
-		intermediate = BrightnessDecode.calculateReplaceIntensityValue(intermediate, itensity, targetBri, targetBriInc, false);
+		intermediate = BrightnessDecode.calculateReplaceIntensityValue(intermediate, intensity, targetBri, targetBriInc, false);
+		if (colorData != null) {
+			intermediate = ColorDecode.replaceColorData(intermediate, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);	
+		}
 		intermediate = DeviceDataDecode.replaceDeviceData(intermediate, device);
 		intermediate = TimeDecode.replaceTimeValue(intermediate);
 		String execGarden = theSettings.getBridgeSecurity().getExecGarden();
@@ -88,8 +96,13 @@ public class CommandHome implements Home {
 
 	@Override
 	public void closeHome() {
-		// noop
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		
+		closed = true;
 	}
 
 }

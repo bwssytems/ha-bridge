@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,7 @@ import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.HueApiResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
+import com.bwssystems.HABridge.hue.ColorData;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -25,11 +27,14 @@ public class HueHome implements Home {
 	private Boolean validHue;
 	private Gson aGsonHandler;
 	private BridgeSettings theBridgeSettings;
+	private boolean closed;
 	
 	public HueHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		theBridgeSettings = bridgeSettings;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
@@ -86,7 +91,7 @@ public class HueHome implements Home {
 	
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
-			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
+			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		if(!validHue)
 			return null;
 		String responseString = null;
@@ -133,6 +138,11 @@ public class HueHome implements Home {
 	public void closeHome() {
 		if(!validHue)
 			return;
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		if(hues == null)
 			return;
 		Iterator<String> keys = hues.keySet().iterator();
@@ -141,5 +151,6 @@ public class HueHome implements Home {
 			hues.get(key).closeHue();;
 		}
 		hues = null;
+		closed = true;
 	}
 }

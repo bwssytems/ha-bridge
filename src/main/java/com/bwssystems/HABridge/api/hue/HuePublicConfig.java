@@ -18,9 +18,9 @@ public class HuePublicConfig
 	private Boolean factorynew;
 	private String modelid;
 
-	public static HuePublicConfig createConfig(String name, String ipaddress, String emulateHubVersion) {
+	public static HuePublicConfig createConfig(String name, String ipaddress, String emulateHubVersion, String emulateMAC) {
 		HuePublicConfig aConfig = new HuePublicConfig();
-		aConfig.setMac(HuePublicConfig.getMacAddress(ipaddress));
+		aConfig.setMac(HuePublicConfig.getMacAddress(ipaddress, emulateMAC));
 		aConfig.setApiversion(HueConstants.API_VERSION);
 		aConfig.setSwversion(emulateHubVersion);
 		aConfig.setName(name);
@@ -32,34 +32,39 @@ public class HuePublicConfig
 		return aConfig;
 	}
 
-	private static String getMacAddress(String addr)
+	private static String getMacAddress(String addr, String aMAC)
 	{
 		InetAddress ip;
 		StringBuilder sb = new StringBuilder();
-		try {
+		if(aMAC == null || aMAC.trim().length() <= 0) {
+			try {
+					
+				ip = InetAddress.getByName(addr);
 				
-			ip = InetAddress.getByName(addr);
-			
-			NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+				NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+					
+				byte[] mac = network.getHardwareAddress();
+					
+				for (int i = 0; i < mac.length; i++) {
+					sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));		
+				}
+					
+			} catch (UnknownHostException e) {
 				
-			byte[] mac = network.getHardwareAddress();
+				sb.append("00:00:88:00:bb:ee");
 				
-			for (int i = 0; i < mac.length; i++) {
-				sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));		
+			} catch (SocketException e){
+					
+				sb.append("00:00:88:00:bb:ee");
+					
+			} catch (Exception e){
+				
+				sb.append("00:00:88:00:bb:ee");
+				
 			}
-				
-		} catch (UnknownHostException e) {
-			
-			sb.append("00:00:88:00:bb:ee");
-			
-		} catch (SocketException e){
-				
-			sb.append("00:00:88:00:bb:ee");
-				
-		} catch (Exception e){
-			
-			sb.append("00:00:88:00:bb:ee");
-			
+		}
+		else {
+			sb.append(aMAC.trim());
 		}
 		    
 		return sb.toString();

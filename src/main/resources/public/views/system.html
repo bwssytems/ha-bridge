@@ -7,6 +7,10 @@
 		href="#!/veradevices">Vera Devices</a></li>
 	<li ng-if="bridge.showVera" role="presentation"><a
 		href="#!/verascenes">Vera Scenes</a></li>
+	<li ng-if="bridge.showFibaro" role="presentation"><a
+		href="#!/fibarodevices">Fibaro Devices</a></li>
+	<li ng-if="bridge.showFibaro" role="presentation"><a
+		href="#!/fibaroscenes">Fibaro Scenes</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
 		href="#!/harmonyactivities">Harmony Activities</a></li>
 	<li ng-if="bridge.showHarmony" role="presentation"><a
@@ -76,6 +80,13 @@
 						placeholder="data/device.db"></td>
 				</tr>
 				<tr>
+					<td>Groups DB Path and File</td>
+					<td><input id="bridge-settings-upnpgroupdb"
+						class="form-control" type="text"
+						ng-model="bridge.settings.upnpgroupdb"
+						placeholder="data/group.db"></td>
+				</tr>
+				<tr>
 					<td>UPNP IP Address</td>
 					<td><input id="bridge-settings-upnpconfigaddress"
 						class="form-control" type="text"
@@ -137,6 +148,51 @@
 									placeholder="192.168.1.2"></td>
 								<td><button class="btn btn-success" type="submit"
 										ng-click="addVeratoSettings(newveraname, newveraip)">Add</button></td>
+							</tr>
+						</table></td>
+				</tr>
+				<tr>
+					<td>Fibaro Names and IP Addresses</td>
+					<td><table
+							class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>IP</th>
+									<th>Port</th>
+									<th>Username</th>
+									<th>Password </th>
+									<th>Manage</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="fibaro in bridge.settings.fibaroaddress.devices">
+								<td>{{fibaro.name}}</td>
+								<td>{{fibaro.ip}}</td>
+								<td>{{fibaro.port}}</td>
+								<td>{{fibaro.username}}</td>
+								<td ng-if="fibaro.password">*******</td>
+								<td ng-if="!fibaro.password"> </td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removeFibarotoSettings(fibaro.name, fibaro.ip, fibaro.port)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-next-fibaro-name"
+									class="form-control" type="text" ng-model="newfibaroname"
+									placeholder="A Fibaro"></td>
+								<td><input id="bridge-settings-next-fibaro-ip"
+									class="form-control" type="text" ng-model="newfibaroip"
+									placeholder="192.168.1.2"></td>
+								<td><input id="bridge-settings-next-fibaro-port"
+									class="form-control" type="text" ng-model="newfibaroport"
+									placeholder="80"></td>
+								<td><input id="bridge-settings-next-fibaro-username"
+									class="form-control" type="text" ng-model="newfibarousername"
+									placeholder="Fibaro username"></td>
+								<td><input id="bridge-settings-next-fibaro-password"
+									class="form-control" type="password" ng-model="newfibaropassword"
+									placeholder="Fibaro password"></td>
+								<td><button class="btn btn-success" type="submit"
+										ng-click="addFibarotoSettings(newfibaroname, newfibaroip, newfibaroport, newfibarousername, newfibaropassword)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>
@@ -259,12 +315,6 @@
 										ng-click="addHaltoSettings(newhalname, newhalip, newhalsecure, newhaltoken)">Add</button></td>
 							</tr>
 						</table></td>
-				</tr>
-				<tr>
-					<td>HAL Token (please use token on individual HAL entry)</td>
-					<td><input id="bridge-settings-haltoken" class="form-control"
-						type="password" ng-model="bridge.settings.haltoken"
-						placeholder="thetoken"></td>
 				</tr>
 				<tr>
 					<td>MQTT Client IDs and IP Addresses</td>
@@ -499,7 +549,12 @@
 						placeholder="01036562"></td>
 				</tr>
 				<tr>
-					<td>Button Press/Call Item Loop Sleep Interval (ms)</td>
+					<td>Emulate MAC<br />(used in bridge-id, uuid, etc.<br /> - leave blank unless needed)</td>
+					<td><input id="bridge-settings-hubmac" class="form-control"
+						type="text" ng-model="bridge.settings.hubmac"></td>
+				</tr>
+				<tr>
+					<td>Button Press/Call Item<br />Loop Sleep Interval (ms)</td>
 					<td><input id="bridge-settings-buttonsleep"
 						class="form-control" type="number" name="input"
 						ng-model="bridge.settings.buttonsleep" min="100" max="9999"></td>
@@ -510,12 +565,6 @@
 						class="form-control" type="number"
 						ng-model="bridge.settings.numberoflogmessages" min="100"
 						max="65535"></td>
-				</tr>
-				<tr>
-					<td>UPNP Strict Handling</td>
-					<td><input type="checkbox"
-						ng-model="bridge.settings.upnpstrict" ng-true-value=true
-						ng-false-value=false> {{bridge.settings.upnpstrict}}</td>
 				</tr>
 				<tr>
 					<td>Trace UPNP Calls</td>

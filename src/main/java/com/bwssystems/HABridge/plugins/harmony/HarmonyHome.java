@@ -18,6 +18,7 @@ import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.ColorData;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -31,16 +32,24 @@ public class HarmonyHome implements Home {
 	private Boolean isDevMode;
 	private Boolean validHarmony;
 	private Gson aGsonHandler;
+	private boolean closed;
 
 	public HarmonyHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
 	public void closeHome() {
 		if(!validHarmony)
 			return;
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		if(isDevMode || hubs == null)
 			return;
 		Iterator<String> keys = hubs.keySet().iterator();
@@ -50,6 +59,7 @@ public class HarmonyHome implements Home {
 		}
 		
 		hubs = null;
+		closed = true;
 	}
 
 	public HarmonyHandler getHarmonyHandler(String aName) {
@@ -125,7 +135,7 @@ public class HarmonyHome implements Home {
 
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
-			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
+			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		String responseString = null;
 		log.debug("executing HUE api request to change " + anItem.getType() + " to Harmony: " + device.getName());
 		if(!validHarmony) {

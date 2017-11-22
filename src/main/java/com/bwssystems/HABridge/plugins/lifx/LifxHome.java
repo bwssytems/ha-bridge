@@ -19,6 +19,7 @@ import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
+import com.bwssystems.HABridge.hue.ColorData;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.github.besherman.lifx.LFXClient;
 import com.github.besherman.lifx.LFXGroup;
@@ -37,10 +38,13 @@ public class LifxHome implements Home {
 	private LFXClient client;        
 	private Boolean validLifx;
 	private Gson aGsonHandler;
+	private boolean closed;
 	
 	public LifxHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	@Override
@@ -130,6 +134,7 @@ public class LifxHome implements Home {
 		return deviceList;
 	}
 
+	@SuppressWarnings("unused")
 	private Boolean addLifxLights(LFXLightCollection theDeviceList) {
 		if(!validLifx)
 			return false;
@@ -142,6 +147,7 @@ public class LifxHome implements Home {
 		return true;
 	}
 	
+	@SuppressWarnings("unused")
 	private Boolean addLifxGroups(LFXGroupCollection theDeviceList) {
 		if(!validLifx)
 			return false;
@@ -156,7 +162,7 @@ public class LifxHome implements Home {
 	
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
-			Integer targetBri, Integer targetBriInc, DeviceDescriptor device, String body) {
+			Integer targetBri, Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		String theReturn = null;
 		float aBriValue;
 		float theValue;
@@ -210,7 +216,13 @@ public class LifxHome implements Home {
 	public void closeHome() {
 		if(!validLifx)
 			return;
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		client.close();
+		closed = true;
 	}
     private static class MyLightListener implements LFXLightCollectionListener {
         private static final Logger log = LoggerFactory.getLogger(MyLightListener.class);

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.NameValue;
 import com.bwssystems.HABridge.plugins.http.HTTPHandler;
+import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.google.gson.Gson;
 
 public class HomeAssistant {
@@ -21,7 +22,7 @@ public class HomeAssistant {
 
 	public HomeAssistant(NamedIP addressName) {
 		super();
-		anHttpHandler = new HTTPHandler();
+		anHttpHandler = HTTPHome.getHandler();
         hassAddress = addressName;
 	}
 

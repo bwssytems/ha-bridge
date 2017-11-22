@@ -1,5 +1,5 @@
 .scrollableContainer {
-    height: 310px;
+/*    height: 310px; */
     position: relative;
     padding-top: 35px;
     overflow: hidden;
@@ -29,6 +29,7 @@
 
 .scrollArea {
     height: 100%;
+    max-height: 800px;
     overflow-x: auto;
     overflow-y: auto;
     border: 1px solid #d5d5d5;

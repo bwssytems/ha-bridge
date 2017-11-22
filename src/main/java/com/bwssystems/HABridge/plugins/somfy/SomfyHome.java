@@ -6,6 +6,7 @@ import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
+import com.bwssystems.HABridge.hue.ColorData;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +31,13 @@ public class SomfyHome implements Home  {
     private static final Logger log = LoggerFactory.getLogger(SomfyHome.class);
 	private Map<String, SomfyInfo> somfys;
 	private Boolean validSomfy;
+	private boolean closed;
 
 	public SomfyHome(BridgeSettings bridgeSettings) {
+		super();
+		closed = true;
 		createHome(bridgeSettings);
-
+		closed = false;
 	}
 
 	public SomfyInfo getSomfyHandler(String somfyName) {
@@ -62,7 +66,7 @@ public class SomfyHome implements Home  {
 	}
 
 	@Override
-	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity, Integer targetBri, Integer targetBriInc, DeviceDescriptor device, String body) {
+	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity, Integer targetBri, Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		String responseString = null;
 		if (!validSomfy) {
 			log.warn("Should not get here, no somfy hub available");
@@ -113,6 +117,12 @@ public class SomfyHome implements Home  {
 
 	@Override
 	public void closeHome() {
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		somfys = null;
+		closed = true;
 	}
 }

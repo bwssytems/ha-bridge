@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.plugins.http.HTTPHandler;
+import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.bwssystems.HABridge.plugins.vera.luupRequests.Categorie;
 import com.bwssystems.HABridge.plugins.vera.luupRequests.Device;
 import com.bwssystems.HABridge.plugins.vera.luupRequests.Room;
@@ -25,7 +26,7 @@ public class VeraInfo {
 
     public VeraInfo(NamedIP addressName) {
 		super();
-        httpClient = new HTTPHandler();
+        httpClient = HTTPHome.getHandler();
         veraAddress = addressName;
 	}
     

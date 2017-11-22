@@ -70,21 +70,17 @@ public class UpnpSettingsResource {
 	}
 
 	public void setupServer() {
-		log.info("Hue description service started....");
+		log.info("Description xml service started....");
 //      http://ip_adress:port/description.xml which returns the xml configuration for the hue emulator
 		get("/description.xml", "application/xml; charset=utf-8", (request, response) -> {
-			if(theSettings.isTraceupnp())
-				log.info("Traceupnp: upnp device settings requested: " + " from " + request.ip() + ":" + request.port());
-			else
-				log.debug("upnp device settings requested: " + " from " + request.ip() + ":" + request.port());
 			String portNumber = Integer.toString(request.port());
 			String filledTemplate = null;
-			String bridgeIdMac = HuePublicConfig.createConfig("temp", theSettings.getUpnpConfigAddress(), HueConstants.HUB_VERSION).getSNUUIDFromMac();
+			String bridgeIdMac = HuePublicConfig.createConfig("temp", theSettings.getUpnpConfigAddress(), HueConstants.HUB_VERSION, theSettings.getHubmac()).getSNUUIDFromMac();
 			filledTemplate = String.format(hueTemplate, theSettings.getUpnpConfigAddress(), portNumber, theSettings.getUpnpConfigAddress(), bridgeIdMac, bridgeIdMac);
 			if(theSettings.isTraceupnp())
-				log.info("Traceupnp: upnp device settings template filled with address: " + theSettings.getUpnpConfigAddress() + " and port: " + portNumber);
+				log.info("Traceupnp: request of description.xml from: " + request.ip() + ":" + request.port() + " filled in with address: " + theSettings.getUpnpConfigAddress() + ":" + portNumber);
 			else
-				log.debug("Traceupnp: upnp device settings template filled with address: " + theSettings.getUpnpConfigAddress() + " and port: " + portNumber);
+				log.debug("request of description.xml from: " + request.ip() + ":" + request.port() + " filled in with address: " + theSettings.getUpnpConfigAddress() + ":" + portNumber);
 //			response.header("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
 //			response.header("Pragma", "no-cache");
 //			response.header("Expires", "Mon, 1 Aug 2011 09:00:00 GMT");

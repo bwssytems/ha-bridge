@@ -1,6 +1,6 @@
 package com.bwssystems.HABridge.api.hue;
 
-// import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,14 +9,15 @@ import java.util.List;
 public class DeviceState {
     private boolean on;
     private int bri;
-    private int hue;
-    private int sat;
+    private Integer hue;
+    private Integer sat;
     private String effect;
-    private int ct;
+    private List<Double> xy;
+    private Integer ct;
     private String alert;
     private String colormode;
     private boolean reachable;
-    private List<Double> xy;
+    
 //    private int transitiontime;
 
     public boolean isOn() {
@@ -36,19 +37,21 @@ public class DeviceState {
     }
 
     public int getHue() {
-        return hue;
+        return hue != null ? hue.intValue() : 0;
     }
 
     public void setHue(int hue) {
         this.hue = hue;
+        this.colormode = "hs";
     }
 
     public int getSat() {
-        return sat;
+        return sat != null ? sat.intValue() : 0;
     }
 
     public void setSat(int sat) {
         this.sat = sat;
+        this.colormode = "hs";
     }
 
     public String getEffect() {
@@ -60,11 +63,12 @@ public class DeviceState {
     }
 
     public int getCt() {
-        return ct;
+        return ct != null ? ct.intValue() : 0;
     }
 
     public void setCt(int ct) {
         this.ct = ct;
+        this.colormode = "ct";
     }
 
     public String getAlert() {
@@ -97,6 +101,7 @@ public class DeviceState {
 
     public void setXy(List<Double> xy) {
         this.xy = xy;
+        this.colormode = "xy";
     }
 //    public int getTransitiontime() {
 //		return transitiontime;
@@ -106,22 +111,28 @@ public class DeviceState {
 //		this.transitiontime = transitiontime;
 //	}
 
-	public static DeviceState createDeviceState() {
+	public static DeviceState createDeviceState(boolean color) {
     	DeviceState newDeviceState = new DeviceState();
-    	newDeviceState.fillIn();
-//    	newDeviceState.setColormode("none");
-//    	ArrayList<Double> doubleArray = new ArrayList<Double>();
-//    	doubleArray.add(new Double(0));
-//    	doubleArray.add(new Double(0));
-//    	newDeviceState.setXy(doubleArray);
-    	
+    	newDeviceState.fillIn(color);
+        if (color) {
+            newDeviceState.setColormode("xy");
+            newDeviceState.setHue(0);
+            newDeviceState.setSat(0);
+            newDeviceState.setCt(153);
+            ArrayList<Double> doubleArray = new ArrayList<Double>();
+            doubleArray.add(0.3146);
+            doubleArray.add(0.3303);
+            newDeviceState.setXy(doubleArray);    
+        }
     	return newDeviceState;
     }
-    public void fillIn() {
+    public void fillIn(boolean color) {
     	if(this.getAlert() == null)
     		this.setAlert("none");
-    	if(this.getEffect() == null)
-    		this.setEffect("none");
+        if (color) {
+            if(this.getEffect() == null)
+                this.setEffect("none");
+        }
     	this.setReachable(true);
     }
     @Override

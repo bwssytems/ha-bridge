@@ -18,9 +18,9 @@ public class HueApiResponse {
     private Map<String, JsonObject> rules;
     private HueConfig config;
 
-    public HueApiResponse(String name, String ipaddress, Map<String, WhitelistEntry> awhitelist, String emulateHubVersion, boolean isLinkButtonPressed) {
+    public HueApiResponse(String name, String ipaddress, Map<String, WhitelistEntry> awhitelist, String emulateHubVersion, boolean isLinkButtonPressed, String emulateMAC) {
 		super();
-		this.setConfig(HueConfig.createConfig(name, ipaddress, awhitelist, emulateHubVersion, isLinkButtonPressed));
+		this.setConfig(HueConfig.createConfig(name, ipaddress, awhitelist, emulateHubVersion, isLinkButtonPressed, emulateMAC));
 		this.setRules(new HashMap<>());
 		this.setSensors(new HashMap<>());
 		this.setSchedules(new HashMap<>());

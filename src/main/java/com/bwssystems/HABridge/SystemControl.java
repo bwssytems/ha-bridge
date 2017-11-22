@@ -245,10 +245,22 @@ public class SystemControl {
 	    });
 //      http://ip_address:port/system/presslinkbutton which sets the link button for device registration
 		put(SYSTEM_CONTEXT + "/presslinkbutton", (request, response) -> {
-			log.info("Link button pressed....");
+			LinkParams linkParams = null;
+			if(!request.body().isEmpty()) {
+				linkParams = new Gson().fromJson(request.body(), LinkParams.class);
+				if(linkParams.getSeconds() <= 0)
+					linkParams.setSeconds(1);
+			}
+			else {
+				linkParams = new LinkParams();
+				linkParams.setSilent(false);
+				linkParams.setSeconds(30);
+			}
+			if(!linkParams.isSilent())
+				log.info("Link button pressed....");
 			bridgeSettings.getBridgeControl().setLinkButton(true);
 			Timer theTimer = new Timer();
-			theTimer.schedule(new LinkButtonPressed(bridgeSettings.getBridgeControl(), theTimer), 30000);
+			theTimer.schedule(new LinkButtonPressed(bridgeSettings.getBridgeControl(), theTimer, linkParams.isSilent()), (linkParams.getSeconds() * 1000));
 	        response.status(HttpStatus.SC_OK);
 			response.type("application/json");
             return "";

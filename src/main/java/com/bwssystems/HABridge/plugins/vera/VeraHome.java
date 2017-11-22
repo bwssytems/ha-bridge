@@ -15,6 +15,7 @@ import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
+import com.bwssystems.HABridge.hue.ColorData;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.plugins.vera.luupRequests.Device;
 import com.bwssystems.HABridge.plugins.vera.luupRequests.Scene;
@@ -24,10 +25,13 @@ public class VeraHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(VeraHome.class);
 	private Map<String, VeraInfo> veras;
 	private Boolean validVera;
+	private boolean closed;
 	
 	public VeraHome(BridgeSettings bridgeSettings) {
 		super();
+		closed = true;
 		createHome(bridgeSettings);
+		closed = false;
 	}
 
 	public List<Device> getDevices() {
@@ -73,7 +77,7 @@ public class VeraHome implements Home {
 
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
-			Integer targetBri,Integer targetBriInc, DeviceDescriptor device, String body) {
+			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		// Not a device handler
 		return null;
 	}
@@ -106,6 +110,12 @@ public class VeraHome implements Home {
 
 	@Override
 	public void closeHome() {
+		log.debug("Closing Home.");
+		if(closed) {
+			log.debug("Home is already closed....");
+			return;
+		}
 		veras = null;
+		closed = true;
 	}
 }
