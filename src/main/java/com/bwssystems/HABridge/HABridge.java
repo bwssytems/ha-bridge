@@ -80,15 +80,20 @@ public class HABridge {
 		        homeManager.buildHomes(bridgeSettings, udpSender);
 		        // setup the class to handle the resource setup rest api
 		        theResources = new DeviceResource(bridgeSettings, homeManager);
-		        // setup the class to handle the upnp response rest api
-		        theSettingResponder = new UpnpSettingsResource(bridgeSettings.getBridgeSettingsDescriptor());
-		        theSettingResponder.setupServer();
 		        // setup the class to handle the hue emulator rest api
 		        theHueMulator = new HueMulator(bridgeSettings, theResources.getDeviceRepository(), theResources.getGroupRepository(), homeManager);
 		        theHueMulator.setupServer();
 		        // wait for the sparkjava initialization of the rest api classes to be complete
 		        awaitInitialization();
-		
+
+		        if(bridgeSettings.getBridgeSettingsDescriptor().isTraceupnp())
+		        	log.info("Traceupnp: upnp config address: " + bridgeSettings.getBridgeSettingsDescriptor().getUpnpConfigAddress() + "-useIface:" +
+		        			bridgeSettings.getBridgeSettingsDescriptor().isUseupnpiface() + " on web server: " +
+		        			bridgeSettings.getBridgeSettingsDescriptor().getWebaddress() + ":" + bridgeSettings.getBridgeSettingsDescriptor().getServerPort());
+		        // setup the class to handle the upnp response rest api
+		        theSettingResponder = new UpnpSettingsResource(bridgeSettings.getBridgeSettingsDescriptor());
+		        theSettingResponder.setupServer();
+
 		        // start the upnp ssdp discovery listener
 		        theUpnpListener = null;
 		        try {

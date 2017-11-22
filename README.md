@@ -277,22 +277,32 @@ Don't forget - You will need to push the link button when you got to the Hue Tab
 Provide IP Addresses of your HAL Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target HAL and device/scene you configure. 
 #### MQTT Client IDs and IP Addresses	
 Provide Client ID and IP Addresses and ports of your MQTT Brokers that you want to utilize with the bridge. Also, you can provide the username and password if you have secured your MQTT broker which is optional. When these Client ID and IP's are given, the bridge will be able to publish MQTT messages by the call it receives and send it to the target MQTT Broker you configure. The MQTT Messages Tab will become available to help you build messages.
+#### Home Assistant Names and IP Addresses
+Provide IP Addresses and ports of your Home Assistant that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Home Assistant and device/scene you configure. 
+#### Domoticz Names and IP Addresses
+Provide IP Addresses of your Domoticz Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Domoticz and device/scene you configure. 
+#### Somfy Tahoma Names and IP Addresses
+Provide user name and password used to login to www.tahomalink.com.  This needs to be provided if you're using the Somfy Tahoma features (for connecting to IO Homecontrol used by Velux among others). There is no need to give any IP address or host information as this contacts your cloud account.  *Note:* you have to 'turn on' a window to open it, and 'turn off' to close.
 #### Nest Username
 The user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features. There is no need to give any ip address or host information as this contacts your cloud account.
 #### Nest Password
 The password for the user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features.
 #### Nest Temp Fahrenheit
 This setting allows the value being sent into the bridge to be interpreted as Fahrenheit or Celsius. The default is to have Fahrenheit.
-#### Somfy Tahoma Username
-The user name used to login to www.tahomalink.com.  This needs to be provided if you're using the Somfy Tahoma features (for connecting to IO Homecontrol used by Velux among others). There is no need to give any IP address or host information as this contacts your cloud account.  *Note:* you have to 'turn on' a window to open it, and 'turn off' to close.
-#### Somfy Tahoma Password
-The password associated with the Somfy Tahoma username above 
+#### LIFX Support
+This setting will have the ha-bridge look for LIFX devices on your network. Since this is broadcast based, there is no other info needed.
+#### Emulate Hue Hub Version
+This setting is used to set the version that the ha-bridge will return in the hub version field. The default is 9999999999 which should work to be higher than the versions that are being used.
+#### Emulate MAC
+This setting is in bridge-id, uuid, etc. in ha-bridge hue config replies. Leave blank unless needed as it is mainly a tool to keep a config to a specific set of devices whtn the ha-bridge is moved to another machine
 #### Button Press/Call Item Loop Sleep Interval (ms)
 This setting is the time used in between button presses when there is multiple buttons in a button device. It also controls the time between multiple items in a custom device call. This is defaulted to 100ms and the number represents milliseconds (1000 milliseconds = 1 second).
 #### Log Messages to Buffer
 This controls how many log messages will be kept and displayed on the log tab. This does not affect what is written to the standard output for logging. The default is 512. Changing this will incur more memory usage of the process.
 #### Trace UPNP Calls
 Turn on tracing for upnp discovery messages to the log. The default is false.
+#### My Echo URL
+This sets the URL that is used in the menu bar to ge to your echo. For certain countries, this needs to be set to a different URL.
 
 At the bottom of the screen is the "Bridge Settings Backup" which can be accessed with clicking on the `+` to expand this frame. Here you can backup and restore configurations that you have saved. These configs can be named or by clicking the `Backup Settings' button will create a backup and name it for you. You can manage these backups by restoring them or deleting them.
 ### The Logs Tab
@@ -311,6 +321,16 @@ The helper tabs will also show you what you have already configured for that tar
 Another way to add a device is through the Manual Add Tab. This allows you to manually enter the name, the on and off URLs and select if there are custom handling with the type of call that can be made. This allows for control of anything that has a distinct request that can be executed so you are not limited to the Vera, Harmony, Nest or other Hue.
 
 There is a new format for the on/dim/off URL areas. The new editor handles the intricacies of the components, but is broken down here for explanation.
+
+It is imperative when adding a line by hand that you hit the ```Add``` button at the end of the line before adding or updating the whole entry.
+
+```Update Bridge Device``` Button is for editing a current bridge device entry.
+
+```Add Bridge Device``` Button is to ccreate a new bridge device entry.
+
+```Clear``` Button is used to clear the contents of the entry on the screen.
+
+```Change Edit Mode``` Button is used to swithc back to a pure editor for the on/off/dim/color lines within the device entry.
 
 Here are the fields that can be put into the call item:
 

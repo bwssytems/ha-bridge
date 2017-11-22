@@ -625,7 +625,7 @@ public class HueMulator {
 	}
 
 	private String basicListHandler(String type, String userId, String requestIp) {
-		log.debug("hue " + type + " list requested: " + userId + " from " + requestIp);
+		log.debug("hue " + type + " list requested by user: " + userId + " from address: " + requestIp);
 		HueError[] theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors != null) {
 			if(bridgeSettingMaster.getBridgeSecurity().isSettingsChanged())
@@ -854,7 +854,7 @@ public class HueMulator {
 		HueError[] theErrors = null;
 		Map<String, DeviceResponse> deviceResponseMap = null;
 		if (bridgeSettings.isTraceupnp())
-			log.info("Traceupnp: hue lights list requested: " + userId + " from " + requestIp);
+			log.info("Traceupnp: hue lights list requested by user: " + userId + " from address: " + requestIp);
 		log.debug("hue lights list requested: " + userId + " from " + requestIp);
 		theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors == null) {
@@ -911,8 +911,10 @@ public class HueMulator {
 		String aDeviceType = null;
 		boolean toContinue = false;
 
-		if (bridgeSettings.isTraceupnp())
-			log.info("Traceupnp: hue api user create requested: " + body + " from " + ipAddress);
+		if (bridgeSettings.isTraceupnp() && !body.contains("test_ha_bridge"))
+			log.info("Traceupnp: hue api user create requested: " + body + " from address: " + ipAddress);
+		else
+			log.debug("hue api user create requested: " + body + " from address: " + ipAddress);
 		
 		if(bridgeSettingMaster.getBridgeSecurity().isUseLinkButton() && bridgeSettingMaster.getBridgeControl().isLinkButton())
 			toContinue = true;
@@ -947,7 +949,7 @@ public class HueMulator {
 			if(bridgeSettingMaster.getBridgeSecurity().isSettingsChanged())
 				bridgeSettingMaster.updateConfigFile();
 	
-			if (bridgeSettings.isTraceupnp())
+			if (bridgeSettings.isTraceupnp() && !aDeviceType.equals("test_ha_bridge"))
 				log.info("Traceupnp: hue api user create requested for device type: " + aDeviceType + " and username: "
 						+ newUser + (followingSlash ? " /api/ called" : ""));
 			log.debug("hue api user create requested for device type: " + aDeviceType + " and username: " + newUser + (followingSlash ? " /api/ called" : ""));
@@ -960,7 +962,7 @@ public class HueMulator {
 	
 	private Object getConfig(String userId, String ipAddress) {
 		if (bridgeSettings.isTraceupnp())
-			log.info("Traceupnp: hue api/:userid/config config requested: " + userId + " from " + ipAddress);
+			log.info("Traceupnp: hue api/:userid/config config requested from user: " + userId + " from address: " + ipAddress);
 		log.debug("hue api config requested: " + userId + " from " + ipAddress);
 		if (bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton()) != null) {
 			log.debug("hue api config requested, User invalid, returning public config");

@@ -109,15 +109,18 @@ public class UpnpListener {
 
 			while (addrs.hasMoreElements()) {
 				InetAddress addr = addrs.nextElement();
-				if (traceupnp)
-					log.info("Traceupnp: " + name + " ... has addr " + addr);
-				else
-					log.debug(name + " ... has addr " + addr);
+				log.debug(name + " ... has addr " + addr);
 				if (InetAddressUtils.isIPv4Address(addr.getHostAddress())) {
-					if(!useUpnpIface)
+					if(!useUpnpIface) {
+						if(traceupnp)
+							log.info("Traceupnp: Interface: " + name + " valid usable IP address: " + addr);
 						IPsPerNic++;
-					else if(addr.getHostAddress().equals(responseAddress))
-						IPsPerNic++;						
+					}
+					else if(addr.getHostAddress().equals(responseAddress)) {
+						if(traceupnp)
+							log.info("Traceupnp: Interface: " + name + " matches upnp config address of IP address: " + addr);
+						IPsPerNic++;
+					}
 				}
 			}
 			log.debug("Checking " + name + " to our interface set");
@@ -125,7 +128,7 @@ public class UpnpListener {
 				try {
 					upnpMulticastSocket.joinGroup(socketAddress, xface);
 					if (traceupnp)
-						log.info("Traceupnp: Adding " + name + " to our interface set");
+						log.info("Traceupnp: Adding " + name + " to our upnp join interface set.");
 					else
 						log.debug("Adding " + name + " to our interface set");
 				} catch (IOException e) {
@@ -199,29 +202,22 @@ public class UpnpListener {
 		//Only respond to discover request for strict upnp form
 		String packetString = new String(packet.getData(), 0, packet.getLength());
 		if(packetString != null && packetString.startsWith("M-SEARCH * HTTP/1.1") && packetString.contains("\"ssdp:discover\"")){
-			log.debug("isSSDPDiscovery Found message to be an M-SEARCH message.");
-			log.debug("isSSDPDiscovery Got SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
-
 			if(strict && (packetString.contains("ST: urn:schemas-upnp-org:device:basic:1") || packetString.contains("ST: upnp:rootdevice") || packetString.contains("ST: ssdp:all")))
 			{
 				if(traceupnp) {
-					log.info("Traceupnp: isSSDPDiscovery found message to be an M-SEARCH message.");
-					log.info("Traceupnp: isSSDPDiscovery found message to be valid under strict rules - strict: " + strict);
-					log.info("Traceupnp: SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
+					log.info("Traceupnp: SSDP M-SEARCH packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort());
 				}
 				else
-					log.debug("isSSDPDiscovery found message to be valid under strict rules - strict: " + strict);
+					log.debug("SSDP M-SEARCH packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: <<<" + packetString + ">>>");
 				return true;
 			}
 			else if (!strict)
 			{
 				if(traceupnp) {
-					log.info("Traceupnp: isSSDPDiscovery found message to be an M-SEARCH message.");
-					log.info("Traceupnp: isSSDPDiscovery found message to be valid under loose rules - strict: " + strict);
-					log.info("Traceupnp: SSDP packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: " + packetString);
+					log.info("Traceupnp: SSDP M-SEARCH packet (!strict) from " + packet.getAddress().getHostAddress() + ":" + packet.getPort());
 				}
 				else
-					log.debug("isSSDPDiscovery found message to be valid under loose rules - strict: " + strict);
+					log.debug("SSDP M-SEARCH packet (!strict) from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ", body: <<<" + packetString + ">>>");
 				return true;
 			}
 		}
@@ -236,26 +232,26 @@ public class UpnpListener {
 		String discoveryResponse = null;
 		discoveryResponse = String.format(responseTemplate1, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID);
 		if(traceupnp) {
-			log.info("Traceupnp: sendUpnpResponse discovery responseTemplate1 is <<<" + discoveryResponse + ">>>");
+			log.info("Traceupnp: send upnp discovery template 1 with response address: " + responseAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
 		}
 		else
-			log.debug("sendUpnpResponse discovery responseTemplate1 is <<<" + discoveryResponse + ">>>");
+			log.debug("sendUpnpResponse to address: " + requester + ":" + sourcePort + " with discovery responseTemplate1 is <<<" + discoveryResponse + ">>>");
 		sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
 
 		discoveryResponse = String.format(responseTemplate2, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
 		if(traceupnp) {
-			log.info("Traceupnp: sendUpnpResponse discovery responseTemplate2 is <<<" + discoveryResponse + ">>>");
+			log.info("Traceupnp: send upnp discovery template 2 with response address: " + responseAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
 		}
 		else
-			log.debug("sendUpnpResponse discovery responseTemplate2 is <<<" + discoveryResponse + ">>>");
+			log.debug("sendUpnpResponse to address: " + requester + ":" + sourcePort + " discovery responseTemplate2 is <<<" + discoveryResponse + ">>>");
 		sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
 
 		discoveryResponse = String.format(responseTemplate3, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID);
 		if(traceupnp) {
-			log.info("Traceupnp: sendUpnpResponse discovery responseTemplate3 is <<<" + discoveryResponse + ">>>");
+			log.info("Traceupnp: send upnp discovery template 3 with response address: " + responseAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
 		}
 		else
-			log.debug("sendUpnpResponse discovery responseTemplate3 is <<<" + discoveryResponse + ">>>");
+			log.debug("sendUpnpResponse to address: " + requester + ":" + sourcePort + " discovery responseTemplate3 is <<<" + discoveryResponse + ">>>");
 		sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
 	}
 
@@ -269,11 +265,8 @@ public class UpnpListener {
 	
 	protected void sendUpnpNotify(InetAddress aSocketAddress) {
 		String notifyData = null;
-		log.debug("Sending notify packet for upnp.");
 		notifyData = String.format(notifyTemplate, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
-		if(traceupnp) {
-			log.info("Traceupnp: sendUpnpNotify notifyTemplate is <<<" + notifyData + ">>>");
-		}
+		log.debug("sendUpnpNotify notifyTemplate is <<<" + notifyData + ">>>");
 		DatagramPacket notifyPacket = new DatagramPacket(notifyData.getBytes(), notifyData.length(), aSocketAddress, Configuration.UPNP_DISCOVERY_PORT);
 		try {
 			upnpMulticastSocket.send(notifyPacket);
