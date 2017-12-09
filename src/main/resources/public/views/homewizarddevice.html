@@ -11,97 +11,93 @@
 	<li ng-if="bridge.showNest" role="presentation"><a href="#!/nest">Nest</a></li>
 	<li ng-if="bridge.showHue" role="presentation"><a href="#!/huedevices">Hue Devices</a></li>
 	<li ng-if="bridge.showHal" role="presentation"><a href="#!/haldevices">HAL Devices</a></li>
-	<li role="presentation" class="active"><a href="#!/mqttmessages">MQTT Messages</a></li>
+	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
 	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
 	<li ng-if="bridge.showHomeWizard" role="presentation"><a href="#!/homewizarddevices">HomeWizard Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
-	<li ng-if="bridge.showSomfy" role="presentation"><a href="#!/somfydevices">Somfy Devices</a></li>
-	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
+	<li ng-if="bridge.showSomfy" role="presentation" class="active"><a href="#!/homewizarddevices">Somfy Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">MQTT Messages</h2>
+		<h2 class="panel-title">HomeWizard Device List
+			({{bridge.homewizarddevices.length}})</h2>
 	</div>
 	<div class="panel-body">
-		<p class="text-muted">For any MQTT Broker, use the
-			build action buttons
-			to generate the item addition information into the ha-bridge device and this will put you into the edit screen.
-			You can add topic and content in the text areas provided
-			then selecting the publish generation. Then you can modify the name
-			to anything you want that will be the keyword for the Echo or Google Home. Also, you can go back to any helper tab and click a build 
+		<p class="text-muted">For any HomeWizard Device, use the build action buttons
+			to generate the item addition information into the ha-bridge device
+			and this will put you into the edit screen. Then
+			you can modify the name to anything you want that will be the keyword
+			for the Echo or Google Home. Also, you can go back to any helper tab and click a build
 			action button to add another item for a multi-command. After you are
-			 done in the edit tab, click the
-			'Add Bridge Device' to finish that selection setup. The 'Already
-			Configured MQTT Publish messages' list below will show what is already
-			setup for your MQTT Brokers.</p>
-
-	<scrollable-table watch="bridge.mqttbrokers">
+			 done in the edit tab, click the 'Add Bridge Device' to finish that selection
+			setup. The 'Already Configured HomeWizard Devices' list below will show
+			what is already setup for your HomeWizard Gateway.</p>
+		<p>Use the check boxes by the names to use the bulk addition
+			feature. Select your items, then click
+			bulk add below. Your items will be added with the name of the device from the HomeWizard Cloud.</p>
+	</div>
+	<scrollable-table watch="bridge.homewizarddevices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<th>Row</th>
-				<th sortable-header col="name">ClientID</th>
-				<th sortable-header col="ip">IP</th>
-				<th>Topic</th>
-				<th>Content</th>
-				<th>QoS</th>
-				<th>Retain</th>
+				<th sortable-header col="name"><span><input type="checkbox" name="selectAll"
+					value="{{selectAll}}"
+					ng-checked="selectAll"
+					ng-click="toggleSelectAll()"> Name</span></th>
+				<th sortable-header col="id" comparator-fn="comparatorUniqueId">Id</th>
+				<th sortable-header col="type">Type</th>
 				<th>Build Actions</th>
 			</tr>
 		</thead>
-		<tr ng-repeat="mqttbroker in bridge.mqttbrokers">
+		<tr
+			ng-repeat="homewizarddevice in bridge.homewizarddevices">
 			<td>{{$index+1}}</td>
-			<td>{{mqttbroker.clientId}}</td>
-			<td>{{mqttbroker.ip}}</td>
+			<td><input type="checkbox" name="bulk.devices[]"
+				value="{{homewizarddevice.id}}"
+				ng-checked="bulk.devices.indexOf(homewizarddevice.id) > -1"
+				ng-click="toggleSelection(homewizarddevice.id)">
+				{{homewizarddevice.name}}</td>
+			<td>{{homewizarddevice.id}}</td>
+			<td>{{homewizarddevice.typeName}}</td>
 			<td>
-				<textarea rows="2" class="form-control" id="mqtt-topic"
-							ng-model="mqtttopic" placeholder="The MQTT Topic"></textarea>
-			</td>
-			<td>
-				<textarea rows="2" class="form-control" id="mqtt-content"
-							ng-model="mqttcontent" placeholder="The MQTT Message Content"></textarea>
-			</td>
-			<td>
-				<input type="number" rows="1" class="form-control" id="mqtt-qos"
-					   ng-model="mqttqos" placeholder="1"/>
-			</td>
-			<td>
-				<input type="checkbox" rows="1" class="form-control" id="mqtt-retain"
-					   ng-model="mqttretain"/>
-			</td>
-			<td>
+				<!--TODO - taken device_dim_control out of here since not yet used-->
 				<button class="btn btn-success" type="submit"
-					ng-click="buildMQTTPublish(mqttbroker, mqtttopic, mqttcontent, mqttqos, mqttretain)">Build
-					publish Message</button>
+					ng-click="buildDeviceUrls(homewizarddevice, false)">Build Item</button>
 			</td>
 		</tr>
 	</table>
 	</scrollable-table>
+	<div class="panel-footer">
+		<button class="btn btn-success" type="submit"
+			ng-click="bulkAddDevices()">Bulk Add
+			({{bulk.devices.length}})</button>
+	</div>
 	</div>
 </div>
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title">
-			Already Configured MQTT Messages <a ng-click="toggleButtons()"><span
+			Already Configured HomeWizard Devices <a ng-click="toggleButtons()"><span
 				class={{imgButtonsUrl}} aria-hidden="true"></span></a>
 		</h2>
 	</div>
 	<div ng-if="buttonsVisible" class="panel-body">
-	<scrollable-table watch="bridge.mqttbrokers">
+	<scrollable-table watch="bridge.devices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<th>Row</th>
-				<th sortable-header col="nameclientid">Name</th>
-				<th sortable-header col="targetDevice">ClientID</th>
+				<th sortable-header col="name">Name</th>
+				<th sortable-header col="targetDevice">HomeWizard Gateway</th>
 				<th>Map Id</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="device in bridge.devices | configuredMqttMsgs | orderBy:predicate:reverse">
+			ng-repeat="device in bridge.devices |configuredHomeWizardDevices">
 			<td>{{$index+1}}</td>
 			<td>{{device.name}}</td>
 			<td>{{device.targetDevice}}</td>

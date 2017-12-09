@@ -62,7 +62,11 @@ app.config (function ($locationProvider, $routeProvider) {
 	}).when ('/hassdevices', {
 		templateUrl: 'views/hassdevice.html',
 		controller: 'HassController',		
-		requiresAuthentication: true		
+		requiresAuthentication: true
+    }).when ('/homewizarddevices', {
+        templateUrl: 'views/homewizarddevice.html',
+        controller: 'HomeWizardController',       
+        requiresAuthentication: true		
 	}).when ('/domoticzdevices', {
 		templateUrl: 'views/domoticzdevice.html',
 		controller: 'DomoticzController',		
@@ -143,7 +147,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {},
 			mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false,
 			isInControl: false, showVera: false, showFibaro: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false,
-			showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: {}, viewDevId: "", queueDevId: "", securityInfo: {}, filterDevicesByIpAddress: null, 
+			showHomeWizard: false, showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: {}, viewDevId: "", queueDevId: "", securityInfo: {}, filterDevicesByIpAddress: null, 
 			filterDevicesOnlyFiltered: false, filterDeviceType: null};
 
 	this.displayWarn = function(errorTitle, error) {
@@ -504,11 +508,16 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 		return;
 	}
 
-	this.updateShowHass = function () {
-		this.state.showHass = self.state.settings.hassconfigured;
+	this.updateShowHomeWizard = function () {
+		this.state.showHomeWizard = self.state.settings.homewizardconfigured;
 		return;
 	}
 
+	this.updateShowHass = function () {
+        this.state.showHass = self.state.settings.hassconfigured;
+        return;
+    }
+	   
 	this.updateShowDomoticz = function () {
 		this.state.showDomoticz = self.state.settings.domoticzconfigured;
 		return;
@@ -536,6 +545,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.updateShowHal();
 					self.updateShowMqtt();
 					self.updateShowHass();
+					self.updateShowHomeWizard();
 					self.updateShowDomoticz();
 					self.updateShowSomfy();
 					self.updateShowLifx();
@@ -781,6 +791,22 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 		);
 	};
 
+   this.viewHomeWizardDevices = function () {
+        if (!this.state.showHomeWizard)
+            return;
+        return $http.get(this.state.base + "/homewizard/devices").then(
+                function (response) {
+                    self.state.homewizarddevices = response.data;
+                },
+                function (error) {
+                    if (error.status === 401)
+                        $rootScope.$broadcast('securityReinit', 'done');
+                    else
+                    self.displayWarn("Get HomeWizard Devices Error: ", error);
+                }
+        );
+    };
+	    
 	this.viewDomoticzDevices = function () {
 		if (!this.state.showDomoticz)
 			return;
@@ -1467,6 +1493,24 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     	    	$scope.bridge.settings.hassaddress.devices.splice(i, 1);
     	    }
     	}    	
+    };
+    $scope.addHomeWizardtoSettings = function (newhomewizardname, newhomewizardip, newhomewizardusername, newhomewizardpassword) {
+        if($scope.bridge.settings.homewizardaddress === undefined || $scope.bridge.settings.homewizardaddress === null) {
+            $scope.bridge.settings.homewizardaddress = { devices: [] };
+        }
+        var newhomewizard = { name: newhomewizardname, ip: newhomewizardip, username: newhomewizardusername, password: newhomewizardpassword }
+        $scope.bridge.settings.homewizardaddress.devices.push(newhomewizard);
+        $scope.newhomewizardname = null;
+        $scope.newhomewizardip = null;
+        $scope.newhomewizardusername = null;
+        $scope.newhomewizardpassword = null;
+    };
+    $scope.removeHomeWizardtoSettings = function (homewizardname, homewizardip) {
+        for(var i = $scope.bridge.settings.homewizardaddress.devices.length - 1; i >= 0; i--) {
+            if($scope.bridge.settings.homewizardaddress.devices[i].name === homewizardname && $scope.bridge.settings.homewizardaddress.devices[i].ip === homewizardip) {
+                $scope.bridge.settings.homewizardaddress.devices.splice(i, 1);
+            }
+        }       
     };
     $scope.addDomoticztoSettings = function (newdomoticzname, newdomoticzip, newdomoticzport, newdomoticzusername, newdomoticzpassword) {
     	if($scope.bridge.settings.domoticzaddress === undefined || $scope.bridge.settings.domoticzaddress === null) {
@@ -2782,7 +2826,7 @@ app.controller('HassController', function ($scope, $location, bridgeService, ngD
 		$scope.device = bridgeService.state.device;
 	};
 
-	$scope.buildDeviceUrls = function (hassdevice, dim_control, buildonly) {
+	$scope.buildDeviceUrls = function (hassdevice, buildonly) {
 		onpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"}";
 		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0))
 			dimpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\",\"bri\":\"" + dim_control + "\"}";
@@ -2798,7 +2842,7 @@ app.controller('HassController', function ($scope, $location, bridgeService, ngD
 		}
 	};
 
-	$scope.bulkAddDevices = function(dim_control) {
+	$scope.bulkAddDevices = function() {
 		var devicesList = [];
 		$scope.clearDevice();
 		for(var i = 0; i < $scope.bulk.devices.length; i++) {
@@ -2892,6 +2936,132 @@ app.controller('HassController', function ($scope, $location, bridgeService, ngD
 		bridgeService.editDevice(device);
 		$location.path('/editdevice');
 	};
+});
+
+app.controller('HomeWizardController', function ($scope, $location, bridgeService, ngDialog) {
+    $scope.bridge = bridgeService.state;
+    $scope.device = bridgeService.state.device;
+    $scope.device_dim_control = "";
+    $scope.bulk = { devices: [] };
+    $scope.selectAll = false;
+    bridgeService.viewHomeWizardDevices();
+    $scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+    $scope.buttonsVisible = false;
+
+    $scope.clearDevice = function () {
+        bridgeService.clearDevice();
+        $scope.device = bridgeService.state.device;
+    };
+
+    $scope.buildDeviceUrls = function (homewizarddevice, buildonly) {
+        
+    	dimpayload = "{\"deviceid\":\"" + homewizarddevice.id + "\",\"action\":\"on\"}";
+        onpayload = "{\"deviceid\":\"" + homewizarddevice.id + "\",\"action\":\"on\"}";
+        offpayload = "{\"deviceid\":\"" + homewizarddevice.id + "\",\"action\":\"off\"}";
+        
+        bridgeService.buildUrls(onpayload, dimpayload, offpayload, null, true, homewizarddevice.id ,homewizarddevice.name, homewizarddevice.gateway, null,  "homewizardDevice", null, null);
+        $scope.device = bridgeService.state.device;
+        
+        if (!buildonly) {
+            bridgeService.editNewDevice($scope.device);
+            $location.path('/editdevice');
+        }
+    };
+
+    $scope.bulkAddDevices = function() {
+        var devicesList = [];
+        $scope.clearDevice();
+        for(var i = 0; i < $scope.bulk.devices.length; i++) {
+            for(var x = 0; x < bridgeService.state.homewizarddevices.length; x++) {
+                if(bridgeService.state.homewizarddevices[x].id === $scope.bulk.devices[i]) {
+                    $scope.buildDeviceUrls(bridgeService.state.homewizarddevices[x],true);
+                    devicesList[i] = {
+                            name: $scope.device.name,
+                            mapId: $scope.device.mapId,
+                            mapType: $scope.device.mapType,
+                            deviceType: $scope.device.deviceType,
+                            targetDevice: $scope.device.targetDevice,
+                            onUrl: $scope.device.onUrl,
+                            dimUrl: $scope.device.dimUrl,
+                            offUrl: $scope.device.offUrl,
+                            colorUrl: $scope.device.colorUrl,
+                            headers: $scope.device.headers,
+                            httpVerb: $scope.device.httpVerb,
+                            contentType: $scope.device.contentType,
+                            contentBody: $scope.device.contentBody,
+                            contentBodyDim: $scope.device.contentBodyDim,
+                            contentBodyOff: $scope.device.contentBodyOff
+                    };
+                    $scope.clearDevice();
+                }
+            }
+        }
+        bridgeService.bulkAddDevice(devicesList).then(
+                function () {
+                    $scope.clearDevice();
+                    bridgeService.viewDevices();
+                    bridgeService.viewHalDevices();
+                },
+                function (error) {
+                    bridgeService.displayWarn("Error adding HomeWizard devices in bulk.", error)
+                }
+            );
+        $scope.bulk = { devices: [] };
+        $scope.selectAll = false;
+    };
+
+    $scope.toggleSelection = function toggleSelection(deviceId) {
+        var idx = $scope.bulk.devices.indexOf(deviceId);
+
+        // is currently selected
+        if (idx > -1) {
+            $scope.bulk.devices.splice(idx, 1);
+            if($scope.bulk.devices.length === 0 && $scope.selectAll)
+                $scope.selectAll = false;
+        }
+
+        // is newly selected
+        else {
+            $scope.bulk.devices.push(deviceId);
+            $scope.selectAll = true;
+        }
+    };
+
+    $scope.toggleSelectAll = function toggleSelectAll() {
+        if($scope.selectAll) {
+            $scope.selectAll = false;
+            $scope.bulk = { devices: [] };
+        }
+        else {
+            $scope.selectAll = true;
+            for(var x = 0; x < bridgeService.state.homewizarddevices.length; x++) {
+                if($scope.bulk.devices.indexOf(bridgeService.state.homewizarddevices[x]) < 0)
+                    $scope.bulk.devices.push(bridgeService.state.homewizarddevices[x].devicename);
+            }
+        }
+    };
+
+    $scope.toggleButtons = function () {
+        $scope.buttonsVisible = !$scope.buttonsVisible;
+        if($scope.buttonsVisible)
+            $scope.imgButtonsUrl = "glyphicon glyphicon-minus";
+        else
+            $scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+    };
+
+    $scope.deleteDevice = function (device) {
+        $scope.bridge.device = device;
+        ngDialog.open({
+            template: 'deleteDialog',
+            controller: 'DeleteDialogCtrl',
+            className: 'ngdialog-theme-default'
+        });
+    };
+    
+    $scope.editDevice = function (device) {
+        bridgeService.editDevice(device);
+        $location.path('/editdevice');
+    };
 });
 
 app.controller('DomoticzController', function ($scope, $location, bridgeService, ngDialog) {
@@ -3698,6 +3868,20 @@ app.filter('configuredSomfyDevices', function (bridgeService) {
 			return out;
 		for (var i = 0; i < input.length; i++) {
 			if(bridgeService.deviceContainsType(input[i], "somfyDevice")){
+				out.push(input[i]);
+			}
+		}
+		return out;
+	}
+});
+
+app.filter('configuredHomeWizardDevices', function (bridgeService) {
+	return function(input) {
+		var out = [];
+		if(input === undefined || input === null || input.length === undefined)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if(bridgeService.deviceContainsType(input[i], "homewizardDevice")){
 				out.push(input[i]);
 			}
 		}
