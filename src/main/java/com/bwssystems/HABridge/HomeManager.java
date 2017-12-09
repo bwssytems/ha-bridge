@@ -14,6 +14,7 @@ import com.bwssystems.HABridge.plugins.exec.CommandHome;
 import com.bwssystems.HABridge.plugins.hal.HalHome;
 import com.bwssystems.HABridge.plugins.harmony.HarmonyHome;
 import com.bwssystems.HABridge.plugins.hass.HassHome;
+import com.bwssystems.HABridge.plugins.homewizard.HomeWizardHome;
 import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.bwssystems.HABridge.plugins.hue.HueHome;
 import com.bwssystems.HABridge.plugins.lifx.LifxHome;
@@ -68,6 +69,10 @@ public class HomeManager {
 		aHome = new HassHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.HASS_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.HASS_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		// Setup the HomeWizard configuration if available
+		aHome = new HomeWizardHome(bridgeSettings);
+		resourceList.put(DeviceMapTypes.HOMEWIZARD_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.HOMEWIZARD_DEVICE[DeviceMapTypes.typeIndex], aHome);		
 		//setup the command execution Home
 		aHome = new CommandHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.EXEC_DEVICE_COMPAT[DeviceMapTypes.typeIndex], aHome);
@@ -96,7 +101,7 @@ public class HomeManager {
 		aHome = new FibaroHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.FIBARO_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		resourceList.put(DeviceMapTypes.FIBARO_SCENE[DeviceMapTypes.typeIndex], aHome);
-    //setup the Domoticz configuration if available
+        //setup the Domoticz configuration if available
 		aHome = new DomoticzHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		resourceList.put(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex], aHome);
