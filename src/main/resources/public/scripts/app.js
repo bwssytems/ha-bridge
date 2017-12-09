@@ -2826,7 +2826,7 @@ app.controller('HassController', function ($scope, $location, bridgeService, ngD
 		$scope.device = bridgeService.state.device;
 	};
 
-	$scope.buildDeviceUrls = function (hassdevice, buildonly) {
+	$scope.buildDeviceUrls = function (hassdevice, dim_control, buildonly) {
 		onpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"}";
 		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0))
 			dimpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\",\"bri\":\"" + dim_control + "\"}";
@@ -2842,7 +2842,7 @@ app.controller('HassController', function ($scope, $location, bridgeService, ngD
 		}
 	};
 
-	$scope.bulkAddDevices = function() {
+	$scope.bulkAddDevices = function(dim_control) {
 		var devicesList = [];
 		$scope.clearDevice();
 		for(var i = 0; i < $scope.bulk.devices.length; i++) {

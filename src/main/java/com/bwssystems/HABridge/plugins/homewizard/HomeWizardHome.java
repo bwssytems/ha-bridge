@@ -65,7 +65,6 @@ public class HomeWizardHome implements Home {
 							+ lightId + "state\"}}]";
 				} else {
 					try {
-						
 						homeWizzardHandler.execApply(jsonToPost);
 					} catch (Exception e) {
 						

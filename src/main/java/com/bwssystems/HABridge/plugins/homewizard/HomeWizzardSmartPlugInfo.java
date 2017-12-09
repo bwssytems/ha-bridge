@@ -130,37 +130,59 @@ public class HomeWizzardSmartPlugInfo {
 	
 	private boolean sendAction(String request, String action)
 	{
+		boolean result = true;
+		
 		// Check login was successful
 		if (login()) {
-			
+						
 			// Post action into Cloud service
 			try
 			{
 				URL url = new URL(HOMEWIZARD_API_URL + request);
 				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-				connection.setRequestMethod("POST");
-				connection.setRequestProperty("X-Session-Token", cloudSessionId);
-				connection.setRequestProperty("Content-Type", "application/json;charset=utf-8");
-				
+
 				JsonObject actionJson = new JsonObject();
-				actionJson.addProperty("action", action);
+				actionJson.addProperty("action", StringUtils.capitalize(action));			
+				
+				connection.setRequestMethod("POST");
+				connection.setDoOutput(true);
+				connection.setRequestProperty("X-Session-Token", cloudSessionId);
+				connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
 				
 				OutputStream os = connection.getOutputStream();
 				os.write(actionJson.toString().getBytes("UTF-8"));
 				os.close();	
+				
+				BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+				StringBuilder buffer = new StringBuilder();
+				String line;
+				
+				while((line = br.readLine()) != null)
+				{
+					buffer.append(line).append("\n");
+				}
+				
+				br.close();
+				connection.disconnect();
+				
+				// Check if request was Ok
+				if (!buffer.toString().contains("Success"))
+				{
+					result = false;
+				}
 			}
 			catch(IOException e)
 			{
 				log.warn("Error while post json action: {} ", request, e);
-				return false;
+				result = false;
 			}
 		}
 		else
 		{
-			return false;
+			result = false;
 		}
 		
-		return true;
+		return result;
 	}
 	
 	public List<HomeWizardSmartPlugDevice> getDevices() 
@@ -189,17 +211,22 @@ public class HomeWizzardSmartPlugInfo {
 		return homewizardDevices;
 	}
 
-	public void execApply(String jsonToPost) {
-		try
-		{
-			JSONObject resultJson = new JSONObject(jsonToPost);
-			String deviceId = resultJson.getString("deviceid");
-			String action = resultJson.getString("action");
+	public void execApply(String jsonToPost) throws JSONException, IOException {
 			
-			sendAction("/" + cloudPlugId + "/devices/" + deviceId + "/action", action);
+		// Extract 
+		JSONObject resultJson = new JSONObject(jsonToPost);
+		String deviceId = resultJson.getString("deviceid");
+		String action = resultJson.getString("action");
+		
+		// Check if we have an plug id stored
+		if (StringUtils.isBlank(cloudPlugId)) {
+			getDevices();
 		}
-		catch(JSONException e) {
-			log.warn("Error while get devices from cloud service ", e);
+		
+		// Send request to HomeWizard cloud
+		if (!sendAction("/" + cloudPlugId + "/devices/" + deviceId + "/action", action))
+		{
+			throw new IOException("Send action to HomeWizard Cloud failed.");
 		}
 	}
 
