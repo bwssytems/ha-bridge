@@ -93,7 +93,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("securityData")
 	@Expose
 	private String securityData;
-
+	@SerializedName("homewizardaddress")
+	@Expose
+	private IpList homewizardaddress;
 	
 	private boolean settingsChanged;
 	private boolean veraconfigured;
@@ -107,7 +109,8 @@ public class BridgeSettingsDescriptor {
 	private boolean domoticzconfigured;
 	private boolean somfyconfigured;
 	private boolean lifxconfigured;
-
+	private boolean homewizardconfigured;
+	
 	// Deprecated settings
 	private String haltoken;
 	private boolean upnpstrict;
@@ -127,7 +130,7 @@ public class BridgeSettingsDescriptor {
 		this.mqttconfigured = false;
 		this.hassconfigured = false;
 		this.domoticzconfigured = false;
-		this.somfyconfigured = false;
+		this.homewizardconfigured = false;
 		this.lifxconfigured = false;
 		this.farenheit = true;
 		this.securityData = null;
@@ -188,6 +191,9 @@ public class BridgeSettingsDescriptor {
 	public IpList getSomfyAddress() {
 		return somfyaddress;
 	}
+	public IpList getHomeWizardAddress() {
+		return homewizardaddress;
+	}	
 	public void setVeraAddress(IpList veraAddress) {
 		this.veraaddress = veraAddress;
 	}
@@ -196,6 +202,9 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setSomfyAddress(IpList somfyAddress) {
 		this.somfyaddress = somfyAddress;
+	}
+	public void setHomeWizardAddress(IpList homewizardaddress) {
+		this.homewizardaddress = homewizardaddress;
 	}
 	public IpList getHarmonyAddress() {
 		return harmonyaddress;
@@ -236,6 +245,9 @@ public class BridgeSettingsDescriptor {
 	public boolean isSomfyconfigured() {
 		return somfyconfigured;
 	}
+	public boolean isHomeWizardConfigured() {
+		return homewizardconfigured;
+	}	
 	public void setVeraconfigured(boolean veraconfigured) {
 		this.veraconfigured = veraconfigured;
 	}
@@ -244,6 +256,9 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setSomfyconfigured(boolean somfyconfigured) {
 		this.somfyconfigured = somfyconfigured;
+	}
+	public void setHomeWizardConfigured(boolean homewizardconfigured) {
+		this.homewizardconfigured = homewizardconfigured;
 	}
 	public boolean isHarmonyconfigured() {
 		return harmonyconfigured;
@@ -491,5 +506,15 @@ public class BridgeSettingsDescriptor {
 			hueaddress.getDevices().set(indexHue, aHue);
 			this.setSettingsChanged(true);
 		}
+	}
+	public Boolean isValidHomeWizard() {
+		if(this.getHomeWizardAddress() == null || this.getHomeWizardAddress().getDevices().size() <= 0)
+			return false;
+		
+		List<NamedIP> devicesList = this.getHomeWizardAddress().getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+		
+		return true;
 	}
 }
