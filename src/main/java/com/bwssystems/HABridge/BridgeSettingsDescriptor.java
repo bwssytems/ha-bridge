@@ -15,6 +15,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("useupnpiface")
 	@Expose
 	private boolean useupnpiface;
+	@SerializedName("userooms")
+	@Expose
+	private boolean userooms;
 	@SerializedName("serverport")
 	@Expose
 	private Integer serverport;
@@ -119,6 +122,7 @@ public class BridgeSettingsDescriptor {
 		super();
 		this.upnpstrict = true;
 		this.useupnpiface = false;
+		this.userooms = false;
 		this.traceupnp = false;
 		this.nestconfigured = false;
 		this.veraconfigured = false;
@@ -151,6 +155,12 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setUseupnpiface(boolean useupnpiface) {
 		this.useupnpiface = useupnpiface;
+	}
+	public boolean isUserooms() {
+		return userooms;
+	}
+	public void setUserooms(boolean userooms) {
+		this.userooms = userooms;
 	}
 	public Integer  getServerPort() {
 		return serverport;

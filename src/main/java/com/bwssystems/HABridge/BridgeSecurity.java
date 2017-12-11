@@ -238,6 +238,31 @@ public class BridgeSecurity {
 		return null;
 	}
 	
+	public String findWhitelistUserByDeviceType(String aDeviceType) {
+		String validUser = null;
+		boolean found = false;
+		WhitelistEntry anEntry = null;
+		if (aDeviceType != null) {
+			if (securityDescriptor.getWhitelist() != null) {
+				Set<String> theUserIds = securityDescriptor.getWhitelist().keySet();
+				Iterator<String> userIterator = theUserIds.iterator();
+				while (!found && userIterator.hasNext()) {
+					validUser = userIterator.next();
+					anEntry = securityDescriptor.getWhitelist().get(validUser);
+					if (anEntry.getName().equals(aDeviceType)) {
+						found = true;
+						log.debug("findWhitelistUserByDeviceType: found a user <" + validUser + "> for device type <" + aDeviceType + ">");
+					}
+				}
+			}
+		}
+		
+		if(!found)
+			validUser = null;
+		
+		return validUser;
+	}
+	
 	private void newWhitelistUser(String aUser, String userDescription) {
 		if (securityDescriptor.getWhitelist() == null) {
 			securityDescriptor.setWhitelist(new HashMap<>());
@@ -250,8 +275,14 @@ public class BridgeSecurity {
 	}
 
 	public String createWhitelistUser(String userDescription) {
-		String aUser = getNewUserID();
-		newWhitelistUser(aUser, userDescription);
+		String aUser = null;
+		String theEntry = findWhitelistUserByDeviceType(userDescription);
+		if(theEntry == null) {
+			aUser = getNewUserID();
+			newWhitelistUser(aUser, userDescription);
+		} else {
+			aUser = theEntry;
+		}
 		return aUser;
 	}
 

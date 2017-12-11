@@ -127,7 +127,12 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			return addGroup(request.params(":userid"), request.ip(), request.body());
+			if(bridgeSettings.isUserooms()) {
+				return addGroup(request.params(":userid"), request.ip(), request.body());
+			} else {
+				log.debug("group add requested from (No Use Rooms) " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
+				return "[{\"success\":{\"id\":\"1\"}}]";
+			}
 		});
 		// http://ip_address:port/api/:userid/groups/<groupid>
 		// delete a group
@@ -135,7 +140,12 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			return deleteGroup(request.params(":userid"), request.params(":groupid"), request.ip());
+			if(bridgeSettings.isUserooms()) {
+				return deleteGroup(request.params(":userid"), request.params(":groupid"), request.ip());
+			} else {
+				log.debug("delete to groups API from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
+				return "[{\"error\":{\"address\": \"/groups/0/action/scene\", \"type\":7, \"description\": \"invalid value, dummy for parameter, scene\"}}]";
+			}
 		});
 		// http://ip_address:port/api/:userid/groups/<groupid>
 		// modify a single group
@@ -143,7 +153,12 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			return modifyGroup(request.params(":userid"), request.params(":groupid"), request.ip(), request.body());
+			if(bridgeSettings.isUserooms()) {
+				return modifyGroup(request.params(":userid"), request.params(":groupid"), request.ip(), request.body());
+			} else {
+				log.debug("put to groups API from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
+				return "[{\"error\":{\"address\": \"/groups/0/action/scene\", \"type\":7, \"description\": \"invalid value, dummy for parameter, scene\"}}]";
+			}
 		});
 		// http://ip_address:port/api/:userid/groups/<groupid>/action
 		// group acions
@@ -151,7 +166,12 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			return changeGroupState(request.params(":userid"), request.params(":groupid"), request.body(), request.ip(), false);
+			if(bridgeSettings.isUserooms()) {
+				return changeGroupState(request.params(":userid"), request.params(":groupid"), request.body(), request.ip(), false);
+			} else {
+				log.debug("put action to groups API from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
+				return "[{\"error\":{\"address\": \"/groups/0/action/scene\", \"type\":7, \"description\": \"invalid value, dummy for parameter, scene\"}}]";
+			}
 		});		
 		// http://ip_address:port/api/{userId}/scenes returns json objects of
 		// all scenes configured
@@ -922,7 +942,7 @@ public class HueMulator {
 			toContinue = true;
 		
 		if(toContinue) {
-			log.debug("hue api user create requested: " + body + " from " + ipAddress);
+			log.debug("user add toContinue was true, creating user.");
 	
 			if (body != null && !body.isEmpty()) {
 				try {
@@ -938,6 +958,8 @@ public class HueMulator {
 	
 			if (aDeviceType == null)
 				aDeviceType = "<not given>";
+			else
+				aDeviceType = aDeviceType + "#" + ipAddress;
 	
 			if (newUser == null) {
 				newUser = bridgeSettingMaster.getBridgeSecurity().createWhitelistUser(aDeviceType);
@@ -1084,7 +1106,7 @@ public class HueMulator {
 	}
 
 	private String changeState(String userId, String lightId, String body, String ipAddress, boolean ignoreRequester) {
-		if (Integer.parseInt(lightId) >= 10000) {
+		if (bridgeSettings.isUserooms() && Integer.parseInt(lightId) >= 10000) {
 			return changeGroupState(userId, String.valueOf(Integer.parseInt(lightId) - 10000), body, ipAddress, true);
 		}
 		String responseString = null;

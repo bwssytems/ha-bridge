@@ -1,5 +1,6 @@
 package com.bwssystems.HABridge.plugins.exec;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.slf4j.Logger;
@@ -45,10 +46,7 @@ public class CommandHome implements Home {
 		intermediate = TimeDecode.replaceTimeValue(intermediate);
 		String execGarden = theSettings.getBridgeSecurity().getExecGarden();
 		if(execGarden != null && !execGarden.trim().isEmpty()) {
-			if(System.getProperty("os.name").toLowerCase().indexOf("win") >= 0)
-				intermediate = execGarden + "\\" + intermediate;
-			else
-				intermediate = execGarden + "/" + intermediate;
+			intermediate = new File(execGarden.trim(), intermediate).getAbsolutePath();
 		}
 
 		String anError = doExecRequest(intermediate, lightId);

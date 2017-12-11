@@ -16,6 +16,10 @@ public class ColorDecode {
 	private static final String COLOR_R = "${color.r}";
 	private static final String COLOR_G = "${color.g}";
 	private static final String COLOR_B = "${color.b}";
+	private static final String COLOR_RX = "${color.rx}";
+	private static final String COLOR_GX = "${color.gx}";
+	private static final String COLOR_BX = "${color.bx}";
+	private static final String COLOR_RGBX = "${color.rgbx}";
 	private static final Pattern COLOR_MILIGHT = Pattern.compile("\\$\\{color.milight\\:([01234])\\}");
 
 	public static List<Integer> convertCIEtoRGB(List<Double> xy, int brightness) {
@@ -175,6 +179,26 @@ public class ColorDecode {
 				notDone = true;
 			}
 
+			if (request.contains(COLOR_RX)) {
+				request = request.replace(COLOR_RX, String.format("%02X", rgb.get(0)));
+				notDone = true;
+			}
+
+			if (request.contains(COLOR_GX)) {
+				request = request.replace(COLOR_GX, String.format("%02X", rgb.get(1)));
+				notDone = true;
+			}
+
+			if (request.contains(COLOR_BX)) {
+				request = request.replace(COLOR_BX, String.format("%02X", rgb.get(2)));
+				notDone = true;
+			}
+
+			if (request.contains(COLOR_RGBX)) {
+				request = request.replace(COLOR_RGBX, String.format("%02X%02X%02X", rgb.get(0), rgb.get(1), rgb.get(2)));
+				notDone = true;
+			}
+			
 			Matcher m = COLOR_MILIGHT.matcher(request);
 			while (m.find()) {
 			    int group = Integer.parseInt(m.group(1));

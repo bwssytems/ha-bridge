@@ -62,7 +62,7 @@ public class HABridge {
 	        // sparkjava config directive to set port for the web server to listen on
 	        port(bridgeSettings.getBridgeSettingsDescriptor().getServerPort());
 	    	staticFileLocation("/public");
-	    	initExceptionHandler((e) -> HABridge.theExceptionHandler(e, bridgeSettings.getBridgeSettingsDescriptor().getServerPort()));
+//	    	initExceptionHandler((e) -> HABridge.theExceptionHandler(e, bridgeSettings.getBridgeSettingsDescriptor().getServerPort()));
 	        if(!bridgeSettings.getBridgeControl().isReinit())
 	        	init();
 	        bridgeSettings.getBridgeControl().setReinit(false);

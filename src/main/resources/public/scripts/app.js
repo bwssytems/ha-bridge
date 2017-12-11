@@ -2068,7 +2068,7 @@ app.controller('FibaroController', function ($scope, $location, bridgeService, n
 		onpayload = "http://" + fibarodevice.fibaroaddress + ":" + fibarodevice.fibaroport + "/api/callAction?deviceID=" + fibarodevice.id + "&name=turnOn";
 		offpayload = "http://" + fibarodevice.fibaroaddress + ":" + fibarodevice.fibaroport + "/api/callAction?deviceID=" + fibarodevice.id + "&name=turnOff";
 
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, false, fibarodevice.id, fibarodevice.name, fibarodevice.fibaroname, "switch", "fibaroDevice", null, null);
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, null,  false, fibarodevice.id, fibarodevice.name, fibarodevice.fibaroname, "switch", "fibaroDevice", null, null);
 		bridgeService.state.device.headers = "[{\"name\":\"Authorization\",\"value\":\"" + fibarodevice.fibaroAuth + "\"}]";
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
@@ -2081,7 +2081,7 @@ app.controller('FibaroController', function ($scope, $location, bridgeService, n
 		onpayload = "http://" + fibaroscene.fibaroaddress + ":" + fibaroscene.fibaroport + "/api/sceneControl?id=" + fibaroscene.id + "&action=start";
 		offpayload = "http://" + fibaroscene.fibaroaddress + ":" + fibaroscene.fibaroport + "/api/sceneControl?id=" + fibaroscene.id + "&action=stop";
 
-		bridgeService.buildUrls(onpayload, null, offpayload, false, fibaroscene.id, fibaroscene.name, fibaroscene.fibaroname, "scene", "fibaroScene", null, null);
+		bridgeService.buildUrls(onpayload, null, offpayload, null, false, fibaroscene.id, fibaroscene.name, fibaroscene.fibaroname, "scene", "fibaroScene", null, null);
 		bridgeService.state.device.headers = "[{\"name\":\"Authorization\",\"value\":\"" + fibaroscene.fibaroAuth + "\"}]";
 		$scope.device = bridgeService.state.device;
 		bridgeService.editNewDevice($scope.device);
