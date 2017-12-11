@@ -378,7 +378,7 @@ Headers can be added as well using a Json construct [{"name":"header type name",
 
 Another option that is detected by the bridge is to use UDP or TCP direct calls such as `udp://<ip_address>:<port>/<your stuff here>` to send a UDP request. TCP calls are handled the same way as `tcp://<ip_address>:<port>/<your stuff here>`. If your data for the UDP or TCP request is formatted as "0x00F009B9" lexical hex format, the bridge will convert the data into a binary stream to send.
 
-You can also use the value replacement constructs within these statements. Such as using the expressions "${time.format(Java time format string)}" for inserting a date/time stamp, "${timestamp}" for inserting a pure timestamp (milliseconds from 1.1.1970), ${intensity.percent} or ${intensity.percent.hex} for 0-100 or ${intensity.decimal_percent} for 0.00-1.00 or ${intensity.byte} or ${intensity.byte.hex} for 0-255 for straight pass through of the value or items that require special calculated values using ${intensity.math()} i.e. "${intensity.math(X/4)}" or "${intensity.math(X/4).hex}". See Value Passing Controls Below.
+You can also use the value replacement constructs within these statements. Such as using the expressions "${time.format(Java time format string)}" for inserting a date/time stamp, "${time.millis}" for inserting a pure timestamp (milliseconds from 1.1.1970), ${intensity.percent} or ${intensity.percent.hex} for 0-100 or ${intensity.decimal_percent} for 0.00-1.00 or ${intensity.byte} or ${intensity.byte.hex} for 0-255 for straight pass through of the value or items that require special calculated values using ${intensity.math()} i.e. "${intensity.math(X/4)}" or "${intensity.math(X/4).hex}". See Value Passing Controls Below.
 Examples:
 ```
 

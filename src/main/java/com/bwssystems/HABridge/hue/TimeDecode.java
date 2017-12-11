@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 public class TimeDecode {
 	private static final Logger log = LoggerFactory.getLogger(TimeDecode.class);
 	private static final String TIME_FORMAT = "${time.format(";
-	private static final String TIMESTAMP = "${timestamp}";
+	private static final String TIMESTAMP = "${time.millis}";
 	private static final String TIME_FORMAT_CLOSE = ")}";
 
 	/*
