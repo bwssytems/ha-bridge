@@ -76,10 +76,11 @@ public class HueMulator {
 	public void setupServer() {
 		log.info("Hue emulator service started....");
 		before(HUE_CONTEXT + "/*", (request, response) -> {
-			String path = request.pathInfo();
-			if (path.endsWith("/")) { // it should work with or without a trailing slash
-        		response.redirect(path.substring(0, path.length() - 1));
-			}
+			// This currently causes an error with Spark replies
+//			String path = request.pathInfo();
+//			if (path.endsWith("/")) { // it should work with or without a trailing slash
+//        		response.redirect(path.substring(0, path.length() - 1));
+//			}
 			log.debug("HueMulator " + request.requestMethod() + " called on api/* with request <<<" + request.pathInfo() + ">>>, and body <<<" + request.body() + ">>>");
 			if(bridgeSettingMaster.getBridgeSecurity().isSecure()) {
 				String pathInfo = request.pathInfo();
@@ -922,7 +923,7 @@ public class HueMulator {
 			toContinue = true;
 		
 		if(toContinue) {
-			log.debug("hue api user create requested: " + body + " from " + ipAddress);
+			log.debug("user add toContinue was true, creating user.");
 	
 			if (body != null && !body.isEmpty()) {
 				try {
@@ -938,6 +939,8 @@ public class HueMulator {
 	
 			if (aDeviceType == null)
 				aDeviceType = "<not given>";
+			else
+				aDeviceType = aDeviceType + "#" + ipAddress;
 	
 			if (newUser == null) {
 				newUser = bridgeSettingMaster.getBridgeSecurity().createWhitelistUser(aDeviceType);
@@ -1000,7 +1003,7 @@ public class HueMulator {
 		if (theErrors != null)
 			return theErrors;
 
-		if (Integer.parseInt(lightId) >= 10000) {
+		if (bridgeSettings.isUserooms() && Integer.parseInt(lightId) >= 10000) {
 			GroupDescriptor group = groupRepository.findOne(String.valueOf(Integer.parseInt(lightId) - 10000));
 			return DeviceResponse.createResponseForVirtualLight(group);
 		}
@@ -1084,7 +1087,7 @@ public class HueMulator {
 	}
 
 	private String changeState(String userId, String lightId, String body, String ipAddress, boolean ignoreRequester) {
-		if (Integer.parseInt(lightId) >= 10000) {
+		if (bridgeSettings.isUserooms() && Integer.parseInt(lightId) >= 10000) {
 			return changeGroupState(userId, String.valueOf(Integer.parseInt(lightId) - 10000), body, ipAddress, true);
 		}
 		String responseString = null;

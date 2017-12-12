@@ -23,6 +23,7 @@
 		href="#!/haldevices">HAL Devices</a></li>
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
 	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
+	<li ng-if="bridge.showHomeWizard" role="presentation"><a href="#!/homewizarddevices">HomeWizard Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
 	<li ng-if="bridge.showSomfy" role="presentation"><a href="#!/somfydevices">Somfy Devices</a></li>
 	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
@@ -38,6 +39,7 @@
 			<div class="form-group">
 				<button class="btn btn-primary" type="submit" ng-click="renumberDevices()">Renumber Devices</button>
 				<button ng-if="bridge.securityInfo.useLinkButton" class="btn btn-primary" type="submit" ng-click="pushLinkButton()">Link</button>
+				<button class="btn btn-primary" type="submit" ng-click="manageLinksButton()">Manage Links</button>
 				<label for="device-ip-filter">Show devices visible to: </label>
 				<input type="text" id="device-ip-filter" style="width:150px"
 							ng-model="bridge.state.filterDevicesByIpAddress" placeholder="">

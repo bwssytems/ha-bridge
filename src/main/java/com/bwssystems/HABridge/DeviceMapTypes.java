@@ -22,6 +22,7 @@ public class DeviceMapTypes {
 	public final static String[] EXEC_DEVICE_COMPAT = { "exec", "Execute Script/Program"};
 	public final static String[] CMD_DEVICE = { "cmdDevice", "Execute Command/Script/Program"};
 	public final static String[] HASS_DEVICE = { "hassDevice", "HomeAssistant Device"};
+	public final static String[] HOMEWIZARD_DEVICE = { "homewizardDevice", "HomeWizard Device"};
 	public final static String[] TCP_DEVICE = { "tcpDevice", "TCP Device"};
 	public final static String[] TCP_DEVICE_COMPAT = { "TCP", "TCP Device"};
 	public final static String[] UDP_DEVICE = { "udpDevice", "UDP Device"};
@@ -48,6 +49,7 @@ public class DeviceMapTypes {
 		deviceMapTypes.add(HARMONY_ACTIVITY);
 		deviceMapTypes.add(HARMONY_BUTTON);
 		deviceMapTypes.add(HASS_DEVICE);
+		deviceMapTypes.add(HOMEWIZARD_DEVICE);
 		deviceMapTypes.add(HTTP_DEVICE);
 		deviceMapTypes.add(HUE_DEVICE);
 		deviceMapTypes.add(LIFX_DEVICE);

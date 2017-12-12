@@ -1,0 +1,32 @@
+        <div class="form-container ngdialog-message" ng-controller="ManageLinksDialogCtrl">
+
+            <form name="manageLinksForm" role="form">
+               <legend class="form-label">Manage Links</legend>
+              		<div>
+ 						<scrollable-table watch="whitelist">
+						<table class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>Create Date</th>
+									<th>Manage</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="linkItem in whitelist">
+								<td>{{linkItem.name}}</td>
+								<td>{{linkItem.createDate}}</td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="delEntry(linkItem.name)">Del</button></td>
+							</tr>
+						</table>
+						</scrollable-table></td>
+					</div>
+	            <div class="form-group">
+	 				<button type="button" class="btn btn-success" ng-click="dismissDialog()" autofocus>Dismiss</button>
+	 				<button type="button" class="btn btn-info" ng-click="refresh()" autofocus>Refresh</button>
+	 				<button type="button" class="btn btn-warning" ng-click="setWhitelist()" autofocus>Save</button>
+	 				<button type="button" class="btn btn-danger" ng-click="delAll()" autofocus>Clear All</button>
+		 		</div>
+            </form>
+
+        </div>

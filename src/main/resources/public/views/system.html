@@ -22,6 +22,7 @@
 		href="#!/haldevices">HAL Devices</a></li>
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
 	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
+	<li ng-if="bridge.showHomeWizard" role="presentation"><a href="#!/homewizarddevices">HomeWizard Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
 	<li ng-if="bridge.showSomfy" role="presentation"><a href="#!/somfydevices">Somfy Devices</a></li>
 	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
@@ -98,6 +99,12 @@
 					<td><input type="checkbox"
 						ng-model="bridge.settings.useupnpiface" ng-true-value=true
 						ng-false-value=false> {{bridge.settings.useupnpiface}}</td>
+				</tr>
+				<tr>
+					<td>Use Rooms for Alexa</td>
+					<td><input type="checkbox"
+						ng-model="bridge.settings.userooms" ng-true-value=true
+						ng-false-value=false> {{bridge.settings.userooms}}</td>
 				</tr>
 				<tr>
 					<td>Web Server IP Address</td>
@@ -417,6 +424,53 @@
 							</tr>
 						</table></td>
 				</tr>
+				<tr>
+					<td>HomeWizard Gateways</td>
+					<td><table
+							class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>IP</th>
+									<th>Username</th>
+									<th>Password</th>
+									<th>Manage</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="homewizard in bridge.settings.homewizardaddress.devices">
+								<td><input id="bridge-settings-next-homewizard-name"
+									class="form-control" type="text" ng-model="homewizard.name"
+									placeholder="A HomeWizard Gateway"></td>
+								<td><input id="bridge-settings-next-homewizard-ip"
+									class="form-control" type="text" ng-model="homewizard.ip"
+									placeholder="http://www.homewizard.nl"></td>
+								<td><input id="bridge-settings-next-homewizard-username"
+									class="form-control" type="text" ng-model="homewizard.username"
+									placeholder="HomeWizard username"></td>
+								<td><input id="bridge-settings-next-homewizard-password"
+									class="form-control" type="password" ng-model="homewizard.password"
+									placeholder="HomeWizard password"></td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removeHomeWizardtoSettings(homewizard.name, homewizard.ip)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-new-homewizard-name"
+									class="form-control" type="text" ng-model="newhomewizardname"
+									placeholder="A HomeWizard Gateway"></td>
+								<td><input id="bridge-settings-new-homewizard-ip"
+									class="form-control" type="text" ng-model="newhomewizardip"
+									placeholder="http://www.homewizard.nl"></td>
+								<td><input id="bridge-settings-new-homewizard-username"
+									class="form-control" type="text" ng-model="newhomewizardusername"
+									placeholder="HomeWizard username"></td>
+								<td><input id="bridge-settings-new-homewizard-password"
+									class="form-control" type="password" ng-model="newhomewizardpassword"
+									placeholder="HomeWizard password"></td>
+								<td><button class="btn btn-success" type="submit"
+										ng-click="addHomeWizardtoSettings(newhomewizardname, newhomewizardip, newhomewizardusername, newhomewizardpassword)">Add</button></td>
+							</tr>
+						</table></td>
+				</tr>				
 				<tr>
 					<td>Domoticz Names and IP Addresses</td>
 					<td><table

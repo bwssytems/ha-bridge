@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 public class TimeDecode {
 	private static final Logger log = LoggerFactory.getLogger(TimeDecode.class);
 	private static final String TIME_FORMAT = "${time.format(";
+	private static final String TIMESTAMP = "${time.millis}";
 	private static final String TIME_FORMAT_CLOSE = ")}";
 
 	/*
@@ -37,6 +38,10 @@ public class TimeDecode {
 				} catch (Exception e) {
 					log.warn("Could not format current time: " + timeFormatDescriptor, e);
 				}
+			}
+			if (request.contains(TIMESTAMP)) {
+				request = request.replace(TIMESTAMP, String.valueOf(System.currentTimeMillis()));
+				notDone = true;
 			}
 		}
 		return request;

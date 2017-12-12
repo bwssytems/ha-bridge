@@ -291,6 +291,12 @@ public class DeviceResource {
 	      	return homeManager.findResource(DeviceMapTypes.HASS_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.HASS_DEVICE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
+    	get (API_CONTEXT + "/homewizard/devices", "application/json", (request, response) -> {
+	    	log.debug("Get HomeWizard Clients");
+	      	response.status(HttpStatus.SC_OK);
+	      	return homeManager.findResource(DeviceMapTypes.HOMEWIZARD_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.HOMEWIZARD_DEVICE[DeviceMapTypes.typeIndex]);
+	    }, new JsonTransformer());
+    	
     	get (API_CONTEXT + "/domoticz/devices", "application/json", (request, response) -> {
 	    	log.debug("Get Domoticz Clients");
 	      	response.status(HttpStatus.SC_OK);
