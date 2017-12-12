@@ -39,6 +39,7 @@
 			<div class="form-group">
 				<button class="btn btn-primary" type="submit" ng-click="renumberDevices()">Renumber Devices</button>
 				<button ng-if="bridge.securityInfo.useLinkButton" class="btn btn-primary" type="submit" ng-click="pushLinkButton()">Link</button>
+				<button class="btn btn-primary" type="submit" ng-click="manageLinksButton()">Manage Links</button>
 				<label for="device-ip-filter">Show devices visible to: </label>
 				<input type="text" id="device-ip-filter" style="width:150px"
 							ng-model="bridge.state.filterDevicesByIpAddress" placeholder="">

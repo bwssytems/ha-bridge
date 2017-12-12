@@ -8,6 +8,7 @@ import static spark.Spark.before;
 import static spark.Spark.halt;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -16,11 +17,13 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.Base64;
+import java.util.Map;
 
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.bwssystems.HABridge.api.hue.WhitelistEntry;
 import com.bwssystems.HABridge.dao.BackupFilename;
 import com.bwssystems.HABridge.util.JsonTransformer;
 import com.bwssystems.HABridge.util.TextStringFormatter;
@@ -28,6 +31,7 @@ import com.bwssystems.logservices.LoggerInfo;
 import com.bwssystems.logservices.LoggingForm;
 import com.bwssystems.logservices.LoggingManager;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -293,6 +297,36 @@ public class SystemControl {
 	        response.status(HttpStatus.SC_OK);
 			response.type("application/json");
             return bridgeSettings.getBridgeSecurity().getSecurityInfo();
+        }, new JsonTransformer());
+
+	    // http://ip_address:port/system/whitelist gets the whitelist for the bridge
+    	get (SYSTEM_CONTEXT + "/whitelist", (request, response) -> {
+			log.debug("Get whitelist");
+	        response.status(HttpStatus.SC_OK);
+			response.type("application/json");
+			return bridgeSettings.getBridgeSecurity().getWhitelist();
+	    }, new JsonTransformer());
+
+//      http://ip_address:port/system/setwhitelist CORS request
+	    options(SYSTEM_CONTEXT + "/setwhitelist", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+//      http://ip_address:port/system/setwhitelist which sets the whitelist after being managed
+		post(SYSTEM_CONTEXT + "/setwhitelist", (request, response) -> {
+			log.debug("setwhitelist....");
+			Type listType = new TypeToken<Map<String, WhitelistEntry>>() {
+			}.getType();
+			Map<String, WhitelistEntry> aWhitelist = new Gson().fromJson(request.body(), listType);
+			bridgeSettings.getBridgeSecurity().setWhitelist(aWhitelist);
+	        bridgeSettings.save(bridgeSettings.getBridgeSettingsDescriptor());
+	        response.status(HttpStatus.SC_OK);
+			response.type("application/json");
+            return bridgeSettings.getBridgeSecurity().getWhitelist();
         }, new JsonTransformer());
 
 //      http://ip_address:port/system/logmgmt/update CORS request

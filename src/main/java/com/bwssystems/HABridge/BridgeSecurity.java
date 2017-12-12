@@ -205,6 +205,12 @@ public class BridgeSecurity {
 		return securityDescriptor.getWhitelist();
 	}
 
+	public void setWhitelist(Map<String, WhitelistEntry> aWhitelist) {
+		securityDescriptor.setWhitelist(aWhitelist);
+		settingsChanged = true;
+		return;
+	}
+
 	public HueError[] validateWhitelistUser(String aUser, String userDescription, boolean strict) {
 		String validUser = null;
 		boolean found = false;

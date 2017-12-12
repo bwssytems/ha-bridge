@@ -76,10 +76,11 @@ public class HueMulator {
 	public void setupServer() {
 		log.info("Hue emulator service started....");
 		before(HUE_CONTEXT + "/*", (request, response) -> {
-			String path = request.pathInfo();
-			if (path.endsWith("/")) { // it should work with or without a trailing slash
-        		response.redirect(path.substring(0, path.length() - 1));
-			}
+			// This currently causes an error with Spark replies
+//			String path = request.pathInfo();
+//			if (path.endsWith("/")) { // it should work with or without a trailing slash
+//        		response.redirect(path.substring(0, path.length() - 1));
+//			}
 			log.debug("HueMulator " + request.requestMethod() + " called on api/* with request <<<" + request.pathInfo() + ">>>, and body <<<" + request.body() + ">>>");
 			if(bridgeSettingMaster.getBridgeSecurity().isSecure()) {
 				String pathInfo = request.pathInfo();
@@ -127,12 +128,7 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			if(bridgeSettings.isUserooms()) {
-				return addGroup(request.params(":userid"), request.ip(), request.body());
-			} else {
-				log.debug("group add requested from (No Use Rooms) " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
-				return "[{\"success\":{\"id\":\"1\"}}]";
-			}
+			return addGroup(request.params(":userid"), request.ip(), request.body());
 		});
 		// http://ip_address:port/api/:userid/groups/<groupid>
 		// delete a group
@@ -140,12 +136,7 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			if(bridgeSettings.isUserooms()) {
-				return deleteGroup(request.params(":userid"), request.params(":groupid"), request.ip());
-			} else {
-				log.debug("delete to groups API from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
-				return "[{\"error\":{\"address\": \"/groups/0/action/scene\", \"type\":7, \"description\": \"invalid value, dummy for parameter, scene\"}}]";
-			}
+			return deleteGroup(request.params(":userid"), request.params(":groupid"), request.ip());
 		});
 		// http://ip_address:port/api/:userid/groups/<groupid>
 		// modify a single group
@@ -153,12 +144,7 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			if(bridgeSettings.isUserooms()) {
-				return modifyGroup(request.params(":userid"), request.params(":groupid"), request.ip(), request.body());
-			} else {
-				log.debug("put to groups API from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
-				return "[{\"error\":{\"address\": \"/groups/0/action/scene\", \"type\":7, \"description\": \"invalid value, dummy for parameter, scene\"}}]";
-			}
+			return modifyGroup(request.params(":userid"), request.params(":groupid"), request.ip(), request.body());
 		});
 		// http://ip_address:port/api/:userid/groups/<groupid>/action
 		// group acions
@@ -166,12 +152,7 @@ public class HueMulator {
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);
-			if(bridgeSettings.isUserooms()) {
-				return changeGroupState(request.params(":userid"), request.params(":groupid"), request.body(), request.ip(), false);
-			} else {
-				log.debug("put action to groups API from " + request.ip() + " user " + request.params(":userid") + " with body " + request.body());
-				return "[{\"error\":{\"address\": \"/groups/0/action/scene\", \"type\":7, \"description\": \"invalid value, dummy for parameter, scene\"}}]";
-			}
+			return changeGroupState(request.params(":userid"), request.params(":groupid"), request.body(), request.ip(), false);
 		});		
 		// http://ip_address:port/api/{userId}/scenes returns json objects of
 		// all scenes configured
@@ -1022,7 +1003,7 @@ public class HueMulator {
 		if (theErrors != null)
 			return theErrors;
 
-		if (Integer.parseInt(lightId) >= 10000) {
+		if (bridgeSettings.isUserooms() && Integer.parseInt(lightId) >= 10000) {
 			GroupDescriptor group = groupRepository.findOne(String.valueOf(Integer.parseInt(lightId) - 10000));
 			return DeviceResponse.createResponseForVirtualLight(group);
 		}

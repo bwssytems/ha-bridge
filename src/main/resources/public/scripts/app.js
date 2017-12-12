@@ -277,6 +277,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 		return $http.post(this.state.huebase, "{\"devicetype\":\"test_ha_bridge\"}").then(
 				function (response) {
 					self.state.testuser = response.data[0].success.username;
+					self.getWhitelist();
 				},
 				function (error) {
 					if (error.status === 401)
@@ -318,7 +319,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					if (error.status === 401)
 						$rootScope.$broadcast('securityReinit', 'done');
 					else
-					self.displayWarn("Update ecurity settings Error: ", error);
+					self.displayWarn("Update security settings Error: ", error);
 				}
 		);
 	};
@@ -406,6 +407,29 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 						$rootScope.$broadcast('securityReinit', 'done');
 					else
 					self.displayWarn("Cannot get security info: ", error);
+				}
+		);
+	};
+
+	this.getWhitelist = function () {
+		return $http.get(this.state.systemsbase + "/whitelist").then(
+				function (response) {
+					self.state.whitelist = response.data;
+				},
+				function (error) {
+					self.displayWarn("Cannot get swhitelist: ", error);
+				}
+		);
+	};
+	
+	this.setWhitelist = function (whitelist) {
+		return $http.post(this.state.systemsbase + "/setwhitelist", whitelist ).then(
+				function (response) {
+					self.state.whitelist = response.data;
+					self.displaySuccess("Updated whitelist.")
+				},
+				function (error) {
+					self.displayWarn("Update whitelist Error: ", error);
 				}
 		);
 	};
@@ -1141,6 +1165,18 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 
 	};
 
+	this.saveSettingsNoReinit = function () {
+		return $http.put(this.state.systemsbase + "/settings", this.state.settings).then(
+				function (response) {
+					self.displaySuccess("Save Settings completed.");
+				},
+				function (error) {
+					self.displayWarn("Save Settings Error: ", error);
+				}
+		);
+
+	};
+
 	this.backupSettings = function (afilename) {
 		return $http.put(this.state.systemsbase + "/backup/create", {
 			filename: afilename
@@ -1699,6 +1735,40 @@ app.controller('SecurityDialogCtrl', function ($scope, bridgeService, ngDialog) 
 	};
 });
 
+app.controller('ManageLinksDialogCtrl', function ($scope, bridgeService, ngDialog) {
+	bridgeService.getWhitelist();
+	$scope.whitelist = bridgeService.state.whitelist;
+
+	$scope.setWhitelist = function () {
+		bridgeService.setWhitelist($scope.whitelist);
+		ngDialog.close('ngdialog1');
+	};
+	
+	$scope.delEntry = function (anEntry) {
+    	for(var key in $scope.whitelist) {
+    	    if ($scope.whitelist.hasOwnProperty(key)) {
+    	    	var theEntry =  $scope.whitelist[key];
+    	    	if(theEntry.name === anEntry) {
+    	    		delete $scope.whitelist[key];
+    	    	}
+    	    }
+    	}    	
+	};
+	
+	$scope.refresh  = function () {
+		bridgeService.getWhitelist();
+		$scope.whitelist = bridgeService.state.whitelist;
+	}
+	
+	$scope.delAll = function () {
+		$scope.whitelist = null;
+	};
+	
+	$scope.dismissDialog = function () {
+		ngDialog.close('ngdialog1');
+	};
+});
+
 app.controller('LogsController', function ($scope, $location, bridgeService) {
     bridgeService.viewLogs();
     $scope.bridge = bridgeService.state;
@@ -1806,6 +1876,13 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
 	};
 	$scope.pushLinkButton = function() {
 		bridgeService.pushLinkButton();
+	};
+	$scope.manageLinksButton = function() {
+		ngDialog.open({
+			template: 'views/managelinksdialog.html',
+			controller: 'ManageLinksDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
 	};
 	$scope.backupDeviceDb = function (optionalbackupname) {
 		bridgeService.backupDeviceDb(optionalbackupname);
