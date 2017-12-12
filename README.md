@@ -39,7 +39,7 @@ THe Harmony Hub Path looks like this:
 
 **FAQ: Please look here for the current FAQs! https://github.com/bwssytems/ha-bridge/wiki/HA-Bridge-FAQs**
 
-In the cases of systems that require authorization and/or have APIs that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest, Somfy Tahoma and the ability to proxy all of your real Hue bridges behind this bridge.
+In the cases of systems that require authorization and/or have APIs that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest, Somfy Tahoma, Home Assistant, Domoticz, HAL, Fibaro, HomeWizard and the ability to proxy all of your real Hue bridges behind this bridge.
 
 Alternatively the Bridge supports custom calls as well using http/https/udp and tcp such as the LimitlessLED/MiLight bulbs using the UDP protocol. Binary data is supported with UDP/TCP.
 
@@ -61,17 +61,17 @@ ATTENTION: This requires JDK 1.8 to run
 ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
 
 ```
-java -jar ha-bridge-5.0.0.jar
+java -jar ha-bridge-5.1.0.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
-Create the directory and make sure that ha-bridge-5.0.0.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-5.1.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
 
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v5.0.0/ha-bridge-5.0.0.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v5.1.0/ha-bridge-5.1.0.jar
 ```
 
 #### System Control Setup on a pi (preferred)
@@ -92,7 +92,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/home/pi/habridge
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-5.0.0.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-5.1.0.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -127,7 +127,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-5.0.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-5.1.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
@@ -257,6 +257,8 @@ The default location for the db to contain the devices as they are added is "dat
 The server defaults to the first available address on the host if this is not given. This default may NOT be the correct IP that is your public IP for your host on the network. It is best to set this parameter to not have discovery issues. Replace this value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery. 
 #### Use UPNP Address Interface
 The server tries to bind to all interfaces to respond to UPNP request. Setting this to `true` will make the binding to the interface that has the `UPNP IP Address`. The default is to be all interfaces which is set as false.
+#### Use Rooms for Alexa
+This setting controls rooms for Alexa. If it is set to true, any device ID abaove 10000 is treated as a special group. The default is set as false.
 #### Web Server IP Address
 The server defaults to all interfaces on the machine (0.0.0.0). Replace this value with the server ipv4 address you would like to use as the address that will bind to a specific ip address on an interface if you would like. This is only necessary if you want to isolate how access is handled to the web UI. 
 #### Web Server Port
@@ -432,7 +434,12 @@ There are multiple replacement constructs available to be put into any of the ca
 
 You can control items that require special calculated values using ${intensity.math(<your expression using "X" as the value to operate on>)} i.e. "${intensity.math(X/4)}".
 
-For the items that want to have a date time put into the message, utilize ${time.format(yyyy-MM-ddTHH:mm:ssXXX)} where "yyyy-MM-ddTHH:mm:ssXXX" can be any format from the Java SimpleDateFormat documented here: https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
+For the items that want to have a date time put into the message, utilize ${time.format(yyyy-MM-ddTHH:mm:ssXXX)} where "yyyy-MM-ddTHH:mm:ssXXX" can be any format from the Java SimpleDateFormat documented here: https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html. Also, there is a $(time.millis) which will put the millis timestamp where this replacement control is located.
+
+Color has been added as a replacement control and the available values are $(color.r), $(color.g), $(color.b) which are representations of each color as 0 - 255. There are hex equivalents as well as $(color.rx), $(color.gx), $(color.bx) and $(color.rgbx) as 2 place hex representations except for rgbx which is a six place hex representation.
+
+Special handling for milights is included and is handled by $(color.milight:x). The usage for that is as follows: udp://ip:port/0x${color.milight:x} where x is a number between 0 and 4 (0 all groups, 1-4 specific group). The group is necessary in case the color turns out to be white. The correct group on must of course be sent before that udp packet.
+Note that milight can only use 255 colors and white is handled completely separate for the rgbw strips, so setting temperature via ct with milight does something but not really the desired result
 
 Also, device data can be inserted into your payloads by the use of "${device.name}", "${device.id}", "${device.uniqueid}", "${device.targetDevice}", "${device.mapId}", "${device.mapType}", "${device.deviceType}", "${device.requesterAddress}", "${device.description}" and "${device.comments}". These work just like the dimming value replacements.
 e.g.
