@@ -87,6 +87,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("somfyaddress")
 	@Expose
 	private IpList somfyaddress;
+	@SerializedName("openhabaddress")
+	@Expose
+	private IpList openhabaddress;
 	@SerializedName("hubversion")
 	@Expose
 	private String hubversion;
@@ -113,6 +116,7 @@ public class BridgeSettingsDescriptor {
 	private boolean somfyconfigured;
 	private boolean lifxconfigured;
 	private boolean homewizardconfigured;
+	private boolean openhabconfigured;
 	
 	// Deprecated settings
 	private String haltoken;
@@ -136,6 +140,7 @@ public class BridgeSettingsDescriptor {
 		this.domoticzconfigured = false;
 		this.homewizardconfigured = false;
 		this.lifxconfigured = false;
+		this.openhabconfigured = false;
 		this.farenheit = true;
 		this.securityData = null;
 		this.settingsChanged = false;
@@ -384,6 +389,18 @@ public class BridgeSettingsDescriptor {
 	public void setHassconfigured(boolean hassconfigured) {
 		this.hassconfigured = hassconfigured;
 	}
+	public IpList getOpenhabaddress() {
+		return openhabaddress;
+	}
+	public void setOpenhabaddress(IpList openhabaddress) {
+		this.openhabaddress = openhabaddress;
+	}
+	public boolean isOpenhabconfigured() {
+		return openhabconfigured;
+	}
+	public void setOpenhabconfigured(boolean openhabconfigured) {
+		this.openhabconfigured = openhabconfigured;
+	}
 	public String getHubversion() {
 		return hubversion;
 	}
@@ -522,6 +539,16 @@ public class BridgeSettingsDescriptor {
 			return false;
 		
 		List<NamedIP> devicesList = this.getHomeWizardAddress().getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+		
+		return true;
+	}
+	public Boolean isValidOpenhab() {
+		if(this.getOpenhabaddress() == null || this.getOpenhabaddress().getDevices().size() <= 0)
+			return false;
+		
+		List<NamedIP> devicesList = this.getOpenhabaddress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
 		
