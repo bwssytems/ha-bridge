@@ -19,6 +19,7 @@ import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.bwssystems.HABridge.plugins.hue.HueHome;
 import com.bwssystems.HABridge.plugins.lifx.LifxHome;
 import com.bwssystems.HABridge.plugins.mqtt.MQTTHome;
+import com.bwssystems.HABridge.plugins.openhab.OpenHABHome;
 import com.bwssystems.HABridge.plugins.somfy.SomfyHome;
 import com.bwssystems.HABridge.plugins.tcp.TCPHome;
 import com.bwssystems.HABridge.plugins.udp.UDPHome;
@@ -113,6 +114,10 @@ public class HomeManager {
 		aHome = new LifxHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.LIFX_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.LIFX_DEVICE[DeviceMapTypes.typeIndex], aHome);
+        //setup the OpenHAB configuration if available
+		aHome = new OpenHABHome(bridgeSettings);
+		resourceList.put(DeviceMapTypes.OPENHAB_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.OPENHAB_DEVICE[DeviceMapTypes.typeIndex], aHome);
 	}
 	
 	public Home findHome(String type) {

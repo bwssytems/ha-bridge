@@ -18,7 +18,10 @@ import com.bwssystems.HABridge.api.hue.HueErrorResponse;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.ColorData;
+import com.bwssystems.HABridge.hue.ColorDecode;
+import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
+import com.bwssystems.HABridge.hue.TimeDecode;
 import com.bwssystems.HABridge.plugins.http.HTTPHandler;
 import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.google.gson.Gson;
@@ -41,7 +44,7 @@ public class DomoticzHome implements Home {
 	public Object getItems(String type) {
 		if(!validDomoticz)
 			return null;
-		log.debug("consolidating devices for hues");
+		log.debug("consolidating devices for Domoticzs");
 		List<DomoticzDevice> theResponse = null;
 		Iterator<String> keys = domoticzs.keySet().iterator();
 		List<DomoticzDevice> deviceList = new ArrayList<DomoticzDevice>();
@@ -95,7 +98,23 @@ public class DomoticzHome implements Home {
 		    	String theData;
 				String anUrl = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody,
 						intensity, targetBri, targetBriInc, false);
-		   		theData = httpClient.doHttpRequest(theHandler.buildUrl(anUrl), null, null, null, theHandler.buildHeaders());
+				if (colorData != null) {
+					anUrl = ColorDecode.replaceColorData(anUrl, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);	
+				}
+				anUrl = DeviceDataDecode.replaceDeviceData(anUrl, device);
+				anUrl = TimeDecode.replaceTimeValue(anUrl);
+
+				String aBody = null;
+				if(anItem.getHttpBody()!= null && !anItem.getHttpBody().isEmpty()) {
+					aBody = BrightnessDecode.calculateReplaceIntensityValue(anItem.getHttpBody(),
+							intensity, targetBri, targetBriInc, false);
+					if (colorData != null) {
+						aBody = ColorDecode.replaceColorData(aBody, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);	
+					}
+					aBody = DeviceDataDecode.replaceDeviceData(aBody, device);
+					aBody = TimeDecode.replaceTimeValue(aBody);
+				}
+		   		theData = httpClient.doHttpRequest(theHandler.buildUrl(anUrl), null, null, aBody, theHandler.buildHeaders());
 		   		try {
 		   			theDomoticzApiResponse = new Gson().fromJson(theData, Devices.class);
 		   			if(theDomoticzApiResponse.getStatus().equals("OK"))
@@ -167,7 +186,7 @@ public class DomoticzHome implements Home {
 	@Override
 	public void closeHome() {
 		log.debug("Closing Home.");
-		if(closed) {
+		if(closed || !validDomoticz) {
 			log.debug("Home is already closed....");
 			return;
 		}
@@ -175,6 +194,7 @@ public class DomoticzHome implements Home {
 		if(httpClient != null)
 			httpClient.closeHandler();
 
+		domoticzs = null;
 		closed = true;		
 	}
 }

@@ -315,6 +315,12 @@ public class DeviceResource {
 			return homeManager.findResource(DeviceMapTypes.SOMFY_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.SOMFY_DEVICE[DeviceMapTypes.typeIndex]);
 		}, new JsonTransformer());
 
+    	get (API_CONTEXT + "/openhab/devices", "application/json", (request, response) -> {
+	    	log.debug("Get OpenHAB devices");
+	      	response.status(HttpStatus.SC_OK);
+	      	return homeManager.findResource(DeviceMapTypes.OPENHAB_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.OPENHAB_DEVICE[DeviceMapTypes.typeIndex]);
+	    }, new JsonTransformer());
+
 		get (API_CONTEXT + "/map/types", "application/json", (request, response) -> {
 	    	log.debug("Get map types");
 	      	return new DeviceMapTypes().getDeviceMapTypes();

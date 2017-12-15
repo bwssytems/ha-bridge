@@ -79,6 +79,10 @@ app.config (function ($locationProvider, $routeProvider) {
 		templateUrl: 'views/lifxdevice.html',
 		controller: 'LifxController',		
 		requiresAuthentication: true		
+	}).when ('/openhabdevices', {
+		templateUrl: 'views/openhabdevice.html',
+		controller: 'OpenHABController',
+		requiresAuthentication: true
 	}).when ('/login', {
 		templateUrl: 'views/login.html',
 		controller: 'LoginController'		
@@ -147,7 +151,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {},
 			mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false,
 			isInControl: false, showVera: false, showFibaro: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false,
-			showHomeWizard: false, showDomoticz: false, showSomfy: false, showLifx: false, habridgeversion: {}, viewDevId: "", queueDevId: "", securityInfo: {}, filterDevicesByIpAddress: null, 
+			showHomeWizard: false, showDomoticz: false, showSomfy: false, showLifx: false, showOpenHAB: false, habridgeversion: {}, viewDevId: "", queueDevId: "", securityInfo: {}, filterDevicesByIpAddress: null, 
 			filterDevicesOnlyFiltered: false, filterDeviceType: null};
 
 	this.displayWarn = function(errorTitle, error) {
@@ -460,6 +464,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 		
 		return false;
 	}
+
 	this.compareHarmonyNumber = function(r1, r2) {
 		if (r1.device !== undefined) {
 		 if (r1.device.id === r2.device.id)
@@ -557,6 +562,11 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 		return;
 	}
 
+	this.updateShowOpenHAB = function () {
+		this.state.showOpenHAB = self.state.settings.openhabconfigured;
+		return;
+	}
+
 	this.loadBridgeSettings = function () {
 		return $http.get(this.state.systemsbase + "/settings").then(
 				function (response) {
@@ -573,6 +583,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.updateShowDomoticz();
 					self.updateShowSomfy();
 					self.updateShowLifx();
+					self.updateShowOpenHAB();
 				},
 				function (error) {
 					if (error.status === 401)
@@ -876,6 +887,22 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 						$rootScope.$broadcast('securityReinit', 'done');
 					else
 					self.displayWarn("Get Lifx Devices Error: ", error);
+				}
+		);
+	};
+
+	this.viewOpenHABDevices = function () {
+		if (!this.state.showOpenHAB)
+			return;
+		return $http.get(this.state.base + "/openhab/devices").then(
+				function (response) {
+					self.state.openhabdevices = response.data;
+				},
+				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
+						self.displayWarn("Get OpenHAB Devices Error: ", error);
 				}
 		);
 	};
@@ -1583,6 +1610,25 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
                 $scope.bridge.settings.somfyaddress.devices.splice(i, 1);
             }
         }
+    };
+    $scope.addOpenHABtoSettings = function (newopenhabname, newopenhabip, newopenhabport, newopenhabusername, newopenhabpassword, newopenhabsecure) {
+    	if($scope.bridge.settings.openhabaddress === undefined || $scope.bridge.settings.openhabaddress === null) {
+			$scope.bridge.settings.openhabaddress = { devices: [] };
+		}
+    	var newopenhab = {name: newopenhabname, ip: newopenhabip, port: newopenhabport, username: newopenhabusername, password: newopenhabpassword, secure: newopenhabsecure }
+    	$scope.bridge.settings.openhabaddress.devices.push(newopenhab);
+    	$scope.newopenhabname = null;
+    	$scope.newopenhabip = null;
+    	$scope.newopenhabport = null;
+    	$scope.newopenhabusername = null;
+    	$scope.newopenhabpassword = null;
+    };
+    $scope.removeOpenHABtoSettings = function (openhabname, openhabip) {
+    	for(var i = $scope.bridge.settings.openhabaddress.devices.length - 1; i >= 0; i--) {
+    	    if($scope.bridge.settings.openhabaddress.devices[i].name === openhabname && $scope.bridge.settings.openhabaddress.devices[i].ip === openhabip) {
+    	    	$scope.bridge.settings.openhabaddress.devices.splice(i, 1);
+    	    }
+    	}    	
     };
 
     $scope.bridgeReinit = function () {
@@ -3549,6 +3595,134 @@ app.controller('SomfyController', function ($scope, $location, bridgeService, ng
 	};
 });
 
+app.controller('OpenHABController', function ($scope, $location, bridgeService, ngDialog) {
+	$scope.bridge = bridgeService.state;
+	$scope.device = bridgeService.state.device;
+	$scope.device_dim_control = "";
+	$scope.bulk = { devices: [] };
+	$scope.selectAll = false;
+	bridgeService.viewOpenHABDevices();
+	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	$scope.buttonsVisible = false;
+
+	$scope.clearDevice = function () {
+		bridgeService.clearDevice();
+		$scope.device = bridgeService.state.device;
+	};
+
+	$scope.buildDeviceUrls = function (openhabdevice, dim_control, buildonly) {
+		var preCmd = "/rest/items/" + openhabdevice.item.name;
+		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)) {
+			dimpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + dim_control + "\"}";
+		}
+		else
+			dimpayload = null;
+		onpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"ON\"}";
+		offpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"OFF\"}";
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, null, true, openhabdevice.item.name + "-" + openhabdevice.name,  openhabdevice.item.name, openhabdevice.name, openhabdevice.item.type,  "openhabDevice", null, null);
+		$scope.device = bridgeService.state.device;
+		if (!buildonly) {
+			bridgeService.editNewDevice($scope.device);
+			$location.path('/editdevice');
+		}
+	};
+
+	$scope.bulkAddDevices = function(dim_control) {
+		var devicesList = [];
+		$scope.clearDevice();
+		for(var i = 0; i < $scope.bulk.devices.length; i++) {
+			for(var x = 0; x < bridgeService.state.openhabdevices.length; x++) {
+				if(bridgeService.state.openhabdevices[x].devicename === $scope.bulk.devices[i]) {
+					$scope.buildDeviceUrls(bridgeService.state.openhabdevices[x],dim_control,true);
+					devicesList[i] = {
+							name: $scope.device.name,
+							mapId: $scope.device.mapId,
+							mapType: $scope.device.mapType,
+							deviceType: $scope.device.deviceType,
+							targetDevice: $scope.device.targetDevice,
+							onUrl: $scope.device.onUrl,
+							dimUrl: $scope.device.dimUrl,
+							offUrl: $scope.device.offUrl,
+							colorUrl: $scope.device.colorUrl,
+							headers: $scope.device.headers,
+							httpVerb: $scope.device.httpVerb,
+							contentType: $scope.device.contentType,
+							contentBody: $scope.device.contentBody,
+							contentBodyDim: $scope.device.contentBodyDim,
+							contentBodyOff: $scope.device.contentBodyOff
+					};
+					$scope.clearDevice();
+				}
+			}
+		}
+		bridgeService.bulkAddDevice(devicesList).then(
+				function () {
+					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewHalDevices();
+				},
+				function (error) {
+					bridgeService.displayWarn("Error adding openhab devices in bulk.", error)
+				}
+			);
+		$scope.bulk = { devices: [] };
+		$scope.selectAll = false;
+	};
+
+	$scope.toggleSelection = function toggleSelection(deviceId) {
+		var idx = $scope.bulk.devices.indexOf(deviceId);
+
+		// is currently selected
+		if (idx > -1) {
+			$scope.bulk.devices.splice(idx, 1);
+			if($scope.bulk.devices.length === 0 && $scope.selectAll)
+				$scope.selectAll = false;
+		}
+
+		// is newly selected
+		else {
+			$scope.bulk.devices.push(deviceId);
+			$scope.selectAll = true;
+		}
+	};
+
+	$scope.toggleSelectAll = function toggleSelectAll() {
+		if($scope.selectAll) {
+			$scope.selectAll = false;
+			$scope.bulk = { devices: [] };
+		}
+		else {
+			$scope.selectAll = true;
+			for(var x = 0; x < bridgeService.state.openhabdevices.length; x++) {
+				if($scope.bulk.devices.indexOf(bridgeService.state.openhabdevices[x]) < 0)
+					$scope.bulk.devices.push(bridgeService.state.openhabdevices[x].devicename);
+			}
+		}
+	};
+
+	$scope.toggleButtons = function () {
+		$scope.buttonsVisible = !$scope.buttonsVisible;
+		if($scope.buttonsVisible)
+			$scope.imgButtonsUrl = "glyphicon glyphicon-minus";
+		else
+			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	};
+
+	$scope.deleteDevice = function (device) {
+		$scope.bridge.device = device;
+		ngDialog.open({
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
+	};
+	
+	$scope.editDevice = function (device) {
+		bridgeService.editDevice(device);
+		$location.path('/editdevice');
+	};
+});
+
 app.controller('EditController', function ($scope, $location, bridgeService) {
 	$scope.bridge = bridgeService.state;
 	$scope.device = bridgeService.state.device;
@@ -3959,6 +4133,20 @@ app.filter('configuredHomeWizardDevices', function (bridgeService) {
 			return out;
 		for (var i = 0; i < input.length; i++) {
 			if(bridgeService.deviceContainsType(input[i], "homewizardDevice")){
+				out.push(input[i]);
+			}
+		}
+		return out;
+	}
+});
+
+app.filter('configuredOpenHABItems', function (bridgeService) {
+	return function(input) {
+		var out = [];
+		if(input === undefined || input === null || input.length === undefined)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if (bridgeService.deviceContainsType(input[i], "openhab")) {
 				out.push(input[i]);
 			}
 		}

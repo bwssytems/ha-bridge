@@ -1,7 +1,6 @@
 package com.bwssystems.HABridge.plugins.openhab;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.client.methods.HttpGet;
@@ -12,17 +11,14 @@ import org.slf4j.LoggerFactory;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.NameValue;
 import com.bwssystems.HABridge.plugins.http.HTTPHandler;
-import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.google.gson.Gson;
 
 public class OpenHABInstance {
 	private static final Logger log = LoggerFactory.getLogger(OpenHABInstance.class);
 	private NamedIP theOpenHAB;
-	private HTTPHandler anHttpHandler;
 
 	public OpenHABInstance(NamedIP openhabLocation) {
 		super();
-		anHttpHandler = HTTPHome.getHandler();
 		theOpenHAB = openhabLocation;
 	}
 
@@ -34,65 +30,38 @@ public class OpenHABInstance {
 		this.theOpenHAB = openhabAddress;
 	}
 
-	public Boolean callCommand(String aCommand) {
-		log.debug("calling HomeAssistant: " + aCommand);
+	public Boolean callCommand(String aCommand, String commandData, HTTPHandler httpClient) {
+		log.debug("calling OpenHAB: " + theOpenHAB.getIp() + ":" + theOpenHAB.getPort() + aCommand);
 		String aUrl = null;
-		if(theOpenHAB.getSecure() != null && theOpenHAB.getSecure())
-			aUrl = "https";
-		else
-			aUrl = "http";
-/*		String domain = aCommand.getEntityId().substring(0, aCommand.getEntityId().indexOf("."));
-		aUrl = aUrl + "://" + theOpenHAB.getIp() + ":" + theOpenHAB.getPort() + "/api/services/";
-		if(domain.equals("group"))
-			aUrl = aUrl + "homeassistant";
-		else
-			aUrl = aUrl + domain;
-		String aBody = "{\"entity_id\":\"" + aCommand.getEntityId() + "\"";
 		NameValue[] headers = null;
-		if(theOpenHAB.getPassword() != null && !theOpenHAB.getPassword().isEmpty()) {
-			NameValue password = new NameValue();
-			password.setName("x-ha-access");
-			password.setValue(theOpenHAB.getPassword());
-			headers = new NameValue[1];
-			headers[0] = password;
+		if(theOpenHAB.getSecure() != null && theOpenHAB.getSecure())
+			aUrl = "https://";
+		else
+			aUrl = "http://";
+		if(theOpenHAB.getUsername() != null && !theOpenHAB.getUsername().isEmpty() && theOpenHAB.getPassword() != null && !theOpenHAB.getPassword().isEmpty()) {
+			aUrl = aUrl + theOpenHAB.getUsername() + ":" + theOpenHAB.getPassword() + "@";
 		}
-		if(aCommand.getState().equalsIgnoreCase("on")) {
-			aUrl = aUrl + "/turn_on";
-			if(aCommand.getBri() != null)
-				aBody = aBody + ",\"brightness\":" + aCommand.getBri() + "}";
-			else
-				aBody = aBody + "}";
-		}
-		else {
-			aUrl = aUrl + "/turn_off";
-			aBody = aBody + "}";			
-		}
-		log.debug("Calling HomeAssistant with url: " + aUrl);
-   		String theData = anHttpHandler.doHttpRequest(aUrl, HttpPost.METHOD_NAME, "application/json", aBody, headers);
+		aUrl = aUrl + theOpenHAB.getIp() + ":" + theOpenHAB.getPort() + "/" + aCommand;
+		String theData = httpClient.doHttpRequest(aUrl, HttpPost.METHOD_NAME, "text/plain", commandData, headers);
    		log.debug("call Command return is: <" + theData + ">");
-   		*/
 		return true;
 	}
 
-	public List<OpenHABItem> getDevices() {
-		List<OpenHABItem> theDeviceStates = null;
+	public List<OpenHABDevice> getDevices(HTTPHandler httpClient) {
+		List<OpenHABDevice> deviceList = null;
 		OpenHABItem[] theOpenhabStates;
 		String theUrl = null;
     	String theData;
 		NameValue[] headers = null;
-		if(theOpenHAB.getPassword() != null && !theOpenHAB.getPassword().isEmpty()) {
-			NameValue password = new NameValue();
-			password.setName("x-ha-access");
-			password.setValue(theOpenHAB.getPassword());
-			headers = new NameValue[1];
-			headers[0] = password;
-		}
 		if(theOpenHAB.getSecure() != null && theOpenHAB.getSecure())
-			theUrl = "https";
+			theUrl = "https://";
 		else
-			theUrl = "http";
-   		theUrl = theUrl + "://" + theOpenHAB.getIp() + ":" + theOpenHAB.getPort() + "/rest/items?recursive=false";
-   		theData = anHttpHandler.doHttpRequest(theUrl, HttpGet.METHOD_NAME, "application/json", null, headers);
+			theUrl = "http://";
+		if(theOpenHAB.getUsername() != null && !theOpenHAB.getUsername().isEmpty() && theOpenHAB.getPassword() != null && !theOpenHAB.getPassword().isEmpty()) {
+			theUrl = theUrl + theOpenHAB.getUsername() + ":" + theOpenHAB.getPassword() + "@";
+		}
+   		theUrl = theUrl + theOpenHAB.getIp() + ":" + theOpenHAB.getPort() + "/rest/items?recursive=false";
+   		theData = httpClient.doHttpRequest(theUrl, HttpGet.METHOD_NAME, "application/json", null, headers);
     	if(theData != null) {
     		log.debug("GET OpenHAB States - data: " + theData);
     		theOpenhabStates = new Gson().fromJson(theData, OpenHABItem[].class);
@@ -100,17 +69,24 @@ public class OpenHABInstance {
 	    		log.warn("Cannot get an devices for OpenHAB " + theOpenHAB.getName() + " as response is not parsable.");
 	    	}
 	    	else {
-	    		theDeviceStates = new ArrayList<OpenHABItem>(Arrays.asList(theOpenhabStates));
+		    	deviceList = new ArrayList<OpenHABDevice>();
+		    	
+		    	for (int i = 0; i < theOpenhabStates.length; i++) {
+		    		OpenHABDevice aNewOpenHABDeviceDevice = new OpenHABDevice();
+		    		aNewOpenHABDeviceDevice.setItem(theOpenhabStates[i]);
+		    		aNewOpenHABDeviceDevice.setAddress(theOpenHAB.getIp() + ":" + theOpenHAB.getPort());
+		    		aNewOpenHABDeviceDevice.setName(theOpenHAB.getName());
+					deviceList.add(aNewOpenHABDeviceDevice);
+		    		
+		    	}
 	    	}
     	}
     	else
     		log.warn("Cannot get an devices for OpenHAB " + theOpenHAB.getName() + " http call failed.");
-		return theDeviceStates;
+		return deviceList;
 	}
 
 	
 	protected void closeClient() {
-		anHttpHandler.closeHandler();
-		anHttpHandler = null;
 	}
 }
