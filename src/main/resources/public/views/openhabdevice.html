@@ -17,7 +17,7 @@
 	<li ng-if="bridge.showSomfy" role="presentation"><a href="#!/somfydevices">Somfy Devices</a></li>
 	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
 	<li ng-if="bridge.showHomeWizard" role="presentation"><a href="#!/homewizarddevices">HomeWizard Devices</a></li>
-	<li role="presentation" class="active"><a href="#!/openhabdevices">OpenHAB Devices</a></li>
+	<li ng-if="bridge.showOpenHAB" role="presentation" class="active"><a href="#!/openhabdevices">OpenHAB Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
@@ -62,6 +62,8 @@
 					ng-click="toggleSelectAll()"> Name</span></th>
 				<th sortable-header col="type">Type</th>
 				<th sortable-header col="openhabname">OpenHAB</th>
+				<th col="string-actions">On Actions</th>
+				<th col="string-actions">Off Actions</th>
 				<th>Build Actions</th>
 			</tr>
 		</thead>
@@ -75,8 +77,32 @@
 			<td>{{openhabdevice.item.type}}</td>
 			<td>{{openhabdevice.name}}</td>
 			<td>
+				<select name="on-device-action" id="on-device-action" ng-model="ondeviceaction">
+					<option value="">None</option>
+					<option ng-repeat="option in openhabdevice.item.stateDescription.options"
+						value="{{option.value}}">{{option.label}}</option>
+					<option value="other">Other</option>
+				</select>
+				<input id="on-input-device-action"
+					class="form-control" type="text"
+					ng-model="oninputdeviceaction"
+					placeholder="Type Action if Other">
+			</td>
+			<td>
+				<select name="off-device-action" id="off-device-action" ng-model="offdeviceaction">
+					<option value="">None</option>
+					<option ng-repeat="option in openhabdevice.item.stateDescription.options"
+						value="{{option.value}}">{{option.label}}</option>
+					<option value="other">Other</option>
+				</select>
+				<input id="off-input-device-action"
+					class="form-control" type="text"
+					ng-model="offinputdeviceaction"
+					placeholder="Type Action if Other">
+			</td>
+			<td>
 				<button  class="btn btn-success" type="submit"
-					ng-click="buildDeviceUrls(openhabdevice, device_dim_control, false)">Build Item</button>
+					ng-click="buildDeviceUrls(openhabdevice, device_dim_control, ondeviceaction, oninputdeviceaction, offdeviceaction, offinputdeviceaction, false)">Build Item</button>
 			</td>
 		</tr>
 	</table>

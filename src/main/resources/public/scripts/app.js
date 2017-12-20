@@ -3604,21 +3604,35 @@ app.controller('OpenHABController', function ($scope, $location, bridgeService, 
 	bridgeService.viewOpenHABDevices();
 	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	$scope.buttonsVisible = false;
-
+	
 	$scope.clearDevice = function () {
 		bridgeService.clearDevice();
 		$scope.device = bridgeService.state.device;
 	};
 
-	$scope.buildDeviceUrls = function (openhabdevice, dim_control, buildonly) {
+	$scope.buildDeviceUrls = function (openhabdevice, dim_control, ondeviceaction, oninputdeviceaction, offdeviceaction, offinputdeviceaction, buildonly) {
 		var preCmd = "/rest/items/" + openhabdevice.item.name;
-		if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)) {
-			dimpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + dim_control + "\"}";
+		if(openhabdevice.item.type !== 'String') {
+			if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)) {
+				dimpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + dim_control + "\"}";
+			}
+			else
+				dimpayload = null;
+			onpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"ON\"}";
+			offpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"OFF\"}";
 		}
-		else
+		else {
 			dimpayload = null;
-		onpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"ON\"}";
-		offpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"OFF\"}";
+			if(ondeviceaction === 'other')
+				onpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + oninputdeviceaction + "\"}";
+			else
+				onpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + ondeviceaction + "\"}";
+				
+			if(offdeviceaction === 'other')
+				offpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + offinputdeviceaction + "\"}";
+			else
+				offpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + offdeviceaction + "\"}";
+		}
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, null, true, openhabdevice.item.name + "-" + openhabdevice.name,  openhabdevice.item.name, openhabdevice.name, openhabdevice.item.type,  "openhabDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {

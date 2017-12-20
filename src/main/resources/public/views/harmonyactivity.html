@@ -2,29 +2,22 @@
 	<li role="presentation"><a href="#!/">Bridge Devices</a></li>
 	<li role="presentation"><a href="#!/system">Bridge Control</a></li>
 	<li role="presentation"><a href="#!/logs">Logs</a></li>
-	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#!/veradevices">Vera Devices</a></li>
-	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#!/verascenes">Vera Scenes</a></li>
-	<li ng-if="bridge.showFibaro" role="presentation"><a
-		href="#!/fibarodevices">Fibaro Devices</a></li>
-	<li ng-if="bridge.showFibaro" role="presentation"><a
-		href="#!/fibaroscenes">Fibaro Scenes</a></li>
-	<li role="presentation" class="active"><a
-		href="#!/harmonyactivities">Harmony Activities</a></li>
-	<li role="presentation"><a href="#!/harmonydevices">Harmony
-			Devices</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a href="#!/veradevices">Vera Devices</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a href="#!/verascenes">Vera Scenes</a></li>
+	<li ng-if="bridge.showFibaro" role="presentation"><a href="#!/fibarodevices">Fibaro Devices</a></li>
+	<li ng-if="bridge.showFibaro" role="presentation"><a href="#!/fibaroscenes">Fibaro Scenes</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation" class="active"><a href="#!/harmonyactivities">Harmony Activities</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a href="#!/harmonydevices">Harmony Devices</a></li>
 	<li ng-if="bridge.showNest" role="presentation"><a href="#!/nest">Nest</a></li>
-	<li ng-if="bridge.showHue" role="presentation"><a
-		href="#!/huedevices">Hue Devices</a></li>
-	<li ng-if="bridge.showHal" role="presentation"><a
-		href="#!/haldevices">HAL Devices</a></li>
+	<li ng-if="bridge.showHue" role="presentation"><a href="#!/huedevices">Hue Devices</a></li>
+	<li ng-if="bridge.showHal" role="presentation"><a href="#!/haldevices">HAL Devices</a></li>
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
 	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
-	<li ng-if="bridge.showHomeWizard" role="presentation"><a href="#!/homewizarddevices">HomeWizard Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
 	<li ng-if="bridge.showSomfy" role="presentation"><a href="#!/somfydevices">Somfy Devices</a></li>
 	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
+	<li ng-if="bridge.showHomeWizard" role="presentation"><a href="#!/homewizarddevices">HomeWizard Devices</a></li>
+	<li ng-if="bridge.showOpenHAB" role="presentation"><a href="#!/openhabdevices">OpenHAB Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
