@@ -372,6 +372,8 @@ public class SystemControl {
 		put(SYSTEM_CONTEXT + "/settings", (request, response) -> {
 			log.debug("save bridge settings requested from " + request.ip() + " with body: " + request.body());
 			BridgeSettingsDescriptor newBridgeSettings = new Gson().fromJson(request.body(), BridgeSettingsDescriptor.class);
+			if(newBridgeSettings.getUpnpsenddelay() > 15000)
+				newBridgeSettings.setUpnpsenddelay(15000);
 			bridgeSettings.save(newBridgeSettings);
 	        response.status(HttpStatus.SC_OK);
 			response.type("application/json");

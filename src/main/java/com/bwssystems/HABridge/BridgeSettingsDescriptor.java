@@ -102,6 +102,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("homewizardaddress")
 	@Expose
 	private IpList homewizardaddress;
+	@SerializedName("upnpsenddelay")
+	@Expose
+	private Integer upnpsenddelay;
 	
 	private boolean settingsChanged;
 	private boolean veraconfigured;
@@ -148,6 +151,7 @@ public class BridgeSettingsDescriptor {
 		this.webaddress = "0.0.0.0";
 		this.hubversion = HueConstants.HUB_VERSION;
 		this.hubmac = null;
+		this.upnpsenddelay = 1500;
 	}
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -436,6 +440,12 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setSecurityData(String securityData) {
 		this.securityData = securityData;
+	}
+	public Integer getUpnpsenddelay() {
+		return upnpsenddelay;
+	}
+	public void setUpnpsenddelay(Integer upnpsenddelay) {
+		this.upnpsenddelay = upnpsenddelay;
 	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)

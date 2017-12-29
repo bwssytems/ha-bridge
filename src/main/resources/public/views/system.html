@@ -18,6 +18,7 @@
 	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
 	<li ng-if="bridge.showHomeWizard" role="presentation"><a href="#!/homewizarddevices">HomeWizard Devices</a></li>
 	<li ng-if="bridge.showOpenHAB" role="presentation"><a href="#!/openhabdevices">OpenHAB Devices</a></li>
+	<li ng-if="bridge.showFHEM" role="presentation"><a href="#!/fhemdevices">FHEM Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
@@ -573,6 +574,7 @@
 									<th>Name</th>
 									<th>IP</th>
 									<th>Port</th>
+									<th>Username (opt)</th>
 									<th>Password (opt)</th>
 									<th>Use SSL</th>
 									<th>Manage</th>
@@ -588,7 +590,7 @@
 								<td><input id="bridge-settings-next-openhab-port"
 									class="form-control" type="text" ng-model="openhab.port"
 									placeholder="8080"></td>
-							<td><input id="bridge-settings-next-openhab-username"
+								<td><input id="bridge-settings-next-openhab-username"
 									   class="form-control" type="text" ng-model="openhab.username"
 									   placeholder="OpenHAB username"></td>
 								<td><input id="bridge-settings-next-openhab-password"
@@ -610,7 +612,7 @@
 								<td><input id="bridge-settings-new-openhab-port"
 									class="form-control" type="text" ng-model="newopenhabport"
 									placeholder="8080"></td>
-							<td><input id="bridge-settings-new-openhab-username"
+								<td><input id="bridge-settings-new-openhab-username"
 									   class="form-control" type="text" ng-model="newopenhabusername"
 									   placeholder="OpenHAB username"></td>
 								<td><input id="bridge-settings-new-openhab-password"
@@ -621,6 +623,67 @@
 										ng-false-value=false></td>
 								<td><button class="btn btn-success" type="submit"
 										ng-click="addOpenHABtoSettings(newopenhabname, newopenhabip, newopenhabport, newsopenhabusername, newopenhabpassword, newopenhabsecure)">Add</button></td>
+							</tr>
+						</table></td>
+				</tr>
+				<tr>
+					<td>FHEM Names and IP Addresses</td>
+					<td><table
+							class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>IP</th>
+									<th>Port</th>
+									<th>Username (opt)</th>
+									<th>Password (opt)</th>
+									<th>Use SSL</th>
+									<th>Manage</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="fhem in bridge.settings.fhemaddress.devices">
+								<td><input id="bridge-settings-next-fhem-name"
+									class="form-control" type="text" ng-model="fhem.name"
+									placeholder="An FHEM"></td>
+								<td><input id="bridge-settings-next-fhem-ip"
+									class="form-control" type="text" ng-model="fhem.ip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-next-fhem-port"
+									class="form-control" type="text" ng-model="fhem.port"
+									placeholder="8080"></td>
+								<td><input id="bridge-settings-next-fhem-username"
+									   class="form-control" type="text" ng-model="fhem.username"
+									   placeholder="FHEM username"></td>
+								<td><input id="bridge-settings-next-fhem-password"
+									class="form-control" type="password" ng-model="fhem.password"
+									placeholder="FHEM password (opt)"></td>
+								<td><input type="checkbox"
+										ng-model="fhem.secure" ng-true-value=true
+										ng-false-value=false></td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removeFhemtoSettings(fhem.name, fhem.ip)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-new-fhem-name"
+									class="form-control" type="text" ng-model="newfhemname"
+									placeholder="A FHEM"></td>
+								<td><input id="bridge-settings-new-fhem-ip"
+									class="form-control" type="text" ng-model="newfhemip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-new-fhem-port"
+									class="form-control" type="text" ng-model="newfhemport"
+									placeholder="8080"></td>
+								<td><input id="bridge-settings-new-fhem-username"
+									   class="form-control" type="text" ng-model="newfhemusername"
+									   placeholder="FHEM username"></td>
+								<td><input id="bridge-settings-new-fhem-password"
+									class="form-control" type="password" ng-model="newfhempassword"
+									placeholder="FHEM password (opt)"></td>
+								<td><input type="checkbox"
+										ng-model="newfhemsecure" ng-true-value=true
+										ng-false-value=false></td>
+								<td><button class="btn btn-success" type="submit"
+										ng-click="addFhemtoSettings(newfhemname, newfhemip, newfhemport, newsfhemusername, newfhempassword, newfhemsecure)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>
@@ -677,6 +740,13 @@
 					<td><input type="checkbox"
 						ng-model="bridge.settings.traceupnp" ng-true-value=true
 						ng-false-value=false> {{bridge.settings.traceupnp}}</td>
+				</tr>
+				<tr>
+					<td>UPNP Send Delay</td>
+					<td><input id="bridge-settings-upnpsenddelay"
+						class="form-control" type="number"
+						ng-model="bridge.settings.upnpsenddelay" min="100"
+						max="15000"></td>
 				</tr>
 				<tr>
 					<td>My Echo URL</td>
