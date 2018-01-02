@@ -66,7 +66,7 @@ public class OpenHABInstance {
     		log.debug("GET OpenHAB States - data: " + theData);
     		theOpenhabStates = new Gson().fromJson(theData, OpenHABItem[].class);
 	    	if(theOpenhabStates == null) {
-	    		log.warn("Cannot get an devices for OpenHAB " + theOpenHAB.getName() + " as response is not parsable.");
+	    		log.warn("Cannot get any devices for OpenHAB " + theOpenHAB.getName() + " as response is not parsable.");
 	    	}
 	    	else {
 		    	deviceList = new ArrayList<OpenHABDevice>();

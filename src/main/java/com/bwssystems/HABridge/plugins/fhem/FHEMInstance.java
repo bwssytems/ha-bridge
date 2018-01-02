@@ -49,7 +49,7 @@ public class FHEMInstance {
 
 	public List<FHEMDevice> getDevices(HTTPHandler httpClient) {
 		List<FHEMDevice> deviceList = null;
-		FHEMItem[] theFhemStates;
+		FHEMItem theFhemStates;
 		String theUrl = null;
     	String theData;
 		NameValue[] headers = null;
@@ -61,24 +61,25 @@ public class FHEMInstance {
 			theUrl = theUrl + theFhem.getUsername() + ":" + theFhem.getPassword() + "@";
 		}
    		theUrl = theUrl + theFhem.getIp() + ":" + theFhem.getPort() + "/fhem?cmd=jsonlist2";
+   		if(theFhem.getWebhook() != null && !theFhem.getWebhook().trim().isEmpty())
+   			theUrl = theUrl + "%20room=" + theFhem.getWebhook().trim();
    		theData = httpClient.doHttpRequest(theUrl, HttpGet.METHOD_NAME, "application/json", null, headers);
     	if(theData != null) {
     		log.debug("GET FHEM States - data: " + theData);
     		theData = getJSONData(theData);
-    		theFhemStates = new Gson().fromJson(theData, FHEMItem[].class);
+    		theFhemStates = new Gson().fromJson(theData, FHEMItem.class);
 	    	if(theFhemStates == null) {
-	    		log.warn("Cannot get an devices for FHEM " + theFhem.getName() + " as response is not parsable.");
+	    		log.warn("Cannot get any devices for FHEM " + theFhem.getName() + " as response is not parsable.");
 	    	}
 	    	else {
 		    	deviceList = new ArrayList<FHEMDevice>();
 		    	
-		    	for (int i = 0; i < theFhemStates.length; i++) {
+		    	for (Result aResult:theFhemStates.getResults()) {
 		    		FHEMDevice aNewFhemDeviceDevice = new FHEMDevice();
-		    		aNewFhemDeviceDevice.setItem(theFhemStates[i]);
+		    		aNewFhemDeviceDevice.setItem(aResult);
 		    		aNewFhemDeviceDevice.setAddress(theFhem.getIp() + ":" + theFhem.getPort());
 		    		aNewFhemDeviceDevice.setName(theFhem.getName());
 					deviceList.add(aNewFhemDeviceDevice);
-		    		
 		    	}
 	    	}
     	}
@@ -91,7 +92,10 @@ public class FHEMInstance {
 		String theData;
 		theData = response.substring(response.indexOf("<pre>") + 4);
 		theData = theData.substring(1, theData.indexOf("</pre>") - 1);
-		// TODO Fix stripping out new line chars
+		theData = theData.replace("\n", "");
+		theData = theData.replace("\r", "");
+		theData = theData.replace("<a href=\"", "<a href=\\\"");
+		theData = theData.replace("\">", "\\\">");
 		return theData;
 	}
 	

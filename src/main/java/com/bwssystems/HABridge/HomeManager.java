@@ -11,6 +11,7 @@ import com.bwssystems.HABridge.devicemanagmeent.ResourceHandler;
 import com.bwssystems.HABridge.plugins.NestBridge.NestHome;
 import com.bwssystems.HABridge.plugins.domoticz.DomoticzHome;
 import com.bwssystems.HABridge.plugins.exec.CommandHome;
+import com.bwssystems.HABridge.plugins.fhem.FHEMHome;
 import com.bwssystems.HABridge.plugins.hal.HalHome;
 import com.bwssystems.HABridge.plugins.harmony.HarmonyHome;
 import com.bwssystems.HABridge.plugins.hass.HassHome;
@@ -106,7 +107,7 @@ public class HomeManager {
 		aHome = new DomoticzHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		resourceList.put(DeviceMapTypes.DOMOTICZ_DEVICE[DeviceMapTypes.typeIndex], aHome);
-		//setup the Somfy configuration if available
+		//setup the Somfy configuration if availableOPENHAB
 		aHome = new SomfyHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.SOMFY_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		resourceList.put(DeviceMapTypes.SOMFY_DEVICE[DeviceMapTypes.typeIndex], aHome);
@@ -118,6 +119,10 @@ public class HomeManager {
 		aHome = new OpenHABHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.OPENHAB_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.OPENHAB_DEVICE[DeviceMapTypes.typeIndex], aHome);
+        //setup the OpenHAB configuration if available
+		aHome = new FHEMHome(bridgeSettings);
+		resourceList.put(DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex], aHome);
 	}
 	
 	public Home findHome(String type) {

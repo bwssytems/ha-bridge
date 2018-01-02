@@ -131,7 +131,7 @@ public class FHEMHome implements Home {
 
 		if(!validFhem)
 			return null;
-		log.debug("consolidating devices for java.lang.String");
+		log.debug("consolidating devices for FHEM");
 		List<FHEMDevice> theResponse = null;
 		Iterator<String> keys = fhemMap.keySet().iterator();
 		List<FHEMDevice> deviceList = new ArrayList<FHEMDevice>();
@@ -160,12 +160,12 @@ public class FHEMHome implements Home {
 	@Override
 	public Home createHome(BridgeSettings bridgeSettings) {
 		fhemMap = null;
-		validFhem = bridgeSettings.getBridgeSettingsDescriptor().isValidOpenhab();
+		validFhem = bridgeSettings.getBridgeSettingsDescriptor().isValidFhem();
 		log.info("FHEM Home created." + (validFhem ? "" : " No FHEMs configured."));
 		if(validFhem) {
 			fhemMap = new HashMap<String,FHEMInstance>();
 	        httpClient = HTTPHome.getHandler();
-			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getOpenhabaddress().getDevices().iterator();
+			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getFhemaddress().getDevices().iterator();
 			while(theList.hasNext() && validFhem) {
 				NamedIP aFhem = theList.next();
 		      	try {

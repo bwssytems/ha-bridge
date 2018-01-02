@@ -105,6 +105,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("upnpsenddelay")
 	@Expose
 	private Integer upnpsenddelay;
+	@SerializedName("fhemaddress")
+	@Expose
+	private IpList fhemaddress;
 	
 	private boolean settingsChanged;
 	private boolean veraconfigured;
@@ -120,6 +123,7 @@ public class BridgeSettingsDescriptor {
 	private boolean lifxconfigured;
 	private boolean homewizardconfigured;
 	private boolean openhabconfigured;
+	private boolean fhemconfigured;
 	
 	// Deprecated settings
 	private String haltoken;
@@ -447,6 +451,18 @@ public class BridgeSettingsDescriptor {
 	public void setUpnpsenddelay(Integer upnpsenddelay) {
 		this.upnpsenddelay = upnpsenddelay;
 	}
+	public IpList getFhemaddress() {
+		return fhemaddress;
+	}
+	public void setFhemaddress(IpList fhemaddress) {
+		this.fhemaddress = fhemaddress;
+	}
+	public boolean isFhemconfigured() {
+		return fhemconfigured;
+	}
+	public void setFhemconfigured(boolean fhemconfigured) {
+		this.fhemconfigured = fhemconfigured;
+	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
 			return false;
@@ -559,6 +575,16 @@ public class BridgeSettingsDescriptor {
 			return false;
 		
 		List<NamedIP> devicesList = this.getOpenhabaddress().getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+		
+		return true;
+	}
+	public Boolean isValidFhem() {
+		if(this.getFhemaddress() == null || this.getFhemaddress().getDevices().size() <= 0)
+			return false;
+		
+		List<NamedIP> devicesList = this.getFhemaddress().getDevices();
 		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
 		

@@ -15,32 +15,43 @@
 	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
 	<li ng-if="bridge.showSomfy" role="presentation"><a href="#!/somfydevices">Somfy Devices</a></li>
-	<li ng-if="bridge.showLifx" role="presentation" class="active"><a href="#!/lifxdevices">LIFX Devices</a></li>
+	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
 	<li ng-if="bridge.showHomeWizard" role="presentation"><a href="#!/homewizarddevices">HomeWizard Devices</a></li>
 	<li ng-if="bridge.showOpenHAB" role="presentation"><a href="#!/openhabdevices">OpenHAB Devices</a></li>
-	<li ng-if="bridge.showFHEM" role="presentation"><a href="#!/fhemdevices">FHEM Devices</a></li>
+	<li ng-if="bridge.showFHEM" role="presentation" class="active"><a href="#!/fhemdevices">FHEM Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">LIFX Devices</h2>
+		<h2 class="panel-title">FHEM Device List
+			({{bridge.fhemdevices.length}})</h2>
 	</div>
 	<div class="panel-body">
-		<p class="text-muted">For any LIFX Device, use the build action buttons
+		<p class="text-muted">For any FHEM Device, use the build action buttons
 			to generate the item addition information into the ha-bridge device and this will put you into the edit screen. Then
 			you can modify the name to anything you want that will be the keyword
 			for the Echo or Google Home. Also, you can go back to any helper tab and click a build 
 			action button to add another item for a multi-command. After you are
 			 done in the edit tab, click the 'Add Bridge Device' to finish that selection
-			setup. The 'Already Configured LIFX Devices' list below will show what
-			is already setup for your LIFX.</p>
-
+			setup. The 'Already Configured FHEM Devices' list below will show what
+			is already setup for your FHEM.</p>
+		<p class="text-muted">
+			Also, use this select menu for which type of dim control you would
+			like to be generated: <select name="device-dim-control"
+				id="device-dim-control" ng-model="device_dim_control">
+				<option value="">none</option>
+				<option value="${intensity.byte}">Pass-thru Value</option>
+				<option value="${intensity.percent}">Percentage</option>
+				<option value="${intensity.decimal_percent}">Decimal Percentage</option>
+				<option value="${intensity.math(X*1)}">Custom Math</option>
+			</select>
+		</p>
 		<p class="text-muted">Use the check boxes by the names to use the bulk addition
 			feature. Select your items and dim control type if wanted, then click
-			bulk add below. Your items will be added with on, off and dim 
-			with the name of the device from the LIFX device.</p>
-	<scrollable-table watch="bridge.lifxdevices">
+			bulk add below. Your items will be added with on and off or dim and
+			off if selected with the name of the device from the FHEM.</p>
+	<scrollable-table watch="bridge.fhemdevices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
@@ -50,23 +61,23 @@
 					value="{{selectAll}}"
 					ng-checked="selectAll"
 					ng-click="toggleSelectAll()"> Name</span></th>
-				<th sortable-header col="id">ID</th>
-				<th sortable-header col="type">Type</th>
+				<th sortable-header col="fhemname">FHEM</th>
+				<th sortable-header col="type">Capabilities</th>
 				<th>Build Actions</th>
 			</tr>
 		</thead>
-		<tr ng-repeat="lifxdev in bridge.lifxdevices">
+		<tr ng-repeat="fhemdevice in bridge.fhemdevices">
 			<td>{{$index+1}}</td>
 			<td><input type="checkbox" name="bulk.devices[]"
-				value="{{lifxdev.name}}"
-				ng-checked="bulk.devices.indexOf(lifxdev.name) > -1"
-				ng-click="toggleSelection(lifxdev.name)">{{lifxdev.name}}</td>
-			<td>{{lifxdev.id}}</td>
-			<td>{{lifxdev.type}}</td>
+				value="{{fhemdevice.item.name}}"
+				ng-checked="bulk.devices.indexOf(fhemdevice.item.name) > -1"
+				ng-click="toggleSelection(fhemdevice.item.name)">
+				{{fhemdevice.item.name}}</td>
+			<td>{{fhemdevice.name}}</td>
+			<td>{{fhemdevice.item.possibleSets}}</td>
 			<td>
-				<button class="btn btn-success" type="submit"
-					ng-click="buildDeviceUrls(lifxdev, false)">Build
-					Item</button>
+				<button  class="btn btn-success" type="submit"
+					ng-click="buildDeviceUrls(fhemdevice, device_dim_control, false)">Build Item</button>
 			</td>
 		</tr>
 	</table>
@@ -81,26 +92,29 @@
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title">
-			Already Configured LIFX Devices <a ng-click="toggleButtons()"><span
-				class={{imgButtonsUrl}} aria-hidden="true"></span></a>
+			Already Configured FHEM Devices <a ng-click="toggleButtons()"><span
+				class={{imgButtonsUrl}} aria-hidden="true"></span></a></a>
 		</h2>
 	</div>
 	<div ng-if="buttonsVisible" class="panel-body">
-	<scrollable-table watch="bridge.lifxdevices">
+	
+	<scrollable-table watch="bridge.fhemdevices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<th>Row</th>
 				<th sortable-header col="name">Name</th>
-				<th sortable-header col="targetDevice">Light Name</th>
+				<th sortable-header col="category">Category</th>
+				<th sortable-header col="fhemname">FHEM</th>
 				<th>Map Id</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="device in bridge.devices | configuredLifxItems | orderBy:predicate:reverse">
+			ng-repeat="device in bridge.devices | configuredfhemItems">
 			<td>{{$index+1}}</td>
 			<td>{{device.name}}</td>
+			<td>{{device.deviceType}}</td>
 			<td>{{device.targetDevice}}</td>
 			<td>{{device.mapId}}</td>
 			<td>

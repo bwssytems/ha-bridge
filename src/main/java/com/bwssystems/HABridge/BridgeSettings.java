@@ -211,6 +211,7 @@ public class BridgeSettings extends BackupHandler {
 		theBridgeSettings.setSomfyconfigured(theBridgeSettings.isValidSomfy());
 		theBridgeSettings.setHomeWizardConfigured(theBridgeSettings.isValidHomeWizard());
 		theBridgeSettings.setOpenhabconfigured(theBridgeSettings.isValidOpenhab());
+		theBridgeSettings.setFhemconfigured(theBridgeSettings.isValidFhem());
         // Lifx is either configured or not, so it does not need an update.
        if(serverPortOverride != null)
         	theBridgeSettings.setServerPort(serverPortOverride);

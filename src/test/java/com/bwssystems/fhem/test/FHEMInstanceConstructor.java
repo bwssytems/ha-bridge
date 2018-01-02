@@ -248,14 +248,11 @@ public class FHEMInstanceConstructor {
 			aGson = new GsonBuilder()
 	                .create();
 			
-			FHEMItem[] aService = aGson.fromJson(decodeData, FHEMItem[].class);
-			for(int i = 0; i < aService.length; i++) {
-				System.out.println(aService[i].getTotalResultsReturned());
-				List<Result> services = aService[i].getResults();
+			FHEMItem aService = aGson.fromJson(decodeData, FHEMItem.class);
+				List<Result> services = aService.getResults();
 				for(Result aResult:services) {
 					System.out.println("    " + aResult.getName());
 				}
-			}
 		} catch (Exception e) {
 			return false;
 		}

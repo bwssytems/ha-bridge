@@ -4,7 +4,7 @@ public class FHEMDevice {
 	
 	private String address;
 	private String name;
-	private FHEMItem item;
+	private Result item;
 	public String getAddress() {
 		return address;
 	}
@@ -17,11 +17,10 @@ public class FHEMDevice {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public FHEMItem getItem() {
+	public Result getItem() {
 		return item;
 	}
-	public void setItem(FHEMItem item) {
+	public void setItem(Result item) {
 		this.item = item;
 	}
-
 }
