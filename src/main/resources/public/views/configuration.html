@@ -78,7 +78,7 @@
 			<td>{{device.id}}</td>
 			<td>{{device.name}}</td>
 			<td class="cr">{{device.description}}</td>
-			<td class="cr">on={{device.deviceState.on}},bri={{device.deviceState.on}},hue={{device.deviceState.hue}},sat={{device.deviceState.sat}},effect={{device.deviceState.effect}},ct={{device.deviceState.ct}},alert={{device.deviceState.alert}},colormode={{device.deviceState.colormode}},reachable={{device.deviceState.reachable}},XYList={{device.deviceState.xy}}</td>
+			<td class="cr">on={{device.deviceState.on}},bri={{device.deviceState.bri}},hue={{device.deviceState.hue}},sat={{device.deviceState.sat}},effect={{device.deviceState.effect}},ct={{device.deviceState.ct}},alert={{device.deviceState.alert}},colormode={{device.deviceState.colormode}},reachable={{device.deviceState.reachable}},XYList={{device.deviceState.xy}}</td>
 			<td>{{device.deviceType}}</td>
 			<td>{{device.targetDevice}}</td>
 			<td>{{device.inactive}}</td>
@@ -91,6 +91,8 @@
 						ng-click="testUrl(device, 'dim')">Test Dim</button>
 					<button class="btn btn-info" type="submit"
 						ng-click="testUrl(device, 'off')">Test OFF</button>
+					<button class="btn btn-info" type="submit"
+						ng-click="testUrl(device, 'color')">Test Color</button>
 					<button class="btn btn-warning" type="submit"
 						ng-click="editDevice(device)">Edit/Copy</button>
 					<button class="btn btn-danger" type="submit"
@@ -155,6 +157,17 @@
 				</p>
 				<p>
 					<rzslider rz-slider-model="slider.value" rz-slider-options="slider.options"></rzslider>
+				</p>
+		</div>
+		<div class="ngdialog-buttons mt">
+			<button type="button" class="ngdialog-button ngdialog-button-primary" ng-click="setValue()">Set</button>
+		</div>
+	</script>
+<script type="text/ng-template" id="colorDialog">
+		<div class="ngdialog-message">
+			<h2>Select Color</h2>
+				<p>
+					<input colorpicker="rgb" ng-model="rgbPicker.color" type="text">
 				</p>
 		</div>
 		<div class="ngdialog-buttons mt">

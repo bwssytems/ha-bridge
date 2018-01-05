@@ -231,6 +231,12 @@ public class FHEMInstanceConstructor {
 			"    </body>\n" + 
 			"</html>";
 
+	public final static String TestData2 = "        <div id='content' >\n" + 
+			"            <pre>\n" + "{   \"Arg\":\"room=HaBridge\",   \"Results\": [   {     \"Name\":\"wifi_steckdose3\",     \"PossibleSets\":\"on:noArg off:noArg off on toggle\",     \"PossibleAttrs\":\"alias comment:textField-long eventMap group room suppressReading userReadings:textField-long verbose:0,1,2,3,4,5 IODev qos retain publishSet publishSet_.* subscribeReading_.* autoSubscribeReadings event-on-change-reading event-on-update-reading event-aggregator event-min-interval stateFormat:textField-long timestamp-on-change-reading alarmDevice:Actor,Sensor alarmSettings cmdIcon devStateIcon devStateStyle icon lightSceneParamsToSave lightSceneRestoreOnlyIfChanged:1,0 sortby structexclude webCmd webCmdLabel:textField-long widgetOverride userattr\",     \"Internals\": {       \"CHANGED\": \"null\",       \"NAME\": \"wifi_steckdose3\",       \"NR\": \"270\",       \"STATE\": \"off\",       \"TYPE\": \"MQTT_DEVICE\",       \"retain\": \"*:1 \"     },     \"Readings\": {       \"state\": { \"Value\":\"OFF\", \"Time\":\"2018-01-01 23:01:21\" },       \"transmission-state\": { \"Value\":\"subscription acknowledged\", \"Time\":\"2018-01-03 22:34:00\" }     },     \"Attributes\": {       \"IODev\": \"myBroker\",       \"alias\": \"Stecki\",       \"devStateIcon\": \"on:black_Steckdose.on off:black_Steckdose.off\",       \"event-on-change-reading\": \"state\",       \"eventMap\": \"ON:on OFF:off\",       \"publishSet\": \"on off toggle /SmartHome/az/stecker/cmnd/POWER\",       \"retain\": \"1\",       \"room\": \"HaBridge,Arbeitszimmer,mqtt\",       \"stateFormat\": \"state\",       \"subscribeReading_state\": \"/SmartHome/az/stecker/stat/POWER\",       \"webCmd\": \"on:off:toggle\"     }   }  ],   \"totalResultsReturned\":1 }" + 
+			"            </pre>\n" + 
+			"        </div>\n" + 
+			"    </body>\n" + 
+			"</html>";
 	public static void main(String[] args){
 		FHEMInstanceConstructor aTestService = new FHEMInstanceConstructor();
 		if(aTestService.validateStructure())
@@ -243,7 +249,7 @@ public class FHEMInstanceConstructor {
 		anAddress.setName("testName");
 		anAddress.setIp("10.0.0.1");
 		FHEMInstance anInstance = new FHEMInstance(anAddress);
-		String decodeData = anInstance.getJSONData(TestData);
+		String decodeData = anInstance.getJSONData(TestData2);
 		try {
 			aGson = new GsonBuilder()
 	                .create();

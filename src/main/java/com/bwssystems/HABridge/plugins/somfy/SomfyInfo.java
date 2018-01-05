@@ -75,7 +75,7 @@ public class SomfyInfo {
 		urlEncodedFormEntity.writeTo(bos);
 		String body = bos.toString();
 		String response = httpClient.doHttpRequest(BASE_URL + "json/login",HttpPost.METHOD_NAME, "application/x-www-form-urlencoded", body,httpHeader);
-		log.debug(response);
+		log.debug("Somfy login response <<<" + response + ">>>");
 	}
 
 	private NameValue[] getHttpHeaders() {
@@ -89,7 +89,7 @@ public class SomfyInfo {
 		NameValue[] httpHeader = getHttpHeaders();
 		log.info("Making SOMFY http setup call");
 		String response = httpClient.doHttpRequest(BASE_URL + "json/getSetup", HttpGet.METHOD_NAME, "", "", httpHeader );
-		log.debug(response);
+		log.debug("Somfy getSetup response <<<" + response + ">>>");
 		GetSetup setupData = new Gson().fromJson(response, GetSetup.class);
 		return setupData;
 	}
@@ -98,7 +98,7 @@ public class SomfyInfo {
 		login(namedIP.getUsername(), namedIP.getPassword());
 		log.info("Making SOMFY http exec call");
 		String response = httpClient.doHttpRequest(BASE_URL_ENDUSER + "exec/apply", HttpPost.METHOD_NAME, "application/json;charset=UTF-8", jsonToPost, getHttpHeaders());
-		log.info(response);
+		log.debug("Somfy exec reply response <<<" + response + ">>>");
 	}
 
 

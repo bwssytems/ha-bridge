@@ -103,9 +103,10 @@ public class HTTPHandler {
 					retryCount = 2;
 				} else if (response != null) {
 					log.warn("HTTP response code was not an expected successful response of between 200 - 299, the code was: "
-									+ response.getStatusLine());
+									+ response.getStatusLine() + " with the content of <<<" + theContent + ">>>");
 					if (response.getStatusLine().getStatusCode() == 504) {
 						log.warn("HTTP response code was 504, retrying...");
+						log.debug("The 504 error content is <<<" + theContent + ">>>");
 					} else
 						retryCount = 2;
 					

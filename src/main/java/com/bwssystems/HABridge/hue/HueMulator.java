@@ -1096,10 +1096,11 @@ public class HueMulator {
 		DeviceState state = null;
 		Integer targetBri = null;
 		Integer targetBriInc = null;
-		MultiCommandUtil aMultiUtil = new MultiCommandUtil();
-		aMultiUtil.setTheDelay(bridgeSettings.getButtonsleep());
-		aMultiUtil.setDelayDefault(bridgeSettings.getButtonsleep());
-		aMultiUtil.setSetCount(1);
+		boolean isColorRequest = false;
+		boolean isDimRequest = false;
+		boolean isOnRequest = false;
+		boolean previousError = false;
+		ColorData colorData = null;
 		log.debug("hue state change requested: " + userId + " from " + ipAddress + " body: " + body);
 		HueError[] theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors != null) {
@@ -1125,136 +1126,127 @@ public class HueMulator {
 					"Could not find device.", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
 		}
 
-		if (body.contains("\"bri_inc\"")) {
-			targetBriInc = new Integer(theStateChanges.getBri_inc());
-		}
-		else if (body.contains("\"bri\"")) {
-			targetBri = new Integer(theStateChanges.getBri());
-		}
-
 		state = device.getDeviceState();
 		if (state == null) {
 			state = DeviceState.createDeviceState(device.isColorDevice());
 			device.setDeviceState(state);
 		}
 
-		if (targetBri != null || targetBriInc != null) {
-			url = device.getDimUrl();
+		if (body.contains("\"bri_inc\"")) {
+			targetBriInc = new Integer(theStateChanges.getBri_inc());
+			isDimRequest = true;
+		}
+		else if (body.contains("\"bri\"")) {
+			targetBri = new Integer(theStateChanges.getBri());
+			isDimRequest = true;
+		}
 
-			if (url == null || url.length() == 0)
-				url = device.getOnUrl();
-		} else {
-			if (body.contains("\"xy\"") || body.contains("\"ct\"") || body.contains("\"hue\"")) {
-				url = device.getColorUrl();
-			} else if (theStateChanges.isOn()) {
+		if (body.contains("\"xy\"") || body.contains("\"ct\"") || body.contains("\"hue\"") || body.contains("\"xy_inc\"") || body.contains("\"ct_inc\"") || body.contains("\"hue_inc\"")) {
+			List<Double> xy = theStateChanges.getXy();
+			List<Double> xyInc = theStateChanges.getXy_inc();
+			Integer ct = theStateChanges.getCt();
+			Integer ctInc = theStateChanges.getCt_inc();
+			if (xy != null && xy.size() == 2) {
+				colorData = new ColorData(ColorData.ColorMode.XY, xy);
+			} else if (xyInc != null && xyInc.size() == 2) { 
+				List<Double> current = state.getXy();
+				current.set(0, current.get(0) + xyInc.get(0));
+				current.set(1, current.get(1) + xyInc.get(1));
+				colorData = new ColorData(ColorData.ColorMode.XY, current);
+			} else if (ct != null && ct != 0) {
+				colorData = new ColorData(ColorData.ColorMode.CT, ct);
+			} else if (ctInc != null && ctInc != 0) {
+				colorData = new ColorData(ColorData.ColorMode.CT, state.getCt() + ctInc);
+			}
+			if(colorData != null)
+				isColorRequest = true;
+		}
+		
+		if (body.contains("\"on\"")) {
+			isOnRequest = true;
+		}
+		
+		if(isOnRequest || (isDimRequest && device.isOnFirstDim() && !device.getDeviceState().isOn())) {
+			if (theStateChanges.isOn()) {
 				url = device.getOnUrl();
 			} else if (!theStateChanges.isOn()) {
 				url = device.getOffUrl();
 			}
-		}
 
-		// code for backwards compatibility
-		if(device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) {
-			if(url == null)
-				url = device.getOnUrl();
-		}
-		if (url != null && !url.equals("")) {
-			if (!url.startsWith("[")) {
-				if (url.startsWith("{\"item"))
-					url = "[" + url + "]";
-				else {
-					if(url.startsWith("{"))
-						url = "[{\"item\":" + url + "}]";
-					else
-						url = "[{\"item\":\"" + url + "\"}]";
-				}
-			} else if(!url.startsWith("[{\"item\""))
-				url = "[{\"item\":" + url + "}]";
-
-			log.debug("Decode Json for url items: " + url);
-			CallItem[] callItems = null;
-			try {
-				callItems = aGsonHandler.fromJson(url, CallItem[].class);
-			} catch(JsonSyntaxException e) {
-				log.warn("Could not decode Json for url items: " + lightId + " for hue state change request: " + userId + " from "
-						+ ipAddress + " body: " + body + " url items: " + url);
-				return aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/lights/" + lightId,
-						"Could decode json in request", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
+			// code for backwards compatibility
+			if(device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) {
+				if(url == null)
+					url = device.getOnUrl();
 			}
-			
-			for (int i = 0; callItems != null && i < callItems.length; i++) {
-				if (!ignoreRequester) {
-					if(!filterByRequester(device.getRequesterAddress(), ipAddress) || !filterByRequester(callItems[i].getFilterIPs(), ipAddress)) {
-						log.warn("filter for requester address not present in: (device)" + device.getRequesterAddress() + " OR then (item)" + callItems[i].getFilterIPs() + " with request ip of: " + ipAddress);
-						continue;
-					}	
-				}
-				
-				if (callItems[i].getCount() != null && callItems[i].getCount() > 0)
-					aMultiUtil.setSetCount(callItems[i].getCount());
-				else
-					aMultiUtil.setSetCount(1);
-				// code for backwards compatibility
-				if((callItems[i].getType() == null || callItems[i].getType().trim().isEmpty())) {
-					if(validMapTypes.validateType(device.getMapType()))
-						callItems[i].setType(device.getMapType().trim());
-					else if(validMapTypes.validateType(device.getDeviceType()))
-						callItems[i].setType(device.getDeviceType().trim());
-					else
-						callItems[i].setType(DeviceMapTypes.CUSTOM_DEVICE[DeviceMapTypes.typeIndex]);
-				}
-	
-				if (callItems[i].getType() != null) {
-					for (int x = 0; x < aMultiUtil.getSetCount(); x++) {
-						if (x > 0 || i > 0) {
-							try {
-								Thread.sleep(aMultiUtil.getTheDelay());
-							} catch (InterruptedException e) {
-								// ignore
-							}
-						}
-						if (callItems[i].getDelay() != null && callItems[i].getDelay() > 0)
-							aMultiUtil.setTheDelay(callItems[i].getDelay());
-						else
-							aMultiUtil.setTheDelay(aMultiUtil.getDelayDefault());
 
-						ColorData colorData = null;
-						List<Double> xy = theStateChanges.getXy();
-						List<Double> xyInc = theStateChanges.getXy_inc();
-						Integer ct = theStateChanges.getCt();
-						Integer ctInc = theStateChanges.getCt_inc();
-						if (xy != null && xy.size() == 2) {
-							colorData = new ColorData(ColorData.ColorMode.XY, xy);
-						} else if (xyInc != null && xyInc.size() == 2) { 
-							List<Double> current = state.getXy();
-							current.set(0, current.get(0) + xyInc.get(0));
-							current.set(1, current.get(1) + xyInc.get(1));
-							colorData = new ColorData(ColorData.ColorMode.XY, current);
-						} else if (ct != null && ct != 0) {
-							colorData = new ColorData(ColorData.ColorMode.CT, ct);
-						} else if (ctInc != null && ctInc != 0) {
-							colorData = new ColorData(ColorData.ColorMode.CT, state.getCt() + ctInc);
-						}
-						log.debug("Calling Home device handler for type : " + callItems[i].getType().trim());
-						responseString = homeManager.findHome(callItems[i].getType().trim()).deviceHandler(callItems[i], aMultiUtil, lightId, state.getBri(), targetBri, targetBriInc, colorData, device, body);
-						if(responseString != null && responseString.contains("{\"error\":")) {
-							x = aMultiUtil.getSetCount();
-						}
+			if (url != null && !url.equals("")) {
+				responseString = callUrl(url, device, userId, lightId, body, ipAddress, ignoreRequester, targetBri, targetBriInc, colorData);
+			} else {
+				log.warn("Could not find on/off url: " + lightId + " for hue state change request: " + userId + " from "
+						+ ipAddress + " body: " + body);
+				responseString =  aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/lights/" + lightId,
+						"Could not find on/off url.", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
+				previousError = true;
+			}
+		}
+
+		if (isDimRequest && !previousError) {
+			if(!device.isOnFirstDim() )
+				url = device.getDimUrl();
+
+			if (url == null || url.length() == 0)
+				url = device.getOnUrl();
+
+			// code for backwards compatibility
+			if(device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) {
+				if(url == null)
+					url = device.getOnUrl();
+			}
+
+			if (url != null && !url.equals("")) {
+				if(isOnRequest) {
+					try {
+						Thread.sleep(bridgeSettings.getButtonsleep());
+					} catch (InterruptedException e) {
+						// ignore
 					}
 				}
-				else
-					log.warn("Call Items type is null <<<" + callItems[i] + ">>>");
+				responseString = callUrl(url, device, userId, lightId, body, ipAddress, ignoreRequester, targetBri, targetBriInc, colorData);
+			} else {
+				log.warn("Could not find dim url: " + lightId + " for hue state change request: " + userId + " from "
+						+ ipAddress + " body: " + body);
+				responseString =  aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/lights/" + lightId,
+						"Could not find dim url.", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
+				previousError = true;
 			}
-			
-			if(callItems.length == 0)
-				log.warn("No call items were available: <<<" + url + ">>>");
-		} else {
-			log.warn("Could not find url: " + lightId + " for hue state change request: " + userId + " from "
-					+ ipAddress + " body: " + body);
-			responseString =  aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/lights/" + lightId,
-					"Could not find url.", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
 		}
 
+		if (isColorRequest && !previousError) {
+			url = device.getColorUrl();
+			// code for backwards compatibility
+			if(device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) {
+				if(url == null)
+					url = device.getOnUrl();
+			}
+
+			if (url != null && !url.equals("")) {
+				if((isOnRequest && !isDimRequest) || isDimRequest) {
+					try {
+						Thread.sleep(bridgeSettings.getButtonsleep());
+					} catch (InterruptedException e) {
+						// ignore
+					}
+				}
+				responseString = callUrl(url, device, userId, lightId, body, ipAddress, ignoreRequester, targetBri, targetBriInc, colorData);
+			} else {
+				log.warn("Could not find color url: " + lightId + " for hue state change request: " + userId + " from "
+						+ ipAddress + " body: " + body);
+				responseString =  aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/lights/" + lightId,
+						"Could not find color url.", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
+				previousError = true;
+			}
+		}
+		
 		if (responseString == null || !responseString.contains("[{\"error\":")) {
 			log.debug("Response is in error: " + ((responseString == null) ? "null" : responseString));
 			if(!device.isNoState()) {
@@ -1374,5 +1366,88 @@ public class HueMulator {
 		}
 
 		return aGsonHandler.toJson(theErrors);
+	}
+	
+	protected String callUrl(String url, DeviceDescriptor device, String userId, String lightId, String body, String ipAddress, boolean ignoreRequester, Integer targetBri, Integer targetBriInc, ColorData colorData) {
+		String responseString = null;
+		MultiCommandUtil aMultiUtil = new MultiCommandUtil();
+		aMultiUtil.setTheDelay(bridgeSettings.getButtonsleep());
+		aMultiUtil.setDelayDefault(bridgeSettings.getButtonsleep());
+		aMultiUtil.setSetCount(1);
+
+		if (!url.startsWith("[")) {
+			if (url.startsWith("{\"item"))
+				url = "[" + url + "]";
+			else {
+				if(url.startsWith("{"))
+					url = "[{\"item\":" + url + "}]";
+				else
+					url = "[{\"item\":\"" + url + "\"}]";
+			}
+		} else if(!url.startsWith("[{\"item\""))
+			url = "[{\"item\":" + url + "}]";
+
+		log.debug("Decode Json for url items: " + url);
+		CallItem[] callItems = null;
+		try {
+			callItems = aGsonHandler.fromJson(url, CallItem[].class);
+		} catch(JsonSyntaxException e) {
+			log.warn("Could not decode Json for url items: " + lightId + " for hue state change request: " + userId + " from "
+					+ ipAddress + " body: " + body + " url items: " + url);
+			return aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/lights/" + lightId,
+					"Could decode json in request", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
+		}
+		
+		for (int i = 0; callItems != null && i < callItems.length; i++) {
+			if (!ignoreRequester) {
+				if(!filterByRequester(device.getRequesterAddress(), ipAddress) || !filterByRequester(callItems[i].getFilterIPs(), ipAddress)) {
+					log.warn("filter for requester address not present in: (device)" + device.getRequesterAddress() + " OR then (item)" + callItems[i].getFilterIPs() + " with request ip of: " + ipAddress);
+					continue;
+				}	
+			}
+			
+			if (callItems[i].getCount() != null && callItems[i].getCount() > 0)
+				aMultiUtil.setSetCount(callItems[i].getCount());
+			else
+				aMultiUtil.setSetCount(1);
+			// code for backwards compatibility
+			if((callItems[i].getType() == null || callItems[i].getType().trim().isEmpty())) {
+				if(validMapTypes.validateType(device.getMapType()))
+					callItems[i].setType(device.getMapType().trim());
+				else if(validMapTypes.validateType(device.getDeviceType()))
+					callItems[i].setType(device.getDeviceType().trim());
+				else
+					callItems[i].setType(DeviceMapTypes.CUSTOM_DEVICE[DeviceMapTypes.typeIndex]);
+			}
+
+			if (callItems[i].getType() != null) {
+				for (int x = 0; x < aMultiUtil.getSetCount(); x++) {
+					if (x > 0 || i > 0) {
+						try {
+							Thread.sleep(aMultiUtil.getTheDelay());
+						} catch (InterruptedException e) {
+							// ignore
+						}
+					}
+					if (callItems[i].getDelay() != null && callItems[i].getDelay() > 0)
+						aMultiUtil.setTheDelay(callItems[i].getDelay());
+					else
+						aMultiUtil.setTheDelay(aMultiUtil.getDelayDefault());
+
+					log.debug("Calling Home device handler for type : " + callItems[i].getType().trim());
+					responseString = homeManager.findHome(callItems[i].getType().trim()).deviceHandler(callItems[i], aMultiUtil, lightId, device.getDeviceState().getBri(), targetBri, targetBriInc, colorData, device, body);
+					if(responseString != null && responseString.contains("{\"error\":")) {
+						x = aMultiUtil.getSetCount();
+					}
+				}
+			}
+			else
+				log.warn("Call Items type is null <<<" + callItems[i] + ">>>");
+		}
+		
+		if(callItems.length == 0)
+			log.warn("No call items were available: <<<" + url + ">>>");
+		
+		return responseString;
 	}
 }

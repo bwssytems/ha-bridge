@@ -72,9 +72,9 @@
 				value="{{fhemdevice.item.name}}"
 				ng-checked="bulk.devices.indexOf(fhemdevice.item.name) > -1"
 				ng-click="toggleSelection(fhemdevice.item.name)">
-				{{fhemdevice.item.name}}</td>
+				{{fhemdevice.item.Name}}</td>
 			<td>{{fhemdevice.name}}</td>
-			<td>{{fhemdevice.item.possibleSets}}</td>
+			<td>{{fhemdevice.item.PossibleSets}}</td>
 			<td>
 				<button  class="btn btn-success" type="submit"
 					ng-click="buildDeviceUrls(fhemdevice, device_dim_control, false)">Build Item</button>

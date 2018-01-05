@@ -94,6 +94,12 @@
 						ng-false-value=false> {{device.offState}}</td>
 				</tr>
 				<tr>
+					<td><label>On with First Dim (If the device is not on in the ha-bridge state, it will send on instead of the dim.)</label></td>
+					<td><input type="checkbox"
+						ng-model="device.onFirstDim" ng-true-value=true
+						ng-false-value=false> {{device.onFirstDim}}</td>
+				</tr>
+				<tr>
 					<td><label>Filter Address (comma separated list)</label></td>
 					<td><input type="text" class="form-control" id="device-requester-addr"
 						ng-model="device.requesterAddress" placeholder="Only use if you want to restrict this device to a specific caller(s)"></td>

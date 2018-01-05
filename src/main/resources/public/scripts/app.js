@@ -1,4 +1,4 @@
-var app = angular.module ('habridge', ['ngRoute', 'ngToast', 'rzModule', 'ngDialog', 'base64', 'scrollable-table', 'ngResource', 'ngStorage']);
+var app = angular.module ('habridge', ['ngRoute', 'ngToast', 'rzModule', 'ngDialog', 'base64', 'scrollable-table', 'ngResource', 'ngStorage', 'colorpicker.module']);
 
 app.config (function ($locationProvider, $routeProvider) {
     $locationProvider.hashPrefix('!');
@@ -1303,18 +1303,53 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 		self.state.device = device;
 	};
 
-	this.testUrl = function (device, type, value) {
+	this.toXY = function (red, green, blue) {
+        //Gamma corrective
+        red = (red > 0.04045) ? Math.pow((red + 0.055) / (1.0 + 0.055), 2.4) : (red / 12.92);
+        green = (green > 0.04045) ? Math.pow((green + 0.055) / (1.0 + 0.055), 2.4) : (green / 12.92);
+        blue = (blue > 0.04045) ? Math.pow((blue + 0.055) / (1.0 + 0.055), 2.4) : (blue / 12.92);
+        
+        //Apply wide gamut conversion D65
+        var X = red * 0.664511 + green * 0.154324 + blue * 0.162028;
+        var Y = red * 0.283881 + green * 0.668433 + blue * 0.047685;
+        var Z = red * 0.000088 + green * 0.072310 + blue * 0.986039;
+        
+        var fx = X / (X + Y + Z);
+        var fy = Y / (X + Y + Z);
+        if (isNaN(fx)) {
+            fx = 0.0;
+        }
+        if (isNaN(fy)) {
+            fy = 0.0;
+        }
+        
+        return [fx.toPrecision(4),fy.toPrecision(4)];
+    };
+
+	this.testUrl = function (device, type, value, valueType) {
 		var msgDescription = "unknown";
 		self.getTestUser();
 		var testUrl = this.state.huebase + "/" + this.state.testuser + "/lights/" + device.id + "/state";
-		var testBody = "{\"on\":";
+		var addComma = false;
+		var testBody = "{";
 		if (type === "off") {
-			testBody = testBody + "false";
-		} else {
-			testBody = testBody + "true";
+			testBody = testBody + "\"on\":false";
+			addComma = true
 		}
-		if (value) {
-			testBody = testBody + ",\"bri\":" + value;
+		if (type === "on") {
+			testBody = testBody + "\"on\":true";
+			addComma = true
+		}
+		if (valueType === "dim" && value) {
+			if(addComma)
+				testBody = testBody + ",";
+			testBody = testBody + "\"bri\":" + value;
+			addComma = true
+		}
+		if (valueType === "color" && value) {
+			if(addComma)
+				testBody = testBody + ",";
+			testBody = testBody + "\"xy\": [" + value[0] +"," + value[1] + "]";
 		}
 		testBody = testBody + "}";
 		$http.put(testUrl, testBody).then(
@@ -1940,7 +1975,7 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
 		var dialogNeeded = false;
 		if ((type === "on" && device.onUrl !== undefined && bridgeService.aContainsB(device.onUrl, "${intensity")) ||
 				(type === "off" && device.offUrl !== undefined && bridgeService.aContainsB(device.offUrl, "${intensity")) ||
-				(type === "dim" && device.dimUrl !== undefined) || (type === "color" && device.colorUrl !== undefined)) {
+				(type === "dim" && device.dimUrl !== undefined)) {
 			$scope.bridge.device = device;
 			$scope.bridge.type = type;
 			ngDialog.open({
@@ -1949,8 +1984,19 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
 				className: 'ngdialog-theme-default'
 			});
 		}
+		else if ((type === "on" && device.onUrl !== undefined && bridgeService.aContainsB(device.onUrl, "${color")) ||
+				(type === "off" && device.offUrl !== undefined && bridgeService.aContainsB(device.offUrl, "${color")) ||
+				(type === "color" && device.colorUrl !== undefined)) {
+			$scope.bridge.device = device;
+			$scope.bridge.type = type;
+			ngDialog.open({
+				template: 'colorDialog',
+				controller: 'ColorDialogCtrl',
+				className: 'ngdialog-theme-default'
+			});
+		}
 		else
-			bridgeService.testUrl(device, type);
+			bridgeService.testUrl(device, type, null, type);
 	};
 	$scope.deleteDevice = function (device) {
 		$scope.bridge.device = device;
@@ -2039,7 +2085,28 @@ app.controller('ValueDialogCtrl', function ($scope, bridgeService, ngDialog) {
 			theValue = Math.round(($scope.slider.value * .01) * 255);
 		else
 			theValue = $scope.slider.value;
-		bridgeService.testUrl($scope.bridge.device, $scope.bridge.type, theValue);
+		bridgeService.testUrl($scope.bridge.device, $scope.bridge.type, theValue, "dim");
+		$scope.bridge.device = null;
+		$scope.bridge.type = "";
+	};
+});
+
+app.controller('ColorDialogCtrl', function ($scope, bridgeService, ngDialog) {
+	$scope.rgbPicker = {
+	        color: 'rgb(255,255,255)'
+    };
+
+	$scope.bridge = bridgeService.state;
+	$scope.setValue = function () {
+		ngDialog.close('ngdialog1');
+		var next =  $scope.rgbPicker.color.substr($scope.rgbPicker.color.indexOf('(') + 1);
+		var red = next.substr(0, next.indexOf(','));
+		next = next.substr(next.indexOf(',') + 1);
+		var green = next.substr(0, next.indexOf(','));
+		next = next.substr(next.indexOf(',') + 1);
+		var blue = next.substr(0, next.indexOf(')'));
+		var theValue = bridgeService.toXY(red, green, blue);
+		bridgeService.testUrl($scope.bridge.device, $scope.bridge.type, theValue, "color");
 		$scope.bridge.device = null;
 		$scope.bridge.type = "";
 	};
@@ -2232,6 +2299,7 @@ app.controller('FibaroController', function ($scope, $location, bridgeService, n
 	};
 
 	$scope.buildDeviceUrls = function (fibarodevice, dim_control, buildonly) {
+		var dimpayload = null;
 		if(dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)
 			dimpayload = "http://" + fibarodevice.fibaroaddress + ":" + fibarodevice.fibaroport + "/api/callAction?deviceID=" + fibarodevice.id + "&name=setValue&arg1=" + dim_control;
 				
@@ -2248,6 +2316,8 @@ app.controller('FibaroController', function ($scope, $location, bridgeService, n
 	};
 
 	$scope.buildSceneUrls = function (fibaroscene) {
+		var onpayload = null;
+		var offpayload = null;
 		onpayload = "http://" + fibaroscene.fibaroaddress + ":" + fibaroscene.fibaroport + "/api/sceneControl?id=" + fibaroscene.id + "&action=start";
 		offpayload = "http://" + fibaroscene.fibaroaddress + ":" + fibaroscene.fibaroport + "/api/sceneControl?id=" + fibaroscene.id + "&action=stop";
 
@@ -3533,7 +3603,7 @@ app.controller('SomfyController', function ($scope, $location, bridgeService, ng
 
 	$scope.buildDeviceUrls = function (somfydevice, dim_control, buildonly) {
         //TODO - support partial window opening - add back 'dim_control' second param in here, and in somfydevice.html
-        dimpayload = "";
+        dimpayload = null;
         onpayload = "{\"label\":\"Label that is ignored probably\",\"actions\":[{\"deviceURL\":\""+ somfydevice.deviceUrl+"\",\"commands\":[{\"name\":\"open\",\"parameters\":[]}]}]}";
         offpayload = "{\"label\":\"Label that is ignored probably\",\"actions\":[{\"deviceURL\":\""+ somfydevice.deviceUrl+"\",\"commands\":[{\"name\":\"close\",\"parameters\":[]}]}]}";
 
@@ -3800,28 +3870,24 @@ app.controller('FhemController', function ($scope, $location, bridgeService, ngD
 	};
 
 	$scope.buildDeviceUrls = function (fhemdevice, dim_control, ondeviceaction, oninputdeviceaction, offdeviceaction, offinputdeviceaction, buildonly) {
-		var preCmd = "/fhem?cmd=set%20" + fhemdevice.item.name + "%20";
-		if(fhemdevice.item.possibleSets.indexOf("dim" >= 0)) {
+		var preCmd = "/fhem?cmd=set%20" + fhemdevice.item.Name + "%20";
+		if(fhemdevice.item.PossibleSets.indexOf("dim") >= 0) {
 			if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)) {
 				dimpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"dim%20" + dim_control + "\"}";
 			}
 			else
-				dimpayload = null;
+				dimpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"dim%20${intensity.percent}\"}";
 		}
 		else
 			dimpayload = null;
-		if(fhemdevice.item.possibleSets.indexOf("RGB" >= 0)) {
-			if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)) {
-				colorpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"RGB%20${color.rgbx}\"}";
-			}
-			else
-				colorpayload = null;
+		if(fhemdevice.item.PossibleSets.indexOf("RGB") >= 0) {
+			colorpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"RGB%20${color.rgbx}\"}";
 		}
 		else
 			colorpayload = null;
 		onpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"on\"}";
 		offpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"off\"}";
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, fhemdevice.item.name + "-" + fhemdevice.name,  fhemdevice.item.name, fhemdevice.name, fhemdevice.item.type,  "fhemDevice", null, null);
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, fhemdevice.item.Name + "-" + fhemdevice.name,  fhemdevice.item.Name, fhemdevice.name, fhemdevice.item.type,  "fhemDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
