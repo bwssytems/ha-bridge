@@ -20,6 +20,7 @@ import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.ColorData;
+import com.bwssystems.HABridge.hue.ColorDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.github.besherman.lifx.LFXClient;
 import com.github.besherman.lifx.LFXGroup;
@@ -199,6 +200,10 @@ public class LifxHome implements Home {
 							if(theValue > (float)1.0)
 								theValue = (float)0.99;
 							theLight.setBrightness(theValue);
+						}
+						if(colorData != null) {
+							int rgbVal = ColorDecode.getIntRGB(colorData, intensity);
+							theLight.setColor(rgbVal);
 						}
 					} else if (theDevice.getType().equals(LifxDevice.GROUP_TYPE)) {
 						LFXGroup theGroup = (LFXGroup)theDevice.getLifxObject();
