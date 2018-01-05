@@ -266,29 +266,7 @@ public class ColorDecode {
 			rgb = convertCTtoRGB((Integer) colorData.getData());
 		}
 
-		double r = (double) rgb.get(0);
-		double g = (double) rgb.get(1);
-		double b = (double) rgb.get(2);
-		r /= (double) 0xFF;
-		g /= (double) 0xFF;
-		b /= (double) 0xFF;
-		double max = Math.max(Math.max(r, g), b), min = Math.min(Math.min(r, g), b);
-		double h = 0;
-		double d = max - min;
-
-		if (max == min) {
-			h = 0;
-		} else {
-			if (max == r) {
-				h = ((g - b) / d + (g < b ? 6 : 0));
-			} else if (max == g) {
-				h = ((b - r) / d + 2);
-			} else if (max == b) {
-				h = ((r - g) / d + 4);
-			}
-			h = Math.round(h * 60);
-		}
-		int rgbIntVal = (int) ((256 + 176 - Math.floor(h / 360.0 * 255.0)) % 256);
+		int rgbIntVal = Integer.parseInt(String.format("%02X%02X%02X", rgb.get(0), rgb.get(1), rgb.get(2)), 16);
 		log.debug("Convert RGB to int. Result: " + rgbIntVal + " RGB Values: " + rgb.get(0) + " " + rgb.get(1) + " "
 				+ rgb.get(2));
 		return rgbIntVal;
