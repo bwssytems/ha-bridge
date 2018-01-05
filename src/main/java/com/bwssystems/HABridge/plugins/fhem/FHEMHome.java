@@ -137,7 +137,7 @@ public class FHEMHome implements Home {
 		List<FHEMDevice> deviceList = new ArrayList<FHEMDevice>();
 		while(keys.hasNext()) {
 			String key = keys.next();
-			theResponse = fhemMap.get(key).testGetDevices(httpClient);
+			theResponse = fhemMap.get(key).getDevices(httpClient);
 			if(theResponse != null)
 				addFHEMDevices(deviceList, theResponse, key);
 			else {
