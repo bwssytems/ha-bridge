@@ -74,7 +74,8 @@ public class FibaroInfo
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
 			connection.setRequestProperty("Authorization", fibaroAuth);
-			connection.getResponseMessage();
+			String aResponse = connection.getResponseMessage();
+			log.debug("sendCommand response: <<<" + aResponse + ">>>");
 		}
 		catch(IOException e)
 		{
@@ -94,6 +95,7 @@ public class FibaroInfo
 	private Room[] getRooms()
 	{
 		String result = request("/api/rooms");
+		log.debug("getRooms response: <<<" + result + ">>>");
 		Room[] rooms = result == null ? new Room[0] : gson.fromJson(result, Room[].class);
 		if(replaceTrash)
 			for(Room r : rooms)
@@ -108,6 +110,7 @@ public class FibaroInfo
 		log.info("Found: " + rooms.length + " rooms");
 
 		String result = request("/api/devices?enabled=true&visible=true");
+		log.debug("getDevices response: <<<" + result + ">>>");
 		Device[] all_devices = result == null ? new Device[0] : gson.fromJson(result, Device[].class);
 
 		int count = 0;
@@ -147,6 +150,7 @@ public class FibaroInfo
 		Room[] rooms = getRooms();
 		
 		String result = request("/api/scenes?enabled=true&visible=true");
+		log.debug("getScenes response: <<<" + result + ">>>");
 		Scene[] all_scenes = result == null ? new Scene[0] : gson.fromJson(result, Scene[].class);
 		
 		int count = 0;

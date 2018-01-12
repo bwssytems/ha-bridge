@@ -1499,6 +1499,10 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     $scope.bridge.isInControl = false;
     $scope.visible = false;
     $scope.imgUrl = "glyphicon glyphicon-plus";
+	$scope.newhassport = "8123";
+	$scope.newdomoticzport = "8080";
+	$scope.newopenhabport = "8080";
+	$scope.newfhemport = "8080";
     $scope.addVeratoSettings = function (newveraname, newveraip) {
     	if($scope.bridge.settings.veraaddress === undefined || $scope.bridge.settings.veraaddress === null) {
     		$scope.bridge.settings.veraaddress = { devices: [] };
@@ -1610,6 +1614,7 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     	$scope.newhassip = null;
     	$scope.newhassport = null;
     	$scope.newhasspassword = null;
+    	$scope.newhassport = "8123";
     };
     $scope.removeHasstoSettings = function (hassname, hassip) {
     	for(var i = $scope.bridge.settings.hassaddress.devices.length - 1; i >= 0; i--) {
@@ -1644,7 +1649,7 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     	$scope.bridge.settings.domoticzaddress.devices.push(newdomoticz);
     	$scope.newdomoticzname = null;
     	$scope.newdomoticzip = null;
-    	$scope.newdomoticzport = null;
+    	$scope.newdomoticzport = "8080";
     	$scope.newdomoticzpassword = null;
     };
     $scope.removeDomoticztoSettings = function (domoticzname, domoticzip) {
@@ -1680,7 +1685,7 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     	$scope.bridge.settings.openhabaddress.devices.push(newopenhab);
     	$scope.newopenhabname = null;
     	$scope.newopenhabip = null;
-    	$scope.newopenhabport = null;
+    	$scope.newopenhabport = "8080";
     	$scope.newopenhabusername = null;
     	$scope.newopenhabpassword = null;
     };
@@ -1700,7 +1705,7 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     	$scope.bridge.settings.fhemaddress.devices.push(newfhem);
     	$scope.newfhemname = null;
     	$scope.newfhemip = null;
-    	$scope.newfhemport = null;
+    	$scope.newfhemport = "8080";
     	$scope.newfhemusername = null;
     	$scope.newfhempassword = null;
     	$scope.newfhemwebhook = null;

@@ -3,6 +3,7 @@ package com.bwssystems.fhem.test;
 import java.util.List;
 
 import com.bwssystems.HABridge.NamedIP;
+import com.bwssystems.HABridge.plugins.fhem.FHEMDevice;
 import com.bwssystems.HABridge.plugins.fhem.FHEMInstance;
 import com.bwssystems.HABridge.plugins.fhem.FHEMItem;
 import com.bwssystems.HABridge.plugins.fhem.Result;
@@ -237,6 +238,63 @@ public class FHEMInstanceConstructor {
 			"        </div>\n" + 
 			"    </body>\n" + 
 			"</html>";
+	public final static String TestData3 ="DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n" + 
+			"<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" + 
+			"<head root=\"/fhem\">\n" + 
+			"<title>Home, Sweet Home</title>\n" + 
+			"<link rel=\"shortcut icon\" href=\"/fhem/icons/favicon\" />\n" + 
+			"<meta charset=\"UTF-8\">\n" + 
+			"<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n" + 
+			"<link href=\"/fhem/pgm2/style.css?v=1515015198\" rel=\"stylesheet\"/>\n" + 
+			"<link href=\"/fhem/pgm2/jquery-ui.min.css\" rel=\"stylesheet\"/>\n" + 
+			"<script attr='' type=\"text/javascript\" src=\"/fhem/pgm2/jquery.min.js\"></script>\n" + 
+			"<script attr='' type=\"text/javascript\" src=\"/fhem/pgm2/jquery-ui.min.js\"></script>\n" + 
+			"<script attr='' type=\"text/javascript\" src=\"/fhem/pgm2/fhemweb.js\"></script>\n" + 
+			"<script attr='' type=\"text/javascript\" src=\"/fhem/pgm2/doif.js\"></script>\n" + 
+			"<script attr='' type=\"text/javascript\" src=\"/fhem/pgm2/fronthemEditor.js\"></script>\n" + 
+			"<script attr='' type=\"text/javascript\" src=\"/fhem/pgm2/fhemweb_readingsGroup.js\"></script>\n" + 
+			"</head>\n" + 
+			"<body name='Home, Sweet Home' fw_id='1490' generated=\"1515770038\" longpoll=\"websocket\"  data-confirmDelete='1' data-confirmJSError='1' data-addHtmlTitle='1' data-availableJs='sortable,iconLabel,readingsHistory,colorpicker,iconButtons,fbcalllist,knob,weekprofile,iconRadio,readingsGroup,iconSwitch,uzsu' data-webName='WEB '>\n" + 
+			"<div id=\"menuScrollArea\">\n" + 
+			"</div>\n" + 
+			"<div id='content' >\n" + 
+			"<pre>{\n" + 
+			"\"Arg\":\"room=HaBridge\",\n" + 
+			"\"Results\": [\n" + 
+			"{\n" + 
+			"\"Name\":\"<a href='/fhem?detail=wifi_steckdose3'>wifi_steckdose3</a>\",\n" + 
+			"\"PossibleSets\":\"on:noArg off:noArg off on toggle\",\n" + 
+			"\"PossibleAttrs\":\"alias comment:textField-long eventMap group room suppressReading userReadings:textField-long verbose:0,1,2,3,4,5 IODev qos retain publishSet publishSet_.* subscribeReading_.* autoSubscribeReadings event-on-change-reading event-on-update-reading event-aggregator event-min-interval stateFormat:textField-long timestamp-on-change-reading alarmDevice:Actor,Sensor alarmSettings cmdIcon devStateIcon devStateStyle icon lightSceneParamsToSave lightSceneRestoreOnlyIfChanged:1,0 sortby structexclude webCmd webCmdLabel:textField-long widgetOverride userattr\",\n" + 
+			"\"Internals\": {\n" + 
+			"\"NAME\": \"<a href='/fhem?detail=wifi_steckdose3'>wifi_steckdose3</a>\",\n" + 
+			"\"NR\": \"270\",\n" + 
+			"\"STATE\": \"off\",\n" + 
+			"\"TYPE\": \"MQTT_DEVICE\",\n" + 
+			"\"retain\": \"*:1 \"\n" + 
+			"},\n" + 
+			"\"Readings\": {\n" + 
+			"\"state\": { \"Value\":\"OFF\", \"Time\":\"2018-01-07 05:16:01\" },\n" + 
+			"\"transmission-state\": { \"Value\":\"incoming publish received\", \"Time\":\"2018-01-07 05:16:01\" }\n" + 
+			"},\n" + 
+			"\"Attributes\": {\n" + 
+			"\"IODev\": \"<a href='/fhem?detail=myBroker'>myBroker</a>\",\n" + 
+			"\"alias\": \"Stecki\",\n" + 
+			"\"devStateIcon\": \"on:black_Steckdose.on off:black_Steckdose.off\",\n" + 
+			"\"event-on-change-reading\": \"state\",\n" + 
+			"\"eventMap\": \"ON:on OFF:off\",\n" + 
+			"\"publishSet\": \"on off toggle /SmartHome/az/stecker/cmnd/POWER\",\n" + 
+			"\"retain\": \"1\",\n" + 
+			"\"room\": \"HaBridge,Arbeitszimmer,mqtt\",\n" + 
+			"\"stateFormat\": \"state\",\n" + 
+			"\"subscribeReading_state\": \"/SmartHome/az/stecker/stat/POWER\",\n" + 
+			"\"webCmd\": \"on:off:toggle\"\n" + 
+			"}\n" + 
+			"}  ],\n" + 
+			"\"totalResultsReturned\":1\n" + 
+			"}\n" + 
+			"</pre>\n" + 
+			"</div>\n" + 
+			"</body></html>";
 	public static void main(String[] args){
 		FHEMInstanceConstructor aTestService = new FHEMInstanceConstructor();
 		if(aTestService.validateStructure())
@@ -246,21 +304,57 @@ public class FHEMInstanceConstructor {
 	public Boolean validateStructure() {
 		Gson aGson;
 		NamedIP anAddress = new NamedIP();
-		anAddress.setName("testName");
+		anAddress.setName("TestData1");
 		anAddress.setIp("10.0.0.1");
 		FHEMInstance anInstance = new FHEMInstance(anAddress);
-		String decodeData = anInstance.getJSONData(TestData2);
-		try {
-			aGson = new GsonBuilder()
-	                .create();
-			
-			FHEMItem aService = aGson.fromJson(decodeData, FHEMItem.class);
-				List<Result> services = aService.getResults();
+		HttpTestHandler theHttpTestClient = new HttpTestHandler();
+		List<Result> services = null;
+		List<FHEMDevice> deviceList = null;
+		String decodeData = null;
+		String theTestData = null;
+		
+		for(int i = 0; i < 3; i++) {
+			if(i == 0)
+				theTestData = TestData;
+			else if(i == 1) {
+				theTestData = TestData2;
+				anAddress.setName(anAddress.getName().replace("1", "2"));
+				anInstance = new FHEMInstance(anAddress);
+			}
+			else {
+				anAddress.setName(anAddress.getName().replace("2", "3"));
+				theTestData = TestData3;
+			}
+			decodeData = anInstance.getJSONData(theTestData);
+			try {
+				aGson = new GsonBuilder()
+		                .create();
+				
+				FHEMItem aService = aGson.fromJson(decodeData, FHEMItem.class);
+				services = aService.getResults();
 				for(Result aResult:services) {
-					System.out.println("    " + aResult.getName());
+					System.out.println(anAddress.getName() + " - Json Test:");
+					System.out.println("    " +  aResult.getName());
+					System.out.println("    	" + aResult.getPossibleSets());
 				}
-		} catch (Exception e) {
-			return false;
+			} catch (Exception e) {
+				return false;
+			}
+			System.out.println("----------------------------------");
+			try {
+				theHttpTestClient.setTheData(theTestData);
+				deviceList = anInstance.getDevices(theHttpTestClient);
+				if(deviceList == null)
+					return false;
+				for(FHEMDevice aDevice:deviceList) {
+					System.out.println(aDevice.getName() + " - FHEMDevice Class Test:");
+					System.out.println("    " + aDevice.getItem().getName());
+					System.out.println("    	" + aDevice.getItem().getPossibleSets());
+				}
+			} catch (Exception e) {
+				return false;
+			}
+			System.out.println("----------------------------------");
 		}
 		return true;
 	}

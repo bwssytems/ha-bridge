@@ -1166,7 +1166,24 @@ public class HueMulator {
 			isOnRequest = true;
 		}
 		
-		if(isOnRequest || (isDimRequest && device.isOnFirstDim() && !device.getDeviceState().isOn())) {
+		if(device.isOnFirstDim() && isDimRequest && !device.getDeviceState().isOn()) {
+			isOnRequest = true;
+			isDimRequest = false;
+			isColorRequest = false;
+		} else if(device.isOnFirstDim() && isDimRequest && device.getDeviceState().isOn()) {
+			if(device.getDeviceState().getBri() == theStateChanges.getBri()) {
+				isOnRequest = true;
+				isDimRequest = false;
+				isColorRequest = false;
+			} else {
+				isOnRequest = false;
+				isDimRequest = true;
+				isColorRequest = false;
+			}
+		}
+		
+		if(isOnRequest) {
+			log.debug("Calling on-off as requested.");
 			if (theStateChanges.isOn()) {
 				url = device.getOnUrl();
 			} else if (!theStateChanges.isOn()) {
@@ -1191,6 +1208,7 @@ public class HueMulator {
 		}
 
 		if (isDimRequest && !previousError) {
+			log.debug("Calling dim as requested.");
 			if(!device.isOnFirstDim() )
 				url = device.getDimUrl();
 
@@ -1222,6 +1240,7 @@ public class HueMulator {
 		}
 
 		if (isColorRequest && !previousError) {
+			log.debug("Calling color as requested.");
 			url = device.getColorUrl();
 			// code for backwards compatibility
 			if(device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) {
@@ -1248,7 +1267,6 @@ public class HueMulator {
 		}
 		
 		if (responseString == null || !responseString.contains("[{\"error\":")) {
-			log.debug("Response is in error: " + ((responseString == null) ? "null" : responseString));
 			if(!device.isNoState()) {
 				responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc, device.isOffState());
 				device.setDeviceState(state);
@@ -1257,6 +1275,7 @@ public class HueMulator {
 				responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, dummyState, targetBri, targetBriInc, device.isOffState());
 			}
 		}
+
 		return responseString;
 		
 	}
