@@ -1,16 +1,10 @@
 package com.bwssystems.HABridge;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.bwssystems.HABridge.devicemanagmeent.ResourceHandler;
 import com.bwssystems.HABridge.plugins.NestBridge.NestHome;
 import com.bwssystems.HABridge.plugins.domoticz.DomoticzHome;
 import com.bwssystems.HABridge.plugins.exec.CommandHome;
+import com.bwssystems.HABridge.plugins.fibaro.FibaroHome;
 import com.bwssystems.HABridge.plugins.fritz.FritzHome;
 import com.bwssystems.HABridge.plugins.hal.HalHome;
 import com.bwssystems.HABridge.plugins.harmony.HarmonyHome;
@@ -24,8 +18,13 @@ import com.bwssystems.HABridge.plugins.somfy.SomfyHome;
 import com.bwssystems.HABridge.plugins.tcp.TCPHome;
 import com.bwssystems.HABridge.plugins.udp.UDPHome;
 import com.bwssystems.HABridge.plugins.vera.VeraHome;
-import com.bwssystems.HABridge.plugins.fibaro.FibaroHome;
 import com.bwssystems.HABridge.util.UDPDatagramSender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HomeManager {
 	private static final Logger log = LoggerFactory.getLogger(HomeManager.class);

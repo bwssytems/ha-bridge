@@ -364,7 +364,7 @@ The Add/Edit tab will show you the fields to fill in for the above in a form, wh
 The format of the item can be the default HTTP request which executes the URLs formatted as `http://<your stuff here>` as a GET. Other options to this are to select the HTTP Verb and add the data type and add a body that is passed with the request. Secure https is supported as well, just use `https://<your secure call here>`. When using POST and PUT, you have the ability to specify the body that will be sent with the request as well as the application type for the http call.
 
 The valid device types are: "custom", "veraDevice", "veraScene", "harmonyActivity", "harmonyButton", "nestHomeAway", "nestThermoSet", "hueDevice", "halDevice", 
-	"halButton", "halHome", "halThermoSet", "mqttMessage", "cmdDevice", "hassDevice", "homewizardDevice", "tcpDevice", "udpDevice", "httpDevice", "domoticzDevice", "somfyDevice"
+	"halButton", "halHome", "halThermoSet", "mqttMessage", "cmdDevice", "fritzDevice" "hassDevice", "homewizardDevice", "tcpDevice", "udpDevice", "httpDevice", "domoticzDevice", "somfyDevice"
 
 Filter Ip example:
 ```
