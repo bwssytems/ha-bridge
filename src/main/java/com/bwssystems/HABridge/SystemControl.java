@@ -14,19 +14,19 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.Base64;
-import java.util.Iterator;
-import java.util.List;
+//import java.util.Iterator;
+//import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.api.NameValue;
+//import com.bwssystems.HABridge.api.NameValue;
 import com.bwssystems.HABridge.api.hue.WhitelistEntry;
 import com.bwssystems.HABridge.dao.BackupFilename;
 import com.bwssystems.HABridge.util.JsonTransformer;
@@ -40,7 +40,7 @@ import com.google.gson.reflect.TypeToken;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
-import ch.qos.logback.core.Appender;
+//import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.read.CyclicBufferAppender;
 
 public class SystemControl {
@@ -361,8 +361,8 @@ public class SystemControl {
 			log.debug("bridge settings requested from " + request.ip());
 	        response.status(HttpStatus.SC_OK);
 			response.type("application/json");
-			if(bridgeSettings.getBridgeSettingsDescriptor().getActiveloggers() == null)
-				bridgeSettings.getBridgeSettingsDescriptor().setActiveloggers(getLogAppenders());
+//			if(bridgeSettings.getBridgeSettingsDescriptor().getActiveloggers() == null)
+//				bridgeSettings.getBridgeSettingsDescriptor().setActiveloggers(getLogAppenders());
             return bridgeSettings.getBridgeSettingsDescriptor();
         }, new JsonTransformer());
 		
@@ -492,41 +492,41 @@ public class SystemControl {
     }
     
     private void setupLoggerSettings() {
-		final ch.qos.logback.classic.Logger logger = lc.getLogger(Logger.ROOT_LOGGER_NAME);
+//		final ch.qos.logback.classic.Logger logger = lc.getLogger(Logger.ROOT_LOGGER_NAME);
 
        cyclicBufferAppender = (CyclicBufferAppender<ILoggingEvent>) lc.getLogger(
             Logger.ROOT_LOGGER_NAME).getAppender(CYCLIC_BUFFER_APPENDER_NAME);
         cyclicBufferAppender.setMaxSize(bridgeSettings.getBridgeSettingsDescriptor().getNumberoflogmessages());
-        if(bridgeSettings.getBridgeSettingsDescriptor().getActiveloggers() != null) {
-    		for (NameValue temp : bridgeSettings.getBridgeSettingsDescriptor().getActiveloggers()) {
-    			if(temp.getValue().equals("false"))
-    				logger.detachAppender(temp.getName());
-    		}
-        	
-        }
+//        if(bridgeSettings.getBridgeSettingsDescriptor().getActiveloggers() != null) {
+//    		for (NameValue temp : bridgeSettings.getBridgeSettingsDescriptor().getActiveloggers()) {
+//    			if(temp.getValue().equals("false"))
+//    				logger.detachAppender(temp.getName());
+//    		}
+//       	
+//        }
     }
 
-    private List<NameValue> getLogAppenders() {
-		final ch.qos.logback.classic.Logger logger = lc.getLogger(Logger.ROOT_LOGGER_NAME);
-
-		final Iterator<Appender<ILoggingEvent>> it = logger.iteratorForAppenders();
-		
-		List<NameValue> theLoggers = new ArrayList<NameValue>();
-
-		while (it.hasNext()) {
-
-			final Appender<ILoggingEvent> appender = it.next();
-			
-			if (!(appender instanceof CyclicBufferAppender)) {
-				NameValue theLogger = new NameValue();
-				theLogger.setName(appender.getName());
-				theLogger.setValue("true");
-				theLoggers.add(theLogger);
-			}
-		}
-    	
-    	return theLoggers;
-    }
+//    private List<NameValue> getLogAppenders() {
+//		final ch.qos.logback.classic.Logger logger = lc.getLogger(Logger.ROOT_LOGGER_NAME);
+//
+//		final Iterator<Appender<ILoggingEvent>> it = logger.iteratorForAppenders();
+//		
+//		List<NameValue> theLoggers = new ArrayList<NameValue>();
+//
+//		while (it.hasNext()) {
+//
+//			final Appender<ILoggingEvent> appender = it.next();
+//			
+//			if (!(appender instanceof CyclicBufferAppender)) {
+//				NameValue theLogger = new NameValue();
+//				theLogger.setName(appender.getName());
+//				theLogger.setValue("true");
+//				theLoggers.add(theLogger);
+//			}
+//		}
+//    	
+//   	return theLoggers;
+//  }
 
     protected void pingListener() {
         try {

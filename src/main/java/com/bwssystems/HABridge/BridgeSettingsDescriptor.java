@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.bwssystems.HABridge.api.NameValue;
+//import com.bwssystems.HABridge.api.NameValue;
 import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.WhitelistEntry;
 
@@ -108,9 +108,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("fhemaddress")
 	@Expose
 	private IpList fhemaddress;
-	@SerializedName("activeloggers")
-	@Expose
-	private List<NameValue> activeloggers;
+//	@SerializedName("activeloggers")
+//	@Expose
+//	private List<NameValue> activeloggers;
 	
 	private boolean settingsChanged;
 	private boolean veraconfigured;
@@ -158,7 +158,7 @@ public class BridgeSettingsDescriptor {
 		this.webaddress = "0.0.0.0";
 		this.hubversion = HueConstants.HUB_VERSION;
 		this.hubmac = null;
-		this.activeloggers = null;
+//		this.activeloggers = null;
 		this.upnpsenddelay = 1500;
 	}
 	public String getUpnpConfigAddress() {
@@ -467,12 +467,12 @@ public class BridgeSettingsDescriptor {
 	public void setFhemconfigured(boolean fhemconfigured) {
 		this.fhemconfigured = fhemconfigured;
 	}
-	public List<NameValue> getActiveloggers() {
-		return activeloggers;
-	}
-	public void setActiveloggers(List<NameValue> activeloggers) {
-		this.activeloggers = activeloggers;
-	}
+//	public List<NameValue> getActiveloggers() {
+//		return activeloggers;
+//	}
+//	public void setActiveloggers(List<NameValue> activeloggers) {
+//		this.activeloggers = activeloggers;
+//	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
 			return false;
