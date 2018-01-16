@@ -743,6 +743,27 @@
 						max="65535"></td>
 				</tr>
 				<tr>
+					<td>Log Output Control</td>
+					<td><table
+							class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>Active</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="thePair in bridge.settings.activeloggers">
+								<td><input id="bridge-settings-next-logger-name"
+									class="form-control" type="text" ng-model="thePair.name"
+										disabled></td>
+								<td><input type="checkbox"
+										ng-model="thePair.value" ng-true-value="'true'"
+										ng-false-value="'false'"></td>
+							</tr>
+						</table>										
+					</td>
+				</tr>
+				<tr>
 					<td>Trace UPNP Calls</td>
 					<td><input type="checkbox"
 						ng-model="bridge.settings.traceupnp" ng-true-value=true

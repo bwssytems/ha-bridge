@@ -445,8 +445,9 @@ public class HueMulator {
 		});
 	}
 	
+	@SuppressWarnings("unchecked")
 	private String formatSuccessHueResponse(StateChangeBody stateChanges, String body, String lightId,
-			DeviceState deviceState, Integer targetBri, Integer targetBriInc, boolean offState) {
+			DeviceState deviceState, Integer targetBri, Integer targetBriInc, ColorData colorData, boolean offState) {
 
 		String responseString = "[";
 		boolean notFirstChange = false;
@@ -534,7 +535,7 @@ public class HueMulator {
 			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/xy_inc\":"
 					+ stateChanges.getXy_inc() + "}}";
 			if (deviceState != null)
-				deviceState.setXy(stateChanges.getXy());
+				deviceState.setXy((List<Double>) colorData.getData());
 			notFirstChange = true;
 		} else if (body.contains("\"ct_inc\"")) {
 			if (notFirstChange)
@@ -1047,16 +1048,17 @@ public class HueMulator {
 		DeviceState state = null;
 		Integer targetBri = null;
 		Integer targetBriInc = null;
+		ColorData colorData = null;
+
 		log.debug("Update state requested: " + userId + " from " + ipAddress + " body: " + body);
+
 		HueError[] theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
 		if (theErrors != null)
 			return aGsonHandler.toJson(theErrors);
+
 		try {
 			theStateChanges = aGsonHandler.fromJson(body, StateChangeBody.class);
 		} catch (Exception e) {
-			theStateChanges = null;
-		}
-		if (theStateChanges == null) {
 			log.warn("Could not parse state change body. Light state not changed.");
 			return aGsonHandler.toJson(HueErrorResponse.createResponse("2", "/lights/" + lightId,
 					"Could not parse state change body.", null, null, null).getTheErrors(), HueError[].class);
@@ -1080,7 +1082,26 @@ public class HueMulator {
 		if (state == null)
 			state = DeviceState.createDeviceState(device.isColorDevice());
 
-		responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc, device.isOffState());
+		if (body.contains("\"xy\"") || body.contains("\"ct\"") || body.contains("\"hue\"") || body.contains("\"xy_inc\"") || body.contains("\"ct_inc\"") || body.contains("\"hue_inc\"")) {
+			List<Double> xy = theStateChanges.getXy();
+			List<Double> xyInc = theStateChanges.getXy_inc();
+			Integer ct = theStateChanges.getCt();
+			Integer ctInc = theStateChanges.getCt_inc();
+			if (xy != null && xy.size() == 2) {
+				colorData = new ColorData(ColorData.ColorMode.XY, xy);
+			} else if (xyInc != null && xyInc.size() == 2) { 
+				List<Double> current = state.getXy();
+				current.set(0, current.get(0) + xyInc.get(0));
+				current.set(1, current.get(1) + xyInc.get(1));
+				colorData = new ColorData(ColorData.ColorMode.XY, current);
+			} else if (ct != null && ct != 0) {
+				colorData = new ColorData(ColorData.ColorMode.CT, ct);
+			} else if (ctInc != null && ctInc != 0) {
+				colorData = new ColorData(ColorData.ColorMode.CT, state.getCt() + ctInc);
+			}
+		}
+		
+		responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc, colorData, device.isOffState());
 		device.setDeviceState(state);
 
 		return responseString;
@@ -1099,7 +1120,6 @@ public class HueMulator {
 		boolean isColorRequest = false;
 		boolean isDimRequest = false;
 		boolean isOnRequest = false;
-		boolean previousError = false;
 		ColorData colorData = null;
 		log.debug("hue state change requested: " + userId + " from " + ipAddress + " body: " + body);
 		HueError[] theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
@@ -1199,21 +1219,14 @@ public class HueMulator {
 			if (url != null && !url.equals("")) {
 				responseString = callUrl(url, device, userId, lightId, body, ipAddress, ignoreRequester, targetBri, targetBriInc, colorData);
 			} else {
-				log.warn("Could not find on/off url: " + lightId + " for hue state change request: " + userId + " from "
-						+ ipAddress + " body: " + body);
-				responseString =  aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/lights/" + lightId,
-						"Could not find on/off url.", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
-				previousError = true;
+				log.info("On/off url not available for state change, lightId: " + lightId + ", userId: " + userId + ", from IP: "
+						+ ipAddress + ", body: " + body);
 			}
 		}
 
-		if (isDimRequest && !previousError) {
+		if (isDimRequest) {
 			log.debug("Calling dim as requested.");
-			if(!device.isOnFirstDim() )
-				url = device.getDimUrl();
-
-			if (url == null || url.length() == 0)
-				url = device.getOnUrl();
+			url = device.getDimUrl();
 
 			// code for backwards compatibility
 			if(device.getMapType() != null && device.getMapType().equalsIgnoreCase(DeviceMapTypes.HUE_DEVICE[DeviceMapTypes.typeIndex])) {
@@ -1231,15 +1244,12 @@ public class HueMulator {
 				}
 				responseString = callUrl(url, device, userId, lightId, body, ipAddress, ignoreRequester, targetBri, targetBriInc, colorData);
 			} else {
-				log.warn("Could not find dim url: " + lightId + " for hue state change request: " + userId + " from "
-						+ ipAddress + " body: " + body);
-				responseString =  aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/lights/" + lightId,
-						"Could not find dim url.", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
-				previousError = true;
+				log.info("Dim url not available for state change, lightId: " + lightId + ", userId: " + userId + ", from IP: "
+						+ ipAddress + ", body: " + body);
 			}
 		}
 
-		if (isColorRequest && !previousError) {
+		if (isColorRequest) {
 			log.debug("Calling color as requested.");
 			url = device.getColorUrl();
 			// code for backwards compatibility
@@ -1258,21 +1268,18 @@ public class HueMulator {
 				}
 				responseString = callUrl(url, device, userId, lightId, body, ipAddress, ignoreRequester, targetBri, targetBriInc, colorData);
 			} else {
-				log.warn("Could not find color url: " + lightId + " for hue state change request: " + userId + " from "
-						+ ipAddress + " body: " + body);
-				responseString =  aGsonHandler.toJson(HueErrorResponse.createResponse("3", "/lights/" + lightId,
-						"Could not find color url.", "/lights/" + lightId, null, null).getTheErrors(), HueError[].class);
-				previousError = true;
+				log.info("Color url not available for state change, lightId: " + lightId + ", userId: " + userId + ", from IP: "
+						+ ipAddress + ", body: " + body);
 			}
 		}
 		
 		if (responseString == null || !responseString.contains("[{\"error\":")) {
 			if(!device.isNoState()) {
-				responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc, device.isOffState());
+				responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, state, targetBri, targetBriInc, colorData, device.isOffState());
 				device.setDeviceState(state);
 			} else {
 				DeviceState dummyState = DeviceState.createDeviceState(device.isColorDevice());
-				responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, dummyState, targetBri, targetBriInc, device.isOffState());
+				responseString = this.formatSuccessHueResponse(theStateChanges, body, lightId, dummyState, targetBri, targetBriInc, colorData, device.isOffState());
 			}
 		}
 
@@ -1283,6 +1290,7 @@ public class HueMulator {
 
 	@SuppressWarnings("unchecked")
 	private String changeGroupState(String userId, String groupId, String body, String ipAddress, boolean fakeLightResponse) {
+		ColorData colorData = null;
 		log.debug("PUT action to group  " + groupId + " from " + ipAddress + " user " + userId + " with body " + body);
 		HueError[] theErrors = null;
 		theErrors = bridgeSettingMaster.getBridgeSecurity().validateWhitelistUser(userId, null, bridgeSettingMaster.getBridgeSecurity().isUseLinkButton());
@@ -1363,7 +1371,7 @@ public class HueMulator {
 				// construct success response: one success message per changed property, but not per light
 				if (group != null) { // if not group 0
 					 String response = formatSuccessHueResponse(theStateChanges, body, String.valueOf(Integer.parseInt(groupId) + 10000),
-						state, targetBri, targetBriInc, true);
+						state, targetBri, targetBriInc, colorData, true);
 					 group.setAction(state);
 					 if (fakeLightResponse) {
 					 	return response;
