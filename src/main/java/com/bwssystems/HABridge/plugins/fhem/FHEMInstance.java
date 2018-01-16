@@ -31,7 +31,6 @@ public class FHEMInstance {
 	}
 
 	public Boolean callCommand(String aCommand, String commandData, HTTPHandler httpClient) {
-		log.debug("calling FHEM: " + theFhem.getIp() + ":" + theFhem.getPort() + aCommand);
 		String aUrl = null;
 		NameValue[] headers = null;
 		if(theFhem.getSecure() != null && theFhem.getSecure())
@@ -41,9 +40,11 @@ public class FHEMInstance {
 		if(theFhem.getUsername() != null && !theFhem.getUsername().isEmpty() && theFhem.getPassword() != null && !theFhem.getPassword().isEmpty()) {
 			aUrl = aUrl + theFhem.getUsername() + ":" + theFhem.getPassword() + "@";
 		}
-		aUrl = aUrl + theFhem.getIp() + ":" + theFhem.getPort() + "/" + aCommand;
-		String theData = httpClient.doHttpRequest(aUrl, HttpPost.METHOD_NAME, "text/plain", commandData, headers);
-   		log.debug("call Command return is: <" + theData + ">");
+		aUrl = aUrl + theFhem.getIp() + ":" + theFhem.getPort() + "/" + aCommand + "/" + commandData;
+		log.debug("calling FHEM: " + aUrl);
+		String theData = httpClient.doHttpRequest(aUrl, HttpPost.METHOD_NAME, "text/plain", null, headers);
+		if(theData != null)
+			log.debug("doHttpRequest returned data: <" + theData + ">");
 		return true;
 	}
 

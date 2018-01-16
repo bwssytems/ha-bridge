@@ -7,6 +7,7 @@ import com.bwssystems.HABridge.plugins.fhem.FHEMDevice;
 import com.bwssystems.HABridge.plugins.fhem.FHEMInstance;
 import com.bwssystems.HABridge.plugins.fhem.FHEMItem;
 import com.bwssystems.HABridge.plugins.fhem.Result;
+import com.bwssystems.HABridge.plugins.http.HttpTestHandler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 

@@ -3874,7 +3874,7 @@ app.controller('FhemController', function ($scope, $location, bridgeService, ngD
 		$scope.device = bridgeService.state.device;
 	};
 
-	$scope.buildDeviceUrls = function (fhemdevice, dim_control, ondeviceaction, oninputdeviceaction, offdeviceaction, offinputdeviceaction, buildonly) {
+	$scope.buildDeviceUrls = function (fhemdevice, dim_control, buildonly) {
 		var preCmd = "/fhem?cmd=set%20" + fhemdevice.item.Name + "%20";
 		if(fhemdevice.item.PossibleSets.indexOf("dim") >= 0) {
 			if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)) {

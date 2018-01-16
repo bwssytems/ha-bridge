@@ -24,12 +24,15 @@ import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
 import com.bwssystems.HABridge.plugins.http.HTTPHandler;
 import com.bwssystems.HABridge.plugins.http.HTTPHome;
+import com.bwssystems.HABridge.plugins.http.HttpTestHandler;
+import com.bwssystems.fhem.test.FHEMInstanceConstructor;
 import com.google.gson.Gson;
 
 public class FHEMHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(FHEMHome.class);
 	private Map<String, FHEMInstance> fhemMap;
 	private Boolean validFhem;
+	private Boolean isDevMode;
     private HTTPHandler httpClient;
 	private boolean closed;
 
@@ -159,12 +162,17 @@ public class FHEMHome implements Home {
 
 	@Override
 	public Home createHome(BridgeSettings bridgeSettings) {
+        isDevMode = Boolean.parseBoolean(System.getProperty("dev.mode", "false"));
 		fhemMap = null;
 		validFhem = bridgeSettings.getBridgeSettingsDescriptor().isValidFhem();
 		log.info("FHEM Home created." + (validFhem ? "" : " No FHEMs configured."));
 		if(validFhem) {
 			fhemMap = new HashMap<String,FHEMInstance>();
 	        httpClient = HTTPHome.getHandler();
+			if(isDevMode) {
+				httpClient = new HttpTestHandler();
+				((HttpTestHandler)httpClient).setTheData(FHEMInstanceConstructor.TestData);
+			}
 			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getFhemaddress().getDevices().iterator();
 			while(theList.hasNext() && validFhem) {
 				NamedIP aFhem = theList.next();
