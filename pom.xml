@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>5.2.0RC5</version>
+	<version>5.2.0RC6</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
@@ -125,6 +125,11 @@
 		  <groupId>com.github.bwssytems</groupId>
 		  <artifactId>lifx-sdk-java</artifactId>
 		  <version>2.1.6</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.github.mob41</groupId>
+		    <artifactId>broadlink-java-api</artifactId>
+		    <version>-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 		  <groupId>org.apache.commons</groupId>

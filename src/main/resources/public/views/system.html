@@ -719,6 +719,12 @@
 						ng-false-value=false> {{bridge.settings.lifxconfigured}}</td>
 				</tr>
 				<tr>
+					<td>Broadlink Support</td>
+					<td><input type="checkbox"
+						ng-model="bridge.settings.broadlinkconfigured" ng-true-value=true
+						ng-false-value=false> {{bridge.settings.broadlinkconfigured}}</td>
+				</tr>
+				<tr>
 					<td>Emulate Hue Hub Version</td>
 					<td><input id="bridge-settings-hubversion" class="form-control"
 						type="text" ng-model="bridge.settings.hubversion"

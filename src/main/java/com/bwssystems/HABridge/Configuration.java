@@ -14,4 +14,6 @@ public class Configuration {
 	public static final String CONFIG_FILE = "data/habridge.config";
 	public static final int NUMBER_OF_LOG_MESSAGES = 512;
 	public static final long UPNP_NOTIFY_TIMEOUT = 20000;
+	public static final int BROADLINK_DISCOVER_PORT = 40000;
+	public static final int BROADLINK_DISCONVER_TIMEOUT = 5000;
 }

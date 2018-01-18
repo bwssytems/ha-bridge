@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.devicemanagmeent.ResourceHandler;
 import com.bwssystems.HABridge.plugins.NestBridge.NestHome;
+import com.bwssystems.HABridge.plugins.broadlink.BroadlinkHome;
 import com.bwssystems.HABridge.plugins.domoticz.DomoticzHome;
 import com.bwssystems.HABridge.plugins.exec.CommandHome;
 import com.bwssystems.HABridge.plugins.fhem.FHEMHome;
@@ -123,6 +124,10 @@ public class HomeManager {
 		aHome = new FHEMHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex], aHome);
+        //setup the Broadlink configuration if available
+		aHome = new BroadlinkHome(bridgeSettings);
+		resourceList.put(DeviceMapTypes.BROADLINK_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.BROADLINK_DEVICE[DeviceMapTypes.typeIndex], aHome);
 	}
 	
 	public Home findHome(String type) {

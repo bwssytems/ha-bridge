@@ -4123,6 +4123,7 @@ app.controller('EditController', function ($scope, $location, bridgeService) {
     	    	$scope.onDevices.splice(i, 1);
     	    }
     	}    	
+    	$scope.newOnItem = {};
     };
 
     $scope.addItemDim = function (anItem) {
@@ -4140,6 +4141,7 @@ app.controller('EditController', function ($scope, $location, bridgeService) {
     	      	$scope.dimDevices.splice(i, 1);
     	    }
     	}    	
+    	$scope.newDimItem = {};
     };
 
     $scope.addItemOff = function (anItem) {
@@ -4157,6 +4159,7 @@ app.controller('EditController', function ($scope, $location, bridgeService) {
     	    	$scope.offDevices.splice(i, 1);
     	    }
     	}    	
+    	$scope.newOffItem = {};
     };
 
     $scope.addItemColor = function (anItem) {
@@ -4174,6 +4177,7 @@ app.controller('EditController', function ($scope, $location, bridgeService) {
     	    	$scope.colorDevices.splice(i, 1);
     	    }
     	}    	
+    	$scope.newColorItem = {};
     };
 
 

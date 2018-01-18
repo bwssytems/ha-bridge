@@ -33,6 +33,7 @@ public class DeviceMapTypes {
 	public final static String[] LIFX_DEVICE = { "lifxDevice", "LIFX Device"};
 	public final static String[] OPENHAB_DEVICE = { "openhabDevice", "OpenHAB Device"};
 	public final static String[] FHEM_DEVICE = { "fhemDevice", "FHEM Device"};
+	public final static String[] BROADLINK_DEVICE = { "broadlinkDevice", "Broadlink Device"};
 
 	public final static int typeIndex = 0;
 	public final static int displayIndex = 1;
@@ -67,6 +68,7 @@ public class DeviceMapTypes {
 		deviceMapTypes.add(SOMFY_DEVICE);
 		deviceMapTypes.add(OPENHAB_DEVICE);
 		deviceMapTypes.add(FHEM_DEVICE);
+		deviceMapTypes.add(BROADLINK_DEVICE);
 	}
 	public static int getTypeIndex() {
 		return typeIndex;

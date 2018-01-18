@@ -108,6 +108,12 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("fhemaddress")
 	@Expose
 	private IpList fhemaddress;
+	@SerializedName("lifxconfigured")
+	@Expose
+	private boolean lifxconfigured;
+	@SerializedName("broadlinkconfigured")
+	@Expose
+	private boolean broadlinkconfigured;
 //	@SerializedName("activeloggers")
 //	@Expose
 //	private List<NameValue> activeloggers;
@@ -123,7 +129,6 @@ public class BridgeSettingsDescriptor {
 	private boolean hassconfigured;
 	private boolean domoticzconfigured;
 	private boolean somfyconfigured;
-	private boolean lifxconfigured;
 	private boolean homewizardconfigured;
 	private boolean openhabconfigured;
 	private boolean fhemconfigured;
@@ -160,6 +165,7 @@ public class BridgeSettingsDescriptor {
 		this.hubmac = null;
 //		this.activeloggers = null;
 		this.upnpsenddelay = 1500;
+		this.broadlinkconfigured = false;
 	}
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -473,6 +479,12 @@ public class BridgeSettingsDescriptor {
 //	public void setActiveloggers(List<NameValue> activeloggers) {
 //		this.activeloggers = activeloggers;
 //	}
+	public boolean isBroadlinkconfigured() {
+		return broadlinkconfigured;
+	}
+	public void setBroadlinkconfigured(boolean broadlinkconfigured) {
+		this.broadlinkconfigured = broadlinkconfigured;
+	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
 			return false;
@@ -599,5 +611,8 @@ public class BridgeSettingsDescriptor {
 			return false;
 		
 		return true;
+	}
+	public Boolean isValidBroadlink() {
+		return this.isBroadlinkconfigured();
 	}
 }
