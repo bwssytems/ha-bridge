@@ -44,6 +44,8 @@ public class OpenHABInstance {
 		aUrl = aUrl + theOpenHAB.getIp() + ":" + theOpenHAB.getPort() + "/" + aCommand;
 		String theData = httpClient.doHttpRequest(aUrl, HttpPost.METHOD_NAME, "text/plain", commandData, headers);
    		log.debug("call Command return is: <" + theData + ">");
+   		if(theData.contains("error") || theData.contains("ERROR") || theData.contains("Error"))
+   			return false;
 		return true;
 	}
 

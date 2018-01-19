@@ -99,6 +99,8 @@ public class HTTPHandler {
 					}
 				}
 				if (response != null && response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
+					if(theContent == null)
+						theContent = "";
 					log.debug("Successfull response - The http response is <<<" + theContent + ">>>");
 					retryCount = 2;
 				} else if (response != null) {
@@ -107,10 +109,9 @@ public class HTTPHandler {
 					if (response.getStatusLine().getStatusCode() == 504) {
 						log.warn("HTTP response code was 504, retrying...");
 						log.debug("The 504 error content is <<<" + theContent + ">>>");
+						theContent = null;
 					} else
 						retryCount = 2;
-					
-					theContent = null;
 				}
 				
 			} catch (ClientProtocolException e) {

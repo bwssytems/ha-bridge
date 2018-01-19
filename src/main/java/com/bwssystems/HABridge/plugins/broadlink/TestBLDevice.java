@@ -15,17 +15,9 @@ import com.github.mob41.blapi.pkt.CmdPayload;
 
 public class TestBLDevice extends BLDevice {
 	private static final Logger log = LoggerFactory.getLogger(TestBLDevice.class);
-	short adeviceType;
-	String adeviceDesc;
-	String ahost;
-	Mac amac;
 	
 	protected TestBLDevice(short deviceType, String deviceDesc, String host, Mac mac) throws IOException {
-		super(deviceType, host, host, mac);
-		adeviceType = deviceType;
-		adeviceDesc = deviceDesc;
-		ahost = host;
-		
+		super(deviceType, deviceDesc, host, mac);
 	}
 
 	public void setState(boolean aState) {
@@ -46,30 +38,30 @@ public class TestBLDevice extends BLDevice {
 	}
 	
 	public static BLDevice[] discoverDevices(InetAddress theAddress, int aport, int timeout) {
-		TestBLDevice mp1Device = null;
-		TestBLDevice sp1Device = null;
-		TestBLDevice sp2Device = null;
-		TestBLDevice rm2Device = null;
+		TestMP1Device mp1Device = null;
+		TestSP1Device sp1Device = null;
+		TestSP2Device sp2Device = null;
+		TestRM2Device rm2Device = null;
 		try {
-			mp1Device = new TestBLDevice(BLDevice.DEV_MP1, BLDevice.DESC_MP1, "mp1host", null);
+			mp1Device = new TestMP1Device("mp1host", null);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
-			sp1Device = new TestBLDevice(BLDevice.DEV_SP1, BLDevice.DESC_SP1, "sp1host", null);
+			sp1Device = new TestSP1Device("sp1host", null);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
-			sp2Device = new TestBLDevice(BLDevice.DEV_SP2, BLDevice.DESC_SP2, "sp2host", null);
+			sp2Device = new TestSP2Device("sp2host", null);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
-			rm2Device = new TestBLDevice(BLDevice.DEV_RM_2, BLDevice.DESC_RM_2, "rm2host", null);
+			rm2Device = new TestRM2Device("rm2host", null);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

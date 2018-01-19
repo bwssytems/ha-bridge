@@ -88,7 +88,13 @@ public class OpenHABHome implements Home  {
 					aCommand = TimeDecode.replaceTimeValue(aCommand);
 				}
 		   		try {
-		   			theHandler.callCommand(anUrl, aCommand, httpClient);
+		   			boolean success = theHandler.callCommand(anUrl, aCommand, httpClient);
+		   			if(!success) {
+		    			log.warn("Comand had error to OpenHAB");
+						responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
+								"Error on calling url to change device state", "/lights/"
+								+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+		   			}
 		   		} catch (Exception e) {
 	    			log.warn("Cannot send comand to OpenHAB", e);
 					responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,

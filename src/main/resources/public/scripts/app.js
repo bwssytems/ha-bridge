@@ -87,6 +87,10 @@ app.config (function ($locationProvider, $routeProvider) {
 		templateUrl: 'views/fhemdevice.html',
 		controller: 'FhemController',
 		requiresAuthentication: true
+	}).when ('/broadlinkdevices', {
+		templateUrl: 'views/broadlinkdevice.html',
+		controller: 'BroadlinkController',
+		requiresAuthentication: true
 	}).when ('/login', {
 		templateUrl: 'views/login.html',
 		controller: 'LoginController'		
@@ -155,7 +159,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {},
 			mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false,
 			isInControl: false, showVera: false, showFibaro: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false,
-			showHomeWizard: false, showDomoticz: false, showSomfy: false, showLifx: false, showOpenHAB: false, showFHEM: false, habridgeversion: {}, viewDevId: "", queueDevId: "", securityInfo: {}, filterDevicesByIpAddress: null, 
+			showHomeWizard: false, showDomoticz: false, showSomfy: false, showLifx: false, showOpenHAB: false, showFHEM: false, showBroadlink: false, habridgeversion: {}, viewDevId: "", queueDevId: "", securityInfo: {}, filterDevicesByIpAddress: null, 
 			filterDevicesOnlyFiltered: false, filterDeviceType: null};
 
 	this.displayWarn = function(errorTitle, error) {
@@ -576,6 +580,11 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 		return;
 	}
 
+	this.updateShowBroadlink = function () {
+		this.state.showBroadlink = self.state.settings.broadlinkconfigured;
+		return;
+	}
+
 	this.loadBridgeSettings = function () {
 		return $http.get(this.state.systemsbase + "/settings").then(
 				function (response) {
@@ -594,6 +603,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.updateShowLifx();
 					self.updateShowOpenHAB();
 					self.updateShowFhem();
+					self.updateShowBroadlink();
 				},
 				function (error) {
 					if (error.status === 401)
@@ -929,6 +939,22 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 						$rootScope.$broadcast('securityReinit', 'done');
 					else
 						self.displayWarn("Get FHEM Devices Error: ", error);
+				}
+		);
+	};
+
+	this.viewBroadlinkDevices = function () {
+		if (!this.state.showBroadlink)
+			return;
+		return $http.get(this.state.base + "/broadlink/devices").then(
+				function (response) {
+					self.state.broadlinkdevices = response.data;
+				},
+				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
+						self.displayWarn("Get broadlink Devices Error: ", error);
 				}
 		);
 	};
@@ -1352,6 +1378,11 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 			testBody = testBody + "\"xy\": [" + value[0] +"," + value[1] + "]";
 		}
 		testBody = testBody + "}";
+		if (testBody === "{}") {
+			self.displayWarn("No value available for test call...", null);
+			return;
+		}
+			
 		$http.put(testUrl, testBody).then(
 				function (response) {
 					if (typeof(response.data[0].success) !== 'undefined') {
@@ -3732,7 +3763,7 @@ app.controller('OpenHABController', function ($scope, $location, bridgeService, 
 		$scope.device = bridgeService.state.device;
 	};
 
-	$scope.buildDeviceUrls = function (openhabdevice, dim_control, ondeviceaction, oninputdeviceaction, offdeviceaction, offinputdeviceaction, buildonly) {
+	$scope.buildDeviceUrls = function (openhabdevice, dim_control, onaction, ondata, dimaction, dimdata, offaction, offdata, coloraction, colordata, buildonly) {
 		var preCmd = "/rest/items/" + openhabdevice.item.name;
 		if(openhabdevice.item.type !== 'String') {
 			if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)) {
@@ -3742,20 +3773,38 @@ app.controller('OpenHABController', function ($scope, $location, bridgeService, 
 				dimpayload = null;
 			onpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"ON\"}";
 			offpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"OFF\"}";
+			colorpayload = null;
 		}
 		else {
-			dimpayload = null;
-			if(ondeviceaction === 'other')
-				onpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + oninputdeviceaction + "\"}";
+			if(onaction === 'other')
+				onpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + ondata + "\"}";
+			else if(onaction !== undefined && onaction !== null && onaction !== '')
+				onpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + onaction + "\"}";
 			else
-				onpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + ondeviceaction + "\"}";
+				onpayload = null;
 				
-			if(offdeviceaction === 'other')
-				offpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + offinputdeviceaction + "\"}";
+			if(dimaction === 'other')
+				dimpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + dimdata + "\"}";
+			else if(dimaction !== undefined && dimaction !== null && dimaction !== '')
+				dimpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + dimaction + "\"}";
 			else
-				offpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + offdeviceaction + "\"}";
+				dimpayload = null;
+
+			if(offaction === 'other')
+				offpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + offdata + "\"}";
+			else if(offaction !== undefined && offaction !== null && offaction !== '')
+				offpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + offaction + "\"}";
+			else
+				offpayload = null;
+
+			if(coloraction === 'other')
+				colorpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + colordata + "\"}";
+			else if(coloraction !== undefined && coloraction !== null && coloraction !== '')
+				colorpayload = "{\"url\":\"http://" + openhabdevice.address + preCmd + "\",\"command\":\"" + coloraction + "\"}";
+			else
+				colorpayload = null;
 		}
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, null, true, openhabdevice.item.name + "-" + openhabdevice.name,  openhabdevice.item.name, openhabdevice.name, openhabdevice.item.type,  "openhabDevice", null, null);
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, openhabdevice.item.name + "-" + openhabdevice.name,  openhabdevice.item.name, openhabdevice.name, openhabdevice.item.type,  "openhabDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -3769,7 +3818,7 @@ app.controller('OpenHABController', function ($scope, $location, bridgeService, 
 		for(var i = 0; i < $scope.bulk.devices.length; i++) {
 			for(var x = 0; x < bridgeService.state.openhabdevices.length; x++) {
 				if(bridgeService.state.openhabdevices[x].devicename === $scope.bulk.devices[i]) {
-					$scope.buildDeviceUrls(bridgeService.state.openhabdevices[x],dim_control,true);
+					$scope.buildDeviceUrls(bridgeService.state.openhabdevices[x],dim_control, null, null, null, null, null, null, null, null, true);
 					devicesList[i] = {
 							name: $scope.device.name,
 							mapId: $scope.device.mapId,
@@ -3969,6 +4018,156 @@ app.controller('FhemController', function ($scope, $location, bridgeService, ngD
 			for(var x = 0; x < bridgeService.state.fhemdevices.length; x++) {
 				if($scope.bulk.devices.indexOf(bridgeService.state.fhemdevices[x]) < 0)
 					$scope.bulk.devices.push(bridgeService.state.fhemdevices[x].devicename);
+			}
+		}
+	};
+
+	$scope.toggleButtons = function () {
+		$scope.buttonsVisible = !$scope.buttonsVisible;
+		if($scope.buttonsVisible)
+			$scope.imgButtonsUrl = "glyphicon glyphicon-minus";
+		else
+			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	};
+
+	$scope.deleteDevice = function (device) {
+		$scope.bridge.device = device;
+		ngDialog.open({
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
+	};
+	
+	$scope.editDevice = function (device) {
+		bridgeService.editDevice(device);
+		$location.path('/editdevice');
+	};
+});
+
+app.controller('BroadlinkController', function ($scope, $location, bridgeService, ngDialog) {
+	$scope.bridge = bridgeService.state;
+	$scope.device = bridgeService.state.device;
+	$scope.device_dim_control = "";
+	$scope.bulk = { devices: [] };
+	$scope.selectAll = false;
+	bridgeService.viewBroadlinkDevices();
+	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	$scope.buttonsVisible = false;
+	
+	$scope.clearDevice = function () {
+		bridgeService.clearDevice();
+		$scope.device = bridgeService.state.device;
+	};
+
+	$scope.buildDeviceUrls = function (broadlinkdevice, dim_control, ondata, dimdata, offdata, colordata, buildonly) {
+		var preCmd = "{\"id\":\"" + broadlinkdevice.id + "\",\"name\":\"" + broadlinkdevice.name +"\",\"command\":\"";
+		if(broadlinkdevice.type === 'SP1' || broadlinkdevice.type === 'SP2') {
+			dimpayload = null;
+			colorpayload = null;
+			onpayload = preCmd + "on\"}";
+			offpayload = preCmd + "off\"}";
+		}
+		else if(broadlinkdevice.type === 'MP1') {
+			dimpayload = null;
+			colorpayload = null;
+			onpayload = preCmd + "on\",\"data\":\"" + ondata + "\"}";
+			offpayload = preCmd + "off\",\"data\":\"" + offdata + "\"}";
+		} else {
+			if(  ondata !== undefined &&   ondata !== null &&   ondata !== "")
+				onpayload = preCmd + "ircommand\",\"data\":\"" +   ondata + "\"}";
+			else
+				onpayload = null;
+			if(  dimdata !== undefined &&   dimdata !== null &&   dimdata !== "")
+				dimpayload = preCmd + "ircommand\",\"data\":\"" +   dimdata + "\"}";
+			else
+				dimpayload = null;
+			if(  offdata !== undefined &&   offdata !== null &&   offdata !== "")
+				offpayload = preCmd + "ircommand\",\"data\":\"" +   offdata + "\"}";
+			else
+				offpayload = null;
+			if(  colordata !== undefined &&   colordata !== null &&   colordata !== "")
+				colorpayload = preCmd + "ircommand\",\"data\":\"" +   colordata + "\"}";
+			else
+				colorpayload = null;
+		}
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, broadlinkdevice.id,  broadlinkdevice.name, broadlinkdevice.id, broadlinkdevice.type,  "broadlinkDevice", null, null);
+		$scope.device = bridgeService.state.device;
+		if (!buildonly) {
+			bridgeService.editNewDevice($scope.device);
+			$location.path('/editdevice');
+		}
+	};
+
+	$scope.bulkAddDevices = function(dim_control) {
+		var devicesList = [];
+		$scope.clearDevice();
+		for(var i = 0; i < $scope.bulk.devices.length; i++) {
+			for(var x = 0; x < bridgeService.state.broadlinkdevices.length; x++) {
+				if(bridgeService.state.broadlinkdevices[x].devicename === $scope.bulk.devices[i]) {
+					$scope.buildDeviceUrls(bridgeService.state.broadlinkdevices[x],dim_control,null,null,null,null,true);
+					devicesList[i] = {
+							name: $scope.device.name,
+							mapId: $scope.device.mapId,
+							mapType: $scope.device.mapType,
+							deviceType: $scope.device.deviceType,
+							targetDevice: $scope.device.targetDevice,
+							onUrl: $scope.device.onUrl,
+							dimUrl: $scope.device.dimUrl,
+							offUrl: $scope.device.offUrl,
+							colorUrl: $scope.device.colorUrl,
+							headers: $scope.device.headers,
+							httpVerb: $scope.device.httpVerb,
+							contentType: $scope.device.contentType,
+							contentBody: $scope.device.contentBody,
+							contentBodyDim: $scope.device.contentBodyDim,
+							contentBodyOff: $scope.device.contentBodyOff
+					};
+					$scope.clearDevice();
+				}
+			}
+		}
+		bridgeService.bulkAddDevice(devicesList).then(
+				function () {
+					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewHalDevices();
+				},
+				function (error) {
+					bridgeService.displayWarn("Error adding openhab devices in bulk.", error)
+				}
+			);
+		$scope.bulk = { devices: [] };
+		$scope.selectAll = false;
+	};
+
+	$scope.toggleSelection = function toggleSelection(deviceId) {
+		var idx = $scope.bulk.devices.indexOf(deviceId);
+
+		// is currently selected
+		if (idx > -1) {
+			$scope.bulk.devices.splice(idx, 1);
+			if($scope.bulk.devices.length === 0 && $scope.selectAll)
+				$scope.selectAll = false;
+		}
+
+		// is newly selected
+		else {
+			$scope.bulk.devices.push(deviceId);
+			$scope.selectAll = true;
+		}
+	};
+
+	$scope.toggleSelectAll = function toggleSelectAll() {
+		if($scope.selectAll) {
+			$scope.selectAll = false;
+			$scope.bulk = { devices: [] };
+		}
+		else {
+			$scope.selectAll = true;
+			for(var x = 0; x < bridgeService.state.broadlinkdevices.length; x++) {
+				if($scope.bulk.devices.indexOf(bridgeService.state.broadlinkdevices[x]) < 0)
+					$scope.bulk.devices.push(bridgeService.state.broadlinkdevices[x].devicename);
 			}
 		}
 	};
@@ -4438,6 +4637,20 @@ app.filter('configuredFhemItems', function (bridgeService) {
 			return out;
 		for (var i = 0; i < input.length; i++) {
 			if (bridgeService.deviceContainsType(input[i], "fhem")) {
+				out.push(input[i]);
+			}
+		}
+		return out;
+	}
+});
+
+app.filter('configuredBroadlinkItems', function (bridgeService) {
+	return function(input) {
+		var out = [];
+		if(input === undefined || input === null || input.length === undefined)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if (bridgeService.deviceContainsType(input[i], "broadlink")) {
 				out.push(input[i]);
 			}
 		}

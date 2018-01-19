@@ -41,7 +41,6 @@ public class BroadlinkHome implements Home {
     private static final String _rm2 = "RM2";
 	private Map<String, BLDevice> broadlinkMap;
 	private Boolean validBroadlink;
-	private Gson aGsonHandler;
 	private boolean closed;
 	private Boolean isDevMode;
 	
@@ -55,7 +54,6 @@ public class BroadlinkHome implements Home {
 	@Override
 	public Home createHome(BridgeSettings bridgeSettings) {
 		broadlinkMap = null;
-		aGsonHandler = null;
 		BLDevice[] clients;
 
         isDevMode = Boolean.parseBoolean(System.getProperty("dev.mode", "false"));
@@ -127,10 +125,7 @@ public class BroadlinkHome implements Home {
 
 		} else {
 			BroadlinkEntry broadlinkCommand = null;
-			if(anItem.getItem().isJsonObject())
-				broadlinkCommand = aGsonHandler.fromJson(anItem.getItem(), BroadlinkEntry.class);
-			else
-				broadlinkCommand = aGsonHandler.fromJson(anItem.getItem().getAsString(), BroadlinkEntry.class);
+			broadlinkCommand = new Gson().fromJson(anItem.getItem().getAsString(), BroadlinkEntry.class);
 			BLDevice theDevice = broadlinkMap.get(broadlinkCommand.getId());
 			if (theDevice == null) {
 				log.warn("Should not get here, no BroadlinkDevices available");
@@ -149,6 +144,8 @@ public class BroadlinkHome implements Home {
 		            	else
 		            		changeState = false;
 		                try {
+		                	if(!isDevMode)
+		                		theDevice.auth();
 							((MP1Device) theDevice).setState(Integer.parseInt(broadlinkCommand.getData()), changeState);
 						} catch (NumberFormatException e1) {
 							log.error("Call to " + _mp1 + " device failed with number format exception.", e1);
@@ -178,6 +175,8 @@ public class BroadlinkHome implements Home {
 		            	else
 		            		changeState = false;
 		                try {
+		                	if(!isDevMode)
+		                		theDevice.auth();
 							((SP2Device) theDevice).setState(changeState);
 						} catch (Exception e1) {
 							log.error("Call to " + _sp2 + " device failed with exception.", e1);
@@ -192,6 +191,8 @@ public class BroadlinkHome implements Home {
 		            	else
 		            		changeState = false;
 		                try {
+		                	if(!isDevMode)
+		                		theDevice.auth();
 							((SP1Device) theDevice).setPower(changeState);
 						} catch (Exception e) {
 							log.error("Call to " + _sp1 + " device failed with exception.", e);
@@ -210,8 +211,9 @@ public class BroadlinkHome implements Home {
 		            case BLDevice.DEV_RM_2_PRO_PLUS_2_BL:
 		            case BLDevice.DEV_RM_MINI_SHATE:
 		            	if(broadlinkCommand.getData() != null && !broadlinkCommand.getData().trim().isEmpty()) {
+		            		theStringData = broadlinkCommand.getData().trim();
 							if(targetBri != null || targetBriInc != null) {
-								theStringData = BrightnessDecode.calculateReplaceIntensityValue(broadlinkCommand.getData().trim(), intensity, targetBri, targetBriInc, true);
+								theStringData = BrightnessDecode.calculateReplaceIntensityValue(theStringData, intensity, targetBri, targetBriInc, true);
 							}
 							if(colorData != null) {
 								theStringData = ColorDecode.replaceColorData(theStringData, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), true);
@@ -221,6 +223,8 @@ public class BroadlinkHome implements Home {
 			            	byte[] theData = DatatypeConverter.parseHexBinary(theStringData);
 			            	SendDataCmdPayload thePayload = new SendDataCmdPayload(theData);
 			                try {
+			                	if(!isDevMode)
+			                		theDevice.auth();
 								((RM2Device) theDevice).sendCmdPkt(Configuration.BROADLINK_DISCONVER_TIMEOUT, thePayload);
 							} catch (IOException e) {
 								log.error("Call to " + _rm2 + " device failed with exception.", e);
