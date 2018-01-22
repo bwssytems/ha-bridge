@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.BridgeSettings;
+import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.Home;
 import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.CallItem;
@@ -174,6 +175,7 @@ public class FHEMHome implements Home {
 				((HttpTestHandler)httpClient).setTheData("set", "Command Received");
 				((HttpTestHandler)httpClient).setTheData(null, "no match");
 			}
+			httpClient.setCallType(DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex]);
 			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getFhemaddress().getDevices().iterator();
 			while(theList.hasNext() && validFhem) {
 				NamedIP aFhem = theList.next();

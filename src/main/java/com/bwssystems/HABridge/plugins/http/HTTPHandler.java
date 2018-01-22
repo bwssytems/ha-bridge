@@ -17,13 +17,22 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.api.NameValue;
 
 public class HTTPHandler {
 	private static final Logger log = LoggerFactory.getLogger(HTTPHandler.class);
+	private String callType;
 	
 	public HTTPHandler() {
 		super();
+		callType = null;
+	}
+
+
+	public HTTPHandler(String type) {
+		super();
+		callType = type;
 	}
 
 
@@ -103,6 +112,11 @@ public class HTTPHandler {
 						theContent = "";
 					log.debug("Successfull response - The http response is <<<" + theContent + ">>>");
 					retryCount = 2;
+				} else if (callType != null && callType == DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex] && response.getStatusLine().getStatusCode() == 302) {
+					if(theContent == null)
+						theContent = "";
+					log.debug("Successfull response - The http response is <<<" + theContent + ">>>");
+					retryCount = 2;
 				} else if (response != null) {
 					log.warn("HTTP response code was not an expected successful response of between 200 - 299, the code was: "
 									+ response.getStatusLine() + " with the content of <<<" + theContent + ">>>");
@@ -132,6 +146,11 @@ public class HTTPHandler {
 		}
 		return theContent;
 	}
+	public void setCallType(String callType) {
+		this.callType = callType;
+	}
+
+
 	public void closeHandler() {
 	}
 }
