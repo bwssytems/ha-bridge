@@ -163,16 +163,39 @@
 									<th>Port</th>
 									<th>Username</th>
 									<th>Password </th>
+									<th>Filters</th>
 									<th>Manage</th>
 								</tr>
 							</thead>
 							<tr ng-repeat="fibaro in bridge.settings.fibaroaddress.devices">
-								<td>{{fibaro.name}}</td>
-								<td>{{fibaro.ip}}</td>
-								<td>{{fibaro.port}}</td>
-								<td>{{fibaro.username}}</td>
-								<td ng-if="fibaro.password">*******</td>
-								<td ng-if="!fibaro.password"> </td>
+								<td><input id="bridge-settings-next-fibaro-name"
+									class="form-control" type="text" ng-model="fibaro.name"
+									placeholder="A Fibaro"></td>
+								<td><input id="bridge-settings-next-fibaro-ip"
+									class="form-control" type="text" ng-model="fibaro.ip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-next-fibaro-port"
+									class="form-control" type="text" ng-model="fibaro.port"
+									placeholder="80"></td>
+								<td><input id="bridge-settings-next-fibaro-username"
+									class="form-control" type="text" ng-model="fibaro.username"
+									placeholder="A Username"></td>
+								<td><input id="bridge-settings-next-fibaro-password"
+									class="form-control" type="password" ng-model="fibaro.password"
+									placeholder="Fibaro password"></td>
+								<td>Save Logs <input type="checkbox"
+										ng-model="fibaro.extensions.useSaveLogs" ng-true-value=true
+										ng-false-value=false>
+									User Desc <input type="checkbox"
+										ng-model="fibaro.extensions.useUserDescription" ng-true-value=true
+										ng-false-value=false>
+									Lili Cmd <input type="checkbox"
+										ng-model="fibaro.extensions.scenesLiliCmddOnly" ng-true-value=true
+										ng-false-value=false>
+									Trash Chars <input type="checkbox"
+										ng-model="fibaro.extensions.replaceTrash" ng-true-value=true
+										ng-false-value=false>
+								</td>
 								<td><button class="btn btn-danger" type="submit"
 										ng-click="removeFibarotoSettings(fibaro.name, fibaro.ip, fibaro.port)">Del</button></td>
 							</tr>
@@ -192,8 +215,21 @@
 								<td><input id="bridge-settings-next-fibaro-password"
 									class="form-control" type="password" ng-model="newfibaropassword"
 									placeholder="Fibaro password"></td>
+								<td>Save Logs <input type="checkbox"
+										ng-model="filters.useSaveLogs" ng-true-value=true
+										ng-false-value=false>
+									User Desc <input type="checkbox"
+										ng-model="filters.useUserDescription" ng-true-value=true
+										ng-false-value=false>
+									Lili Cmd <input type="checkbox"
+										ng-model="filters.scenesLiliCmddOnly" ng-true-value=true
+										ng-false-value=false>
+									Trash Chars <input type="checkbox"
+										ng-model="filters.replaceTrash" ng-true-value=true
+										ng-false-value=false>
+								</td>
 								<td><button class="btn btn-success" type="submit"
-										ng-click="addFibarotoSettings(newfibaroname, newfibaroip, newfibaroport, newfibarousername, newfibaropassword)">Add</button></td>
+										ng-click="addFibarotoSettings(newfibaroname, newfibaroip, newfibaroport, newfibarousername, newfibaropassword, filters)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>
@@ -696,22 +732,27 @@
 						</table></td>
 				</tr>
 				<tr>
-					<td>Nest Username</td>
+					<td>Nest</td>
+					<td><table class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Username</th>
+									<th>Password</th>
+									<th>Temp Farenheit</th>
+								</tr>
+							</thead>
+					<tr>
 					<td><input id="bridge-settings-nestuser" class="form-control"
 						type="text" ng-model="bridge.settings.nestuser"
 						placeholder="someone@gmail.com"></td>
-				</tr>
-				<tr>
-					<td>Nest Password</td>
 					<td><input id="bridge-settings-nestpwd" class="form-control"
 						type="password" ng-model="bridge.settings.nestpwd"
 						placeholder="thepassword"></td>
-				</tr>
-				<tr>
-					<td>Nest Temp Farenheit</td>
-					<td><input type="checkbox"
+					<td> <input type="checkbox"
 						ng-model="bridge.settings.farenheit" ng-true-value=true
 						ng-false-value=false> {{bridge.settings.farenheit}}</td>
+					</tr>
+					</table></td>
 				</tr>
 				<tr>
 					<td>LIFX Support</td>
@@ -748,27 +789,6 @@
 						class="form-control" type="number"
 						ng-model="bridge.settings.numberoflogmessages" min="100"
 						max="65535"></td>
-				</tr>
-				<tr>
-					<td>Log Output Control</td>
-					<td><table
-							class="table table-bordered table-striped table-hover">
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Active</th>
-								</tr>
-							</thead>
-							<tr ng-repeat="thePair in bridge.settings.activeloggers">
-								<td><input id="bridge-settings-next-logger-name"
-									class="form-control" type="text" ng-model="thePair.name"
-										disabled></td>
-								<td><input type="checkbox"
-										ng-model="thePair.value" ng-true-value="'true'"
-										ng-false-value="'false'"></td>
-							</tr>
-						</table>										
-					</td>
 				</tr>
 				<tr>
 					<td>Trace UPNP Calls</td>

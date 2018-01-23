@@ -16,11 +16,14 @@ import com.bwssystems.HABridge.hue.ColorDecode;
 import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
+import com.bwssystems.HABridge.plugins.fibaro.FibaroTestData;
+import com.bwssystems.HABridge.plugins.vera.VeraTestData;
 import com.google.gson.Gson;
 
 public class HTTPHome implements Home {
 	private static final Logger log = LoggerFactory.getLogger(HTTPHome.class);
 	private static HTTPHandler anHttpHandler = null;
+	private Boolean isDevMode;
 	private boolean closed;
 
 	public HTTPHome(BridgeSettings bridgeSettings) {
@@ -78,13 +81,16 @@ public class HTTPHome implements Home {
 				aBody = TimeDecode.replaceTimeValue(aBody);
 			}
 			// make call
-			if (anHttpHandler.doHttpRequest(anUrl, anItem.getHttpVerb(), anItem.getContentType(), aBody,
-					new Gson().fromJson(anItem.getHttpHeaders(), NameValue[].class)) == null) {
+			String httpReply = anHttpHandler.doHttpRequest(anUrl, anItem.getHttpVerb(), anItem.getContentType(), aBody,	new Gson().fromJson(anItem.getHttpHeaders(), NameValue[].class));
+			if (httpReply == null) {
 				log.warn("Error on calling url to change device state: " + anUrl);
 				responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
 						"Error on calling url to change device state", "/lights/"
 						+ lightId + "state", null, null).getTheErrors(), HueError[].class);
 			}
+			
+			if(isDevMode)
+				log.info("Dev Mode response dump <<<" + httpReply +">>>");
 		} else {
 			log.warn("HTTP Call to be presented as http(s)://<ip_address>(:<port>)/payload, format of request unknown: " + theUrl);
 			responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
@@ -97,9 +103,21 @@ public class HTTPHome implements Home {
 
 	@Override
 	public Home createHome(BridgeSettings bridgeSettings) {
+		isDevMode = Boolean.parseBoolean(System.getProperty("dev.mode", "false"));
+		log.info("HTTP Home created." + (isDevMode ? " DevMode is set." : ""));
+		if(isDevMode) {
+			anHttpHandler = new HttpTestHandler();
+			((HttpTestHandler)anHttpHandler).setTheData("id=sdata", VeraTestData.SDataTestData);
+			((HttpTestHandler)anHttpHandler).setTheData("action=SetLoadLevelTarget", VeraTestData.SetLoadLevelTargetData);
+			((HttpTestHandler)anHttpHandler).setTheData("action=SetTarget", VeraTestData.SetTargetData);
+			((HttpTestHandler)anHttpHandler).setTheData("action=RunScene", VeraTestData.RunSceneData);
+			((HttpTestHandler)anHttpHandler).setTheData("/api/callAction", FibaroTestData.CallActionTestData);
+			((HttpTestHandler)anHttpHandler).setTheData("/api/sceneControl", FibaroTestData.SceneControlTestData);
+			((HttpTestHandler)anHttpHandler).setTheData(null, "generic treply - no match");
+			
+		}
 		if(anHttpHandler == null)
 			anHttpHandler = new HTTPHandler();
-		log.info("Http Home created.");
 		return this;
 	}
 

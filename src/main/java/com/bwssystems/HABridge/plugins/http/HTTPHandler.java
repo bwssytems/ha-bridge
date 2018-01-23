@@ -39,7 +39,10 @@ public class HTTPHandler {
 	// This function executes the url from the device repository against the
 	// target as http or https as defined
 	public String doHttpRequest(String url, String httpVerb, String contentType, String body, NameValue[] headers) {
-		log.debug("doHttpRequest with url: " + url + " with http command: " + httpVerb + " with body: " + body);
+		log.debug("doHttpRequest with url <<<" + url + ">>>, verb: " + httpVerb + ", contentType: " + contentType + ", body <<<" + body + ">>>" );
+		if(headers != null && headers.length > 0)
+			for(int i = 0; i < headers.length; i++)
+				log.debug("header index " + i + " name: <<<" + headers[i].getName() + ">>>, value: <<<" + headers[i].getValue() + ">>>");
 		HttpUriRequest request = null;
 		String theContent = null;
 		URI theURI = null;

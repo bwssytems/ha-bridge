@@ -1,5 +1,5 @@
 # ha-bridge
-Emulates Philips Hue API to other home automation gateways such as an Amazon Echo or other systems that support Philips Hue.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
+Emulates Philips Hue API to other home automation gateways such as an Amazon Echo/Dot Gen 1 (gen 2 cannot discover ha-bridge) or other systems that support Philips Hue.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
 
 Here are some diagrams to put this software in perspective.
 
@@ -35,6 +35,8 @@ THe Harmony Hub Path looks like this:
 
 **NOTE: This software does not control Philips Hue devices directly. A physical Philips Hue Hub is required for that, by which the ha-bridge can then proxy all of your real Hue bridges behind this bridge.**
 
+**ISSUE: Amazon Echo (2nd Generation) do not find the ha-bridge. The only workaround is to have a first generation Echo or Dot on your network that finds the ha-bridge.**
+
 **ISSUE: Google Home now seems to not support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local API, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
 
 **FAQ: Please look here for the current FAQs! https://github.com/bwssytems/ha-bridge/wiki/HA-Bridge-FAQs**
@@ -61,17 +63,22 @@ ATTENTION: This requires JDK 1.8 to run
 ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
 
 ```
-java -jar ha-bridge-5.1.0.jar
+java -jar ha-bridge-5.2.0.jar
+```
+
+ATTENTION: If running Java9, you will need to add the xml bind module
+```
+java -jar  --add-modules java.xml.bind ha-bridge-5.2.0.jar
 ```
 ### Automation on Linux systems
 To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
 
-Create the directory and make sure that ha-bridge-5.1.0.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-5.2.0.jar is in your /home/pi/habridge directory.
 ```
 pi@raspberrypi:~ $ mkdir habridge
 pi@raspberrypi:~ $ cd habridge
 
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v5.1.0/ha-bridge-5.1.0.jar
+pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v5.2.0/ha-bridge-5.2.0.jar
 ```
 
 #### System Control Setup on a pi (preferred)
@@ -92,7 +99,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/home/pi/habridge
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-5.1.0.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-5.2.0.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -127,7 +134,7 @@ Then cut and past this, modify any locations that are not correct
 ```
 cd /home/pi/habridge
 rm /home/pi/habridge/habridge-log.txt
-nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-5.1.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
+nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-5.2.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
 
 chmod 777 /home/pi/habridge/habridge-log.txt
 ```
@@ -268,7 +275,7 @@ The upnp response port that will be used. The default is 50000.
 #### Vera Names and IP Addresses
 Provide IP Addresses of your Veras that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Vera and device/scene you configure.
 #### Fibaro Names and IP Addresses
-Provide IP Addresses of your Fibaros that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Fibaro and device/scene you configure.
+Provide IP Addresses of your Fibaros that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Fibaro and device/scene you configure. There are filter switches available to limit some of the returns for devices and scenes such as use save logs, use user description, use only Lili command and a switch that cleans up format Trash Chars. The default filters are false for everything but Trash Chars.
 #### Harmony Names and IP Addresses
 Provide IP Addresses of your Harmony Hubs that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the activity or buttons by the call it receives and send it to the target Harmony Hub and activity/button you configure. Also, an option of webhook can be called when the activity changes on the harmony hub that will send an HTTP GET call to the the address of your choosing. This can contain the replacement variables of ${activity.id} and/or ${activity.label}. Example : http://192.168.0.1/activity/${activity.id}/${activity.label} OR http://hook?a=${activity.label}
 #### Hue Names and IP Addresses
@@ -281,10 +288,16 @@ Provide IP Addresses of your HAL Systems that you want to utilize with the bridg
 Provide Client ID and IP Addresses and ports of your MQTT Brokers that you want to utilize with the bridge. Also, you can provide the username and password if you have secured your MQTT broker which is optional. When these Client ID and IP's are given, the bridge will be able to publish MQTT messages by the call it receives and send it to the target MQTT Broker you configure. The MQTT Messages Tab will become available to help you build messages.
 #### Home Assistant Names and IP Addresses
 Provide IP Addresses and ports of your Home Assistant that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Home Assistant and device/scene you configure. 
+#### HomeWizard Gateways Names and IP Addresses
+Provide IP Addresses of your HomeWizard Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target HomeWizard and device/scene you configure. 
 #### Domoticz Names and IP Addresses
 Provide IP Addresses of your Domoticz Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Domoticz and device/scene you configure. 
 #### Somfy Tahoma Names and IP Addresses
 Provide user name and password used to login to www.tahomalink.com.  This needs to be provided if you're using the Somfy Tahoma features (for connecting to IO Homecontrol used by Velux among others). There is no need to give any IP address or host information as this contacts your cloud account.  *Note:* you have to 'turn on' a window to open it, and 'turn off' to close.
+#### OpenHAB Names and IP Addresses
+Provide IP Addresses of your OpenHAB Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target OpenHAB and device/scene you configure. 
+#### FHEM Names and IP Addresses
+Provide IP Addresses of your FHEM Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target FHEM and device/scene you configure. 
 #### Nest Username
 The user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features. There is no need to give any ip address or host information as this contacts your cloud account.
 #### Nest Password
@@ -293,6 +306,8 @@ The password for the user name of the home.nest.com account for the Nest user. T
 This setting allows the value being sent into the bridge to be interpreted as Fahrenheit or Celsius. The default is to have Fahrenheit.
 #### LIFX Support
 This setting will have the ha-bridge look for LIFX devices on your network. Since this is broadcast based, there is no other info needed.
+#### Broadlink Support
+This setting will have the ha-bridge look for Broadlink devices on your network (i.e. RM2 IRcontrollers, Smart Power Strips and Smart Plugs). Since this is broadcast based, there is no other info needed.
 #### Emulate Hue Hub Version
 This setting is used to set the version that the ha-bridge will return in the hub version field. The default is 9999999999 which should work to be higher than the versions that are being used.
 #### Emulate MAC

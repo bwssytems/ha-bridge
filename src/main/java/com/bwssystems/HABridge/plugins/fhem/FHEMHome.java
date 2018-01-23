@@ -171,9 +171,9 @@ public class FHEMHome implements Home {
 	        httpClient = HTTPHome.getHandler();
 			if(isDevMode) {
 				httpClient = new HttpTestHandler();
-				((HttpTestHandler)httpClient).setTheData("jsonlist2", FHEMTestData.TestData);
-				((HttpTestHandler)httpClient).setTheData("set", "Command Received");
-				((HttpTestHandler)httpClient).setTheData(null, "no match");
+				((HttpTestHandler)httpClient).setTheData("cmd=jsonlist2", FHEMTestData.TestData);
+				((HttpTestHandler)httpClient).setTheData("set", "FHEM Command Received");
+				((HttpTestHandler)httpClient).setTheData(null, "FHEM no match");
 			}
 			httpClient.setCallType(DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex]);
 			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getFhemaddress().getDevices().iterator();

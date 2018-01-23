@@ -1218,7 +1218,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 						content:"HABridge is re-initializing, waiting for completion..."});
 					setTimeout(function(){
 						self.checkForBridge();
-					}, 2000);
+					}, 5000);
 				},
 				function (error) {
 					if (error.status === 401)
@@ -1550,11 +1550,12 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     	    }
     	}    	
     };
-    $scope.addFibarotoSettings = function (newfibaroname, newfibaroip, newfibaroport, newfibarousername, newfibaropassword) {
+    $scope.addFibarotoSettings = function (newfibaroname, newfibaroip, newfibaroport, newfibarousername, newfibaropassword, filters) {
     	if($scope.bridge.settings.fibaroaddress === undefined || $scope.bridge.settings.fibaroaddress === null) {
     		$scope.bridge.settings.fibaroaddress = { devices: [] };
 		}
-    	var newFibaro = {name: newfibaroname, ip: newfibaroip, port: newfibaroport, username: newfibarousername, password: newfibaropassword }
+    	var stringFilter = angular.toJson(filters);
+    	var newFibaro = {name: newfibaroname, ip: newfibaroip, port: newfibaroport, username: newfibarousername, password: newfibaropassword, extensions: filters}
     	$scope.bridge.settings.fibaroaddress.devices.push(newFibaro);
     	$scope.newfibaroname = null;
     	$scope.newfibaroip = null;
