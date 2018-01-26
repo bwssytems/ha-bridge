@@ -63,8 +63,10 @@ ATTENTION: Due to port 80 being the default, Linux restricts this to super user.
 ```
 java -jar ha-bridge-5.1.0.jar
 ```
-### Automation on Linux systems
-To have this configured and running automatically there are a few resources to use. One is using Docker and a docker container has been built for this and can be gotten here: https://github.com/aptalca/docker-ha-bridge
+
+### Manual installation of ha-bridge and setup of systemd service
+Next gen Linux systems (this includes the Raspberry Pi), use systemd to run and manage services.
+Here is a link on how to use systemd: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
 
 Create the directory and make sure that ha-bridge-5.1.0.jar is in your /home/pi/habridge directory.
 ```
@@ -74,10 +76,7 @@ pi@raspberrypi:~ $ cd habridge
 pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v5.1.0/ha-bridge-5.1.0.jar
 ```
 
-#### System Control Setup on a pi (preferred)
-For next gen Linux systems (this includes the Raspberry Pi), here is a systemctl unit file that you can install. Here is a link on how to do this: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
-
-Start here to create the habridge.service unit file:
+Create the habridge.service unit file:
 ```
 pi@raspberrypi:~ $ cd /etc/systemd/system
 pi@raspberrypi:~ $ sudo nano habridge.service
@@ -97,20 +96,24 @@ ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.confi
 [Install]
 WantedBy=multi-user.target
 ```
+
 Save the file in the editor by hitting CTL-X and then saying Y to update and save.
 
 Reload the system control config:
 ```
 pi@raspberrypi:~ $ sudo systemctl daemon-reload
 ```
+
 To start the bridge:
 ```
 pi@raspberrypi:~ $ sudo systemctl start habridge.service
 ```
+
 To start the service at boot, use the `enable` command:
 ```
 pi@raspberrypi:~ $ sudo systemctl enable habridge.service
 ```
+
 To look at the log, the output goes into the system log at `/var/log/syslog':
 ```
 pi@raspberrypi:~ $ tail -f /var/log/syslog
