@@ -119,6 +119,43 @@ To look at the log, the output goes into the system log at `/var/log/syslog':
 pi@raspberrypi:~ $ tail -f /var/log/syslog
 ```
 
+### ha-bridge inside Docker container
+Docker start offering official support for Raspbian operating system since autumn 2016.
+Running services inside containers became to be a good alternative to normal installation method described before.
+
+Install Docker Community Edition (CE) on Raspberry Pi
+```
+pi@raspberrypi:~ $ curl -fsSL get.docker.com -o get-docker.sh
+pi@raspberrypi:~ $ sudo sh get-docker.sh
+```
+
+For every architecture there is a specialized ha-bridge Docker image available.
+Please use the suitable image from the following list.
+
+* Generic x86 / x86_64 system: [aptalca/home-automation-bridge](https://hub.docker.com/r/aptalca/home-automation-bridge)
+* Raspberry Pi 1 (ARM): [habridge/ha-bridge-raspberry-pi](https://hub.docker.com/r/habridge/ha-bridge-raspberry-pi)
+* Raspberry Pi 2 (ARM): [habridge/ha-bridge-raspberry-pi2](https://hub.docker.com/r/habridge/ha-bridge-raspberry-pi2)
+* Raspberry Pi 3 (ARM): [habridge/ha-bridge-raspberrypi3](https://hub.docker.com/r/habridge/ha-bridge-raspberrypi3)
+
+Run the latest version of ha-bridge Docker container on Raspberry Pi 3:
+```
+pi@raspberrypi:~ $ docker pull habridge/ha-bridge-raspberrypi3
+pi@raspberrypi:~ $ docker run \
+    --name habridge \
+    --rm \
+    --detach \
+    --net=host \
+    --volume=$PWD:/habridge/data \
+    --volume=/etc/localtime:/etc/localtime:ro \
+    --volume=/etc/timezone:/etc/timezone:ro \
+    habridge/ha-bridge-raspberrypi3
+```
+
+To halt the ha-bridge Docker container use the `stop` command:
+```
+pi@raspberrypi:~ $ docker stop habridge
+```
+
 ## Run ha-bridge alongside web server already on port 80
 These examples will help you proxy your current webserver requests to the ha-bridge running on a different port, such as 8080.
 
