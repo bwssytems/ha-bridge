@@ -115,34 +115,7 @@ To look at the log, the output goes into the system log at `/var/log/syslog':
 ```
 pi@raspberrypi:~ $ tail -f /var/log/syslog
 ```
-#### Basic script setup to run the bridge on a pi.
 
-*NOTE ON RC.LOCAL*: Due to the way network subsystem is brought up on the pi, it uses the new systemctl to start services. The old style runlevel setup, which rc.local is part of does not get the benefit of knowing if the network has been fully realized. Starting ha-bridge from rc.local on next gen systems will cause unexpected results and issues with discovering registered devices. 
-
-Edit the shell script for starting:
-```
-pi@raspberrypi:~/habridge $ nano starthabridge.sh
-```
-Then cut and past this, modify any locations that are not correct
-```
-cd /home/pi/habridge
-rm /home/pi/habridge/habridge-log.txt
-nohup java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-5.1.0.jar > /home/pi/habridge/habridge-log.txt 2>&1 &
-
-chmod 777 /home/pi/habridge/habridge-log.txt
-```
-Exit and save the file with ctrl-X and follow the prompts and then execute on the command line:
-```
-pi@raspberrypi:~/habridge $ chmod u+x starthabridge.sh
-```
-Then execute the script:
-```
-pi@raspberrypi:~/habridge $ ./starthabridge.sh
-```
-You should now be running the bridge. Check for errors:
-```
-pi@raspberrypi:~/habridge $ tail -f habridge-log.txt
-```
 ## Run ha-bridge alongside web server already on port 80
 These examples will help you proxy your current webserver requests to the ha-bridge running on a different port, such as 8080.
 
