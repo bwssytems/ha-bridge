@@ -71,8 +71,9 @@
 					   ng-model="mqttqos" placeholder="1"/>
 			</td>
 			<td>
-				<input type="checkbox" rows="1" class="form-control" id="mqtt-retain"
-					   ng-model="mqttretain"/>
+				<input type="checkbox" id="mqtt-retain"
+						ng-model="mqttretain" ng-true-value=true
+						ng-false-value=false>{{mqttretain}}</td>
 			</td>
 			<td>
 				<button class="btn btn-success" type="submit"

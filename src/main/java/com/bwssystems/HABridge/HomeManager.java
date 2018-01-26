@@ -42,6 +42,14 @@ public class HomeManager {
 	// factory method
 	public void buildHomes(BridgeSettings bridgeSettings, UDPDatagramSender aUdpDatagramSender) {
 		Home aHome = null;
+		//setup the http handler Home - This must be the first home created for devMode
+		aHome = new HTTPHome(bridgeSettings);
+		homeList.put(DeviceMapTypes.HTTP_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.CUSTOM_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.VERA_SCENE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.FIBARO_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.FIBARO_SCENE[DeviceMapTypes.typeIndex], aHome);
         //setup the harmony connection if available
 		aHome = new HarmonyHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.typeIndex], aHome);
@@ -80,14 +88,6 @@ public class HomeManager {
 		aHome = new CommandHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.EXEC_DEVICE_COMPAT[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.CMD_DEVICE[DeviceMapTypes.typeIndex], aHome);
-		//setup the http handler Home
-		aHome = new HTTPHome(bridgeSettings);
-		homeList.put(DeviceMapTypes.HTTP_DEVICE[DeviceMapTypes.typeIndex], aHome);
-		homeList.put(DeviceMapTypes.CUSTOM_DEVICE[DeviceMapTypes.typeIndex], aHome);
-		homeList.put(DeviceMapTypes.VERA_DEVICE[DeviceMapTypes.typeIndex], aHome);
-		homeList.put(DeviceMapTypes.VERA_SCENE[DeviceMapTypes.typeIndex], aHome);
-		homeList.put(DeviceMapTypes.FIBARO_DEVICE[DeviceMapTypes.typeIndex], aHome);
-		homeList.put(DeviceMapTypes.FIBARO_SCENE[DeviceMapTypes.typeIndex], aHome);
 		//setup the tcp handler Home
 		aHome = new TCPHome(bridgeSettings);
 		homeList.put(DeviceMapTypes.TCP_DEVICE[DeviceMapTypes.typeIndex], aHome);

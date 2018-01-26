@@ -3049,6 +3049,8 @@ app.controller('MQTTController', function ($scope, $location, bridgeService, ngD
 	bridgeService.viewMQTTDevices();
 	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
 	$scope.buttonsVisible = false;
+	$scope.mqttretain = false;
+	$scope.mqttqos = 1;
 
 	$scope.clearDevice = function () {
 		bridgeService.clearDevice();
@@ -3056,6 +3058,10 @@ app.controller('MQTTController', function ($scope, $location, bridgeService, ngD
 	};
 
 	$scope.buildMQTTPublish = function (mqttbroker, mqtttopic, mqttmessage, mqttqos, mqttretain) {
+		if(mqttretain === 'undefined')
+			mqttretain = false;
+		if(mqttqos === 'undefined')
+			mqttqos = 1;
 		onpayload = "{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\",\"qos\":\"" + mqttqos + "\",\"retain\":\"" + mqttretain + "\"}";
 		offpayload = "{\"clientId\":\"" + mqttbroker.clientId + "\",\"topic\":\"" + mqtttopic + "\",\"message\":\"" + mqttmessage + "\",\"qos\":\"" + mqttqos + "\",\"retain\":\"" + mqttretain + "\"}";
 
@@ -3926,16 +3932,23 @@ app.controller('FhemController', function ($scope, $location, bridgeService, ngD
 
 	$scope.buildDeviceUrls = function (fhemdevice, dim_control, buildonly) {
 		var preCmd = "/fhem?cmd=set%20" + fhemdevice.item.Name + "%20";
-		if(fhemdevice.item.PossibleSets.indexOf("dim") >= 0) {
+		if(fhemdevice.item.PossibleSets.toLowerCase().indexOf("dim") >= 0) {
 			if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)) {
 				dimpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"dim%20" + dim_control + "\"}";
 			}
 			else
 				dimpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"dim%20${intensity.percent}\"}";
 		}
+		else if(fhemdevice.item.PossibleSets.toLowerCase().indexOf("pct") >= 0) {
+			if((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)) {
+				dimpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"pct%20" + dim_control + "\"}";
+			}
+			else
+				dimpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"pct%20${intensity.percent}\"}";
+		}
 		else
 			dimpayload = null;
-		if(fhemdevice.item.PossibleSets.indexOf("RGB") >= 0) {
+		if(fhemdevice.item.PossibleSets.toLowerCase().indexOf("rgb") >= 0) {
 			colorpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"RGB%20${color.rgbx}\"}";
 		}
 		else

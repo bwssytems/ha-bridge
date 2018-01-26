@@ -45,14 +45,21 @@ public class HttpTestHandler extends HTTPHandler {
 				log.info("header index " + i + " name: <<<" + headers[i].getName() + ">>>, value: <<<" + headers[i].getValue() + ">>>");
 		String responseData = null;
 		for(NameValue aTest:theData) {
-			if(url.contains(aTest.getName()))
+			if(aTest.getName() == null)
 				responseData = aTest.getValue();
-			else if(aTest.getName() == null || aTest.getName().isEmpty())
-				responseData = aTest.getValue();
+			else {
+				if(url.contains(aTest.getName()))
+					responseData = aTest.getValue();
+				else if(aTest.getName() == null || aTest.getName().isEmpty())
+					responseData = aTest.getValue();
+			}
 			
 			if(responseData != null)
 				break;
 		}
+		
+		if(responseData == null)
+			responseData = "No data was set for HttpTestHandler for your request url.";
 		return responseData;
 	}
 }

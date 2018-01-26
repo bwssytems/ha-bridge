@@ -66,22 +66,26 @@ public class OpenHABInstance {
    		theData = httpClient.doHttpRequest(theUrl, HttpGet.METHOD_NAME, "application/json", null, headers);
     	if(theData != null) {
     		log.debug("GET OpenHAB States - data: " + theData);
-    		theOpenhabStates = new Gson().fromJson(theData, OpenHABItem[].class);
-	    	if(theOpenhabStates == null) {
-	    		log.warn("Cannot get any devices for OpenHAB " + theOpenHAB.getName() + " as response is not parsable.");
-	    	}
-	    	else {
-		    	deviceList = new ArrayList<OpenHABDevice>();
-		    	
-		    	for (int i = 0; i < theOpenhabStates.length; i++) {
-		    		OpenHABDevice aNewOpenHABDeviceDevice = new OpenHABDevice();
-		    		aNewOpenHABDeviceDevice.setItem(theOpenhabStates[i]);
-		    		aNewOpenHABDeviceDevice.setAddress(theOpenHAB.getIp() + ":" + theOpenHAB.getPort());
-		    		aNewOpenHABDeviceDevice.setName(theOpenHAB.getName());
-					deviceList.add(aNewOpenHABDeviceDevice);
-		    		
-		    	}
-	    	}
+    		try  {
+    			theOpenhabStates = new Gson().fromJson(theData, OpenHABItem[].class);
+    	    	if(theOpenhabStates == null) {
+    	    		log.warn("Cannot get any devices for OpenHAB " + theOpenHAB.getName() + " as response is not parsable.");
+    	    	}
+    	    	else {
+    		    	deviceList = new ArrayList<OpenHABDevice>();
+    		    	
+    		    	for (int i = 0; i < theOpenhabStates.length; i++) {
+    		    		OpenHABDevice aNewOpenHABDeviceDevice = new OpenHABDevice();
+    		    		aNewOpenHABDeviceDevice.setItem(theOpenhabStates[i]);
+    		    		aNewOpenHABDeviceDevice.setAddress(theOpenHAB.getIp() + ":" + theOpenHAB.getPort());
+    		    		aNewOpenHABDeviceDevice.setName(theOpenHAB.getName());
+    					deviceList.add(aNewOpenHABDeviceDevice);
+    		    		
+    		    	}
+    	    	}
+    		} catch (Exception e) {
+        		log.warn("Cannot get an devices for OpenHAB " + theOpenHAB.getName() + " Gson Parse Error.");   			
+    		}
     	}
     	else
     		log.warn("Cannot get an devices for OpenHAB " + theOpenHAB.getName() + " http call failed.");

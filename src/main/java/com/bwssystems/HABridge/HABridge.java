@@ -49,14 +49,12 @@ public class HABridge {
         // Singleton initialization
         thePool = new HttpClientPool();
 
-        log.info("HA Bridge (v" + theVersion.getVersion() + ") starting....");
-        
         bridgeSettings = new BridgeSettings();
     	// sparkjava config directive to set html static file location for Jetty
         while(!bridgeSettings.getBridgeControl().isStop()) {
         	bridgeSettings.buildSettings();
             bridgeSettings.getBridgeSecurity().removeTestUsers();
-            log.info("HA Bridge initializing....");
+            log.info("HA Bridge (v" + theVersion.getVersion() + ") initializing....");
 	        // sparkjava config directive to set ip address for the web server to listen on
 	        ipAddress(bridgeSettings.getBridgeSettingsDescriptor().getWebaddress());
 	        // sparkjava config directive to set port for the web server to listen on
@@ -91,7 +89,7 @@ public class HABridge {
 		        			bridgeSettings.getBridgeSettingsDescriptor().isUseupnpiface() + " on web server: " +
 		        			bridgeSettings.getBridgeSettingsDescriptor().getWebaddress() + ":" + bridgeSettings.getBridgeSettingsDescriptor().getServerPort());
 		        // setup the class to handle the upnp response rest api
-		        theSettingResponder = new UpnpSettingsResource(bridgeSettings.getBridgeSettingsDescriptor());
+		        theSettingResponder = new UpnpSettingsResource(bridgeSettings);
 		        theSettingResponder.setupServer();
 
 		        // start the upnp ssdp discovery listener
@@ -127,12 +125,12 @@ public class HABridge {
         	bridgeSettings.updateConfigFile();
 		try {
 			HttpClientPool.shutdown();
-			thePool = null;
 		} catch (InterruptedException e) {
 			log.warn("Error shutting down http pool: " + e.getMessage());;
 		} catch (IOException e) {
 			log.warn("Error shutting down http pool: " + e.getMessage());;
 		}
+		thePool = null;
         log.info("HA Bridge (v" + theVersion.getVersion() + ") exiting....");
         System.exit(0);
     }
