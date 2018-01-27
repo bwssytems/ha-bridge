@@ -68,18 +68,18 @@ java -jar ha-bridge-5.1.0.jar
 Next gen Linux systems (this includes the Raspberry Pi), use systemd to run and manage services.
 Here is a link on how to use systemd: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
 
-Create the directory and make sure that ha-bridge-5.1.0.jar is in your /home/pi/habridge directory.
+Create the directory and make sure that ha-bridge-5.1.0.jar is in your /home/pi/ha-bridge directory.
 ```
-pi@raspberrypi:~ $ mkdir habridge
-pi@raspberrypi:~ $ cd habridge
+pi@raspberrypi:~ $ mkdir ha-bridge
+pi@raspberrypi:~ $ cd ha-bridge
 
-pi@raspberrypi:~/habridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v5.1.0/ha-bridge-5.1.0.jar
+pi@raspberrypi:~/ha-bridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v5.1.0/ha-bridge-5.1.0.jar
 ```
 
-Create the habridge.service unit file:
+Create the ha-bridge.service unit file:
 ```
 pi@raspberrypi:~ $ cd /etc/systemd/system
-pi@raspberrypi:~ $ sudo nano habridge.service
+pi@raspberrypi:~ $ sudo nano ha-bridge.service
 ```
 Copy the text below into the editor nano.
 ```
@@ -90,8 +90,8 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/pi/habridge
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-5.1.0.jar
+WorkingDirectory=/home/pi/ha-bridge
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/ha-bridge/data/habridge.config /home/pi/ha-bridge/ha-bridge-5.1.0.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -106,12 +106,12 @@ pi@raspberrypi:~ $ sudo systemctl daemon-reload
 
 To start the bridge:
 ```
-pi@raspberrypi:~ $ sudo systemctl start habridge.service
+pi@raspberrypi:~ $ sudo systemctl start ha-bridge.service
 ```
 
 To start the service at boot, use the `enable` command:
 ```
-pi@raspberrypi:~ $ sudo systemctl enable habridge.service
+pi@raspberrypi:~ $ sudo systemctl enable ha-bridge.service
 ```
 
 To look at the log, the output goes into the system log at `/var/log/syslog':
@@ -141,11 +141,11 @@ Run the latest version of ha-bridge Docker container on Raspberry Pi 3:
 ```
 pi@raspberrypi:~ $ docker pull habridge/ha-bridge-raspberrypi3
 pi@raspberrypi:~ $ docker run \
-    --name habridge \
+    --name ha-bridge \
     --rm \
     --detach \
     --net=host \
-    --volume=$PWD:/habridge/data \
+    --volume=$PWD:/ha-bridge/data \
     --volume=/etc/localtime:/etc/localtime:ro \
     --volume=/etc/timezone:/etc/timezone:ro \
     habridge/ha-bridge-raspberrypi3
@@ -153,7 +153,7 @@ pi@raspberrypi:~ $ docker run \
 
 To halt the ha-bridge Docker container use the `stop` command:
 ```
-pi@raspberrypi:~ $ docker stop habridge
+pi@raspberrypi:~ $ docker stop ha-bridge
 ```
 
 ## Run ha-bridge alongside web server already on port 80
