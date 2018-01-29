@@ -137,12 +137,13 @@ Please use the suitable image from the following list.
 * Raspberry Pi 2 (ARM): [habridge/ha-bridge-raspberry-pi2](https://hub.docker.com/r/habridge/ha-bridge-raspberry-pi2)
 * Raspberry Pi 3 (ARM): [habridge/ha-bridge-raspberrypi3](https://hub.docker.com/r/habridge/ha-bridge-raspberrypi3)
 
-Run the latest version of ha-bridge Docker container on Raspberry Pi 3:
+The following example explains how to run the latest version of ha-bridge Docker container on Raspberry Pi 3.
 ```
 pi@raspberrypi:~ $ docker pull habridge/ha-bridge-raspberrypi3
 pi@raspberrypi:~ $ docker run \
     --name ha-bridge \
     --rm \
+    --init \
     --detach \
     --net=host \
     --volume=$PWD:/ha-bridge/data \
@@ -151,10 +152,28 @@ pi@raspberrypi:~ $ docker run \
     habridge/ha-bridge-raspberrypi3
 ```
 
+To set additional arguments for ha-bridge just write them as arguments for docker run command.
+```
+pi@raspberrypi:~ $ docker run \
+     --name ha-bridge \
+     --rm \
+     --init \
+     --detach \
+     --net=host \
+     --volume=$PWD:/ha-bridge/data \
+     --volume=/etc/localtime:/etc/localtime:ro \
+     --volume=/etc/timezone:/etc/timezone:ro \
+     habridge/ha-bridge-raspberry-pi3 \
+     -Dserver.port=8080 \
+     -Dsecurity.key=secret
+```
+
 To halt the ha-bridge Docker container use the `stop` command:
 ```
 pi@raspberrypi:~ $ docker stop ha-bridge
 ```
+
+If you like to automate the deployment just use the Ansible role on https://github.com/escalate/ansible-ha-bridge-docker.
 
 ## Run ha-bridge alongside web server already on port 80
 These examples will help you proxy your current webserver requests to the ha-bridge running on a different port, such as 8080.
