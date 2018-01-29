@@ -76,8 +76,12 @@ public class BroadlinkHome implements Home {
 					return this;
 				}
 	    		for(int i = 0; i < clients.length; i++) {
-	    			if(clients[i].getDeviceType() != BLDevice.DEV_A1)
+	    			if(clients[i].getDeviceType() != BLDevice.DEV_A1) {
 	    				broadlinkMap.put(clients[i].getHost() + "-" + String.format("%04x", clients[i].getDeviceType()), clients[i]);
+	    				log.debug("Adding Device to Map - host: " + clients[i].getHost() + ", device Type: " + clients[i].getDeviceDescription() + ", mac: " + (clients[i].getMac() == null ? "no Mac in client" : clients[i].getMac().getMacString()));
+	    			} else {
+	    				log.debug("Ignoring A1 Device - host: " + clients[i].getHost() + ", device Type: " + clients[i].getDeviceDescription() + ", mac: " + (clients[i].getMac() == null ? "no Mac in client" : clients[i].getMac().getMacString()));
+	    			}
 	    		}
 			} catch (IOException e) {
 				log.warn("Could not discover Broadlinks, with IO Exception", e);
@@ -300,6 +304,8 @@ public class BroadlinkHome implements Home {
 		if(!validBroadlink)
 			return;
 		log.debug("Closing Home.");
+		broadlinkMap.clear();
+		broadlinkMap = null;
 		if(closed) {
 			log.debug("Home is already closed....");
 			return;
