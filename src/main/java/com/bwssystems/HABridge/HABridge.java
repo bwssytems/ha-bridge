@@ -45,6 +45,7 @@ public class HABridge {
     	@SuppressWarnings("unused")
 		HttpClientPool thePool;
        
+        log.info("HA Bridge startup sequence...");
         theVersion = new Version();
         // Singleton initialization
         thePool = new HttpClientPool();

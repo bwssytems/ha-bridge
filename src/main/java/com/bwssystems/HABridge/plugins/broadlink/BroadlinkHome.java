@@ -1,6 +1,8 @@
 package com.bwssystems.HABridge.plugins.broadlink;
 
 import java.io.IOException;
+import java.net.BindException;
+import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,13 +64,15 @@ public class BroadlinkHome implements Home {
 		log.info("Broadlink Home created." + (validBroadlink ? "" : " No Broadlinks configured.") + (isDevMode ? " DevMode is set." : ""));
 		if(validBroadlink) {
 			broadlinkMap = new HashMap<String, BLDevice>();
+			int aDiscoverPort = Configuration.BROADLINK_DISCOVER_PORT;
+			while(aDiscoverPort > 0) {
 	    	try {
 	    		log.info("Broadlink discover....");
 				if(isDevMode) {
-					clients = TestBLDevice.discoverDevices(InetAddress.getByName(bridgeSettings.getBridgeSettingsDescriptor().getUpnpConfigAddress()), Configuration.BROADLINK_DISCOVER_PORT, Configuration.BROADLINK_DISCONVER_TIMEOUT);
+					clients = TestBLDevice.discoverDevices(InetAddress.getByName(bridgeSettings.getBridgeSettingsDescriptor().getUpnpConfigAddress()), aDiscoverPort, Configuration.BROADLINK_DISCONVER_TIMEOUT);
 				}
 				else
-					clients = BLDevice.discoverDevices(InetAddress.getByName(bridgeSettings.getBridgeSettingsDescriptor().getUpnpConfigAddress()), Configuration.BROADLINK_DISCOVER_PORT, Configuration.BROADLINK_DISCONVER_TIMEOUT);
+					clients = BLDevice.discoverDevices(InetAddress.getByName(bridgeSettings.getBridgeSettingsDescriptor().getUpnpConfigAddress()), aDiscoverPort, Configuration.BROADLINK_DISCONVER_TIMEOUT);
 				if(clients.length <= 0) {
 					log.warn("Did not discover any Broadlinks, try again with bridge reinitialization");
 					broadlinkMap = null;
@@ -83,11 +87,17 @@ public class BroadlinkHome implements Home {
 	    				log.debug("Ignoring A1 Device - host: " + clients[i].getHost() + ", device Type: " + clients[i].getDeviceDescription() + ", mac: " + (clients[i].getMac() == null ? "no Mac in client" : clients[i].getMac().getMacString()));
 	    			}
 	    		}
+			} catch (BindException e) {
+				log.warn("Could not discover Broadlinks, Port in use, increasing by 11");
+				aDiscoverPort += 11;
+				if(aDiscoverPort > Configuration.BROADLINK_DISCOVER_PORT + 110)
+					aDiscoverPort = 0;
 			} catch (IOException e) {
 				log.warn("Could not discover Broadlinks, with IO Exception", e);
 				broadlinkMap = null;
 				validBroadlink = false;
 				return this;
+			}
 			}
 	    }
 		return this;
@@ -229,7 +239,9 @@ public class BroadlinkHome implements Home {
 			                try {
 			                	if(!isDevMode)
 			                		theDevice.auth();
-								((RM2Device) theDevice).sendCmdPkt(Configuration.BROADLINK_DISCONVER_TIMEOUT, thePayload);
+			                	DatagramPacket thePacket = ((RM2Device) theDevice).sendCmdPkt(Configuration.BROADLINK_DISCONVER_TIMEOUT, thePayload);
+			                	String returnData = DatatypeConverter.printHexBinary(thePacket.getData());
+			                	log.debug("RM2 Device data return: <<<" + returnData + ">>>");
 							} catch (IOException e) {
 								log.error("Call to " + _rm2 + " device failed with exception.", e);
 								theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
