@@ -28,7 +28,6 @@ import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
 import com.github.mob41.blapi.BLDevice;
 import com.github.mob41.blapi.MP1Device;
-import com.github.mob41.blapi.RM2Device;
 import com.github.mob41.blapi.SP1Device;
 import com.github.mob41.blapi.SP2Device;
 import com.github.mob41.blapi.pkt.cmd.rm2.SendDataCmdPayload;
@@ -159,18 +158,24 @@ public class BroadlinkHome implements Home {
 		            	else
 		            		changeState = false;
 		                try {
-		                	if(!isDevMode)
-		                		theDevice.auth();
+		                	if(!isDevMode) {
+		                		if(!theDevice.auth()) {
+									log.error("Call to " + broadlinkCommand.getId() + " - " + _rm2 + " device authorization failed.");
+									theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+											+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _rm2 + " device auth error.\", \"parameter\": \"/lights/"
+											+ lightId + "state\"}}]";
+								}	
+		                	}
 							((MP1Device) theDevice).setState(Integer.parseInt(broadlinkCommand.getData()), changeState);
 						} catch (NumberFormatException e1) {
-							log.error("Call to " + _mp1 + " device failed with number format exception.", e1);
+							log.error("Call to " + broadlinkCommand.getId() + " - " + _mp1 + " device failed with number format exception.", e1);
 							theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-									+ "\",\"description\": \"" + _mp1 + " number format error.\", \"parameter\": \"/lights/"
+									+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _mp1 + " number format error.\", \"parameter\": \"/lights/"
 									+ lightId + "state\"}}]";
 						} catch (Exception e1) {
-							log.error("Call to " + _mp1 + " device failed with exception.", e1);
+							log.error("Call to " + broadlinkCommand.getId() + " - " + _mp1 + " device failed with exception.", e1);
 							theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-									+ "\",\"description\": \"" + _mp1 + " device call error.\", \"parameter\": \"/lights/"
+									+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _mp1 + " device call error.\", \"parameter\": \"/lights/"
 									+ lightId + "state\"}}]";
 						};
 		                break;
@@ -190,13 +195,19 @@ public class BroadlinkHome implements Home {
 		            	else
 		            		changeState = false;
 		                try {
-		                	if(!isDevMode)
-		                		theDevice.auth();
+		                	if(!isDevMode) {
+		                		if(!theDevice.auth()) {
+									log.error("Call to " + broadlinkCommand.getId() + " - " + _rm2 + " device authorization failed.");
+									theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+											+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _rm2 + " device auth error.\", \"parameter\": \"/lights/"
+											+ lightId + "state\"}}]";
+								}	
+		                	}
 							((SP2Device) theDevice).setState(changeState);
 						} catch (Exception e1) {
-							log.error("Call to " + _sp2 + " device failed with exception.", e1);
+							log.error("Call to " + broadlinkCommand.getId() + " - " + _sp2 + " device failed with exception.", e1);
 							theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-									+ "\",\"description\": \"" + _sp2 + " device call error.\", \"parameter\": \"/lights/"
+									+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _sp2 + " device call error.\", \"parameter\": \"/lights/"
 									+ lightId + "state\"}}]";
 						}
 		                break;
@@ -206,11 +217,17 @@ public class BroadlinkHome implements Home {
 		            	else
 		            		changeState = false;
 		                try {
-		                	if(!isDevMode)
-		                		theDevice.auth();
+		                	if(!isDevMode) {
+		                		if(!theDevice.auth()) {
+									log.error("Call to " + broadlinkCommand.getId() + " - " + _rm2 + " device authorization failed.");
+									theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+											+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _rm2 + " device auth error.\", \"parameter\": \"/lights/"
+											+ lightId + "state\"}}]";
+								}	
+		                	}
 							((SP1Device) theDevice).setPower(changeState);
 						} catch (Exception e) {
-							log.error("Call to " + _sp1 + " device failed with exception.", e);
+							log.error("Call to " + broadlinkCommand.getId() + " - " + _sp1 + " device failed with exception.", e);
 							theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 									+ "\",\"description\": \"" + _sp1 + " device call error.\", \"parameter\": \"/lights/"
 									+ lightId + "state\"}}]";
@@ -238,22 +255,29 @@ public class BroadlinkHome implements Home {
 			            	byte[] theData = DatatypeConverter.parseHexBinary(theStringData);
 			            	SendDataCmdPayload thePayload = new SendDataCmdPayload(theData);
 			                try {
-			                	if(!isDevMode)
-			                		theDevice.auth();
-			                	DatagramPacket thePacket = ((RM2Device) theDevice).sendCmdPkt(Configuration.BROADLINK_DISCONVER_TIMEOUT, thePayload);
+			                	if(!isDevMode) {
+			                		if(!theDevice.auth()) {
+										log.error("Call to " + broadlinkCommand.getId() + " - " + _rm2 + " device authorization failed.");
+										theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+												+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _rm2 + " device auth error.\", \"parameter\": \"/lights/"
+												+ lightId + "state\"}}]";
+									}	
+			                	}
+			                		
+			                	DatagramPacket thePacket = theDevice.sendCmdPkt(Configuration.BROADLINK_DISCONVER_TIMEOUT, thePayload);
 			                	String returnData = DatatypeConverter.printHexBinary(thePacket.getData());
 			                	log.debug("RM2 Device data return: <<<" + returnData + ">>>");
 							} catch (IOException e) {
-								log.error("Call to " + _rm2 + " device failed with exception.", e);
+								log.error("Call to " + broadlinkCommand.getId() + " - " + _rm2 + " device failed with exception.", e);
 								theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-										+ "\",\"description\": \"" + _rm2 + " device call error.\", \"parameter\": \"/lights/"
+										+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _rm2 + " device call error.\", \"parameter\": \"/lights/"
 										+ lightId + "state\"}}]";
 							}
 		            	}
 		            	else {
-							log.error("Call to " + _rm2 + " with no data, noop");
+							log.error("Call to " + broadlinkCommand.getId() + " - " + _rm2 + " with no data, noop");
 							theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-									+ "\",\"description\": \"" + _rm2 + " could not call device without data.\", \"parameter\": \"/lights/"
+									+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _rm2 + " could not call device without data.\", \"parameter\": \"/lights/"
 									+ lightId + "state\"}}]";
 		            	}
 		                break;
