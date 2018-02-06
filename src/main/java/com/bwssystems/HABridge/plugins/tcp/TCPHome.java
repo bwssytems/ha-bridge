@@ -89,6 +89,9 @@ public class TCPHome implements Home {
 					theUrlBody = ColorDecode.replaceColorData(theUrlBody, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), true);	
 				}
 				theUrlBody = DeviceDataDecode.replaceDeviceData(theUrlBody, device);
+				if (colorData != null) {
+					theUrlBody = ColorDecode.replaceColorData(theUrlBody, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), true);	
+				}
 				sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
 			} else {
 				theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, false);
@@ -96,6 +99,9 @@ public class TCPHome implements Home {
 					theUrlBody = ColorDecode.replaceColorData(theUrlBody, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);	
 				}
 				theUrlBody = DeviceDataDecode.replaceDeviceData(theUrlBody, device);
+				if (colorData != null) {
+					theUrlBody = ColorDecode.replaceColorData(theUrlBody, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);	
+				}
 				theUrlBody = StringEscapeUtils.unescapeJava(theUrlBody);
 				sendData = theUrlBody.getBytes();
 			}
