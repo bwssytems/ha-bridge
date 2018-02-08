@@ -150,4 +150,9 @@ public class MQTTHome implements Home {
 		}
 		return this;
 	}
+	
+	@Override
+	public void refresh() {
+		// noop		
+	}
 }

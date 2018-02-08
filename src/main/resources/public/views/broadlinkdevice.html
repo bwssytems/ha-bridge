@@ -52,6 +52,10 @@
 			feature. Select your items and dim control type if wanted, then click
 			bulk add below. Your items will be added with on and off or dim and
 			off if selected with the name of the device from the Broadlink.</p>
+		<p>
+			<button class="btn btn-success" type="submit"
+				ng-click="refreshDevices()">Refresh</button>
+		</p>
 	<scrollable-table watch="bridge.broadlinkdevices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>

@@ -118,6 +118,11 @@ public class HassHome implements Home {
 	}
 	
 	@Override
+	public void refresh() {
+		// noop		
+	}
+	
+	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
 			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		String theReturn = null;

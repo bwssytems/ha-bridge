@@ -172,5 +172,9 @@ public class TCPHome implements Home {
 		}
 		closed = true;
 	}
-
+	
+	@Override
+	public void refresh() {
+		// noop		
+	}
 }

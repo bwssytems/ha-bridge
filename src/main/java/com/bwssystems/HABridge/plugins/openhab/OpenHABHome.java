@@ -200,6 +200,9 @@ public class OpenHABHome implements Home  {
 		openhabMap = null;
 		closed = true;		
 	}
-
-
+	
+	@Override
+	public void refresh() {
+		// noop		
+	}
 }

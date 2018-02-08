@@ -151,6 +151,11 @@ public class FHEMHome implements Home {
 		return deviceList;
 	}
 	
+	@Override
+	public void refresh() {
+		// noop		
+	}
+	
 	private Boolean addFHEMDevices(List<FHEMDevice> theDeviceList, List<FHEMDevice> theSourceList, String theKey) {
 		Iterator<FHEMDevice> devices = theSourceList.iterator();
 		while(devices.hasNext()) {

@@ -147,4 +147,9 @@ public class HomeWizardHome implements Home {
 		plugGateways = null;
 		closed = true;
 	}
+	
+	@Override
+	public void refresh() {
+		// noop		
+	}
 }

@@ -118,4 +118,9 @@ public class VeraHome implements Home {
 		veras = null;
 		closed = true;
 	}
+	
+	@Override
+	public void refresh() {
+		// noop		
+	}
 }

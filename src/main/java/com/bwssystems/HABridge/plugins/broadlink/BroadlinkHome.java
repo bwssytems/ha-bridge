@@ -57,10 +57,11 @@ public class BroadlinkHome implements Home {
 	@Override
 	public Home createHome(BridgeSettings bridgeSettings) {
 		broadlinkMap = null;
-		bridgeSettingsDesc = bridgeSettings.getBridgeSettingsDescriptor();
-
         isDevMode = Boolean.parseBoolean(System.getProperty("dev.mode", "false"));
+		bridgeSettingsDesc = bridgeSettings.getBridgeSettingsDescriptor();
 		validBroadlink = bridgeSettings.getBridgeSettingsDescriptor().isValidBroadlink();
+
+		broadlinkDiscover();
 
 		log.info("Broadlink Home created." + (validBroadlink ? "" : " No Broadlinks configured.") + (isDevMode ? " DevMode is set." : ""));
 		return this;
@@ -68,48 +69,11 @@ public class BroadlinkHome implements Home {
 
 	@Override
 	public Object getItems(String type) {
-		BLDevice[] clients;
+		if(!validBroadlink || broadlinkMap == null)
+			return null;
 		BroadlinkEntry theResponse = null;
 		List<BroadlinkEntry> deviceList = new ArrayList<BroadlinkEntry>();
 		log.debug("consolidating devices for Broadlink");
-		if(!validBroadlink)
-			return null;
-		broadlinkMap = new HashMap<String, BLDevice>();
-		int aDiscoverPort = Configuration.BROADLINK_DISCOVER_PORT;
-		while(aDiscoverPort > 0) {
-	    	try {
-	    		log.info("Broadlink discover....");
-				if(isDevMode) {
-					clients = TestBLDevice.discoverDevices(InetAddress.getByName(bridgeSettingsDesc.getUpnpConfigAddress()), aDiscoverPort, Configuration.BROADLINK_DISCONVER_TIMEOUT);
-				}
-				else
-					clients = BLDevice.discoverDevices(InetAddress.getByName(bridgeSettingsDesc.getUpnpConfigAddress()), aDiscoverPort, Configuration.BROADLINK_DISCONVER_TIMEOUT);
-				if(clients.length <= 0) {
-					log.warn("Did not discover any Broadlinks.");
-					broadlinkMap = null;
-					return deviceList;
-				}
-	    		for(int i = 0; i < clients.length; i++) {
-	    			if(clients[i].getDeviceType() != BLDevice.DEV_A1) {
-	    				broadlinkMap.put(clients[i].getHost() + "-" + String.format("%04x", clients[i].getDeviceType()), clients[i]);
-	    				log.debug("Adding Device to Map - host: " + clients[i].getHost() + ", device Type: " + clients[i].getDeviceDescription() + ", mac: " + (clients[i].getMac() == null ? "no Mac in client" : clients[i].getMac().getMacString()));
-	    			} else {
-	    				log.debug("Ignoring A1 Device - host: " + clients[i].getHost() + ", device Type: " + clients[i].getDeviceDescription() + ", mac: " + (clients[i].getMac() == null ? "no Mac in client" : clients[i].getMac().getMacString()));
-	    			}
-	    		}
-				aDiscoverPort = 0;
-			} catch (BindException e) {
-				log.warn("Could not discover Broadlinks, Port in use, increasing by 11");
-				aDiscoverPort += 11;
-				if(aDiscoverPort > Configuration.BROADLINK_DISCOVER_PORT + 110)
-					aDiscoverPort = 0;
-			} catch (IOException e) {
-				log.warn("Could not discover Broadlinks, with IO Exception", e);
-				broadlinkMap = null;
-				validBroadlink = false;
-				aDiscoverPort = 0;
-			}
-		}
 		Iterator<String> keys = broadlinkMap.keySet().iterator();
 		while(keys.hasNext()) {
 			String key = keys.next();
@@ -122,6 +86,13 @@ public class BroadlinkHome implements Home {
 			}
 		}
 		return deviceList;
+	}
+	
+	@Override
+	public void refresh() {
+		if(validBroadlink)
+			broadlinkDiscover();
+		
 	}
 
 	@Override
@@ -336,6 +307,51 @@ public class BroadlinkHome implements Home {
         }
 		return theType;
 	}
+
+	public BLDevice[] broadlinkDiscover () {
+		BLDevice[] clients = null;
+		int aDiscoverPort = Configuration.BROADLINK_DISCOVER_PORT;
+		while(aDiscoverPort > 0) {
+	    	try {
+	    		log.info("Broadlink discover....");
+				if(isDevMode) {
+					clients = TestBLDevice.discoverDevices(InetAddress.getByName(bridgeSettingsDesc.getUpnpConfigAddress()), aDiscoverPort, Configuration.BROADLINK_DISCONVER_TIMEOUT);
+				}
+				else
+					clients = BLDevice.discoverDevices(InetAddress.getByName(bridgeSettingsDesc.getUpnpConfigAddress()), aDiscoverPort, Configuration.BROADLINK_DISCONVER_TIMEOUT);
+	    		for(int i = 0; i < clients.length; i++) {
+	    			if(clients[i].getDeviceType() != BLDevice.DEV_A1) {
+	    				broadlinkMap.put(clients[i].getHost() + "-" + String.format("%04x", clients[i].getDeviceType()), clients[i]);
+	    				log.debug("Adding Device to Map - host: " + clients[i].getHost() + ", device Type: " + clients[i].getDeviceDescription() + ", mac: " + (clients[i].getMac() == null ? "no Mac in client" : clients[i].getMac().getMacString()));
+	    			} else {
+	    				log.debug("Ignoring A1 Device - host: " + clients[i].getHost() + ", device Type: " + clients[i].getDeviceDescription() + ", mac: " + (clients[i].getMac() == null ? "no Mac in client" : clients[i].getMac().getMacString()));
+	    			}
+	    		}
+				aDiscoverPort = 0;
+			} catch (BindException e) {
+				log.warn("Could not discover Broadlinks, Port in use, increasing by 11");
+				aDiscoverPort += 11;
+				if(aDiscoverPort > Configuration.BROADLINK_DISCOVER_PORT + 110)
+					aDiscoverPort = 0;
+			} catch (IOException e) {
+				log.warn("Could not discover Broadlinks, with IO Exception", e);
+				broadlinkMap = null;
+				validBroadlink = false;
+				aDiscoverPort = 0;
+			}
+		}
+		if(clients == null || clients.length <= 0) {
+			log.warn("Did not discover any Broadlinks.");
+			broadlinkMap = null;
+		} else {
+			broadlinkMap = new HashMap<String, BLDevice>();
+			for(BLDevice aDevice : clients) {
+				broadlinkMap.put(aDevice.getHost() + "-" + String.format("%04x", aDevice.getDeviceType()), aDevice);
+			}
+		}
+		return clients;
+	}
+	
 	@Override
 	public void closeHome() {
 		if(!validBroadlink)

@@ -338,6 +338,14 @@ public class DeviceResource {
 	      	return new DeviceMapTypes().getDeviceMapTypes();
 	    }, new JsonTransformer());
 
+    	get (API_CONTEXT + "/refresh/:typeIndex", "application/json", (request, response) -> {
+    		String typeIndex = request.params(":typeIndex");
+	    	log.debug("Refresh Home: " + typeIndex);
+	      	response.status(HttpStatus.SC_OK);
+	      	homeManager.findResource(typeIndex).refresh();
+	      	return null;
+	    }, new JsonTransformer());
+
 	    // http://ip_address:port/api/devices/exec/renumber CORS request
 	    options(API_CONTEXT + "/exec/renumber", "application/json", (request, response) -> {
 	        response.status(HttpStatus.SC_OK);

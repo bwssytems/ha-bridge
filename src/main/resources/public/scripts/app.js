@@ -959,6 +959,17 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 		);
 	};
 
+	this.refreshDevices = function (typeIndex) {
+		return $http.get(this.state.base + "/refresh/" + typeIndex).then(
+				function (response) {
+					self.displaySuccess("Refresh devices request complete");
+				},
+				function (error) {
+					self.displayWarn("Refresh devices request Error: ", error);
+				}
+		);
+	};
+
 	this.formatCallItem = function (currentItem) {
 		if(!currentItem.startsWith("{\"item") && !currentItem.startsWith("[{\"item")) {
 			if (currentItem.startsWith("[") || currentItem.startsWith("{"))
@@ -3518,6 +3529,11 @@ app.controller('LifxController', function ($scope, $location, bridgeService, ngD
 		$scope.device = bridgeService.state.device;
 	};
 
+	$scope.refreshDevices = function () {
+		bridgeService.refreshDevices("lifxDevice");
+		bridgeService.viewLifxDevices();
+	};
+
 	$scope.buildDeviceUrls = function (lifxdevice, dim_control, buildonly) {
 		dimpayload = angular.toJson(lifxdevice);
 		onpayload = angular.toJson(lifxdevice);
@@ -4072,6 +4088,11 @@ app.controller('BroadlinkController', function ($scope, $location, bridgeService
 	$scope.clearDevice = function () {
 		bridgeService.clearDevice();
 		$scope.device = bridgeService.state.device;
+	};
+
+	$scope.refreshDevices = function () {
+		bridgeService.refreshDevices("broadlinkDevice");
+		bridgeService.viewBroadlinkDevices();
 	};
 
 	$scope.buildDeviceUrls = function (broadlinkdevice, dim_control, ondata, dimdata, offdata, colordata, buildonly) {

@@ -125,4 +125,9 @@ public class SomfyHome implements Home  {
 		somfys = null;
 		closed = true;
 	}
+	
+	@Override
+	public void refresh() {
+		// noop		
+	}
 }

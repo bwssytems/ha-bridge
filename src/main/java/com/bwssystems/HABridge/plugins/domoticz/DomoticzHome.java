@@ -66,6 +66,11 @@ public class DomoticzHome implements Home {
 		return deviceList;
 	}
 	
+	@Override
+	public void refresh() {
+		// noop
+	}
+	
 	private Boolean addDomoticzDevices(List<DomoticzDevice> theDeviceList, List<DomoticzDevice> theSourceList, String theKey) {
 		if(!validDomoticz)
 			return null;

@@ -139,5 +139,9 @@ public class HTTPHome implements Home {
 		anHttpHandler = null;
 		closed = true;
 	}
-
+	
+	@Override
+	public void refresh() {
+		// noop		
+	}
 }

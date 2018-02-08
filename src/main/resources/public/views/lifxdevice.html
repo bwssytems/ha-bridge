@@ -41,6 +41,10 @@
 			feature. Select your items and dim control type if wanted, then click
 			bulk add below. Your items will be added with on, off and dim 
 			with the name of the device from the LIFX device.</p>
+		<p>
+			<button class="btn btn-success" type="submit"
+				ng-click="refreshDevices()">Refresh</button>
+		</p>
 	<scrollable-table watch="bridge.lifxdevices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
