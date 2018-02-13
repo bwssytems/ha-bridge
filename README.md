@@ -240,7 +240,7 @@ At the bottom of the screen is the "Bridge Device DB Backup" which can be access
 #### Renumber Devices
 This changes the numbering of the added devices to start at 1 and goes up from there. It was originally intended for a conversion from the previous system version that used large numbers and was not necessary. This also allows the system to try and number sequentially. If you use this button, you will need to re-discover your devices as their ID's will have changed.
 #### Link
-If this is present, you have enabled the ue link button feature for the ha-bridge. If you want a new system to recognize the ha-bridge, you will need to press this button when you are doign a discovery.
+If this is present, you have enabled the ue link button feature for the ha-bridge. If you want a new system to recognize the ha-bridge, you will need to press this button when you are doing a discovery.
 ### The Bridge Control Tab
 This is where all of the configuration occurs for what ports and IP's the bridge runs on. It also contains the configurations for target devices so that Helper Tabs for configuration can be added as well as the connection information to control those devices.
 #### Bridge server
