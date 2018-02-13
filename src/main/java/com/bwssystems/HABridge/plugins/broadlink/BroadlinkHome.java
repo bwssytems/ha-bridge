@@ -108,7 +108,7 @@ public class BroadlinkHome implements Home {
 					+ "\",\"description\": \"Should not get here, no LifxDevices configured\", \"parameter\": \"/lights/"
 					+ lightId + "state\"}}]";
 
-		} else {
+		} else if(broadlinkMap != null) {
 			BroadlinkEntry broadlinkCommand = null;
 			broadlinkCommand = new Gson().fromJson(anItem.getItem().getAsString(), BroadlinkEntry.class);
 			BLDevice theDevice = broadlinkMap.get(broadlinkCommand.getId());
@@ -255,6 +255,11 @@ public class BroadlinkHome implements Home {
 
 		            }
 			}
+		} else {
+			log.warn("Should not get here, no BroadlinkDevices available");
+			theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+					+ "\",\"description\": \"Should not get here, no Broadlinks available\", \"parameter\": \"/lights/"
+					+ lightId + "state\"}}]";
 		}
 		return theReturn;
 	}
@@ -311,6 +316,7 @@ public class BroadlinkHome implements Home {
 	public BLDevice[] broadlinkDiscover () {
 		BLDevice[] clients = null;
 		int aDiscoverPort = Configuration.BROADLINK_DISCOVER_PORT;
+		broadlinkMap = new HashMap<String, BLDevice>();
 		while(aDiscoverPort > 0) {
 	    	try {
 	    		log.info("Broadlink discover....");
