@@ -198,7 +198,8 @@ public class LifxHome implements Home {
 			log.debug("Home is already closed....");
 			return;
 		}
-		client.close();
+		if(client != null)
+			client.close();
 		closed = true;
 	}
     private static class MyLightListener implements LFXLightCollectionListener {

@@ -236,7 +236,11 @@ public class BroadlinkHome implements Home {
 			                	}
 			                		
 			                	DatagramPacket thePacket = theDevice.sendCmdPkt(Configuration.BROADLINK_DISCONVER_TIMEOUT, thePayload);
-			                	String returnData = DatatypeConverter.printHexBinary(thePacket.getData());
+			                	String returnData = null;
+			                	if(thePacket != null)
+			                		returnData = DatatypeConverter.printHexBinary(thePacket.getData());
+			                	else
+			                		returnData = "No Data - null";
 			                	log.debug("RM2 Device data return: <<<" + returnData + ">>>");
 							} catch (IOException e) {
 								log.error("Call to " + broadlinkCommand.getId() + " - " + _rm2 + " device failed with exception.", e);

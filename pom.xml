@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>5.2.0RC18</version>
+	<version>5.2.0RC19</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
@@ -129,7 +129,7 @@
 		<dependency>
 		    <groupId>com.github.bwssytems</groupId>
 		    <artifactId>broadlink-java-api</artifactId>
-		    <version>52f6bcb628</version>
+		    <version>c105234547</version>
 		</dependency>
 		<dependency>
 		  <groupId>org.apache.commons</groupId>
