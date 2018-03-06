@@ -75,7 +75,7 @@
 				<th>Build Actions</th>
 			</tr>
 		</thead>
-		<tr ng-if="broadlinkdevice.type === 'SP1' || broadlinkdevice.type === 'SP2'" ng-repeat="broadlinkdevice in bridge.broadlinkdevices">
+		<tr ng-if="broadlinkdevice.baseType === '0000' || broadlinkdevice.baseType === '2711'" ng-repeat="broadlinkdevice in bridge.broadlinkdevices">
 			<td>{{$index+1}}</td>
 			<td><input type="checkbox" name="bulk.devices[]"
 				value="{{broadlinkdevice.id}}"
@@ -101,7 +101,7 @@
 						ng-click="buildDeviceUrls(broadlinkdevice, device_dim_control, null, null, null, null, false)">Build Item</button>
 				</td>
 		</tr>
-		<tr  ng-if="broadlinkdevice.type === 'MP1'" ng-repeat="broadlinkdevice in bridge.broadlinkdevices">
+		<tr  ng-if="broadlinkdevice.baseType === '4EB5'" ng-repeat="broadlinkdevice in bridge.broadlinkdevices">
 			<td>{{$index+1}}</td>
 			<td><input type="checkbox" name="bulk.devices[]"
 				value="{{broadlinkdevice.id}}"
@@ -140,7 +140,7 @@
 						ng-click="buildDeviceUrls(broadlinkdevice, device_dim_control, ondata, null, offdata, null, false)">Build Item</button>
 				</td>
 		</tr>
-		<tr  ng-if="broadlinkdevice.type === 'RM2'" ng-repeat="broadlinkdevice in bridge.broadlinkdevices">
+		<tr  ng-if="broadlinkdevice.baseType === '2712'" ng-repeat="broadlinkdevice in bridge.broadlinkdevices">
 			<td>{{$index+1}}</td>
 			<td><input type="checkbox" name="bulk.devices[]"
 				value="{{broadlinkdevice.id}}"

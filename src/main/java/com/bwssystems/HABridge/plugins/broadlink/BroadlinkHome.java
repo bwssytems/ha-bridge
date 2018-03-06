@@ -1,6 +1,7 @@
 package com.bwssystems.HABridge.plugins.broadlink;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.BindException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -31,16 +32,13 @@ import com.github.mob41.blapi.BLDevice;
 import com.github.mob41.blapi.MP1Device;
 import com.github.mob41.blapi.SP1Device;
 import com.github.mob41.blapi.SP2Device;
+import com.github.mob41.blapi.mac.Mac;
+import com.github.mob41.blapi.mac.MacFormatException;
 import com.github.mob41.blapi.pkt.cmd.rm2.SendDataCmdPayload;
 import com.google.gson.Gson;
 
 public class BroadlinkHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(BroadlinkHome.class);
-    private static final String _a1 = "A1";
-    private static final String _mp1 = "MP1";
-    private static final String _sp1 = "SP1";
-    private static final String _sp2 = "SP2";
-    private static final String _rm2 = "RM2";
 	private Map<String, BLDevice> broadlinkMap;
 	private Boolean validBroadlink;
 	private boolean closed;
@@ -108,182 +106,153 @@ public class BroadlinkHome implements Home {
 					+ "\",\"description\": \"Should not get here, no LifxDevices configured\", \"parameter\": \"/lights/"
 					+ lightId + "state\"}}]";
 
-		} else if(broadlinkMap != null) {
+		} else {
 			BroadlinkEntry broadlinkCommand = null;
 			broadlinkCommand = new Gson().fromJson(anItem.getItem().getAsString(), BroadlinkEntry.class);
-			BLDevice theDevice = broadlinkMap.get(broadlinkCommand.getId());
+			BLDevice theDevice = null;
+			if(broadlinkMap != null && !broadlinkMap.isEmpty())
+				theDevice = broadlinkMap.get(broadlinkCommand.getId());
+
 			if (theDevice == null) {
-				log.warn("Should not get here, no BroadlinkDevices available");
+				if(broadlinkCommand.hasIpAndMac()) {
+					byte[] intBytes = DatatypeConverter.parseHexBinary(broadlinkCommand.getType());
+					BigInteger theBig = new BigInteger(intBytes);
+					int theType =  theBig.intValue();
+					try {
+		            	theDevice = BLDevice.createInstance((short)theType, broadlinkCommand.getIpAddr(), new Mac(broadlinkCommand.getMacAddr()));
+					} catch (MacFormatException e) {
+						log.warn("Could not initialize BroadlinkDevice device due to Mac (" + broadlinkCommand.getId() + ") format exception: " + e.getMessage());
+						theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+								+ "\",\"description\": \"Could not initialize BroadlinkDevice device due to Mac format exception\", \"parameter\": \"/lights/"
+								+ lightId + "state\"}}]";
+					} catch (IOException e) {
+						log.warn("Could not initialize BroadlinkDevice device due to IP Address (" + broadlinkCommand.getId() + ") exception: " + e.getMessage());
+						theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+								+ "\",\"description\": \"Could not initialize BroadlinkDevice device due to IP Address exception\", \"parameter\": \"/lights/"
+								+ lightId + "state\"}}]";
+					} catch (Exception e) {
+						log.warn("Could not initialize BroadlinkDevice device due to (" + broadlinkCommand.getId() + ") exception: " + e.getMessage());
+						theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+								+ "\",\"description\": \"Could not initialize BroadlinkDevice device due to exception\", \"parameter\": \"/lights/"
+								+ lightId + "state\"}}]";
+					}
+
+	            	if(broadlinkMap == null)
+						broadlinkMap = new HashMap<String, BLDevice>();
+					
+					String newId = theDevice.getHost() + "-" + String.format("%04x", theDevice.getDeviceType());
+					if(broadlinkMap.get(newId) == null)
+	    				broadlinkMap.put(newId, theDevice);		
+				}
+			}
+			if (theDevice == null) {
+				log.warn("Should not get here, no BroadlinkDevice not available");
 				theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 						+ "\",\"description\": \"Should not get here, no Broadlinks available\", \"parameter\": \"/lights/"
 						+ lightId + "state\"}}]";
 			} else {
 					log.debug("calling BroadlinkDevice: " + broadlinkCommand.getName());
-		            switch (theDevice.getDeviceType()) {
-		            case BLDevice.DEV_A1:
-		            	log.debug("Broadlink A1 device called and not supported. No Action, device name = " + device.getName() + ", id= " + broadlinkCommand.getId());
-		                break;
-		            case BLDevice.DEV_MP1:
-		            	if(broadlinkCommand.getCommand().equals("on"))
-		            		changeState = true;
-		            	else
-		            		changeState = false;
-		                try {
-		                	if(!isDevMode) {
-		                		if(!theDevice.auth()) {
-									log.error("Call to " + broadlinkCommand.getId() + " - " + _rm2 + " device authorization failed.");
-									theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-											+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _rm2 + " device auth error.\", \"parameter\": \"/lights/"
-											+ lightId + "state\"}}]";
-								}	
-		                	}
-							((MP1Device) theDevice).setState(Integer.parseInt(broadlinkCommand.getData()), changeState);
-						} catch (NumberFormatException e1) {
-							log.error("Call to " + broadlinkCommand.getId() + " - " + _mp1 + " device failed with number format exception.", e1);
-							theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-									+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _mp1 + " number format error.\", \"parameter\": \"/lights/"
-									+ lightId + "state\"}}]";
-						} catch (Exception e1) {
-							log.error("Call to " + broadlinkCommand.getId() + " - " + _mp1 + " device failed with exception.", e1);
-							theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-									+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _mp1 + " device call error.\", \"parameter\": \"/lights/"
-									+ lightId + "state\"}}]";
-						};
-		                break;
-		            case BLDevice.DEV_SP2:
-		            case BLDevice.DEV_SP2_HONEYWELL_ALT1:
-		            case BLDevice.DEV_SP2_HONEYWELL_ALT2:
-		            case BLDevice.DEV_SP2_HONEYWELL_ALT3:
-		            case BLDevice.DEV_SP2_HONEYWELL_ALT4:
-		            case BLDevice.DEV_SPMINI:
-		            case BLDevice.DEV_SP3:
-		            case BLDevice.DEV_SPMINI2:
-		            case BLDevice.DEV_SPMINI_OEM_ALT1:
-		            case BLDevice.DEV_SPMINI_OEM_ALT2:
-		            case BLDevice.DEV_SPMINI_PLUS:
-		            	if(broadlinkCommand.getCommand().equals("on"))
-		            		changeState = true;
-		            	else
-		            		changeState = false;
-		                try {
-		                	if(!isDevMode) {
-		                		if(!theDevice.auth()) {
-									log.error("Call to " + broadlinkCommand.getId() + " - " + _rm2 + " device authorization failed.");
-									theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-											+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _rm2 + " device auth error.\", \"parameter\": \"/lights/"
-											+ lightId + "state\"}}]";
-								}	
-		                	}
-							((SP2Device) theDevice).setState(changeState);
-						} catch (Exception e1) {
-							log.error("Call to " + broadlinkCommand.getId() + " - " + _sp2 + " device failed with exception.", e1);
-							theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-									+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _sp2 + " device call error.\", \"parameter\": \"/lights/"
-									+ lightId + "state\"}}]";
-						}
-		                break;
-		            case BLDevice.DEV_SP1:
-		            	if(broadlinkCommand.getCommand().equals("on"))
-		            		changeState = true;
-		            	else
-		            		changeState = false;
-		                try {
-		                	if(!isDevMode) {
-		                		if(!theDevice.auth()) {
-									log.error("Call to " + broadlinkCommand.getId() + " - " + _rm2 + " device authorization failed.");
-									theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-											+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _rm2 + " device auth error.\", \"parameter\": \"/lights/"
-											+ lightId + "state\"}}]";
-								}	
-		                	}
-							((SP1Device) theDevice).setPower(changeState);
-						} catch (Exception e) {
-							log.error("Call to " + broadlinkCommand.getId() + " - " + _sp1 + " device failed with exception.", e);
-							theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-									+ "\",\"description\": \"" + _sp1 + " device call error.\", \"parameter\": \"/lights/"
-									+ lightId + "state\"}}]";
-						}
-		                break;
-		            case BLDevice.DEV_RM_2:
-		            case BLDevice.DEV_RM_MINI:
-		            case BLDevice.DEV_RM_PRO_PHICOMM:
-		            case BLDevice.DEV_RM_2_HOME_PLUS:
-		            case BLDevice.DEV_RM_2_2HOME_PLUS_GDT:
-		            case BLDevice.DEV_RM_2_PRO_PLUS:
-		            case BLDevice.DEV_RM_2_PRO_PLUS_2:
-		            case BLDevice.DEV_RM_2_PRO_PLUS_2_BL:
-		            case BLDevice.DEV_RM_MINI_SHATE:
-		            	if(broadlinkCommand.getData() != null && !broadlinkCommand.getData().trim().isEmpty()) {
-		            		theStringData = broadlinkCommand.getData().trim();
-							if(targetBri != null || targetBriInc != null) {
-								theStringData = BrightnessDecode.calculateReplaceIntensityValue(theStringData, intensity, targetBri, targetBriInc, true);
-							}
-							if(colorData != null) {
-								theStringData = ColorDecode.replaceColorData(theStringData, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), true);
-							}
-							theStringData = DeviceDataDecode.replaceDeviceData(theStringData, device);
-							theStringData = TimeDecode.replaceTimeValue(theStringData);
-			            	byte[] theData = DatatypeConverter.parseHexBinary(theStringData);
-			            	SendDataCmdPayload thePayload = new SendDataCmdPayload(theData);
-			                try {
-			                	if(!isDevMode) {
-			                		if(!theDevice.auth()) {
-										log.error("Call to " + broadlinkCommand.getId() + " - " + _rm2 + " device authorization failed.");
-										theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-												+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _rm2 + " device auth error.\", \"parameter\": \"/lights/"
-												+ lightId + "state\"}}]";
-									}	
-			                	}
-			                		
-			                	DatagramPacket thePacket = theDevice.sendCmdPkt(Configuration.BROADLINK_DISCONVER_TIMEOUT, thePayload);
-			                	String returnData = null;
-			                	if(thePacket != null)
-			                		returnData = DatatypeConverter.printHexBinary(thePacket.getData());
-			                	else
-			                		returnData = "No Data - null";
-			                	log.debug("RM2 Device data return: <<<" + returnData + ">>>");
-							} catch (IOException e) {
-								log.error("Call to " + broadlinkCommand.getId() + " - " + _rm2 + " device failed with exception.", e);
+					try {
+	                	if(!isDevMode) {
+	                		if(!theDevice.auth()) {
+								log.error("Call to " + broadlinkCommand.getId() + " device authorization failed.");
 								theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-										+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _rm2 + " device call error.\", \"parameter\": \"/lights/"
+										+ "\",\"description\": \"" + broadlinkCommand.getId() + " device auth error.\", \"parameter\": \"/lights/"
 										+ lightId + "state\"}}]";
-							}
-		            	}
-		            	else {
-							log.error("Call to " + broadlinkCommand.getId() + " - " + _rm2 + " with no data, noop");
-							theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-									+ "\",\"description\": \"" + broadlinkCommand.getId() + " - " + _rm2 + " could not call device without data.\", \"parameter\": \"/lights/"
-									+ lightId + "state\"}}]";
-		            	}
-		                break;
-
-		            }
+							}	
+	                	}
+			            switch (theDevice.getDeviceType()) {
+			            case BLDevice.DEV_A1:
+			            	log.debug("Broadlink A1 device called and not supported. No Action, device name = " + device.getName() + ", id= " + broadlinkCommand.getId());
+			                break;
+			            case BLDevice.DEV_MP1:
+			            	if(broadlinkCommand.getCommand().equals("on"))
+			            		changeState = true;
+			            	else
+			            		changeState = false;
+							((MP1Device) theDevice).setState(Integer.parseInt(broadlinkCommand.getData()), changeState);
+			                break;
+			            case BLDevice.DEV_SP2:
+			            case BLDevice.DEV_SP2_HONEYWELL_ALT1:
+			            case BLDevice.DEV_SP2_HONEYWELL_ALT2:
+			            case BLDevice.DEV_SP2_HONEYWELL_ALT3:
+			            case BLDevice.DEV_SP2_HONEYWELL_ALT4:
+			            case BLDevice.DEV_SPMINI:
+			            case BLDevice.DEV_SP3:
+			            case BLDevice.DEV_SPMINI2:
+			            case BLDevice.DEV_SPMINI_OEM_ALT1:
+			            case BLDevice.DEV_SPMINI_OEM_ALT2:
+			            case BLDevice.DEV_SPMINI_PLUS:
+			            	if(broadlinkCommand.getCommand().equals("on"))
+			            		changeState = true;
+			            	else
+			            		changeState = false;
+							((SP2Device) theDevice).setState(changeState);
+			                break;
+			            case BLDevice.DEV_SP1:
+			            	if(broadlinkCommand.getCommand().equals("on"))
+			            		changeState = true;
+			            	else
+			            		changeState = false;
+							((SP1Device) theDevice).setPower(changeState);
+			                break;
+			            case BLDevice.DEV_RM_2:
+			            case BLDevice.DEV_RM_MINI:
+			            case BLDevice.DEV_RM_PRO_PHICOMM:
+			            case BLDevice.DEV_RM_2_HOME_PLUS:
+			            case BLDevice.DEV_RM_2_2HOME_PLUS_GDT:
+			            case BLDevice.DEV_RM_2_PRO_PLUS:
+			            case BLDevice.DEV_RM_2_PRO_PLUS_2:
+			            case BLDevice.DEV_RM_2_PRO_PLUS_2_BL:
+			            case BLDevice.DEV_RM_MINI_SHATE:
+			            	if(broadlinkCommand.getData() != null && !broadlinkCommand.getData().trim().isEmpty()) {
+			            		theStringData = broadlinkCommand.getData().trim();
+								if(targetBri != null || targetBriInc != null) {
+									theStringData = BrightnessDecode.calculateReplaceIntensityValue(theStringData, intensity, targetBri, targetBriInc, true);
+								}
+								if(colorData != null) {
+									theStringData = ColorDecode.replaceColorData(theStringData, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), true);
+								}
+								theStringData = DeviceDataDecode.replaceDeviceData(theStringData, device);
+								theStringData = TimeDecode.replaceTimeValue(theStringData);
+				            	byte[] theData = DatatypeConverter.parseHexBinary(theStringData);
+				            	SendDataCmdPayload thePayload = new SendDataCmdPayload(theData);
+				                		
+				                DatagramPacket thePacket = theDevice.sendCmdPkt(Configuration.BROADLINK_DISCONVER_TIMEOUT, thePayload);
+				                String returnData = null;
+				                if(thePacket != null)
+				                	returnData = DatatypeConverter.printHexBinary(thePacket.getData());
+				                else
+				                	returnData = "No Data - null";
+				                log.debug("RM2 Device data return: <<<" + returnData + ">>>");
+			            	}
+			            	else {
+								log.error("Call to " + broadlinkCommand.getId() + " with no data, noop");
+								theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+										+ "\",\"description\": \"" + broadlinkCommand.getId() + " could not call device without data.\", \"parameter\": \"/lights/"
+										+ lightId + "state\"}}]";
+			            	}
+			                break;
+	
+			            }
+					} catch (Exception e) {
+						log.error("Call to " + broadlinkCommand.getId() + " device failed with exception: " + e.getMessage(), e);
+						theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
+								+ "\",\"description\": \"" + broadlinkCommand.getId() + " device call error.\", \"parameter\": \"/lights/"
+								+ lightId + "state\"}}]";
+					}
+		            
 			}
-		} else {
-			log.warn("Should not get here, no BroadlinkDevices available");
-			theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-					+ "\",\"description\": \"Should not get here, no Broadlinks available\", \"parameter\": \"/lights/"
-					+ lightId + "state\"}}]";
 		}
+		
 		return theReturn;
 	}
 
 	private BroadlinkEntry toEntry(BLDevice broadlinkObject) {
-		BroadlinkEntry anEntry = new BroadlinkEntry();
-		anEntry.setId(broadlinkObject.getHost() + "-" + String.format("%04x", broadlinkObject.getDeviceType()));
-		anEntry.setName(broadlinkObject.getDeviceDescription());
-		anEntry.setType(convertType(broadlinkObject));
-		return anEntry;
-	}
-
-	private String convertType(BLDevice aDevice) {
-		String theType = null;
-        switch (aDevice.getDeviceType()) {
-        case BLDevice.DEV_A1:
-        	theType = _a1;
-            break;
+		short baseType = 0;
+		switch (broadlinkObject.getDeviceType()) {
         case BLDevice.DEV_MP1:
-        	theType = _mp1;
+        	baseType = BLDevice.DEV_MP1;
             break;
         case BLDevice.DEV_SP2:
         case BLDevice.DEV_SP2_HONEYWELL_ALT1:
@@ -296,10 +265,10 @@ public class BroadlinkHome implements Home {
         case BLDevice.DEV_SPMINI_OEM_ALT1:
         case BLDevice.DEV_SPMINI_OEM_ALT2:
         case BLDevice.DEV_SPMINI_PLUS:
-        	theType = _sp2;
+        	baseType = BLDevice.DEV_SP2;
             break;
         case BLDevice.DEV_SP1:
-        	theType = _sp1;
+        	baseType = BLDevice.DEV_SP1;
             break;
         case BLDevice.DEV_RM_2:
         case BLDevice.DEV_RM_MINI:
@@ -310,11 +279,18 @@ public class BroadlinkHome implements Home {
         case BLDevice.DEV_RM_2_PRO_PLUS_2:
         case BLDevice.DEV_RM_2_PRO_PLUS_2_BL:
         case BLDevice.DEV_RM_MINI_SHATE:
-        	theType = _rm2;
+        	baseType = BLDevice.DEV_RM_2;
             break;
-
-        }
-		return theType;
+		}
+		BroadlinkEntry anEntry = new BroadlinkEntry();
+		anEntry.setId(broadlinkObject.getHost() + "-" + String.format("%04x", broadlinkObject.getDeviceType()));
+		anEntry.setName(broadlinkObject.getDeviceDescription());
+		anEntry.setType(String.format("%04x", broadlinkObject.getDeviceType()));
+		anEntry.setBaseType(String.format("%04x", baseType));
+		anEntry.setDesc(BLDevice.getDescOfType(broadlinkObject.getDeviceType()));
+		anEntry.setIpAddr(broadlinkObject.getHost());
+		anEntry.setMacAddr(broadlinkObject.getMac().getMacString());
+		return anEntry;
 	}
 
 	public BLDevice[] broadlinkDiscover () {
@@ -330,11 +306,11 @@ public class BroadlinkHome implements Home {
 				else
 					clients = BLDevice.discoverDevices(InetAddress.getByName(bridgeSettingsDesc.getUpnpConfigAddress()), aDiscoverPort, Configuration.BROADLINK_DISCONVER_TIMEOUT);
 	    		for(int i = 0; i < clients.length; i++) {
-	    			if(clients[i].getDeviceType() != BLDevice.DEV_A1) {
+	    			if(clients[i].getDeviceType() != BLDevice.DEV_A1 && broadlinkMap.get(clients[i].getHost() + "-" + String.format("%04x", clients[i].getDeviceType())) == null) {
 	    				broadlinkMap.put(clients[i].getHost() + "-" + String.format("%04x", clients[i].getDeviceType()), clients[i]);
 	    				log.debug("Adding Device to Map - host: " + clients[i].getHost() + ", device Type: " + clients[i].getDeviceDescription() + ", mac: " + (clients[i].getMac() == null ? "no Mac in client" : clients[i].getMac().getMacString()));
 	    			} else {
-	    				log.debug("Ignoring A1 Device - host: " + clients[i].getHost() + ", device Type: " + clients[i].getDeviceDescription() + ", mac: " + (clients[i].getMac() == null ? "no Mac in client" : clients[i].getMac().getMacString()));
+	    				log.debug("Ignoring Device (already in the list or an A1 Device) - host: " + clients[i].getHost() + ", device Type: " + clients[i].getDeviceDescription() + ", mac: " + (clients[i].getMac() == null ? "no Mac in client" : clients[i].getMac().getMacString()));
 	    			}
 	    		}
 				aDiscoverPort = 0;
@@ -346,7 +322,6 @@ public class BroadlinkHome implements Home {
 			} catch (IOException e) {
 				log.warn("Could not discover Broadlinks, with IO Exception", e);
 				broadlinkMap = null;
-				validBroadlink = false;
 				aDiscoverPort = 0;
 			}
 		}
@@ -354,10 +329,7 @@ public class BroadlinkHome implements Home {
 			log.warn("Did not discover any Broadlinks.");
 			broadlinkMap = null;
 		} else {
-			broadlinkMap = new HashMap<String, BLDevice>();
-			for(BLDevice aDevice : clients) {
-				broadlinkMap.put(aDevice.getHost() + "-" + String.format("%04x", aDevice.getDeviceType()), aDevice);
-			}
+			log.info("Broadlink discover found " + clients.length + " clients.");
 		}
 		return clients;
 	}

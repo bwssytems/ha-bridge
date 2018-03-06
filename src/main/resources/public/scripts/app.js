@@ -4096,14 +4096,14 @@ app.controller('BroadlinkController', function ($scope, $location, bridgeService
 	};
 
 	$scope.buildDeviceUrls = function (broadlinkdevice, dim_control, ondata, dimdata, offdata, colordata, buildonly) {
-		var preCmd = "{\"id\":\"" + broadlinkdevice.id + "\",\"name\":\"" + broadlinkdevice.name +"\",\"command\":\"";
-		if(broadlinkdevice.type === 'SP1' || broadlinkdevice.type === 'SP2') {
+		var preCmd = "{\"id\":\"" + broadlinkdevice.id + "\",\"name\":\"" + broadlinkdevice.name + "\",\"type\":\"" + broadlinkdevice.type + "\",\"ipAddr\":\"" + broadlinkdevice.ipAddr + "\",\"macAddr\":\"" + broadlinkdevice.macAddr + "\",\"command\":\"";
+		if(broadlinkdevice.baseType === '0000' || broadlinkdevice.type === '2711') {
 			dimpayload = null;
 			colorpayload = null;
 			onpayload = preCmd + "on\"}";
 			offpayload = preCmd + "off\"}";
 		}
-		else if(broadlinkdevice.type === 'MP1') {
+		else if(broadlinkdevice.baseType === '4EB5') {
 			dimpayload = null;
 			colorpayload = null;
 			onpayload = preCmd + "on\",\"data\":\"" + ondata + "\"}";
@@ -4126,7 +4126,7 @@ app.controller('BroadlinkController', function ($scope, $location, bridgeService
 			else
 				colorpayload = null;
 		}
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, broadlinkdevice.id,  broadlinkdevice.name, broadlinkdevice.id, broadlinkdevice.type,  "broadlinkDevice", null, null);
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, broadlinkdevice.id,  broadlinkdevice.name, broadlinkdevice.id, broadlinkdevice.desc,  "broadlinkDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
