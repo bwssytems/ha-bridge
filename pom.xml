@@ -129,7 +129,7 @@
 		<dependency>
 		    <groupId>com.github.bwssytems</groupId>
 		    <artifactId>broadlink-java-api</artifactId>
-		    <version>cbed334fa1</version>
+		    <version>5f1da4c3d0</version>
 		</dependency>
 		<dependency>
 		  <groupId>org.apache.commons</groupId>
