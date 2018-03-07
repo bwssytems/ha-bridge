@@ -4097,7 +4097,7 @@ app.controller('BroadlinkController', function ($scope, $location, bridgeService
 
 	$scope.buildDeviceUrls = function (broadlinkdevice, dim_control, ondata, dimdata, offdata, colordata, buildonly) {
 		var preCmd = "{\"id\":\"" + broadlinkdevice.id + "\",\"name\":\"" + broadlinkdevice.name + "\",\"type\":\"" + broadlinkdevice.type + "\",\"ipAddr\":\"" + broadlinkdevice.ipAddr + "\",\"macAddr\":\"" + broadlinkdevice.macAddr + "\",\"command\":\"";
-		if(broadlinkdevice.baseType === '0000' || broadlinkdevice.type === '2711') {
+		if(broadlinkdevice.baseType === '0000' || broadlinkdevice.baseType === '2711') {
 			dimpayload = null;
 			colorpayload = null;
 			onpayload = preCmd + "on\"}";

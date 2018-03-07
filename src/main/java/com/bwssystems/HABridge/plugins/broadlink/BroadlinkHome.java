@@ -67,10 +67,10 @@ public class BroadlinkHome implements Home {
 
 	@Override
 	public Object getItems(String type) {
-		if(!validBroadlink || broadlinkMap == null)
-			return null;
-		BroadlinkEntry theResponse = null;
 		List<BroadlinkEntry> deviceList = new ArrayList<BroadlinkEntry>();
+		if(!validBroadlink || broadlinkMap == null)
+			return deviceList;
+		BroadlinkEntry theResponse = null;
 		log.debug("consolidating devices for Broadlink");
 		Iterator<String> keys = broadlinkMap.keySet().iterator();
 		while(keys.hasNext()) {
