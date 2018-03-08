@@ -164,7 +164,7 @@ public class BridgeSettingsDescriptor {
 		this.hubversion = HueConstants.HUB_VERSION;
 		this.hubmac = null;
 //		this.activeloggers = null;
-		this.upnpsenddelay = 1500;
+		this.upnpsenddelay = Configuration.UPNP_SEND_DELAY;
 		this.broadlinkconfigured = false;
 	}
 	public String getUpnpConfigAddress() {

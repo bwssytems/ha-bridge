@@ -971,12 +971,12 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 	};
 
 	this.formatCallItem = function (currentItem) {
-		if(!currentItem.startsWith("{\"item") && !currentItem.startsWith("[{\"item")) {
+		if(currentItem.indexOf("item") < 0) {
 			if (currentItem.startsWith("[") || currentItem.startsWith("{"))
 				currentItem = "[{\"item\":" + currentItem + "}]";
 			else
 				currentItem = "[{\"item\":\"" + currentItem + "\"}]";
-		} else if(currentItem.startsWith("{\"item"))
+		} else if(currentItem.startsWith("{"))
 			currentItem = "[" + currentItem + "]";
 
 		return currentItem;

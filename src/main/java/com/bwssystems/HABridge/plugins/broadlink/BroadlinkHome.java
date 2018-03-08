@@ -55,11 +55,14 @@ public class BroadlinkHome implements Home {
 	@Override
 	public Home createHome(BridgeSettings bridgeSettings) {
 		broadlinkMap = null;
-        isDevMode = Boolean.parseBoolean(System.getProperty("dev.mode", "false"));
 		bridgeSettingsDesc = bridgeSettings.getBridgeSettingsDescriptor();
 		validBroadlink = bridgeSettings.getBridgeSettingsDescriptor().isValidBroadlink();
+		isDevMode = Boolean.parseBoolean(System.getProperty("dev.mode", "false"));
+		if (isDevMode)
+			validBroadlink = true;
 
-		broadlinkDiscover();
+		if(validBroadlink)
+			broadlinkDiscover();
 
 		log.info("Broadlink Home created." + (validBroadlink ? "" : " No Broadlinks configured.") + (isDevMode ? " DevMode is set." : ""));
 		return this;

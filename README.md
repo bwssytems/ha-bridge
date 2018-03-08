@@ -1,9 +1,9 @@
 # ha-bridge
-Emulates Philips Hue API to other home automation gateways such as an Amazon Echo/Dot Gen 1 (gen 2 cannot discover ha-bridge) or other systems that support Philips Hue.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
+Emulates Philips Hue API to other home automation gateways such as an Amazon Echo/Dot Gen 1 (gen 2 has issues discovering ha-bridge) or other systems that support Philips Hue.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
 
 Here are some diagrams to put this software in perspective.
 
-The Echo Path looks like this:
+The Echo path looks like this:
 ```
                      +------------------------+    +------------------------+
 +-------------+      | H A +------------------|    | A +------------------+ |
@@ -11,19 +11,19 @@ The Echo Path looks like this:
 +-------------+      | E I +------------------|    | I +------------------+ |
                      +------------------------+    +------------------------+
 ```
-The Google Home Path looks like this:
-```
-                     +------------------------+    +------------------------+
-+-------------+      | H A +------------------|    | A +------------------+ |
-| Google Home |----->| U P | ha-bridge core   |--->| P | Device to control| |
-+-------------+      | E I +------------------|    | I +------------------+ |
-                     +------------------------+    +------------------------+
-```
-THe Harmony Hub Path looks like this:
+THe Harmony Hub path looks like this:
 ```
                      +------------------------+    +------------------------+
 +-------------+      | H A +------------------|    | A +------------------+ |
 | Harmony Hub |----->| U P | ha-bridge core   |--->| P | Device to control| |
++-------------+      | E I +------------------|    | I +------------------+ |
+                     +------------------------+    +------------------------+
+```
+A Custom implementation path looks like this:
+```
+                     +------------------------+    +------------------------+
++-------------+      | H A +------------------|    | A +------------------+ |
+|  HA System  |----->| U P | ha-bridge core   |--->| P | Device to control| |
 +-------------+      | E I +------------------|    | I +------------------+ |
                      +------------------------+    +------------------------+
 ```
@@ -35,13 +35,13 @@ THe Harmony Hub Path looks like this:
 
 **NOTE: This software does not control Philips Hue devices directly. A physical Philips Hue Hub is required for that, by which the ha-bridge can then proxy all of your real Hue bridges behind this bridge.**
 
-**ISSUE: Amazon Echo (2nd Generation) do not find the ha-bridge. The only workaround is to have a first generation Echo or Dot on your network that finds the ha-bridge.**
+**ISSUE: Amazon Echo (2nd Generation) has issues finding the ha-bridge. The only workaround is to have a first generation Echo or Dot on your network that finds the ha-bridge.**
 
 **ISSUE: Google Home now seems to not support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local API, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
 
 **FAQ: Please look here for the current FAQs! https://github.com/bwssytems/ha-bridge/wiki/HA-Bridge-FAQs**
 
-In the cases of systems that require authorization and/or have APIs that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest, Somfy Tahoma, Home Assistant, Domoticz, HAL, Fibaro, HomeWizard and the ability to proxy all of your real Hue bridges behind this bridge.
+In the cases of systems that require authorization and/or have APIs that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest, Somfy Tahoma, Home Assistant, Domoticz, MQTT, HAL, Fibaro, HomeWizard, LIFX, OpenHAB, FHEM, Broadlink and the ability to proxy all of your real Hue bridges behind this bridge.
 
 Alternatively the Bridge supports custom calls as well using http/https/udp and tcp such as the LimitlessLED/MiLight bulbs using the UDP protocol. Binary data is supported with UDP/TCP.
 
@@ -247,7 +247,7 @@ At the bottom of the screen is the "Bridge Device DB Backup" which can be access
 #### Renumber Devices
 This changes the numbering of the added devices to start at 1 and goes up from there. It was originally intended for a conversion from the previous system version that used large numbers and was not necessary. This also allows the system to try and number sequentially. If you use this button, you will need to re-discover your devices as their ID's will have changed.
 #### Link
-If this is present, you have enabled the ue link button feature for the ha-bridge. If you want a new system to recognize the ha-bridge, you will need to press this button when you are doign a discovery.
+If this is present, you have enabled the Hue link button feature for the ha-bridge. If you want a new system to recognize the ha-bridge, you will need to press this button when you are doing a discovery.
 ### The Bridge Control Tab
 This is where all of the configuration occurs for what ports and IP's the bridge runs on. It also contains the configurations for target devices so that Helper Tabs for configuration can be added as well as the connection information to control those devices.
 #### Bridge server
@@ -318,6 +318,8 @@ This setting is the time used in between button presses when there is multiple b
 This controls how many log messages will be kept and displayed on the log tab. This does not affect what is written to the standard output for logging. The default is 512. Changing this will incur more memory usage of the process.
 #### Trace UPNP Calls
 Turn on tracing for upnp discovery messages to the log. The default is false.
+#### UPNP Send Delay
+This setting is for the upnp spec to delay a certain amount between upnp response messages sent back to a client. This is defaulted to 650ms and can be tuned to any value up to 1500ms.
 #### My Echo URL
 This sets the URL that is used in the menu bar to ge to your echo. For certain countries, this needs to be set to a different URL.
 
@@ -449,11 +451,11 @@ There are multiple replacement constructs available to be put into any of the ca
 
 You can control items that require special calculated values using ${intensity.math(<your expression using "X" as the value to operate on>)} i.e. "${intensity.math(X/4)}".
 
-For the items that want to have a date time put into the message, utilize ${time.format(yyyy-MM-ddTHH:mm:ssXXX)} where "yyyy-MM-ddTHH:mm:ssXXX" can be any format from the Java SimpleDateFormat documented here: https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html. Also, there is a $(time.millis) which will put the millis timestamp where this replacement control is located.
+For the items that want to have a date time put into the message, utilize ${time.format(yyyy-MM-ddTHH:mm:ssXXX)} where "yyyy-MM-ddTHH:mm:ssXXX" can be any format from the Java SimpleDateFormat documented here: https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html. Also, there is a ${time.millis} which will put the millis timestamp where this replacement control is located.
 
-Color has been added as a replacement control and the available values are $(color.r), $(color.g), $(color.b) which are representations of each color as 0 - 255. There are hex equivalents as well as $(color.rx), $(color.gx), $(color.bx) and $(color.rgbx) as 2 place hex representations except for rgbx which is a six place hex representation.
+Color has been added as a replacement control and the available values are ${color.r}, ${color.g}, ${color.b} which are representations of each color as 0 - 255. There are hex equivalents as well as ${color.rx}, ${color.gx}, ${color.bx} and ${color.rgbx} as 2 place hex representations except for rgbx which is a six place hex representation.
 
-Special handling for milights is included and is handled by $(color.milight:x). The usage for that is as follows: udp://ip:port/0x${color.milight:x} where x is a number between 0 and 4 (0 all groups, 1-4 specific group). The group is necessary in case the color turns out to be white. The correct group on must of course be sent before that udp packet.
+Special handling for milights is included and is handled by ${color.milight:x}. The usage for that is as follows: udp://ip:port/0x${color.milight:x} where x is a number between 0 and 4 (0 all groups, 1-4 specific group). The group is necessary in case the color turns out to be white. The correct group on must of course be sent before that udp packet.
 Note that milight can only use 255 colors and white is handled completely separate for the rgbw strips, so setting temperature via ct with milight does something but not really the desired result
 
 Also, device data can be inserted into your payloads by the use of "${device.name}", "${device.id}", "${device.uniqueid}", "${device.targetDevice}", "${device.mapId}", "${device.mapType}", "${device.deviceType}", "${device.requesterAddress}", "${device.description}" and "${device.comments}". These work just like the dimming value replacements.
