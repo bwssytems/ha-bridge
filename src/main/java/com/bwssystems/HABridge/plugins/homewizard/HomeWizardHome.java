@@ -85,7 +85,7 @@ public class HomeWizardHome implements Home {
 	
 	public List<HomeWizardSmartPlugDevice> getDevices() {
 		
-		log.debug("consolidating devices for plug gateways");
+		log.debug("consolidating devices for HomeWizard plug gateways");
 		Iterator<String> keys = plugGateways.keySet().iterator();
 		ArrayList<HomeWizardSmartPlugDevice> deviceList = new ArrayList<>();
 		
@@ -146,5 +146,10 @@ public class HomeWizardHome implements Home {
 		
 		plugGateways = null;
 		closed = true;
+	}
+	
+	@Override
+	public void refresh() {
+		// noop		
 	}
 }

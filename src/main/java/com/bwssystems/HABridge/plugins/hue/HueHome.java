@@ -153,4 +153,9 @@ public class HueHome implements Home {
 		hues = null;
 		closed = true;
 	}
+	
+	@Override
+	public void refresh() {
+		// noop		
+	}
 }

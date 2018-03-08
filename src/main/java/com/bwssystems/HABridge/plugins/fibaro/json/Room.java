@@ -12,18 +12,6 @@ public class Room {
     @SerializedName("sectionID")
     private int sectionID;
 
-    @SerializedName("icon")
-    private String icon;
-
-    @SerializedName("defaultSensors")
-    private Sensor defaultSensors;
-
-    @SerializedName("defaultThermostat")
-    private int defaultThermostat;
-
-    @SerializedName("sortOrder")
-    private int sortOrder;
-
     public int getId() {
         return id;
     }

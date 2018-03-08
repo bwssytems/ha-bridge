@@ -269,4 +269,10 @@ public class HarmonyHome implements Home {
 		}
 		return null;
 	}
+
+	@Override
+	public void refresh() {
+		// noop		
+	}
+	
 }

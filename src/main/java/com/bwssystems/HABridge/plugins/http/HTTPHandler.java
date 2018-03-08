@@ -17,20 +17,32 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.api.NameValue;
 
 public class HTTPHandler {
 	private static final Logger log = LoggerFactory.getLogger(HTTPHandler.class);
+	private String callType;
 	
 	public HTTPHandler() {
 		super();
+		callType = null;
+	}
+
+
+	public HTTPHandler(String type) {
+		super();
+		callType = type;
 	}
 
 
 	// This function executes the url from the device repository against the
 	// target as http or https as defined
 	public String doHttpRequest(String url, String httpVerb, String contentType, String body, NameValue[] headers) {
-		log.debug("doHttpRequest with url: " + url + " with http command: " + httpVerb + " with body: " + body);
+		log.debug("doHttpRequest with url <<<" + url + ">>>, verb: " + httpVerb + ", contentType: " + contentType + ", body <<<" + body + ">>>" );
+		if(headers != null && headers.length > 0)
+			for(int i = 0; i < headers.length; i++)
+				log.debug("header index " + i + " name: <<<" + headers[i].getName() + ">>>, value: <<<" + headers[i].getValue() + ">>>");
 		HttpUriRequest request = null;
 		String theContent = null;
 		URI theURI = null;
@@ -99,17 +111,24 @@ public class HTTPHandler {
 					}
 				}
 				if (response != null && response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
+					if(theContent == null)
+						theContent = "";
+					log.debug("Successfull response - The http response is <<<" + theContent + ">>>");
+					retryCount = 2;
+				} else if (callType != null && callType == DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex] && response.getStatusLine().getStatusCode() == 302) {
+					if(theContent == null)
+						theContent = "";
 					log.debug("Successfull response - The http response is <<<" + theContent + ">>>");
 					retryCount = 2;
 				} else if (response != null) {
 					log.warn("HTTP response code was not an expected successful response of between 200 - 299, the code was: "
-									+ response.getStatusLine());
+									+ response.getStatusLine() + " with the content of <<<" + theContent + ">>>");
 					if (response.getStatusLine().getStatusCode() == 504) {
 						log.warn("HTTP response code was 504, retrying...");
+						log.debug("The 504 error content is <<<" + theContent + ">>>");
+						theContent = null;
 					} else
 						retryCount = 2;
-					
-					theContent = null;
 				}
 				
 			} catch (ClientProtocolException e) {
@@ -130,6 +149,11 @@ public class HTTPHandler {
 		}
 		return theContent;
 	}
+	public void setCallType(String callType) {
+		this.callType = callType;
+	}
+
+
 	public void closeHandler() {
 	}
 }

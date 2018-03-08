@@ -315,9 +315,35 @@ public class DeviceResource {
 			return homeManager.findResource(DeviceMapTypes.SOMFY_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.SOMFY_DEVICE[DeviceMapTypes.typeIndex]);
 		}, new JsonTransformer());
 
+    	get (API_CONTEXT + "/openhab/devices", "application/json", (request, response) -> {
+	    	log.debug("Get OpenHAB devices");
+	      	response.status(HttpStatus.SC_OK);
+	      	return homeManager.findResource(DeviceMapTypes.OPENHAB_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.OPENHAB_DEVICE[DeviceMapTypes.typeIndex]);
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/fhem/devices", "application/json", (request, response) -> {
+	    	log.debug("Get FHEM devices");
+	      	response.status(HttpStatus.SC_OK);
+	      	return homeManager.findResource(DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex]);
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/broadlink/devices", "application/json", (request, response) -> {
+	    	log.debug("Get Broadlink devices");
+	      	response.status(HttpStatus.SC_OK);
+	      	return homeManager.findResource(DeviceMapTypes.BROADLINK_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.BROADLINK_DEVICE[DeviceMapTypes.typeIndex]);
+	    }, new JsonTransformer());
+
 		get (API_CONTEXT + "/map/types", "application/json", (request, response) -> {
 	    	log.debug("Get map types");
 	      	return new DeviceMapTypes().getDeviceMapTypes();
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/refresh/:typeIndex", "application/json", (request, response) -> {
+    		String typeIndex = request.params(":typeIndex");
+	    	log.debug("Refresh Home: " + typeIndex);
+	      	response.status(HttpStatus.SC_OK);
+	      	homeManager.findResource(typeIndex).refresh();
+	      	return null;
 	    }, new JsonTransformer());
 
 	    // http://ip_address:port/api/devices/exec/renumber CORS request

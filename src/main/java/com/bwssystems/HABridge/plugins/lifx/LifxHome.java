@@ -5,6 +5,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,6 +21,7 @@ import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.ColorData;
+import com.bwssystems.HABridge.hue.ColorDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.github.besherman.lifx.LFXClient;
 import com.github.besherman.lifx.LFXGroup;
@@ -38,6 +40,7 @@ public class LifxHome implements Home {
 	private LFXClient client;        
 	private Boolean validLifx;
 	private Gson aGsonHandler;
+	private InetAddress configuredAddress;
 	private boolean closed;
 	
 	public LifxHome(BridgeSettings bridgeSettings) {
@@ -54,47 +57,17 @@ public class LifxHome implements Home {
 		validLifx = bridgeSettings.getBridgeSettingsDescriptor().isValidLifx();
 		log.info("LifxDevice Home created." + (validLifx ? "" : " No LifxDevices configured."));
 		if(validLifx) {
-	    	try {
-	    		log.info("Open Lifx client....");
-	    		InetAddress configuredAddress = InetAddress.getByName(bridgeSettings.getBridgeSettingsDescriptor().getUpnpConfigAddress());
-	    		NetworkInterface networkInterface = NetworkInterface.getByInetAddress(configuredAddress);
-	    		InetAddress bcastInetAddr = null;
-	            if (networkInterface != null) {
-	                for (InterfaceAddress ifaceAddr : networkInterface.getInterfaceAddresses()) {
-	                    InetAddress addr = ifaceAddr.getAddress();
-	                    if (addr instanceof Inet4Address) {
-	                    	bcastInetAddr = ifaceAddr.getBroadcast();
-	                    	break;
-	                    }
-	                }
-	            }
-	            if(bcastInetAddr != null) {
-		    		lifxMap = new HashMap<String, LifxDevice>();
-		    		log.info("Opening LFX Client with broadcast address: " + bcastInetAddr.getHostAddress());
-		    		client = new LFXClient(bcastInetAddr.getHostAddress());
-		    		client.getLights().addLightCollectionListener(new MyLightListener(lifxMap));
-		    		client.getGroups().addGroupCollectionListener(new MyGroupListener(lifxMap));
-					client.open(false);
-					aGsonHandler =
-							new GsonBuilder()
-							.create();
-	            } else {
-					log.warn("Could not open LIFX, no bcast addr available, check your upnp config address.");
-					client = null;
-					validLifx = false;
-					return this;
-	            }
-			} catch (IOException e) {
-				log.warn("Could not open LIFX, with IO Exception", e);
-				client = null;
-				validLifx = false;
-				return this;
-			} catch (InterruptedException e) {
-				log.warn("Could not open LIFX, with Interruprted Exception", e);
-				client = null;
+			aGsonHandler =
+					new GsonBuilder()
+					.create();
+    		try {
+				configuredAddress = InetAddress.getByName(bridgeSettings.getBridgeSettingsDescriptor().getUpnpConfigAddress());
+			} catch (UnknownHostException e) {
+				log.warn("Could not get Inet Address for Lifx broadcast.");
 				validLifx = false;
 				return this;
 			}
+			broadcastDiscover();
         }
 		return this;
 	}
@@ -116,7 +89,7 @@ public class LifxHome implements Home {
 	@Override
 	public Object getItems(String type) {
 		log.debug("consolidating devices for lifx");
-		if(!validLifx)
+		if(!validLifx || lifxMap == null)
 			return null;
 		LifxEntry theResponse = null;
 		Iterator<String> keys = lifxMap.keySet().iterator();
@@ -200,6 +173,10 @@ public class LifxHome implements Home {
 								theValue = (float)0.99;
 							theLight.setBrightness(theValue);
 						}
+						if(colorData != null) {
+							int rgbVal = ColorDecode.getIntRGB(colorData, intensity);
+							theLight.setColor(rgbVal);
+						}
 					} else if (theDevice.getType().equals(LifxDevice.GROUP_TYPE)) {
 						LFXGroup theGroup = (LFXGroup)theDevice.getLifxObject();
 						if(body.contains("true"))
@@ -221,7 +198,8 @@ public class LifxHome implements Home {
 			log.debug("Home is already closed....");
 			return;
 		}
-		client.close();
+		if(client != null)
+			client.close();
 		closed = true;
 	}
     private static class MyLightListener implements LFXLightCollectionListener {
@@ -266,4 +244,47 @@ public class LifxHome implements Home {
         }
         
     }
+
+    private void broadcastDiscover() {
+    	try {
+    		log.info("Open Lifx client....");
+    		NetworkInterface networkInterface = NetworkInterface.getByInetAddress(configuredAddress);
+    		InetAddress bcastInetAddr = null;
+            if (networkInterface != null) {
+                for (InterfaceAddress ifaceAddr : networkInterface.getInterfaceAddresses()) {
+                    InetAddress addr = ifaceAddr.getAddress();
+                    if (addr instanceof Inet4Address) {
+                    	bcastInetAddr = ifaceAddr.getBroadcast();
+                    	break;
+                    }
+                }
+            }
+            if(bcastInetAddr != null) {
+	    		lifxMap = new HashMap<String, LifxDevice>();
+	    		log.info("Opening LFX Client with broadcast address: " + bcastInetAddr.getHostAddress());
+	    		client = new LFXClient(bcastInetAddr.getHostAddress());
+	    		client.getLights().addLightCollectionListener(new MyLightListener(lifxMap));
+	    		client.getGroups().addGroupCollectionListener(new MyGroupListener(lifxMap));
+				client.open(false);
+            } else {
+				log.warn("Could not open LIFX, no bcast addr available, check your upnp config address.");
+				client = null;
+				return;
+            }
+		} catch (IOException e) {
+			log.warn("Could not open LIFX, with IO Exception", e);
+			client = null;
+			return;
+		} catch (InterruptedException e) {
+			log.warn("Could not open LIFX, with Interruprted Exception", e);
+			client = null;
+			return;
+		}    	
+    }
+    
+	@Override
+	public void refresh() {
+		if(client == null)
+			broadcastDiscover();		
+	}
 }

@@ -50,7 +50,7 @@ public class UDPDatagramSender {
 				udpResponsePort++;
 			}
 		}
-		log.info("UDP response Seocket initialized to: " + udpResponsePort);
+		log.info("UDP response Socket initialized to: " + udpResponsePort);
 		return true;
 	}
 	

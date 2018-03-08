@@ -114,5 +114,9 @@ public class UDPHome implements Home {
 		}
 		closed = true;
 	}
-
+	
+	@Override
+	public void refresh() {
+		// noop		
+	}
 }

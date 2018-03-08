@@ -14,50 +14,11 @@ public class Scene {
     @SerializedName("type")
     private String type;
 
-    @SerializedName("properties")
-    private String properties;
-
     @SerializedName("roomID")
     private int roomID;
 
-    @SerializedName("iconID")
-    private int iconID;
-
-    @SerializedName("runConfig")
-    private String runConfig;
-
-    @SerializedName("autostart")
-    private boolean autostart;
-
-    @SerializedName("protectedByPIN")
-    private boolean protectedByPIN;
-
-    @SerializedName("killable")
-    private boolean killable;
-
-    @SerializedName("maxRunningInstances")
-    private int maxRunningInstances;
-
-    @SerializedName("runningInstances")
-    private int runningInstances;
-
-    @SerializedName("visible")
-    private boolean visible;
-
-    @SerializedName("isLua")
-    private boolean isLua;
-
-    @SerializedName("triggers")
-    private SceneTriggers triggers;
-
     @SerializedName("liliStartCommand")
     private String liliStartCommand;
-
-    @SerializedName("liliStopCommand")
-    private String liliStopCommand;
-
-    @SerializedName("sortOrder")
-    private int sortOrder;
 
     public String getRoomName() {
         return roomName;

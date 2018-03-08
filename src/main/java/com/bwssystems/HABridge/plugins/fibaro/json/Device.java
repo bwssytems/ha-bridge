@@ -17,47 +17,8 @@ public class Device {
     @SerializedName("type")
     private String type;
 
-    @SerializedName("baseType")
-    private String baseType;
-
-    @SerializedName("enabled")
-    private boolean enabled;
-
-    @SerializedName("visible")
-    private boolean visible;
-
-    @SerializedName("isPlugin")
-    private boolean isPlugin;
-
-    @SerializedName("parentId")
-    private int parentId;
-
-    @SerializedName("remoteGatewayId")
-    private int remoteGatewayId;
-
-    @SerializedName("viewXml")
-    private boolean viewXml;
-
-    @SerializedName("configXml")
-    private boolean configXml;
-
-    @SerializedName("interfaces")
-    private Object interfaces;
-
     @SerializedName("properties")
     private DeviceProperties properties;
-
-    @SerializedName("actions")
-    private Object actions;
-
-    @SerializedName("created")
-    private int created;
-
-    @SerializedName("modified")
-    private int modified;
-
-    @SerializedName("sortOrder")
-    private int sortOrder;
 
     public String getRoomName() {
         return roomName;

@@ -93,6 +93,11 @@ public class CommandHome implements Home {
 	}
 
 	@Override
+	public void refresh() {
+		// noop		
+	}
+	
+	@Override
 	public void closeHome() {
 		log.debug("Closing Home.");
 		if(closed) {
