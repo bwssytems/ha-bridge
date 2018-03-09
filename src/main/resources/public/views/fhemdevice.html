@@ -70,9 +70,9 @@
 		<tr ng-repeat="fhemdevice in bridge.fhemdevices">
 			<td>{{$index+1}}</td>
 			<td><input type="checkbox" name="bulk.devices[]"
-				value="{{fhemdevice.item.name}}"
-				ng-checked="bulk.devices.indexOf(fhemdevice.item.name) > -1"
-				ng-click="toggleSelection(fhemdevice.item.name)">
+				value="{{fhemdevice.item.Name}}"
+				ng-checked="bulk.devices.indexOf(fhemdevice.item.Name) > -1"
+				ng-click="toggleSelection(fhemdevice.item.Name)">
 				{{fhemdevice.item.Name}}</td>
 			<td>{{fhemdevice.name}}</td>
 			<td>{{fhemdevice.item.PossibleSets}}</td>

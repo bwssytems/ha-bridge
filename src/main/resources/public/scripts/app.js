@@ -3984,7 +3984,7 @@ app.controller('FhemController', function ($scope, $location, bridgeService, ngD
 		$scope.clearDevice();
 		for(var i = 0; i < $scope.bulk.devices.length; i++) {
 			for(var x = 0; x < bridgeService.state.fhemdevices.length; x++) {
-				if(bridgeService.state.fhemdevices[x].devicename === $scope.bulk.devices[i]) {
+				if(bridgeService.state.fhemdevices[x].item.Name === $scope.bulk.devices[i]) {
 					$scope.buildDeviceUrls(bridgeService.state.fhemdevices[x],dim_control,true);
 					devicesList[i] = {
 							name: $scope.device.name,
@@ -4047,7 +4047,7 @@ app.controller('FhemController', function ($scope, $location, bridgeService, ngD
 			$scope.selectAll = true;
 			for(var x = 0; x < bridgeService.state.fhemdevices.length; x++) {
 				if($scope.bulk.devices.indexOf(bridgeService.state.fhemdevices[x]) < 0)
-					$scope.bulk.devices.push(bridgeService.state.fhemdevices[x].devicename);
+					$scope.bulk.devices.push(bridgeService.state.fhemdevices[x].item.Name);
 			}
 		}
 	};
