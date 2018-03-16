@@ -19,9 +19,7 @@ import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.plugins.homewizard.json.Device;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-
-import us.monoid.json.JSONException;
-import us.monoid.json.JSONObject;
+import com.google.gson.JsonParser;
 
 /**
  * Control HomeWizard devices over HomeWizard Cloud
@@ -75,10 +73,12 @@ public class HomeWizzardSmartPlugInfo {
 			br.close();
 			
 			// Get session id from result JSON
-			JSONObject json = new JSONObject(buffer.toString());
-			cloudSessionId = json.get("session").toString();
+			JsonParser parser = new JsonParser();
+			JsonObject json = parser.parse(buffer.toString()).getAsJsonObject();
+
+			cloudSessionId = json.get("session").getAsString();
 		}
-		catch(IOException | JSONException e)
+		catch(Exception e)
 		{
 			log.warn("Error while login to cloud service ", e);
 			return false;
@@ -191,8 +191,9 @@ public class HomeWizzardSmartPlugInfo {
 		try {
 			
 			String result = requestJson(EMPTY_STRING);
-			JSONObject resultJson = new JSONObject(result);
-			cloudPlugId = resultJson.getString("id");
+			JsonParser parser = new JsonParser();
+			JsonObject resultJson = parser.parse(result).getAsJsonObject();
+			cloudPlugId = resultJson.get("id").getAsString();
 		
 			String all_devices_json = resultJson.get("devices").toString();
 			Device[] devices = gson.fromJson(all_devices_json, Device[].class);
@@ -203,7 +204,7 @@ public class HomeWizzardSmartPlugInfo {
 				homewizardDevices.add(mapDeviceToHomeWizardSmartPlugDevice(device));
 			}
 		}
-		catch(JSONException e) {
+		catch(Exception e) {
 			log.warn("Error while get devices from cloud service ", e);
 		}
 		
@@ -211,12 +212,13 @@ public class HomeWizzardSmartPlugInfo {
 		return homewizardDevices;
 	}
 
-	public void execApply(String jsonToPost) throws JSONException, IOException {
+	public void execApply(String jsonToPost) throws Exception {
 			
 		// Extract 
-		JSONObject resultJson = new JSONObject(jsonToPost);
-		String deviceId = resultJson.getString("deviceid");
-		String action = resultJson.getString("action");
+		JsonParser parser = new JsonParser();
+		JsonObject resultJson = parser.parse(jsonToPost).getAsJsonObject();
+		String deviceId = resultJson.get("deviceid").getAsString();
+		String action = resultJson.get("action").getAsString();
 		
 		// Check if we have an plug id stored
 		if (StringUtils.isBlank(cloudPlugId)) {

@@ -114,6 +114,11 @@ public class HalHome implements Home {
 	}
 
 	@Override
+	public void refresh() {
+		// noop		
+	}
+	
+	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
 			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		boolean halFound = false;

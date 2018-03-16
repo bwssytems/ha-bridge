@@ -197,5 +197,10 @@ public class NestHome implements com.bwssystems.HABridge.Home {
         }
 		return this;
 	}
+	
+	@Override
+	public void refresh() {
+		// noop		
+	}
 }
 

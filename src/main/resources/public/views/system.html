@@ -1,31 +1,25 @@
 <ul class="nav nav-pills" role="tablist">
 	<li role="presentation"><a href="#!/">Bridge Devices</a></li>
-	<li role="presentation" class="active"><a href="#!/system">Bridge
-			Control</a></li>
+	<li role="presentation" class="active"><a href="#!/system">Bridge Control</a></li>
 	<li role="presentation"><a href="#!/logs">Logs</a></li>
-	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#!/veradevices">Vera Devices</a></li>
-	<li ng-if="bridge.showVera" role="presentation"><a
-		href="#!/verascenes">Vera Scenes</a></li>
-	<li ng-if="bridge.showFibaro" role="presentation"><a
-		href="#!/fibarodevices">Fibaro Devices</a></li>
-	<li ng-if="bridge.showFibaro" role="presentation"><a
-		href="#!/fibaroscenes">Fibaro Scenes</a></li>
-	<li ng-if="bridge.showHarmony" role="presentation"><a
-		href="#!/harmonyactivities">Harmony Activities</a></li>
-	<li ng-if="bridge.showHarmony" role="presentation"><a
-		href="#!/harmonydevices">Harmony Devices</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a href="#!/veradevices">Vera Devices</a></li>
+	<li ng-if="bridge.showVera" role="presentation"><a href="#!/verascenes">Vera Scenes</a></li>
+	<li ng-if="bridge.showFibaro" role="presentation"><a href="#!/fibarodevices">Fibaro Devices</a></li>
+	<li ng-if="bridge.showFibaro" role="presentation"><a href="#!/fibaroscenes">Fibaro Scenes</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a href="#!/harmonyactivities">Harmony Activities</a></li>
+	<li ng-if="bridge.showHarmony" role="presentation"><a href="#!/harmonydevices">Harmony Devices</a></li>
 	<li ng-if="bridge.showNest" role="presentation"><a href="#!/nest">Nest</a></li>
-	<li ng-if="bridge.showHue" role="presentation"><a
-		href="#!/huedevices">Hue Devices</a></li>
-	<li ng-if="bridge.showHal" role="presentation"><a
-		href="#!/haldevices">HAL Devices</a></li>
+	<li ng-if="bridge.showHue" role="presentation"><a href="#!/huedevices">Hue Devices</a></li>
+	<li ng-if="bridge.showHal" role="presentation"><a href="#!/haldevices">HAL Devices</a></li>
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
 	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
-	<li ng-if="bridge.showHomeWizard" role="presentation"><a href="#!/homewizarddevices">HomeWizard Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
 	<li ng-if="bridge.showSomfy" role="presentation"><a href="#!/somfydevices">Somfy Devices</a></li>
 	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
+	<li ng-if="bridge.showHomeWizard" role="presentation"><a href="#!/homewizarddevices">HomeWizard Devices</a></li>
+	<li ng-if="bridge.showOpenHAB" role="presentation"><a href="#!/openhabdevices">OpenHAB Devices</a></li>
+	<li ng-if="bridge.showFHEM" role="presentation"><a href="#!/fhemdevices">FHEM Devices</a></li>
+	<li ng-if="bridge.showBroadlink" role="presentation"><a href="#!/broadlinkdevices">Broadlink Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
@@ -169,16 +163,39 @@
 									<th>Port</th>
 									<th>Username</th>
 									<th>Password </th>
+									<th>Filters</th>
 									<th>Manage</th>
 								</tr>
 							</thead>
 							<tr ng-repeat="fibaro in bridge.settings.fibaroaddress.devices">
-								<td>{{fibaro.name}}</td>
-								<td>{{fibaro.ip}}</td>
-								<td>{{fibaro.port}}</td>
-								<td>{{fibaro.username}}</td>
-								<td ng-if="fibaro.password">*******</td>
-								<td ng-if="!fibaro.password"> </td>
+								<td><input id="bridge-settings-next-fibaro-name"
+									class="form-control" type="text" ng-model="fibaro.name"
+									placeholder="A Fibaro"></td>
+								<td><input id="bridge-settings-next-fibaro-ip"
+									class="form-control" type="text" ng-model="fibaro.ip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-next-fibaro-port"
+									class="form-control" type="text" ng-model="fibaro.port"
+									placeholder="80"></td>
+								<td><input id="bridge-settings-next-fibaro-username"
+									class="form-control" type="text" ng-model="fibaro.username"
+									placeholder="A Username"></td>
+								<td><input id="bridge-settings-next-fibaro-password"
+									class="form-control" type="password" ng-model="fibaro.password"
+									placeholder="Fibaro password"></td>
+								<td>Save Logs <input type="checkbox"
+										ng-model="fibaro.extensions.useSaveLogs" ng-true-value=true
+										ng-false-value=false>
+									User Desc <input type="checkbox"
+										ng-model="fibaro.extensions.useUserDescription" ng-true-value=true
+										ng-false-value=false>
+									Lili Cmd <input type="checkbox"
+										ng-model="fibaro.extensions.scenesLiliCmddOnly" ng-true-value=true
+										ng-false-value=false>
+									Trash Chars <input type="checkbox"
+										ng-model="fibaro.extensions.replaceTrash" ng-true-value=true
+										ng-false-value=false>
+								</td>
 								<td><button class="btn btn-danger" type="submit"
 										ng-click="removeFibarotoSettings(fibaro.name, fibaro.ip, fibaro.port)">Del</button></td>
 							</tr>
@@ -198,8 +215,21 @@
 								<td><input id="bridge-settings-next-fibaro-password"
 									class="form-control" type="password" ng-model="newfibaropassword"
 									placeholder="Fibaro password"></td>
+								<td>Save Logs <input type="checkbox"
+										ng-model="filters.useSaveLogs" ng-true-value=true
+										ng-false-value=false>
+									User Desc <input type="checkbox"
+										ng-model="filters.useUserDescription" ng-true-value=true
+										ng-false-value=false>
+									Lili Cmd <input type="checkbox"
+										ng-model="filters.scenesLiliCmddOnly" ng-true-value=true
+										ng-false-value=false>
+									Trash Chars <input type="checkbox"
+										ng-model="filters.replaceTrash" ng-true-value=true
+										ng-false-value=false>
+								</td>
 								<td><button class="btn btn-success" type="submit"
-										ng-click="addFibarotoSettings(newfibaroname, newfibaroip, newfibaroport, newfibarousername, newfibaropassword)">Add</button></td>
+										ng-click="addFibarotoSettings(newfibaroname, newfibaroip, newfibaroport, newfibarousername, newfibaropassword, filters)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>
@@ -573,28 +603,168 @@
 					</table></td>
 				</tr>
 				<tr>
-					<td>Nest Username</td>
+					<td>OpenHAB Names and IP Addresses</td>
+					<td><table
+							class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>IP</th>
+									<th>Port</th>
+									<th>Username (opt)</th>
+									<th>Password (opt)</th>
+									<th>Use SSL</th>
+									<th>Manage</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="openhab in bridge.settings.openhabaddress.devices">
+								<td><input id="bridge-settings-next-openhab-name"
+									class="form-control" type="text" ng-model="openhab.name"
+									placeholder="An OpenHAB"></td>
+								<td><input id="bridge-settings-next-openhab-ip"
+									class="form-control" type="text" ng-model="openhab.ip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-next-openhab-port"
+									class="form-control" type="text" ng-model="openhab.port"
+									placeholder="8080"></td>
+								<td><input id="bridge-settings-next-openhab-username"
+									   class="form-control" type="text" ng-model="openhab.username"
+									   placeholder="OpenHAB username"></td>
+								<td><input id="bridge-settings-next-openhab-password"
+									class="form-control" type="password" ng-model="openhab.password"
+									placeholder="OpenHAB password (opt)"></td>
+								<td><input type="checkbox"
+										ng-model="openhab.secure" ng-true-value=true
+										ng-false-value=false></td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removeOpenHABtoSettings(openhab.name, openhab.ip)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-new-openhab-name"
+									class="form-control" type="text" ng-model="newopenhabname"
+									placeholder="A OpenHAB"></td>
+								<td><input id="bridge-settings-new-openhab-ip"
+									class="form-control" type="text" ng-model="newopenhabip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-new-openhab-port"
+									class="form-control" type="text" ng-model="newopenhabport"
+									placeholder="8080"></td>
+								<td><input id="bridge-settings-new-openhab-username"
+									   class="form-control" type="text" ng-model="newopenhabusername"
+									   placeholder="OpenHAB username"></td>
+								<td><input id="bridge-settings-new-openhab-password"
+									class="form-control" type="password" ng-model="newopenhabpassword"
+									placeholder="OpenHAB password (opt)"></td>
+								<td><input type="checkbox"
+										ng-model="newopenhabsecure" ng-true-value=true
+										ng-false-value=false></td>
+								<td><button class="btn btn-success" type="submit"
+										ng-click="addOpenHABtoSettings(newopenhabname, newopenhabip, newopenhabport, newsopenhabusername, newopenhabpassword, newopenhabsecure)">Add</button></td>
+							</tr>
+						</table></td>
+				</tr>
+				<tr>
+					<td>FHEM Names and IP Addresses</td>
+					<td><table
+							class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>IP</th>
+									<th>Port</th>
+									<th>Username (opt)</th>
+									<th>Password (opt)</th>
+									<th>Room (opt)</th>
+									<th>Use SSL</th>
+									<th>Manage</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="fhem in bridge.settings.fhemaddress.devices">
+								<td><input id="bridge-settings-next-fhem-name"
+									class="form-control" type="text" ng-model="fhem.name"
+									placeholder="An FHEM"></td>
+								<td><input id="bridge-settings-next-fhem-ip"
+									class="form-control" type="text" ng-model="fhem.ip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-next-fhem-port"
+									class="form-control" type="text" ng-model="fhem.port"
+									placeholder="8080"></td>
+								<td><input id="bridge-settings-next-fhem-username"
+									   class="form-control" type="text" ng-model="fhem.username"
+									   placeholder="FHEM username"></td>
+								<td><input id="bridge-settings-next-fhem-password"
+									class="form-control" type="password" ng-model="fhem.password"
+									placeholder="FHEM password (opt)"></td>
+                                <td><input id="bridge-settings-next-fhem-webhook"
+                                    class="form-control" type="text" ng-model="fhem.webhook"
+                                    placeholder="Room Name"></td>
+								<td><input type="checkbox"
+										ng-model="fhem.secure" ng-true-value=true
+										ng-false-value=false></td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removeFhemtoSettings(fhem.name, fhem.ip)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-new-fhem-name"
+									class="form-control" type="text" ng-model="newfhemname"
+									placeholder="A FHEM"></td>
+								<td><input id="bridge-settings-new-fhem-ip"
+									class="form-control" type="text" ng-model="newfhemip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-new-fhem-port"
+									class="form-control" type="text" ng-model="newfhemport"
+									placeholder="8080"></td>
+								<td><input id="bridge-settings-new-fhem-username"
+									   class="form-control" type="text" ng-model="newfhemusername"
+									   placeholder="FHEM username"></td>
+								<td><input id="bridge-settings-new-fhem-password"
+									class="form-control" type="password" ng-model="newfhempassword"
+									placeholder="FHEM password (opt)"></td>
+                                <td><input id="bridge-settings-new-fhem-webhook"
+                                    class="form-control" type="text" ng-model="newfhemwebhook"
+                                    placeholder="Room Name"></td>
+								<td><input type="checkbox"
+										ng-model="newfhemsecure" ng-true-value=true
+										ng-false-value=false></td>
+								<td><button class="btn btn-success" type="submit"
+										ng-click="addFhemtoSettings(newfhemname, newfhemip, newfhemport, newsfhemusername, newfhempassword, newfhemwebhook, newfhemsecure)">Add</button></td>
+							</tr>
+						</table></td>
+				</tr>
+				<tr>
+					<td>Nest</td>
+					<td><table class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Username</th>
+									<th>Password</th>
+									<th>Temp Farenheit</th>
+								</tr>
+							</thead>
+					<tr>
 					<td><input id="bridge-settings-nestuser" class="form-control"
 						type="text" ng-model="bridge.settings.nestuser"
 						placeholder="someone@gmail.com"></td>
-				</tr>
-				<tr>
-					<td>Nest Password</td>
 					<td><input id="bridge-settings-nestpwd" class="form-control"
 						type="password" ng-model="bridge.settings.nestpwd"
 						placeholder="thepassword"></td>
-				</tr>
-				<tr>
-					<td>Nest Temp Farenheit</td>
-					<td><input type="checkbox"
+					<td> <input type="checkbox"
 						ng-model="bridge.settings.farenheit" ng-true-value=true
 						ng-false-value=false> {{bridge.settings.farenheit}}</td>
+					</tr>
+					</table></td>
 				</tr>
 				<tr>
 					<td>LIFX Support</td>
 					<td><input type="checkbox"
 						ng-model="bridge.settings.lifxconfigured" ng-true-value=true
 						ng-false-value=false> {{bridge.settings.lifxconfigured}}</td>
+				</tr>
+				<tr>
+					<td>Broadlink Support</td>
+					<td><input type="checkbox"
+						ng-model="bridge.settings.broadlinkconfigured" ng-true-value=true
+						ng-false-value=false> {{bridge.settings.broadlinkconfigured}}</td>
 				</tr>
 				<tr>
 					<td>Emulate Hue Hub Version</td>
@@ -625,6 +795,13 @@
 					<td><input type="checkbox"
 						ng-model="bridge.settings.traceupnp" ng-true-value=true
 						ng-false-value=false> {{bridge.settings.traceupnp}}</td>
+				</tr>
+				<tr>
+					<td>UPNP Send Delay</td>
+					<td><input id="bridge-settings-upnpsenddelay"
+						class="form-control" type="number"
+						ng-model="bridge.settings.upnpsenddelay" min="100"
+						max="15000"></td>
 				</tr>
 				<tr>
 					<td>My Echo URL</td>

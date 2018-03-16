@@ -1,5 +1,7 @@
 package com.bwssystems.HABridge;
 
+import com.google.gson.JsonObject;
+
 public class NamedIP {
 	private String name;
 	private String ip;
@@ -7,6 +9,7 @@ public class NamedIP {
 	private String port;
 	private String username;
 	private String password;
+	private JsonObject extensions;
 	private Boolean secure;
 	
 	public String getName() {
@@ -50,5 +53,11 @@ public class NamedIP {
 	}
 	public void setSecure(Boolean secure) {
 		this.secure = secure;
+	}
+	public JsonObject getExtensions() {
+		return extensions;
+	}
+	public void setExtensions(JsonObject extensions) {
+		this.extensions = extensions;
 	}
 }

@@ -85,6 +85,11 @@ public class FibaroHome implements Home
 	}
 
 	@Override
+	public void refresh() {
+		// noop		
+	}
+	
+	@Override
 	public Home createHome(BridgeSettings bridgeSettings)
 	{
 		validFibaro = bridgeSettings.getBridgeSettingsDescriptor().isValidFibaro();

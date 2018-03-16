@@ -80,7 +80,10 @@ public class DeviceDescriptor{
     @SerializedName("deviceState")
     @Expose
     private DeviceState deviceState;
-    
+    @SerializedName("onFirstDim")
+    @Expose
+    private boolean onFirstDim;
+   
     public String getName() {
         return name;
     }
@@ -273,6 +276,14 @@ public class DeviceDescriptor{
 
 	public void setComments(String comments) {
 		this.comments = comments;
+	}
+
+	public boolean isOnFirstDim() {
+		return onFirstDim;
+	}
+
+	public void setOnFirstDim(boolean onFirstDim) {
+		this.onFirstDim = onFirstDim;
 	}
 
 	public boolean containsType(String aType) {

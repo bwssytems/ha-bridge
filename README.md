@@ -1,9 +1,9 @@
 # ha-bridge
-Emulates Philips Hue API to other home automation gateways such as an Amazon Echo or other systems that support Philips Hue.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
+Emulates Philips Hue API to other home automation gateways such as an Amazon Echo/Dot Gen 1 (gen 2 has issues discovering ha-bridge) or other systems that support Philips Hue.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
 
 Here are some diagrams to put this software in perspective.
 
-The Echo Path looks like this:
+The Echo path looks like this:
 ```
                      +------------------------+    +------------------------+
 +-------------+      | H A +------------------|    | A +------------------+ |
@@ -11,19 +11,19 @@ The Echo Path looks like this:
 +-------------+      | E I +------------------|    | I +------------------+ |
                      +------------------------+    +------------------------+
 ```
-The Google Home Path looks like this:
-```
-                     +------------------------+    +------------------------+
-+-------------+      | H A +------------------|    | A +------------------+ |
-| Google Home |----->| U P | ha-bridge core   |--->| P | Device to control| |
-+-------------+      | E I +------------------|    | I +------------------+ |
-                     +------------------------+    +------------------------+
-```
-THe Harmony Hub Path looks like this:
+THe Harmony Hub path looks like this:
 ```
                      +------------------------+    +------------------------+
 +-------------+      | H A +------------------|    | A +------------------+ |
 | Harmony Hub |----->| U P | ha-bridge core   |--->| P | Device to control| |
++-------------+      | E I +------------------|    | I +------------------+ |
+                     +------------------------+    +------------------------+
+```
+A Custom implementation path looks like this:
+```
+                     +------------------------+    +------------------------+
++-------------+      | H A +------------------|    | A +------------------+ |
+|  HA System  |----->| U P | ha-bridge core   |--->| P | Device to control| |
 +-------------+      | E I +------------------|    | I +------------------+ |
                      +------------------------+    +------------------------+
 ```
@@ -35,11 +35,13 @@ THe Harmony Hub Path looks like this:
 
 **NOTE: This software does not control Philips Hue devices directly. A physical Philips Hue Hub is required for that, by which the ha-bridge can then proxy all of your real Hue bridges behind this bridge.**
 
+**ISSUE: Amazon Echo (2nd Generation) has issues finding the ha-bridge. The only workaround is to have a first generation Echo or Dot on your network that finds the ha-bridge.**
+
 **ISSUE: Google Home now seems to not support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local API, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
 
 **FAQ: Please look here for the current FAQs! https://github.com/bwssytems/ha-bridge/wiki/HA-Bridge-FAQs**
 
-In the cases of systems that require authorization and/or have APIs that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest, Somfy Tahoma, Home Assistant, Domoticz, HAL, Fibaro, HomeWizard and the ability to proxy all of your real Hue bridges behind this bridge.
+In the cases of systems that require authorization and/or have APIs that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest, Somfy Tahoma, Home Assistant, Domoticz, MQTT, HAL, Fibaro, HomeWizard, LIFX, OpenHAB, FHEM, Broadlink and the ability to proxy all of your real Hue bridges behind this bridge.
 
 Alternatively the Bridge supports custom calls as well using http/https/udp and tcp such as the LimitlessLED/MiLight bulbs using the UDP protocol. Binary data is supported with UDP/TCP.
 
@@ -61,19 +63,25 @@ ATTENTION: This requires JDK 1.8 to run
 ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
 
 ```
-java -jar ha-bridge-5.1.0.jar
+java -jar ha-bridge-5.2.1.jar
 ```
 
-### Manual installation of ha-bridge and setup of systemd service
+ATTENTION: If running Java9, you will need to add the xml bind module
+```
+java -jar  --add-modules java.xml.bind ha-bridge-5.2.1.jar
+```
+
+## Manual installation of ha-bridge and setup of systemd service
 Next gen Linux systems (this includes the Raspberry Pi), use systemd to run and manage services.
 Here is a link on how to use systemd: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
 
-Create the directory and make sure that ha-bridge-5.1.0.jar is in your /home/pi/ha-bridge directory.
+Create the directory and make sure that ha-bridge-5.2.1.jar is in your /home/pi/ha-bridge directory.
+
 ```
 pi@raspberrypi:~ $ mkdir ha-bridge
 pi@raspberrypi:~ $ cd ha-bridge
 
-pi@raspberrypi:~/ha-bridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v5.1.0/ha-bridge-5.1.0.jar
+pi@raspberrypi:~/ha-bridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v5.2.1/ha-bridge-5.2.1.jar
 ```
 
 Create the ha-bridge.service unit file:
@@ -90,8 +98,9 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/pi/ha-bridge
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/ha-bridge/data/habridge.config /home/pi/ha-bridge/ha-bridge-5.1.0.jar
+
+WorkingDirectory=/home/pi/habridge
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-5.2.1.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -272,7 +281,7 @@ At the bottom of the screen is the "Bridge Device DB Backup" which can be access
 #### Renumber Devices
 This changes the numbering of the added devices to start at 1 and goes up from there. It was originally intended for a conversion from the previous system version that used large numbers and was not necessary. This also allows the system to try and number sequentially. If you use this button, you will need to re-discover your devices as their ID's will have changed.
 #### Link
-If this is present, you have enabled the ue link button feature for the ha-bridge. If you want a new system to recognize the ha-bridge, you will need to press this button when you are doign a discovery.
+If this is present, you have enabled the Hue link button feature for the ha-bridge. If you want a new system to recognize the ha-bridge, you will need to press this button when you are doing a discovery.
 ### The Bridge Control Tab
 This is where all of the configuration occurs for what ports and IP's the bridge runs on. It also contains the configurations for target devices so that Helper Tabs for configuration can be added as well as the connection information to control those devices.
 #### Bridge server
@@ -300,7 +309,7 @@ The upnp response port that will be used. The default is 50000.
 #### Vera Names and IP Addresses
 Provide IP Addresses of your Veras that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Vera and device/scene you configure.
 #### Fibaro Names and IP Addresses
-Provide IP Addresses of your Fibaros that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Fibaro and device/scene you configure.
+Provide IP Addresses of your Fibaros that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Fibaro and device/scene you configure. There are filter switches available to limit some of the returns for devices and scenes such as use save logs, use user description, use only Lili command and a switch that cleans up format Trash Chars. The default filters are false for everything but Trash Chars.
 #### Harmony Names and IP Addresses
 Provide IP Addresses of your Harmony Hubs that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the activity or buttons by the call it receives and send it to the target Harmony Hub and activity/button you configure. Also, an option of webhook can be called when the activity changes on the harmony hub that will send an HTTP GET call to the the address of your choosing. This can contain the replacement variables of ${activity.id} and/or ${activity.label}. Example : http://192.168.0.1/activity/${activity.id}/${activity.label} OR http://hook?a=${activity.label}
 #### Hue Names and IP Addresses
@@ -312,11 +321,17 @@ Provide IP Addresses of your HAL Systems that you want to utilize with the bridg
 #### MQTT Client IDs and IP Addresses
 Provide Client ID and IP Addresses and ports of your MQTT Brokers that you want to utilize with the bridge. Also, you can provide the username and password if you have secured your MQTT broker which is optional. When these Client ID and IP's are given, the bridge will be able to publish MQTT messages by the call it receives and send it to the target MQTT Broker you configure. The MQTT Messages Tab will become available to help you build messages.
 #### Home Assistant Names and IP Addresses
-Provide IP Addresses and ports of your Home Assistant that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Home Assistant and device/scene you configure.
+<Provide IP Addresses and ports of your Home Assistant that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Home Assistant and device/scene you configure. 
+#### HomeWizard Gateways Names and IP Addresses
+Provide IP Addresses of your HomeWizard Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target HomeWizard and device/scene you configure. 
 #### Domoticz Names and IP Addresses
 Provide IP Addresses of your Domoticz Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Domoticz and device/scene you configure.
 #### Somfy Tahoma Names and IP Addresses
 Provide user name and password used to login to www.tahomalink.com.  This needs to be provided if you're using the Somfy Tahoma features (for connecting to IO Homecontrol used by Velux among others). There is no need to give any IP address or host information as this contacts your cloud account.  *Note:* you have to 'turn on' a window to open it, and 'turn off' to close.
+#### OpenHAB Names and IP Addresses
+Provide IP Addresses of your OpenHAB Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target OpenHAB and device/scene you configure. 
+#### FHEM Names and IP Addresses
+Provide IP Addresses of your FHEM Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target FHEM and device/scene you configure. 
 #### Nest Username
 The user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features. There is no need to give any ip address or host information as this contacts your cloud account.
 #### Nest Password
@@ -325,6 +340,8 @@ The password for the user name of the home.nest.com account for the Nest user. T
 This setting allows the value being sent into the bridge to be interpreted as Fahrenheit or Celsius. The default is to have Fahrenheit.
 #### LIFX Support
 This setting will have the ha-bridge look for LIFX devices on your network. Since this is broadcast based, there is no other info needed.
+#### Broadlink Support
+This setting will have the ha-bridge look for Broadlink devices on your network (i.e. RM2 IRcontrollers, Smart Power Strips and Smart Plugs). Since this is broadcast based, there is no other info needed.
 #### Emulate Hue Hub Version
 This setting is used to set the version that the ha-bridge will return in the hub version field. The default is 9999999999 which should work to be higher than the versions that are being used.
 #### Emulate MAC
@@ -335,6 +352,8 @@ This setting is the time used in between button presses when there is multiple b
 This controls how many log messages will be kept and displayed on the log tab. This does not affect what is written to the standard output for logging. The default is 512. Changing this will incur more memory usage of the process.
 #### Trace UPNP Calls
 Turn on tracing for upnp discovery messages to the log. The default is false.
+#### UPNP Send Delay
+This setting is for the upnp spec to delay a certain amount between upnp response messages sent back to a client. This is defaulted to 650ms and can be tuned to any value up to 1500ms.
 #### My Echo URL
 This sets the URL that is used in the menu bar to ge to your echo. For certain countries, this needs to be set to a different URL.
 
@@ -466,11 +485,11 @@ There are multiple replacement constructs available to be put into any of the ca
 
 You can control items that require special calculated values using ${intensity.math(<your expression using "X" as the value to operate on>)} i.e. "${intensity.math(X/4)}".
 
-For the items that want to have a date time put into the message, utilize ${time.format(yyyy-MM-ddTHH:mm:ssXXX)} where "yyyy-MM-ddTHH:mm:ssXXX" can be any format from the Java SimpleDateFormat documented here: https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html. Also, there is a $(time.millis) which will put the millis timestamp where this replacement control is located.
+For the items that want to have a date time put into the message, utilize ${time.format(yyyy-MM-ddTHH:mm:ssXXX)} where "yyyy-MM-ddTHH:mm:ssXXX" can be any format from the Java SimpleDateFormat documented here: https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html. Also, there is a ${time.millis} which will put the millis timestamp where this replacement control is located.
 
-Color has been added as a replacement control and the available values are $(color.r), $(color.g), $(color.b) which are representations of each color as 0 - 255. There are hex equivalents as well as $(color.rx), $(color.gx), $(color.bx) and $(color.rgbx) as 2 place hex representations except for rgbx which is a six place hex representation.
+Color has been added as a replacement control and the available values are ${color.r}, ${color.g}, ${color.b} which are representations of each color as 0 - 255. There are hex equivalents as well as ${color.rx}, ${color.gx}, ${color.bx} and ${color.rgbx} as 2 place hex representations except for rgbx which is a six place hex representation.
 
-Special handling for milights is included and is handled by $(color.milight:x). The usage for that is as follows: udp://ip:port/0x${color.milight:x} where x is a number between 0 and 4 (0 all groups, 1-4 specific group). The group is necessary in case the color turns out to be white. The correct group on must of course be sent before that udp packet.
+Special handling for milights is included and is handled by ${color.milight:x}. The usage for that is as follows: udp://ip:port/0x${color.milight:x} where x is a number between 0 and 4 (0 all groups, 1-4 specific group). The group is necessary in case the color turns out to be white. The correct group on must of course be sent before that udp packet.
 Note that milight can only use 255 colors and white is handled completely separate for the rgbw strips, so setting temperature via ct with milight does something but not really the desired result
 
 Also, device data can be inserted into your payloads by the use of "${device.name}", "${device.id}", "${device.uniqueid}", "${device.targetDevice}", "${device.mapId}", "${device.mapType}", "${device.deviceType}", "${device.requesterAddress}", "${device.description}" and "${device.comments}". These work just like the dimming value replacements.

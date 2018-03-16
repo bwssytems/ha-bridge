@@ -15,6 +15,7 @@ import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.hue.BrightnessDecode;
 import com.bwssystems.HABridge.hue.ColorData;
+import com.bwssystems.HABridge.hue.ColorDecode;
 import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
@@ -100,6 +101,9 @@ public class MQTTHome implements Home {
 					intensity, targetBri, targetBriInc, false);
 			mqttObject = DeviceDataDecode.replaceDeviceData(mqttObject, device);
 			mqttObject = TimeDecode.replaceTimeValue(mqttObject);
+			if (colorData != null) {
+				mqttObject = ColorDecode.replaceColorData(mqttObject, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);	
+			}
 			if (mqttObject.substring(0, 1).equalsIgnoreCase("{"))
 				mqttObject = "[" + mqttObject + "]";
 			MQTTMessage[] mqttMessages = aGsonHandler.fromJson(mqttObject, MQTTMessage[].class);
@@ -145,5 +149,10 @@ public class MQTTHome implements Home {
 			}
 		}
 		return this;
+	}
+	
+	@Override
+	public void refresh() {
+		// noop		
 	}
 }

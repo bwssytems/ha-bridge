@@ -255,4 +255,20 @@ public class ColorDecode {
 		    return "40" + String.format("%02X", milight) + "55";
 	    }
 	}
+
+	@SuppressWarnings("unchecked")
+	public static int getIntRGB(ColorData colorData, int setIntensity) {
+		ColorData.ColorMode colorMode = colorData.getColorMode();
+		List<Integer> rgb = null;
+		if (colorMode == ColorData.ColorMode.XY) {
+			rgb = convertCIEtoRGB((List<Double>) colorData.getData(), setIntensity);
+		} else if (colorMode == ColorData.ColorMode.CT) {
+			rgb = convertCTtoRGB((Integer) colorData.getData());
+		}
+
+		int rgbIntVal = Integer.parseInt(String.format("%02X%02X%02X", rgb.get(0), rgb.get(1), rgb.get(2)), 16);
+		log.debug("Convert RGB to int. Result: " + rgbIntVal + " RGB Values: " + rgb.get(0) + " " + rgb.get(1) + " "
+				+ rgb.get(2));
+		return rgbIntVal;
+	}
 }

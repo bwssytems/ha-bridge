@@ -3,6 +3,7 @@ package com.bwssystems.HABridge.upnp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.HuePublicConfig;
@@ -16,6 +17,7 @@ public class UpnpSettingsResource {
     private Logger log = LoggerFactory.getLogger(UpnpSettingsResource.class);
     
     private BridgeSettingsDescriptor theSettings;
+    private BridgeSettings bridgeSettings;
 
 	private String hueTemplate = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
 			+ "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">\n"
@@ -35,15 +37,6 @@ public class UpnpSettingsResource {
 				+ "<modelURL>http://www.meethue.com</modelURL>\n"
 				+ "<serialNumber>%s</serialNumber>\n"
 				+ "<UDN>uuid:" + HueConstants.UUID_PREFIX + "%s</UDN>\n"
-				+ "<serviceList>\n"
-					+ "<service>\n"
-						+ "<serviceType>(null)</serviceType>\n"
-						+ "<serviceId>(null)</serviceId>\n"
-						+ "<controlURL>(null)</controlURL>\n"
-						+ "<eventSubURL>(null)</eventSubURL>\n"
-						+ "<SCPDURL>(null)</SCPDURL>\n"
-					+ "</service>\n"
-				+ "</serviceList>\n"
 				+ "<presentationURL>index.html</presentationURL>\n"
 					+ "<iconList>\n"
 						+ "<icon>\n"
@@ -64,15 +57,22 @@ public class UpnpSettingsResource {
 				+ "</device>\n"
 			+ "</root>\n";
 
-	public UpnpSettingsResource(BridgeSettingsDescriptor theBridgeSettings) {
+	public UpnpSettingsResource(BridgeSettings theBridgeSettings) {
 		super();
-		this.theSettings = theBridgeSettings;
+		this.bridgeSettings = theBridgeSettings;
+		this.theSettings = theBridgeSettings.getBridgeSettingsDescriptor();
 	}
 
 	public void setupServer() {
 		log.info("Description xml service started....");
 //      http://ip_adress:port/description.xml which returns the xml configuration for the hue emulator
 		get("/description.xml", "application/xml; charset=utf-8", (request, response) -> {
+			if(bridgeSettings.getBridgeControl().isReinit() || bridgeSettings.getBridgeControl().isStop()) {
+				log.info("Get description.xml called while in re-init or stop state");
+		         response.status(503);
+				return null;
+			}
+			
 			String portNumber = Integer.toString(request.port());
 			String filledTemplate = null;
 			String bridgeIdMac = HuePublicConfig.createConfig("temp", theSettings.getUpnpConfigAddress(), HueConstants.HUB_VERSION, theSettings.getHubmac()).getSNUUIDFromMac();

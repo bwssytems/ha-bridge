@@ -30,6 +30,7 @@ public class UpnpListener {
 	private String bridgeId;
 	private String bridgeSNUUID;
 	private HuePublicConfig aHueConfig;
+	private Integer theUpnpSendDelay;
 	private String responseTemplate1 = "HTTP/1.1 200 OK\r\n" +
 			"HOST: %s:%s\r\n" +
 			"CACHE-CONTROL: max-age=100\r\n" +
@@ -76,6 +77,7 @@ public class UpnpListener {
 		strict = theSettings.isUpnpStrict();
 		traceupnp = theSettings.isTraceupnp();
 		useUpnpIface = theSettings.isUseupnpiface();
+		theUpnpSendDelay = theSettings.getUpnpsenddelay();
 		bridgeControl = theControl;
 		aHueConfig = HuePublicConfig.createConfig("temp", responseAddress, HueConstants.HUB_VERSION, theSettings.getHubmac());
 		bridgeId = aHueConfig.getBridgeid();
@@ -230,6 +232,11 @@ public class UpnpListener {
 
 	protected void sendUpnpResponse(InetAddress requester, int sourcePort) throws IOException {
 		String discoveryResponse = null;
+		try {
+			Thread.sleep(theUpnpSendDelay);
+		} catch (InterruptedException e) {
+			// noop
+		}
 		discoveryResponse = String.format(responseTemplate1, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID);
 		if(traceupnp) {
 			log.info("Traceupnp: send upnp discovery template 1 with response address: " + responseAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
@@ -238,6 +245,11 @@ public class UpnpListener {
 			log.debug("sendUpnpResponse to address: " + requester + ":" + sourcePort + " with discovery responseTemplate1 is <<<" + discoveryResponse + ">>>");
 		sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
 
+		try {
+			Thread.sleep(theUpnpSendDelay);
+		} catch (InterruptedException e) {
+			// noop
+		}
 		discoveryResponse = String.format(responseTemplate2, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
 		if(traceupnp) {
 			log.info("Traceupnp: send upnp discovery template 2 with response address: " + responseAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
@@ -246,6 +258,11 @@ public class UpnpListener {
 			log.debug("sendUpnpResponse to address: " + requester + ":" + sourcePort + " discovery responseTemplate2 is <<<" + discoveryResponse + ">>>");
 		sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
 
+		try {
+			Thread.sleep(theUpnpSendDelay);
+		} catch (InterruptedException e) {
+			// noop
+		}
 		discoveryResponse = String.format(responseTemplate3, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID);
 		if(traceupnp) {
 			log.info("Traceupnp: send upnp discovery template 3 with response address: " + responseAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);

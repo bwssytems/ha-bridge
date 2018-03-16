@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
+//import com.bwssystems.HABridge.api.NameValue;
 import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.WhitelistEntry;
 
@@ -87,6 +87,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("somfyaddress")
 	@Expose
 	private IpList somfyaddress;
+	@SerializedName("openhabaddress")
+	@Expose
+	private IpList openhabaddress;
 	@SerializedName("hubversion")
 	@Expose
 	private String hubversion;
@@ -99,6 +102,21 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("homewizardaddress")
 	@Expose
 	private IpList homewizardaddress;
+	@SerializedName("upnpsenddelay")
+	@Expose
+	private Integer upnpsenddelay;
+	@SerializedName("fhemaddress")
+	@Expose
+	private IpList fhemaddress;
+	@SerializedName("lifxconfigured")
+	@Expose
+	private boolean lifxconfigured;
+	@SerializedName("broadlinkconfigured")
+	@Expose
+	private boolean broadlinkconfigured;
+//	@SerializedName("activeloggers")
+//	@Expose
+//	private List<NameValue> activeloggers;
 	
 	private boolean settingsChanged;
 	private boolean veraconfigured;
@@ -111,8 +129,9 @@ public class BridgeSettingsDescriptor {
 	private boolean hassconfigured;
 	private boolean domoticzconfigured;
 	private boolean somfyconfigured;
-	private boolean lifxconfigured;
 	private boolean homewizardconfigured;
+	private boolean openhabconfigured;
+	private boolean fhemconfigured;
 	
 	// Deprecated settings
 	private String haltoken;
@@ -136,6 +155,7 @@ public class BridgeSettingsDescriptor {
 		this.domoticzconfigured = false;
 		this.homewizardconfigured = false;
 		this.lifxconfigured = false;
+		this.openhabconfigured = false;
 		this.farenheit = true;
 		this.securityData = null;
 		this.settingsChanged = false;
@@ -143,6 +163,9 @@ public class BridgeSettingsDescriptor {
 		this.webaddress = "0.0.0.0";
 		this.hubversion = HueConstants.HUB_VERSION;
 		this.hubmac = null;
+//		this.activeloggers = null;
+		this.upnpsenddelay = Configuration.UPNP_SEND_DELAY;
+		this.broadlinkconfigured = false;
 	}
 	public String getUpnpConfigAddress() {
 		return upnpconfigaddress;
@@ -384,6 +407,18 @@ public class BridgeSettingsDescriptor {
 	public void setHassconfigured(boolean hassconfigured) {
 		this.hassconfigured = hassconfigured;
 	}
+	public IpList getOpenhabaddress() {
+		return openhabaddress;
+	}
+	public void setOpenhabaddress(IpList openhabaddress) {
+		this.openhabaddress = openhabaddress;
+	}
+	public boolean isOpenhabconfigured() {
+		return openhabconfigured;
+	}
+	public void setOpenhabconfigured(boolean openhabconfigured) {
+		this.openhabconfigured = openhabconfigured;
+	}
 	public String getHubversion() {
 		return hubversion;
 	}
@@ -419,6 +454,36 @@ public class BridgeSettingsDescriptor {
 	}
 	public void setSecurityData(String securityData) {
 		this.securityData = securityData;
+	}
+	public Integer getUpnpsenddelay() {
+		return upnpsenddelay;
+	}
+	public void setUpnpsenddelay(Integer upnpsenddelay) {
+		this.upnpsenddelay = upnpsenddelay;
+	}
+	public IpList getFhemaddress() {
+		return fhemaddress;
+	}
+	public void setFhemaddress(IpList fhemaddress) {
+		this.fhemaddress = fhemaddress;
+	}
+	public boolean isFhemconfigured() {
+		return fhemconfigured;
+	}
+	public void setFhemconfigured(boolean fhemconfigured) {
+		this.fhemconfigured = fhemconfigured;
+	}
+//	public List<NameValue> getActiveloggers() {
+//		return activeloggers;
+//	}
+//	public void setActiveloggers(List<NameValue> activeloggers) {
+//		this.activeloggers = activeloggers;
+//	}
+	public boolean isBroadlinkconfigured() {
+		return broadlinkconfigured;
+	}
+	public void setBroadlinkconfigured(boolean broadlinkconfigured) {
+		this.broadlinkconfigured = broadlinkconfigured;
 	}
 	public Boolean isValidVera() {
 		if(this.getVeraAddress() == null || this.getVeraAddress().getDevices().size() <= 0)
@@ -526,5 +591,28 @@ public class BridgeSettingsDescriptor {
 			return false;
 		
 		return true;
+	}
+	public Boolean isValidOpenhab() {
+		if(this.getOpenhabaddress() == null || this.getOpenhabaddress().getDevices().size() <= 0)
+			return false;
+		
+		List<NamedIP> devicesList = this.getOpenhabaddress().getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+		
+		return true;
+	}
+	public Boolean isValidFhem() {
+		if(this.getFhemaddress() == null || this.getFhemaddress().getDevices().size() <= 0)
+			return false;
+		
+		List<NamedIP> devicesList = this.getFhemaddress().getDevices();
+		if(devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+		
+		return true;
+	}
+	public Boolean isValidBroadlink() {
+		return this.isBroadlinkconfigured();
 	}
 }

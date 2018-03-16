@@ -111,11 +111,7 @@ public class BrightnessDecode {
 	
 				Integer endResult = calculateMath(variables, mathDescriptor);
 				if(endResult != null) {
-					if (isHex) {
-						replaceValue = convertToHex(endResult);
-					} else {
-						replaceValue = endResult.toString();
-					}
+					replaceValue = convertToHex(endResult);
 					replaceTarget = INTENSITY_MATH + mathDescriptor + INTENSITY_MATH_CLOSE_HEX;
 					notDone = true;
 				}
