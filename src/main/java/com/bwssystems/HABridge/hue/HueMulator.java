@@ -570,8 +570,8 @@ public class HueMulator {
 		if (body.contains("\"effect\"")) {
 			if (notFirstChange)
 				responseString = responseString + ",";
-			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/effect\":"
-					+ stateChanges.getEffect() + "}}";
+			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/effect\":\""
+					+ stateChanges.getEffect() + "\"}}";
 			if (deviceState != null)
 				deviceState.setEffect(stateChanges.getEffect());
 			notFirstChange = true;
@@ -590,8 +590,8 @@ public class HueMulator {
 		if (body.contains("\"alert\"")) {
 			if (notFirstChange)
 				responseString = responseString + ",";
-			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/alert\":"
-					+ stateChanges.getAlert() + "}}";
+			responseString = responseString + "{\"success\":{\"/lights/" + lightId + "/state/alert\":\""
+					+ stateChanges.getAlert() + "\"}}";
 			if (deviceState != null)
 				deviceState.setAlert(stateChanges.getAlert());
 			notFirstChange = true;
