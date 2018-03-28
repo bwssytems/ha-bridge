@@ -100,7 +100,7 @@ After=network.target
 Type=simple
 
 WorkingDirectory=/home/pi/habridge
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/habridge/data/habridge.config /home/pi/habridge/ha-bridge-5.2.1.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/ha-bridge/data/habridge.config /home/pi/ha-bridge/ha-bridge-5.2.1.jar
 
 [Install]
 WantedBy=multi-user.target
