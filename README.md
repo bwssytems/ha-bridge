@@ -99,7 +99,7 @@ After=network.target
 [Service]
 Type=simple
 
-WorkingDirectory=/home/pi/habridge
+WorkingDirectory=/home/pi/ha-bridge
 ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/ha-bridge/data/habridge.config /home/pi/ha-bridge/ha-bridge-5.2.1.jar
 
 [Install]
