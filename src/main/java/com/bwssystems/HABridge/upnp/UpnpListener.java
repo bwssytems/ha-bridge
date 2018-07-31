@@ -23,6 +23,7 @@ public class UpnpListener {
 	private MulticastSocket upnpMulticastSocket;
 	private int httpServerPort;
 	private String responseAddress;
+	private String httpLocationAddress;
 	private boolean strict;
 	private boolean traceupnp;
 	private boolean useUpnpIface;
@@ -68,6 +69,23 @@ public class UpnpListener {
 			"hue-bridgeid: %s\r\n" +
 			"NT: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n" +
 			"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
+
+	// Ruthlessly stolen from https://stackoverflow.com/questions/22045165/java-datagrampacket-receive-how-to-determine-local-ip-interface
+	// Try to get a source IP that makes sense for the requestor to contact for use in the LOCATION header in replies
+	private InetAddress getOutboundAddress(SocketAddress remoteAddress) throws SocketException {
+		DatagramSocket sock = new DatagramSocket();
+		// connect is needed to bind the socket and retrieve the local address
+		// later (it would return 0.0.0.0 otherwise)
+		sock.connect(remoteAddress);
+
+		final InetAddress localAddress = sock.getLocalAddress();
+
+		sock.disconnect();
+		sock.close();
+		sock = null;
+
+		return localAddress;
+	}
 
 	public UpnpListener(BridgeSettingsDescriptor theSettings, BridgeControlDescriptor theControl, UDPDatagramSender aUdpDatagramSender) throws IOException {
 		super();
@@ -155,6 +173,7 @@ public class UpnpListener {
 			DatagramPacket packet = new DatagramPacket(buf, buf.length);
 			try {
 				upnpMulticastSocket.receive(packet);
+				httpLocationAddress = getOutboundAddress(packet.getSocketAddress()).getHostAddress();
 				if (isSSDPDiscovery(packet)) {
 					try {
 						sendUpnpResponse(packet.getAddress(), packet.getPort());
@@ -237,9 +256,10 @@ public class UpnpListener {
 		} catch (InterruptedException e) {
 			// noop
 		}
-		discoveryResponse = String.format(responseTemplate1, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID);
+
+		discoveryResponse = String.format(responseTemplate1, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID);
 		if(traceupnp) {
-			log.info("Traceupnp: send upnp discovery template 1 with response address: " + responseAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
+			log.info("Traceupnp: send upnp discovery template 1 with response address: " + httpLocationAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
 		}
 		else
 			log.debug("sendUpnpResponse to address: " + requester + ":" + sourcePort + " with discovery responseTemplate1 is <<<" + discoveryResponse + ">>>");
@@ -250,9 +270,9 @@ public class UpnpListener {
 		} catch (InterruptedException e) {
 			// noop
 		}
-		discoveryResponse = String.format(responseTemplate2, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
+		discoveryResponse = String.format(responseTemplate2, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
 		if(traceupnp) {
-			log.info("Traceupnp: send upnp discovery template 2 with response address: " + responseAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
+			log.info("Traceupnp: send upnp discovery template 2 with response address: " + httpLocationAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
 		}
 		else
 			log.debug("sendUpnpResponse to address: " + requester + ":" + sourcePort + " discovery responseTemplate2 is <<<" + discoveryResponse + ">>>");
@@ -263,9 +283,9 @@ public class UpnpListener {
 		} catch (InterruptedException e) {
 			// noop
 		}
-		discoveryResponse = String.format(responseTemplate3, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID);
+		discoveryResponse = String.format(responseTemplate3, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID);
 		if(traceupnp) {
-			log.info("Traceupnp: send upnp discovery template 3 with response address: " + responseAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
+			log.info("Traceupnp: send upnp discovery template 3 with response address: " + httpLocationAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
 		}
 		else
 			log.debug("sendUpnpResponse to address: " + requester + ":" + sourcePort + " discovery responseTemplate3 is <<<" + discoveryResponse + ">>>");
