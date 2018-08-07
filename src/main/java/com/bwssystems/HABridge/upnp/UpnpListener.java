@@ -22,7 +22,7 @@ public class UpnpListener {
 	private Logger log = LoggerFactory.getLogger(UpnpListener.class);
 	private MulticastSocket upnpMulticastSocket;
 	private int httpServerPort;
-	private String responseAddress;
+	private String upnpConfigIP;
 	private boolean strict;
 	private boolean traceupnp;
 	private boolean useUpnpIface;
@@ -73,17 +73,20 @@ public class UpnpListener {
 		super();
 		upnpMulticastSocket = null;
 		httpServerPort = Integer.valueOf(theSettings.getServerPort());
-		responseAddress = theSettings.getUpnpConfigAddress();
+		upnpConfigIP = theSettings.getUpnpConfigAddress();
 		strict = theSettings.isUpnpStrict();
 		traceupnp = theSettings.isTraceupnp();
 		useUpnpIface = theSettings.isUseupnpiface();
 		theUpnpSendDelay = theSettings.getUpnpsenddelay();
 		bridgeControl = theControl;
-		aHueConfig = HuePublicConfig.createConfig("temp", responseAddress, HueConstants.HUB_VERSION, theSettings.getHubmac());
+		aHueConfig = HuePublicConfig.createConfig("temp", upnpConfigIP, HueConstants.HUB_VERSION, theSettings.getHubmac());
 		bridgeId = aHueConfig.getBridgeid();
 		bridgeSNUUID = aHueConfig.getSNUUIDFromMac();
 		try {
-			upnpMulticastSocket  = new MulticastSocket(Configuration.UPNP_DISCOVERY_PORT);
+			if(useUpnpIface)
+				upnpMulticastSocket  = new MulticastSocket(new InetSocketAddress(upnpConfigIP, Configuration.UPNP_DISCOVERY_PORT));
+			else
+				upnpMulticastSocket  = new MulticastSocket(Configuration.UPNP_DISCOVERY_PORT);
 		} catch(IOException e){
 			log.error("Upnp Discovery Port is in use, or restricted by admin (try running with sudo or admin privs): " + Configuration.UPNP_DISCOVERY_PORT + " with message: " + e.getMessage());
 			throw(e);
@@ -118,7 +121,7 @@ public class UpnpListener {
 							log.info("Traceupnp: Interface: " + name + " valid usable IP address: " + addr);
 						IPsPerNic++;
 					}
-					else if(addr.getHostAddress().equals(responseAddress)) {
+					else if(addr.getHostAddress().equals(upnpConfigIP)) {
 						if(traceupnp)
 							log.info("Traceupnp: Interface: " + name + " matches upnp config address of IP address: " + addr);
 						IPsPerNic++;
@@ -157,7 +160,7 @@ public class UpnpListener {
 				upnpMulticastSocket.receive(packet);
 				if (isSSDPDiscovery(packet)) {
 					try {
-						sendUpnpResponse(packet.getAddress(), packet.getPort());
+						sendUpnpResponse(packet);
 					} catch (IOException e) {
 						log.warn("UpnpListener encountered an error sending upnp response packet. IP: " + packet.getAddress().getHostAddress() + " with message: " + e.getMessage());
 						log.debug("UpnpListener send upnp exception: ", e);
@@ -230,16 +233,21 @@ public class UpnpListener {
 		return false;
 	}
 
-	protected void sendUpnpResponse(InetAddress requester, int sourcePort) throws IOException {
+	protected void sendUpnpResponse(DatagramPacket aPacket) throws IOException {
+		SocketAddress requesterAddress = aPacket.getSocketAddress();
+		InetAddress requester = aPacket.getAddress();
+		int sourcePort = aPacket.getPort();
 		String discoveryResponse = null;
+		// refactored suggestion by https://github.com/pvint
+		String httpLocationAddress = getOutboundAddress(requesterAddress).getHostAddress();
 		try {
 			Thread.sleep(theUpnpSendDelay);
 		} catch (InterruptedException e) {
 			// noop
 		}
-		discoveryResponse = String.format(responseTemplate1, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID);
+		discoveryResponse = String.format(responseTemplate1, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID);
 		if(traceupnp) {
-			log.info("Traceupnp: send upnp discovery template 1 with response address: " + responseAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
+			log.info("Traceupnp: send upnp discovery template 1 with response address: " + httpLocationAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
 		}
 		else
 			log.debug("sendUpnpResponse to address: " + requester + ":" + sourcePort + " with discovery responseTemplate1 is <<<" + discoveryResponse + ">>>");
@@ -250,9 +258,9 @@ public class UpnpListener {
 		} catch (InterruptedException e) {
 			// noop
 		}
-		discoveryResponse = String.format(responseTemplate2, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
+		discoveryResponse = String.format(responseTemplate2, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
 		if(traceupnp) {
-			log.info("Traceupnp: send upnp discovery template 2 with response address: " + responseAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
+			log.info("Traceupnp: send upnp discovery template 2 with response address: " + httpLocationAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
 		}
 		else
 			log.debug("sendUpnpResponse to address: " + requester + ":" + sourcePort + " discovery responseTemplate2 is <<<" + discoveryResponse + ">>>");
@@ -263,9 +271,9 @@ public class UpnpListener {
 		} catch (InterruptedException e) {
 			// noop
 		}
-		discoveryResponse = String.format(responseTemplate3, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID);
+		discoveryResponse = String.format(responseTemplate3, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID);
 		if(traceupnp) {
-			log.info("Traceupnp: send upnp discovery template 3 with response address: " + responseAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
+			log.info("Traceupnp: send upnp discovery template 3 with response address: " + httpLocationAddress + ":" + httpServerPort + " to address: " + requester + ":" + sourcePort);
 		}
 		else
 			log.debug("sendUpnpResponse to address: " + requester + ":" + sourcePort + " discovery responseTemplate3 is <<<" + discoveryResponse + ">>>");
@@ -282,7 +290,7 @@ public class UpnpListener {
 	
 	protected void sendUpnpNotify(InetAddress aSocketAddress) {
 		String notifyData = null;
-		notifyData = String.format(notifyTemplate, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, responseAddress, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
+		notifyData = String.format(notifyTemplate, Configuration.UPNP_MULTICAST_ADDRESS, Configuration.UPNP_DISCOVERY_PORT, upnpConfigIP, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
 		log.debug("sendUpnpNotify notifyTemplate is <<<" + notifyData + ">>>");
 		DatagramPacket notifyPacket = new DatagramPacket(notifyData.getBytes(), notifyData.length(), aSocketAddress, Configuration.UPNP_DISCOVERY_PORT);
 		try {
@@ -291,6 +299,20 @@ public class UpnpListener {
 			log.warn("UpnpListener encountered an error sending upnp notify packet. IP: " + notifyPacket.getAddress().getHostAddress() + " with message: " + e1.getMessage());
 			log.debug("UpnpListener send upnp notify exception: ", e1);
 		}
+	}
 
+	// added by https://github.com/pvint
+	// Ruthlessly stolen from https://stackoverflow.com/questions/22045165/java-datagrampacket-receive-how-to-determine-local-ip-interface
+	// Try to get a source IP that makes sense for the requestor to contact for use in the LOCATION header in replies
+	private InetAddress getOutboundAddress(SocketAddress remoteAddress) throws SocketException {
+		DatagramSocket sock = new DatagramSocket();
+		// connect is needed to bind the socket and retrieve the local address
+		// later (it would return 0.0.0.0 otherwise)
+		sock.connect(remoteAddress);
+		final InetAddress localAddress = sock.getLocalAddress();
+		sock.disconnect();
+		sock.close();
+		sock = null;
+		return localAddress;
 	}
 }

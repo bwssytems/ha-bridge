@@ -215,8 +215,10 @@ public class BridgeSettings extends BackupHandler {
         // Lifx is either configured or not, so it does not need an update.
        if(serverPortOverride != null)
         	theBridgeSettings.setServerPort(serverPortOverride);
-        if(serverIpOverride != null)
+        if(serverIpOverride != null) {
         	theBridgeSettings.setWebaddress(serverIpOverride);
+        	theBridgeSettings.setUpnpConfigAddress(serverIpOverride);
+        }
         if(upnpStrictOverride != null)
         	theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(upnpStrictOverride));
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
