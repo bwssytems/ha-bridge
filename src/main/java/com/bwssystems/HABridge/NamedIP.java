@@ -9,6 +9,7 @@ public class NamedIP {
 	private String port;
 	private String username;
 	private String password;
+	private String csrfToken;
 	private JsonObject extensions;
 	private Boolean secure;
 	
@@ -59,5 +60,11 @@ public class NamedIP {
 	}
 	public void setExtensions(JsonObject extensions) {
 		this.extensions = extensions;
+	}
+	public String getCsrfToken() {
+		return csrfToken;
+	}
+	public void setCsrfToken(String csrfToken) {
+		this.csrfToken = csrfToken;
 	}
 }

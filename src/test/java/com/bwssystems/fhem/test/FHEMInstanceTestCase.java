@@ -11,4 +11,9 @@ public class FHEMInstanceTestCase {
 		Assert.assertEquals(aTestService.validateStructure(), true);
 	}
 
+	@Test
+	public void testValidateStructureWithCsrfToken() {
+		FHEMInstanceConstructor aTestService = new FHEMInstanceConstructor("csrfToken");
+		Assert.assertEquals(aTestService.validateStructure(), true);
+	}
 }

@@ -62,8 +62,12 @@ public class FHEMInstance {
 			theUrl = theUrl + theFhem.getUsername() + ":" + theFhem.getPassword() + "@";
 		}
    		theUrl = theUrl + theFhem.getIp() + ":" + theFhem.getPort() + "/fhem?cmd=jsonlist2";
-   		if(theFhem.getWebhook() != null && !theFhem.getWebhook().trim().isEmpty())
-   			theUrl = theUrl + "%20room=" + theFhem.getWebhook().trim();
+   		if(theFhem.getWebhook() != null && !theFhem.getWebhook().trim().isEmpty()){
+			theUrl = theUrl + "%20room=" + theFhem.getWebhook().trim();
+		}
+		if (theFhem.getCsrfToken() != null && !theFhem.getCsrfToken().trim().isEmpty()) {
+			theUrl = theUrl + "&fwcsrf=csrf_" + theFhem.getCsrfToken();
+		}
    		theData = httpClient.doHttpRequest(theUrl, HttpGet.METHOD_NAME, "application/json", null, headers);
     	if(theData != null) {
     		log.debug("GET FHEM States - data: " + theData);
@@ -86,6 +90,7 @@ public class FHEMInstance {
 		    		aNewFhemDeviceDevice.setItem(aResult);
 		    		aNewFhemDeviceDevice.setAddress(theFhem.getIp() + ":" + theFhem.getPort());
 		    		aNewFhemDeviceDevice.setName(theFhem.getName());
+		    		aNewFhemDeviceDevice.setCsrfToken(theFhem.getCsrfToken());
 					deviceList.add(aNewFhemDeviceDevice);
 		    	}
 	    	}

@@ -675,6 +675,7 @@
 									<th>Username (opt)</th>
 									<th>Password (opt)</th>
 									<th>Room (opt)</th>
+									<th>csrf-Token</th>
 									<th>Use SSL</th>
 									<th>Manage</th>
 								</tr>
@@ -698,11 +699,14 @@
                                 <td><input id="bridge-settings-next-fhem-webhook"
                                     class="form-control" type="text" ng-model="fhem.webhook"
                                     placeholder="Room Name"></td>
+								<td><input id="bridge-settings-next-fhem-csrftoken"
+									class="form-control" type="text" ng-model="fhem.csrftoken"
+									placeholder="csrf-Token"></td>
 								<td><input type="checkbox"
-										ng-model="fhem.secure" ng-true-value=true
-										ng-false-value=false></td>
+									ng-model="fhem.secure" ng-true-value=true
+									ng-false-value=false></td>
 								<td><button class="btn btn-danger" type="submit"
-										ng-click="removeFhemtoSettings(fhem.name, fhem.ip)">Del</button></td>
+									ng-click="removeFhemtoSettings(fhem.name, fhem.ip)">Del</button></td>
 							</tr>
 							<tr>
 								<td><input id="bridge-settings-new-fhem-name"
@@ -715,19 +719,22 @@
 									class="form-control" type="text" ng-model="newfhemport"
 									placeholder="8080"></td>
 								<td><input id="bridge-settings-new-fhem-username"
-									   class="form-control" type="text" ng-model="newfhemusername"
-									   placeholder="FHEM username"></td>
+									class="form-control" type="text" ng-model="newfhemusername"
+									placeholder="FHEM username"></td>
 								<td><input id="bridge-settings-new-fhem-password"
 									class="form-control" type="password" ng-model="newfhempassword"
 									placeholder="FHEM password (opt)"></td>
                                 <td><input id="bridge-settings-new-fhem-webhook"
                                     class="form-control" type="text" ng-model="newfhemwebhook"
                                     placeholder="Room Name"></td>
+								<td><input id="bridge-settings-new-fhem-csrftoken"
+									class="form-control" type="text" ng-model="newfhemcsrftoken"
+									placeholder="csrf-Token"></td>
 								<td><input type="checkbox"
-										ng-model="newfhemsecure" ng-true-value=true
-										ng-false-value=false></td>
+									ng-model="newfhemsecure" ng-true-value=true
+									ng-false-value=false></td>
 								<td><button class="btn btn-success" type="submit"
-										ng-click="addFhemtoSettings(newfhemname, newfhemip, newfhemport, newsfhemusername, newfhempassword, newfhemwebhook, newfhemsecure)">Add</button></td>
+									ng-click="addFhemtoSettings(newfhemname, newfhemip, newfhemport, newsfhemusername, newfhempassword, newfhemwebhook, newfhemsecure, newfhemcsrftoken)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>

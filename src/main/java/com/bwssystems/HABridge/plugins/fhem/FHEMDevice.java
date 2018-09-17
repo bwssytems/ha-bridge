@@ -1,10 +1,11 @@
 package com.bwssystems.HABridge.plugins.fhem;
 
 public class FHEMDevice {
-	
+
 	private String address;
 	private String name;
 	private Result item;
+	private String csrfToken;
 	public String getAddress() {
 		return address;
 	}
@@ -23,4 +24,6 @@ public class FHEMDevice {
 	public void setItem(Result item) {
 		this.item = item;
 	}
+	public String getCsrfToken(){ return csrfToken; }
+	public void setCsrfToken(String csrfToken){ this.csrfToken = csrfToken; }
 }

@@ -14,11 +14,22 @@ import com.google.gson.GsonBuilder;
 
 public class FHEMInstanceConstructor {
 
+	String csrfToken;
+
+	public FHEMInstanceConstructor(){
+		this(null);
+	}
+
+	public FHEMInstanceConstructor(String csrfToken){
+		this.csrfToken = csrfToken;
+	}
+
 	public Boolean validateStructure() {
 		Gson aGson;
 		NamedIP anAddress = new NamedIP();
 		anAddress.setName("TestData1");
 		anAddress.setIp("10.0.0.1");
+		anAddress.setCsrfToken(csrfToken);
 		FHEMInstance anInstance = new FHEMInstance(anAddress);
 		HttpTestHandler theHttpTestClient = new HttpTestHandler();
 		List<Result> services = null;
@@ -62,6 +73,7 @@ public class FHEMInstanceConstructor {
 				for(FHEMDevice aDevice:deviceList) {
 					System.out.println(aDevice.getName() + " - FHEMDevice Class Test:");
 					System.out.println("    " + aDevice.getItem().getName());
+					System.out.println("    " + aDevice.getCsrfToken());
 					System.out.println("    	" + aDevice.getItem().getPossibleSets());
 				}
 			} catch (Exception e) {
