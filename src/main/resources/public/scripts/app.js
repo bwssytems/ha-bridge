@@ -4036,32 +4036,32 @@ app.controller('FhemController', function ($scope, $location, bridgeService, ngD
         if (fhemdevice.csrfToken.length === 0) {
             preCmd = "/fhem?cmd=set%20" + fhemdevice.item.Name + "%20";
         } else {
-            preCmd = "/fhem?fwcsrf=csrf_" + fhemdevice.csrfToken + "&cmd=set%20" + fhemdevice.item.Name + "%20";
+            preCmd = "/fhem?fwcsrf=csrf_" + fhemdevice.csrfToken + "%26cmd=set%20" + fhemdevice.item.Name + "%20";
         }
 
         if (fhemdevice.item.PossibleSets.toLowerCase().indexOf("dim") >= 0) {
             if ((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)) {
-                dimpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"dim%20" + dim_control + "\"}";
+                dimpayload = "\"{\\\"url\\\":\\\"http://" + fhemdevice.address + preCmd + "\\\",\\\"command\\\":\\\"dim%20" + dim_control + "\\\"}\"";
             }
             else
                 dimpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"dim%20${intensity.percent}\"}";
         }
         else if (fhemdevice.item.PossibleSets.toLowerCase().indexOf("pct") >= 0) {
             if ((dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)) {
-                dimpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"pct%20" + dim_control + "\"}";
+                dimpayload = "\"{\\\"url\\\":\\\"http://" + fhemdevice.address + preCmd + "\\\",\\\"command\\\":\\\"pct%20" + dim_control + "\\\"}\"";
             }
             else
-                dimpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"pct%20${intensity.percent}\"}";
+                dimpayload = "\"{\\\"url\\\":\\\"http://" + fhemdevice.address + preCmd + "\\\",\\\"command\\\":\\\"pct%20${intensity.percent}\\\"}\"";
         }
         else
             dimpayload = null;
         if (fhemdevice.item.PossibleSets.toLowerCase().indexOf("rgb") >= 0) {
-            colorpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"RGB%20${color.rgbx}\"}";
+            colorpayload = "\"{\\\"url\\\":\\\"http://" + fhemdevice.address + preCmd + "\\\",\\\"command\\\":\\\"RGB%20${color.rgbx}\\\"}\"";
         }
         else
             colorpayload = null;
-        onpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"on\"}";
-        offpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"off\"}";
+        onpayload = "\"{\\\"url\\\":\\\"http://" + fhemdevice.address + preCmd + "\\\",\\\"command\\\":\\\"on\\\"}\"";
+        offpayload = "\"{\\\"url\\\":\\\"http://" + fhemdevice.address + preCmd + "\\\",\\\"command\\\":\\\"off\\\"}\"";
         bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, fhemdevice.item.Name + "-" + fhemdevice.name, fhemdevice.item.Name, fhemdevice.name, fhemdevice.item.type, "fhemDevice", null, null);
         $scope.device = bridgeService.state.device;
         if (!buildonly) {
