@@ -4036,7 +4036,7 @@ app.controller('FhemController', function ($scope, $location, bridgeService, ngD
         if (fhemdevice.csrfToken.length === 0) {
             preCmd = "/fhem?cmd=set%20" + fhemdevice.item.Name + "%20";
         } else {
-            preCmd = "/fhem?fwcsrf=csrf_" + fhemdevice.csrfToken + "&cmd=set%20" + fhemdevice.item.Name + "%20";
+            preCmd = "/fhem?fwcsrf=" + fhemdevice.csrfToken + "&cmd=set%20" + fhemdevice.item.Name + "%20";
         }
 
         if (fhemdevice.item.PossibleSets.toLowerCase().indexOf("dim") >= 0) {
