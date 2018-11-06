@@ -110,7 +110,7 @@ public class HarmonyServer {
             });
             harmonyClient.connect(myNameAndIP.getIp());
         }
-        myHarmony = new HarmonyHandler(harmonyClient, noopCalls, devResponse);
+        myHarmony = new HarmonyHandler(harmonyClient, noopCalls, devResponse, myNameAndIP);
     }
 
     public HarmonyHandler getMyHarmony() {
