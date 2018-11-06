@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.util.BackupHandler;
 import com.bwssystems.HABridge.util.JsonTransformer;
+import com.bwssystems.HABridge.util.ParseRoute;
 import com.google.gson.Gson;
 
 public class BridgeSettings extends BackupHandler {
@@ -166,8 +167,9 @@ public class BridgeSettings extends BackupHandler {
 	        theBridgeSettings.setNestpwd(System.getProperty("nest.pwd"));
         }
 
+		ParseRoute aDefaultRoute = ParseRoute.getInstance();
         if(theBridgeSettings.getUpnpConfigAddress() == null || theBridgeSettings.getUpnpConfigAddress().trim().equals("") || theBridgeSettings.getUpnpConfigAddress().trim().equals("0.0.0.0")) {
-        	addressString = checkIpAddress(null, true);
+        	addressString = aDefaultRoute.getLocalIPAddress();
         	if(addressString != null) {
         		theBridgeSettings.setUpnpConfigAddress(addressString);
         		log.info("Adding " + addressString + " as our default upnp config address.");
@@ -177,8 +179,10 @@ public class BridgeSettings extends BackupHandler {
         }
         else {
         	addressString = checkIpAddress(theBridgeSettings.getUpnpConfigAddress(), false);
-        	if(addressString == null)
-        		log.warn("The upnp config address, " + theBridgeSettings.getUpnpConfigAddress() + ", does not match any known IP's on this host.");
+        	if(addressString == null) {
+				addressString = aDefaultRoute.getLocalIPAddress();
+				log.warn("The upnp config address, " + theBridgeSettings.getUpnpConfigAddress() + ", does not match any known IP's on this host. Using default address: " + addressString);
+			}
         }
         
         if(theBridgeSettings.getUpnpResponsePort() == null)
