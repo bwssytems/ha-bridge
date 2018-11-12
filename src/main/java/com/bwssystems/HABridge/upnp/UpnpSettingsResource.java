@@ -7,13 +7,13 @@ import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.HuePublicConfig;
+import com.bwssystems.HABridge.util.ParseRoute;
 
 import static spark.Spark.get;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
 
 /**
  * 
@@ -118,7 +118,7 @@ public class UpnpSettingsResource {
 	// added by https://github.com/pvint
 	// Ruthlessly stolen from https://stackoverflow.com/questions/22045165/java-datagrampacket-receive-how-to-determine-local-ip-interface
 	// Try to get a source IP that makes sense for the requester to contact for use in the LOCATION header in replies
-	private InetAddress getOutboundAddress(String remoteAddress, int remotePort) throws SocketException {
+	private InetAddress getOutboundAddress(String remoteAddress, int remotePort) {
 		InetAddress localAddress = null;
 		try {
 		DatagramSocket sock = new DatagramSocket();
@@ -130,7 +130,11 @@ public class UpnpSettingsResource {
 		sock.close();
 		sock = null;
 		} catch(Exception e)  {
-
+			log.warn("Error <" + e.getMessage() + "> on determining interface to reply for <" + remoteAddress + ">. Using default route IP");
+			ParseRoute theRoute = ParseRoute.getInstance();
+			try {
+				localAddress = InetAddress.getByName(theRoute.getLocalIPAddress());
+			} catch(Exception e1) {}
 		}
 		return localAddress;
 	}
