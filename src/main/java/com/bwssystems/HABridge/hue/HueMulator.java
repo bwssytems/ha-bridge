@@ -1186,13 +1186,22 @@ public class HueMulator {
 			isOnRequest = true;
 		}
 		
+		if(!device.isOnFirstDim() && device.isOnWhenDimPresent() && isDimRequest) {
+			isOnRequest = true;
+			theStateChanges.setOn(true);
+		} else if(!device.isOnFirstDim() && !device.isOnWhenDimPresent() && isDimRequest) {
+			isOnRequest = false;
+		}
+
 		if(device.isOnFirstDim() && isDimRequest && !device.getDeviceState().isOn()) {
 			isOnRequest = true;
+			theStateChanges.setOn(true);
 			isDimRequest = false;
 			isColorRequest = false;
 		} else if(device.isOnFirstDim() && isDimRequest && device.getDeviceState().isOn()) {
 			if(device.getDeviceState().getBri() == theStateChanges.getBri()) {
 				isOnRequest = true;
+				theStateChanges.setOn(true);
 				isDimRequest = false;
 				isColorRequest = false;
 			} else {

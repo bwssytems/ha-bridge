@@ -83,6 +83,9 @@ public class DeviceDescriptor{
     @SerializedName("onFirstDim")
     @Expose
     private boolean onFirstDim;
+    @SerializedName("onWhenDimPresent")
+    @Expose
+    private boolean onWhenDimPresent;
    
     public String getName() {
         return name;
@@ -284,6 +287,14 @@ public class DeviceDescriptor{
 
 	public void setOnFirstDim(boolean onFirstDim) {
 		this.onFirstDim = onFirstDim;
+	}
+
+	public boolean isOnWhenDimPresent() {
+		return onWhenDimPresent;
+	}
+
+	public void setOnWhenDimPresent(boolean onWhenDimPresent) {
+		this.onWhenDimPresent = onWhenDimPresent;
 	}
 
 	public boolean containsType(String aType) {
