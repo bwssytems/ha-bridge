@@ -1684,11 +1684,11 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
             }
         }       
     };
-    $scope.addDomoticztoSettings = function (newdomoticzname, newdomoticzip, newdomoticzport, newdomoticzusername, newdomoticzpassword) {
+    $scope.addDomoticztoSettings = function (newdomoticzname, newdomoticzip, newdomoticzport, newdomoticzusername, newdomoticzpassword, newdomoticzsecure) {
     	if($scope.bridge.settings.domoticzaddress === undefined || $scope.bridge.settings.domoticzaddress === null) {
 			$scope.bridge.settings.domoticzaddress = { devices: [] };
 		}
-    	var newdomoticz = {name: newdomoticzname, ip: newdomoticzip, port: newdomoticzport, username: newdomoticzusername, password: newdomoticzpassword }
+    	var newdomoticz = {name: newdomoticzname, ip: newdomoticzip, port: newdomoticzport, username: newdomoticzusername, password: newdomoticzpassword, secure: newdomoticzsecure }
     	$scope.bridge.settings.domoticzaddress.devices.push(newdomoticz);
     	$scope.newdomoticzname = null;
     	$scope.newdomoticzip = null;

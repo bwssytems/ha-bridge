@@ -124,18 +124,19 @@ public class UpnpSettingsResource {
 		DatagramSocket sock = new DatagramSocket();
 		// connect is needed to bind the socket and retrieve the local address
 		// later (it would return 0.0.0.0 otherwise)
-		sock.connect(InetSocketAddress.createUnresolved(remoteAddress, remotePort));
+		sock.connect(new InetSocketAddress(remoteAddress, remotePort));
 		localAddress = sock.getLocalAddress();
 		sock.disconnect();
 		sock.close();
 		sock = null;
 		} catch(Exception e)  {
-			log.warn("Error <" + e.getMessage() + "> on determining interface to reply for <" + remoteAddress + ">. Using default route IP");
 			ParseRoute theRoute = ParseRoute.getInstance();
 			try {
 				localAddress = InetAddress.getByName(theRoute.getLocalIPAddress());
 			} catch(Exception e1) {}
+			log.warn("Error <" + e.getMessage() + "> on determining interface to reply for <" + remoteAddress + ">. Using default route IP Address of " + localAddress.getHostAddress());
 		}
+		log.debug("getOutbountAddress returning IP Address of " + localAddress.getHostAddress());
 		return localAddress;
 	}
 }

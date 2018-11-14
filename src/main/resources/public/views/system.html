@@ -512,6 +512,7 @@
 									<th>Port</th>
 									<th>Username (opt)</th>
 									<th>Password (opt)</th>
+									<th>Use SSL</th>
 									<th>Manage</th>
 								</tr>
 							</thead>
@@ -531,6 +532,9 @@
 								<td><input id="bridge-settings-next-domoticz-password"
 									class="form-control" type="password" ng-model="domoticz.password"
 									placeholder="Domoticz password (opt)"></td>
+									<td><input type="checkbox"
+										ng-model="domoticz.secure" ng-true-value=true
+										ng-false-value=false></td>
 								<td><button class="btn btn-danger" type="submit"
 										ng-click="removeDomoticztoSettings(domoticz.name, domoticz.ip)">Del</button></td>
 							</tr>
@@ -550,8 +554,11 @@
 								<td><input id="bridge-settings-new-domoticz-password"
 									class="form-control" type="password" ng-model="newdomoticzpassword"
 									placeholder="Domoticz password (opt)"></td>
+									<td><input type="checkbox"
+										ng-model="newdomoticzsecure" ng-true-value=true
+										ng-false-value=false></td>
 								<td><button class="btn btn-success" type="submit"
-										ng-click="addDomoticztoSettings(newdomoticzname, newdomoticzip, newdomoticzport, newdomoticzusername, newdomoticzpassword)">Add</button></td>
+										ng-click="addDomoticztoSettings(newdomoticzname, newdomoticzip, newdomoticzport, newdomoticzusername, newdomoticzpassword, newdomoticzsecure)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>
