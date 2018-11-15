@@ -62,7 +62,7 @@ public class BrightnessDecode {
 			if(intensity > 0 && intensity < 5)
 				percentBrightness = 1;
 			else
-				percentBrightness = (int) Math.round(intensity / 255.0 * 100)
+				percentBrightness = (int) Math.round(intensity / 255.0 * 100);
 		} else {
 			decimalBrightness = (float) 0.0;
 			percentBrightness = 0;
