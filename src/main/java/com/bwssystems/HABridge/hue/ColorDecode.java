@@ -209,7 +209,7 @@ public class ColorDecode {
 				float bright = hsb[2] * (float) 100.0;
 				request = request.replace(COLOR_HSL, String.format("%f,%f,%f", hue, sat, bright));
 				notDone = true;
-                        }
+			}
 			
 			Matcher m = COLOR_MILIGHT.matcher(request);
 			while (m.find()) {
