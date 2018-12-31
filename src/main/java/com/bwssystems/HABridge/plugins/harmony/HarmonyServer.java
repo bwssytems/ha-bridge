@@ -11,7 +11,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.NamedIP;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -50,11 +49,10 @@ public class HarmonyServer {
     }
 
     public static HarmonyServer setup(
-            BridgeSettingsDescriptor bridgeSettings,
             Boolean harmonyDevMode,
             NamedIP theHarmonyAddress
     ) throws Exception {
-        if (!bridgeSettings.isValidHarmony() && harmonyDevMode) {
+        if (harmonyDevMode) {
             return new HarmonyServer(theHarmonyAddress);
         }
         Injector injector = null;
@@ -65,11 +63,11 @@ public class HarmonyServer {
         if (!harmonyDevMode) {
             injector.injectMembers(mainObject);
         }
-        mainObject.execute(bridgeSettings, harmonyDevMode);
+        mainObject.execute(harmonyDevMode);
         return mainObject;
     }
 
-    private void execute(BridgeSettingsDescriptor mySettings, Boolean harmonyDevMode) throws Exception {
+    private void execute(Boolean harmonyDevMode) throws Exception {
         Boolean noopCalls = Boolean.parseBoolean(System.getProperty("noop.calls", "false"));
         isDevMode = harmonyDevMode;
         String modeString = "";

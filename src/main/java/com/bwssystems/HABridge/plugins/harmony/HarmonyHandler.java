@@ -43,6 +43,7 @@ public class HarmonyHandler {
 			listOfActivities = harmonyClient.getConfig().getActivities();
 		} catch (RuntimeException e) {
 			handleExceptionError(e);
+			return null;
 		}
 
        	return listOfActivities;
@@ -59,6 +60,7 @@ public class HarmonyHandler {
 			listOfDevices = harmonyClient.getConfig().getDevices();
 		} catch (RuntimeException e) {
 			handleExceptionError(e);
+			return null;
 		}
        	return listOfDevices;
 	}
@@ -73,6 +75,7 @@ public class HarmonyHandler {
 			aConfig = harmonyClient.getConfig();
 		} catch (RuntimeException e) {
 			handleExceptionError(e);
+			return null;
 		}
 		return aConfig;
 	}
@@ -87,6 +90,7 @@ public class HarmonyHandler {
 			anActivity = harmonyClient.getCurrentActivity();
 		} catch (RuntimeException e) {
 			handleExceptionError(e);
+			return null;
 		}
 		return anActivity;
 	}
@@ -112,16 +116,14 @@ public class HarmonyHandler {
 						harmonyClient.startActivityByName(anActivity.getName());
 				} catch (IllegalArgumentException ei) {
 					log.error("Error in finding activity: " + anActivity.getName() + " for a hub: " + anActivity.getHub());
-					return false;
 				} catch (RuntimeException e1) {
-					handleExceptionError(e1);
+					return handleExceptionError(e1);
 				}
 			} catch (RuntimeException e1) {
-				handleExceptionError(e1);
+				return handleExceptionError(e1);
 			}
 		} else {
 			log.error("Error in finding activity: " + anActivity.getName() + " for a hub: " + anActivity.getHub());
-			return false;
 		}
 
 		return true;
@@ -147,40 +149,45 @@ public class HarmonyHandler {
 						harmonyClient.pressButton(aDeviceButton.getDevice(), aDeviceButton.getButton());
 				} catch (IllegalArgumentException ei) {
 					log.error("Error in finding device: " + aDeviceButton.getDevice() +" and a button: " + aDeviceButton.getButton() + " for a hub: " + aDeviceButton.getHub());
-					return false;
 				} catch (RuntimeException e1) {
-					handleExceptionError(e1);
+					return handleExceptionError(e1);
 				}
 			} catch (RuntimeException e1) {
-				handleExceptionError(e1);
+				return handleExceptionError(e1);
 			}
 		} else {
 			log.error("Error in finding device: " + aDeviceButton.getDevice() +" and a button: " + aDeviceButton.getButton() + " for a hub: " + aDeviceButton.getHub());
+		}
+
+		return true;
+	}
+
+	boolean handleExceptionError(Exception e) {
+		if(e.getMessage().equalsIgnoreCase("Failed communicating with Harmony Hub")) {
+			log.warn("Issue in communcicating with Harmony Hub, retrying connect....");
 			return false;
 		}
 
 		return true;
 	}
 
-	void handleExceptionError(Exception e) {
-		if(e.getMessage().equalsIgnoreCase("Failed communicating with Harmony Hub")) {
-			log.warn("Issue in communcicating with Harmony Hub, retrying connect....");
-			try {
-				harmonyClient.disconnect();
-			} catch(Exception e1) {
-				log.warn("Hub disconnect failed, continuing....");
-			}
-			harmonyClient.connect(myNameAndIP.getIp());
-		}
-	}
-
 	public void shutdown() {
 		log.debug("Harmony api shutdown requested.");
         if(devMode)
         	return;
-        
-		harmonyClient.disconnect();
+        try {
+			harmonyClient.disconnect();
+		} catch(Exception e)
+		{
+			// noop
+		}
 		harmonyClient = null;
 	}
 
+	/**
+	 * @return the myNameAndIP
+	 */
+	public NamedIP getMyNameAndIP() {
+		return myNameAndIP;
+	}
 }
