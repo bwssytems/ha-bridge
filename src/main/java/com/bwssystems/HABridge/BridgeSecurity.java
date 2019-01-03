@@ -355,7 +355,7 @@ public class BridgeSecurity {
 
 	public void removeAuthenticatedUser(Request request) {
 		request.session().removeAttribute(USER_SESSION_ID);
-		
+		request.session().invalidate();
 	}
 
 	public User getAuthenticatedUser(Request request) {
