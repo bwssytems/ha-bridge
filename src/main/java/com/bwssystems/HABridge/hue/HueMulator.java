@@ -597,10 +597,10 @@ public class HueMulator {
 			notFirstChange = true;
 		}
 
-		if(deviceState.isOn() && deviceState.getBri() <= 0)
+		if((deviceState != null) && deviceState.isOn() && deviceState.getBri() <= 0)
 			deviceState.setBri(254);
 		
-		if(!deviceState.isOn() && (targetBri != null || targetBriInc != null))
+		if((deviceState != null) && !deviceState.isOn() && (targetBri != null || targetBriInc != null))
 			deviceState.setOn(true);
 
 		responseString = responseString + "]";
