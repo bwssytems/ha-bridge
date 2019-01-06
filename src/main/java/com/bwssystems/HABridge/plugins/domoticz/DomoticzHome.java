@@ -73,7 +73,7 @@ public class DomoticzHome implements Home {
 	
 	private Boolean addDomoticzDevices(List<DomoticzDevice> theDeviceList, List<DomoticzDevice> theSourceList, String theKey) {
 		if(!validDomoticz)
-			return null;
+			return false;
 		Iterator<DomoticzDevice> devices = theSourceList.iterator();
 		while(devices.hasNext()) {
 			DomoticzDevice theDevice = devices.next();
