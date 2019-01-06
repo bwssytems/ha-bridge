@@ -161,8 +161,8 @@ public class HueInfo {
 						+ "\",\"description\": \"Error on calling HUE to change device state\", \"parameter\": \"/lights/"
 						+ lightId + "state\"}}]";
 			} else if (responseString.contains("[{\"error\":")) {
-				if(responseString.contains("unauthorized user")) {
-				}
+//				if(responseString.contains("unauthorized user")) {
+//				}
 				log.warn("Error occurred when calling Hue Passthru: " + responseString);
 			}
 		} else  {
