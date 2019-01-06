@@ -1471,10 +1471,11 @@ public class HueMulator {
 			else
 				log.warn("Call Items type is null <<<" + callItems[i] + ">>>");
 		}
-		
-		if(callItems.length == 0)
+
+		if ((callItems == null) || (callItems.length == 0)) {
 			log.warn("No call items were available: <<<" + url + ">>>");
-		
+		}
+
 		return responseString;
 	}
 }
