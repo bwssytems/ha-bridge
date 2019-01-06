@@ -115,7 +115,7 @@ public class HTTPHandler {
 						theContent = "";
 					log.debug("Successfull response - The http response is <<<" + theContent + ">>>");
 					retryCount = 2;
-				} else if (callType != null && callType == DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex] && response.getStatusLine().getStatusCode() == 302) {
+				} else if (DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex].equals(callType) && response.getStatusLine().getStatusCode() == 302) {
 					if(theContent == null)
 						theContent = "";
 					log.debug("Successfull response - The http response is <<<" + theContent + ">>>");
