@@ -32,7 +32,7 @@ public class HttpTestHandler extends HTTPHandler {
 		}
 		else {
 			for(NameValue aTest:this.theData) {
-				if(aTest.getName().equals(compareValue));
+				if(aTest.getName().equals(compareValue))
 					aTest.setValue(testData);
 			}
 		}
