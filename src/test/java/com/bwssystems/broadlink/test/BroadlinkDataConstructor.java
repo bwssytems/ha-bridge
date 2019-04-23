@@ -1,6 +1,6 @@
 package com.bwssystems.broadlink.test;
 
-import javax.xml.bind.DatatypeConverter;
+import com.bwssystems.HABridge.util.HexLibrary;
 
 public class BroadlinkDataConstructor {
 	public final static byte[] testData1 = { 84, 104, 105, 115, 73, 115, 65, 84, 101, 115, 116, 83, 116, 114, 105, 110, 103, 49 };
@@ -18,8 +18,8 @@ public class BroadlinkDataConstructor {
 		System.out.println("----------------------------------");
 		System.out.println("This is the test hex string: <<<" + theHexString + ">>>");
 		try {
-			theData = DatatypeConverter.parseHexBinary(theHexString);
-			System.out.println("This is the test hex string from data bytes: <<<" + DatatypeConverter.printHexBinary(theData) + ">>>");
+			theData = HexLibrary.decodeHexString(theHexString);
+			System.out.println("This is the test hex string from data bytes: <<<" + HexLibrary.encodeHexString(theData) + ">>>");
 		} catch(Exception e) {
 			System.out.println("Error parsing he string: " + e.getMessage());
 			return false;

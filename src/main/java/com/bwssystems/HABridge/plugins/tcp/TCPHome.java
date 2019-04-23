@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.xml.bind.DatatypeConverter;
+import com.bwssystems.HABridge.util.HexLibrary;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
@@ -92,7 +92,7 @@ public class TCPHome implements Home {
 				if (colorData != null) {
 					theUrlBody = ColorDecode.replaceColorData(theUrlBody, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), true);	
 				}
-				sendData = DatatypeConverter.parseHexBinary(theUrlBody.substring(2));
+				sendData = HexLibrary.decodeHexString(theUrlBody.substring(2));
 			} else {
 				theUrlBody = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody, intensity, targetBri, targetBriInc, false);
 				if (colorData != null) {

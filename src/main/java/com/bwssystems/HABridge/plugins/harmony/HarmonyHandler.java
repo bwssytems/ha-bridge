@@ -163,7 +163,7 @@ public class HarmonyHandler {
 	}
 
 	boolean handleExceptionError(Exception e) {
-		if(e.getMessage().equalsIgnoreCase("Failed communicating with Harmony Hub")) {
+		if(e.getMessage().contains("Failed communicating with Harmony Hub") || e.getMessage().contains("Send heartbeat failed")) {
 			log.warn("Issue in communcicating with Harmony Hub, retrying connect....");
 			return false;
 		}

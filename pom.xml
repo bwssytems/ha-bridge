@@ -5,16 +5,16 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>5.2.2RC3</version>
+	<version>5.2.2RC4</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
 	<description>Emulates a Philips Hue bridge to allow the Amazon Echo to hook up to other HA systems, i.e. Vera or Harmony Hub or Nest, using lightweight frameworks</description>
 
 	<properties>
-		<java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+		<java.version>1.11</java.version>
+        <maven.compiler.source>1.11</maven.compiler.source>
+        <maven.compiler.target>1.11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 

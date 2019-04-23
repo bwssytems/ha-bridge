@@ -2,7 +2,6 @@ package com.bwssystems.HABridge.dao;
 
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,8 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +22,7 @@ import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.plugins.hue.HueHome;
 import com.bwssystems.HABridge.util.BackupHandler;
 import com.bwssystems.HABridge.util.JsonTransformer;
+import com.bwssystems.HABridge.util.HexLibrary;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -180,9 +178,7 @@ public class DeviceRepository extends BackupHandler {
 	        	descriptors[i].setId(String.valueOf(nextId));
 	        }
 	        if(descriptors[i].getUniqueid() == null || descriptors[i].getUniqueid().length() == 0) {
-	        	BigInteger bigInt = BigInteger.valueOf(Integer.decode(descriptors[i].getId()));
-	        	byte[] theBytes = bigInt.toByteArray();
-	        	String hexValue = DatatypeConverter.printHexBinary(theBytes);
+	        	String hexValue = HexLibrary.encodeUsingBigIntegerToString(descriptors[i].getId());
 
 	        	descriptors[i].setUniqueid("00:17:88:5E:D3:" + hexValue + "-" + hexValue);
 	        }
@@ -204,9 +200,7 @@ public class DeviceRepository extends BackupHandler {
         	nextId++;
 			DeviceDescriptor theDevice = deviceIterator.next();
         	theDevice.setId(String.valueOf(nextId));
-        	BigInteger bigInt = BigInteger.valueOf(nextId);
-        	byte[] theBytes = bigInt.toByteArray();
-        	String hexValue = DatatypeConverter.printHexBinary(theBytes);
+        	String hexValue = HexLibrary.encodeUsingBigIntegerToString(nextId.toString());
        	
         	theDevice.setUniqueid("00:17:88:5E:D3:" + hexValue + "-" + hexValue);
 	        newdevices.put(theDevice.getId(), theDevice);

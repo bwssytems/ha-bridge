@@ -93,7 +93,13 @@ public class HarmonyHome implements Home {
 				resetHub(hubs.get(key).getMyHarmony());
 				activities = hubs.get(key).getMyHarmony().getActivities().iterator();
 				if (activities == null) {
-					log.error("Could not get communication restored with hub: " + key + ", please restart...");
+					if (resetHub(hubs.get(key).getMyHarmony())) {
+						activities = hubs.get(key).getMyHarmony().getActivities().iterator();
+						if (activities == null) {
+							log.error("Could not get communication restored with hub: " + key
+									+ ", please restart...");
+						}
+					}
 				}
 			}
 			if (activities != null) {
@@ -120,7 +126,13 @@ public class HarmonyHome implements Home {
 				resetHub(hubs.get(key).getMyHarmony());
 				theActivity = hubs.get(key).getMyHarmony().getCurrentActivity();
 				if (theActivity == null) {
-					log.error("Could not get communication restored with hub: " + key + ", please restart...");
+					if (resetHub(hubs.get(key).getMyHarmony())) {
+						theActivity = hubs.get(key).getMyHarmony().getCurrentActivity();
+						if (theActivity == null) {
+							log.error("Could not get communication restored with hub: " + key
+									+ ", please restart...");
+						}
+					}
 				}
 			}
 			if (theActivity != null) {
@@ -145,7 +157,13 @@ public class HarmonyHome implements Home {
 				resetHub(hubs.get(key).getMyHarmony());
 				devices = hubs.get(key).getMyHarmony().getDevices().iterator();
 				if (devices == null) {
-					log.error("Could not get communication restored with hub: " + key + ", please restart...");
+					if (resetHub(hubs.get(key).getMyHarmony())) {
+						devices = hubs.get(key).getMyHarmony().getDevices().iterator();
+						if (devices == null) {
+							log.error("Could not get communication restored with hub: " + key
+									+ ", please restart...");
+						}
+					}
 				}
 			}
 			if (devices != null) {
@@ -239,7 +257,7 @@ public class HarmonyHome implements Home {
 						if (myHarmony == null)
 							log.warn("Button Press - Should not get here, no harmony hub available");
 						else{
-							if (myHarmony.pressButton(deviceButtons[z])) {
+							if (!myHarmony.pressButton(deviceButtons[z])) {
 								if (resetHub(myHarmony)) {
 									myHarmony = getHarmonyHandler(deviceButtons[z].getHub());
 									if (!myHarmony.pressButton(deviceButtons[z])) {
