@@ -11,8 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +26,7 @@ import com.bwssystems.HABridge.hue.ColorDecode;
 import com.bwssystems.HABridge.hue.DeviceDataDecode;
 import com.bwssystems.HABridge.hue.MultiCommandUtil;
 import com.bwssystems.HABridge.hue.TimeDecode;
+import com.bwssystems.HABridge.util.HexLibrary;
 import com.github.mob41.blapi.BLDevice;
 import com.github.mob41.blapi.MP1Device;
 import com.github.mob41.blapi.SP1Device;
@@ -118,7 +117,7 @@ public class BroadlinkHome implements Home {
 
 			if (theDevice == null) {
 				if(broadlinkCommand.hasIpAndMac()) {
-					byte[] intBytes = DatatypeConverter.parseHexBinary(broadlinkCommand.getType());
+					byte[] intBytes = HexLibrary.decodeHexString(broadlinkCommand.getType());
 					BigInteger theBig = new BigInteger(intBytes);
 					int theType =  theBig.intValue();
 					try {
@@ -218,13 +217,13 @@ public class BroadlinkHome implements Home {
 								}
 								theStringData = DeviceDataDecode.replaceDeviceData(theStringData, device);
 								theStringData = TimeDecode.replaceTimeValue(theStringData);
-				            	byte[] theData = DatatypeConverter.parseHexBinary(theStringData);
+				            	byte[] theData = HexLibrary.decodeHexString(theStringData);
 				            	SendDataCmdPayload thePayload = new SendDataCmdPayload(theData);
 				                		
 				                DatagramPacket thePacket = theDevice.sendCmdPkt(Configuration.BROADLINK_DISCONVER_TIMEOUT, thePayload);
 				                String returnData = null;
 				                if(thePacket != null)
-				                	returnData = DatatypeConverter.printHexBinary(thePacket.getData());
+				                	returnData = HexLibrary.encodeHexString(thePacket.getData());
 				                else
 				                	returnData = "No Data - null";
 				                log.debug("RM2 Device data return: <<<" + returnData + ">>>");

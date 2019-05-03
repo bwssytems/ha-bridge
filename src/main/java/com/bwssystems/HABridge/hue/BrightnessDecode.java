@@ -52,11 +52,22 @@ public class BrightnessDecode {
 		boolean notDone = true;
 		String replaceValue = null;
 		String replaceTarget = null;
-		int percentBrightness = (int) Math.round(intensity / 255.0 * 100);
-		float decimalBrightness = (float) (intensity / 255.0);
+		int percentBrightness = 0;
+		float decimalBrightness = (float) 0.0;
 		Map<String, BigDecimal> variables = new HashMap<String, BigDecimal>();
 		String mathDescriptor = null;
-		
+
+		if(intensity > 0) {
+			decimalBrightness = (float) (intensity / 255.0);
+			if(intensity > 0 && intensity < 5)
+				percentBrightness = 1;
+			else
+				percentBrightness = (int) Math.round(intensity / 255.0 * 100);
+		} else {
+			decimalBrightness = (float) 0.0;
+			percentBrightness = 0;
+		}
+
 		while(notDone) {
 			notDone = false;
 			if (request.contains(INTENSITY_BYTE)) {

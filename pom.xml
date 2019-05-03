@@ -63,7 +63,7 @@
 		<dependency>
 		    <groupId>com.sparkjava</groupId>
 		    <artifactId>spark-core</artifactId>
-		    <version>2.7.1</version>
+		    <version>2.7.2</version>
 		    <exclusions>
 		    	<exclusion>
 		    		<artifactId>slf4j-simple</artifactId>
@@ -114,12 +114,13 @@
 	    <dependency>
 	        <groupId>org.eclipse.paho</groupId>
 	        <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-	        <version>1.1.0</version>
+	        <version>1.2.0</version>
 	    </dependency>
 		<dependency>
 		    <groupId>junit</groupId>
 		    <artifactId>junit</artifactId>
 		    <version>4.12</version>
+      		<scope>test</scope>
 		</dependency>
 		<dependency>
 		  <groupId>com.github.bwssytems</groupId>
@@ -156,6 +157,14 @@
 	      </resource>
 	    </resources>
 		<plugins>
+			<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-surefire-plugin</artifactId>
+			<version>2.22.1</version>
+			<configuration>
+				<skipTests>true</skipTests>
+			</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>

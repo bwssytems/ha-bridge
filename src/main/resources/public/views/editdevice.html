@@ -95,6 +95,12 @@
 						ng-false-value=false> {{device.offState}}</td>
 				</tr>
 				<tr>
+					<td><label>On when Dim is present (Always uses on with a dim request otherwise it will ignore a given on was well. This is overidden by onFirstDim.)</label></td>
+					<td><input type="checkbox"
+						ng-model="device.onWhenDimPresent" ng-true-value=true
+						ng-false-value=false> {{device.onWhenDimPresent}}</td>
+				</tr>
+				<tr>
 					<td><label>On with First Dim (If the device is not on in the ha-bridge state, it will send on instead of the dim.)</label></td>
 					<td><input type="checkbox"
 						ng-model="device.onFirstDim" ng-true-value=true

@@ -1073,9 +1073,9 @@ public class HueMulator {
 		}
 
 		if (body.contains("\"bri_inc\""))
-			targetBriInc = new Integer(theStateChanges.getBri_inc());
+			targetBriInc = Integer.valueOf(theStateChanges.getBri_inc());
 		else if (body.contains("\"bri\"")) {
-			targetBri = new Integer(theStateChanges.getBri());
+			targetBri =Integer.valueOf(theStateChanges.getBri());
 		}
 
 		state = device.getDeviceState();
@@ -1153,11 +1153,11 @@ public class HueMulator {
 		}
 
 		if (body.contains("\"bri_inc\"")) {
-			targetBriInc = new Integer(theStateChanges.getBri_inc());
+			targetBriInc = Integer.valueOf(theStateChanges.getBri_inc());
 			isDimRequest = true;
 		}
 		else if (body.contains("\"bri\"")) {
-			targetBri = new Integer(theStateChanges.getBri());
+			targetBri = Integer.valueOf(theStateChanges.getBri());
 			isDimRequest = true;
 		}
 
@@ -1186,13 +1186,22 @@ public class HueMulator {
 			isOnRequest = true;
 		}
 		
+		if(!device.isOnFirstDim() && device.isOnWhenDimPresent() && isDimRequest) {
+			isOnRequest = true;
+			theStateChanges.setOn(true);
+		} else if(!device.isOnFirstDim() && !device.isOnWhenDimPresent() && isDimRequest) {
+			isOnRequest = false;
+		}
+
 		if(device.isOnFirstDim() && isDimRequest && !device.getDeviceState().isOn()) {
 			isOnRequest = true;
+			theStateChanges.setOn(true);
 			isDimRequest = false;
 			isColorRequest = false;
 		} else if(device.isOnFirstDim() && isDimRequest && device.getDeviceState().isOn()) {
 			if(device.getDeviceState().getBri() == theStateChanges.getBri()) {
 				isOnRequest = true;
+				theStateChanges.setOn(true);
 				isDimRequest = false;
 				isColorRequest = false;
 			} else {
@@ -1334,10 +1343,10 @@ public class HueMulator {
 
 				if (group != null) {
 					if (body.contains("\"bri_inc\"")) {
-						targetBriInc = new Integer(theStateChanges.getBri_inc());
+						targetBriInc = Integer.valueOf(theStateChanges.getBri_inc());
 					}
 					else if (body.contains("\"bri\"")) {
-						targetBri = new Integer(theStateChanges.getBri());
+						targetBri = Integer.valueOf(theStateChanges.getBri());
 					}
 
 					state = group.getAction();

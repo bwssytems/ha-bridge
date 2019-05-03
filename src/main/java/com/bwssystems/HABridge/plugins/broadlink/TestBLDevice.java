@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 
-import javax.xml.bind.DatatypeConverter;
+import com.bwssystems.HABridge.util.HexLibrary;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ public class TestBLDevice extends BLDevice {
 	}
 	
 	public DatagramPacket sendCmdPkt(int timeout, CmdPayload aCmd) {
-		log.info("sendCmdPkt called with " + DatatypeConverter.printHexBinary(aCmd.getPayload().getData()));
+		log.info("sendCmdPkt called with " + HexLibrary.encodeHexString(aCmd.getPayload().getData()));
 		return null;		
 	}
 	

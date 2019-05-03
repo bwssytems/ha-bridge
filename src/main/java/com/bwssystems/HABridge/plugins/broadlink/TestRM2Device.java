@@ -3,7 +3,7 @@ package com.bwssystems.HABridge.plugins.broadlink;
 import java.io.IOException;
 import java.net.DatagramPacket;
 
-import javax.xml.bind.DatatypeConverter;
+import com.bwssystems.HABridge.util.HexLibrary;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public class TestRM2Device extends RM2Device {
 	}
 
 	public DatagramPacket sendCmdPkt(int timeout, CmdPayload aCmd) {
-		log.info("sendCmdPkt called with " + DatatypeConverter.printHexBinary(((SendDataCmdPayload)aCmd).getData()));
+		log.info("sendCmdPkt called with " + HexLibrary.encodeHexString(((SendDataCmdPayload)aCmd).getData()));
 		return null;		
 	}
 }

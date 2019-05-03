@@ -7,8 +7,13 @@ import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.HuePublicConfig;
+import com.bwssystems.HABridge.util.ParseRoute;
 
 import static spark.Spark.get;
+
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  * 
@@ -75,12 +80,13 @@ public class UpnpSettingsResource {
 			
 			String portNumber = Integer.toString(request.port());
 			String filledTemplate = null;
-			String bridgeIdMac = HuePublicConfig.createConfig("temp", theSettings.getUpnpConfigAddress(), HueConstants.HUB_VERSION, theSettings.getHubmac()).getSNUUIDFromMac();
-			filledTemplate = String.format(hueTemplate, theSettings.getUpnpConfigAddress(), portNumber, theSettings.getUpnpConfigAddress(), bridgeIdMac, bridgeIdMac);
+			String httpLocationAddr = getOutboundAddress(request.ip(), request.port()).getHostAddress();
+			String bridgeIdMac = HuePublicConfig.createConfig("temp", httpLocationAddr, HueConstants.HUB_VERSION, theSettings.getHubmac()).getSNUUIDFromMac();
+			filledTemplate = String.format(hueTemplate, httpLocationAddr, portNumber, httpLocationAddr, bridgeIdMac, bridgeIdMac);
 			if(theSettings.isTraceupnp())
-				log.info("Traceupnp: request of description.xml from: " + request.ip() + ":" + request.port() + " filled in with address: " + theSettings.getUpnpConfigAddress() + ":" + portNumber);
+				log.info("Traceupnp: request of description.xml from: " + request.ip() + ":" + request.port() + " filled in with address: " + httpLocationAddr + ":" + portNumber);
 			else
-				log.debug("request of description.xml from: " + request.ip() + ":" + request.port() + " filled in with address: " + theSettings.getUpnpConfigAddress() + ":" + portNumber);
+				log.debug("request of description.xml from: " + request.ip() + ":" + request.port() + " filled in with address: " + httpLocationAddr + ":" + portNumber);
 //			response.header("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
 //			response.header("Pragma", "no-cache");
 //			response.header("Expires", "Mon, 1 Aug 2011 09:00:00 GMT");
@@ -108,5 +114,29 @@ public class UpnpSettingsResource {
 		get("/hue_logo_3.png", "application/xml; charset=utf-8", (request, response) -> {
 			return "";
         } );
+	}
+	// added by https://github.com/pvint
+	// Ruthlessly stolen from https://stackoverflow.com/questions/22045165/java-datagrampacket-receive-how-to-determine-local-ip-interface
+	// Try to get a source IP that makes sense for the requester to contact for use in the LOCATION header in replies
+	private InetAddress getOutboundAddress(String remoteAddress, int remotePort) {
+		InetAddress localAddress = null;
+		try {
+		DatagramSocket sock = new DatagramSocket();
+		// connect is needed to bind the socket and retrieve the local address
+		// later (it would return 0.0.0.0 otherwise)
+		sock.connect(new InetSocketAddress(remoteAddress, remotePort));
+		localAddress = sock.getLocalAddress();
+		sock.disconnect();
+		sock.close();
+		sock = null;
+		} catch(Exception e)  {
+			ParseRoute theRoute = ParseRoute.getInstance();
+			try {
+				localAddress = InetAddress.getByName(theRoute.getLocalIPAddress());
+			} catch(Exception e1) {}
+			log.warn("Error <" + e.getMessage() + "> on determining interface to reply for <" + remoteAddress + ">. Using default route IP Address of " + localAddress.getHostAddress());
+		}
+		log.debug("getOutbountAddress returning IP Address of " + localAddress.getHostAddress());
+		return localAddress;
 	}
 }

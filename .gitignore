@@ -15,3 +15,7 @@ data
 
 sftp-config\.json
 /bin/
+.vscode/launch.json
+.vscode/launch.test.json
+.vscode/settings.json
+.vscode/tasks.json

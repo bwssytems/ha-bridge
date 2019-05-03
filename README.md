@@ -63,25 +63,25 @@ ATTENTION: This requires JDK 1.8 to run
 ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
 
 ```
-java -jar ha-bridge-5.2.1.jar
+java -jar ha-bridge-5.2.2.jar
 ```
 
 ATTENTION: If running Java9, you will need to add the xml bind module
 ```
-java -jar  --add-modules java.xml.bind ha-bridge-5.2.1.jar
+java -jar  --add-modules java.xml.bind ha-bridge-5.2.2.jar
 ```
 
 ## Manual installation of ha-bridge and setup of systemd service
 Next gen Linux systems (this includes the Raspberry Pi), use systemd to run and manage services.
 Here is a link on how to use systemd: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
 
-Create the directory and make sure that ha-bridge-5.2.1.jar is in your /home/pi/ha-bridge directory.
+Create the directory and make sure that ha-bridge-5.2.2.jar is in your /home/pi/ha-bridge directory.
 
 ```
 pi@raspberrypi:~ $ mkdir ha-bridge
 pi@raspberrypi:~ $ cd ha-bridge
 
-pi@raspberrypi:~/ha-bridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v5.2.1/ha-bridge-5.2.1.jar
+pi@raspberrypi:~/ha-bridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v5.2.2/ha-bridge-5.2.2.jar
 ```
 
 Create the ha-bridge.service unit file:
@@ -100,7 +100,7 @@ After=network.target
 Type=simple
 
 WorkingDirectory=/home/pi/ha-bridge
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/ha-bridge/data/habridge.config /home/pi/ha-bridge/ha-bridge-5.2.1.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/ha-bridge/data/habridge.config /home/pi/ha-bridge/ha-bridge-5.2.2.jar
 
 [Install]
 WantedBy=multi-user.target
