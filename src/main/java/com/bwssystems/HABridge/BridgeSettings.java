@@ -198,7 +198,7 @@ public class BridgeSettings extends BackupHandler {
         	theBridgeSettings.setUpnpGroupDb(Configuration.GROUP_DB_DIRECTORY);
         
         if(theBridgeSettings.getNumberoflogmessages() == null || theBridgeSettings.getNumberoflogmessages() <= 0)
-        	theBridgeSettings.setNumberoflogmessages(new Integer(Configuration.NUMBER_OF_LOG_MESSAGES));
+        	theBridgeSettings.setNumberoflogmessages(Integer.valueOf(Configuration.NUMBER_OF_LOG_MESSAGES));
 
         if(theBridgeSettings.getButtonsleep() == null || theBridgeSettings.getButtonsleep() < 0)
         	theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DEFAULT_BUTTON_SLEEP));

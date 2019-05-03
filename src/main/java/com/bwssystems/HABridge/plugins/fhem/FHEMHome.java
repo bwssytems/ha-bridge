@@ -27,6 +27,7 @@ import com.bwssystems.HABridge.plugins.http.HTTPHandler;
 import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.bwssystems.HABridge.plugins.http.HttpTestHandler;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 
 public class FHEMHome implements Home {
     private static final Logger log = LoggerFactory.getLogger(FHEMHome.class);
@@ -47,7 +48,8 @@ public class FHEMHome implements Home {
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
 			Integer targetBri, Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 
-		String theUrl = anItem.getItem().getAsString();
+		JsonElement jsonUrl = anItem.getItem();
+		String theUrl = jsonUrl.toString();
 		String responseString = null;
 
 		if(theUrl != null && !theUrl.isEmpty()) {

@@ -14,7 +14,7 @@ public class ConvertCIEColorTestCase {
 
 	@Test
 	public void testColorConversion() {
-		ArrayList<Double> xy = new ArrayList<Double>(Arrays.asList(new Double(0.671254), new Double(0.303273)));
+		ArrayList<Double> xy = new ArrayList<Double>(Arrays.asList(Double.parseDouble("0.671254"), Double.parseDouble("0.303273")));
 		
 		List<Integer> colorDecode = ColorDecode.convertCIEtoRGB(xy, 254);
 		List<Integer> assertDecode = new ArrayList<Integer>();
