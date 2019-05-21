@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.awt.Color;
 
 
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ public class ColorDecode {
 	private static final String COLOR_GX = "${color.gx}";
 	private static final String COLOR_BX = "${color.bx}";
 	private static final String COLOR_RGBX = "${color.rgbx}";
+	private static final String COLOR_HSL = "${color.hsl}";
 	private static final Pattern COLOR_MILIGHT = Pattern.compile("\\$\\{color.milight\\:([01234])\\}");
 
 	public static List<Integer> convertCIEtoRGB(List<Double> xy, int brightness) {
@@ -196,6 +198,16 @@ public class ColorDecode {
 
 			if (request.contains(COLOR_RGBX)) {
 				request = request.replace(COLOR_RGBX, String.format("%02X%02X%02X", rgb.get(0), rgb.get(1), rgb.get(2)));
+				notDone = true;
+			}
+
+			if (request.contains(COLOR_HSL)) {
+				float[] hsb = new float[3];
+				Color.RGBtoHSB(rgb.get(0),rgb.get(1),rgb.get(2),hsb);
+				float hue = hsb[0] * (float) 360.0;
+				float sat = hsb[1] * (float) 100.0;
+				float bright = hsb[2] * (float) 100.0;
+				request = request.replace(COLOR_HSL, String.format("%f,%f,%f", hue, sat, bright));
 				notDone = true;
 			}
 			
