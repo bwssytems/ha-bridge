@@ -600,8 +600,8 @@ public class HueMulator {
 		if((deviceState != null) && deviceState.isOn() && deviceState.getBri() <= 0)
 			deviceState.setBri(254);
 		
-		if((deviceState != null) && !deviceState.isOn() && (targetBri != null || targetBriInc != null))
-			deviceState.setOn(true);
+//		if((deviceState != null) && !deviceState.isOn() && (targetBri != null || targetBriInc != null))
+//			deviceState.setOn(true);
 
 		responseString = responseString + "]";
 
@@ -1186,11 +1186,11 @@ public class HueMulator {
 			isOnRequest = true;
 		}
 		
-		if(!device.isOnFirstDim() && device.isOnWhenDimPresent() && isDimRequest) {
+		if(!device.isOnFirstDim() && device.isOnWhenDimPresent() && isDimRequest && !isOnRequest) {
 			isOnRequest = true;
 			theStateChanges.setOn(true);
 		} else if(!device.isOnFirstDim() && !device.isOnWhenDimPresent() && isDimRequest) {
-			isOnRequest = false;
+			// isOnRequest = false;
 		}
 
 		if(device.isOnFirstDim() && isDimRequest && !device.getDeviceState().isOn()) {

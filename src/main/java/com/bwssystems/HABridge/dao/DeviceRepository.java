@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
+import com.bwssystems.HABridge.api.hue.DeviceState;
 import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.plugins.hue.HueHome;
 import com.bwssystems.HABridge.util.BackupHandler;
@@ -67,7 +68,10 @@ public class DeviceRepository extends BackupHandler {
 		{
 			DeviceDescriptor list[] = gson.fromJson(jsonContent, DeviceDescriptor[].class);
 			for(int i = 0; i < list.length; i++) {
-				list[i].setDeviceState(null);
+				if(list[i].getColorUrl() == null || list[i].getColorUrl().isEmpty())
+					list[i].setDeviceState(DeviceState.createDeviceState(false));
+				else
+					list[i].setDeviceState(DeviceState.createDeviceState(true));
 				put(list[i].getId(), list[i]);
 				if(Integer.decode(list[i].getId()) > nextId) {
 					nextId = Integer.decode(list[i].getId());
