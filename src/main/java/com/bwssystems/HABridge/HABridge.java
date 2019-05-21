@@ -44,7 +44,8 @@ public class HABridge {
         Version theVersion;
     	@SuppressWarnings("unused")
 		HttpClientPool thePool;
-       
+		ShutdownHook shutdownHook = null;
+
         log.info("HA Bridge startup sequence...");
         theVersion = new Version();
         // Singleton initialization
@@ -68,6 +69,14 @@ public class HABridge {
 	        // setup system control api first
 	        theSystem = new SystemControl(bridgeSettings, theVersion);
 	        theSystem.setupServer();
+
+			// Add shutdown hook to be able to properly stop server
+			if (shutdownHook != null) {
+				Runtime.getRuntime().removeShutdownHook(shutdownHook);
+			}
+			shutdownHook = new ShutdownHook(bridgeSettings, theSystem);
+			Runtime.getRuntime().addShutdownHook(shutdownHook);
+
 	        // setup the UDP Datagram socket to be used by the HueMulator and the upnpListener
 	        udpSender = UDPDatagramSender.createUDPDatagramSender(bridgeSettings.getBridgeSettingsDescriptor().getUpnpResponsePort());
 	        if(udpSender == null) {

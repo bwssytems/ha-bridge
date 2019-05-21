@@ -12,8 +12,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.security.GeneralSecurityException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -32,7 +32,7 @@ public class BridgeSettings extends BackupHandler {
 	private BridgeSettingsDescriptor theBridgeSettings;
 	private BridgeControlDescriptor bridgeControl;
 	private BridgeSecurity bridgeSecurity;
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+	private static final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
 	
 	public BridgeSettings() {
 		super();
@@ -59,10 +59,10 @@ public class BridgeSettings extends BackupHandler {
 	public BridgeSecurity getBridgeSecurity() {
 		return bridgeSecurity;
 	}
-	 public static String getCurrentDate() {
-		 return dateFormat.format(new Date());
-	 }
-	
+	public String getCurrentDate() {
+		return LocalDateTime.now().format(dateTimeFormat);
+	}
+
 	public void buildSettings() {
         String addressString = null;
         String theVeraAddress = null;

@@ -4813,15 +4813,24 @@ app.factory('Auth', function($resource, $rootScope, $sessionStorage, $http, $bas
             	bridgeService.displayWarn("Login Error: ", error);
             });
     };
-     
- 
-    auth.logout = function() {
-        delete $sessionStorage.user;
-        delete $rootScope.user;
-        delete bridgeService.state.loggedInUser;
-    };
-     
-     
+
+
+	auth.logout = function() {
+		delete $sessionStorage.user;
+		delete $rootScope.user;
+		delete bridgeService.state.loggedInUser;
+		// Logout on server side to destroy current session (fire and forget it)
+		$http.put(bridgeService.state.systemsbase + "/logout").then(
+			function (response) {
+				// nothing more to do
+			},
+			function (error) {
+				bridgeService.displayWarn("Logout Error: ", error);
+			}
+		);
+	};
+
+
     auth.checkPermissionForView = function(view) {
         if (!view.requiresAuthentication) {
             return true;

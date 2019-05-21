@@ -142,9 +142,12 @@ public class BroadlinkHome implements Home {
 	            	if(broadlinkMap == null)
 						broadlinkMap = new HashMap<String, BLDevice>();
 					
-					String newId = theDevice.getHost() + "-" + String.format("%04x", theDevice.getDeviceType());
-					if(broadlinkMap.get(newId) == null)
-	    				broadlinkMap.put(newId, theDevice);		
+					if (theDevice != null) {
+						String newId = theDevice.getHost() + "-" + String.format("%04x", theDevice.getDeviceType());
+						if (broadlinkMap.get(newId) == null) {
+							broadlinkMap.put(newId, theDevice);
+						}
+					}
 				}
 			}
 			if (theDevice == null) {

@@ -98,7 +98,7 @@ public class HassHome implements Home {
 
 	private Boolean addHassDevices(List<HassDevice> theDeviceList, List<State> theSourceList, String theKey) {
 		if(!validHass)
-			return null;
+			return false;
 		Iterator<State> devices = theSourceList.iterator();
 		while(devices.hasNext()) {
 			State theDevice = devices.next();

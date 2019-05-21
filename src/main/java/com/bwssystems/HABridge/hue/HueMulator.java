@@ -597,10 +597,10 @@ public class HueMulator {
 			notFirstChange = true;
 		}
 
-		if(deviceState.isOn() && deviceState.getBri() <= 0)
+		if((deviceState != null) && deviceState.isOn() && deviceState.getBri() <= 0)
 			deviceState.setBri(254);
 		
-		if(!deviceState.isOn() && (targetBri != null || targetBriInc != null))
+		if((deviceState != null) && !deviceState.isOn() && (targetBri != null || targetBriInc != null))
 			deviceState.setOn(true);
 
 		responseString = responseString + "]";
@@ -1480,10 +1480,11 @@ public class HueMulator {
 			else
 				log.warn("Call Items type is null <<<" + callItems[i] + ">>>");
 		}
-		
-		if(callItems.length == 0)
+
+		if ((callItems == null) || (callItems.length == 0)) {
 			log.warn("No call items were available: <<<" + url + ">>>");
-		
+		}
+
 		return responseString;
 	}
 }

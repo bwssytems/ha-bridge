@@ -104,7 +104,7 @@ public class HalHome implements Home {
 	
 	private Boolean addHalDevices(List<HalDevice> theDeviceList, List<HalDevice> theSourceList, String theKey) {
 		if(!validHal)
-			return null;
+			return false;
 		Iterator<HalDevice> devices = theSourceList.iterator();
 		while(devices.hasNext()) {
 			HalDevice theDevice = devices.next();

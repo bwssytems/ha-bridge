@@ -243,6 +243,24 @@ public class SystemControl {
             return result;
         }, new JsonTransformer());
 
+		// http://ip_address:port/system/logout CORS request
+		options(SYSTEM_CONTEXT + "/logout", (request, response) -> {
+			response.status(HttpStatus.SC_OK);
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+			response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+			response.header("Content-Type", "text/html; charset=utf-8");
+			return "";
+		});
+		// http://ip_address:port/system/logout invalidates user session
+		put(SYSTEM_CONTEXT + "/logout", (request, response) -> {
+			log.debug("logout....");
+			bridgeSettings.getBridgeSecurity().removeAuthenticatedUser(request);
+			response.status(HttpStatus.SC_OK);
+			response.type("application/json");
+			return "";
+		});
+
 //      http://ip_address:port/system/presslinkbutton CORS request
 	    options(SYSTEM_CONTEXT + "/presslinkbutton", (request, response) -> {
 	        response.status(HttpStatus.SC_OK);
@@ -558,4 +576,5 @@ public class SystemControl {
     	pingListener();
     	return "{\"control\":\"stopping\"}";    	
     }
+
 }
