@@ -19,4 +19,10 @@ public class ColorData {
 		return mode;
 	}
 
+	public String toString() {
+		String formatString;
+
+		formatString = "Color Data mode: " + mode + ", data: " + data;
+		return formatString;
+	}
 }

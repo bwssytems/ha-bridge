@@ -19,6 +19,7 @@
 	<li ng-if="bridge.showHomeWizard" role="presentation"><a href="#!/homewizarddevices">HomeWizard Devices</a></li>
 	<li ng-if="bridge.showOpenHAB" role="presentation"><a href="#!/openhabdevices">OpenHAB Devices</a></li>
 	<li ng-if="bridge.showFHEM" role="presentation"><a href="#!/fhemdevices">FHEM Devices</a></li>
+	<li ng-if="bridge.showMozIot" role="presentation"><a href="#!/moziotdevices">Mozilla IOT Devices</a></li>
 	<li ng-if="bridge.showBroadlink" role="presentation"><a href="#!/broadlinkdevices">Broadlink Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
@@ -739,6 +740,73 @@
 						</table></td>
 				</tr>
 				<tr>
+					<td>Mozilla IOT Names and IP Addresses</td>
+					<td><table
+							class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>IP</th>
+									<th>Port</th>
+									<th>Username (opt)</th>
+									<th>Password (opt)</th>
+									<th>Use SSL</th>
+									<th>Manage</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="moziot in bridge.settings.moziotaddress.devices">
+								<td><input id="bridge-settings-next-moziot-name"
+									class="form-control" type="text" ng-model="moziot.name"
+									placeholder="An moziot"></td>
+								<td><input id="bridge-settings-next-moziot-ip"
+									class="form-control" type="text" ng-model="moziot.ip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-next-moziot-port"
+									class="form-control" type="text" ng-model="moziot.port"
+									placeholder="8080"></td>
+								<td><input id="bridge-settings-next-moziot-username"
+									   class="form-control" type="text" ng-model="moziot.username"
+									   placeholder="moziot username"></td>
+								<td><input id="bridge-settings-next-moziot-password"
+									class="form-control" type="password" ng-model="moziot.password"
+									placeholder="moziot password (opt)"></td>
+                                <td><input id="bridge-settings-next-moziot-webhook"
+                                    class="form-control" type="text" ng-model="moziot.webhook"
+                                    placeholder="Room Name"></td>
+								<td><input type="checkbox"
+										ng-model="moziot.secure" ng-true-value=true
+										ng-false-value=false></td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removemoziottoSettings(moziot.name, moziot.ip)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-new-moziot-name"
+									class="form-control" type="text" ng-model="newmoziotname"
+									placeholder="A moziot"></td>
+								<td><input id="bridge-settings-new-moziot-ip"
+									class="form-control" type="text" ng-model="newmoziotip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-new-moziot-port"
+									class="form-control" type="text" ng-model="newmoziotport"
+									placeholder="8080"></td>
+								<td><input id="bridge-settings-new-moziot-username"
+									   class="form-control" type="text" ng-model="newmoziotusername"
+									   placeholder="moziot username"></td>
+								<td><input id="bridge-settings-new-moziot-password"
+									class="form-control" type="password" ng-model="newmoziotpassword"
+									placeholder="moziot password (opt)"></td>
+                                <td><input id="bridge-settings-new-moziot-webhook"
+                                    class="form-control" type="text" ng-model="newmoziotwebhook"
+                                    placeholder="Room Name"></td>
+								<td><input type="checkbox"
+										ng-model="newmoziotsecure" ng-true-value=true
+										ng-false-value=false></td>
+								<td><button class="btn btn-success" type="submit"
+										ng-click="addmoziottoSettings(newmoziotname, newmoziotip, newmoziotport, newsmoziotusername, newmoziotpassword, newmoziotwebhook, newmoziotsecure)">Add</button></td>
+							</tr>
+						</table></td>
+				</tr>
+				<tr>
 					<td>Nest</td>
 					<td><table class="table table-bordered table-striped table-hover">
 							<thead>
@@ -802,6 +870,12 @@
 					<td><input type="checkbox"
 						ng-model="bridge.settings.traceupnp" ng-true-value=true
 						ng-false-value=false> {{bridge.settings.traceupnp}}</td>
+				</tr>
+				<tr>
+					<td>Trace State Changes</td>
+					<td><input type="checkbox"
+						ng-model="bridge.settings.tracestate" ng-true-value=true
+						ng-false-value=false> {{bridge.settings.tracestate}}</td>
 				</tr>
 				<tr>
 					<td>UPNP Send Delay</td>
