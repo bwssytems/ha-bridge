@@ -160,7 +160,7 @@ public class BridgeSettings extends BackupHandler {
 			}
 			theBridgeSettings.setSomfyAddress(theSomfyList);
 
-	        theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
+	        // theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
 	        theBridgeSettings.setTraceupnp(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
 	        theBridgeSettings.setButtonsleep(Integer.parseInt(System.getProperty("button.sleep", Configuration.DEFAULT_BUTTON_SLEEP)));
 	        theBridgeSettings.setNestuser(System.getProperty("nest.user"));
@@ -223,9 +223,13 @@ public class BridgeSettings extends BackupHandler {
         if(serverIpOverride != null) {
         	theBridgeSettings.setWebaddress(serverIpOverride);
         	theBridgeSettings.setUpnpConfigAddress(serverIpOverride);
-        }
+		}
+		
+		/*
         if(upnpStrictOverride != null)
-        	theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(upnpStrictOverride));
+			theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(upnpStrictOverride));
+			*/
+
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
 		
 		bridgeSecurity.setSecurityData(theBridgeSettings.getSecurityData());

@@ -83,6 +83,10 @@ app.config (function ($locationProvider, $routeProvider) {
 		templateUrl: 'views/openhabdevice.html',
 		controller: 'OpenHABController',
 		requiresAuthentication: true
+	}).when ('/moziotdevices', {
+		templateUrl: 'views/moziotdevice.html',
+		controller: 'MozIotController',
+		requiresAuthentication: true
 	}).when ('/fhemdevices', {
 		templateUrl: 'views/fhemdevice.html',
 		controller: 'FhemController',
@@ -159,7 +163,8 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 	this.state = {base: "./api/devices", bridgelocation: ".", systemsbase: "./system", huebase: "./api", configs: [], backups: [], devices: [], device: {},
 			mapandid: [], type: "", settings: [], myToastMsg: [], logMsgs: [], loggerInfo: [], mapTypes: [], olddevicename: "", logShowAll: false,
 			isInControl: false, showVera: false, showFibaro: false, showHarmony: false, showNest: false, showHue: false, showHal: false, showMqtt: false, showHass: false,
-			showHomeWizard: false, showDomoticz: false, showSomfy: false, showLifx: false, showOpenHAB: false, showFHEM: false, showBroadlink: false, habridgeversion: {}, viewDevId: "", queueDevId: "", securityInfo: {}, filterDevicesByIpAddress: null, 
+			showHomeWizard: false, showDomoticz: false, showSomfy: false, showLifx: false, showOpenHAB: false, showMozIot: false, showFHEM: false, showBroadlink: false, habridgeversion: {},
+			viewDevId: "", queueDevId: "", securityInfo: {}, filterDevicesByIpAddress: null, 
 			filterDevicesOnlyFiltered: false, filterDeviceType: null};
 
 	this.displayWarn = function(errorTitle, error) {
@@ -575,6 +580,11 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 		return;
 	};
 
+	this.updateShowMozIot = function () {
+		this.state.showMozIot = self.state.settings.moziotconfigured;
+		return;
+	};
+
 	this.updateShowFhem = function () {
 		this.state.showFHEM = self.state.settings.fhemconfigured;
 		return;
@@ -602,6 +612,7 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 					self.updateShowSomfy();
 					self.updateShowLifx();
 					self.updateShowOpenHAB();
+					self.updateShowMozIot();
 					self.updateShowFhem();
 					self.updateShowBroadlink();
 				},
@@ -923,6 +934,22 @@ app.service ('bridgeService', function ($rootScope, $http, $base64, $location, n
 						$rootScope.$broadcast('securityReinit', 'done');
 					else
 						self.displayWarn("Get OpenHAB Devices Error: ", error);
+				}
+		);
+	};
+
+	this.viewMozIotDevices = function () {
+		if (!this.state.showMozIot)
+			return;
+		return $http.get(this.state.base + "/moziot/devices").then(
+				function (response) {
+					self.state.moziotdevices = response.data;
+				},
+				function (error) {
+					if (error.status === 401)
+						$rootScope.$broadcast('securityReinit', 'done');
+					else
+						self.displayWarn("Get Mozilla IOT Devices Error: ", error);
 				}
 		);
 	};
@@ -1736,6 +1763,26 @@ app.controller ('SystemController', function ($scope, $location, bridgeService, 
     	for(var i = $scope.bridge.settings.openhabaddress.devices.length - 1; i >= 0; i--) {
     	    if($scope.bridge.settings.openhabaddress.devices[i].name === openhabname && $scope.bridge.settings.openhabaddress.devices[i].ip === openhabip) {
     	    	$scope.bridge.settings.openhabaddress.devices.splice(i, 1);
+    	    }
+    	}    	
+    };
+
+    $scope.addMozIottoSettings = function (newmoziotname, newmoziotip, newmoziotport, newmoziotusername, newmoziotpassword, newmoziotsecure) {
+    	if($scope.bridge.settings.moziotaddress === undefined || $scope.bridge.settings.moziotaddress === null) {
+			$scope.bridge.settings.moziotaddress = { devices: [] };
+		}
+    	var newmoziot = {name: newmoziotname, ip: newmoziotip, port: newmoziotport, username: newmoziotusername, password: newmoziotpassword, secure: newmoziotsecure };
+    	$scope.bridge.settings.moziotaddress.devices.push(newmoziot);
+    	$scope.newmoziotname = null;
+    	$scope.newmoziotip = null;
+    	$scope.newmoziotport = "4443";
+    	$scope.newmoziotusername = null;
+    	$scope.newmoziotpassword = null;
+    };
+    $scope.removeMozIottoSettings = function (moziotname, moziotip) {
+    	for(var i = $scope.bridge.settings.moziotaddress.devices.length - 1; i >= 0; i--) {
+    	    if($scope.bridge.settings.moziotaddress.devices[i].name === moziotname && $scope.bridge.settings.moziotaddress.devices[i].ip === moziotip) {
+    	    	$scope.bridge.settings.moziotaddress.devices.splice(i, 1);
     	    }
     	}    	
     };
@@ -3904,6 +3951,142 @@ app.controller('OpenHABController', function ($scope, $location, bridgeService, 
 			for(var x = 0; x < bridgeService.state.openhabdevices.length; x++) {
 				if($scope.bulk.devices.indexOf(bridgeService.state.openhabdevices[x]) < 0)
 					$scope.bulk.devices.push(bridgeService.state.openhabdevices[x].devicename);
+			}
+		}
+	};
+
+	$scope.toggleButtons = function () {
+		$scope.buttonsVisible = !$scope.buttonsVisible;
+		if($scope.buttonsVisible)
+			$scope.imgButtonsUrl = "glyphicon glyphicon-minus";
+		else
+			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	};
+
+	$scope.deleteDevice = function (device) {
+		$scope.bridge.device = device;
+		ngDialog.open({
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
+	};
+	
+	$scope.editDevice = function (device) {
+		bridgeService.editDevice(device);
+		$location.path('/editdevice');
+	};
+});
+
+app.controller('MozIotController', function ($scope, $location, bridgeService, ngDialog) {
+	$scope.bridge = bridgeService.state;
+	$scope.device = bridgeService.state.device;
+	$scope.device_dim_control = "";
+	$scope.bulk = { devices: [] };
+	$scope.selectAll = false;
+	bridgeService.viewMozIotDevices();
+	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	$scope.buttonsVisible = false;
+	
+	$scope.clearDevice = function () {
+		bridgeService.clearDevice();
+		$scope.device = bridgeService.state.device;
+	};
+
+	$scope.buildDeviceUrls = function (moziotdevice, dim_control, colordata, buildonly) {
+		var preCmd = moziotdevice.href + "/";
+		onpayload = null;
+		offpayload = null;
+		dimpayload = null;
+		colorpayload = null;
+		if(moziotdevice.properties.on !== undefined) {
+			onpayload = "{\"url\":\"" + preCmd + "on\",\"command\":{\"on\":true}}";
+			offpayload = "{\"url\":\"" + preCmd + "on\",\"command\":{\"on\":false}}";
+		}
+		if(moziotdevice.properties.level !== undefined) {
+				dimpayload = "{\"url\":\"" + preCmd + "level\",\"command\":{\"level\":" + dim_control + "}}";
+		}
+		if(moziotdevice.properties.color !== undefined) {
+			colorpayload = "{\"url\":\"" + preCmd + "color\",\"command\":\"{\"color\":" + colordata + "}}";
+		}
+
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, moziotdevice.name + "-" + moziotdevice.type,  moziotdevice.name, moziotdevice.name, moziotdevice.type,  "moziotDevice", null, null);
+		$scope.device = bridgeService.state.device;
+		if (!buildonly) {
+			bridgeService.editNewDevice($scope.device);
+			$location.path('/editdevice');
+		}
+	};
+
+	$scope.bulkAddDevices = function(dim_control) {
+		var devicesList = [];
+		$scope.clearDevice();
+		for(var i = 0; i < $scope.bulk.devices.length; i++) {
+			for(var x = 0; x < bridgeService.state.moziotdevices.length; x++) {
+				if(bridgeService.state.moziotdevices[x].devicename === $scope.bulk.devices[i]) {
+					$scope.buildDeviceUrls(bridgeService.state.moziotdevices[x],dim_control, null, true);
+					devicesList[i] = {
+							name: $scope.device.name,
+							mapId: $scope.device.mapId,
+							mapType: $scope.device.mapType,
+							deviceType: $scope.device.deviceType,
+							targetDevice: $scope.device.targetDevice,
+							onUrl: $scope.device.onUrl,
+							dimUrl: $scope.device.dimUrl,
+							offUrl: $scope.device.offUrl,
+							colorUrl: $scope.device.colorUrl,
+							headers: $scope.device.headers,
+							httpVerb: $scope.device.httpVerb,
+							contentType: $scope.device.contentType,
+							contentBody: $scope.device.contentBody,
+							contentBodyDim: $scope.device.contentBodyDim,
+							contentBodyOff: $scope.device.contentBodyOff
+					};
+					$scope.clearDevice();
+				}
+			}
+		}
+		bridgeService.bulkAddDevice(devicesList).then(
+				function () {
+					$scope.clearDevice();
+					bridgeService.viewDevices();
+					bridgeService.viewHalDevices();
+				},
+				function (error) {
+					bridgeService.displayWarn("Error adding Mozilla IOT devices in bulk.", error);
+				}
+			);
+		$scope.bulk = { devices: [] };
+		$scope.selectAll = false;
+	};
+
+	$scope.toggleSelection = function toggleSelection(deviceId) {
+		var idx = $scope.bulk.devices.indexOf(deviceId);
+
+		// is currently selected
+		if (idx > -1) {
+			$scope.bulk.devices.splice(idx, 1);
+			if($scope.bulk.devices.length === 0 && $scope.selectAll)
+				$scope.selectAll = false;
+		}
+
+		// is newly selected
+		else {
+			$scope.bulk.devices.push(deviceId);
+			$scope.selectAll = true;
+		}
+	};
+
+	$scope.toggleSelectAll = function toggleSelectAll() {
+		if($scope.selectAll) {
+			$scope.selectAll = false;
+			$scope.bulk = { devices: [] };
+		}
+		else {
+			$scope.selectAll = true;
+			for(var x = 0; x < bridgeService.state.moziotdevices.length; x++) {
+				if($scope.bulk.devices.indexOf(bridgeService.state.moziotdevices[x]) < 0)
+					$scope.bulk.devices.push(bridgeService.state.moziotdevices[x].devicename);
 			}
 		}
 	};

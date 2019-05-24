@@ -321,6 +321,12 @@ public class DeviceResource {
 	      	return homeManager.findResource(DeviceMapTypes.OPENHAB_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.OPENHAB_DEVICE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
+    	get (API_CONTEXT + "/moziot/devices", "application/json", (request, response) -> {
+	    	log.debug("Get MOzilla IOT devices");
+	      	response.status(HttpStatus.SC_OK);
+	      	return homeManager.findResource(DeviceMapTypes.MOZIOT_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.MOZIOT_DEVICE[DeviceMapTypes.typeIndex]);
+	    }, new JsonTransformer());
+
     	get (API_CONTEXT + "/fhem/devices", "application/json", (request, response) -> {
 	    	log.debug("Get FHEM devices");
 	      	response.status(HttpStatus.SC_OK);

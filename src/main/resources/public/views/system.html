@@ -757,7 +757,7 @@
 							<tr ng-repeat="moziot in bridge.settings.moziotaddress.devices">
 								<td><input id="bridge-settings-next-moziot-name"
 									class="form-control" type="text" ng-model="moziot.name"
-									placeholder="An moziot"></td>
+									placeholder="An Mozilla IOT "></td>
 								<td><input id="bridge-settings-next-moziot-ip"
 									class="form-control" type="text" ng-model="moziot.ip"
 									placeholder="192.168.1.3"></td>
@@ -766,23 +766,20 @@
 									placeholder="8080"></td>
 								<td><input id="bridge-settings-next-moziot-username"
 									   class="form-control" type="text" ng-model="moziot.username"
-									   placeholder="moziot username"></td>
+									   placeholder="Mozilla IOT username"></td>
 								<td><input id="bridge-settings-next-moziot-password"
 									class="form-control" type="password" ng-model="moziot.password"
-									placeholder="moziot password (opt)"></td>
-                                <td><input id="bridge-settings-next-moziot-webhook"
-                                    class="form-control" type="text" ng-model="moziot.webhook"
-                                    placeholder="Room Name"></td>
+									placeholder="Mozilla IOT password"></td>
 								<td><input type="checkbox"
 										ng-model="moziot.secure" ng-true-value=true
 										ng-false-value=false></td>
 								<td><button class="btn btn-danger" type="submit"
-										ng-click="removemoziottoSettings(moziot.name, moziot.ip)">Del</button></td>
+										ng-click="removeMozIottoSettings(moziot.name, moziot.ip)">Del</button></td>
 							</tr>
 							<tr>
 								<td><input id="bridge-settings-new-moziot-name"
 									class="form-control" type="text" ng-model="newmoziotname"
-									placeholder="A moziot"></td>
+									placeholder="A Mozilla IOT "></td>
 								<td><input id="bridge-settings-new-moziot-ip"
 									class="form-control" type="text" ng-model="newmoziotip"
 									placeholder="192.168.1.3"></td>
@@ -791,18 +788,15 @@
 									placeholder="8080"></td>
 								<td><input id="bridge-settings-new-moziot-username"
 									   class="form-control" type="text" ng-model="newmoziotusername"
-									   placeholder="moziot username"></td>
+									   placeholder="Mozilla IOT username"></td>
 								<td><input id="bridge-settings-new-moziot-password"
 									class="form-control" type="password" ng-model="newmoziotpassword"
-									placeholder="moziot password (opt)"></td>
-                                <td><input id="bridge-settings-new-moziot-webhook"
-                                    class="form-control" type="text" ng-model="newmoziotwebhook"
-                                    placeholder="Room Name"></td>
+									placeholder="Mozilla IOT password "></td>
 								<td><input type="checkbox"
 										ng-model="newmoziotsecure" ng-true-value=true
 										ng-false-value=false></td>
 								<td><button class="btn btn-success" type="submit"
-										ng-click="addmoziottoSettings(newmoziotname, newmoziotip, newmoziotport, newsmoziotusername, newmoziotpassword, newmoziotwebhook, newmoziotsecure)">Add</button></td>
+										ng-click="addMozIottoSettings(newmoziotname, newmoziotip, newmoziotport, newsmoziotusername, newmoziotpassword, newmoziotwebhook, newmoziotsecure)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>
@@ -864,6 +858,12 @@
 						class="form-control" type="number"
 						ng-model="bridge.settings.numberoflogmessages" min="100"
 						max="65535"></td>
+				</tr>
+				<tr>
+					<td>UPNP Original (simple version)</td>
+					<td><input type="checkbox"
+						ng-model="bridge.settings.upnporiginal" ng-true-value=true
+						ng-false-value=false> {{bridge.settings.upnporiginal}}</td>
 				</tr>
 				<tr>
 					<td>Trace UPNP Calls</td>

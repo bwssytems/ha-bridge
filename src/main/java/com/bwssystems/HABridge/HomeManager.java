@@ -20,6 +20,7 @@ import com.bwssystems.HABridge.plugins.homewizard.HomeWizardHome;
 import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.bwssystems.HABridge.plugins.hue.HueHome;
 import com.bwssystems.HABridge.plugins.lifx.LifxHome;
+import com.bwssystems.HABridge.plugins.moziot.MozIotHome;
 import com.bwssystems.HABridge.plugins.mqtt.MQTTHome;
 import com.bwssystems.HABridge.plugins.openhab.OpenHABHome;
 import com.bwssystems.HABridge.plugins.somfy.SomfyHome;
@@ -120,7 +121,11 @@ public class HomeManager {
 		aHome = new OpenHABHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.OPENHAB_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.OPENHAB_DEVICE[DeviceMapTypes.typeIndex], aHome);
-        //setup the OpenHAB configuration if available
+        //setup the Mozilla IOT configuration if available
+		aHome = new MozIotHome(bridgeSettings);
+		resourceList.put(DeviceMapTypes.MOZIOT_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.MOZIOT_DEVICE[DeviceMapTypes.typeIndex], aHome);
+        //setup the FHEM configuration if available
 		aHome = new FHEMHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex], aHome);

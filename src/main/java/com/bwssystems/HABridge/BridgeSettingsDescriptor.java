@@ -90,9 +90,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("openhabaddress")
 	@Expose
 	private IpList openhabaddress;
-	@SerializedName("moziotgateway")
+	@SerializedName("moziotaddress")
 	@Expose
-	private IpList moziotgateway;
+	private IpList moziotaddress;
 	@SerializedName("hubversion")
 	@Expose
 	private String hubversion;
@@ -120,6 +120,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("tracestate")
 	@Expose
 	private boolean tracestate;
+	@SerializedName("upnporiginal")
+	@Expose
+	private boolean upnporiginal;
 	// @SerializedName("activeloggers")
 	// @Expose
 	// private List<NameValue> activeloggers;
@@ -142,11 +145,11 @@ public class BridgeSettingsDescriptor {
 
 	// Deprecated settings
 	private String haltoken;
-	private boolean upnpstrict;
+	// private boolean upnpstrict;
 
 	public BridgeSettingsDescriptor() {
 		super();
-		this.upnpstrict = true;
+		// this.upnpstrict = true;
 		this.useupnpiface = false;
 		this.userooms = false;
 		this.traceupnp = false;
@@ -175,6 +178,7 @@ public class BridgeSettingsDescriptor {
 		this.upnpsenddelay = Configuration.UPNP_SEND_DELAY;
 		this.broadlinkconfigured = false;
 		this.tracestate = false;
+		this.upnporiginal = false;
 	}
 
 	public String getUpnpConfigAddress() {
@@ -280,7 +284,7 @@ public class BridgeSettingsDescriptor {
 	public void setHarmonyAddress(IpList harmonyaddress) {
 		this.harmonyaddress = harmonyaddress;
 	}
-
+/*
 	public boolean isUpnpStrict() {
 		return upnpstrict;
 	}
@@ -288,7 +292,7 @@ public class BridgeSettingsDescriptor {
 	public void setUpnpStrict(boolean upnpStrict) {
 		this.upnpstrict = upnpStrict;
 	}
-
+*/
 	public boolean isTraceupnp() {
 		return traceupnp;
 	}
@@ -753,19 +757,19 @@ public class BridgeSettingsDescriptor {
 		this.tracestate = tracestate;
 	}
 
-	public IpList getMoziotgateway() {
-		return moziotgateway;
+	public IpList getMoziotaddress() {
+		return moziotaddress;
 	}
 
-	public void setMoziotgateway(IpList moziotgateway) {
-		this.moziotgateway = moziotgateway;
+	public void setMoziotgaddress(IpList moziotgateway) {
+		this.moziotaddress = moziotgateway;
 	}
 
 	public Boolean isValidMozIot() {
-		if (this.getMoziotgateway() == null || this.getMoziotgateway().getDevices().size() <= 0)
+		if (this.getMoziotaddress() == null || this.getMoziotaddress().getDevices().size() <= 0)
 			return false;
 
-		List<NamedIP> devicesList = this.getMoziotgateway().getDevices();
+		List<NamedIP> devicesList = this.getMoziotaddress().getDevices();
 		if (devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
 			return false;
 
@@ -778,5 +782,13 @@ public class BridgeSettingsDescriptor {
 
 	public void setMoziotconfigured(boolean moziotconfigured) {
 		this.moziotconfigured = moziotconfigured;
+	}
+
+	public boolean isUpnporiginal() {
+		return upnporiginal;
+	}
+
+	public void setUpnporiginal(boolean upnporiginal) {
+		this.upnporiginal = upnporiginal;
 	}
 }

@@ -12,35 +12,35 @@
 	<li ng-if="bridge.showHue" role="presentation"><a href="#!/huedevices">Hue Devices</a></li>
 	<li ng-if="bridge.showHal" role="presentation"><a href="#!/haldevices">HAL Devices</a></li>
 	<li ng-if="bridge.showMqtt" role="presentation"><a href="#!/mqttmessages">MQTT Messages</a></li>
-	<li ng-if="bridge.showHass" role="presentation" class="active"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
+	<li ng-if="bridge.showHass" role="presentation"><a href="#!/hassdevices">HomeAssistant Devices</a></li>
 	<li ng-if="bridge.showDomoticz" role="presentation"><a href="#!/domoticzdevices">Domoticz Devices</a></li>
 	<li ng-if="bridge.showSomfy" role="presentation"><a href="#!/somfydevices">Somfy Devices</a></li>
 	<li ng-if="bridge.showLifx" role="presentation"><a href="#!/lifxdevices">LIFX Devices</a></li>
 	<li ng-if="bridge.showHomeWizard" role="presentation"><a href="#!/homewizarddevices">HomeWizard Devices</a></li>
 	<li ng-if="bridge.showOpenHAB" role="presentation"><a href="#!/openhabdevices">OpenHAB Devices</a></li>
 	<li ng-if="bridge.showFHEM" role="presentation"><a href="#!/fhemdevices">FHEM Devices</a></li>
-	<li ng-if="bridge.showMozIot" role="presentation"><a href="#!/moziotdevices">Mozilla IOT Devices</a></li>
+	<li ng-if="bridge.showMozIot" role="presentation" class="active"><a href="#!/moziotdevices">Mozilla IOT Devices</a></li>
 	<li ng-if="bridge.showBroadlink" role="presentation"><a href="#!/broadlinkdevices">Broadlink Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
 <div class="panel panel-default">
 	<div class="panel-heading">
-		<h2 class="panel-title">HomeAssistant Device List
-			({{bridge.hassdevices.length}})</h2>
+		<h2 class="panel-title">Mozilla show Device List
+			({{bridge.moziotdevices.length}})</h2>
 	</div>
 	<div class="panel-body">
-		<p class="text-muted">For any HomeAssistant Device, use the build action buttons
+		<p class="text-muted">For any Mozilla IOT Device, use the build action buttons
 			to generate the item addition information into the ha-bridge device and this will put you into the edit screen. Then
 			you can modify the name to anything you want that will be the keyword
 			for the Echo or Google Home. Also, you can go back to any helper tab and click a build 
 			action button to add another item for a multi-command. After you are
 			 done in the edit tab, click the 'Add Bridge Device' to finish that selection
-			setup. The 'Already Configured HomeAssistant Devices' list below will show what
-			is already setup for your HomeAssitant.</p>
+			setup. The 'Already Configured Mozilla IOT Devices' list below will show what
+			is already setup for your Mozilla IOT.</p>
 		<p class="text-muted">
 			Also, use this select menu for which type of dim control you would
-			like to be generated, BUT for Home Assistant, the selection should be Pass-thru: <select name="device-dim-control"
+			like to be generated: <select name="device-dim-control"
 				id="device-dim-control" ng-model="device_dim_control">
 				<option value="">none</option>
 				<option value="${intensity.byte}">Pass-thru Value</option>
@@ -52,8 +52,8 @@
 		<p class="text-muted">Use the check boxes by the names to use the bulk addition
 			feature. Select your items and dim control type if wanted, then click
 			bulk add below. Your items will be added with on and off or dim and
-			off if selected with the name of the device from the HomeAssitant.</p>
-	<scrollable-table watch="bridge.hassdevices">
+			off if selected with the name of the device from the Mozilla IOT.</p>
+	<scrollable-table watch="bridge.moziotdevices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
@@ -63,21 +63,30 @@
 					value="{{selectAll}}"
 					ng-checked="selectAll"
 					ng-click="toggleSelectAll()"> Name</span></th>
-				<th sortable-header col="hassname">HomeAssitant</th>
+				<th sortable-header col="type">Type</th>
+				<th sortable-header col="moziotname">Mozilla IOT</th>
+				<th col="string-actions">Color Actions</th>
 				<th>Build Actions</th>
 			</tr>
 		</thead>
-		<tr ng-repeat="hassdevice in bridge.hassdevices">
+		<tr ng-repeat="moziotdevice in bridge.moziotdevices">
 			<td>{{$index+1}}</td>
 			<td><input type="checkbox" name="bulk.devices[]"
-				value="{{hassdevice.deviceState.entity_id}}"
-				ng-checked="bulk.devices.indexOf(hassdevice.deviceState.entity_id) > -1"
-				ng-click="toggleSelection(hassdevice.deviceState.entity_id)">
-				{{hassdevice.deviceState.entity_id}}</td>
-			<td>{{hassdevice.hassname}}</td>
+				value="{{moziotdevice.item.name}}"
+				ng-checked="bulk.devices.indexOf(moziotdevice.item.name) > -1"
+				ng-click="toggleSelection(moziotdevice.item.name)">
+				{{moziotdevice.name}}</td>
+			<td>{{moziotdevice.type}}</td>
+			<td>{{moziotdevice.name}}</td>
 			<td>
-				<button ng-if="hassdevice.domain != 'sensor' && hassdevice.domain != 'sun'" class="btn btn-success" type="submit"
-					ng-click="buildDeviceUrls(hassdevice, device_dim_control, false)">Build Item</button>
+				<input id="color-input-device-action"
+					class="form-control" type="text"
+					ng-model="colordata"
+					placeholder="R,G,B">
+			</td>
+			<td>
+				<button  class="btn btn-success" type="submit"
+					ng-click="buildDeviceUrls(moziotdevice, device_dim_control, colordata, false)">Build Item</button>
 			</td>
 		</tr>
 	</table>
@@ -92,26 +101,29 @@
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title">
-			Already Configured HomeAssitant Devices <a ng-click="toggleButtons()"><span
-				class={{imgButtonsUrl}} aria-hidden="true"></span></a>
+			Already Configured OpenHAB Devices <a ng-click="toggleButtons()"><span
+				class={{imgButtonsUrl}} aria-hidden="true"></span></a></a>
 		</h2>
 	</div>
 	<div ng-if="buttonsVisible" class="panel-body">
-	<scrollable-table watch="bridge.hassdevices">
+	
+	<scrollable-table watch="bridge.moziotdevices">
 	<table class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<th>Row</th>
 				<th sortable-header col="name">Name</th>
-				<th sortable-header col="hassname">HomeAssistant</th>
+				<th sortable-header col="category">Category</th>
+				<th sortable-header col="moziotname">Mozilla IOT</th>
 				<th>Map Id</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
 		<tr
-			ng-repeat="device in bridge.devices | configuredHassItems">
+			ng-repeat="device in bridge.devices | configuredMozIotItems">
 			<td>{{$index+1}}</td>
 			<td>{{device.name}}</td>
+			<td>{{device.deviceType}}</td>
 			<td>{{device.targetDevice}}</td>
 			<td>{{device.mapId}}</td>
 			<td>
