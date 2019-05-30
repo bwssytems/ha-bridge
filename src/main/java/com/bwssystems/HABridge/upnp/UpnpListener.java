@@ -249,6 +249,20 @@ public class UpnpListener {
 						+ " with discovery responseTemplateOriginal is <<<" + discoveryResponse + ">>>");
 			sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
 		} else {
+			discoveryResponse = String.format(responseTemplateOriginal, Configuration.UPNP_MULTICAST_ADDRESS,
+					Configuration.UPNP_DISCOVERY_PORT, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID);
+			if (traceupnp) {
+				log.info("Traceupnp: send upnp discovery template Original with response address: " + httpLocationAddress + ":"
+						+ httpServerPort + " to address: " + requester + ":" + sourcePort);
+			} else
+				log.debug("sendUpnpResponse to address: " + requester + ":" + sourcePort
+						+ " with discovery responseTemplateOriginal is <<<" + discoveryResponse + ">>>");
+			sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
+			try {
+				Thread.sleep(theUpnpSendDelay);
+			} catch (InterruptedException e) {
+				// noop
+			}
 			discoveryResponse = String.format(responseTemplate1, Configuration.UPNP_MULTICAST_ADDRESS,
 					Configuration.UPNP_DISCOVERY_PORT, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID);
 			if (traceupnp) {

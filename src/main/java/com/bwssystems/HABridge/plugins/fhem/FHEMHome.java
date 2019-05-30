@@ -55,12 +55,15 @@ public class FHEMHome implements Home {
 		if(theUrl != null && !theUrl.isEmpty()) {
 			FHEMCommand theCommand = null;
 			try {
-				theCommand = new Gson().fromJson(theUrl, FHEMCommand.class);
+				if(anItem.getItem().isJsonObject())
+					theCommand = new Gson().fromJson(anItem.getItem(), FHEMCommand.class);
+				else
+					theCommand = new Gson().fromJson(anItem.getItem().getAsString(), FHEMCommand.class);
 			} catch(Exception e) {
     			log.warn("Cannot parse command to FHEM <<<" + theUrl + ">>>", e);
 				responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
 						"Error on calling url to change device state", "/lights/"
-						+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+						+ lightId + "/state", null, null).getTheErrors(), HueError[].class);
 				return responseString;
 			}
 			String intermediate = theCommand.getUrl().substring(theCommand.getUrl().indexOf("://") + 3);

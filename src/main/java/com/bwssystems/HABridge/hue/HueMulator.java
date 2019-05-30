@@ -1246,7 +1246,7 @@ public class HueMulator {
 
 		if (isOnRequest) {
 			if (bridgeSettings.isTracestate())
-				log.info("Tracestate: Calling on-off as requested.");
+				log.info("Tracestate: Calling on-off as requested: " + theStateChanges.isOn());
 
 			log.debug("Calling on-off as requested.");
 			if (theStateChanges.isOn()) {
@@ -1265,6 +1265,9 @@ public class HueMulator {
 			if (url != null && !url.equals("")) {
 				responseString = callUrl(url, device, userId, lightId, body, ipAddress, ignoreRequester, targetBri,
 						targetBriInc, colorData);
+				if (responseString != null && responseString.contains("[{\"error\":")) {
+					log.warn("On/Off Request failed with: " + responseString);
+				}
 			} else {
 				log.info("On/off url not available for state change, lightId: " + lightId + ", userId: " + userId
 						+ ", from IP: " + ipAddress + ", body: " + body);
@@ -1273,7 +1276,7 @@ public class HueMulator {
 
 		if (isDimRequest) {
 			if (bridgeSettings.isTracestate())
-				log.info("Tracestate: Calling dim as requested.");
+				log.info("Tracestate: Calling dim as requested: " + targetBri + ", inc: " + targetBriInc);
 
 			log.debug("Calling dim as requested.");
 			url = device.getDimUrl();
@@ -1295,6 +1298,9 @@ public class HueMulator {
 				}
 				responseString = callUrl(url, device, userId, lightId, body, ipAddress, ignoreRequester, targetBri,
 						targetBriInc, colorData);
+				if (responseString != null && responseString.contains("[{\"error\":")) {
+					log.warn("Dim Request failed with: " + responseString);
+				}
 			} else {
 				log.info("Dim url not available for state change, lightId: " + lightId + ", userId: " + userId
 						+ ", from IP: " + ipAddress + ", body: " + body);
@@ -1324,6 +1330,9 @@ public class HueMulator {
 				}
 				responseString = callUrl(url, device, userId, lightId, body, ipAddress, ignoreRequester, targetBri,
 						targetBriInc, colorData);
+				if (responseString != null && responseString.contains("[{\"error\":")) {
+					log.warn("Color Request failed with: " + responseString);
+				}
 			} else {
 				log.info("Color url not available for state change, lightId: " + lightId + ", userId: " + userId
 						+ ", from IP: " + ipAddress + ", body: " + body);
@@ -1346,7 +1355,8 @@ public class HueMulator {
 
 	}
 
-	private ColorData parseColorInfo(String body, StateChangeBody theStateChanges, DeviceState state, Integer targetBri, Integer targetBriInc) {
+	private ColorData parseColorInfo(String body, StateChangeBody theStateChanges, DeviceState state, Integer targetBri,
+			Integer targetBriInc) {
 		ColorData colorData = null;
 		List<Double> xy = null;
 		List<Double> xyInc = null;
@@ -1402,9 +1412,9 @@ public class HueMulator {
 		} else if (hue != null || sat != null) {
 			anHSL = new HueSatBri();
 			int bri = 0;
-			if(targetBriInc != null) {
+			if (targetBriInc != null) {
 				bri = state.getBri() - targetBriInc;
-				if(bri < 0)
+				if (bri < 0)
 					bri = 0;
 			} else if (targetBri != null) {
 				bri = targetBri;
@@ -1412,12 +1422,12 @@ public class HueMulator {
 				bri = state.getBri();
 			}
 			anHSL.setBri(bri);
-			if(hue != null)
+			if (hue != null)
 				anHSL.setHue(hue);
 			else
 				anHSL.setHue(state.getHue());
 
-			if(sat != null)
+			if (sat != null)
 				anHSL.setSat(sat);
 			else
 				anHSL.setSat(state.getSat());
@@ -1426,9 +1436,9 @@ public class HueMulator {
 		} else if (hueInc != null || satInc != null) {
 			anHSL = new HueSatBri();
 			int bri = 0;
-			if(targetBriInc != null) {
+			if (targetBriInc != null) {
 				bri = state.getBri() - targetBriInc;
-				if(bri < 0)
+				if (bri < 0)
 					bri = 0;
 			} else if (targetBri != null) {
 				bri = targetBri;
@@ -1436,12 +1446,12 @@ public class HueMulator {
 				bri = state.getBri();
 			}
 			anHSL.setBri(bri);
-			if(hueInc != null)
+			if (hueInc != null)
 				anHSL.setHue(state.getHue() - hueInc);
 			else
 				anHSL.setHue(state.getHue());
 
-			if(satInc != null)
+			if (satInc != null)
 				anHSL.setSat(state.getSat() - satInc);
 			else
 				anHSL.setSat(state.getSat());
@@ -1591,6 +1601,8 @@ public class HueMulator {
 		} else if (!url.startsWith("[{\"item\""))
 			url = "[{\"item\":" + url + "}]";
 
+		if (bridgeSettings.isTracestate())
+			log.info("Tracestate: Decode Json for url items: " + url);
 		log.debug("Decode Json for url items: " + url);
 		CallItem[] callItems = null;
 		try {
@@ -1639,7 +1651,8 @@ public class HueMulator {
 						aMultiUtil.setTheDelay(callItems[i].getDelay());
 					else
 						aMultiUtil.setTheDelay(aMultiUtil.getDelayDefault());
-
+					if (bridgeSettings.isTracestate())
+						log.info("Tracestate: Calling Home device handler for type : " + callItems[i].getType().trim());
 					log.debug("Calling Home device handler for type : " + callItems[i].getType().trim());
 					responseString = homeManager.findHome(callItems[i].getType().trim()).deviceHandler(callItems[i],
 							aMultiUtil, lightId, device.getDeviceState().getBri(), targetBri, targetBriInc, colorData,

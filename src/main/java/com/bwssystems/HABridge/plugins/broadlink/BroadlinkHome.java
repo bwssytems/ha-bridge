@@ -106,11 +106,14 @@ public class BroadlinkHome implements Home {
 			log.warn("Should not get here, no Broadlinks configured");
 			theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 					+ "\",\"description\": \"Should not get here, no LifxDevices configured\", \"parameter\": \"/lights/"
-					+ lightId + "state\"}}]";
+					+ lightId + "/state\"}}]";
 
 		} else {
 			BroadlinkEntry broadlinkCommand = null;
-			broadlinkCommand = new Gson().fromJson(anItem.getItem().getAsString(), BroadlinkEntry.class);
+			if(anItem.getItem().isJsonObject())
+				broadlinkCommand = new Gson().fromJson(anItem.getItem(), BroadlinkEntry.class);
+			else
+				broadlinkCommand = new Gson().fromJson(anItem.getItem().getAsString(), BroadlinkEntry.class);
 			BLDevice theDevice = null;
 			if(broadlinkMap != null && !broadlinkMap.isEmpty())
 				theDevice = broadlinkMap.get(broadlinkCommand.getId());
@@ -126,17 +129,17 @@ public class BroadlinkHome implements Home {
 						log.warn("Could not initialize BroadlinkDevice device due to Mac (" + broadlinkCommand.getId() + ") format exception: " + e.getMessage());
 						theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 								+ "\",\"description\": \"Could not initialize BroadlinkDevice device due to Mac format exception\", \"parameter\": \"/lights/"
-								+ lightId + "state\"}}]";
+								+ lightId + "/state\"}}]";
 					} catch (IOException e) {
 						log.warn("Could not initialize BroadlinkDevice device due to IP Address (" + broadlinkCommand.getId() + ") exception: " + e.getMessage());
 						theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 								+ "\",\"description\": \"Could not initialize BroadlinkDevice device due to IP Address exception\", \"parameter\": \"/lights/"
-								+ lightId + "state\"}}]";
+								+ lightId + "/state\"}}]";
 					} catch (Exception e) {
 						log.warn("Could not initialize BroadlinkDevice device due to (" + broadlinkCommand.getId() + ") exception: " + e.getMessage());
 						theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 								+ "\",\"description\": \"Could not initialize BroadlinkDevice device due to exception\", \"parameter\": \"/lights/"
-								+ lightId + "state\"}}]";
+								+ lightId + "/state\"}}]";
 					}
 
 	            	if(broadlinkMap == null)
@@ -154,7 +157,7 @@ public class BroadlinkHome implements Home {
 				log.warn("Should not get here, no BroadlinkDevice not available");
 				theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 						+ "\",\"description\": \"Should not get here, no Broadlinks available\", \"parameter\": \"/lights/"
-						+ lightId + "state\"}}]";
+						+ lightId + "/state\"}}]";
 			} else {
 					log.debug("calling BroadlinkDevice: " + broadlinkCommand.getName());
 					try {
@@ -163,7 +166,7 @@ public class BroadlinkHome implements Home {
 								log.error("Call to " + broadlinkCommand.getId() + " device authorization failed.");
 								theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 										+ "\",\"description\": \"" + broadlinkCommand.getId() + " device auth error.\", \"parameter\": \"/lights/"
-										+ lightId + "state\"}}]";
+										+ lightId + "/state\"}}]";
 							}	
 	                	}
 			            switch (theDevice.getDeviceType()) {
@@ -235,7 +238,7 @@ public class BroadlinkHome implements Home {
 								log.error("Call to " + broadlinkCommand.getId() + " with no data, noop");
 								theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 										+ "\",\"description\": \"" + broadlinkCommand.getId() + " could not call device without data.\", \"parameter\": \"/lights/"
-										+ lightId + "state\"}}]";
+										+ lightId + "/state\"}}]";
 			            	}
 			                break;
 	
@@ -244,7 +247,7 @@ public class BroadlinkHome implements Home {
 						log.error("Call to " + broadlinkCommand.getId() + " device failed with exception: " + e.getMessage(), e);
 						theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 								+ "\",\"description\": \"" + broadlinkCommand.getId() + " device call error.\", \"parameter\": \"/lights/"
-								+ lightId + "state\"}}]";
+								+ lightId + "/state\"}}]";
 					}
 		            
 			}

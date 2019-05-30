@@ -49,7 +49,7 @@ public class HomeWizardHome implements Home {
 			log.warn("Should not get here, no HomeWizard smart plug available");
 			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 					+ "\",\"description\": \"Should not get here, no HomeWizard smart plug available\", \"parameter\": \"/lights/"
-					+ lightId + "state\"}}]";
+					+ lightId + "/state\"}}]";
 		} else {
 			
 			if (anItem.getType() != null && anItem.getType().trim().equalsIgnoreCase(DeviceMapTypes.HOMEWIZARD_DEVICE[DeviceMapTypes.typeIndex])) {
@@ -62,7 +62,7 @@ public class HomeWizardHome implements Home {
 					log.warn("Should not get here, no HomeWizard smart plug configured");
 					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 							+ "\",\"description\": \"Should not get here, no HomeWizard smart plug configured\", \"parameter\": \"/lights/"
-							+ lightId + "state\"}}]";
+							+ lightId + "/state\"}}]";
 				} else {
 					try {
 						homeWizzardHandler.execApply(jsonToPost);
@@ -70,7 +70,7 @@ public class HomeWizardHome implements Home {
 						
 						log.warn("Error posting request to HomeWizard smart plug");
 						responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-								+ "\",\"description\": \"Error posting request to HomeWizard smart plug\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+								+ "\",\"description\": \"Error posting request to HomeWizard smart plug\", \"parameter\": \"/lights/" + lightId + "/state\"}}]";
 					}
 				}
 			}

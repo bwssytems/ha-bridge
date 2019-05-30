@@ -144,7 +144,7 @@ public class LifxHome implements Home {
 			log.warn("Should not get here, no LifxDevice clients configured");
 			theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 					+ "\",\"description\": \"Should not get here, no LifxDevices configured\", \"parameter\": \"/lights/"
-					+ lightId + "state\"}}]";
+					+ lightId + "/state\"}}]";
 
 		} else {
 			LifxEntry lifxCommand = null;
@@ -157,7 +157,7 @@ public class LifxHome implements Home {
 				log.warn("Should not get here, no LifxDevices available");
 				theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 						+ "\",\"description\": \"Should not get here, no Lifx clients available\", \"parameter\": \"/lights/"
-						+ lightId + "state\"}}]";
+						+ lightId + "/state\"}}]";
 			} else {
 					log.debug("calling LifxDevice: " + lifxCommand.getName());
 					if(theDevice.getType().equals(LifxDevice.LIGHT_TYPE)) {

@@ -119,7 +119,7 @@ public class NestHome implements com.bwssystems.HABridge.Home {
 			log.warn("Should not get here, no Nest available");
 			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 					+ "\",\"description\": \"Should not get here, no Nest available\", \"parameter\": \"/lights/"
-					+ lightId + "state\"}}]";
+					+ lightId + "/state\"}}]";
 		} else if (anItem.getType() != null && anItem.getType().trim().equalsIgnoreCase(DeviceMapTypes.NEST_HOMEAWAY[DeviceMapTypes.typeIndex])) {
 			NestInstruction homeAway = null;
 			if(anItem.getItem().isJsonObject())
@@ -167,7 +167,7 @@ public class NestHome implements com.bwssystems.HABridge.Home {
 				log.warn("no valid Nest control info: " + thermoSetting.getControl());
 				responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 						+ "\",\"description\": \"no valid Nest control info\", \"parameter\": \"/lights/"
-						+ lightId + "state\"}}]";
+						+ lightId + "/state\"}}]";
 			}
 		}
 		return responseString;

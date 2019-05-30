@@ -94,10 +94,17 @@ public class MozIotInstance {
         else
             aUrl = "http://";
 
+        headers = new NameValue[2];
+        headers[0] = new NameValue();
+        headers[0].setName("Content-Type");
+        headers[0].setValue("application/json");
+        headers[1] = new NameValue();
+        headers[1].setName("Accept");
+        headers[1].setValue("application/json");
         aUrl = aUrl + mozIotIP.getIp() + ":" + mozIotIP.getPort() + "/login";
         String commandData = "{\"email\": \"" + mozIotIP.getUsername() + "\", \"password\":\"" + mozIotIP.getPassword()
                 + "\"}";
-        String theData = httpClient.doHttpRequest(aUrl, HttpPost.METHOD_NAME, "application/json", commandData, null);
+        String theData = httpClient.doHttpRequest(aUrl, HttpPost.METHOD_NAME, "application/json", commandData, headers);
         if (theData != null) {
             log.info("GET Mozilla login - data: " + theData);
             try {
@@ -108,6 +115,8 @@ public class MozIotInstance {
         } else {
             log.warn("Could not login " + mozIotIP.getName() + " error: <<<" + theData + ">>>");
         }
+
+        headers = null;
     }
 
     public NamedIP getMozIotIP() {

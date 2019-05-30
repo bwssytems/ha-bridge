@@ -67,13 +67,13 @@ public class CommandHome implements Home {
 				log.warn("Could not execute request: " + anItem + " with message: " + e.getMessage());
 				responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 						+ "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId
-						+ "state\"}}]";
+						+ "/state\"}}]";
 			}
 		} else {
 			log.warn("Could not execute request. Request is empty.");
 			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 					+ "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId
-					+ "state\"}}]";
+					+ "/state\"}}]";
 		}
 
 		return responseString;

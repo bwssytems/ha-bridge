@@ -165,7 +165,7 @@ public class HalHome implements Home {
 						log.warn("Error on calling hal to change device state: " + anUrl);
 						responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
 								"Error on calling url to change device state", "/lights/"
-								+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+								+ lightId + "/state", null, null).getTheErrors(), HueError[].class);
 					}
 				}
 			}
@@ -175,7 +175,7 @@ public class HalHome implements Home {
 			log.warn("No HAL found to call: " + theUrl);
 			responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
 					"No HAL found.", "/lights/"
-					+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+					+ lightId + "/state", null, null).getTheErrors(), HueError[].class);
 		}
 		return responseString;
 	}

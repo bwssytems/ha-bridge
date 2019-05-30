@@ -128,7 +128,7 @@ public class MQTTHome implements Home {
 			log.warn("Should not get here, no mqtt brokers configured");
 			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 					+ "\",\"description\": \"Should not get here, no mqtt brokers configured\", \"parameter\": \"/lights/"
-					+ lightId + "state\"}}]";
+					+ lightId + "/state\"}}]";
 
 		}
 		return responseString;

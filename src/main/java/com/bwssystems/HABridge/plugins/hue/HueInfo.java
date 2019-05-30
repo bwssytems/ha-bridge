@@ -159,7 +159,7 @@ public class HueInfo {
 				log.warn("Error on calling Hue passthru to change device state: " + deviceId.getHueName());
 				responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 						+ "\",\"description\": \"Error on calling HUE to change device state\", \"parameter\": \"/lights/"
-						+ lightId + "state\"}}]";
+						+ lightId + "/state\"}}]";
 			} else if (responseString.contains("[{\"error\":")) {
 //				if(responseString.contains("unauthorized user")) {
 //				}

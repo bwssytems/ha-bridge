@@ -50,12 +50,13 @@ public class MozIotHome implements Home  {
 		if(theUrl != null && !theUrl.isEmpty()) {
 			MozIotCommand theCommand = null;
 			try {
+				theUrl = theUrl.replaceAll("^\"|\"$", "");
 				theCommand = new Gson().fromJson(theUrl, MozIotCommand.class);
 			} catch(Exception e) {
     			log.warn("Cannot parse command to Mozilla IOT <<<" + theUrl + ">>>", e);
 				responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
 						"Error on calling url to change device state", "/lights/"
-						+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+						+ lightId + "/state", null, null).getTheErrors(), HueError[].class);
 				return responseString;
 			}
 			String intermediate = theCommand.getUrl().substring(theCommand.getUrl().indexOf("://") + 3);

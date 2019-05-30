@@ -72,7 +72,7 @@ public class SomfyHome implements Home  {
 			log.warn("Should not get here, no somfy hub available");
 			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 					+ "\",\"description\": \"Should not get here, no somfy hub available\", \"parameter\": \"/lights/"
-					+ lightId + "state\"}}]";
+					+ lightId + "/state\"}}]";
 		} else {
 			if (anItem.getType() != null && anItem.getType().trim().equalsIgnoreCase(DeviceMapTypes.SOMFY_DEVICE[DeviceMapTypes.typeIndex])) {
 
@@ -84,14 +84,14 @@ public class SomfyHome implements Home  {
 					log.warn("Should not get here, no Somfy configured");
 					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 							+ "\",\"description\": \"Should not get here, no somfy configured\", \"parameter\": \"/lights/"
-							+ lightId + "state\"}}]";
+							+ lightId + "/state\"}}]";
 				} else {
 					try {
 						somfyHandler.execApply(jsonToPost);
 					} catch (Exception e) {
 						log.warn("Error posting request to Somfy");
 						responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-								+ "\",\"description\": \"Error posting request to SomfyTahoma\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+								+ "\",\"description\": \"Error posting request to SomfyTahoma\", \"parameter\": \"/lights/" + lightId + "/state\"}}]";
 					}
 
 				}

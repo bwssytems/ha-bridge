@@ -131,7 +131,7 @@ public class HassHome implements Home {
 			log.warn("Should not get here, no HomeAssistant clients configured");
 			theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 					+ "\",\"description\": \"Should not get here, no HomeAssistants configured\", \"parameter\": \"/lights/"
-					+ lightId + "state\"}}]";
+					+ lightId + "/state\"}}]";
 
 		} else {
 			HassCommand hassCommand = null;
@@ -146,7 +146,7 @@ public class HassHome implements Home {
 				log.warn("Should not get here, no HomeAssistants available");
 				theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 						+ "\",\"description\": \"Should not get here, no HiomeAssistant clients available\", \"parameter\": \"/lights/"
-						+ lightId + "state\"}}]";
+						+ lightId + "/state\"}}]";
 			} else {
 					log.debug("calling HomeAssistant: " + hassCommand.getHassName() + " - "
 							+ hassCommand.getEntityId() + " - " + hassCommand.getState() + " - " + hassCommand.getBri());
