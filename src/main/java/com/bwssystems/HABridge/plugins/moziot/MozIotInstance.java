@@ -102,8 +102,10 @@ public class MozIotInstance {
         headers[1].setName("Accept");
         headers[1].setValue("application/json");
         aUrl = aUrl + mozIotIP.getIp() + ":" + mozIotIP.getPort() + "/login";
+        log.info("gateway login URL: " + aUrl);
         String commandData = "{\"email\": \"" + mozIotIP.getUsername() + "\", \"password\":\"" + mozIotIP.getPassword()
                 + "\"}";
+        log.info("The login body: " + commandData);
         String theData = httpClient.doHttpRequest(aUrl, HttpPost.METHOD_NAME, "application/json", commandData, headers);
         if (theData != null) {
             log.info("GET Mozilla login - data: " + theData);

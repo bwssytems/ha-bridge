@@ -5,6 +5,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 
+import javax.net.ssl.SSLContext;
+
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -23,37 +25,46 @@ import com.bwssystems.HABridge.api.NameValue;
 public class HTTPHandler {
 	private static final Logger log = LoggerFactory.getLogger(HTTPHandler.class);
 	private String callType;
-	
+
 	public HTTPHandler() {
 		super();
 		callType = null;
 	}
-
 
 	public HTTPHandler(String type) {
 		super();
 		callType = type;
 	}
 
-
 	// This function executes the url from the device repository against the
 	// target as http or https as defined
 	public String doHttpRequest(String url, String httpVerb, String contentType, String body, NameValue[] headers) {
-		log.debug("doHttpRequest with url <<<" + url + ">>>, verb: " + httpVerb + ", contentType: " + contentType + ", body <<<" + body + ">>>" );
-		if(headers != null && headers.length > 0)
-			for(int i = 0; i < headers.length; i++)
-				log.debug("header index " + i + " name: <<<" + headers[i].getName() + ">>>, value: <<<" + headers[i].getValue() + ">>>");
 		HttpUriRequest request = null;
 		String theContent = null;
 		URI theURI = null;
+		boolean usingSSL = false;
 		ContentType parsedContentType = null;
 		StringEntity requestBody = null;
+
+		log.debug("doHttpRequest with url <<<" + url + ">>>, verb: " + httpVerb + ", contentType: " + contentType
+				+ ", body <<<" + body + ">>>");
+		if (headers != null && headers.length > 0) {
+			for (int i = 0; i < headers.length; i++) {
+				log.debug("header index " + i + " name: <<<" + headers[i].getName() + ">>>, value: <<<"
+						+ headers[i].getValue() + ">>>");
+			}
+		}
 
 		if (contentType != null && !contentType.trim().isEmpty()) {
 			parsedContentType = ContentType.parse(contentType);
 			if (body != null && body.length() > 0)
 				requestBody = new StringEntity(body, parsedContentType);
 		}
+
+		if (url.startsWith("https:")) {
+			usingSSL = true;
+		}
+
 		try {
 			theURI = new URI(url);
 		} catch (URISyntaxException e1) {
@@ -90,7 +101,11 @@ public class HTTPHandler {
 		CloseableHttpResponse response = null;
 		for (int retryCount = 0; retryCount < 2; retryCount++) {
 			try {
-				response = HttpClientPool.getClient().execute(request);
+				if (usingSSL) {
+					response = HttpClientPool.getSSLClient().execute(request);
+				} else {
+					response = HttpClientPool.getClient().execute(request);
+				}
 				log.debug((httpVerb == null ? "GET" : httpVerb) + " execute (" + retryCount + ") on URL responded: "
 						+ response.getStatusLine().getStatusCode());
 				if (response != null && response.getEntity() != null) {
@@ -106,22 +121,27 @@ public class HTTPHandler {
 																	// ignore
 																	// content
 					} catch (Exception e) {
-						log.debug("Error ocurred in handling response entity after successful call, still responding success. "
-										+ e.getMessage(), e);
+						log.debug(
+								"Error ocurred in handling response entity after successful call, still responding success. "
+										+ e.getMessage(),
+								e);
 					}
 				}
-				if (response != null && response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
-					if(theContent == null)
+				if (response != null && response.getStatusLine().getStatusCode() >= 200
+						&& response.getStatusLine().getStatusCode() < 300) {
+					if (theContent == null)
 						theContent = "";
 					log.debug("Successfull response - The http response is <<<" + theContent + ">>>");
 					retryCount = 2;
-				} else if (DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex].equals(callType) && response.getStatusLine().getStatusCode() == 302) {
-					if(theContent == null)
+				} else if (DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex].equals(callType)
+						&& response.getStatusLine().getStatusCode() == 302) {
+					if (theContent == null)
 						theContent = "";
 					log.debug("Successfull response - The http response is <<<" + theContent + ">>>");
 					retryCount = 2;
 				} else if (response != null) {
-					log.warn("HTTP response code was not an expected successful response of between 200 - 299, the code was: "
+					log.warn(
+							"HTTP response code was not an expected successful response of between 200 - 299, the code was: "
 									+ response.getStatusLine() + " with the content of <<<" + theContent + ">>>");
 					if (response.getStatusLine().getStatusCode() == 504) {
 						log.warn("HTTP response code was 504, retrying...");
@@ -130,15 +150,15 @@ public class HTTPHandler {
 					} else
 						retryCount = 2;
 				}
-				
+
 			} catch (ClientProtocolException e) {
 				log.warn("Client Protocol Exception received, retyring....");
-			}catch (IOException e) {
+			} catch (IOException e) {
 				log.warn("Error calling out to HA gateway: IOException in log: " + e.getMessage());
 				retryCount = 2;
 			}
 
-			if(retryCount < 2) {
+			if (retryCount < 2) {
 				theContent = null;
 				try {
 					Thread.sleep(1000);
@@ -149,10 +169,10 @@ public class HTTPHandler {
 		}
 		return theContent;
 	}
+
 	public void setCallType(String callType) {
 		this.callType = callType;
 	}
-
 
 	public void closeHandler() {
 	}
