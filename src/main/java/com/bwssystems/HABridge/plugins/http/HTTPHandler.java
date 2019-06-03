@@ -5,8 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 
-import javax.net.ssl.SSLContext;
-
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -154,7 +152,7 @@ public class HTTPHandler {
 			} catch (ClientProtocolException e) {
 				log.warn("Client Protocol Exception received, retyring....");
 			} catch (IOException e) {
-				log.warn("Error calling out to HA gateway: IOException in log: " + e.getMessage());
+				log.warn("Error calling out to HA gateway: IOException in log: " + e.getMessage(), e);
 				retryCount = 2;
 			}
 

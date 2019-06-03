@@ -26,8 +26,8 @@ public class MozIotInstance {
         gatewayLogin(httpClient);
     }
 
-    public Boolean callCommand(String aCommand, String commandData, HTTPHandler httpClient) {
-        log.debug("calling Mozilla IOT: " + mozIotIP.getIp() + ":" + mozIotIP.getPort() + aCommand);
+    public Boolean callCommand(String deviceId, String aCommand, MozIotCommandDetail commandData, HTTPHandler httpClient) {
+        log.debug("calling Mozilla IOT: {}:{}{}{}", mozIotIP.getIp(), mozIotIP.getPort(), aCommand, commandData.getBody());
         String aUrl = null;
 
         if (mozIotIP.getSecure() != null && mozIotIP.getSecure())
@@ -36,9 +36,9 @@ public class MozIotInstance {
             aUrl = "http://";
         headers = getAuthHeader();
 
-        aUrl = aUrl + mozIotIP.getIp() + ":" + mozIotIP.getPort() + "/" + aCommand;
-        String theData = httpClient.doHttpRequest(aUrl, HttpPut.METHOD_NAME, "application/json", commandData, headers);
-        log.debug("call Command return is: <" + theData + ">");
+        aUrl = aUrl + mozIotIP.getIp() + ":" + mozIotIP.getPort() + "/things/" + deviceId + "/" +  aCommand;
+        String theData = httpClient.doHttpRequest(aUrl, HttpPut.METHOD_NAME, "application/json", commandData.getBody(), headers);
+        log.debug("call Command return is: <<<{}>>>", theData);
         if (theData.contains("error") || theData.contains("ERROR") || theData.contains("Error"))
             return false;
         return true;
@@ -70,7 +70,7 @@ public class MozIotInstance {
                     }
                 }
             } catch (Exception e) {
-                log.warn("Cannot get an devices for Mozilla IOT " + mozIotIP.getName() + " Gson Parse Error.");
+                log.warn("Cannot get an devices for Mozilla IOT {} Gson Parse Error.", mozIotIP.getName());
             }
         }
         return deviceList;
@@ -78,11 +78,17 @@ public class MozIotInstance {
 
     private NameValue[] getAuthHeader() {
         if (headers == null) {
-            headers = new NameValue[1];
+            headers = new NameValue[3];
             headers[0] = new NameValue();
             headers[0].setName("Authorization");
             headers[0].setValue("Bearer " + moziotToken.getJwt());
-        }
+            headers[1] = new NameValue();
+            headers[1].setName("Content-Type");
+            headers[1].setValue("application/json");
+            headers[2] = new NameValue();
+            headers[2].setName("Accept");
+            headers[2].setValue("application/json");
+            }
         return headers;
     }
 
@@ -102,20 +108,20 @@ public class MozIotInstance {
         headers[1].setName("Accept");
         headers[1].setValue("application/json");
         aUrl = aUrl + mozIotIP.getIp() + ":" + mozIotIP.getPort() + "/login";
-        log.info("gateway login URL: " + aUrl);
+        log.debug("gateway login URL: {}", aUrl);
         String commandData = "{\"email\": \"" + mozIotIP.getUsername() + "\", \"password\":\"" + mozIotIP.getPassword()
                 + "\"}";
-        log.info("The login body: " + commandData);
+        log.debug("The login body: {}", commandData);
         String theData = httpClient.doHttpRequest(aUrl, HttpPost.METHOD_NAME, "application/json", commandData, headers);
         if (theData != null) {
-            log.info("GET Mozilla login - data: " + theData);
+            log.debug("GET Mozilla login - data: {}", theData);
             try {
                 moziotToken = new Gson().fromJson(theData, JWT.class);
             } catch (Exception e) {
-                log.warn("Cannot get login for Mozilla IOT " + mozIotIP.getName() + " Gson Parse Error.");
+                log.warn("Cannot get login for Mozilla IOT {} Gson Parse Error.", mozIotIP.getName());
             }
         } else {
-            log.warn("Could not login " + mozIotIP.getName() + " error: <<<" + theData + ">>>");
+            log.warn("Could not login {} error: <<<{}>>>", mozIotIP.getName(), theData);
         }
 
         headers = null;

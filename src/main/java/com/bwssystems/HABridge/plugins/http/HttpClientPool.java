@@ -62,9 +62,9 @@ public final class HttpClientPool {
     // Just one of me so constructor will be called once.
     SSLClient;
     // The thread-safe client.
-    private final CloseableHttpClient threadSafeClient;
+    private CloseableHttpClient threadSafeClient;
     // The pool monitor.
-    private final IdleConnectionMonitorThread monitor;
+    private IdleConnectionMonitorThread monitor = null;
     private TrustStrategy acceptingTrustStrategy = null;
     private SSLContext sslContext = null;
     private SSLConnectionSocketFactory sslsf = null;
@@ -73,27 +73,33 @@ public final class HttpClientPool {
 
     // The constructor creates it - thus late
     private SingletonSSL() {
-      PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-      // Increase max total connection to 200
-      cm.setMaxTotal(200);
-      // Increase default max connection per route to 20
-      cm.setDefaultMaxPerRoute(20);
       try {
         acceptingTrustStrategy = (cert, authType) -> true;
         hostnameVerifier = new NoopHostnameVerifier();
         sslContext = SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
         sslsf = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
+        HttpClientPool.log.info("Instantiated SSL components.");
+        final Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+        .register("http", new PlainConnectionSocketFactory())
+        .register("https", sslsf)
+        .build();
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+        // Increase max total connection to 200
+        cm.setMaxTotal(200);
+        // Increase default max connection per route to 20
+        cm.setDefaultMaxPerRoute(20);
+  
+        // Build the client.
+        threadSafeClient = HttpClients.custom().setSSLSocketFactory(sslsf).setConnectionManager(cm).build();
+        // Start up an eviction thread.
+        monitor = new IdleConnectionMonitorThread(cm);
+        // Don't stop quitting.
+        monitor.setDaemon(true);
+        monitor.start();
       } catch (Exception e) {
         HttpClientPool.log.warn("SingletonSSL failed on SSL init");
+        threadSafeClient = null;
       }
-      // Build the client.
-      threadSafeClient = HttpClients.custom().setConnectionManager(cm).setSSLSocketFactory(sslsf)
-          .setSSLHostnameVerifier(hostnameVerifier).build();
-      // Start up an eviction thread.
-      monitor = new IdleConnectionMonitorThread(cm);
-      // Don't stop quitting.
-      monitor.setDaemon(true);
-      monitor.start();
     }
 
     public CloseableHttpClient get() {

@@ -26,13 +26,13 @@ import com.bwssystems.HABridge.plugins.http.HTTPHandler;
 import com.bwssystems.HABridge.plugins.http.HTTPHome;
 import com.google.gson.Gson;
 
-public class MozIotHome implements Home  {
-    private static final Logger log = LoggerFactory.getLogger(MozIotHome.class);
+public class MozIotHome implements Home {
+	private static final Logger log = LoggerFactory.getLogger(MozIotHome.class);
 	private Map<String, MozIotInstance> moziotMap;
 	private Boolean validMoziot;
-    private HTTPHandler httpClient;
+	private HTTPHandler httpClient;
 	private boolean closed;
-	
+
 	public MozIotHome(BridgeSettings bridgeSettings) {
 		super();
 		closed = true;
@@ -47,71 +47,68 @@ public class MozIotHome implements Home  {
 		String theUrl = anItem.getItem().getAsString();
 		String responseString = null;
 
-		if(theUrl != null && !theUrl.isEmpty()) {
+		if (theUrl != null && !theUrl.isEmpty()) {
+			String anUrl = BrightnessDecode.calculateReplaceIntensityValue(theUrl, intensity, targetBri, targetBriInc,
+					false);
+			if (colorData != null) {
+				anUrl = ColorDecode.replaceColorData(anUrl, colorData,
+						BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), true);
+			}
+			anUrl = DeviceDataDecode.replaceDeviceData(anUrl, device);
+			anUrl = TimeDecode.replaceTimeValue(anUrl);
+
+			anUrl = BrightnessDecode.calculateReplaceIntensityValue(anUrl, intensity, targetBri, targetBriInc, false);
+			if (colorData != null) {
+				anUrl = ColorDecode.replaceColorData(anUrl, colorData,
+						BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);
+			}
+			anUrl = DeviceDataDecode.replaceDeviceData(anUrl, device);
+			anUrl = TimeDecode.replaceTimeValue(anUrl);
+
 			MozIotCommand theCommand = null;
 			try {
 				theUrl = theUrl.replaceAll("^\"|\"$", "");
-				theCommand = new Gson().fromJson(theUrl, MozIotCommand.class);
-			} catch(Exception e) {
-    			log.warn("Cannot parse command to Mozilla IOT <<<" + theUrl + ">>>", e);
+				theCommand = new Gson().fromJson(anUrl, MozIotCommand.class);
+			} catch (Exception e) {
+				log.warn("Cannot parse command to Mozilla IOT <<<" + theUrl + ">>>", e);
 				responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
-						"Error on calling url to change device state", "/lights/"
-						+ lightId + "/state", null, null).getTheErrors(), HueError[].class);
+						"Error on calling url to change device state", "/lights/" + lightId + "/state", null, null)
+						.getTheErrors(), HueError[].class);
 				return responseString;
 			}
-			String intermediate = theCommand.getUrl().substring(theCommand.getUrl().indexOf("://") + 3);
-			String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
-			String theUrlBody = intermediate.substring(intermediate.indexOf('/') + 1);
-			String hostAddr = null;
-			if (hostPortion.contains(":")) {
-				hostAddr = hostPortion.substring(0, intermediate.indexOf(':'));
-			} else
-				hostAddr = hostPortion;
-			MozIotInstance theHandler = findHandlerByAddress(hostAddr);
-			if(theHandler != null) {
-				String anUrl = BrightnessDecode.calculateReplaceIntensityValue(theUrlBody,
-						intensity, targetBri, targetBriInc, false);
-				if (colorData != null) {
-					anUrl = ColorDecode.replaceColorData(anUrl, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);	
-				}
-				anUrl = DeviceDataDecode.replaceDeviceData(anUrl, device);
-				anUrl = TimeDecode.replaceTimeValue(anUrl);
-		
-				String aCommand = null;
-				if(theCommand.getCommand() != null && !theCommand.getCommand().isEmpty()) {
-					aCommand = BrightnessDecode.calculateReplaceIntensityValue(theCommand.getCommand(),
-							intensity, targetBri, targetBriInc, false);
-					if (colorData != null) {
-						aCommand = ColorDecode.replaceColorData(aCommand, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);	
-					}
-					aCommand = DeviceDataDecode.replaceDeviceData(aCommand, device);
-					aCommand = TimeDecode.replaceTimeValue(aCommand);
-				}
-		   		try {
-		   			boolean success = theHandler.callCommand(anUrl, aCommand, httpClient);
-		   			if(!success) {
-		    			log.warn("Comand had error to Mozilla IOT");
+
+			String intermediate = theCommand.getUrl().substring(theCommand.getUrl().indexOf("/things/") + 8);
+			String devicePortion = intermediate.substring(0, intermediate.indexOf('/'));
+			String theUrlCommand = intermediate.substring(intermediate.indexOf('/') + 1);
+			MozIotInstance theHandler = moziotMap.get(device.getTargetDevice());
+			if (theHandler != null) {
+				try {
+					boolean success = theHandler.callCommand(devicePortion, theUrlCommand, theCommand.getCommand(), httpClient);
+					if (!success) {
+						log.warn("Comand had error to Mozilla IOT");
 						responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
-								"Error on calling url to change device state", "/lights/"
-								+ lightId + "state", null, null).getTheErrors(), HueError[].class);
-		   			}
-		   		} catch (Exception e) {
-	    			log.warn("Cannot send comand to Mozilla IOT", e);
+								"Error on calling url to change device state", "/lights/" + lightId + "/state", null,
+								null).getTheErrors(), HueError[].class);
+					}
+				} catch (Exception e) {
+					log.warn("Cannot send comand to Mozilla IOT", e);
 					responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
-							"Error on calling url to change device state", "/lights/"
-							+ lightId + "state", null, null).getTheErrors(), HueError[].class);
-		    	}
+							"Error on calling url to change device state", "/lights/" + lightId + "/state", null, null)
+							.getTheErrors(), HueError[].class);
+				}
 			} else {
 				log.warn("Mozilla IOT Call could not complete, no address found: " + theUrl);
 				responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
-						"Error on calling url to change device state", "/lights/"
-						+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+						"Error on calling url to change device state", "/lights/" + lightId + "/state", null, null)
+						.getTheErrors(), HueError[].class);
 			}
 		} else {
-			log.warn("Mozilla IOT Call to be presented as http(s)://<ip_address>(:<port>)/payload, format of request unknown: " + theUrl);
+			log.warn(
+					"Mozilla IOT Call to be presented as http(s)://<ip_address>(:<port>)/payload, format of request unknown: "
+							+ theUrl);
 			responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
-					"Error on calling url to change device state", "/lights/"
-					+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+					"Error on calling url to change device state", "/lights/" + lightId + "/state", null, null)
+					.getTheErrors(), HueError[].class);
 		}
 		return responseString;
 	}
@@ -119,16 +116,16 @@ public class MozIotHome implements Home  {
 	@Override
 	public Object getItems(String type) {
 
-		if(!validMoziot)
+		if (!validMoziot)
 			return null;
 		log.debug("consolidating devices for Mozilla IOT");
 		List<MozillaThing> theResponse = null;
 		Iterator<String> keys = moziotMap.keySet().iterator();
-		List<MozillaThing> deviceList = new ArrayList<MozillaThing>();
-		while(keys.hasNext()) {
+		List<MozIotDevice> deviceList = new ArrayList<MozIotDevice>();
+		while (keys.hasNext()) {
 			String key = keys.next();
 			theResponse = moziotMap.get(key).getDevices(httpClient);
-			if(theResponse != null)
+			if (theResponse != null)
 				addMozIotDevices(deviceList, theResponse, key);
 			else {
 				log.warn("Cannot get devices for Mozilla IOT with name: " + key + ", skipping this Mozilla IOT.");
@@ -137,11 +134,15 @@ public class MozIotHome implements Home  {
 		}
 		return deviceList;
 	}
-	
-	private Boolean addMozIotDevices(List<MozillaThing> theDeviceList, List<MozillaThing> theSourceList, String theKey) {
-		Iterator<MozillaThing> devices = theSourceList.iterator();
-		while(devices.hasNext()) {
-			MozillaThing theDevice = devices.next();
+
+	private Boolean addMozIotDevices(List<MozIotDevice> theDeviceList, List<MozillaThing> theSourceList,
+			String theKey) {
+		Iterator<MozillaThing> things = theSourceList.iterator();
+		while (things.hasNext()) {
+			MozillaThing theThing = things.next();
+			MozIotDevice theDevice = new MozIotDevice();
+			theDevice.setDeviceDetail(theThing);
+			theDevice.setGatewayName(theKey);
 			theDeviceList.add(theDevice);
 		}
 		return true;
@@ -152,57 +153,42 @@ public class MozIotHome implements Home  {
 		moziotMap = null;
 		validMoziot = bridgeSettings.getBridgeSettingsDescriptor().isValidMozIot();
 		log.info("Mozilla IOT Home created." + (validMoziot ? "" : " No Mozilla IOTs configured."));
-		if(validMoziot) {
-			moziotMap = new HashMap<String,MozIotInstance>();
-	        httpClient = HTTPHome.getHandler();
-			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getMoziotaddress().getDevices().iterator();
-			while(theList.hasNext() && validMoziot) {
+		if (validMoziot) {
+			moziotMap = new HashMap<String, MozIotInstance>();
+			httpClient = HTTPHome.getHandler();
+			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getMoziotaddress().getDevices()
+					.iterator();
+			while (theList.hasNext() && validMoziot) {
 				NamedIP aMoziot = theList.next();
-		      	try {
-		      		moziotMap.put(aMoziot.getName(), new MozIotInstance(aMoziot, httpClient));
+				try {
+					moziotMap.put(aMoziot.getName(), new MozIotInstance(aMoziot, httpClient));
 				} catch (Exception e) {
-			        log.error("Cannot get Mozilla IOT (" + aMoziot.getName() + ") setup, Exiting with message: " + e.getMessage(), e);
-			        validMoziot = false;
+					log.error("Cannot get Mozilla IOT (" + aMoziot.getName() + ") setup, Exiting with message: "
+							+ e.getMessage(), e);
+					validMoziot = false;
 				}
 			}
-        }
-		return this;
-	}
-
-	private MozIotInstance findHandlerByAddress(String hostAddress) {
-		MozIotInstance aHandler = null;
-		boolean found = false;
-		Iterator<String> keys = moziotMap.keySet().iterator();
-		while(keys.hasNext()) {
-			String key = keys.next();
-			aHandler = moziotMap.get(key);
-			if(aHandler != null && aHandler.getMozIotIP().getIp().equals(hostAddress)) {
-				found = true;
-				break;
-			}	
 		}
-		if(!found)
-			aHandler = null;
-		return aHandler;
+		return this;
 	}
 
 	@Override
 	public void closeHome() {
 		log.debug("Closing Home.");
-		if(!closed && validMoziot) {
+		if (!closed && validMoziot) {
 			log.debug("Home is already closed....");
 			return;
 		}
 
-		if(httpClient != null)
+		if (httpClient != null)
 			httpClient.closeHandler();
 
 		moziotMap = null;
-		closed = true;		
+		closed = true;
 	}
-	
+
 	@Override
 	public void refresh() {
-		// noop		
+		// noop
 	}
 }

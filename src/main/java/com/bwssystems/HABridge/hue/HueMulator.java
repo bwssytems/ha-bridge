@@ -1431,7 +1431,7 @@ public class HueMulator {
 				anHSL.setSat(sat);
 			else
 				anHSL.setSat(state.getSat());
-			log.info("hue/sat request - " + anHSL);
+			log.debug("hue/sat request - " + anHSL);
 			colorData = new ColorData(ColorData.ColorMode.HS, anHSL);
 		} else if (hueInc != null || satInc != null) {
 			anHSL = new HueSatBri();
