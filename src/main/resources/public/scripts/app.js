@@ -5113,6 +5113,20 @@ app.filter('configuredBroadlinkItems', function (bridgeService) {
 	};
 });
 
+app.filter('configuredMozIotItems', function (bridgeService) {
+	return function (input) {
+		var out = [];
+		if (input === undefined || input === null || input.length === undefined)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if (bridgeService.deviceContainsType(input[i], "moziot")) {
+				out.push(input[i]);
+			}
+		}
+		return out;
+	};
+});
+
 app.filter('filterDevicesByRequester', function () {
 	return function (input, search, mustContain, deviceType) {
 		var out = [];

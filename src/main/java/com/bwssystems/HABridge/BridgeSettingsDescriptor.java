@@ -111,6 +111,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("fhemaddress")
 	@Expose
 	private IpList fhemaddress;
+	@SerializedName("homegenieaddress")
+	@Expose
+	private IpList homegenieaddress;
 	@SerializedName("lifxconfigured")
 	@Expose
 	private boolean lifxconfigured;
@@ -123,6 +126,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("upnporiginal")
 	@Expose
 	private boolean upnporiginal;
+	@SerializedName("seedid")
+	@Expose
+	private Integer seedid;
 	// @SerializedName("activeloggers")
 	// @Expose
 	// private List<NameValue> activeloggers;
@@ -142,6 +148,7 @@ public class BridgeSettingsDescriptor {
 	private boolean openhabconfigured;
 	private boolean fhemconfigured;
 	private boolean moziotconfigured;
+	private boolean homegenieconfigured;
 
 	// Deprecated settings
 	private String haltoken;
@@ -167,6 +174,7 @@ public class BridgeSettingsDescriptor {
 		this.lifxconfigured = false;
 		this.openhabconfigured = false;
 		this.moziotconfigured = false;
+		this.homegenieconfigured = false;
 		this.farenheit = true;
 		this.securityData = null;
 		this.settingsChanged = false;
@@ -179,6 +187,7 @@ public class BridgeSettingsDescriptor {
 		this.broadlinkconfigured = false;
 		this.tracestate = false;
 		this.upnporiginal = false;
+		this.seedid = 100;
 	}
 
 	public String getUpnpConfigAddress() {
@@ -791,4 +800,39 @@ public class BridgeSettingsDescriptor {
 	public void setUpnporiginal(boolean upnporiginal) {
 		this.upnporiginal = upnporiginal;
 	}
+
+	public Integer getSeedid() {
+		return seedid;
+	}
+
+	public void setSeedid(Integer seedid) {
+		this.seedid = seedid;
+	}
+
+	public IpList getHomegenieaddress() {
+		return homegenieaddress;
+	}
+
+	public void setHomegenieaddress(IpList homegenieaddress) {
+		this.homegenieaddress = homegenieaddress;
+	}
+
+	public boolean isHomegenieconfigured() {
+		return homegenieconfigured;
+	}
+
+	public void setHomegenieconfigured(boolean homegenieconfigured) {
+		this.homegenieconfigured = homegenieconfigured;
+	}
+	public Boolean isValidHomeGenie() {
+		if (this.getHomegenieaddress() == null || this.getHomegenieaddress().getDevices().size() <= 0)
+			return false;
+
+		List<NamedIP> devicesList = this.getHomegenieaddress().getDevices();
+		if (devicesList.get(0).getIp().contains(Configuration.DEFAULT_ADDRESS))
+			return false;
+
+		return true;
+	}
+
 }

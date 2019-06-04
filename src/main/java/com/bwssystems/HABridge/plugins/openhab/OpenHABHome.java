@@ -54,7 +54,7 @@ public class OpenHABHome implements Home  {
 				if(anItem.getItem().isJsonObject())
 					theCommand = new Gson().fromJson(anItem.getItem(), OpenHABCommand.class);
 				else
-					theCommand = new Gson().fromJson(anItem.getItem().getAsString(), OpenHABCommand.class);
+					theCommand = new Gson().fromJson(anItem.getItem().getAsString().replaceAll("^\"|\"$", ""), OpenHABCommand.class);
 			} catch(Exception e) {
     			log.warn("Cannot parse command to OpenHAB <<<" + theUrl + ">>>", e);
 				responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,

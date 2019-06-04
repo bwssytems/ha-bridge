@@ -28,6 +28,7 @@ import com.bwssystems.HABridge.plugins.tcp.TCPHome;
 import com.bwssystems.HABridge.plugins.udp.UDPHome;
 import com.bwssystems.HABridge.plugins.vera.VeraHome;
 import com.bwssystems.HABridge.plugins.fibaro.FibaroHome;
+import com.bwssystems.HABridge.plugins.homegenie.HomeGenieHome;
 import com.bwssystems.HABridge.util.UDPDatagramSender;
 
 public class HomeManager {
@@ -121,10 +122,6 @@ public class HomeManager {
 		aHome = new OpenHABHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.OPENHAB_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.OPENHAB_DEVICE[DeviceMapTypes.typeIndex], aHome);
-        //setup the Mozilla IOT configuration if available
-		aHome = new MozIotHome(bridgeSettings);
-		resourceList.put(DeviceMapTypes.MOZIOT_DEVICE[DeviceMapTypes.typeIndex], aHome);
-		homeList.put(DeviceMapTypes.MOZIOT_DEVICE[DeviceMapTypes.typeIndex], aHome);
         //setup the FHEM configuration if available
 		aHome = new FHEMHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.FHEM_DEVICE[DeviceMapTypes.typeIndex], aHome);
@@ -133,6 +130,14 @@ public class HomeManager {
 		aHome = new BroadlinkHome(bridgeSettings);
 		resourceList.put(DeviceMapTypes.BROADLINK_DEVICE[DeviceMapTypes.typeIndex], aHome);
 		homeList.put(DeviceMapTypes.BROADLINK_DEVICE[DeviceMapTypes.typeIndex], aHome);
+        //setup the Mozilla IOT configuration if available
+		aHome = new MozIotHome(bridgeSettings);
+		resourceList.put(DeviceMapTypes.MOZIOT_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.MOZIOT_DEVICE[DeviceMapTypes.typeIndex], aHome);
+        //setup the HomeGenie configuration if available
+		aHome = new HomeGenieHome(bridgeSettings);
+		resourceList.put(DeviceMapTypes.HOMEGENIE_DEVICE[DeviceMapTypes.typeIndex], aHome);
+		homeList.put(DeviceMapTypes.HOMEGENIE_DEVICE[DeviceMapTypes.typeIndex], aHome);
 	}
 	
 	public Home findHome(String type) {

@@ -138,7 +138,7 @@ public class HassHome implements Home {
 			if(anItem.getItem().isJsonObject())
 				hassCommand = aGsonHandler.fromJson(anItem.getItem(), HassCommand.class);
 			else
-				hassCommand = aGsonHandler.fromJson(anItem.getItem().getAsString(), HassCommand.class);
+				hassCommand = aGsonHandler.fromJson(anItem.getItem().getAsString().replaceAll("^\"|\"$", ""), HassCommand.class);
 			hassCommand.setBri(BrightnessDecode.replaceIntensityValue(hassCommand.getBri(),
 								BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false));
 			HomeAssistant homeAssistant = getHomeAssistant(hassCommand.getHassName());

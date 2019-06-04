@@ -58,7 +58,7 @@ public class FHEMHome implements Home {
 				if(anItem.getItem().isJsonObject())
 					theCommand = new Gson().fromJson(anItem.getItem(), FHEMCommand.class);
 				else
-					theCommand = new Gson().fromJson(anItem.getItem().getAsString(), FHEMCommand.class);
+					theCommand = new Gson().fromJson(anItem.getItem().getAsString().replaceAll("^\"|\"$", ""), FHEMCommand.class);
 			} catch(Exception e) {
     			log.warn("Cannot parse command to FHEM <<<" + theUrl + ">>>", e);
 				responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,

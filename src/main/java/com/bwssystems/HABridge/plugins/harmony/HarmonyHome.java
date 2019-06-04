@@ -194,7 +194,7 @@ public class HarmonyHome implements Home {
 				if (anItem.getItem().isJsonObject())
 					anActivity = aGsonHandler.fromJson(anItem.getItem(), RunActivity.class);
 				else
-					anActivity = aGsonHandler.fromJson(anItem.getItem().getAsString(), RunActivity.class);
+					anActivity = aGsonHandler.fromJson(anItem.getItem().getAsString().replaceAll("^\"|\"$", ""), RunActivity.class);
 				if (anActivity.getHub() == null || anActivity.getHub().isEmpty())
 					anActivity.setHub(device.getTargetDevice());
 				HarmonyHandler myHarmony = getHarmonyHandler(anActivity.getHub());

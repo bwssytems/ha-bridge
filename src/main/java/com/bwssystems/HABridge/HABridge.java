@@ -56,7 +56,7 @@ public class HABridge {
         while(!bridgeSettings.getBridgeControl().isStop()) {
         	bridgeSettings.buildSettings();
             bridgeSettings.getBridgeSecurity().removeTestUsers();
-            log.info("HA Bridge (v" + theVersion.getVersion() + ") initializing....");
+            log.info("HA Bridge (v{}) initializing....", theVersion.getVersion() );
 	        // sparkjava config directive to set ip address for the web server to listen on
 	        ipAddress(bridgeSettings.getBridgeSettingsDescriptor().getWebaddress());
 	        // sparkjava config directive to set port for the web server to listen on
@@ -94,10 +94,13 @@ public class HABridge {
 		        // wait for the sparkjava initialization of the rest api classes to be complete
 		        awaitInitialization();
 
-		        if(bridgeSettings.getBridgeSettingsDescriptor().isTraceupnp())
-		        	log.info("Traceupnp: upnp config address: " + bridgeSettings.getBridgeSettingsDescriptor().getUpnpConfigAddress() + "-useIface:" +
-		        			bridgeSettings.getBridgeSettingsDescriptor().isUseupnpiface() + " on web server: " +
-		        			bridgeSettings.getBridgeSettingsDescriptor().getWebaddress() + ":" + bridgeSettings.getBridgeSettingsDescriptor().getServerPort());
+		        if(bridgeSettings.getBridgeSettingsDescriptor().isTraceupnp()) {
+		        	log.info("Traceupnp: upnp config address: {} -useIface: {} on web server: {}:{}",
+							bridgeSettings.getBridgeSettingsDescriptor().getUpnpConfigAddress(),
+							bridgeSettings.getBridgeSettingsDescriptor().isUseupnpiface(),
+							bridgeSettings.getBridgeSettingsDescriptor().getWebaddress(),
+							bridgeSettings.getBridgeSettingsDescriptor().getServerPort());
+				}
 		        // setup the class to handle the upnp response rest api
 		        theSettingResponder = new UpnpSettingsResource(bridgeSettings);
 		        theSettingResponder.setupServer();
@@ -111,7 +114,7 @@ public class HABridge {
 					theUpnpListener = null;
 				}
 		        if(theUpnpListener != null && theUpnpListener.startListening())
-		        	log.info("HA Bridge (v" + theVersion.getVersion() + ") reinitialization requessted....");
+		        	log.info("HA Bridge (v{}) reinitialization requessted....", theVersion.getVersion());
 		        else
 		        	bridgeSettings.getBridgeControl().setStop(true);
 		        if(bridgeSettings.getBridgeSettingsDescriptor().isSettingsChanged())
@@ -126,7 +129,7 @@ public class HABridge {
 	        	try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e) {
-					log.error("Sleep error: " + e.getMessage());
+					log.error("Sleep error: {}", e.getMessage());
 				}
 	        }
         }
@@ -136,18 +139,18 @@ public class HABridge {
 		try {
 			HttpClientPool.shutdown();
 		} catch (InterruptedException e) {
-			log.warn("Error shutting down http pool: " + e.getMessage());;
+			log.warn("Error shutting down http pool: {}", e.getMessage());;
 		} catch (IOException e) {
-			log.warn("Error shutting down http pool: " + e.getMessage());;
+			log.warn("Error shutting down http pool: {}", e.getMessage());;
 		}
 		thePool = null;
-        log.info("HA Bridge (v" + theVersion.getVersion() + ") exiting....");
+        log.info("HA Bridge (v{}) exiting....", theVersion.getVersion());
         System.exit(0);
     }
     
     private static void theExceptionHandler(Exception e, Integer thePort) {
         Logger log = LoggerFactory.getLogger(HABridge.class);
-    	log.error("Could not start ha-bridge webservice on port [" + thePort + "] due to: " + e.getMessage());
+    	log.error("Could not start ha-bridge webservice on port [{}] due to: {}", thePort, e.getMessage());
     	System.exit(0);
     }
 }

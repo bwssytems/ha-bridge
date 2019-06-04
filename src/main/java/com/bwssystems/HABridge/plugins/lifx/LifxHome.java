@@ -151,7 +151,7 @@ public class LifxHome implements Home {
 			if(anItem.getItem().isJsonObject())
 				lifxCommand = aGsonHandler.fromJson(anItem.getItem(), LifxEntry.class);
 			else
-				lifxCommand = aGsonHandler.fromJson(anItem.getItem().getAsString(), LifxEntry.class);
+				lifxCommand = aGsonHandler.fromJson(anItem.getItem().getAsString().replaceAll("^\"|\"$", ""), LifxEntry.class);
 			LifxDevice theDevice = getLifxDevice(lifxCommand.getName());
 			if (theDevice == null) {
 				log.warn("Should not get here, no LifxDevices available");

@@ -44,7 +44,7 @@ public class MozIotHome implements Home {
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
 			Integer targetBri, Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 
-		String theUrl = anItem.getItem().getAsString();
+		String theUrl = anItem.getItem().getAsString().replaceAll("^\"|\"$", "");
 		String responseString = null;
 
 		if (theUrl != null && !theUrl.isEmpty()) {

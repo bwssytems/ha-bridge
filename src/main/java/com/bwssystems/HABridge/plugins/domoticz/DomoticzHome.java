@@ -88,7 +88,7 @@ public class DomoticzHome implements Home {
 		Devices theDomoticzApiResponse = null;
 		String responseString = null;
 		
-		String theUrl = anItem.getItem().getAsString();
+		String theUrl = anItem.getItem().getAsString().replaceAll("^\"|\"$", "");
 		if(theUrl != null && !theUrl.isEmpty () && (theUrl.startsWith("http://") || theUrl.startsWith("https://"))) {
 			String intermediate = theUrl.substring(theUrl.indexOf("://") + 3);
 			String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));

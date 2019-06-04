@@ -123,7 +123,7 @@ public class HalHome implements Home {
 			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		boolean halFound = false;
 		String responseString = null;
-		String theUrl = anItem.getItem().getAsString();
+		String theUrl = anItem.getItem().getAsString().replaceAll("^\"|\"$", "");
 		if(theUrl != null && !theUrl.isEmpty () && theUrl.contains("http")) {
 			String intermediate = theUrl.substring(theUrl.indexOf("://") + 3);
 			String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));

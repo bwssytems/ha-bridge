@@ -99,7 +99,7 @@ public class HueHome implements Home {
 		if(anItem.getItem().isJsonObject())
 			deviceId = aGsonHandler.fromJson(anItem.getItem(), HueDeviceIdentifier.class);
 		else
-			deviceId = aGsonHandler.fromJson(anItem.getItem().getAsString(), HueDeviceIdentifier.class);
+			deviceId = aGsonHandler.fromJson(anItem.getItem().getAsString().replaceAll("^\"|\"$", ""), HueDeviceIdentifier.class);
 		if(deviceId.getHueName() == null || deviceId.getHueName().isEmpty())
 			deviceId.setHueName(device.getTargetDevice());
 		

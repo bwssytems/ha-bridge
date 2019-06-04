@@ -54,8 +54,8 @@ public class HomeWizardHome implements Home {
 			
 			if (anItem.getType() != null && anItem.getType().trim().equalsIgnoreCase(DeviceMapTypes.HOMEWIZARD_DEVICE[DeviceMapTypes.typeIndex])) {
 
-				log.debug("Executing HUE api request to change activity to HomeWizard smart plug: " + anItem.getItem().toString());
-				String jsonToPost = anItem.getItem().toString();
+				String jsonToPost = anItem.getItem().getAsString().replaceAll("^\"|\"$", "");
+				log.debug("Executing HUE api request to change activity to HomeWizard smart plug: {}", jsonToPost);
 				
 				HomeWizzardSmartPlugInfo homeWizzardHandler = getHomeWizzardHandler(device.getTargetDevice());
 				if(homeWizzardHandler == null) {

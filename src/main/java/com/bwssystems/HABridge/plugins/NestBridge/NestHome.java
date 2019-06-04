@@ -125,7 +125,7 @@ public class NestHome implements com.bwssystems.HABridge.Home {
 			if(anItem.getItem().isJsonObject())
 				homeAway = aGsonHandler.fromJson(anItem.getItem(), NestInstruction.class);
 			else
-				homeAway = aGsonHandler.fromJson(anItem.getItem().getAsString(), NestInstruction.class);
+				homeAway = aGsonHandler.fromJson(anItem.getItem().getAsString().replaceAll("^\"|\"$", ""), NestInstruction.class);
 			theNest.getHome(homeAway.getName()).setAway(homeAway.getAway());
 		} else if (anItem.getType() != null && anItem.getType().trim().equalsIgnoreCase(DeviceMapTypes.NEST_THERMO_SET[DeviceMapTypes.typeIndex])) {
 			NestInstruction thermoSetting = null;

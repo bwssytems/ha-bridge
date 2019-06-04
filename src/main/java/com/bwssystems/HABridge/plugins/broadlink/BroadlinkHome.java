@@ -113,7 +113,7 @@ public class BroadlinkHome implements Home {
 			if(anItem.getItem().isJsonObject())
 				broadlinkCommand = new Gson().fromJson(anItem.getItem(), BroadlinkEntry.class);
 			else
-				broadlinkCommand = new Gson().fromJson(anItem.getItem().getAsString(), BroadlinkEntry.class);
+				broadlinkCommand = new Gson().fromJson(anItem.getItem().getAsString().replaceAll("^\"|\"$", ""), BroadlinkEntry.class);
 			BLDevice theDevice = null;
 			if(broadlinkMap != null && !broadlinkMap.isEmpty())
 				theDevice = broadlinkMap.get(broadlinkCommand.getId());

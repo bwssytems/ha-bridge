@@ -21,6 +21,7 @@
 	<li ng-if="bridge.showFHEM" role="presentation"><a href="#!/fhemdevices">FHEM Devices</a></li>
 	<li ng-if="bridge.showMozIot" role="presentation"><a href="#!/moziotdevices">Mozilla IOT Devices</a></li>
 	<li ng-if="bridge.showBroadlink" role="presentation"><a href="#!/broadlinkdevices">Broadlink Devices</a></li>
+	<li ng-if="bridge.showHomeGenie" role="presentation"><a href="#!/homegeniedevices">HomeGenie Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
@@ -763,7 +764,7 @@
 									placeholder="192.168.1.3"></td>
 								<td><input id="bridge-settings-next-moziot-port"
 									class="form-control" type="text" ng-model="moziot.port"
-									placeholder="8080"></td>
+									placeholder="4443"></td>
 								<td><input id="bridge-settings-next-moziot-username"
 									   class="form-control" type="text" ng-model="moziot.username"
 									   placeholder="Mozilla IOT username"></td>
@@ -785,7 +786,7 @@
 									placeholder="192.168.1.3"></td>
 								<td><input id="bridge-settings-new-moziot-port"
 									class="form-control" type="text" ng-model="newmoziotport"
-									placeholder="8080"></td>
+									placeholder="4443"></td>
 								<td><input id="bridge-settings-new-moziot-username"
 									   class="form-control" type="text" ng-model="newmoziotusername"
 									   placeholder="Mozilla IOT username"></td>
@@ -797,6 +798,67 @@
 										ng-false-value=false></td>
 								<td><button class="btn btn-success" type="submit"
 										ng-click="addMozIottoSettings(newmoziotname, newmoziotip, newmoziotport, newsmoziotusername, newmoziotpassword, newmoziotwebhook, newmoziotsecure)">Add</button></td>
+							</tr>
+						</table></td>
+				</tr>
+				<tr>
+					<td>HomeGenie Names and IP Addresses</td>
+					<td><table
+							class="table table-bordered table-striped table-hover">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>IP</th>
+									<th>Port (opt)</th>
+									<th>Username (opt)</th>
+									<th>Password (opt)</th>
+									<th>Use SSL</th>
+									<th>Manage</th>
+								</tr>
+							</thead>
+							<tr ng-repeat="homegenie in bridge.settings.homegenieaddress.devices">
+								<td><input id="bridge-settings-next-homegenie-name"
+									class="form-control" type="text" ng-model="homegenie.name"
+									placeholder="A HomeGenie "></td>
+								<td><input id="bridge-settings-next-homegenie-ip"
+									class="form-control" type="text" ng-model="homegenie.ip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-next-homegenie-port"
+									class="form-control" type="text" ng-model="homegenie.port"
+									placeholder=""></td>
+								<td><input id="bridge-settings-next-homegenie-username"
+									   class="form-control" type="text" ng-model="homegenie.username"
+									   placeholder="HomeGenie username"></td>
+								<td><input id="bridge-settings-next-homegenie-password"
+									class="form-control" type="password" ng-model="homegenie.password"
+									placeholder="HomeGenie password"></td>
+								<td><input type="checkbox"
+										ng-model="homegenie.secure" ng-true-value=true
+										ng-false-value=false></td>
+								<td><button class="btn btn-danger" type="submit"
+										ng-click="removeHomeGenietoSettings(homegenie.name, homegenie.ip)">Del</button></td>
+							</tr>
+							<tr>
+								<td><input id="bridge-settings-new-homegenie-name"
+									class="form-control" type="text" ng-model="newhomegeniename"
+									placeholder="A HomeGenie "></td>
+								<td><input id="bridge-settings-new-homegenie-ip"
+									class="form-control" type="text" ng-model="newhomegenieip"
+									placeholder="192.168.1.3"></td>
+								<td><input id="bridge-settings-new-homegenie-port"
+									class="form-control" type="text" ng-model="newhomegenieport"
+									placeholder=""></td>
+								<td><input id="bridge-settings-new-homegenie-username"
+									   class="form-control" type="text" ng-model="newhomegenieusername"
+									   placeholder="HomeGenie username"></td>
+								<td><input id="bridge-settings-new-homegenie-password"
+									class="form-control" type="password" ng-model="newhomegeniepassword"
+									placeholder="HomeGenie password "></td>
+								<td><input type="checkbox"
+										ng-model="newhomegeniesecure" ng-true-value=true
+										ng-false-value=false></td>
+								<td><button class="btn btn-success" type="submit"
+										ng-click="addHomeGenietoSettings(newhomegeniename, newhomegenieip, newhomegenieport, newshomegenieusername, newhomegeniepassword, newhomegeniewebhook, newhomegeniesecure)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>
@@ -883,6 +945,12 @@
 						class="form-control" type="number"
 						ng-model="bridge.settings.upnpsenddelay" min="100"
 						max="15000"></td>
+				</tr>
+				<tr>
+					<td>ID Seed (start numbering from this value)</td>
+					<td><input id="bridge-settings-seedid"
+						class="form-control" type="number"
+						ng-model="bridge.settings.seedid" min="1"></td>
 				</tr>
 				<tr>
 					<td>My Echo URL</td>

@@ -48,7 +48,7 @@ public class TCPHome implements Home {
 			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		Socket dataSendSocket = null;
 		log.debug("executing HUE api request to TCP: " + anItem.getItem().getAsString());
-		String theUrl = anItem.getItem().getAsString();
+		String theUrl = anItem.getItem().getAsString().replaceAll("^\"|\"$", "");
 
 		if(theUrl != null && !theUrl.isEmpty () && theUrl.contains("tcp://")) {
 			if(!theUrl.startsWith("{\"tcpDevice\""))

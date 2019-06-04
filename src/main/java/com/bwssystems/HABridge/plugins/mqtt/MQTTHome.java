@@ -96,7 +96,7 @@ public class MQTTHome implements Home {
 				mqttObject = aGsonHandler.toJson(anItem.getItem());
 			}
 			else
-				mqttObject =anItem.getItem().getAsString();
+				mqttObject = anItem.getItem().getAsString().replaceAll("^\"|\"$", "");
 			mqttObject = BrightnessDecode.calculateReplaceIntensityValue(mqttObject,
 					intensity, targetBri, targetBriInc, false);
 			mqttObject = DeviceDataDecode.replaceDeviceData(mqttObject, device);
