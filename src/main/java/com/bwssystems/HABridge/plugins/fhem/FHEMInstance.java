@@ -33,6 +33,7 @@ public class FHEMInstance {
 	public Boolean callCommand(String aCommand, String commandData, HTTPHandler httpClient) {
 		String aUrl = null;
 		NameValue[] headers = null;
+		/* Trying new code helpers
 		if(theFhem.getSecure() != null && theFhem.getSecure())
 			aUrl = "https://";
 		else
@@ -41,6 +42,10 @@ public class FHEMInstance {
 			aUrl = aUrl + theFhem.getUsername() + ":" + theFhem.getPassword() + "@";
 		}
 		aUrl = aUrl + theFhem.getIp() + ":" + theFhem.getPort() + "/" + aCommand + commandData;
+		*/
+		// New style http creation
+		aUrl = theFhem.getHttpPreamble() + "/" + aCommand + commandData;
+		headers = httpClient.addBasicAuthHeader(null, theFhem);
 		log.debug("calling FHEM: " + aUrl);
 		String theData = httpClient.doHttpRequest(aUrl, HttpPost.METHOD_NAME, "text/plain", null, headers);
 		if(theData != null)
@@ -54,6 +59,7 @@ public class FHEMInstance {
 		String theUrl = null;
     	String theData;
 		NameValue[] headers = null;
+		/* Trying new code helpers
 		if(theFhem.getSecure() != null && theFhem.getSecure())
 			theUrl = "https://";
 		else
@@ -61,7 +67,10 @@ public class FHEMInstance {
 		if(theFhem.getUsername() != null && !theFhem.getUsername().isEmpty() && theFhem.getPassword() != null && !theFhem.getPassword().isEmpty()) {
 			theUrl = theUrl + theFhem.getUsername() + ":" + theFhem.getPassword() + "@";
 		}
-   		theUrl = theUrl + theFhem.getIp() + ":" + theFhem.getPort() + "/fhem?cmd=jsonlist2";
+		   theUrl = theUrl + theFhem.getIp() + ":" + theFhem.getPort() + "/fhem?cmd=jsonlist2";
+		   */
+		theUrl = theFhem.getHttpPreamble() + "/fhem?cmd=jsonlist2";
+		headers = httpClient.addBasicAuthHeader(null, theFhem);
    		if(theFhem.getWebhook() != null && !theFhem.getWebhook().trim().isEmpty())
    			theUrl = theUrl + "%20room=" + theFhem.getWebhook().trim();
    		theData = httpClient.doHttpRequest(theUrl, HttpGet.METHOD_NAME, "application/json", null, headers);

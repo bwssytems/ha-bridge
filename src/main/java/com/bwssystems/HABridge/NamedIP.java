@@ -2,6 +2,8 @@ package com.bwssystems.HABridge;
 
 import com.google.gson.JsonObject;
 
+import org.apache.commons.codec.binary.Base64;
+
 public class NamedIP {
 	private String name;
 	private String ip;
@@ -12,6 +14,7 @@ public class NamedIP {
 	private JsonObject extensions;
 	private Boolean secure;
 	private String httpPreamble;
+	private String encodedLogin;
 
 	public String getName() {
 		return name;
@@ -78,14 +81,14 @@ public class NamedIP {
 	}
 
 	public String getHttpPreamble() {
-		if (httpPreamble == null || httpPreamble.length() == 0) {
+		if (httpPreamble == null || !httpPreamble.trim().isEmpty()) {
 			if (getSecure() != null && getSecure())
 				httpPreamble = "https://";
 			else
 				httpPreamble = "http://";
 
 			httpPreamble = httpPreamble + getIp();
-			if (getPort() != null && getPort().length() > 0) {
+			if (getPort() != null && !getPort().trim().isEmpty()) {
 				httpPreamble = httpPreamble + ":" + getPort();
 			}
 		}
@@ -94,5 +97,17 @@ public class NamedIP {
 
 	public void setHttpPreamble(String httpPreamble) {
 		this.httpPreamble = httpPreamble;
+	}
+
+	public String getUserPass64() {
+		if (encodedLogin == null || !encodedLogin.trim().isEmpty()) {
+			if (getUsername() != null && !getUsername().isEmpty() && getPassword() != null
+					&& !getPassword().isEmpty()) {
+				String userPass = getUsername() + ":" + getPassword();
+				encodedLogin = new String(Base64.encodeBase64(userPass.getBytes()));
+			}
+		}
+
+		return encodedLogin;
 	}
 }

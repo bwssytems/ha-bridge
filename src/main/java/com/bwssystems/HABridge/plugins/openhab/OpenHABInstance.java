@@ -33,16 +33,13 @@ public class OpenHABInstance {
 	public Boolean callCommand(String aCommand, String commandData, HTTPHandler httpClient) {
 		log.debug("calling OpenHAB: " + theOpenHAB.getIp() + ":" + theOpenHAB.getPort() + aCommand);
 		String aUrl = null;
-		NameValue[] headers = null;
 		if(theOpenHAB.getSecure() != null && theOpenHAB.getSecure())
 			aUrl = "https://";
 		else
 			aUrl = "http://";
-		if(theOpenHAB.getUsername() != null && !theOpenHAB.getUsername().isEmpty() && theOpenHAB.getPassword() != null && !theOpenHAB.getPassword().isEmpty()) {
-			aUrl = aUrl + theOpenHAB.getUsername() + ":" + theOpenHAB.getPassword() + "@";
-		}
+			
 		aUrl = aUrl + theOpenHAB.getIp() + ":" + theOpenHAB.getPort() + "/" + aCommand;
-		String theData = httpClient.doHttpRequest(aUrl, HttpPost.METHOD_NAME, "text/plain", commandData, headers);
+		String theData = httpClient.doHttpRequest(aUrl, HttpPost.METHOD_NAME, "text/plain", commandData, httpClient.addBasicAuthHeader(null, theOpenHAB));
    		log.debug("call Command return is: <" + theData + ">");
    		if(theData.contains("error") || theData.contains("ERROR") || theData.contains("Error"))
    			return false;

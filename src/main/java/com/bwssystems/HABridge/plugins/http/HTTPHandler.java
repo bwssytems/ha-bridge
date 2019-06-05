@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.DeviceMapTypes;
+import com.bwssystems.HABridge.NamedIP;
 import com.bwssystems.HABridge.api.NameValue;
 
 public class HTTPHandler {
@@ -166,6 +167,35 @@ public class HTTPHandler {
 			}
 		}
 		return theContent;
+	}
+
+	public NameValue[] addBasicAuthHeader(NameValue[] theHeaders, NamedIP theTarget) {
+		NameValue[] headers = null;
+		int index = 0;
+		String encodedLogin = theTarget.getUserPass64();
+		if (encodedLogin != null && !encodedLogin.trim().isEmpty()) {
+			if (theHeaders != null && theHeaders.length > 0) {
+				headers = new NameValue[theHeaders.length + 1];
+				for(int i = 0; i < theHeaders.length; i++) {
+					headers[i] = theHeaders[i];
+				}
+				index = theHeaders.length;
+			} else {
+				headers = new NameValue[1];
+			}
+
+			log.debug("creating login for {} with username {} password len {}", theTarget.getName(),
+					theTarget.getUsername(), theTarget.getPassword().length());
+			headers[index] = new NameValue();
+			headers[index].setName("Authorization");
+			// log.debug("Encoded login info {}", encodedLogin);
+			headers[index].setValue("Basic " + encodedLogin);
+		} else {
+			headers = theHeaders;
+		}
+
+		return headers;
+
 	}
 
 	public void setCallType(String callType) {

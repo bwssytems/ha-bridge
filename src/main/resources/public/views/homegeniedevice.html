@@ -21,7 +21,8 @@
 	<li ng-if="bridge.showFHEM" role="presentation"><a href="#!/fhemdevices">FHEM Devices</a></li>
 	<li ng-if="bridge.showMozIot" role="presentation"><a href="#!/homegeniedevices">HomeGenie Devices</a></li>
 	<li ng-if="bridge.showBroadlink" role="presentation"><a href="#!/broadlinkdevices">Broadlink Devices</a></li>
-	<li ng-if="bridge.showHomeGenie" role="presentation" class="active"><a href="#!/homegeniedevices">HomeGenie Devices</a></li>
+	<li ng-if="bridge.showHomeGenie" role="presentation" class="active"><a href="#!/homegeniedevices">HomeGenie
+			Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
 
@@ -63,6 +64,7 @@
 						<th sortable-header col="name">
 							<span><input type="checkbox" name="selectAll" value="{{selectAll}}" ng-checked="selectAll"
 									ng-click="toggleSelectAll()"> Name</span></th>
+						<th sortable-header col="domain">Domain</th>
 						<th sortable-header col="type">Type</th>
 						<th sortable-header col="homegeniename">HomeGenie</th>
 						<th>Build Actions</th>
@@ -74,11 +76,12 @@
 							ng-checked="bulk.devices.indexOf(homegeniedevice.deviceDetail.Name) > -1"
 							ng-click="toggleSelection(homegeniedevice.deviceDetail.Name)">
 						{{homegeniedevice.deviceDetail.Name}}</td>
-					<td>{{homegeniedevice.deviceDetail.DeviceType}}</td>
+						<td>{{homegeniedevice.deviceDetail.Domain}}</td>
+						<td>{{homegeniedevice.deviceDetail.DeviceType}}</td>
 					<td>{{homegeniedevice.gatewayName}}</td>
 					<td>
 						<button class="btn btn-success" type="submit"
-							ng-click="buildDeviceUrls(homegeniedevice, device_dim_control, false)">Build
+							ng-click="buildDeviceUrls(homegeniedevice, device_dim_control, null, null, false)">Build
 							Item</button>
 					</td>
 				</tr>
@@ -111,7 +114,7 @@
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tr ng-repeat="device in bridge.devices | configuredMozIotItems">
+				<tr ng-repeat="device in bridge.devices | configuredHomeGenieItems">
 					<td>{{$index+1}}</td>
 					<td>{{device.name}}</td>
 					<td>{{device.deviceType}}</td>

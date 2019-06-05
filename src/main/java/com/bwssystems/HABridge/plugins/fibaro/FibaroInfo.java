@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +29,7 @@ public class FibaroInfo
 	{
 		super();
 		fibaroAddress = addressName;
-		fibaroAuth = "Basic " + new String(Base64.encodeBase64((addressName.getUsername() + ":" + addressName.getPassword()).getBytes()));
+		fibaroAuth = "Basic " + addressName.getUserPass64();
         isDevMode = Boolean.parseBoolean(System.getProperty("dev.mode", "false"));
 		gson = new Gson();
 		theFilters = null;

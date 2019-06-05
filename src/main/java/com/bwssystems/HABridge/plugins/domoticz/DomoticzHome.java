@@ -119,7 +119,7 @@ public class DomoticzHome implements Home {
 					aBody = DeviceDataDecode.replaceDeviceData(aBody, device);
 					aBody = TimeDecode.replaceTimeValue(aBody);
 				}
-		   		theData = httpClient.doHttpRequest(theHandler.buildUrl(anUrl), null, null, aBody, theHandler.buildHeaders());
+		   		theData = httpClient.doHttpRequest(theHandler.buildUrl(anUrl), null, null, aBody, httpClient.addBasicAuthHeader(null, theHandler.getDomoticzAddress()));
 		   		try {
 		   			theDomoticzApiResponse = new Gson().fromJson(theData, Devices.class);
 		   			if(theDomoticzApiResponse.getStatus().equals("OK"))

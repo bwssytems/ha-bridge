@@ -95,6 +95,10 @@ app.config(function ($locationProvider, $routeProvider) {
 		templateUrl: 'views/broadlinkdevice.html',
 		controller: 'BroadlinkController',
 		requiresAuthentication: true
+	}).when('/homegeniedevices', {
+		templateUrl: 'views/homegeniedevice.html',
+		controller: 'HomeGenieController',
+		requiresAuthentication: true
 	}).when('/login', {
 		templateUrl: 'views/login.html',
 		controller: 'LoginController'
@@ -194,6 +198,7 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 		showMozIot: false,
 		showFHEM: false,
 		showBroadlink: false,
+		showHomeGenie: false,
 		habridgeversion: {},
 		viewDevId: "",
 		queueDevId: "",
@@ -636,6 +641,11 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 		return;
 	};
 
+	this.updateShowHomeGenie = function () {
+		this.state.showHomeGenie = self.state.settings.homegenieconfigured;
+		return;
+	};
+
 	this.loadBridgeSettings = function () {
 		return $http.get(this.state.systemsbase + "/settings").then(
 			function (response) {
@@ -656,6 +666,7 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 				self.updateShowMozIot();
 				self.updateShowFhem();
 				self.updateShowBroadlink();
+				self.updateShowHomeGenie();
 			},
 			function (error) {
 				if (error.status === 401)
@@ -1022,7 +1033,23 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 				if (error.status === 401)
 					$rootScope.$broadcast('securityReinit', 'done');
 				else
-					self.displayWarn("Get broadlink Devices Error: ", error);
+					self.displayWarn("Get Broadlink Devices Error: ", error);
+			}
+		);
+	};
+
+	this.viewHomeGenieDevices = function () {
+		if (!this.state.showHomeGenie)
+			return;
+		return $http.get(this.state.base + "/homegenie/devices").then(
+			function (response) {
+				self.state.homegeniedevices = response.data;
+			},
+			function (error) {
+				if (error.status === 401)
+					$rootScope.$broadcast('securityReinit', 'done');
+				else
+					self.displayWarn("Get HomeGenie Devices Error: ", error);
 			}
 		);
 	};
@@ -1885,7 +1912,7 @@ app.controller('SystemController', function ($scope, $location, bridgeService, n
 		}
 	};
 
-	$scope.addMozIottoSettings = function (newmoziotname, newmoziotip, newmoziotport, newmoziotusername, newmoziotpassword, newmoziotsecure) {
+	$scope.addMozIottoSettings = function (newmoziotname, newmoziotip, newmoziotport, newmoziotusername, newmoziotpassword, newmoziotwebhook, newmoziotsecure) {
 		if ($scope.bridge.settings.moziotaddress === undefined || $scope.bridge.settings.moziotaddress === null) {
 			$scope.bridge.settings.moziotaddress = {
 				devices: []
@@ -1897,6 +1924,7 @@ app.controller('SystemController', function ($scope, $location, bridgeService, n
 			port: newmoziotport,
 			username: newmoziotusername,
 			password: newmoziotpassword,
+			webhook: newmoziotwebhook,
 			secure: newmoziotsecure
 		};
 		$scope.bridge.settings.moziotaddress.devices.push(newmoziot);
@@ -1905,6 +1933,7 @@ app.controller('SystemController', function ($scope, $location, bridgeService, n
 		$scope.newmoziotport = "4443";
 		$scope.newmoziotusername = null;
 		$scope.newmoziotpassword = null;
+		$scope.newmoziotwebhook = null;
 	};
 	$scope.removeMozIottoSettings = function (moziotname, moziotip) {
 		for (var i = $scope.bridge.settings.moziotaddress.devices.length - 1; i >= 0; i--) {
@@ -1941,6 +1970,37 @@ app.controller('SystemController', function ($scope, $location, bridgeService, n
 		for (var i = $scope.bridge.settings.fhemaddress.devices.length - 1; i >= 0; i--) {
 			if ($scope.bridge.settings.fhemaddress.devices[i].name === fhemname && $scope.bridge.settings.fhemaddress.devices[i].ip === fhemip) {
 				$scope.bridge.settings.fhemaddress.devices.splice(i, 1);
+			}
+		}
+	};
+
+	$scope.addHomeGenietoSettings = function (newhomegeniename, newhomegenieip, newhomegenieport, newhomegenieusername, newhomegeniepassword, newhomegeniewebhook, newhomegeniesecure) {
+		if ($scope.bridge.settings.homegenieaddress === undefined || $scope.bridge.settings.homegenieaddress === null) {
+			$scope.bridge.settings.homegenieaddress = {
+				devices: []
+			};
+		}
+		var newhomegenie = {
+			name: newhomegeniename,
+			ip: newhomegenieip,
+			port: newhomegenieport,
+			username: newhomegenieusername,
+			password: newhomegeniepassword,
+			secure: newhomegeniesecure,
+			webhook: newhomegeniewebhook
+		};
+		$scope.bridge.settings.homegenieaddress.devices.push(newhomegenie);
+		$scope.newhomegeniename = null;
+		$scope.newhomegenieip = null;
+		$scope.newhomegenieport = "8080";
+		$scope.newhomegenieusername = null;
+		$scope.newhomegeniepassword = null;
+		$scope.newhomegeniewebhook = null;
+	};
+	$scope.removeHomeGenietoSettings = function (homegeniename, homegenieip) {
+		for (var i = $scope.bridge.settings.homegenieaddress.devices.length - 1; i >= 0; i--) {
+			if ($scope.bridge.settings.homegenieaddress.devices[i].name === homegeniename && $scope.bridge.settings.homegenieaddress.devices[i].ip === homegenieip) {
+				$scope.bridge.settings.homegenieaddress.devices.splice(i, 1);
 			}
 		}
 	};
@@ -3504,7 +3564,7 @@ app.controller('HomeWizardController', function ($scope, $location, bridgeServic
 			function () {
 				$scope.clearDevice();
 				bridgeService.viewDevices();
-				bridgeService.viewHalDevices();
+				bridgeService.viewHomeWizardDevices();
 			},
 			function (error) {
 				bridgeService.displayWarn("Error adding HomeWizard devices in bulk.", error);
@@ -3664,7 +3724,7 @@ app.controller('DomoticzController', function ($scope, $location, bridgeService,
 			function () {
 				$scope.clearDevice();
 				bridgeService.viewDevices();
-				bridgeService.viewHalDevices();
+				bridgeService.viewDomoticzDevices();
 			},
 			function (error) {
 				bridgeService.displayWarn("Error adding Domoticz devices in bulk.", error);
@@ -3797,7 +3857,7 @@ app.controller('LifxController', function ($scope, $location, bridgeService, ngD
 			function () {
 				$scope.clearDevice();
 				bridgeService.viewDevices();
-				bridgeService.viewHalDevices();
+				bridgeService.viewLifxDevices();
 			},
 			function (error) {
 				bridgeService.displayWarn("Error adding LIFX devices in bulk.", error);
@@ -4098,7 +4158,7 @@ app.controller('OpenHABController', function ($scope, $location, bridgeService, 
 			function () {
 				$scope.clearDevice();
 				bridgeService.viewDevices();
-				bridgeService.viewHalDevices();
+				bridgeService.viewOpenHABDevices();
 			},
 			function (error) {
 				bridgeService.displayWarn("Error adding openhab devices in bulk.", error);
@@ -4240,7 +4300,7 @@ app.controller('MozIotController', function ($scope, $location, bridgeService, n
 			function () {
 				$scope.clearDevice();
 				bridgeService.viewDevices();
-				bridgeService.viewHalDevices();
+				bridgeService.viewMozIotDevices();
 			},
 			function (error) {
 				bridgeService.displayWarn("Error adding Mozilla IOT devices in bulk.", error);
@@ -4384,7 +4444,7 @@ app.controller('FhemController', function ($scope, $location, bridgeService, ngD
 			function () {
 				$scope.clearDevice();
 				bridgeService.viewDevices();
-				bridgeService.viewHalDevices();
+				bridgeService.viewFhemDevices();
 			},
 			function (error) {
 				bridgeService.displayWarn("Error adding fhem devices in bulk.", error);
@@ -4543,7 +4603,7 @@ app.controller('BroadlinkController', function ($scope, $location, bridgeService
 			function () {
 				$scope.clearDevice();
 				bridgeService.viewDevices();
-				bridgeService.viewHalDevices();
+				bridgeService.viewBroadlinkDevices();
 			},
 			function (error) {
 				bridgeService.displayWarn("Error adding openhab devices in bulk.", error);
@@ -4583,6 +4643,146 @@ app.controller('BroadlinkController', function ($scope, $location, bridgeService
 			for (var x = 0; x < bridgeService.state.broadlinkdevices.length; x++) {
 				if ($scope.bulk.devices.indexOf(bridgeService.state.broadlinkdevices[x]) < 0)
 					$scope.bulk.devices.push(bridgeService.state.broadlinkdevices[x].devicename);
+			}
+		}
+	};
+
+	$scope.toggleButtons = function () {
+		$scope.buttonsVisible = !$scope.buttonsVisible;
+		if ($scope.buttonsVisible)
+			$scope.imgButtonsUrl = "glyphicon glyphicon-minus";
+		else
+			$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	};
+
+	$scope.deleteDevice = function (device) {
+		$scope.bridge.device = device;
+		ngDialog.open({
+			template: 'deleteDialog',
+			controller: 'DeleteDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
+	};
+
+	$scope.editDevice = function (device) {
+		bridgeService.editDevice(device);
+		$location.path('/editdevice');
+	};
+});
+
+app.controller('HomeGenieController', function ($scope, $location, bridgeService, ngDialog) {
+	$scope.bridge = bridgeService.state;
+	$scope.device = bridgeService.state.device;
+	$scope.device_dim_control = "";
+	$scope.bulk = {
+		devices: []
+	};
+	$scope.selectAll = false;
+	bridgeService.viewHomeGenieDevices();
+	$scope.imgButtonsUrl = "glyphicon glyphicon-plus";
+	$scope.buttonsVisible = false;
+
+	$scope.clearDevice = function () {
+		bridgeService.clearDevice();
+		$scope.device = bridgeService.state.device;
+	};
+
+	$scope.buildDeviceUrls = function (homegeniedevice, dim_control, coloraction, colordata, buildonly) {
+		var preCmd = "{\"moduleType\":\"" + homegeniedevice.deviceDetail.Domain + "\",\"deviceId\":\"" + homegeniedevice.deviceDetail.Address + "\",\"command\":";
+		onpayload = null;
+		offpayload = null;
+		dimpayload = null;
+		colorpayload = null;
+		onpayload = preCmd + "{\"command\":\"Control.On\"}}";
+		offpayload = preCmd + "{\"command\":\"Control.Off\"}}";
+		if (dim_control !== undefined && dim_control !== "") {
+			dimpayload = preCmd + "{\"command\":\"Control.Level\",\"level\":\"" + dim_control + "\"}}";
+		}
+		// if (coloraction === 'other')
+		//	colorpayload = "{\"url\":\"" + preCmd + "color\",\"command\":{\"color\":\"" + colordata + "\"}}";
+		// else if (coloraction !== undefined && coloraction !== null && coloraction !== '')
+		//	colorpayload = "{\"url\":\"" + preCmd + "color\",\"command\":{\"color\":\"" + coloraction + "\"}}";
+
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, homegeniedevice.deviceDetail.Name + "-" + homegeniedevice.deviceDetail.DeviceType, homegeniedevice.deviceDetail.Name, homegeniedevice.gatewayName, homegeniedevice.deviceDetail.DeviceType, "homegenieDevice", null, null);
+		$scope.device = bridgeService.state.device;
+		if (!buildonly) {
+			bridgeService.editNewDevice($scope.device);
+			$location.path('/editdevice');
+		}
+	};
+
+	$scope.bulkAddDevices = function (dim_control) {
+		var devicesList = [];
+		$scope.clearDevice();
+		for (var i = 0; i < $scope.bulk.devices.length; i++) {
+			for (var x = 0; x < bridgeService.state.homegeniedevices.length; x++) {
+				if (bridgeService.state.homegeniedevices[x].devicename === $scope.bulk.devices[i]) {
+					$scope.buildDeviceUrls(bridgeService.state.homegeniedevices[x], dim_control, null, null, true);
+					devicesList[i] = {
+						name: $scope.device.name,
+						mapId: $scope.device.mapId,
+						mapType: $scope.device.mapType,
+						deviceType: $scope.device.deviceType,
+						targetDevice: $scope.device.targetDevice,
+						onUrl: $scope.device.onUrl,
+						dimUrl: $scope.device.dimUrl,
+						offUrl: $scope.device.offUrl,
+						colorUrl: $scope.device.colorUrl,
+						headers: $scope.device.headers,
+						httpVerb: $scope.device.httpVerb,
+						contentType: $scope.device.contentType,
+						contentBody: $scope.device.contentBody,
+						contentBodyDim: $scope.device.contentBodyDim,
+						contentBodyOff: $scope.device.contentBodyOff
+					};
+					$scope.clearDevice();
+				}
+			}
+		}
+		bridgeService.bulkAddDevice(devicesList).then(
+			function () {
+				$scope.clearDevice();
+				bridgeService.viewDevices();
+				bridgeService.viewHomeGenieDevices();
+			},
+			function (error) {
+				bridgeService.displayWarn("Error adding HomeGenie devices in bulk.", error);
+			}
+		);
+		$scope.bulk = {
+			devices: []
+		};
+		$scope.selectAll = false;
+	};
+
+	$scope.toggleSelection = function toggleSelection(deviceId) {
+		var idx = $scope.bulk.devices.indexOf(deviceId);
+
+		// is currently selected
+		if (idx > -1) {
+			$scope.bulk.devices.splice(idx, 1);
+			if ($scope.bulk.devices.length === 0 && $scope.selectAll)
+				$scope.selectAll = false;
+		}
+
+		// is newly selected
+		else {
+			$scope.bulk.devices.push(deviceId);
+			$scope.selectAll = true;
+		}
+	};
+
+	$scope.toggleSelectAll = function toggleSelectAll() {
+		if ($scope.selectAll) {
+			$scope.selectAll = false;
+			$scope.bulk = {
+				devices: []
+			};
+		} else {
+			$scope.selectAll = true;
+			for (var x = 0; x < bridgeService.state.homegeniedevices.length; x++) {
+				if ($scope.bulk.devices.indexOf(bridgeService.state.homegeniedevices[x]) < 0)
+					$scope.bulk.devices.push(bridgeService.state.homegeniedevices[x].devicename);
 			}
 		}
 	};
@@ -5120,6 +5320,20 @@ app.filter('configuredMozIotItems', function (bridgeService) {
 			return out;
 		for (var i = 0; i < input.length; i++) {
 			if (bridgeService.deviceContainsType(input[i], "moziot")) {
+				out.push(input[i]);
+			}
+		}
+		return out;
+	};
+});
+
+app.filter('configuredHomeGenieItems', function (bridgeService) {
+	return function (input) {
+		var out = [];
+		if (input === undefined || input === null || input.length === undefined)
+			return out;
+		for (var i = 0; i < input.length; i++) {
+			if (bridgeService.deviceContainsType(input[i], "homegenie")) {
 				out.push(input[i]);
 			}
 		}

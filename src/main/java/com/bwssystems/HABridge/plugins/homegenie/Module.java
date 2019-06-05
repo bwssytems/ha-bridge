@@ -1,7 +1,7 @@
 
 package com.bwssystems.HABridge.plugins.homegenie;
 
-import java.util.List;
+// import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -22,9 +22,11 @@ public class Module {
     @SerializedName("Address")
     @Expose
     private String address;
+    /*
     @SerializedName("Properties")
     @Expose
     private List<Property> properties = null;
+    */
     @SerializedName("RoutingNode")
     @Expose
     private String routingNode;
@@ -68,7 +70,7 @@ public class Module {
     public void setAddress(String address) {
         this.address = address;
     }
-
+/*
     public List<Property> getProperties() {
         return properties;
     }
@@ -76,7 +78,7 @@ public class Module {
     public void setProperties(List<Property> properties) {
         this.properties = properties;
     }
-
+*/
     public String getRoutingNode() {
         return routingNode;
     }
@@ -86,14 +88,17 @@ public class Module {
     }
 
     public boolean isSwitch() {
-        return isPropertyType("Switch");
+        return isDeviceType("Switch");
     }
 
     public boolean isDimmer() {
-        return isPropertyType("Dimmer");
+        return isDeviceType("Dimmer");
     }
 
-    private boolean isPropertyType(String theType) {
+    private boolean isDeviceType(String theType) {
+        if(deviceType.equals(theType)) {
+            return true;
+        }
         return false;
     }
 }

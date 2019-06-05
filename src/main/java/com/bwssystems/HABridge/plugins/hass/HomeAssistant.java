@@ -38,12 +38,8 @@ public class HomeAssistant {
 		log.debug("calling HomeAssistant: " + aCommand.getHassName() + " - "
 				+ aCommand.getEntityId() + " - " + aCommand.getState() + " - " + aCommand.getBri());
 		String aUrl = null;
-		if(hassAddress.getSecure() != null && hassAddress.getSecure())
-			aUrl = "https";
-		else
-			aUrl = "http";
 		String domain = aCommand.getEntityId().substring(0, aCommand.getEntityId().indexOf("."));
-		aUrl = aUrl + "://" + hassAddress.getIp() + ":" + hassAddress.getPort() + "/api/services/";
+		aUrl = hassAddress.getHttpPreamble() + "/api/services/";
 		if(domain.equals("group"))
 			aUrl = aUrl + "homeassistant";
 		else
