@@ -79,6 +79,12 @@
 						ng-model="device.comments" placeholder="Device Comments"></td>
 				</tr>
 				<tr>
+					<td><label>Lock Device ID</label></td>
+					<td><input type="checkbox"
+						ng-model="device.lockDeviceId" ng-true-value=true
+						ng-false-value=false> {{device.lockDeviceId}}</td>
+				</tr>
+				<tr>
 					<td><label>Inactive</label></td>
 					<td><input type="checkbox"
 						ng-model="device.inactive" ng-true-value=true

@@ -92,4 +92,21 @@ public abstract class BackupHandler {
 		return theFilenames;
 	}
 	
+	public String downloadBackup(String aFilename) {
+		Path filePath = FileSystems.getDefault().getPath(repositoryPath.getParent().toString(), aFilename);
+
+		String content = null;
+		if (Files.notExists(filePath) || !Files.isReadable(filePath)) {
+			log.warn("Error reading the file: {} - Does not exist or is not readable. continuing...", aFilename);
+			return null;
+		}
+
+		try {
+			content = new String(Files.readAllBytes(filePath));
+		} catch (IOException e) {
+			log.error("Error reading the file: {} message: {}", aFilename, e.getMessage(), e);
+		}
+
+		return content;
+	}
 }

@@ -385,6 +385,22 @@ public class DeviceResource {
           	return deviceRepository.getBackups();
         }, new JsonTransformer());
 
+	    // http://ip_address:port/api/devices/backup/download CORS request
+	    options(API_CONTEXT + "/backup/download", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+    	put (API_CONTEXT + "/backup/download", "application/json", (request, response) -> {
+	    	log.debug("Create download: {}", request.body());
+        	BackupFilename aFilename = new Gson().fromJson(request.body(), BackupFilename.class);
+        	String backupContent = deviceRepository.downloadBackup(aFilename.getFilename());
+	        return backupContent;
+    	}, new JsonTransformer());
+
 	    // http://ip_address:port/api/devices/backup/create CORS request
 	    options(API_CONTEXT + "/backup/create", "application/json", (request, response) -> {
 	        response.status(HttpStatus.SC_OK);

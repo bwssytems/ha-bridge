@@ -1,4 +1,3 @@
-
 <ul class="nav nav-pills" role="tablist">
 	<li role="presentation" class="active"><a href="#!/">Bridge Devices</a></li>
 	<li role="presentation"><a href="#!/system">Bridge Control</a></li>
@@ -25,94 +24,97 @@
 	<li ng-if="bridge.showHomeGenie" role="presentation"><a href="#!/homegeniedevices">HomeGenie Devices</a></li>
 	<li role="presentation"><a href="#!/editdevice">Add/Edit</a></li>
 </ul>
-<div   postrender-action="goToRow()">
-<div class="panel panel-default">
-	<div class="panel-heading">
-		<h1 class="panel-title">Current devices ({{bridge.devices.length}})</h1>
-	</div>
-	<div class="panel-body">
+<div postrender-action="goToRow()">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h1 class="panel-title">Current devices ({{bridge.devices.length}})</h1>
+		</div>
+		<div class="panel-body">
 
 			<div class="form-group">
 				<button class="btn btn-primary" type="submit" ng-click="renumberDevices()">Renumber Devices</button>
-				<button ng-if="bridge.securityInfo.useLinkButton" class="btn btn-primary" type="submit" ng-click="pushLinkButton()">Link</button>
+				<button ng-if="bridge.securityInfo.useLinkButton" class="btn btn-primary" type="submit"
+					ng-click="pushLinkButton()">Link</button>
 				<button class="btn btn-primary" type="submit" ng-click="manageLinksButton()">Manage Links</button>
 				<label for="device-ip-filter">Show devices visible to: </label>
 				<input type="text" id="device-ip-filter" style="width:150px"
-							ng-model="bridge.state.filterDevicesByIpAddress" placeholder="">
-				<input type="checkbox" id="device-ip-filter-mode" ng-model="bridge.state.filterDevicesOnlyFiltered" ng-true-value=true ng-false-value=false style="margin-right: 3px">Must contain filter
+					ng-model="bridge.state.filterDevicesByIpAddress" placeholder="">
+				<input type="checkbox" id="device-ip-filter-mode" ng-model="bridge.state.filterDevicesOnlyFiltered"
+					ng-true-value=true ng-false-value=false style="margin-right: 3px">Must contain filter
 				<label for="device-type-filter" style="margin-left:50px">Filter device type: </label>
-				<select name="device-type" id="device-type-filter" 
-						ng-model="bridge.state.filterDeviceType">
-							<option value="">---No Filter---</option>
-							<!-- not selected / blank option -->
-							<option value="custom">Custom</option>
-							<option value="UDP">UDP</option>
-							<option value="TCP">TCP</option>
-							<option value="exec">Execute Script/Program</option>
-							<option value="switch">Switch</option>
-							<option value="scene">Scene</option>
-							<option value="macro">Macro</option>
-							<option value="group">Group</option>
-							<option value="activity">Activity</option>
-							<option value="button">Button</option>
-							<option value="thermo">Thermo</option>
-							<option value="passthru">Pass Thru</option>
-					</select>
+				<select name="device-type" id="device-type-filter" ng-model="bridge.state.filterDeviceType">
+					<option value="">---No Filter---</option>
+					<!-- not selected / blank option -->
+					<option value="custom">Custom</option>
+					<option value="UDP">UDP</option>
+					<option value="TCP">TCP</option>
+					<option value="exec">Execute Script/Program</option>
+					<option value="switch">Switch</option>
+					<option value="scene">Scene</option>
+					<option value="macro">Macro</option>
+					<option value="group">Group</option>
+					<option value="activity">Activity</option>
+					<option value="button">Button</option>
+					<option value="thermo">Thermo</option>
+					<option value="passthru">Pass Thru</option>
+				</select>
 			</div>
-		
-	<scrollable-table watch="bridge.devices">
-	<table class="table table-bordered table-striped table-hover">
-		<thead>
-			<tr>
-				<th>Row</th>
-				<th sortable-header col="id" comparator-fn="comparatorUniqueId">ID</th>
-				<th sortable-header col="name">Name</th>
-				<th sortable-header col="description">Description</th>
-				<th sortable-header col="devicestate">Device State</th>
-				<th sortable-header col="deviceType">Type</th>
-				<th sortable-header col="targetDevice">Target</th>
-				<th sortable-header col="inactive">Inactive</th>
-				<th sortable-header col="noState">No State</th>
-				<th>Actions</th>
-			</tr>
-		</thead>
-		<tr ng-repeat="device in bridge.devices | filterDevicesByRequester:bridge.state.filterDevicesByIpAddress:bridge.state.filterDevicesOnlyFiltered:bridge.state.filterDeviceType" row-id="{{device.id}}" ng-class="{info: bridge.viewDevId == device.id}" >
-			<td>{{$index+1}}</td>
-			<td>{{device.id}}</td>
-			<td>{{device.name}}</td>
-			<td class="cr">{{device.description}}</td>
-			<td class="cr">on={{device.deviceState.on}},bri={{device.deviceState.bri}},hue={{device.deviceState.hue}},sat={{device.deviceState.sat}},effect={{device.deviceState.effect}},ct={{device.deviceState.ct}},alert={{device.deviceState.alert}},colormode={{device.deviceState.colormode}},reachable={{device.deviceState.reachable}},XYList={{device.deviceState.xy}}</td>
-			<td>{{device.deviceType}}</td>
-			<td>{{device.targetDevice}}</td>
-			<td>{{device.inactive}}</td>
-			<td>{{device.noState}}</td>
-			<td>
-				<p>
-					<button class="btn btn-info" type="submit"
-						ng-click="testUrl(device, 'on')">Test ON</button>
-					<button class="btn btn-info" type="submit"
-						ng-click="testUrl(device, 'dim')">Test Dim</button>
-					<button class="btn btn-info" type="submit"
-						ng-click="testUrl(device, 'off')">Test OFF</button>
-					<button class="btn btn-info" type="submit"
-						ng-click="testUrl(device, 'color')">Test Color</button>
-					<button class="btn btn-warning" type="submit"
-						ng-click="editDevice(device)">Edit/Copy</button>
-					<button class="btn btn-danger" type="submit"
-						ng-click="deleteDevice(device)">Delete</button>
-				</p>
-			</td>
-		</tr>
-	</table>
-	</scrollable-table>
+
+			<scrollable-table watch="bridge.devices">
+				<table class="table table-bordered table-striped table-hover">
+					<thead>
+						<tr>
+							<th>Row</th>
+							<th sortable-header col="id" comparator-fn="comparatorUniqueId">ID</th>
+							<th sortable-header col="name">Name</th>
+							<th sortable-header col="description">Description</th>
+							<th sortable-header col="devicestate">Device State</th>
+							<th sortable-header col="deviceType">Type</th>
+							<th sortable-header col="targetDevice">Target</th>
+							<th sortable-header col="inactive">Inactive</th>
+							<th sortable-header col="noState">No State</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tr ng-repeat="device in bridge.devices | filterDevicesByRequester:bridge.state.filterDevicesByIpAddress:bridge.state.filterDevicesOnlyFiltered:bridge.state.filterDeviceType"
+						row-id="{{device.id}}" ng-class="{info: bridge.viewDevId == device.id}">
+						<td>{{$index+1}}</td>
+						<td>{{device.id}}</td>
+						<td>{{device.name}}</td>
+						<td class="cr">{{device.description}}</td>
+						<td class="cr">
+							on={{device.deviceState.on}},bri={{device.deviceState.bri}},hue={{device.deviceState.hue}},sat={{device.deviceState.sat}},effect={{device.deviceState.effect}},ct={{device.deviceState.ct}},alert={{device.deviceState.alert}},colormode={{device.deviceState.colormode}},reachable={{device.deviceState.reachable}},XYList={{device.deviceState.xy}}
+						</td>
+						<td>{{device.deviceType}}</td>
+						<td>{{device.targetDevice}}</td>
+						<td>{{device.inactive}}</td>
+						<td>{{device.noState}}</td>
+						<td>
+							<p>
+								<button class="btn btn-info" type="submit" ng-click="testUrl(device, 'on')">Test
+									ON</button>
+								<button class="btn btn-info" type="submit" ng-click="testUrl(device, 'dim')">Test
+									Dim</button>
+								<button class="btn btn-info" type="submit" ng-click="testUrl(device, 'off')">Test
+									OFF</button>
+								<button class="btn btn-info" type="submit" ng-click="testUrl(device, 'color')">Test
+									Color</button>
+								<button class="btn btn-warning" type="submit"
+									ng-click="editDevice(device)">Edit/Copy</button>
+								<button class="btn btn-danger" type="submit"
+									ng-click="deleteDevice(device)">Delete</button>
+							</p>
+						</td>
+					</tr>
+				</table>
+			</scrollable-table>
+		</div>
 	</div>
-</div>
 </div>
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h1 class="panel-title">
-			Bridge Device DB Backup <a ng-click="toggleBk()"><span
-				class={{imgBkUrl}} aria-hidden="true"></span></a>
+			Bridge Device DB Backup <a ng-click="toggleBk()"><span class={{imgBkUrl}} aria-hidden="true"></span></a>
 		</h1>
 	</div>
 	<div ng-if="visibleBk" class="panel-body">
@@ -123,11 +125,10 @@
 					File Name</label>
 
 				<div class="col-xs-8 col-sm-7">
-					<input id="backup-name" class="form-control" type="text"
-						ng-model="optionalbackupname" placeholder="Optional">
+					<input id="backup-name" class="form-control" type="text" ng-model="optionalbackupname"
+						placeholder="Optional">
 				</div>
-				<button type="submit" class="btn btn-primary"
-					ng-click="backupDeviceDb(optionalbackupname)">Backup
+				<button type="submit" class="btn btn-primary" ng-click="backupDeviceDb(optionalbackupname)">Backup
 					Device DB</button>
 			</div>
 		</form>
@@ -139,12 +140,10 @@
 				</tr>
 			</thead>
 			<tr ng-repeat="backup in bridge.backups">
-				<td>{{backup}}</td>
+				<td><button  type="button" ng-click="downloadBackup(backup)">{{backup}}</button></td>
 				<td>
-					<button class="btn btn-danger" type="submit"
-						ng-click="restoreBackup(backup)">Restore</button>
-					<button class="btn btn-warning" type="submit"
-						ng-click="deleteBackup(backup)">Delete</button>
+					<button class="btn btn-danger" type="submit" ng-click="restoreBackup(backup)">Restore</button>
+					<button class="btn btn-warning" type="submit" ng-click="deleteBackup(backup)">Delete</button>
 				</td>
 			</tr>
 		</table>
@@ -152,7 +151,7 @@
 </div>
 
 <script type="text/ng-template" id="valueDialog">
-		<div class="ngdialog-message">
+	<div class="ngdialog-message">
 			<h2>Select value</h2>
 				<p>
 					    <input type="radio" ng-model="valueType" value="percentage" ng-change="changeScale()"> Percentage
@@ -167,7 +166,7 @@
 		</div>
 	</script>
 <script type="text/ng-template" id="colorDialog">
-		<div class="ngdialog-message">
+	<div class="ngdialog-message">
 			<h2>Select Color</h2>
 				<p>
 					<input colorpicker="rgb" ng-model="rgbPicker.color" type="text">
@@ -178,7 +177,7 @@
 		</div>
 	</script>
 <script type="text/ng-template" id="deleteDialog">
-		<div class="ngdialog-message">
+	<div class="ngdialog-message">
 			<h2>Device to Delete?</h2>
 				<p>{{device.name}}</p>
 				<p>Are you Sure?</p>

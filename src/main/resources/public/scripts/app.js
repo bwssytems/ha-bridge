@@ -1279,6 +1279,22 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 		);
 	};
 
+	this.downloadBackup = function (afilename) {
+		return $http.put(this.state.base + "/backup/download", {
+			filename: afilename
+		}).then(
+			function (response) {
+				self.state.backupContent = response.data;
+			},
+			function (error) {
+				if (error.status === 401)
+					$rootScope.$broadcast('securityReinit', 'done');
+				else
+					self.displayWarn("Download Backup Db File Error:", error);
+			}
+		);
+	};
+
 	this.checkForBridge = function () {
 		return $http.get(this.state.bridgelocation + "/description.xml").then(
 			function (response) {
@@ -2256,6 +2272,7 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
 	bridgeService.viewBackups();
 	$scope.bridge = bridgeService.state;
 	$scope.optionalbackupname = "";
+	$scope.bridge.backupContent = undefined;
 	$scope.visible = false;
 	$scope.imgUrl = "glyphicon glyphicon-plus";
 	$scope.visibleBk = false;
@@ -2319,6 +2336,9 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
 	};
 	$scope.deleteBackup = function (backupname) {
 		bridgeService.deleteBackup(backupname);
+	};
+	$scope.downloadBackup = function (backupname) {
+		bridgeService.downloadBackup(backupname);
 	};
 	$scope.toggle = function () {
 		$scope.visible = !$scope.visible;

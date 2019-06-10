@@ -143,7 +143,8 @@ public class DeviceRepository extends BackupHandler {
 						if (light.getOnUrl() != null)
 							callItems = aGsonBuilder.fromJson(light.getOnUrl(), CallItem[].class);
 					} catch (JsonSyntaxException e) {
-						log.warn("Could not decode Json for url items to get Hue state for device: {}", light.getName());
+						log.warn("Could not decode Json for url items to get Hue state for device: {}",
+								light.getName());
 						callItems = null;
 					}
 
@@ -201,7 +202,7 @@ public class DeviceRepository extends BackupHandler {
 		List<DeviceDescriptor> list = new ArrayList<DeviceDescriptor>(devices.values());
 		Iterator<DeviceDescriptor> deviceIterator = list.iterator();
 		Map<String, DeviceDescriptor> newdevices = new HashMap<String, DeviceDescriptor>();
-		;
+
 		nextId = seedId;
 		String hexValue;
 		Integer newValue;
@@ -209,17 +210,19 @@ public class DeviceRepository extends BackupHandler {
 		log.debug("Renumber devices with seed: {}", seedId);
 		while (deviceIterator.hasNext()) {
 			theDevice = deviceIterator.next();
-			theDevice.setId(String.valueOf(nextId));
-			newValue = nextId % 256;
-			if (newValue <= 0)
-				newValue = 1;
-			else if (newValue > 255)
-				newValue = 255;
-			hexValue = HexLibrary.encodeUsingBigIntegerToString(newValue.toString());
+			if (!theDevice.isLockDeviceId()) {
+				theDevice.setId(String.valueOf(nextId));
+				newValue = nextId % 256;
+				if (newValue <= 0)
+					newValue = 1;
+				else if (newValue > 255)
+					newValue = 255;
+				hexValue = HexLibrary.encodeUsingBigIntegerToString(newValue.toString());
 
-			theDevice.setUniqueid("00:17:88:5E:D3:" + hexValue + "-" + hexValue);
+				theDevice.setUniqueid("00:17:88:5E:D3:" + hexValue + "-" + hexValue);
+				nextId++;
+			}
 			newdevices.put(theDevice.getId(), theDevice);
-			nextId++;
 		}
 		devices = newdevices;
 		String jsonValue = gson.toJson(findAll());
