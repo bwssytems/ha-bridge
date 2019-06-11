@@ -132,6 +132,22 @@
 					Device DB</button>
 			</div>
 		</form>
+		<form class="form-horizontal" name="myForm">
+			<div class="form-group">
+				<label class="col-xs-12 col-sm-2 control-label" for="backup-name">Device DB to upload</label>
+				<div class="col-xs-8 col-sm-7">
+					<input type="file" ngf-select="" ng-model="deviceFile" name="file">
+				</div>
+
+				<button ng-disabled="!myForm.$valid" type="submit" class="btn btn-primary" 
+					ng-click="uploadDeviceFile(deviceFile.name, deviceFile)">Upload</button>
+					<span class="progress" ng-show="deviceFile.progress >= 0">
+						<div style="width:{{deviceFile.progress}}%" ng-bind="deviceFile.progress + '%'"
+							class="ng-binding"></div>
+					</span>
+					<span ng-show="deviceFile.result">Upload Successful</span>
+			</div>
+		</form>
 		<table class="table table-bordered table-striped table-hover">
 			<thead>
 				<tr>
@@ -140,7 +156,7 @@
 				</tr>
 			</thead>
 			<tr ng-repeat="backup in bridge.backups">
-				<td><button  type="button" ng-click="downloadBackup(backup)">{{backup}}</button></td>
+				<td><a class="btn" ng-click="downloadBackup(backup)" ng-href="{{ url }}">{{backup}}</a></td>
 				<td>
 					<button class="btn btn-danger" type="submit" ng-click="restoreBackup(backup)">Restore</button>
 					<button class="btn btn-warning" type="submit" ng-click="deleteBackup(backup)">Delete</button>

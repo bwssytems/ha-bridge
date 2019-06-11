@@ -401,6 +401,25 @@ public class DeviceResource {
 	        return backupContent;
     	}, new JsonTransformer());
 
+	    // http://ip_address:port/api/devices/backup/upload CORS request
+	    options(API_CONTEXT + "/backup/upload/:filename", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+    	put (API_CONTEXT + "/backup/upload/:filename", "application/json", (request, response) -> {
+	    	log.debug("Create upload: {} - {}", request.params(":filename"), request.body());
+			String theSuccess = deviceRepository.uploadBackup(request.params(":filename"), request.body());
+			if(theSuccess.contains("Error:"))
+				response.status(HttpStatus.SC_METHOD_FAILURE);
+			else
+				response.status(HttpStatus.SC_OK);
+	        return theSuccess;
+    	}, new JsonTransformer());
+
 	    // http://ip_address:port/api/devices/backup/create CORS request
 	    options(API_CONTEXT + "/backup/create", "application/json", (request, response) -> {
 	        response.status(HttpStatus.SC_OK);

@@ -61,3 +61,15 @@ legend.form-label {
     color:#F00;
     font-size:14px;
 }
+
+.progress {
+    display: inline-block;
+    width: 100px;
+    border: 3px groove #CCC;
+}
+
+.progress div {
+    font-size: smaller;
+    background: greenyellow;
+    width: 0;
+}

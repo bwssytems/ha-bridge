@@ -1,4 +1,4 @@
-var app = angular.module('habridge', ['ngRoute', 'ngToast', 'rzModule', 'ngDialog', 'base64', 'scrollable-table', 'ngResource', 'ngStorage', 'colorpicker.module']);
+var app = angular.module('habridge', ['ngRoute', 'ngToast', 'rzModule', 'ngDialog', 'base64', 'scrollable-table', 'ngResource', 'ngStorage', 'colorpicker.module', 'ngFileUpload']);
 
 app.config(function ($locationProvider, $routeProvider) {
 	$locationProvider.hashPrefix('!');
@@ -161,7 +161,7 @@ String.prototype.replaceAll = function (search, replace) {
 };
 
 
-app.service('bridgeService', function ($rootScope, $http, $base64, $location, ngToast) {
+app.service('bridgeService', function ($rootScope, $http, $base64, $location, ngToast, Upload) {
 	var self = this;
 	this.state = {
 		base: "./api/devices",
@@ -1285,6 +1285,13 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 		}).then(
 			function (response) {
 				self.state.backupContent = response.data;
+				var blob = new Blob([self.state.backupContent], {
+					type: 'text/plain'
+				});
+				var downloadLink = angular.element('<a></a>');
+				downloadLink.attr('href', window.URL.createObjectURL(blob));
+				downloadLink.attr('download', afilename);
+				downloadLink[0].click();
 			},
 			function (error) {
 				if (error.status === 401)
@@ -1294,6 +1301,31 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 			}
 		);
 	};
+
+	this.uploadDeviceFile = function (filename, file) {
+		file.upload = Upload.http({
+			url: this.state.base + "/backup/upload/" + filename,
+			method: 'PUT',
+			headers: {
+				'Content-Type': file.type
+			},
+			data: file
+		});
+
+		file.upload.then(function (response) {
+			file.result = response.data;
+			self.viewBackups();
+		}, function (response) {
+			if (response.status === 401)
+				$rootScope.$broadcast('securityReinit', 'done');
+			else if (response.status > 0)
+				self.displayWarn('Upload Backup Db File Error:' + response.status + ': ' + response.data);
+		});
+
+		file.upload.progress(function (evt) {
+			file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+		});
+	}
 
 	this.checkForBridge = function () {
 		return $http.get(this.state.bridgelocation + "/description.xml").then(
@@ -2266,13 +2298,15 @@ function postrenderAction($timeout) {
 	}
 }
 
-app.controller('ViewingController', function ($scope, $location, bridgeService, ngDialog) {
+app.controller('ViewingController', function ($scope, $location, bridgeService, ngDialog, Upload) {
 
 	bridgeService.viewDevices();
 	bridgeService.viewBackups();
 	$scope.bridge = bridgeService.state;
 	$scope.optionalbackupname = "";
 	$scope.bridge.backupContent = undefined;
+	$scope.bridge.isResumeSupported = Upload.isResumeSupported();
+
 	$scope.visible = false;
 	$scope.imgUrl = "glyphicon glyphicon-plus";
 	$scope.visibleBk = false;
@@ -2340,6 +2374,14 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
 	$scope.downloadBackup = function (backupname) {
 		bridgeService.downloadBackup(backupname);
 	};
+
+	$scope.uploadDeviceFile = function (aFilename, aDeviceFile) {
+		$scope.formUpload = true;
+		if (aDeviceFile != null) {
+			bridgeService.uploadDeviceFile(aFilename, aDeviceFile);
+		}
+	};
+
 	$scope.toggle = function () {
 		$scope.visible = !$scope.visible;
 		if ($scope.visible)
