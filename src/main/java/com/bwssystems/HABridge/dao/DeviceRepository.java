@@ -202,15 +202,33 @@ public class DeviceRepository extends BackupHandler {
 		List<DeviceDescriptor> list = new ArrayList<DeviceDescriptor>(devices.values());
 		Iterator<DeviceDescriptor> deviceIterator = list.iterator();
 		Map<String, DeviceDescriptor> newdevices = new HashMap<String, DeviceDescriptor>();
-
-		nextId = seedId;
+		List<String> lockedIds = new ArrayList<String>();
 		String hexValue;
 		Integer newValue;
 		DeviceDescriptor theDevice;
-		log.debug("Renumber devices with seed: {}", seedId);
+		boolean findNext = true;
+
+		
+		nextId = seedId;
+		while(deviceIterator.hasNext()) {
+			theDevice = deviceIterator.next();
+			if(theDevice.isLockDeviceId()) {
+				lockedIds.add(theDevice.getId());
+			}
+		}
+		log.debug("Renumber devices starting with: {}", nextId);
+		deviceIterator = list.iterator();
 		while (deviceIterator.hasNext()) {
 			theDevice = deviceIterator.next();
 			if (!theDevice.isLockDeviceId()) {
+				findNext = true;
+				while(findNext) {
+					if(lockedIds.contains(String.valueOf(nextId))) {
+						nextId++;
+					} else {
+						findNext = false;
+					}
+				}
 				theDevice.setId(String.valueOf(nextId));
 				newValue = nextId % 256;
 				if (newValue <= 0)

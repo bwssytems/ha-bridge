@@ -89,6 +89,9 @@ public class DeviceDescriptor{
 	@SerializedName("lockDeviceId")
     @Expose
     private boolean lockDeviceId;
+    @SerializedName("startupActions")
+    @Expose
+    private String startupActions;
   
     public String getName() {
         return name;
@@ -343,5 +346,13 @@ public class DeviceDescriptor{
 
 	public void setLockDeviceId(boolean lockDeviceId) {
 		this.lockDeviceId = lockDeviceId;
+	}
+
+	public String getStartupActions() {
+		return startupActions;
+	}
+
+	public void setStartupActions(String startupActions) {
+		this.startupActions = startupActions;
 	}
 }

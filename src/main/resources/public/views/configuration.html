@@ -68,9 +68,9 @@
 							<th sortable-header col="id" comparator-fn="comparatorUniqueId">ID</th>
 							<th sortable-header col="name">Name</th>
 							<th sortable-header col="description">Description</th>
-							<th sortable-header col="devicestate">Device State</th>
 							<th sortable-header col="deviceType">Type</th>
 							<th sortable-header col="targetDevice">Target</th>
+							<th sortable-header col="startupAction">Startup Action</th>
 							<th sortable-header col="inactive">Inactive</th>
 							<th sortable-header col="noState">No State</th>
 							<th>Actions</th>
@@ -79,14 +79,17 @@
 					<tr ng-repeat="device in bridge.devices | filterDevicesByRequester:bridge.state.filterDevicesByIpAddress:bridge.state.filterDevicesOnlyFiltered:bridge.state.filterDeviceType"
 						row-id="{{device.id}}" ng-class="{info: bridge.viewDevId == device.id}">
 						<td>{{$index+1}}</td>
-						<td>{{device.id}}</td>
-						<td>{{device.name}}</td>
-						<td class="cr">{{device.description}}</td>
-						<td class="cr">
-							on={{device.deviceState.on}},bri={{device.deviceState.bri}},hue={{device.deviceState.hue}},sat={{device.deviceState.sat}},effect={{device.deviceState.effect}},ct={{device.deviceState.ct}},alert={{device.deviceState.alert}},colormode={{device.deviceState.colormode}},reachable={{device.deviceState.reachable}},XYList={{device.deviceState.xy}}
+						<td title="Locked: {{device.lockDeviceId}} - Click to Toggle" ng-click="toggleLock(device)">
+							<b ng-if="device.lockDeviceId">{{device.id}}</b>
+							<p ng-if="!device.lockDeviceId">{{device.id}}</p>
 						</td>
+						<td
+							title="on={{device.deviceState.on}},bri={{device.deviceState.bri}},hue={{device.deviceState.hue}},sat={{device.deviceState.sat}},effect={{device.deviceState.effect}},ct={{device.deviceState.ct}},alert={{device.deviceState.alert}},colormode={{device.deviceState.colormode}},reachable={{device.deviceState.reachable}},XYList={{device.deviceState.xy}}">
+							{{device.name}}</td>
+						<td class="cr">{{device.description}}</td>
 						<td>{{device.deviceType}}</td>
 						<td>{{device.targetDevice}}</td>
+						<td class="cr" title="Click to set actions for device on ha-bridge startup." ng-click="setStartupAction(device)">{{device.startupActions}}</td>
 						<td>{{device.inactive}}</td>
 						<td>{{device.noState}}</td>
 						<td>
@@ -139,13 +142,13 @@
 					<input type="file" ngf-select="" ng-model="deviceFile" name="file">
 				</div>
 
-				<button ng-disabled="!myForm.$valid" type="submit" class="btn btn-primary" 
+				<button ng-disabled="!myForm.$valid" type="submit" class="btn btn-primary"
 					ng-click="uploadDeviceFile(deviceFile.name, deviceFile)">Upload</button>
-					<span class="progress" ng-show="deviceFile.progress >= 0">
-						<div style="width:{{deviceFile.progress}}%" ng-bind="deviceFile.progress + '%'"
-							class="ng-binding"></div>
-					</span>
-					<span ng-show="deviceFile.result">Upload Successful</span>
+				<span class="progress" ng-show="deviceFile.progress >= 0">
+					<div style="width:{{deviceFile.progress}}%" ng-bind="deviceFile.progress + '%'" class="ng-binding">
+					</div>
+				</span>
+				<span ng-show="deviceFile.result">Upload Successful</span>
 			</div>
 		</form>
 		<table class="table table-bordered table-striped table-hover">
@@ -202,3 +205,43 @@
 			<button type="button" class="ngdialog-button ngdialog-button-error" ng-click="deleteDevice(device)">Delete</button>
 		</div>
 	</script>
+<script type="text/ng-template" id="startupActionDialog">
+	<div class="ngdialog-message">
+				<h2>Select Actions for startup on {{device.name}}</h2>
+				<table class="table table-bordered table-striped table-hover">
+					<thead>
+						<tr>
+							<th>Setting</th>
+							<th>Value</th>
+						</tr>
+					</thead>
+					<tr>
+						<td>State</td>
+						<td>
+							<select name="the-state" id="the-state"	ng-model="theState">
+								<option value="">---None---</option>
+								<!-- not selected / blank option -->
+								<option value="On">On</option>
+								<option value="Off">Off</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>Dim</td>
+						<td>
+								<input type="checkbox"
+								ng-model="setDim" ng-true-value=true
+								ng-false-value=false>
+								<rzslider rz-slider-model="slider.value" rz-slider-options="slider.options"></rzslider>
+						</td>
+					</tr>
+					<tr>
+						<td>Color RGB</td>
+						<td><input colorpicker="rgb" ng-model="rgbPicker.color" type="text"></td>
+					</tr>
+				</table>
+			</div>
+			<div class="ngdialog-buttons mt">
+				<button type="button" class="ngdialog-button ngdialog-button-error" ng-click="startupActionSave(device)">Save</button>
+			</div>
+		</script>

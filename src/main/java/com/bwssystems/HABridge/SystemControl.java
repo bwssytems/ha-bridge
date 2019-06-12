@@ -437,6 +437,41 @@ public class SystemControl {
 	    	return stop();
 	    });
 
+	    // http://ip_address:port/system/devices/backup/download CORS request
+	    options(SYSTEM_CONTEXT + "/backup/download", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+    	put (SYSTEM_CONTEXT + "/backup/download", "application/json", (request, response) -> {
+	    	log.debug("Create download: {}", request.body());
+        	BackupFilename aFilename = new Gson().fromJson(request.body(), BackupFilename.class);
+        	String backupContent = bridgeSettings.downloadBackup(aFilename.getFilename());
+	        return backupContent;
+    	}, new JsonTransformer());
+
+	    // http://ip_address:port/system/devices/backup/upload CORS request
+	    options(SYSTEM_CONTEXT + "/backup/upload/:filename", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+    	put (SYSTEM_CONTEXT + "/backup/upload/:filename", "application/json", (request, response) -> {
+	    	log.debug("Create upload: {} - {}", request.params(":filename"), request.body());
+			String theSuccess = bridgeSettings.uploadBackup(request.params(":filename"), request.body());
+			if(theSuccess.contains("Error:"))
+				response.status(HttpStatus.SC_METHOD_FAILURE);
+			else
+				response.status(HttpStatus.SC_OK);
+	        return theSuccess;
+    	}, new JsonTransformer());
+
 	    // http://ip_address:port/system/backup/available returns a list of config backup filenames
 	    get (SYSTEM_CONTEXT + "/backup/available", (request, response) -> {
         	log.debug("Get backup filenames");

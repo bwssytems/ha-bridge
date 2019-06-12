@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.awt.Color;
 import java.util.Arrays;
 
 /**
@@ -77,6 +78,7 @@ public class HueMulator {
 	// This function sets up the sparkjava rest calls for the hue api
 	public void setupServer() {
 		log.info("Hue emulator service started....");
+		startupDeviceCall();
 		before(HUE_CONTEXT + "/*", (request, response) -> {
 			// This currently causes an error with Spark replies
 			// String path = request.pathInfo();
@@ -1670,5 +1672,51 @@ public class HueMulator {
 		}
 
 		return responseString;
+	}
+
+	private void startupDeviceCall() {
+		String aUserId = bridgeSettingMaster.getBridgeSecurity().createWhitelistUser("test_ha_bridge");
+		List<DeviceDescriptor> deviceList = repository.findAll();
+		String aChangeBody;
+		String[] components;
+		boolean comma = false;
+
+		for (DeviceDescriptor aDevice : deviceList) {
+			if(aDevice.getStartupActions() != null && !aDevice.getStartupActions().isEmpty()) {
+				log.info("Startup call for {} with startupActions {}", aDevice.getName(), aDevice.getStartupActions());
+				aChangeBody = "{";
+				components = aDevice.getStartupActions().split(":");
+				if(components.length > 0  && components[0] != null && components[0].length() > 0) {
+					if(components[0].equals("On")) {
+						aChangeBody = aChangeBody + "\"on\":true";
+					}
+					else {
+						aChangeBody = aChangeBody + "\"on\":false";
+					}
+					comma = true;
+				}
+				if(components.length > 1  && components[1] != null && components[1].length() > 0 && !(components.length > 2  && components[2] != null && components[2].length() > 0)) {
+					if(comma)
+						aChangeBody = aChangeBody + ",";
+					aChangeBody = aChangeBody + "\"bri\":" + components[1];
+					comma = true;
+				}
+				if(components.length > 2  && components[2] != null && components[2].length() > 0) {
+					if(comma)
+						aChangeBody = aChangeBody + ",";
+						String theRGB = components[2].substring(components[2].indexOf('(') + 1, components[2].indexOf(')'));
+						String[] RGB = theRGB.split(",");
+						float[] hsb = new float[3];
+						Color.RGBtoHSB(Integer.parseInt(RGB[0]), Integer.parseInt(RGB[1]), Integer.parseInt(RGB[2]), hsb);
+						float hue = hsb[0] * (float) 360.0;
+						float sat = hsb[1] * (float) 100.0;
+						float bright = hsb[2] * (float) 100.0;
+						aChangeBody = String.format("%s\"hue\":%.2f,\"sat\":%.2f,\"bri\":%d", aChangeBody, hue, sat, Math.round(bright));
+				}
+				aChangeBody = aChangeBody + "}";
+				log.info("Startup call to set state for {} with body {}", aDevice.getName(), aChangeBody);
+				changeState(aUserId, aDevice.getId(), aChangeBody, "localhost", true);
+			}
+		}
 	}
 }

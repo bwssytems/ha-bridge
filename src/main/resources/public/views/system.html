@@ -985,6 +985,22 @@
 					Settings</button>
 			</div>
 		</form>
+		<form class="form-horizontal" name="myForm">
+			<div class="form-group">
+				<label class="col-xs-12 col-sm-2 control-label" for="backup-name">Config File to upload</label>
+				<div class="col-xs-8 col-sm-7">
+					<input type="file" ngf-select="" ng-model="configFile" name="file">
+				</div>
+
+				<button ng-disabled="!myForm.$valid" type="submit" class="btn btn-primary" 
+					ng-click="uploadConfigFile(configFile.name, configFile)">Upload</button>
+					<span class="progress" ng-show="configFile.progress >= 0">
+						<div style="width:{{configFile.progress}}%" ng-bind="configFile.progress + '%'"
+							class="ng-binding"></div>
+					</span>
+					<span ng-show="configFile.result">Upload Successful</span>
+			</div>
+		</form>
 		<table class="table table-bordered table-striped table-hover">
 			<thead>
 				<tr>
@@ -993,7 +1009,7 @@
 				</tr>
 			</thead>
 			<tr ng-repeat="backup in bridge.configs">
-				<td>{{backup}}</td>
+				<td><a class="btn" ng-click="downloadBackup(backup)" ng-href="{{ url }}">{{backup}}</a></td>
 				<td>
 					<button class="btn btn-danger" type="submit"
 						ng-click="restoreSettings(backup)">Restore</button>

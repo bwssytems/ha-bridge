@@ -1279,7 +1279,7 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 		);
 	};
 
-	this.downloadBackup = function (afilename) {
+	this.downloadDeviceBackup = function (afilename) {
 		return $http.put(this.state.base + "/backup/download", {
 			filename: afilename
 		}).then(
@@ -1458,6 +1458,54 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 			}
 		);
 	};
+
+	this.downloadConfigBackup = function (afilename) {
+		return $http.put(this.state.systemsbase + "/backup/download", {
+			filename: afilename
+		}).then(
+			function (response) {
+				self.state.backupContent = response.data;
+				var blob = new Blob([self.state.backupContent], {
+					type: 'text/plain'
+				});
+				var downloadLink = angular.element('<a></a>');
+				downloadLink.attr('href', window.URL.createObjectURL(blob));
+				downloadLink.attr('download', afilename);
+				downloadLink[0].click();
+			},
+			function (error) {
+				if (error.status === 401)
+					$rootScope.$broadcast('securityReinit', 'done');
+				else
+					self.displayWarn("Download Backup Config File Error:", error);
+			}
+		);
+	};
+
+	this.uploadConfigFile = function (filename, file) {
+		file.upload = Upload.http({
+			url: this.state.systemsbase + "/backup/upload/" + filename,
+			method: 'PUT',
+			headers: {
+				'Content-Type': file.type
+			},
+			data: file
+		});
+
+		file.upload.then(function (response) {
+			file.result = response.data;
+			self.viewConfigs();
+		}, function (response) {
+			if (response.status === 401)
+				$rootScope.$broadcast('securityReinit', 'done');
+			else if (response.status > 0)
+				self.displayWarn('Upload Backup Config File Error:' + response.status + ': ' + response.data);
+		});
+
+		file.upload.progress(function (evt) {
+			file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+		});
+	}
 
 	this.deleteDevice = function (id) {
 		return $http.delete(this.state.base + "/" + id).then(
@@ -2074,6 +2122,17 @@ app.controller('SystemController', function ($scope, $location, bridgeService, n
 	$scope.deleteSettingsBackup = function (backupname) {
 		bridgeService.deleteSettingsBackup(backupname);
 	};
+
+	$scope.downloadBackup = function (backupname) {
+		bridgeService.downloadConfigBackup(backupname);
+	};
+
+	$scope.uploadConfigFile = function (aFilename, aConfigFile) {
+		if (aConfigFile != null) {
+			bridgeService.uploadConfigFile(aFilename, aConfigFile);
+		}
+	};
+
 	$scope.toggle = function () {
 		$scope.visible = !$scope.visible;
 		if ($scope.visible)
@@ -2349,12 +2408,41 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
 		bridgeService.editDevice(device);
 		$location.path('/editdevice');
 	};
+	$scope.setStartupAction = function(device) {
+		$scope.bridge.device = device;
+		ngDialog.open({
+			template: 'startupActionDialog',
+			controller: 'StartupActionDialogCtrl',
+			className: 'ngdialog-theme-default'
+		});
+	};
+
 	$scope.renumberDevices = function () {
 		bridgeService.renumberDevices();
 	};
 	$scope.pushLinkButton = function () {
 		bridgeService.pushLinkButton();
 	};
+
+	$scope.toggleLock = function (device) {
+		if(device.lockDeviceId) {
+			device.lockDeviceId = false;
+		} else {
+			device.lockDeviceId = true;
+		}
+		console.log("toggle lock device called: " + device.name);
+		bridgeService.addDevice(device).then(
+			function () {
+				bridgeService.state.queueDevId = device.id;
+				console.log("Device updated for Q Id <<" + bridgeService.state.queueDevId + ">>");
+				$location.path('/');
+			},
+			function (error) {
+				bridgeService.displayWarn("Error updating lock id for device....", error);
+			}
+		);
+	};
+
 	$scope.manageLinksButton = function () {
 		ngDialog.open({
 			template: 'views/managelinksdialog.html',
@@ -2372,7 +2460,7 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
 		bridgeService.deleteBackup(backupname);
 	};
 	$scope.downloadBackup = function (backupname) {
-		bridgeService.downloadBackup(backupname);
+		bridgeService.downloadDeviceBackup(backupname);
 	};
 
 	$scope.uploadDeviceFile = function (aFilename, aDeviceFile) {
@@ -2408,23 +2496,23 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
 });
 
 app.controller('ValueDialogCtrl', function ($scope, bridgeService, ngDialog) {
+	$scope.bridge = bridgeService.state;
+	$scope.valueType = "percentage";
 	$scope.slider = {
-		value: 100,
+		value: Math.round($scope.bridge.device.deviceState.bri / 2.55),
 		options: {
 			floor: 1,
 			ceil: 100,
 			showSelectionBar: true
 		}
 	};
-	$scope.bridge = bridgeService.state;
-	$scope.valueType = "percentage";
 	$scope.changeScale = function () {
 		if ($scope.valueType === "raw") {
 			$scope.slider.options.ceil = 254;
-			$scope.slider.value = 254;
+			$scope.slider.value = $scope.bridge.device.deviceState.bri;
 		} else {
 			$scope.slider.options.ceil = 100;
-			$scope.slider.value = 100;
+			$scope.slider.value = Math.round($scope.bridge.device.deviceState.bri / 2.55);
 		}
 	};
 	$scope.setValue = function () {
@@ -2470,6 +2558,57 @@ app.controller('DeleteDialogCtrl', function ($scope, bridgeService, ngDialog) {
 		bridgeService.viewDevices();
 		$scope.bridge.device = null;
 		$scope.bridge.type = "";
+	};
+});
+
+app.controller('StartupActionDialogCtrl', function ($scope, bridgeService, ngDialog) {
+	$scope.bridge = bridgeService.state;
+	$scope.device = $scope.bridge.device;
+	$scope.setDim = false;
+	var components = [];
+	if($scope.device.startupActions != undefined) {
+		components = $scope.device.startupActions.split(":");
+		if(components[1] != undefined && components[1].length > 0)
+			$scope.setDim = true;
+	} else {
+		components = "::".split(":");
+	}
+
+	$scope.slider = {
+		value: parseInt(components[1]),
+		options: {
+			floor: 1,
+			ceil: 254,
+			showSelectionBar: true
+		}
+	};
+	$scope.rgbPicker = {
+		color: components[2]
+	};
+
+	$scope.theState = components[0];
+
+	$scope.startupActionSave = function (device) {
+		console.log("Startup action set for device called: " + device.name);
+		ngDialog.close('ngdialog1');
+		var theValue = 1;
+		if($scope.setDim) {
+			theValue = $scope.theState + ":" + $scope.slider.value + ":" + $scope.rgbPicker.color;
+		} else {
+			theValue = $scope.theState + "::" + $scope.rgbPicker.color;
+		}
+		if(theValue == "::")
+			theValue = "";
+		device.startupActions = theValue;
+		bridgeService.addDevice(device).then(
+			function () {
+				bridgeService.state.queueDevId = device.id;
+				console.log("Device updated for Q Id <<" + bridgeService.state.queueDevId + ">>");
+			},
+			function (error) {
+				bridgeService.displayWarn("Error updating lock id for device....", error);
+			}
+		);
 	};
 });
 
