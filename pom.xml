@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>5.3.0RC1</version>
+	<version>5.3.0RC2</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
@@ -167,6 +167,7 @@
             <configuration>
               <rules>
                 <requireMavenVersion>
+				 <!-- Change this to Version 3.3 for Java 1.8 and Raspberry PI compilation -->
                   <version>3.6</version>
                 </requireMavenVersion>
               </rules>    
@@ -178,7 +179,11 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
 				<configuration>
+					 <!-- Comment this release line out for Java 1.8 and Raspberry PI compilation -->
 					<release>11</release>
+				 	<!-- Uncomment the next two lines for Java 1.8 and Raspberry PI compilation -->
+				 	<!-- <source>1.8</source> -->
+				 	<!-- <target>1.8</target> -->
 				</configuration>
 			</plugin>
 			<plugin>
