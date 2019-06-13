@@ -1875,7 +1875,7 @@ app.controller('SystemController', function ($scope, $location, bridgeService, n
 			}
 		}
 	};
-	$scope.addHasstoSettings = function (newhassname, newhassip, newhassport, newhasspassword, newhasssecure) {
+	$scope.addHasstoSettings = function (newhassname, newhassip, newhassport, newhasspassword, newhasssecure, newhassauth) {
 		if ($scope.bridge.settings.hassaddress === undefined || $scope.bridge.settings.hassaddress === null) {
 			$scope.bridge.settings.hassaddress = {
 				devices: []
@@ -1886,7 +1886,8 @@ app.controller('SystemController', function ($scope, $location, bridgeService, n
 			ip: newhassip,
 			port: newhassport,
 			password: newhasspassword,
-			secure: newhasssecure
+			secure: newhasssecure,
+			extensions: newhassauth
 		};
 		$scope.bridge.settings.hassaddress.devices.push(newhass);
 		$scope.newhassname = null;

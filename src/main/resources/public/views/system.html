@@ -411,7 +411,8 @@
 									<th>Name</th>
 									<th>IP</th>
 									<th>Port</th>
-									<th>Password (opt)</th>
+									<th>Token/Password</th>
+									<th>Auth Type</th>
 									<th>Use SSL</th>
 									<th>Manage</th>
 								</tr>
@@ -429,6 +430,12 @@
 								<td><input id="bridge-settings-next-hass-password"
 									class="form-control" type="password" ng-model="hass.password"
 									placeholder="Home Assistant password (opt)"></td>
+								<td>
+									<td>Legacy Password<input type="checkbox"
+										ng-model="hass.extensions.legacyauth" ng-true-value=true
+										ng-false-value=false>
+
+								</td>
 								<td><input type="checkbox"
 										ng-model="hass.secure" ng-true-value=true
 										ng-false-value=false></td>
@@ -448,11 +455,17 @@
 								<td><input id="bridge-settings-new-hass-password"
 									class="form-control" type="password" ng-model="newhasspassword"
 									placeholder="Home Assistant password (opt)"></td>
-								<td><input type="checkbox"
+									<td>
+										<td>Legacy Password<input type="checkbox"
+											ng-model="newhassauth.legacyauth" ng-true-value=true
+											ng-false-value=false>
+	
+									</td>
+									<td><input type="checkbox"
 										ng-model="newhasssecure" ng-true-value=true
 										ng-false-value=false></td>
 								<td><button class="btn btn-success" type="submit"
-										ng-click="addHasstoSettings(newhassname, newhassip, newhassport, newhasspassword, newhasssecure)">Add</button></td>
+										ng-click="addHasstoSettings(newhassname, newhassip, newhassport, newhasspassword, newhasssecure, newhassauth)">Add</button></td>
 							</tr>
 						</table></td>
 				</tr>
