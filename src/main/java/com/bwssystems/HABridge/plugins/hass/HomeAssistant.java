@@ -20,12 +20,14 @@ public class HomeAssistant {
 	private NamedIP hassAddress;
 	private HTTPHandler anHttpHandler;
 	private HassAuth theAuthType;
+	private NameValue[] headers;
 
 	public HomeAssistant(NamedIP addressName) {
 		super();
 		anHttpHandler = HTTPHome.getHandler();
 		hassAddress = addressName;
 		theAuthType = null;
+		headers = null;
 		isLegacyAuth();
 	}
 
@@ -48,14 +50,7 @@ public class HomeAssistant {
 		else
 			aUrl = aUrl + domain;
 		String aBody = "{\"entity_id\":\"" + aCommand.getEntityId() + "\"";
-		NameValue[] headers = null;
-		if (hassAddress.getPassword() != null && !hassAddress.getPassword().isEmpty()) {
-			NameValue password = new NameValue();
-			password.setName("x-ha-access");
-			password.setValue(hassAddress.getPassword());
-			headers = new NameValue[1];
-			headers[0] = password;
-		}
+		headers = getAuthHeader();
 		if (aCommand.getState().equalsIgnoreCase("on")) {
 			aUrl = aUrl + "/turn_on";
 			if (aCommand.getBri() != null)
@@ -77,15 +72,7 @@ public class HomeAssistant {
 		State[] theHassStates;
 		String theUrl = null;
 		String theData;
-		NameValue[] headers = null;
-		// do check for what type of auth: bearer token or legacy password
-		if (hassAddress.getPassword() != null && !hassAddress.getPassword().isEmpty()) {
-			NameValue password = new NameValue();
-			password.setName("x-ha-access");
-			password.setValue(hassAddress.getPassword());
-			headers = new NameValue[1];
-			headers[0] = password;
-		}
+		headers = getAuthHeader();
 		if (hassAddress.getSecure() != null && hassAddress.getSecure())
 			theUrl = "https";
 		else
@@ -122,5 +109,24 @@ public class HomeAssistant {
 			}
 		}
 		return theAuthType.isLegacyauth();
+	}
+
+	private NameValue[] getAuthHeader() {
+		if (headers == null) {
+			if (hassAddress.getPassword() != null && !hassAddress.getPassword().isEmpty()) {
+				headers = new NameValue[1];
+				headers[0] = new NameValue();
+				if (isLegacyAuth()) {
+					headers[0].setName("x-ha-access");
+					headers[0].setValue(hassAddress.getPassword());
+				} else {
+					headers[0].setName("Authorization");
+					headers[0].setValue("Bearer " + hassAddress.getPassword());
+				}
+			}
+		} else if(hassAddress.getPassword() == null || hassAddress.getPassword().isEmpty()) {
+			headers = null;
+		}
+		return headers;
 	}
 }
