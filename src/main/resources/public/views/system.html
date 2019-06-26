@@ -716,6 +716,7 @@
 									<th>Port (opt)</th>
 									<th>Username (opt)</th>
 									<th>Password (opt)</th>
+									<th>Other Types (opt)</th>
 									<th>Use SSL</th>
 									<th>Manage</th>
 								</tr>
@@ -731,6 +732,11 @@
 										ng-model="homegenie.username" placeholder="HomeGenie username"></td>
 								<td><input id="bridge-settings-next-homegenie-password" class="form-control"
 										type="password" ng-model="homegenie.password" placeholder="HomeGenie password">
+								</td>
+								<td>Currently: {{ convertModuleTypes($index) }}
+									<input id="bridge-settings-next-homegenie-othertypes" class="form-control" type="text"
+									ng-model="anExtensions" placeholder="type1, type2, type3">
+									<button class="btn btn-success" type="submit" ng-click="updateModuleTypes($index, anExtensions)">Update</button>
 								</td>
 								<td><input type="checkbox" ng-model="homegenie.secure" ng-true-value=true
 										ng-false-value=false></td>
@@ -750,10 +756,12 @@
 								<td><input id="bridge-settings-new-homegenie-password" class="form-control"
 										type="password" ng-model="newhomegeniepassword"
 										placeholder="HomeGenie password "></td>
+								<td><input id="bridge-settings-new-homegenie-othertypes" class="form-control" type="text"
+										ng-model="newhomegenieothertypes" placeholder="type1, type2, type3"></td>
 								<td><input type="checkbox" ng-model="newhomegeniesecure" ng-true-value=true
 										ng-false-value=false></td>
 								<td><button class="btn btn-success" type="submit"
-										ng-click="addHomeGenietoSettings(newhomegeniename, newhomegenieip, newhomegenieport, newshomegenieusername, newhomegeniepassword, newhomegeniewebhook, newhomegeniesecure)">Add</button>
+										ng-click="addHomeGenietoSettings(newhomegeniename, newhomegenieip, newhomegenieport, newshomegenieusername, newhomegeniepassword, newhomegeniewebhook, newhomegeniesecure, newhomegenieothertypes)">Add</button>
 								</td>
 							</tr>
 						</table>

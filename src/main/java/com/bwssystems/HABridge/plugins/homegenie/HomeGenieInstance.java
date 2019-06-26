@@ -61,12 +61,12 @@ public class HomeGenieInstance {
                 if (hgModules != null && hgModules.length > 0) {
                     deviceList = new ArrayList<Module>();
                     for (int i = 0; i < hgModules.length; i++) {
-                        if (hgModules[i].isSwitch() || hgModules[i].isDimmer())
+                        if (hgModules[i].isModuleValid(homegenieIP.getExtensions()))
                             deviceList.add(hgModules[i]);
                     }
                 }
             } catch (Exception e) {
-                log.warn("Cannot get an devices for Homegenie {} Gson Parse Error.", homegenieIP.getName());
+                log.warn("Cannot get devices for Homegenie {} Gson Parse Error.", homegenieIP.getName(), e);
             }
         }
         return deviceList;

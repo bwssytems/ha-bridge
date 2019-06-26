@@ -1,11 +1,20 @@
 
 package com.bwssystems.HABridge.plugins.homegenie;
 
+import java.util.List;
+
 // import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 public class Module {
+    private static final Logger log = LoggerFactory.getLogger(HomeGenieInstance.class);
 
     @SerializedName("Name")
     @Expose
@@ -23,10 +32,10 @@ public class Module {
     @Expose
     private String address;
     /*
-    @SerializedName("Properties")
-    @Expose
-    private List<Property> properties = null;
-    */
+     * @SerializedName("Properties")
+     * 
+     * @Expose private List<Property> properties = null;
+     */
     @SerializedName("RoutingNode")
     @Expose
     private String routingNode;
@@ -70,15 +79,13 @@ public class Module {
     public void setAddress(String address) {
         this.address = address;
     }
-/*
-    public List<Property> getProperties() {
-        return properties;
-    }
 
-    public void setProperties(List<Property> properties) {
-        this.properties = properties;
-    }
-*/
+    /*
+     * public List<Property> getProperties() { return properties; }
+     * 
+     * public void setProperties(List<Property> properties) { this.properties =
+     * properties; }
+     */
     public String getRoutingNode() {
         return routingNode;
     }
@@ -95,10 +102,48 @@ public class Module {
         return isDeviceType("Dimmer");
     }
 
+    public boolean isLight() {
+        return isDeviceType("Light");
+    }
+
     private boolean isDeviceType(String theType) {
-        if(deviceType.equals(theType)) {
+        if (deviceType.equals(theType)) {
             return true;
         }
+        return false;
+    }
+
+    public boolean isModuleValid(JsonObject theExtensions) {
+        ModuleTypes moduleTypes = null;
+        if (this.name == null || this.name.trim().isEmpty())
+            return false;
+
+        if (isSwitch())
+            return true;
+
+        if (isDimmer())
+            return true;
+
+        if (isLight())
+            return true;
+
+        if (theExtensions != null && theExtensions.isJsonObject() && theExtensions.get("moduleTypes").isJsonArray()) {
+            try {
+                moduleTypes = new Gson().fromJson(theExtensions, ModuleTypes.class);
+            } catch (Exception e) {
+                log.warn("Could not parse extensions for {} with {}", this.name, theExtensions);
+                return false;
+            }
+
+            if (moduleTypes == null)
+                return false;
+
+            for (ModuleType moduleType : moduleTypes.getModuleTypes()) {
+                if (isDeviceType(moduleType.getModuleType()))
+                    return true;
+            }
+        }
+
         return false;
     }
 }

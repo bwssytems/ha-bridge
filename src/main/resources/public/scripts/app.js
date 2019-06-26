@@ -2071,12 +2071,39 @@ app.controller('SystemController', function ($scope, $location, bridgeService, n
 		}
 	};
 
-	$scope.addHomeGenietoSettings = function (newhomegeniename, newhomegenieip, newhomegenieport, newhomegenieusername, newhomegeniepassword, newhomegeniewebhook, newhomegeniesecure) {
+	$scope.addHomeGenietoSettings = function (newhomegeniename, newhomegenieip, newhomegenieport, newhomegenieusername, newhomegeniepassword, newhomegeniewebhook, newhomegeniesecure, newhomegenieothertypes) {
 		if ($scope.bridge.settings.homegenieaddress === undefined || $scope.bridge.settings.homegenieaddress === null) {
 			$scope.bridge.settings.homegenieaddress = {
 				devices: []
 			};
 		}
+
+		var othertypes = [];
+		othertypes = newhomegenieothertypes.split(",");
+		var theModuleTypes = [];
+		var count = 0;
+		if (othertypes.length > 0) {
+			for (var i = 0; i < othertypes.length; i++) {
+				var aType = othertypes[i].trim();
+				if (aType.length > 0) {
+					var moduleType = {
+						moduleType: aType
+					};
+					theModuleTypes.push(moduleType);
+					count++;
+				}
+			}
+		}
+		var theExtension;
+		if (count == 0) {
+			theExtension = undefined;
+		} else {
+			theExtension = {
+				moduleTypes: theModuleTypes
+			}
+
+		}
+
 		var newhomegenie = {
 			name: newhomegeniename,
 			ip: newhomegenieip,
@@ -2084,16 +2111,61 @@ app.controller('SystemController', function ($scope, $location, bridgeService, n
 			username: newhomegenieusername,
 			password: newhomegeniepassword,
 			secure: newhomegeniesecure,
-			webhook: newhomegeniewebhook
+			webhook: newhomegeniewebhook,
+			extensions: theExtension
 		};
 		$scope.bridge.settings.homegenieaddress.devices.push(newhomegenie);
 		$scope.newhomegeniename = null;
 		$scope.newhomegenieip = null;
-		$scope.newhomegenieport = "8080";
+		$scope.newhomegenieport = null;
 		$scope.newhomegenieusername = null;
 		$scope.newhomegeniepassword = null;
 		$scope.newhomegeniewebhook = null;
+		$scope.newhomegenieextensions = null;
 	};
+
+	$scope.updateModuleTypes = function (theIndex, homegenieExtensions) {
+		var othertypes = [];
+		if(homegenieExtensions != undefined)
+			othertypes = homegenieExtensions.split(",");
+		var theModuleTypes = [];
+		var count = 0;
+		if (othertypes.length > 0) {
+			for (var x = 0; x < othertypes.length; x++) {
+				var aType = othertypes[x].trim();
+				if (aType.length > 0) {
+					var moduleType = {
+						moduleType: aType
+					};
+					theModuleTypes.push(moduleType);
+					count++;
+				}
+			}
+		}
+		var theExtension;
+		if (count == 0) {
+			theExtension = undefined;
+		} else {
+			theExtension = {
+				moduleTypes: theModuleTypes
+			}
+
+		}
+		$scope.bridge.settings.homegenieaddress.devices[theIndex].extensions = theExtension;
+	};
+
+	$scope.convertModuleTypes = function (theIndex) {
+
+		var displayExtension = "";
+		if ($scope.bridge.settings.homegenieaddress.devices[theIndex].extensions != undefined && $scope.bridge.settings.homegenieaddress.devices[theIndex].extensions.moduleTypes != undefined) {
+			for (var i = 0; i < $scope.bridge.settings.homegenieaddress.devices[theIndex].extensions.moduleTypes.length; i++) {
+				displayExtension = displayExtension + $scope.bridge.settings.homegenieaddress.devices[theIndex].extensions.moduleTypes[i].moduleType;
+			}
+		}
+
+		return displayExtension;
+	};
+
 	$scope.removeHomeGenietoSettings = function (homegeniename, homegenieip) {
 		for (var i = $scope.bridge.settings.homegenieaddress.devices.length - 1; i >= 0; i--) {
 			if ($scope.bridge.settings.homegenieaddress.devices[i].name === homegeniename && $scope.bridge.settings.homegenieaddress.devices[i].ip === homegenieip) {
@@ -2409,7 +2481,7 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
 		bridgeService.editDevice(device);
 		$location.path('/editdevice');
 	};
-	$scope.setStartupAction = function(device) {
+	$scope.setStartupAction = function (device) {
 		$scope.bridge.device = device;
 		ngDialog.open({
 			template: 'startupActionDialog',
@@ -2426,7 +2498,7 @@ app.controller('ViewingController', function ($scope, $location, bridgeService, 
 	};
 
 	$scope.toggleLock = function (device) {
-		if(device.lockDeviceId) {
+		if (device.lockDeviceId) {
 			device.lockDeviceId = false;
 		} else {
 			device.lockDeviceId = true;
@@ -2567,9 +2639,9 @@ app.controller('StartupActionDialogCtrl', function ($scope, bridgeService, ngDia
 	$scope.device = $scope.bridge.device;
 	$scope.setDim = false;
 	var components = [];
-	if($scope.device.startupActions != undefined) {
+	if ($scope.device.startupActions != undefined) {
 		components = $scope.device.startupActions.split(":");
-		if(components[1] != undefined && components[1].length > 0)
+		if (components[1] != undefined && components[1].length > 0)
 			$scope.setDim = true;
 	} else {
 		components = "::".split(":");
@@ -2593,12 +2665,12 @@ app.controller('StartupActionDialogCtrl', function ($scope, bridgeService, ngDia
 		console.log("Startup action set for device called: " + device.name);
 		ngDialog.close('ngdialog1');
 		var theValue = 1;
-		if($scope.setDim) {
+		if ($scope.setDim) {
 			theValue = $scope.theState + ":" + $scope.slider.value + ":" + $scope.rgbPicker.color;
 		} else {
 			theValue = $scope.theState + "::" + $scope.rgbPicker.color;
 		}
-		if(theValue == "::")
+		if (theValue == "::")
 			theValue = "";
 		device.startupActions = theValue;
 		bridgeService.addDevice(device).then(
