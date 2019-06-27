@@ -7,9 +7,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class MozillaThing {
 
-    @SerializedName("name")
+    @SerializedName("title")
     @Expose
-    private String name;
+    private String title;
     @SerializedName("type")
     @Expose
     private String type;
@@ -46,14 +46,6 @@ public class MozillaThing {
     @SerializedName("iconHref")
     @Expose
     private Object iconHref;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getType() {
         return type;
@@ -149,6 +141,14 @@ public class MozillaThing {
 
     public void setIconHref(Object iconHref) {
         this.iconHref = iconHref;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
 }

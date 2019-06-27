@@ -75,7 +75,7 @@
 					<td><input type="checkbox" name="bulk.devices[]" value="{{moziotdevice.deviceDetail.name}}"
 							ng-checked="bulk.devices.indexOf(moziotdevice.deviceDetail.name) > -1"
 							ng-click="toggleSelection(moziotdevice.deviceDetail.name)">
-						{{moziotdevice.deviceDetail.name}}</td>
+						{{moziotdevice.deviceDetail.title}}</td>
 					<td>{{moziotdevice.deviceDetail.type}}</td>
 					<td>{{moziotdevice.gatewayName}}</td>
 					<td>
@@ -104,7 +104,7 @@
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h2 class="panel-title">
-			Already Configured OpenHAB Devices <a ng-click="toggleButtons()"><span class={{imgButtonsUrl}}
+			Already Configured Mozilla IOT Devices <a ng-click="toggleButtons()"><span class={{imgButtonsUrl}}
 					aria-hidden="true"></span></a></a>
 		</h2>
 	</div>
