@@ -1,5 +1,5 @@
 # ha-bridge
-Emulates Philips Hue API to other home automation gateways such as an Amazon Echo/Dot Gen 1 (gen 2 has issues discovering ha-bridge) or other systems that support Philips Hue.  The Bridge handles basic commands such as "On", "Off" and "brightness" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
+Emulates Philips Hue API to other home automation gateways such as an Amazon Echo/Dot or other systems that support Philips Hue local network discovery. The ha-bridge is not part of meethue.philips.com so the cloud sign in does not apply to this system.  The Bridge handles basic commands such as "On", "Off", "Brightness" and "Color" commands of the hue protocol.  This bridge can control most devices that have a distinct API.
 
 Here are some diagrams to put this software in perspective.
 
@@ -35,15 +35,13 @@ A Custom implementation path looks like this:
 
 **NOTE: This software does not control Philips Hue devices directly. A physical Philips Hue Hub is required for that, by which the ha-bridge can then proxy all of your real Hue bridges behind this bridge.**
 
-**ISSUE: Amazon Echo (2nd Generation) has issues finding the ha-bridge. The only workaround is to have a first generation Echo or Dot on your network that finds the ha-bridge.**
-
-**ISSUE: Google Home now seems to not support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local API, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
+**ISSUE: Google Home does NOT support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local API, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
 
 **FAQ: Please look here for the current FAQs! https://github.com/bwssytems/ha-bridge/wiki/HA-Bridge-FAQs**
 
-In the cases of systems that require authorization and/or have APIs that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest, Somfy Tahoma, Home Assistant, Domoticz, MQTT, HAL, Fibaro, HomeWizard, LIFX, OpenHAB, FHEM, Broadlink and the ability to proxy all of your real Hue bridges behind this bridge.
+In the cases of systems that require authorization and/or have APIs that cannot be handled in the current method, a module may need to be built. The Harmony Hub is such a module and so is the Nest module. The Bridge has helpers to build devices for the gateway for the Logitech Harmony Hub, Vera, Vera Lite or Vera Edge, Nest, Somfy Tahoma, Home Assistant, Domoticz, MQTT, HAL, Fibaro, HomeWizard, LIFX, OpenHAB, FHEM, Broadlink, Mozilla IOT, HomeGenie and the ability to proxy all of your real Hue bridges behind this bridge.
 
-Alternatively the Bridge supports custom calls as well using http/https/udp and tcp such as the LimitlessLED/MiLight bulbs using the UDP protocol. Binary data is supported with UDP/TCP.
+Alternatively the Bridge supports custom calls and executing programs/scripts as well using http/https/udp and tcp such as the LimitlessLED/MiLight bulbs using the UDP protocol. Binary data is supported with UDP/TCP.
 
 This bridge was built to help put the Internet of Things together.
 ## Build
@@ -264,15 +262,27 @@ java -jar -Dexec.garden=C:\Users\John\bin
 ```
 ## HA Bridge Usage and Configuration
 This section will cover the basics of configuration and where this configuration can be done. This requires that you have started your bridge process and then have pointed your
-favorite web interface by going to the http://<my ip address>:<port> or http://localhost:<port> with port you have assigned. The default quick link is http://localhost for your reference.
+favorite web interface by going to the `http://<my ip address>:<port>` or `http://localhost:<port>` with port you have assigned. The default quick link is http://localhost for your reference.
 ### The Bridge Devices Tab
-This screen allows you to see your devices you have configured for the ha-bridge to present to a controller, such as an Amazon Echo/Dot. It gives you a count of devices as there have been reports that the Echo only supports a limited number, but has been growing as of late, YMMV. You can test each device from this page as this calls the ha-bridge just as a controller would, i.e. the Echo. This is useful to make sure your configuration for each device is correct and for trouble shooting. You can also manages your devices as well by editing and making a new device copy as well as deleting it.
+This screen allows you to see your devices you have configured for the ha-bridge to present to a controller, such as an Amazon Echo/Dot. You can test each device from this page as this calls the ha-bridge just as a controller would, i.e. the Echo. This is useful to make sure your configuration for each device is correct and for trouble shooting. You can also manage your devices as well by editing and making a new device copy as well as deleting it.
 
-At the bottom of the screen is the "Bridge Device DB Backup" which can be accessed with clicking on the `+` to expand this frame. Here you can backup and restore configurations that you have saved. These configs can be named or by clicking the `Backup Device DB' button will create a backup and name it for you. You can manage these backups by restoring them or deleting them.
+Each of the columns are sortable by the use of the little arrow in the upper left corner of the heading.
+
+If you click on the ID number on a Device, this will toggle the ID number to lock/unlock that is used during renumbering. When the ID is '<b>Bolded</b>', it is locked. You can also hover your mouse to see the state. This allows you to renumber a part of your devices and keep the ID for others. All IDs will be unique.
+
+There is a new feature for the Devices that can be selected on the 'Startup' column. If you choose to have certain devices executed when the bridge is started or restarted. You can can click this field to bring up the dialog which will allow you to enter what you want the device to do on startup. The default is to do nothing.
+
+At the bottom of the screen is the "Bridge Device DB Backup" which can be accessed with clicking on the `+` to expand this frame. Here you can backup and restore configurations that you have saved. These configs can be named or by clicking the `Backup Device DB' button will create a backup and name it for you. You can manage these backups by restoring them, deleting them, downloading them by clicking on the file name and uploading a saved device DB backup on your local machine.
 #### Renumber Devices
-This changes the numbering of the added devices to start at 1 and goes up from there. It was originally intended for a conversion from the previous system version that used large numbers and was not necessary. This also allows the system to try and number sequentially. If you use this button, you will need to re-discover your devices as their ID's will have changed.
+This changes the numbering of the added devices to start at the nmuber given in the 'Bridge Control' tab field 'ID Seed' and the default is 100 and goes up from there. It was originally intended for a conversion from the previous system version that used large numbers and was not necessary. This also allows the system to try and number sequentially. If you use this button, you will need to re-discover your devices as their ID's will have changed.
 #### Link
 If this is present, you have enabled the Hue link button feature for the ha-bridge. If you want a new system to recognize the ha-bridge, you will need to press this button when you are doing a discovery.
+#### Manage Links
+If this is present, you have enabled the Hue link button feature for the ha-bridge. This button will bring up a dialog which contains all of the registered users created by linking the ha-bridge with a device. This allows you to revoke control for a created user so that it cannot access the ha-bridge by deleting that link user.
+#### Show devices visible to
+This filter is to sort devices that have an IP filter set. Type in the IP that is used in your device filter field.
+#### Filter device type
+This filter is for a quick method to find specific devices by their type listed in the dropdown.
 ### The Bridge Control Tab
 This is where all of the configuration occurs for what ports and IP's the bridge runs on. It also contains the configurations for target devices so that Helper Tabs for configuration can be added as well as the connection information to control those devices.
 #### Bridge server
@@ -284,7 +294,7 @@ This is where you can set the different security settings for the ha-bridge. The
 #### Configuration Path and File
 The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify `<directory>/<filename>` explicitly.
 #### Device DB Path and File
-The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify `<directory>/<filename>  explicitly.
+The default location for the db to contain the devices as they are added is "data/devices.db". If you would like a different filename or directory, specify `<directory>/<filename>`  explicitly.
 #### UPNP IP Address
 The server defaults to the first available address on the host if this is not given. This default may NOT be the correct IP that is your public IP for your host on the network. It is best to set this parameter to not have discovery issues. Replace this value with the server ipv4 address you would like to use as the address that any upnp device will call after discovery.
 #### Use UPNP Address Interface
@@ -298,9 +308,9 @@ The server defaults to running on port 80. To override what the default is, spec
 #### UPNP Response Port
 The upnp response port that will be used. The default is 50000.  
 #### Vera Names and IP Addresses
-Provide IP Addresses of your Veras that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Vera and device/scene you configure.
+Provide IP Addresses of your Veras that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Vera device/scene you configure.
 #### Fibaro Names and IP Addresses
-Provide IP Addresses of your Fibaros that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Fibaro and device/scene you configure. There are filter switches available to limit some of the returns for devices and scenes such as use save logs, use user description, use only Lili command and a switch that cleans up format Trash Chars. The default filters are false for everything but Trash Chars.
+Provide IP Addresses of your Fibaros that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Fibaro device/scene you configure. There are filter switches available to limit some of the returns for devices and scenes such as use save logs, use user description, use only Lili command and a switch that cleans up format Trash Chars. The default filters are false for everything but Trash Chars.
 #### Harmony Names and IP Addresses
 Provide IP Addresses of your Harmony Hubs that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the activity or buttons by the call it receives and send it to the target Harmony Hub and activity/button you configure. Also, an option of webhook can be called when the activity changes on the harmony hub that will send an HTTP GET call to the the address of your choosing. This can contain the replacement variables of ${activity.id} and/or ${activity.label}. Example : http://192.168.0.1/activity/${activity.id}/${activity.label} OR http://hook?a=${activity.label}
 #### Hue Names and IP Addresses
@@ -308,27 +318,27 @@ Provide IP Addresses of your Hue Bridges that you want to proxy through the brid
 
 Don't forget - You will need to push the link button when you got to the Hue Tab the first time after the process comes up.  (The user name is not persistent when the process comes up.)
 #### HAL Names and IP Addresses
-Provide IP Addresses of your HAL Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target HAL and device/scene you configure.
+Provide IP Addresses of your HAL Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target HAL device you configure.
 #### MQTT Client IDs and IP Addresses
 Provide Client ID and IP Addresses and ports of your MQTT Brokers that you want to utilize with the bridge. Also, you can provide the username and password if you have secured your MQTT broker which is optional. When these Client ID and IP's are given, the bridge will be able to publish MQTT messages by the call it receives and send it to the target MQTT Broker you configure. The MQTT Messages Tab will become available to help you build messages.
 #### Home Assistant Names and IP Addresses
-<Provide IP Addresses and ports of your Home Assistant that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Home Assistant and device/scene you configure. 
+<Provide IP Addresses and ports of your Home Assistant that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Home Assistant device you configure. 
 #### HomeWizard Gateways Names and IP Addresses
-Provide IP Addresses of your HomeWizard Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target HomeWizard and device/scene you configure. 
+Provide IP Addresses of your HomeWizard Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target HomeWizard device you configure. 
 #### Domoticz Names and IP Addresses
-Provide IP Addresses of your Domoticz Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Domoticz and device/scene you configure.
+Provide IP Addresses of your Domoticz Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target Domoticz device you configure.
 #### Somfy Tahoma Names and IP Addresses
 Provide user name and password used to login to www.tahomalink.com.  This needs to be provided if you're using the Somfy Tahoma features (for connecting to IO Homecontrol used by Velux among others). There is no need to give any IP address or host information as this contacts your cloud account.  *Note:* you have to 'turn on' a window to open it, and 'turn off' to close.
 #### OpenHAB Names and IP Addresses
-Provide IP Addresses of your OpenHAB Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target OpenHAB and device/scene you configure. 
+Provide IP Addresses of your OpenHAB Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target OpenHAB device you configure. 
 #### FHEM Names and IP Addresses
-Provide IP Addresses of your FHEM Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target FHEM and device/scene you configure. 
+Provide IP Addresses of your FHEM Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices or scenes by the call it receives and send it to the target FHEM device you configure.
+#### Mozilla IOT Names and IP Addresses
+Provide IP Addresses of your Mozilla IOT Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices by the call it receives and send it to the target Mozilla IOT device you configure.
+#### HomeGenie Names and IP Addresses	
+Provide IP Addresses of your HomeGenie Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices by the call it receives and send it to the target HomeGenie device you configure.
 #### Nest Username
-The user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features. There is no need to give any ip address or host information as this contacts your cloud account.
-#### Nest Password
-The password for the user name of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features.
-#### Nest Temp Fahrenheit
-This setting allows the value being sent into the bridge to be interpreted as Fahrenheit or Celsius. The default is to have Fahrenheit.
+Provide the username and password of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features. There is no need to give any ip address or host information as this contacts your cloud account. Also, you can set Nest Temp Fahrenheit that allows the value being sent into the bridge to be interpreted as Fahrenheit or Celsius. The default is to have Fahrenheit.
 #### LIFX Support
 This setting will have the ha-bridge look for LIFX devices on your network. Since this is broadcast based, there is no other info needed.
 #### Broadlink Support
@@ -343,12 +353,16 @@ This setting is the time used in between button presses when there is multiple b
 This controls how many log messages will be kept and displayed on the log tab. This does not affect what is written to the standard output for logging. The default is 512. Changing this will incur more memory usage of the process.
 #### Trace UPNP Calls
 Turn on tracing for upnp discovery messages to the log. The default is false.
+#### Trace State Changes
+Turn on tracing for calls to the ha-bridge and send these information messages to the log for debugging. This a quick way to watch the state changes without turning the HueMulator debugging. The default is false.
 #### UPNP Send Delay
 This setting is for the upnp spec to delay a certain amount between upnp response messages sent back to a client. This is defaulted to 650ms and can be tuned to any value up to 1500ms.
+#### ID Seed
+The seed that starts numbering from this value and is used in the 'Renumbering' button on the 'Bridge Devices' tab. The defaul for this value is 100.
 #### My Echo URL
 This sets the URL that is used in the menu bar to ge to your echo. For certain countries, this needs to be set to a different URL.
 
-At the bottom of the screen is the "Bridge Settings Backup" which can be accessed with clicking on the `+` to expand this frame. Here you can backup and restore configurations that you have saved. These configs can be named or by clicking the `Backup Settings' button will create a backup and name it for you. You can manage these backups by restoring them or deleting them.
+At the bottom of the screen is the "Bridge Settings Backup" which can be accessed with clicking on the `+` to expand this frame. Here you can backup and restore configurations that you have saved. These configs can be named or by clicking the `Backup Settings' button will create a backup and name it for you. You can manage these backups by restoring them, deleting them, downloading them by clicking on the file name and uploading a saved configuration backup on your local machine.
 ### The Logs Tab
 This screen displays the last 512 or number of rows defined in the config screen of the log so you don't have to go to the output of your process. The `Update Log` button refreshes the log as this screen does not auto refresh. FYI, when the trace upnp setting is turned on in the configuration, the messages will show here.
 
@@ -358,13 +372,13 @@ You must configure devices before you will have anything for the Echo or other c
 #### Helpers
 The easy way to get devices configured is with the use of the helpers for the Vera or Harmony, Nest, Hue and others to create devices that the bridge will present.
 
-For the Helpers, each item being presented from the target system has a button such as `Build Item`, `Build A Button` or specific tasks such as `Temp` for thermostats that is used to create the specific device parameters. The build action buttons will put you into the edit screen. The next thing to check is the name for the bridge device that it is something that makes sense especially if you using the ha-bridge with an Echo or Google Home as this is what the Echo or Google Home will interpret as the device you want. Also, you can go back to any helper tab and click a build action button to add another item for a multi-command. After you are done in the edit tab, click the `Add Bridge Device` to finish that selection setup.
+For the Helpers, each item being presented from the target system has a button such as `Build Item`, `Build A Button` or specific tasks such as `Temp` for thermostats that is used to create the specific device parameters. The build action buttons will put you into the edit screen. The next thing to check is the name for the bridge device that it is something that makes sense especially if you using the ha-bridge with an Echo or Google Home as this is what the Echo or Google Home will interpret as the device you want. Also, you can go back to any helper tab and click a build action button to add another item for a multi-command. After you are done in the edit tab, click the `Add Bridge Device` to finish that selection setup. OR you can go back to any helper and use `Build Item` or as such to add another item into the current device being shown in the `Add/Edit` tab. This allows you to create custom devices that execute many devices at once.
 
 The helper tabs will also show you what you have already configured for that target type. Click on the `+` and you will see them and be able to delete them.
 #### The Add/Edit Tab
-Another way to add a device is through the Manual Add Tab. This allows you to manually enter the name, the on and off URLs and select if there are custom handling with the type of call that can be made. This allows for control of anything that has a distinct request that can be executed so you are not limited to the Vera, Harmony, Nest or other Hue.
+This is the main device editing page to modify details or you can add a device through this tab. This allows you to manually enter the name, the on/dim/off/color items and select if there are custom handling with the type of call that can be made. This allows for control of anything that has a distinct request that can be executed so you are not limited to the Vera, Harmony, Nest or other Hue.
 
-There is a new format for the on/dim/off URL areas. The new editor handles the intricacies of the components, but is broken down here for explanation.
+There is a new format for the on/dim/off/color URL areas. The new editor handles the intricacies of the components, but is broken down here for explanation.
 
 It is imperative when adding a line by hand that you hit the ```Add``` button at the end of the line before adding or updating the whole entry.
 
@@ -443,34 +457,15 @@ Examples:
 ```
 
 #### Multiple Call Construct
-Also available is the ability to specify multiple commands in the On URL, Dim URL and Off URL areas by adding Json constructs listed here. This is only for the types of tcp, udp, http, https or a new exec type. Also within the item format you can specify delay in milliseconds and count per item. These new parameters work on device buttons for the Harmony as well.
-Format Example in the URL areas:
-```
-[{"item":"http://192.168.1.1:8180/do/this/thing","type":"httpDevice"},
-{"item":"http://192.168.1.1:8180/do/the/next/thing","delay":1000,"count":2,"type":"httpDevice"},
-{"item":"http://192.168.1.1:8180/do/another/thing","type":"httpDevice"}]
-
-
-[{"item":"udp://192.168.1.1:5000/0x450555","type":"udpDevice"},
-{"item":"udp://192.168.1.1:5000/0x45${intensity.percent}55","type":"udpDevice"}]
-
-[{"item":"udp://192.168.1.1:5000/0x450555","type":"udpDevice"},
-{"item":"http://192.168.1.1:8180/do/this/thing","type":"httpDevice"},
-{"item":"tcp://192.168.2.1/sendthisdata","type":"tcpDevice"},
-{"item":"https://192.168.12.1/do/this/secure/thing","type":"httpDevice"},
-{"item":"exec://notepad.exe","type":"cmdDevice"}]
-```
+Also available is the ability to specify multiple commands in the On Items, Dim Items, Off Items and Color Items by adding a new line to the item. When doing this manually, make sure to hit the `Add` button to the right of the row. If you do not hit the add button, it will not save when the add or update device buttons are selected. You can also add by going to a helper tab after you have entered the `Add/Edit` tab and using the helpers 'Build' buttons to add a new item line in the respected On/Dim/Off/Color items areas.
 #### Script or Command Execution
 The release as of v2.0.0 will now support the execution of a local script or program. This will blindly fire off a process to run and is bound by the privileges of the java process.
 
 To configure this type of manual add, you will need to select the Device type of "Execute Script/Program".
 
 In the URL areas, the format of the execution is just providing what command line you would like to run, or using the multiple call item construct described above.
-```
-[{"item":"exec://C:\\Users\\John\\Documents\\Applications\\putty.exe 192.168.1.1","type":"cmdDevice"},{"item":"exec://notepad.exe","type":"cmdDevice"}]
 
-[{"item":"/home/pi/scripts/dothisscript.sh","type":"cmdDevice"}]
-```
+If you are running a script on a system, you will need to provide the shell interface it will use before the script such as `sh` or `cmd.exe`.
 #### Value Passing Controls
 There are multiple replacement constructs available to be put into any of the calls except Harmony items, Net Items and HAL items. These constructs are: "${time.format(Java time format string)}", "${intensity.percent}", "${intensity.percent.hex}", "${intensity.decimal_percent}", "${intensity.byte}", "${intensity.byte.hex}", "${intensity.math(using X in your calc)}" and "${intensity.math(using X in your calc).hex}".
 
@@ -523,7 +518,7 @@ To view or remove devices that Alexa knows about, you can use the mobile app `Me
 ## Google Assistant
 Google Home is supported as of v3.2.0 and forward, but only if the bridge is running on port 80.
 
-**ISSUE: Google Home now seems to not support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local API, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
+**ISSUE: Google Home does NOT support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local API, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
 
 Use the Google Home app on a phone to add new "home control" devices by going into `Settings / Home Control / +`
 as described [here](https://support.google.com/googlehome/answer/7124115?hl=en&ref_topic=7125624#homecontrol).

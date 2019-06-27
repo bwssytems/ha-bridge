@@ -39,7 +39,7 @@ public class HomeGenieInstance {
 
         String theData = httpClient.doHttpRequest(aUrl, HttpPut.METHOD_NAME, "application/json", null, httpClient.addBasicAuthHeader(null, homegenieIP));
         log.debug("call Command return is: <<<{}>>>", theData);
-        if (!theData.contains("OK"))
+        if (theData.toLowerCase().contains("error"))
             return false;
         return true;
     }

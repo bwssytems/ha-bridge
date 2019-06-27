@@ -64,7 +64,6 @@
 				<table class="table table-bordered table-striped table-hover">
 					<thead>
 						<tr>
-							<th>Row</th>
 							<th sortable-header col="id" comparator-fn="comparatorUniqueId">ID</th>
 							<th sortable-header col="name">Name</th>
 							<th sortable-header col="description">Description</th>
@@ -78,7 +77,6 @@
 					</thead>
 					<tr ng-repeat="device in bridge.devices | filterDevicesByRequester:bridge.state.filterDevicesByIpAddress:bridge.state.filterDevicesOnlyFiltered:bridge.state.filterDeviceType"
 						row-id="{{device.id}}" ng-class="{info: bridge.viewDevId == device.id}">
-						<td>{{$index+1}}</td>
 						<td title="Locked: {{device.lockDeviceId}} - Click to Toggle" ng-click="toggleLock(device)">
 							<b ng-if="device.lockDeviceId">{{device.id}}</b>
 							<p ng-if="!device.lockDeviceId">{{device.id}}</p>
