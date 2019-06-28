@@ -3667,7 +3667,7 @@ app.controller('HassController', function ($scope, $location, bridgeService, ngD
 			dimpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"on\"}";
 		offpayload = "{\"entityId\":\"" + hassdevice.deviceState.entity_id + "\",\"hassName\":\"" + hassdevice.hassname + "\",\"state\":\"off\"}";
 
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, null, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, hassdevice.domain, "hassDevice", null, null);
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, null, true, hassdevice.hassname + "-" + hassdevice.deviceState.entity_id, hassdevice.deviceState.entity_id, hassdevice.hassname, "switch", "hassDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -3797,7 +3797,7 @@ app.controller('HomeWizardController', function ($scope, $location, bridgeServic
 		onpayload = "{\"deviceid\":\"" + homewizarddevice.id + "\",\"action\":\"on\"}";
 		offpayload = "{\"deviceid\":\"" + homewizarddevice.id + "\",\"action\":\"off\"}";
 
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, null, true, homewizarddevice.id, homewizarddevice.name, homewizarddevice.gateway, null, "homewizardDevice", null, null);
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, null, true, homewizarddevice.id, homewizarddevice.name, homewizarddevice.gateway, "switch", "homewizardDevice", null, null);
 		$scope.device = bridgeService.state.device;
 
 		if (!buildonly) {
@@ -4091,7 +4091,7 @@ app.controller('LifxController', function ($scope, $location, bridgeService, ngD
 		dimpayload = angular.toJson(lifxdevice);
 		onpayload = angular.toJson(lifxdevice);
 		offpayload = angular.toJson(lifxdevice);
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, null, true, lifxdevice.name, lifxdevice.name, lifxdevice.name, null, "lifxDevice", null, null);
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, null, true, lifxdevice.name, lifxdevice.name, lifxdevice.name, "switch", "lifxDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -4392,7 +4392,7 @@ app.controller('OpenHABController', function ($scope, $location, bridgeService, 
 			else
 				colorpayload = null;
 		}
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, openhabdevice.item.name + "-" + openhabdevice.name, openhabdevice.item.name, openhabdevice.name, openhabdevice.item.type, "openhabDevice", null, null);
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, openhabdevice.item.name + "-" + openhabdevice.name, openhabdevice.item.name, openhabdevice.name, "switch", "openhabDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -4534,7 +4534,7 @@ app.controller('MozIotController', function ($scope, $location, bridgeService, n
 		else if (coloraction !== undefined && coloraction !== null && coloraction !== '')
 			colorpayload = "{\"url\":\"" + preCmd + "color\",\"command\":{\"color\":\"" + coloraction + "\"}}";
 
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, moziotdevice.deviceDetail.name + "-" + moziotdevice.deviceDetail.type, moziotdevice.deviceDetail.name, moziotdevice.gatewayName, "Switch", "moziotDevice", null, null);
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, moziotdevice.deviceDetail.title + "-" + moziotdevice.deviceDetail.type, moziotdevice.deviceDetail.title, moziotdevice.gatewayName, "switch", "moziotDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -4678,7 +4678,7 @@ app.controller('FhemController', function ($scope, $location, bridgeService, ngD
 			colorpayload = null;
 		onpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"on\"}";
 		offpayload = "{\"url\":\"http://" + fhemdevice.address + preCmd + "\",\"command\":\"off\"}";
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, fhemdevice.item.Name + "-" + fhemdevice.name, fhemdevice.item.Name, fhemdevice.name, fhemdevice.item.type, "fhemDevice", null, null);
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, fhemdevice.item.Name + "-" + fhemdevice.name, fhemdevice.item.Name, fhemdevice.name, "switch", "fhemDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -4837,7 +4837,7 @@ app.controller('BroadlinkController', function ($scope, $location, bridgeService
 			else
 				colorpayload = null;
 		}
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, broadlinkdevice.id, broadlinkdevice.name, broadlinkdevice.id, broadlinkdevice.desc, "broadlinkDevice", null, null);
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, broadlinkdevice.id, broadlinkdevice.name, broadlinkdevice.id, "switch", "broadlinkDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -4977,7 +4977,7 @@ app.controller('HomeGenieController', function ($scope, $location, bridgeService
 		// else if (coloraction !== undefined && coloraction !== null && coloraction !== '')
 		//	colorpayload = "{\"url\":\"" + preCmd + "color\",\"command\":{\"color\":\"" + coloraction + "\"}}";
 
-		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, homegeniedevice.deviceDetail.Name + "-" + homegeniedevice.deviceDetail.DeviceType, homegeniedevice.deviceDetail.Name, homegeniedevice.gatewayName, homegeniedevice.deviceDetail.DeviceType, "homegenieDevice", null, null);
+		bridgeService.buildUrls(onpayload, dimpayload, offpayload, colorpayload, true, homegeniedevice.deviceDetail.Name + "-" + homegeniedevice.deviceDetail.DeviceType, homegeniedevice.deviceDetail.Name, homegeniedevice.gatewayName, "switch", "homegenieDevice", null, null);
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
