@@ -186,9 +186,7 @@ public class DeviceRepository extends BackupHandler {
 				nextId++;
 			}
 			if (descriptors[i].getUniqueid() == null || descriptors[i].getUniqueid().length() == 0) {
-				String hexValue = HexLibrary.encodeUsingBigIntegerToString(descriptors[i].getId());
-
-				descriptors[i].setUniqueid("00:17:88:5E:D3:" + hexValue + "-" + hexValue);
+				descriptors[i].setUniqueid("00:17:88:5E:D3:" + hueUniqueId(Integer.valueOf(descriptors[i].getId())));
 			}
 			put(descriptors[i].getId(), descriptors[i]);
 			theNames = theNames + " " + descriptors[i].getName() + ", ";
@@ -203,8 +201,6 @@ public class DeviceRepository extends BackupHandler {
 		Iterator<DeviceDescriptor> deviceIterator = list.iterator();
 		Map<String, DeviceDescriptor> newdevices = new HashMap<String, DeviceDescriptor>();
 		List<String> lockedIds = new ArrayList<String>();
-		String hexValue;
-		Integer newValue;
 		DeviceDescriptor theDevice;
 		boolean findNext = true;
 
@@ -230,14 +226,7 @@ public class DeviceRepository extends BackupHandler {
 					}
 				}
 				theDevice.setId(String.valueOf(nextId));
-				newValue = nextId % 256;
-				if (newValue <= 0)
-					newValue = 1;
-				else if (newValue > 255)
-					newValue = 255;
-				hexValue = HexLibrary.encodeUsingBigIntegerToString(newValue.toString());
-
-				theDevice.setUniqueid("00:17:88:5E:D3:" + hexValue + "-" + hexValue);
+				theDevice.setUniqueid("00:17:88:5E:D3:" + hueUniqueId(nextId));
 				nextId++;
 			}
 			newdevices.put(theDevice.getId(), theDevice);
@@ -303,5 +292,30 @@ public class DeviceRepository extends BackupHandler {
 		}
 
 		return content;
+	}
+
+	private String hueUniqueId(Integer anId) {
+		String theUniqueId;
+		Integer newValue;
+		String hexValueLeft;
+		String hexValueRight;
+
+		newValue = anId % 256;
+		if (newValue <= 0)
+			newValue = 1;
+		else if (newValue > 255)
+			newValue = 255;
+		hexValueLeft = HexLibrary.byteToHex(newValue.byteValue());
+		newValue = anId / 256;
+		newValue = newValue % 256;
+		if (newValue < 0)
+			newValue = 0;
+		else if (newValue > 255)
+			newValue = 255;
+		hexValueRight = HexLibrary.byteToHex(newValue.byteValue());
+
+		theUniqueId = String.format("%s-%s", hexValueLeft, hexValueRight).toUpperCase();
+
+		return theUniqueId;
 	}
 }

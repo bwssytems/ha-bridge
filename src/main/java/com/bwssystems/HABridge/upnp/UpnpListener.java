@@ -37,30 +37,30 @@ public class UpnpListener {
 			+ HueConstants.UUID_PREFIX + "%s::urn:schemas-upnp-org:device:basic:1\r\n\r\n";
 	private String responseTemplate1 = "HTTP/1.1 200 OK\r\n" + "HOST: %s:%s\r\n" + "CACHE-CONTROL: max-age=100\r\n"
 			+ "EXT:\r\n" + "LOCATION: http://%s:%s/description.xml\r\n" + "SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/"
-			+ HueConstants.API_VERSION + "\r\n" + "hue-bridgeid: %s\r\n" + "ST: upnp:rootdevice\r\n" + "USN: uuid:"
+			+ HueConstants.API_VERSION + "\r\n" + "HUE-BRIDGEID: %s\r\n" + "ST: upnp:rootdevice\r\n" + "USN: uuid:"
 			+ HueConstants.UUID_PREFIX + "%s::upnp:rootdevice\r\n\r\n";
 	private String responseTemplate2 = "HTTP/1.1 200 OK\r\n" + "HOST: %s:%s\r\n" + "CACHE-CONTROL: max-age=100\r\n"
 			+ "EXT:\r\n" + "LOCATION: http://%s:%s/description.xml\r\n" + "SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/"
-			+ HueConstants.API_VERSION + "\r\n" + "hue-bridgeid: %s\r\n" + "ST: uuid:" + HueConstants.UUID_PREFIX
+			+ HueConstants.API_VERSION + "\r\n" + "HUE-BRIDGEID: %s\r\n" + "ST: uuid:" + HueConstants.UUID_PREFIX
 			+ "%s\r\n" + "USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 	private String responseTemplate3 = "HTTP/1.1 200 OK\r\n" + "HOST: %s:%s\r\n" + "CACHE-CONTROL: max-age=100\r\n"
 			+ "EXT:\r\n" + "LOCATION: http://%s:%s/description.xml\r\n" + "SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/"
-			+ HueConstants.API_VERSION + "\r\n" + "hue-bridgeid: %s\r\n" + "ST: urn:schemas-upnp-org:device:basic:1\r\n"
+			+ HueConstants.API_VERSION + "\r\n" + "HUE-BRIDGEID: %s\r\n" + "ST: urn:schemas-upnp-org:device:basic:1\r\n"
 			+ "USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 
 	private String notifyTemplate = "NOTIFY * HTTP/1.1\r\n" + "HOST: %s:%s\r\n" + "CACHE-CONTROL: max-age=100\r\n"
 			+ "LOCATION: http://%s:%s/description.xml\r\n" + "SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/"
-			+ HueConstants.API_VERSION + "\r\n" + "NTS: ssdp:alive\r\n" + "hue-bridgeid: %s\r\n" + "NT: uuid:"
+			+ HueConstants.API_VERSION + "\r\n" + "NTS: ssdp:alive\r\n" + "HUE-BRIDGEID: %s\r\n" + "NT: uuid:"
 			+ HueConstants.UUID_PREFIX + "%s\r\n" + "USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 
 	private String notifyTemplate2 = "NOTIFY * HTTP/1.1\r\n" + "HOST: %s:%s\r\n" + "CACHE-CONTROL: max-age=100\r\n"
 			+ "LOCATION: http://%s:%s/description.xml\r\n" + "SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/"
-			+ HueConstants.API_VERSION + "\r\n" + "NTS: ssdp:alive\r\n" + "hue-bridgeid: %s\r\n"
+			+ HueConstants.API_VERSION + "\r\n" + "NTS: ssdp:alive\r\n" + "HUE-BRIDGEID: %s\r\n"
 			+ "NT: upnp:rootdevice\r\n" + "USN: uuid:" + HueConstants.UUID_PREFIX + "%s::upnp:rootdevice\r\n\r\n";
 
 	private String notifyTemplate3 = "NOTIFY * HTTP/1.1\r\n" + "HOST: %s:%s\r\n" + "CACHE-CONTROL: max-age=100\r\n"
 			+ "LOCATION: http://%s:%s/description.xml\r\n" + "SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/"
-			+ HueConstants.API_VERSION + "\r\n" + "NTS: ssdp:alive\r\n" + "hue-bridgeid: %s\r\n"
+			+ HueConstants.API_VERSION + "\r\n" + "NTS: ssdp:alive\r\n" + "HUE-BRIDGEID: %s\r\n"
 			+ "NT: urn:schemas-upnp-org:device:basic:1\r\n" + "USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 
 	public UpnpListener(BridgeSettingsDescriptor theSettings, BridgeControlDescriptor theControl,
