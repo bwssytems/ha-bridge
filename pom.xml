@@ -5,7 +5,7 @@
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>5.3.0RC8</version>
+	<version>5.3.0RC9</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
@@ -133,6 +133,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jmdns</groupId>
+			<artifactId>jmdns</artifactId>
+			<version>3.5.5</version>
 		</dependency>
 	</dependencies>
 
