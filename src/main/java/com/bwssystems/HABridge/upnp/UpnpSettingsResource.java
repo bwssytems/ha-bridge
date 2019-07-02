@@ -24,7 +24,7 @@ public class UpnpSettingsResource {
     private BridgeSettingsDescriptor theSettings;
     private BridgeSettings bridgeSettings;
 
-	private String hueTemplate = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
+	private String hueTemplate_pre = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
 			+ "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">\n"
 			+ "<specVersion>\n"
 				+ "<major>1</major>\n"
@@ -41,8 +41,9 @@ public class UpnpSettingsResource {
 				+ "<modelNumber>" + HueConstants.MODEL_ID + "</modelNumber>\n"
 				+ "<modelURL>http://www.meethue.com</modelURL>\n"
 				+ "<serialNumber>%s</serialNumber>\n"
-				+ "<UDN>uuid:" + HueConstants.UUID_PREFIX + "%s</UDN>\n"
-				+ "<presentationURL>index.html</presentationURL>\n"
+				+ "<UDN>uuid:" + HueConstants.UUID_PREFIX + "%s</UDN>\n";
+
+	private String hueTemplate_post = "<presentationURL>index.html</presentationURL>\n"
 					+ "<iconList>\n"
 						+ "<icon>\n"
 							+ "<mimetype>image/png</mimetype>\n"
@@ -62,6 +63,17 @@ public class UpnpSettingsResource {
 				+ "</device>\n"
 			+ "</root>\n";
 
+	private String hueTemplate_mid_orig = "<serviceList>\n"
+			+ "<service>\n"
+				+ "<serviceType>(null)</serviceType>\n"
+				+ "<serviceId>(null)</serviceId>\n"
+				+ "<controlURL>(null)</controlURL>\n"
+				+ "<eventSubURL>(null)</eventSubURL>\n"
+				+ "<SCPDURL>(null)</SCPDURL>\n"
+			+ "</service>\n"
+		+ "</serviceList>\n";
+
+
 	public UpnpSettingsResource(BridgeSettings theBridgeSettings) {
 		super();
 		this.bridgeSettings = theBridgeSettings;
@@ -80,7 +92,16 @@ public class UpnpSettingsResource {
 			
 			String portNumber = Integer.toString(request.port());
 			String filledTemplate = null;
-			String httpLocationAddr = getOutboundAddress(request.ip(), request.port()).getHostAddress();
+			String httpLocationAddr = null;
+			String hueTemplate = null;
+			if(theSettings.isUpnporiginal()) {
+				httpLocationAddr = theSettings.getUpnpConfigAddress();
+				hueTemplate = hueTemplate_pre + hueTemplate_mid_orig + hueTemplate_post;
+			} else {
+				httpLocationAddr = getOutboundAddress(request.ip(), request.port()).getHostAddress();
+				hueTemplate = hueTemplate_pre + hueTemplate_post;
+			}
+
 			String bridgeIdMac = HuePublicConfig.createConfig("temp", httpLocationAddr, HueConstants.HUB_VERSION, theSettings.getHubmac()).getSNUUIDFromMac();
 			filledTemplate = String.format(hueTemplate, httpLocationAddr, portNumber, httpLocationAddr, bridgeIdMac, bridgeIdMac);
 			if(theSettings.isTraceupnp())

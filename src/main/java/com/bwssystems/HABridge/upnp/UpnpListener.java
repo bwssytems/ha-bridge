@@ -12,8 +12,8 @@ import com.bwssystems.HABridge.util.UDPDatagramSender;
 
 import java.io.IOException;
 import java.net.*;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+// import java.time.Instant;
+// import java.time.temporal.ChronoUnit;
 import java.util.Enumeration;
 
 import org.apache.http.conn.util.*;
@@ -63,7 +63,7 @@ public class UpnpListener {
 		"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
 		"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 
-	private String notifyTemplate = "NOTIFY * HTTP/1.1\r\n" +
+	private String notifyTemplate1 = "NOTIFY * HTTP/1.1\r\n" +
 		"HOST: %s:%s\r\n" +
 		"CACHE-CONTROL: max-age=100\r\n" +
 		"LOCATION: http://%s:%s/description.xml\r\n" +
@@ -202,8 +202,8 @@ public class UpnpListener {
 		} catch (SocketException e1) {
 			log.warn("Could not sent soTimeout on multi-cast socket");
 		}
-		Instant current, previous;
-		previous = Instant.now();
+//		Instant current, previous;
+//		previous = Instant.now();
 		while (loopControl) { // trigger shutdown here
 			byte[] buf = new byte[1024];
 			DatagramPacket packet = new DatagramPacket(buf, buf.length);
@@ -379,7 +379,7 @@ public class UpnpListener {
 			// noop
 		}
 
-		notifyData = String.format(notifyTemplate, Configuration.UPNP_MULTICAST_ADDRESS,
+		notifyData = String.format(notifyTemplate1, Configuration.UPNP_MULTICAST_ADDRESS,
 				Configuration.UPNP_DISCOVERY_PORT, upnpConfigIP, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
 		if (traceupnp) {
 			log.info("Traceupnp: sendUpnpNotify notifyTemplate1");
@@ -414,22 +414,6 @@ public class UpnpListener {
 		}
 		log.debug("sendUpnpNotify notifyTemplate3 is <<<{}>>>", notifyData);
 		sendUDPResponse(notifyData.getBytes(), aSocketAddress, Configuration.UPNP_DISCOVERY_PORT);
-	}
-
-	public void sendNotifyDatagram(String notifyData, InetAddress aSocketAddress, String templateNumber) {
-		if (traceupnp) {
-			log.info("Traceupnp: sendUpnpNotify {}", templateNumber);
-		}
-		log.debug("sendUpnpNotify {} is <<<{}>>>", templateNumber, notifyData);
-		DatagramPacket notifyPacket = new DatagramPacket(notifyData.getBytes(), notifyData.length(), aSocketAddress,
-				Configuration.UPNP_DISCOVERY_PORT);
-		try {
-			upnpMulticastSocket.send(notifyPacket);
-		} catch (IOException e1) {
-			log.warn("UpnpListener encountered an error sending upnp {}. IP: {} with message: {}", templateNumber,
-					notifyPacket.getAddress().getHostAddress(), e1.getMessage());
-			log.debug("UpnpListener send {} exception: ", templateNumber, e1);
-		}
 	}
 
 	// added by https://github.com/pvint
