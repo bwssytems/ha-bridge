@@ -1,14 +1,34 @@
         <div class="form-container ngdialog-message" ng-controller="SecurityDialogCtrl">
 
             <form name="securityForm" role="form">
-               <legend class="form-label">Update Security Settings</legend>
+			   <legend class="form-label">Update Security Settings</legend>
+			   
                <div class="form-group">
-						<label>Use Link Button</label>
-					    <input type="checkbox"
+					<label>Use HTTPS</label>
+					<input type="checkbox"
+						ng-model="useHttps" ng-true-value=true
+						ng-false-value=false />  {{useHttps}}
+					<div>
+						<label>Keyfile Path</label>
+						<input id="keyfilePath" name="keyfilePath" class="form-control"
+							type="text" ng-model="keyfilePath" placeholder="the keyfile path"/>
+						<label>Keyfile Password</label>
+						<input id="keyfilePassword" name="keyfilePassword" class="form-control" type="password" ng-model="keyfilePassword"/>
+					</div>
+				</div>
+
+            	<div class="form-group">
+					<label>Use Link Button</label>
+					<input type="checkbox"
 						ng-model="useLinkButton" ng-true-value=true
 						ng-false-value=false /> {{useLinkButton}}
                 </div>
-                <div class="form-group">
+            	<div class="form-group">
+					<label>Exec Garden</label>
+					<input id="execGarden" name="execGarden" class="form-control"
+						type="text" ng-model="execGarden" placeholder="execGarden path"/>
+            	</div>
+				<div class="form-group">
 						<label>Use username/password for HUE Api</label>
 					    <input type="checkbox"
 						ng-model="secureHueApi" ng-true-value=true

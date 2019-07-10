@@ -54,9 +54,13 @@ public class HABridge {
         bridgeSettings = new BridgeSettings();
     	// sparkjava config directive to set html static file location for Jetty
         while(!bridgeSettings.getBridgeControl().isStop()) {
-        	bridgeSettings.buildSettings();
-            bridgeSettings.getBridgeSecurity().removeTestUsers();
             log.info("HA Bridge (v{}) initializing....", theVersion.getVersion() );
+			bridgeSettings.buildSettings();
+			if(bridgeSettings.getBridgeSecurity().isUseHttps()) {
+				secure(bridgeSettings.getBridgeSecurity().getKeyfilePath(), bridgeSettings.getBridgeSecurity().getKeyfilePassword(), null, null);
+				log.info("Using https for web and api calls");
+			}
+            bridgeSettings.getBridgeSecurity().removeTestUsers();
 	        // sparkjava config directive to set ip address for the web server to listen on
 	        ipAddress(bridgeSettings.getBridgeSettingsDescriptor().getWebaddress());
 	        // sparkjava config directive to set port for the web server to listen on

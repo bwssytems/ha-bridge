@@ -9,7 +9,10 @@ public class BridgeSecurityDescriptor {
 	private String execGarden;
 	private boolean secureHueApi;
 	private Map<String, WhitelistEntry> whitelist;
-
+	private boolean useHttps;
+	private String keyfilePassword;
+	private String keyfilePath;
+	
 	public BridgeSecurityDescriptor() {
 		super();
 		this.setUseLinkButton(false);
@@ -66,5 +69,29 @@ public class BridgeSecurityDescriptor {
 		}
 		return secureFlag;
 		
+	}
+
+	public boolean isUseHttps() {
+		return useHttps;
+	}
+
+	public void setUseHttps(boolean useHttps) {
+		this.useHttps = useHttps;
+	}
+
+	public String getKeyfilePassword() {
+		return keyfilePassword;
+	}
+
+	public void setKeyfilePassword(String keyfilePassword) {
+		this.keyfilePassword = keyfilePassword;
+	}
+
+	public String getKeyfilePath() {
+		return keyfilePath;
+	}
+
+	public void setKeyfilePath(String keyfilePath) {
+		this.keyfilePath = keyfilePath;
 	}
 }

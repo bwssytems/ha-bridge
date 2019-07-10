@@ -38,7 +38,7 @@ public class BridgeSecurity {
             (byte) 0xde, (byte) 0x33, (byte) 0x10, (byte) 0x12,
             (byte) 0xde, (byte) 0x33, (byte) 0x10, (byte) 0x12,
         };
-	private char[] habridgeKey;
+	private static char[] habridgeKey;
 	private String execGarden;
     private BridgeSecurityDescriptor securityDescriptor;
 	private boolean settingsChanged;
@@ -146,7 +146,16 @@ public class BridgeSecurity {
 	public String getExecGarden() {
 		return execGarden;
 	}
-	public void setUseLinkButton(boolean useThis) {
+
+	String getKeyfilePath() {
+		return securityDescriptor.getKeyfilePath();
+	}
+
+	String getKeyfilePassword() {
+		return securityDescriptor.getKeyfilePassword();
+	}
+	
+	private void setUseLinkButton(boolean useThis) {
 		securityDescriptor.setUseLinkButton(useThis);
 		settingsChanged = true;
 	}
@@ -155,16 +164,77 @@ public class BridgeSecurity {
 		return securityDescriptor.isSecureHueApi();
 	}
 	
-	public void setSecureHueApi(boolean theState) {
-		securityDescriptor.setSecureHueApi(theState);
+	public boolean isUseHttps() {
+		return securityDescriptor.isUseHttps();
 	}
+
+	public boolean isKeyfilePW() {
+		if(securityDescriptor.getKeyfilePassword() != null && !securityDescriptor.getKeyfilePassword().trim().isEmpty()) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private void setSecureHueApi(boolean theState) {
+		securityDescriptor.setSecureHueApi(theState);
+		settingsChanged = true;
+	}
+
+	private void setUseHttps(boolean usehttps, String keyfilepath, String keyfilepassword) {
+		if(usehttps) {
+			if(!isUseHttps()) {
+				securityDescriptor.setKeyfilePath(keyfilepath);
+				securityDescriptor.setKeyfilePassword(keyfilepassword);
+				securityDescriptor.setUseHttps(usehttps);
+				settingsChanged = true;
+			} else {
+				if(!keyfilepassword.equals("########")) {
+					securityDescriptor.setKeyfilePassword(keyfilepassword);
+					settingsChanged = true;
+				}
+
+				if(!securityDescriptor.getKeyfilePath().equals(keyfilepath)) {
+					securityDescriptor.setKeyfilePath(keyfilepath);
+					settingsChanged = true;
+				}
+			}
+		} else {
+			if(isUseHttps()) {
+				securityDescriptor.setKeyfilePassword("");
+				securityDescriptor.setKeyfilePath("");
+				securityDescriptor.setUseHttps(usehttps);
+				settingsChanged = true;
+			}
+		}
+	}
+
 	public SecurityInfo getSecurityInfo() {
 		SecurityInfo theInfo = new SecurityInfo();
 		theInfo.setUseLinkButton(isUseLinkButton());
 		theInfo.setSecureHueApi(isSecureHueApi());
 		theInfo.setSecure(isSecure());
+		theInfo.setUseHttps(isUseHttps());
+		theInfo.setKeyfilePath(securityDescriptor.getKeyfilePath());
+
+		if(isKeyfilePW()) {
+			theInfo.setKeyfilePassword("########");
+		}
+		else {
+			theInfo.setKeyfilePassword("");
+		}
+		if(isSecure()) {
+			theInfo.setExecGarden(execGarden);
+		}
 		return theInfo;
 	}
+
+	public void setSecurityDataByInfo(SecurityInfo theInfo) {
+		setUseLinkButton(theInfo.isUseLinkButton());
+		setSecureHueApi(theInfo.isSecureHueApi());
+		setUseHttps(theInfo.isUseHttps(), theInfo.getKeyfilePath(), theInfo.getKeyfilePassword());
+	}
+
 	public LoginResult validatePassword(User targetUser) throws IOException {
 		LoginResult result = new LoginResult();
 		if(targetUser != null && targetUser.getUsername() != null) {
@@ -324,7 +394,7 @@ public class BridgeSecurity {
 		}
 	}
 
-	private String encrypt(String property) throws GeneralSecurityException, UnsupportedEncodingException {
+	static String encrypt(String property) throws GeneralSecurityException, UnsupportedEncodingException {
         SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
         SecretKey key = keyFactory.generateSecret(new PBEKeySpec(habridgeKey));
         Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
@@ -336,7 +406,7 @@ public class BridgeSecurity {
         return Base64.getEncoder().encodeToString(bytes);
     }
 
-    private String decrypt(String property) throws GeneralSecurityException, IOException {
+    static String decrypt(String property) throws GeneralSecurityException, IOException {
         SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
         SecretKey key = keyFactory.generateSecret(new PBEKeySpec(habridgeKey));
         Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");

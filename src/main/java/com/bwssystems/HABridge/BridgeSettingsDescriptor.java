@@ -129,6 +129,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("seedid")
 	@Expose
 	private Integer seedid;
+	@SerializedName("haaddressessecured")
+	@Expose
+	private boolean haaddressessecured;
 	// @SerializedName("activeloggers")
 	// @Expose
 	// private List<NameValue> activeloggers;
@@ -188,6 +191,7 @@ public class BridgeSettingsDescriptor {
 		this.tracestate = false;
 		this.upnporiginal = false;
 		this.seedid = 100;
+		this.haaddressessecured = false;
 	}
 
 	public String getUpnpConfigAddress() {
@@ -255,6 +259,7 @@ public class BridgeSettingsDescriptor {
 	}
 
 	public IpList getVeraAddress() {
+
 		return veraaddress;
 	}
 
@@ -835,4 +840,11 @@ public class BridgeSettingsDescriptor {
 		return true;
 	}
 
+	public boolean isHaaddressessecured() {
+		return haaddressessecured;
+	}
+
+	public void setHaaddressessecured(boolean haaddressessecured) {
+		this.haaddressessecured = haaddressessecured;
+	}
 }

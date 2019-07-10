@@ -314,8 +314,7 @@ public class SystemControl {
 		post(SYSTEM_CONTEXT + "/changesecurityinfo", (request, response) -> {
 			log.debug("changesecurityinfo....");
 			SecurityInfo theInfo = new Gson().fromJson(request.body(), SecurityInfo.class);
-			bridgeSettings.getBridgeSecurity().setUseLinkButton(theInfo.isUseLinkButton());
-			bridgeSettings.getBridgeSecurity().setSecureHueApi(theInfo.isSecureHueApi());
+			bridgeSettings.getBridgeSecurity().setSecurityDataByInfo(theInfo);
 			bridgeSettings.save(bridgeSettings.getBridgeSettingsDescriptor());
 	        response.status(HttpStatus.SC_OK);
 			response.type("application/json");

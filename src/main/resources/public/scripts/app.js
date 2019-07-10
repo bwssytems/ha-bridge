@@ -366,12 +366,15 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 		);
 	};
 
-	this.changeSecuritySettings = function (useLinkButton, secureHueApi, execGarden) {
+	this.changeSecuritySettings = function (useLinkButton, secureHueApi, execGarden, useHttps, keyfilePath, keyfilePassword) {
 		var newSecurityInfo = {};
 		newSecurityInfo = {
 			useLinkButton: useLinkButton,
 			secureHueApi: secureHueApi,
-			execGarden: execGarden
+			execGarden: execGarden,
+			useHttps: useHttps,
+			keyfilePath: keyfilePath,
+			keyfilePassword: keyfilePassword
 		};
 		return $http.post(this.state.systemsbase + "/changesecurityinfo", newSecurityInfo).then(
 			function (response) {
@@ -2287,13 +2290,17 @@ app.controller('SecurityDialogCtrl', function ($scope, bridgeService, ngDialog) 
 	$scope.useLinkButton = bridgeService.state.securityInfo.useLinkButton;
 	$scope.execGarden = bridgeService.state.securityInfo.execGarden;
 	$scope.isSecure = bridgeService.state.securityInfo.isSecure;
+	$scope.useHttps = bridgeService.state.securityInfo.useHttps;
+	$scope.keyfilePath = bridgeService.state.securityInfo.keyfilePath;
+	$scope.keyfilePassword = bridgeService.state.securityInfo.keyfilePassword;
+	
 	$scope.matched = false;
 	$scope.addingUser = false;
 	$scope.showPassword = $scope.isSecure;
 	$scope.firstTime = true;
 
 	$scope.setSecurityInfo = function () {
-		bridgeService.changeSecuritySettings($scope.useLinkButton, $scope.secureHueApi, $scope.execGarden);
+		bridgeService.changeSecuritySettings($scope.useLinkButton, $scope.secureHueApi, $scope.execGarden, $scope.useHttps, $scope.keyfilePath, $scope.keyfilePassword);
 	};
 
 	$scope.changePassword = function (password, password2) {
