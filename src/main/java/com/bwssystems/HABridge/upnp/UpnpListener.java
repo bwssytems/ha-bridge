@@ -15,6 +15,7 @@ import java.net.*;
 // import java.time.Instant;
 // import java.time.temporal.ChronoUnit;
 import java.util.Enumeration;
+import java.util.HashMap;
 
 import org.apache.http.conn.util.*;
 import javax.jmdns.JmDNS;
@@ -183,10 +184,13 @@ public class UpnpListener {
 			log.info("Create and run mDNS service.");
 			try {
 				// Create a JmDNS instance
-				jmdns = JmDNS.create(theUpnpAddress);
+				jmdns = JmDNS.create(theUpnpAddress, "Philips-hue");
 
 				// Register a service - Defined TXT keys: bridgeid, modelid
-				ServiceInfo serviceInfo = ServiceInfo.create("_hue._tcp.local.", "hue", httpServerPort, "modelid=" + HueConstants.MODEL_ID + "\" \"bridgeid=" + bridgeId);
+				final HashMap<String, String> values = new HashMap<String, String>();
+				values.put("modelid", HueConstants.MODEL_ID);
+				values.put("bridgeid", bridgeId);
+				ServiceInfo serviceInfo = ServiceInfo.create("_hue._tcp.local.", "Philips Hue - " + bridgeId.substring(bridgeId.length() - 6), httpServerPort, 0, 0, values);
 				jmdns.registerService(serviceInfo);
 
 			} catch (IOException e) {
