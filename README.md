@@ -290,7 +290,31 @@ This field is used to test the bridge server with the UPNP IP Address and to mak
 #### Bridge Control Buttons
 These buttons are for managing the bridge. The Save button is enabled when there is a change to the configuration. The Bridge Reinitialize button will recycle the internal running of the bridge in the java process. The Stop button will stop the java process. The Refresh button will refresh the page and settings.
 #### The Security Dialog
-This is where you can set the different security settings for the ha-bridge. There are two settings, one for enabling Hue like operation to secure the Hue API with the internally generated user for the calls that are done after the link button. The other is to secure the hue API with a username/password that is created as well. The other fields are to add and delete users and to set and change passwords for those users. If there are no users in the system, the system will not require a username/password to operate.
+This is where you can set the different security settings for the ha-bridge. The settings are the https enablement with the Keyfile path and password and described below, enabling Hue like operation to secure the Hue API with the internally generated user for the calls that are done after the link button. Another is to secure the hue API with a username/password that is created as well. The last one is the path to the exec garden if used for only allowing scripts and programs to be executed from this location only. The other fields are to add and delete users and to set and change passwords for those users. If there are no users in the system, the system will not require a username/password to operate.
+
+The use https selection will require you to generate a java keytool keystore file for the ha-bridge to use. This will require the path to the keyfile and the password that was used to secure the keyfile. There are mulitple ways to add the key file. The basic way is to generate a self signed keystore using keytool as follows:
+
+Step 1. Open the command console
+
+Step 2. Run this command (Where indicate the number of days for which the certificate will be valid)
+keytool -genkey -keyalg RSA -alias selfsigned -keystore keystore.jks -storepass ```<password>``` -validity 365 -keysize 2048
+
+Step 3. Enter a password for the keystore. Note this ```<password>``` as you require this for configuring the server
+
+Step 4. When prompted for first name and last name, enter the domain name of the server. For example, myserver or myserver.mycompany.com.
+
+Step 5. Enter the other details, such as Organizational Unit, Organization, City, State, and Country.
+
+Step 6. When prompted with Enter key ```<password>``` for , press Enter to use the same ```<password>``` as the keystore ```<password>```
+
+Step 7. Run this command to verify the contents of the keystore
+keytool -list -v -keystore selfsigned.jks
+
+Step 8. When prompted, enter the keystore password note in Step 3. The basic information about the generated certificate is displayed. Verify that the Owner and Issuer are the same. Also, you should see the information you provided in Step 4 and 5.
+
+The second way is to acquire a certified certificate to use in the keyfile. Such way to get one is use letsencrypt. Once you have the certifcate files you can follow this to create the keystore: https://community.letsencrypt.org/t/tutorial-java-keystores-jks-with-lets-encrypt/34754.
+
+The easiest place to keep the keystore files is in your ha bridge data directory.
 #### Configuration Path and File
 The default location for the configuration file to contain the settings for the bridge is the relative path from where the bridge is started in "data/habridge.config". If you would like a different filename or directory, specify `<directory>/<filename>` explicitly.
 #### Device DB Path and File
@@ -336,7 +360,7 @@ Provide IP Addresses of your FHEM Systems that you want to utilize with the brid
 #### Mozilla IOT Names and IP Addresses
 Provide IP Addresses of your Mozilla IOT Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices by the call it receives and send it to the target Mozilla IOT device you configure.
 #### HomeGenie Names and IP Addresses	
-Provide IP Addresses of your HomeGenie Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices by the call it receives and send it to the target HomeGenie device you configure.
+Provide IP Addresses of your HomeGenie Systems that you want to utilize with the bridge. Also, give a meaningful name to each one so it is easy to decipher in the helper tab. When these names and IP's are given, the bridge will be able to control the devices by the call it receives and send it to the target HomeGenie device you configure. There is an extra Other Types field that you can add types that are not within the defualt of "light", "Switch" and "Dimmer" that you may want to control.
 #### Nest Username
 Provide the username and password of the home.nest.com account for the Nest user. This needs to be given if you are using the Nest features. There is no need to give any ip address or host information as this contacts your cloud account. Also, you can set Nest Temp Fahrenheit that allows the value being sent into the bridge to be interpreted as Fahrenheit or Celsius. The default is to have Fahrenheit.
 #### LIFX Support
