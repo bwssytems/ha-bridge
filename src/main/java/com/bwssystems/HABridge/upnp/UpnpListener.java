@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bwssystems.HABridge.BridgeControlDescriptor;
-import com.bwssystems.HABridge.BridgeSettingsDescriptor;
+import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.Configuration;
 import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.HuePublicConfig;
@@ -34,13 +34,14 @@ public class UpnpListener {
 	private BridgeControlDescriptor bridgeControl;
 	private String bridgeId;
 	private String bridgeSNUUID;
+	private String httpType;
 	private HuePublicConfig aHueConfig;
 	private Integer theUpnpSendDelay;
 	private String responseTemplate1 = "HTTP/1.1 200 OK\r\n" +
 		"HOST: %s:%s\r\n" +
 		"CACHE-CONTROL: max-age=100\r\n" + 
 		"EXT:\r\n" +
-		"LOCATION: http://%s:%s/description.xml\r\n" +
+		"LOCATION: %s://%s:%s/description.xml\r\n" +
 		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
 		"HUE-BRIDGEID: %s\r\n" +
 		"ST: upnp:rootdevice\r\n" +
@@ -49,7 +50,7 @@ public class UpnpListener {
 		"HOST: %s:%s\r\n" +
 		"CACHE-CONTROL: max-age=100\r\n" +
 		"EXT:\r\n" +
-		"LOCATION: http://%s:%s/description.xml\r\n" +
+		"LOCATION: %s://%s:%s/description.xml\r\n" +
 		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
 		"HUE-BRIDGEID: %s\r\n" +
 		"ST: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n" +
@@ -58,7 +59,7 @@ public class UpnpListener {
 		"HOST: %s:%s\r\n" +
 		"CACHE-CONTROL: max-age=100\r\n" +
 		"EXT:\r\n" +
-		"LOCATION: http://%s:%s/description.xml\r\n" +
+		"LOCATION: %s://%s:%s/description.xml\r\n" +
 		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
 		"HUE-BRIDGEID: %s\r\n" +
 		"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
@@ -67,7 +68,7 @@ public class UpnpListener {
 	private String notifyTemplate1 = "NOTIFY * HTTP/1.1\r\n" +
 		"HOST: %s:%s\r\n" +
 		"CACHE-CONTROL: max-age=100\r\n" +
-		"LOCATION: http://%s:%s/description.xml\r\n" +
+		"LOCATION: %s://%s:%s/description.xml\r\n" +
 		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
 		"NTS: ssdp:alive\r\n" +
 		"HUE-BRIDGEID: %s\r\n" +
@@ -77,7 +78,7 @@ public class UpnpListener {
 	private String notifyTemplate2 = "NOTIFY * HTTP/1.1\r\n" +
 		"HOST: %s:%s\r\n" +
 		"CACHE-CONTROL: max-age=100\r\n" +
-		"LOCATION: http://%s:%s/description.xml\r\n" +
+		"LOCATION: %s://%s:%s/description.xml\r\n" +
 		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
 		"NTS: ssdp:alive\r\n" + "HUE-BRIDGEID: %s\r\n" 	+
 		"NT: upnp:rootdevice\r\n" +
@@ -86,30 +87,36 @@ public class UpnpListener {
 	private String notifyTemplate3 = "NOTIFY * HTTP/1.1\r\n" +
 		"HOST: %s:%s\r\n" +
 		"CACHE-CONTROL: max-age=100\r\n" +
-		"LOCATION: http://%s:%s/description.xml\r\n" +
+		"LOCATION: %s://%s:%s/description.xml\r\n" +
 		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
 		"NTS: ssdp:alive\r\n" +
 		"HUE-BRIDGEID: %s\r\n" +
 		"NT: urn:schemas-upnp-org:device:basic:1\r\n" +
 		"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 
-	public UpnpListener(BridgeSettingsDescriptor theSettings, BridgeControlDescriptor theControl,
+	public UpnpListener(BridgeSettings theSettings, BridgeControlDescriptor theControl,
 			UDPDatagramSender aUdpDatagramSender) throws IOException {
 		super();
 		theUDPDatagramSender = aUdpDatagramSender;
 		upnpMulticastSocket = null;
-		httpServerPort = Integer.valueOf(theSettings.getServerPort());
-		upnpConfigIP = theSettings.getUpnpConfigAddress();
+		httpServerPort = Integer.valueOf(theSettings.getBridgeSettingsDescriptor().getServerPort());
+		upnpConfigIP = theSettings.getBridgeSettingsDescriptor().getUpnpConfigAddress();
 		// strict = theSettings.isUpnpStrict();
-		upnpOriginal = theSettings.isUpnporiginal();
-		traceupnp = theSettings.isTraceupnp();
-		useUpnpIface = theSettings.isUseupnpiface();
-		theUpnpSendDelay = theSettings.getUpnpsenddelay();
+		upnpOriginal = theSettings.getBridgeSettingsDescriptor().isUpnporiginal();
+		traceupnp = theSettings.getBridgeSettingsDescriptor().isTraceupnp();
+		useUpnpIface = theSettings.getBridgeSettingsDescriptor().isUseupnpiface();
+		theUpnpSendDelay = theSettings.getBridgeSettingsDescriptor().getUpnpsenddelay();
 		bridgeControl = theControl;
 		aHueConfig = HuePublicConfig.createConfig("temp", upnpConfigIP, HueConstants.HUB_VERSION,
-				theSettings.getHubmac());
+				theSettings.getBridgeSettingsDescriptor().getHubmac());
 		bridgeId = aHueConfig.getBridgeid();
 		bridgeSNUUID = aHueConfig.getSNUUIDFromMac();
+		if(theSettings.getBridgeSecurity().isUseHttps()) {
+			httpType = "https";
+		} else {
+			httpType = "http";
+		}
+
 		try {
 			if (useUpnpIface)
 				upnpMulticastSocket = new MulticastSocket(
@@ -321,7 +328,7 @@ public class UpnpListener {
 			// noop
 		}
 
-			discoveryResponse = String.format(responseTemplate1, Configuration.UPNP_MULTICAST_ADDRESS,
+			discoveryResponse = String.format(responseTemplate1, httpType, Configuration.UPNP_MULTICAST_ADDRESS,
 					Configuration.UPNP_DISCOVERY_PORT, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID);
 			if (traceupnp) {
 				log.info("Traceupnp: send upnp discovery template 1 with response address: " + httpLocationAddress + ":"
@@ -336,7 +343,7 @@ public class UpnpListener {
 			} catch (InterruptedException e) {
 				// noop
 			}
-			discoveryResponse = String.format(responseTemplate2, Configuration.UPNP_MULTICAST_ADDRESS,
+			discoveryResponse = String.format(responseTemplate2, httpType, Configuration.UPNP_MULTICAST_ADDRESS,
 					Configuration.UPNP_DISCOVERY_PORT, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID,
 					bridgeSNUUID);
 			if (traceupnp) {
@@ -352,7 +359,7 @@ public class UpnpListener {
 			} catch (InterruptedException e) {
 				// noop
 			}
-			discoveryResponse = String.format(responseTemplate3, Configuration.UPNP_MULTICAST_ADDRESS,
+			discoveryResponse = String.format(responseTemplate3, httpType, Configuration.UPNP_MULTICAST_ADDRESS,
 					Configuration.UPNP_DISCOVERY_PORT, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID);
 			if (traceupnp) {
 				log.info("Traceupnp: send upnp discovery template 3 with response address: " + httpLocationAddress + ":"
@@ -383,7 +390,7 @@ public class UpnpListener {
 			// noop
 		}
 
-		notifyData = String.format(notifyTemplate1, Configuration.UPNP_MULTICAST_ADDRESS,
+		notifyData = String.format(notifyTemplate1, httpType, Configuration.UPNP_MULTICAST_ADDRESS,
 				Configuration.UPNP_DISCOVERY_PORT, upnpConfigIP, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
 		if (traceupnp) {
 			log.info("Traceupnp: sendUpnpNotify notifyTemplate1");
@@ -397,7 +404,7 @@ public class UpnpListener {
 			// noop
 		}
 
-		notifyData = String.format(notifyTemplate2, Configuration.UPNP_MULTICAST_ADDRESS,
+		notifyData = String.format(notifyTemplate2, httpType, Configuration.UPNP_MULTICAST_ADDRESS,
 				Configuration.UPNP_DISCOVERY_PORT, upnpConfigIP, httpServerPort, bridgeId, bridgeSNUUID);
 		if (traceupnp) {
 			log.info("Traceupnp: sendUpnpNotify notifyTemplate2");
@@ -411,7 +418,7 @@ public class UpnpListener {
 			// noop
 		}
 
-		notifyData = String.format(notifyTemplate3, Configuration.UPNP_MULTICAST_ADDRESS,
+		notifyData = String.format(notifyTemplate3, httpType, Configuration.UPNP_MULTICAST_ADDRESS,
 				Configuration.UPNP_DISCOVERY_PORT, upnpConfigIP, httpServerPort, bridgeId, bridgeSNUUID);
 		if (traceupnp) {
 			log.info("Traceupnp: sendUpnpNotify notifyTemplate3");

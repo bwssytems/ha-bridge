@@ -112,7 +112,7 @@ public class HABridge {
 		        // start the upnp ssdp discovery listener
 		        theUpnpListener = null;
 		        try {
-					theUpnpListener = new UpnpListener(bridgeSettings.getBridgeSettingsDescriptor(), bridgeSettings.getBridgeControl(), udpSender);
+					theUpnpListener = new UpnpListener(bridgeSettings, bridgeSettings.getBridgeControl(), udpSender);
 				} catch (IOException e) {
 					log.error("Could not initialize UpnpListener, exiting....", e);
 					theUpnpListener = null;
