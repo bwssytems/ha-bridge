@@ -43,7 +43,7 @@ public class UpnpListener {
 		"EXT:\r\n" +
 		"LOCATION: %s://%s:%s/description.xml\r\n" +
 		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
-		"HUE-BRIDGEID: %s\r\n" +
+		"hue-bridgeid: %s\r\n" +
 		"ST: upnp:rootdevice\r\n" +
 		"USN: uuid:" + HueConstants.UUID_PREFIX + "%s::upnp:rootdevice\r\n\r\n";
 	private String responseTemplate2 = "HTTP/1.1 200 OK\r\n" +
@@ -52,7 +52,7 @@ public class UpnpListener {
 		"EXT:\r\n" +
 		"LOCATION: %s://%s:%s/description.xml\r\n" +
 		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
-		"HUE-BRIDGEID: %s\r\n" +
+		"hue-bridgeid: %s\r\n" +
 		"ST: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n" +
 		"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 	private String responseTemplate3 = "HTTP/1.1 200 OK\r\n" +
@@ -61,7 +61,7 @@ public class UpnpListener {
 		"EXT:\r\n" +
 		"LOCATION: %s://%s:%s/description.xml\r\n" +
 		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
-		"HUE-BRIDGEID: %s\r\n" +
+		"hue-bridgeid: %s\r\n" +
 		"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
 		"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 
@@ -71,7 +71,7 @@ public class UpnpListener {
 		"LOCATION: %s://%s:%s/description.xml\r\n" +
 		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
 		"NTS: ssdp:alive\r\n" +
-		"HUE-BRIDGEID: %s\r\n" +
+		"hue-bridgeid: %s\r\n" +
 		"NT: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n" +
 		"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 
@@ -80,7 +80,8 @@ public class UpnpListener {
 		"CACHE-CONTROL: max-age=100\r\n" +
 		"LOCATION: %s://%s:%s/description.xml\r\n" +
 		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
-		"NTS: ssdp:alive\r\n" + "HUE-BRIDGEID: %s\r\n" 	+
+		"NTS: ssdp:alive\r\n" +
+		"hue-bridgeid: %s\r\n" 	+
 		"NT: upnp:rootdevice\r\n" +
 		"USN: uuid:" + HueConstants.UUID_PREFIX + "%s::upnp:rootdevice\r\n\r\n";
 
@@ -90,7 +91,7 @@ public class UpnpListener {
 		"LOCATION: %s://%s:%s/description.xml\r\n" +
 		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
 		"NTS: ssdp:alive\r\n" +
-		"HUE-BRIDGEID: %s\r\n" +
+		"hue-bridgeid: %s\r\n" +
 		"NT: urn:schemas-upnp-org:device:basic:1\r\n" +
 		"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 
