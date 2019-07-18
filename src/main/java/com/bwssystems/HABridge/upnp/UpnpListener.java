@@ -329,8 +329,8 @@ public class UpnpListener {
 			// noop
 		}
 
-			discoveryResponse = String.format(responseTemplate1, httpType, Configuration.UPNP_MULTICAST_ADDRESS,
-					Configuration.UPNP_DISCOVERY_PORT, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID);
+			discoveryResponse = String.format(responseTemplate1, Configuration.UPNP_MULTICAST_ADDRESS,
+					Configuration.UPNP_DISCOVERY_PORT, httpType, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID);
 			if (traceupnp) {
 				log.info("Traceupnp: send upnp discovery template 1 with response address: " + httpLocationAddress + ":"
 						+ httpServerPort + " to address: " + requester + ":" + sourcePort);
@@ -344,8 +344,8 @@ public class UpnpListener {
 			} catch (InterruptedException e) {
 				// noop
 			}
-			discoveryResponse = String.format(responseTemplate2, httpType, Configuration.UPNP_MULTICAST_ADDRESS,
-					Configuration.UPNP_DISCOVERY_PORT, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID,
+			discoveryResponse = String.format(responseTemplate2, Configuration.UPNP_MULTICAST_ADDRESS,
+					Configuration.UPNP_DISCOVERY_PORT, httpType, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID,
 					bridgeSNUUID);
 			if (traceupnp) {
 				log.info("Traceupnp: send upnp discovery template 2 with response address: " + httpLocationAddress + ":"
@@ -360,8 +360,8 @@ public class UpnpListener {
 			} catch (InterruptedException e) {
 				// noop
 			}
-			discoveryResponse = String.format(responseTemplate3, httpType, Configuration.UPNP_MULTICAST_ADDRESS,
-					Configuration.UPNP_DISCOVERY_PORT, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID);
+			discoveryResponse = String.format(responseTemplate3,Configuration.UPNP_MULTICAST_ADDRESS,
+					Configuration.UPNP_DISCOVERY_PORT,  httpType, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID);
 			if (traceupnp) {
 				log.info("Traceupnp: send upnp discovery template 3 with response address: " + httpLocationAddress + ":"
 						+ httpServerPort + " to address: " + requester + ":" + sourcePort);
@@ -391,8 +391,8 @@ public class UpnpListener {
 			// noop
 		}
 
-		notifyData = String.format(notifyTemplate1, httpType, Configuration.UPNP_MULTICAST_ADDRESS,
-				Configuration.UPNP_DISCOVERY_PORT, upnpConfigIP, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
+		notifyData = String.format(notifyTemplate1, Configuration.UPNP_MULTICAST_ADDRESS,
+				Configuration.UPNP_DISCOVERY_PORT, httpType, upnpConfigIP, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
 		if (traceupnp) {
 			log.info("Traceupnp: sendUpnpNotify notifyTemplate1");
 		}
@@ -405,8 +405,8 @@ public class UpnpListener {
 			// noop
 		}
 
-		notifyData = String.format(notifyTemplate2, httpType, Configuration.UPNP_MULTICAST_ADDRESS,
-				Configuration.UPNP_DISCOVERY_PORT, upnpConfigIP, httpServerPort, bridgeId, bridgeSNUUID);
+		notifyData = String.format(notifyTemplate2, Configuration.UPNP_MULTICAST_ADDRESS,
+				Configuration.UPNP_DISCOVERY_PORT, httpType, upnpConfigIP, httpServerPort, bridgeId, bridgeSNUUID);
 		if (traceupnp) {
 			log.info("Traceupnp: sendUpnpNotify notifyTemplate2");
 		}
@@ -419,8 +419,8 @@ public class UpnpListener {
 			// noop
 		}
 
-		notifyData = String.format(notifyTemplate3, httpType, Configuration.UPNP_MULTICAST_ADDRESS,
-				Configuration.UPNP_DISCOVERY_PORT, upnpConfigIP, httpServerPort, bridgeId, bridgeSNUUID);
+		notifyData = String.format(notifyTemplate3, Configuration.UPNP_MULTICAST_ADDRESS,
+				Configuration.UPNP_DISCOVERY_PORT, httpType, upnpConfigIP, httpServerPort, bridgeId, bridgeSNUUID);
 		if (traceupnp) {
 			log.info("Traceupnp: sendUpnpNotify notifyTemplate3");
 		}
