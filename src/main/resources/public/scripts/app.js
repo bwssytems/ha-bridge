@@ -367,6 +367,18 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 	};
 
 	this.changeSecuritySettings = function (useLinkButton, secureHueApi, execGarden, useHttps, keyfilePath, keyfilePassword) {
+		if(useHttps) {
+			if(!keyfilePassword || keyfilePassword.length == 0 || !keyfilePassword.trim()) {
+				self.displayErrorMessage("Use HTTPS - ", "Key File Password cannot be empty.");
+				return;
+			}
+
+			if(!keyfilePath || keyfilePath.length == 0 || !keyfilePath.trim()) {
+				self.displayErrorMessage("Use HTTPS - ", "Key File Path cannot be empty.");
+				return;
+			}
+		}
+
 		var newSecurityInfo = {};
 		newSecurityInfo = {
 			useLinkButton: useLinkButton,
@@ -376,6 +388,7 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 			keyfilePath: keyfilePath,
 			keyfilePassword: keyfilePassword
 		};
+
 		return $http.post(this.state.systemsbase + "/changesecurityinfo", newSecurityInfo).then(
 			function (response) {
 				self.state.securityInfo = response.data;
@@ -2082,21 +2095,25 @@ app.controller('SystemController', function ($scope, $location, bridgeService, n
 		}
 
 		var othertypes = [];
-		othertypes = newhomegenieothertypes.split(",");
-		var theModuleTypes = [];
 		var count = 0;
-		if (othertypes.length > 0) {
-			for (var i = 0; i < othertypes.length; i++) {
-				var aType = othertypes[i].trim();
-				if (aType.length > 0) {
-					var moduleType = {
-						moduleType: aType
-					};
-					theModuleTypes.push(moduleType);
-					count++;
+		var theModuleTypes = [];
+
+		if(newhomegenieothertypes && newhomegenieothertypes.trim() && newhomegenieothertypes.length > 0) {
+			othertypes = newhomegenieothertypes.split(",");
+			if (othertypes.length > 0) {
+				for (var i = 0; i < othertypes.length; i++) {
+					var aType = othertypes[i].trim();
+					if (aType.length > 0) {
+						var moduleType = {
+							moduleType: aType
+						};
+						theModuleTypes.push(moduleType);
+						count++;
+					}
 				}
 			}
 		}
+
 		var theExtension;
 		if (count == 0) {
 			theExtension = undefined;

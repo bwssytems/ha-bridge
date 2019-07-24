@@ -15,6 +15,8 @@ import com.bwssystems.HABridge.upnp.UpnpSettingsResource;
 import com.bwssystems.HABridge.util.UDPDatagramSender;
 
 public class HABridge {
+	private static SystemControl theSystem;
+	private static boolean secureFailed;
 	
 	/*
 	 * This program is based on the work of armzilla from this github repository:
@@ -39,13 +41,13 @@ public class HABridge {
         UDPDatagramSender udpSender;
         UpnpSettingsResource theSettingResponder;
         UpnpListener theUpnpListener;
-        SystemControl theSystem;
         BridgeSettings bridgeSettings;
         Version theVersion;
     	@SuppressWarnings("unused")
 		HttpClientPool thePool;
 		ShutdownHook shutdownHook = null;
 
+		secureFailed = false;
         log.info("HA Bridge startup sequence...");
         theVersion = new Version();
         // Singleton initialization
@@ -56,7 +58,7 @@ public class HABridge {
         while(!bridgeSettings.getBridgeControl().isStop()) {
             log.info("HA Bridge (v{}) initializing....", theVersion.getVersion() );
 			bridgeSettings.buildSettings();
-			if(bridgeSettings.getBridgeSecurity().isUseHttps()) {
+			if(bridgeSettings.getBridgeSecurity().isUseHttps() && !secureFailed) {
 				secure(bridgeSettings.getBridgeSecurity().getKeyfilePath(), bridgeSettings.getBridgeSecurity().getKeyfilePassword(), null, null);
 				log.info("Using https for web and api calls");
 			}
@@ -153,8 +155,14 @@ public class HABridge {
     }
     
     private static void theExceptionHandler(Exception e, Integer thePort) {
-        Logger log = LoggerFactory.getLogger(HABridge.class);
+		Logger log = LoggerFactory.getLogger(HABridge.class);
+		if(e.getMessage().equals("no valid keystore")) {
+			log.error("Could not start ha-bridge using https webservice on port [{}] due to: {}", thePort, e.getMessage());
+			secureFailed = true;
+			theSystem.reinit();
+			return;
+		}
     	log.error("Could not start ha-bridge webservice on port [{}] due to: {}", thePort, e.getMessage());
     	System.exit(0);
-    }
+	}
 }
