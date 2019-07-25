@@ -16,7 +16,6 @@ import com.bwssystems.HABridge.util.UDPDatagramSender;
 
 public class HABridge {
 	private static SystemControl theSystem;
-	private static boolean secureFailed;
 	
 	/*
 	 * This program is based on the work of armzilla from this github repository:
@@ -47,7 +46,6 @@ public class HABridge {
 		HttpClientPool thePool;
 		ShutdownHook shutdownHook = null;
 
-		secureFailed = false;
         log.info("HA Bridge startup sequence...");
         theVersion = new Version();
         // Singleton initialization
@@ -58,7 +56,7 @@ public class HABridge {
         while(!bridgeSettings.getBridgeControl().isStop()) {
             log.info("HA Bridge (v{}) initializing....", theVersion.getVersion() );
 			bridgeSettings.buildSettings();
-			if(bridgeSettings.getBridgeSecurity().isUseHttps() && !secureFailed) {
+			if(bridgeSettings.getBridgeSecurity().isUseHttps()) {
 				secure(bridgeSettings.getBridgeSecurity().getKeyfilePath(), bridgeSettings.getBridgeSecurity().getKeyfilePassword(), null, null);
 				log.info("Using https for web and api calls");
 			}
@@ -156,13 +154,13 @@ public class HABridge {
     
     private static void theExceptionHandler(Exception e, Integer thePort) {
 		Logger log = LoggerFactory.getLogger(HABridge.class);
-		if(e.getMessage().equals("no valid keystore")) {
-			log.error("Could not start ha-bridge using https webservice on port [{}] due to: {}", thePort, e.getMessage());
-			secureFailed = true;
-			theSystem.reinit();
-			return;
+		if(e.getMessage().equals("no valid keystore") || e.getMessage().equals("keystore password was incorrect")) {
+			log.error("Https settings have been removed as {}. Restart system manually after this process exits....", e.getMessage());
+			log.warn(theSystem.removeHttpsSettings());
 		}
-    	log.error("Could not start ha-bridge webservice on port [{}] due to: {}", thePort, e.getMessage());
-    	System.exit(0);
+		else {
+			log.error("Could not start ha-bridge webservice on port [{}] due to: {}", thePort, e.getMessage());
+			log.warn(theSystem.stop());
+		}
 	}
 }

@@ -598,7 +598,12 @@ public class SystemControl {
         	log.warn("Error pinging listener. " + e.getMessage());
         }
     }
-    
+	
+	public String removeHttpsSettings() {
+		bridgeSettings.getBridgeSecurity().removeHttpsSettings();
+    	return stop();
+	}
+
     public String reinit() {
     	bridgeSettings.getBridgeControl().setReinit(true);
     	pingListener();

@@ -133,6 +133,11 @@ public class UpnpListener {
 	}
 
 	public boolean startListening() {
+		if (bridgeControl.isReinit() || bridgeControl.isStop()) {
+			log.warn("UPNP Listener exiting as reinit or stop requested....");
+			return false;
+		}
+
 		log.info("UPNP Discovery Listener starting....");
 		Enumeration<NetworkInterface> ifs = null;
 
@@ -204,6 +209,11 @@ public class UpnpListener {
 			} catch (IOException e) {
 				log.warn("Could not start mDNS service for hue api. {}", e.getMessage());
 			}
+		}
+
+		if (bridgeControl.isReinit() || bridgeControl.isStop()) {
+			log.warn("UPNP Listener exiting as reinit or stop requested....");
+			return false;
 		}
 
 		log.info("UPNP Discovery Listener running and ready....");

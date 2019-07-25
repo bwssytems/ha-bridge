@@ -376,6 +376,13 @@ public class BridgeSecurity {
 
 		return newUser;
 	}
+
+	public void removeHttpsSettings() {
+		securityDescriptor.setUseHttps(false);
+		securityDescriptor.setKeyfilePassword(null);
+		securityDescriptor.setKeyfilePath(null);
+		setSettingsChanged(true);
+	}
 	
 	public void removeTestUsers() {
 		if (securityDescriptor.getWhitelist() != null) {
