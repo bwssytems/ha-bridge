@@ -40,7 +40,7 @@ public class UDPHome implements Home {
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity,
 			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		log.debug("executing HUE api request to UDP: " + anItem.getItem().getAsString());
-		String theUrl = anItem.getItem().getAsString();
+		String theUrl = anItem.getItem().getAsString().replaceAll("^\"|\"$", "");
 		if(theUrl != null && !theUrl.isEmpty () && theUrl.startsWith("udp://")) {
 			String intermediate = theUrl.substring(theUrl.indexOf("://") + 3);
 			String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));

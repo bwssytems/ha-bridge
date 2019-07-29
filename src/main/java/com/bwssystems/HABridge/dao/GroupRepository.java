@@ -201,11 +201,15 @@ public class GroupRepository extends BackupHandler {
 	private String repositoryReader(Path filePath) {
 
 		String content = null;
-		if(Files.notExists(filePath) || !Files.isReadable(filePath)){
-			log.warn("Error reading the file: " + filePath + " - Does not exist or is not readable. continuing...");
+		if(Files.notExists(filePath)){
+			log.debug("Error, the file: " + filePath + " - does not exist. continuing...");
 			return null;
 		}
 
+		if(!Files.isReadable(filePath)){
+			log.warn("Error, the file: " + filePath + " - is not readable. continuing...");
+			return null;
+		}
 		
 		try {
 			content = new String(Files.readAllBytes(filePath));

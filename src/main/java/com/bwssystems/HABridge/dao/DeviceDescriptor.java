@@ -86,7 +86,13 @@ public class DeviceDescriptor{
     @SerializedName("onWhenDimPresent")
     @Expose
     private boolean onWhenDimPresent;
-   
+	@SerializedName("lockDeviceId")
+    @Expose
+    private boolean lockDeviceId;
+    @SerializedName("startupActions")
+    @Expose
+    private String startupActions;
+  
     public String getName() {
         return name;
     }
@@ -332,5 +338,21 @@ public class DeviceDescriptor{
             }
         }
         return color;
+	}
+
+	public boolean isLockDeviceId() {
+		return lockDeviceId;
+	}
+
+	public void setLockDeviceId(boolean lockDeviceId) {
+		this.lockDeviceId = lockDeviceId;
+	}
+
+	public String getStartupActions() {
+		return startupActions;
+	}
+
+	public void setStartupActions(String startupActions) {
+		this.startupActions = startupActions;
 	}
 }

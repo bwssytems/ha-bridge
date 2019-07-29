@@ -243,6 +243,24 @@ public class SystemControl {
             return result;
         }, new JsonTransformer());
 
+		// http://ip_address:port/system/logout CORS request
+		options(SYSTEM_CONTEXT + "/logout", (request, response) -> {
+			response.status(HttpStatus.SC_OK);
+			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+			response.header("Access-Control-Allow-Methods", "GET, POST, PUT");
+			response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+			response.header("Content-Type", "text/html; charset=utf-8");
+			return "";
+		});
+		// http://ip_address:port/system/logout invalidates user session
+		put(SYSTEM_CONTEXT + "/logout", (request, response) -> {
+			log.debug("logout....");
+			bridgeSettings.getBridgeSecurity().removeAuthenticatedUser(request);
+			response.status(HttpStatus.SC_OK);
+			response.type("application/json");
+			return "";
+		});
+
 //      http://ip_address:port/system/presslinkbutton CORS request
 	    options(SYSTEM_CONTEXT + "/presslinkbutton", (request, response) -> {
 	        response.status(HttpStatus.SC_OK);
@@ -296,8 +314,7 @@ public class SystemControl {
 		post(SYSTEM_CONTEXT + "/changesecurityinfo", (request, response) -> {
 			log.debug("changesecurityinfo....");
 			SecurityInfo theInfo = new Gson().fromJson(request.body(), SecurityInfo.class);
-			bridgeSettings.getBridgeSecurity().setUseLinkButton(theInfo.isUseLinkButton());
-			bridgeSettings.getBridgeSecurity().setSecureHueApi(theInfo.isSecureHueApi());
+			bridgeSettings.getBridgeSecurity().setSecurityDataByInfo(theInfo);
 			bridgeSettings.save(bridgeSettings.getBridgeSettingsDescriptor());
 	        response.status(HttpStatus.SC_OK);
 			response.type("application/json");
@@ -418,6 +435,41 @@ public class SystemControl {
 			response.type("application/json");
 	    	return stop();
 	    });
+
+	    // http://ip_address:port/system/devices/backup/download CORS request
+	    options(SYSTEM_CONTEXT + "/backup/download", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+    	put (SYSTEM_CONTEXT + "/backup/download", "application/json", (request, response) -> {
+	    	log.debug("Create download: {}", request.body());
+        	BackupFilename aFilename = new Gson().fromJson(request.body(), BackupFilename.class);
+        	String backupContent = bridgeSettings.downloadBackup(aFilename.getFilename());
+	        return backupContent;
+    	}, new JsonTransformer());
+
+	    // http://ip_address:port/system/devices/backup/upload CORS request
+	    options(SYSTEM_CONTEXT + "/backup/upload/:filename", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+    	put (SYSTEM_CONTEXT + "/backup/upload/:filename", "application/json", (request, response) -> {
+	    	log.debug("Create upload: {} - {}", request.params(":filename"), request.body());
+			String theSuccess = bridgeSettings.uploadBackup(request.params(":filename"), request.body());
+			if(theSuccess.contains("Error:"))
+				response.status(HttpStatus.SC_METHOD_FAILURE);
+			else
+				response.status(HttpStatus.SC_OK);
+	        return theSuccess;
+    	}, new JsonTransformer());
 
 	    // http://ip_address:port/system/backup/available returns a list of config backup filenames
 	    get (SYSTEM_CONTEXT + "/backup/available", (request, response) -> {
@@ -546,7 +598,12 @@ public class SystemControl {
         	log.warn("Error pinging listener. " + e.getMessage());
         }
     }
-    
+	
+	public String removeHttpsSettings() {
+		bridgeSettings.getBridgeSecurity().removeHttpsSettings();
+    	return stop();
+	}
+
     public String reinit() {
     	bridgeSettings.getBridgeControl().setReinit(true);
     	pingListener();
@@ -558,4 +615,5 @@ public class SystemControl {
     	pingListener();
     	return "{\"control\":\"stopping\"}";    	
     }
+
 }

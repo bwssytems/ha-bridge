@@ -44,13 +44,15 @@ public class DeviceResource {
     private BridgeSettings bridgeSettings;
 	private Gson aGsonHandler;
     private static final Set<String> supportedVerbs = new HashSet<>(Arrays.asList("get", "put", "post"));
+	private String errorMessage;
 
 	public DeviceResource(BridgeSettings theSettings, HomeManager aHomeManager) {
 		bridgeSettings = theSettings;
-		this.deviceRepository = new DeviceRepository(bridgeSettings.getBridgeSettingsDescriptor().getUpnpDeviceDb());
+		this.deviceRepository = new DeviceRepository(bridgeSettings.getBridgeSettingsDescriptor().getUpnpDeviceDb(), bridgeSettings.getBridgeSettingsDescriptor().getSeedid());
 		this.groupRepository = new GroupRepository(bridgeSettings.getBridgeSettingsDescriptor().getUpnpGroupDb());
 		homeManager = aHomeManager;
 		aGsonHandler = new GsonBuilder().create();
+		errorMessage = null;
 		setupEndpoints();
 	}
 
@@ -83,7 +85,7 @@ public class DeviceResource {
 	    	return "";
 	    });
     	post(API_CONTEXT, "application/json", (request, response) -> {
-	    	log.debug("Create a Device(s) - request body: " + request.body());
+	    	log.debug("Create a Device(s) - request body: {}", request.body());
 	    	DeviceDescriptor devices[];
 	    	if(request.body().substring(0,1).equalsIgnoreCase("[") == true) {
 	    		devices = new Gson().fromJson(request.body(), DeviceDescriptor[].class);
@@ -93,13 +95,12 @@ public class DeviceResource {
 	    	}
 			@SuppressWarnings("unused")
 			CallItem[] callItems = null;
-			String errorMessage = null;
 	    	for(int i = 0; i < devices.length; i++) {
 		    	if(devices[i].getContentBody() != null ) {
 		            if (devices[i].getContentType() == null || devices[i].getHttpVerb() == null || !supportedVerbs.contains(devices[i].getHttpVerb().toLowerCase())) {
 		            	response.status(HttpStatus.SC_BAD_REQUEST);
 		            	errorMessage = "Bad http verb in create device(s) for name: " + devices[i].getName() + " with verb: " + devices[i].getHttpVerb();
-						log.debug(errorMessage);
+						log.warn(errorMessage);
 						return new ErrorMessage(errorMessage);
 		            }
 		        }
@@ -109,7 +110,7 @@ public class DeviceResource {
 				} catch(JsonSyntaxException e) {
 	            	response.status(HttpStatus.SC_BAD_REQUEST);
 	            	errorMessage = "Bad on URL JSON in create device(s) for name: " + devices[i].getName() + " with on URL: " + devices[i].getOnUrl();
-					log.debug(errorMessage);
+					log.warn(errorMessage);
 					return new ErrorMessage(errorMessage);
 				}
 				try {
@@ -118,7 +119,7 @@ public class DeviceResource {
 				} catch(JsonSyntaxException e) {
 	            	response.status(HttpStatus.SC_BAD_REQUEST);
 	            	errorMessage = "Bad dim URL JSON in create device(s) for name: " + devices[i].getName() + " with dim URL: " + devices[i].getDimUrl();
-					log.debug(errorMessage);
+					log.warn(errorMessage);
 					return new ErrorMessage(errorMessage);
 				}
 				try {
@@ -127,7 +128,7 @@ public class DeviceResource {
 				} catch(JsonSyntaxException e) {
 	            	response.status(HttpStatus.SC_BAD_REQUEST);
 	            	errorMessage = "Bad off URL JSON in create device(s) for name: " + devices[i].getName() + " with off URL: " + devices[i].getOffUrl();
-					log.debug(errorMessage);
+					log.warn(errorMessage);
 					return new ErrorMessage(errorMessage);
 				}
 				try {
@@ -136,13 +137,13 @@ public class DeviceResource {
 				} catch(JsonSyntaxException e) {
 	            	response.status(HttpStatus.SC_BAD_REQUEST);
 	            	errorMessage = "Bad color URL JSON in create device(s) for name: " + devices[i].getName() + " with color URL: " + devices[i].getColorUrl();
-					log.debug(errorMessage);
+					log.warn(errorMessage);
 					return new ErrorMessage(errorMessage);
 				}
 	    	}
 
 	    	deviceRepository.save(devices);
-			log.debug("Created a Device(s): " + request.body());
+			log.debug("Created a Device(s): {}", request.body());
 
 	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.status(HttpStatus.SC_CREATED);
@@ -160,16 +161,17 @@ public class DeviceResource {
 	    	return "";
 	    });
     	put (API_CONTEXT + "/:id", "application/json", (request, response) -> {
-	    	log.debug("Edit a Device - request body: " + request.body());
+	    	log.debug("Edit a Device - request body: {}", request.body());
         	DeviceDescriptor device = new Gson().fromJson(request.body(), DeviceDescriptor.class);
 	        if(deviceRepository.findOne(request.params(":id")) == null){
-		    	log.debug("Could not save an edited device, Device Id not found: " + request.params(":id"));
+				errorMessage = "Could not save an edited device, Device Id not found: " + request.params(":id");
+		    	log.warn(errorMessage);
 		    	response.status(HttpStatus.SC_BAD_REQUEST);
-		    	return new ErrorMessage("Could not save an edited device, Device Id not found: " + request.params(":id") + " ");
+		    	return new ErrorMessage(errorMessage);
 	        }
 	        else
 	        {
-				log.debug("Saving an edited Device: " + device.getName());
+				log.debug("Saving an edited Device: {}", device.getName());
 
 				if (device.getDeviceType() != null)
 					device.setDeviceType(device.getDeviceType());
@@ -187,17 +189,19 @@ public class DeviceResource {
 	    	log.debug("Get all devices");
 	    	JsonTransformer aRenderer = new JsonTransformer();
 	    	String theStream = aRenderer.render(deviceList);
-	    	log.debug("The Device List: " + theStream);
+	    	log.debug("The Device List: {}", theStream);
 			response.status(HttpStatus.SC_OK);
     		return deviceList;
     	}, new JsonTransformer());
 
     	get (API_CONTEXT + "/:id", "application/json", (request, response) -> {
-	    	log.debug("Get a device");
+	    	log.debug("Get a device: {}", request.params(":id"));
 	        DeviceDescriptor descriptor = deviceRepository.findOne(request.params(":id"));
 	        if(descriptor == null) {
+				errorMessage = "Could not find, id: " + request.params(":id");
+				log.warn(errorMessage);
 				response.status(HttpStatus.SC_NOT_FOUND);
-				return new ErrorMessage("Could not find, id: " + request.params(":id") + " ");
+				return new ErrorMessage(errorMessage);
 	        }
 	        else
 	        	response.status(HttpStatus.SC_OK);
@@ -206,11 +210,13 @@ public class DeviceResource {
 
     	delete (API_CONTEXT + "/:id", "application/json", (request, response) -> {
     		String anId = request.params(":id");
-	    	log.debug("Delete a device: " + anId);
+	    	log.debug("Delete a device: {}", anId);
 	        DeviceDescriptor deleted = deviceRepository.findOne(anId);
 	        if(deleted == null) {
+				errorMessage = "Could not delete, id: " + anId + " not found. ";
+				log.warn(errorMessage);
 				response.status(HttpStatus.SC_NOT_FOUND);
-				return new ErrorMessage("Could not delete, id: " + anId + " not found. ");
+				return new ErrorMessage(errorMessage);
 	        }
 	        else
 	        {
@@ -333,6 +339,18 @@ public class DeviceResource {
 	      	return homeManager.findResource(DeviceMapTypes.BROADLINK_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.BROADLINK_DEVICE[DeviceMapTypes.typeIndex]);
 	    }, new JsonTransformer());
 
+    	get (API_CONTEXT + "/moziot/devices", "application/json", (request, response) -> {
+	    	log.debug("Get Mozilla IOT devices");
+	      	response.status(HttpStatus.SC_OK);
+	      	return homeManager.findResource(DeviceMapTypes.MOZIOT_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.MOZIOT_DEVICE[DeviceMapTypes.typeIndex]);
+	    }, new JsonTransformer());
+
+    	get (API_CONTEXT + "/homegenie/devices", "application/json", (request, response) -> {
+	    	log.debug("Get HomeGenie devices");
+	      	response.status(HttpStatus.SC_OK);
+	      	return homeManager.findResource(DeviceMapTypes.HOMEGENIE_DEVICE[DeviceMapTypes.typeIndex]).getItems(DeviceMapTypes.HOMEGENIE_DEVICE[DeviceMapTypes.typeIndex]);
+		}, new JsonTransformer());
+		
 		get (API_CONTEXT + "/map/types", "application/json", (request, response) -> {
 	    	log.debug("Get map types");
 	      	return new DeviceMapTypes().getDeviceMapTypes();
@@ -340,7 +358,7 @@ public class DeviceResource {
 
     	get (API_CONTEXT + "/refresh/:typeIndex", "application/json", (request, response) -> {
     		String typeIndex = request.params(":typeIndex");
-	    	log.debug("Refresh Home: " + typeIndex);
+	    	log.debug("Refresh Home: {}", typeIndex);
 	      	response.status(HttpStatus.SC_OK);
 	      	homeManager.findResource(typeIndex).refresh();
 	      	return null;
@@ -362,10 +380,45 @@ public class DeviceResource {
 	    }, new JsonTransformer());
 
     	get (API_CONTEXT + "/backup/available", "application/json", (request, response) -> {
-        	log.debug("Get backup filenames");
+        	log.debug("Get backup filenames.");
           	response.status(HttpStatus.SC_OK);
           	return deviceRepository.getBackups();
         }, new JsonTransformer());
+
+	    // http://ip_address:port/api/devices/backup/download CORS request
+	    options(API_CONTEXT + "/backup/download", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+    	put (API_CONTEXT + "/backup/download", "application/json", (request, response) -> {
+	    	log.debug("Create download: {}", request.body());
+        	BackupFilename aFilename = new Gson().fromJson(request.body(), BackupFilename.class);
+        	String backupContent = deviceRepository.downloadBackup(aFilename.getFilename());
+	        return backupContent;
+    	}, new JsonTransformer());
+
+	    // http://ip_address:port/api/devices/backup/upload CORS request
+	    options(API_CONTEXT + "/backup/upload/:filename", "application/json", (request, response) -> {
+	        response.status(HttpStatus.SC_OK);
+	        response.header("Access-Control-Allow-Origin", request.headers("Origin"));
+	        response.header("Access-Control-Allow-Methods", "PUT");
+	        response.header("Access-Control-Allow-Headers", request.headers("Access-Control-Request-Headers"));
+	        response.header("Content-Type", "text/html; charset=utf-8");
+	    	return "";
+	    });
+    	put (API_CONTEXT + "/backup/upload/:filename", "application/json", (request, response) -> {
+	    	log.debug("Create upload: {} - {}", request.params(":filename"), request.body());
+			String theSuccess = deviceRepository.uploadBackup(request.params(":filename"), request.body());
+			if(theSuccess.contains("Error:"))
+				response.status(HttpStatus.SC_METHOD_FAILURE);
+			else
+				response.status(HttpStatus.SC_OK);
+	        return theSuccess;
+    	}, new JsonTransformer());
 
 	    // http://ip_address:port/api/devices/backup/create CORS request
 	    options(API_CONTEXT + "/backup/create", "application/json", (request, response) -> {
@@ -377,7 +430,7 @@ public class DeviceResource {
 	    	return "";
 	    });
     	put (API_CONTEXT + "/backup/create", "application/json", (request, response) -> {
-	    	log.debug("Create backup: " + request.body());
+	    	log.debug("Create backup: {}", request.body());
         	BackupFilename aFilename = new Gson().fromJson(request.body(), BackupFilename.class);
         	BackupFilename returnFilename = new BackupFilename();
         	returnFilename.setFilename(deviceRepository.backup(aFilename.getFilename()));
@@ -394,7 +447,7 @@ public class DeviceResource {
 	    	return "";
 	    });
     	post (API_CONTEXT + "/backup/delete", "application/json", (request, response) -> {
-	    	log.debug("Delete backup: " + request.body());
+	    	log.debug("Delete backup: {}", request.body());
         	BackupFilename aFilename = new Gson().fromJson(request.body(), BackupFilename.class);
         	if(aFilename != null)
         		deviceRepository.deleteBackup(aFilename.getFilename());
@@ -413,7 +466,7 @@ public class DeviceResource {
 	    	return "";
 	    });
     	post (API_CONTEXT + "/backup/restore", "application/json", (request, response) -> {
-	    	log.debug("Restore backup: " + request.body());
+	    	log.debug("Restore backup: {}", request.body());
         	BackupFilename aFilename = new Gson().fromJson(request.body(), BackupFilename.class);
         	if(aFilename != null) {
         		deviceRepository.restoreBackup(aFilename.getFilename());

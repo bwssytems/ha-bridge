@@ -1,5 +1,7 @@
 package com.bwssystems.logservices;
 
+import java.io.Serializable;
+
 import com.bwssystems.logservices.LoggingUtil.LogLevels;
 
 /**
@@ -7,7 +9,10 @@ import com.bwssystems.logservices.LoggingUtil.LogLevels;
  *
  *
  */
-public class LoggerInfo {
+public class LoggerInfo implements Serializable {
+
+	/** serialVersionUID. */
+	private static final long serialVersionUID = 1085935297588739585L;
 
 	private String    loggerName;
     private LogLevels logLevel;

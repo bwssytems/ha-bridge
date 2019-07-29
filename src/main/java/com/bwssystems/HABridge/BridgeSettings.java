@@ -12,8 +12,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.security.GeneralSecurityException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -32,7 +32,7 @@ public class BridgeSettings extends BackupHandler {
 	private BridgeSettingsDescriptor theBridgeSettings;
 	private BridgeControlDescriptor bridgeControl;
 	private BridgeSecurity bridgeSecurity;
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+	private static final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
 	
 	public BridgeSettings() {
 		super();
@@ -59,10 +59,10 @@ public class BridgeSettings extends BackupHandler {
 	public BridgeSecurity getBridgeSecurity() {
 		return bridgeSecurity;
 	}
-	 public static String getCurrentDate() {
-		 return dateFormat.format(new Date());
-	 }
-	
+	public String getCurrentDate() {
+		return LocalDateTime.now().format(dateTimeFormat);
+	}
+
 	public void buildSettings() {
         String addressString = null;
         String theVeraAddress = null;
@@ -77,7 +77,6 @@ public class BridgeSettings extends BackupHandler {
         }
         String serverPortOverride = System.getProperty("server.port");
         String serverIpOverride = System.getProperty("server.ip");
-        String upnpStrictOverride = System.getProperty("upnp.strict", "true");
         if(configFileProperty != null)
         {
         	log.info("reading from config file: " + configFileProperty);
@@ -160,7 +159,7 @@ public class BridgeSettings extends BackupHandler {
 			}
 			theBridgeSettings.setSomfyAddress(theSomfyList);
 
-	        theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
+	        // theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(System.getProperty("upnp.strict", "true")));
 	        theBridgeSettings.setTraceupnp(Boolean.parseBoolean(System.getProperty("trace.upnp", "false")));
 	        theBridgeSettings.setButtonsleep(Integer.parseInt(System.getProperty("button.sleep", Configuration.DEFAULT_BUTTON_SLEEP)));
 	        theBridgeSettings.setNestuser(System.getProperty("nest.user"));
@@ -216,15 +215,16 @@ public class BridgeSettings extends BackupHandler {
 		theBridgeSettings.setHomeWizardConfigured(theBridgeSettings.isValidHomeWizard());
 		theBridgeSettings.setOpenhabconfigured(theBridgeSettings.isValidOpenhab());
 		theBridgeSettings.setFhemconfigured(theBridgeSettings.isValidFhem());
+		theBridgeSettings.setMoziotconfigured(theBridgeSettings.isValidMozIot());
+		theBridgeSettings.setHomegenieconfigured(theBridgeSettings.isValidHomeGenie());
         // Lifx is either configured or not, so it does not need an update.
        if(serverPortOverride != null)
         	theBridgeSettings.setServerPort(serverPortOverride);
         if(serverIpOverride != null) {
         	theBridgeSettings.setWebaddress(serverIpOverride);
         	theBridgeSettings.setUpnpConfigAddress(serverIpOverride);
-        }
-        if(upnpStrictOverride != null)
-        	theBridgeSettings.setUpnpStrict(Boolean.parseBoolean(upnpStrictOverride));
+		}
+
 		setupParams(Paths.get(theBridgeSettings.getConfigfile()), ".cfgbk", "habridge.config-");
 		
 		bridgeSecurity.setSecurityData(theBridgeSettings.getSecurityData());

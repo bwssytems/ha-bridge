@@ -72,26 +72,26 @@ public class SomfyHome implements Home  {
 			log.warn("Should not get here, no somfy hub available");
 			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 					+ "\",\"description\": \"Should not get here, no somfy hub available\", \"parameter\": \"/lights/"
-					+ lightId + "state\"}}]";
+					+ lightId + "/state\"}}]";
 		} else {
 			if (anItem.getType() != null && anItem.getType().trim().equalsIgnoreCase(DeviceMapTypes.SOMFY_DEVICE[DeviceMapTypes.typeIndex])) {
 
-				log.debug("executing HUE api request to change activity to Somfy: " + anItem.getItem().toString());
-				String jsonToPost = anItem.getItem().toString();
+				String jsonToPost = anItem.getItem().getAsString().replaceAll("^\"|\"$", "");
+				log.debug("executing HUE api request to change activity to Somfy: {}", jsonToPost);
 				
 				SomfyInfo somfyHandler = getSomfyHandler(device.getTargetDevice());
 				if(somfyHandler == null) {
 					log.warn("Should not get here, no Somfy configured");
 					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 							+ "\",\"description\": \"Should not get here, no somfy configured\", \"parameter\": \"/lights/"
-							+ lightId + "state\"}}]";
+							+ lightId + "/state\"}}]";
 				} else {
 					try {
 						somfyHandler.execApply(jsonToPost);
 					} catch (Exception e) {
 						log.warn("Error posting request to Somfy");
 						responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
-								+ "\",\"description\": \"Error posting request to SomfyTahoma\", \"parameter\": \"/lights/" + lightId + "state\"}}]";
+								+ "\",\"description\": \"Error posting request to SomfyTahoma\", \"parameter\": \"/lights/" + lightId + "/state\"}}]";
 					}
 
 				}
@@ -103,7 +103,7 @@ public class SomfyHome implements Home  {
 	@Override
 	public Home createHome(BridgeSettings bridgeSettings) {
 		validSomfy = bridgeSettings.getBridgeSettingsDescriptor().isValidSomfy();
-		log.info("Somfy Home created." + (validSomfy ? "" : " No Somfys configured."));
+		log.info("Somfy Home created. {}", (validSomfy ? "" : " No Somfys configured."));
 		if(validSomfy) {
 			somfys = new HashMap<>();
 			Iterator<NamedIP> theList = bridgeSettings.getBridgeSettingsDescriptor().getSomfyAddress().getDevices().iterator();

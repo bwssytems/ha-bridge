@@ -19,3 +19,7 @@ sftp-config\.json
 .vscode/launch.test.json
 .vscode/settings.json
 .vscode/tasks.json
+# dependencies
+/node_modules
+
+package-lock.json

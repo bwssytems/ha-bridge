@@ -29,7 +29,9 @@
 
 .scrollArea {
     height: 100%;
+/* THis makes the table scroll - disabled as a feature for now
     max-height: 800px;
+*/
     overflow-x: auto;
     overflow-y: auto;
     border: 1px solid #d5d5d5;

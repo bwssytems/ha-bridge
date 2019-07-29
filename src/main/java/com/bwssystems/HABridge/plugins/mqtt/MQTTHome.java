@@ -96,7 +96,7 @@ public class MQTTHome implements Home {
 				mqttObject = aGsonHandler.toJson(anItem.getItem());
 			}
 			else
-				mqttObject =anItem.getItem().getAsString();
+				mqttObject = anItem.getItem().getAsString().replaceAll("^\"|\"$", "");
 			mqttObject = BrightnessDecode.calculateReplaceIntensityValue(mqttObject,
 					intensity, targetBri, targetBriInc, false);
 			mqttObject = DeviceDataDecode.replaceDeviceData(mqttObject, device);
@@ -128,7 +128,7 @@ public class MQTTHome implements Home {
 			log.warn("Should not get here, no mqtt brokers configured");
 			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 					+ "\",\"description\": \"Should not get here, no mqtt brokers configured\", \"parameter\": \"/lights/"
-					+ lightId + "state\"}}]";
+					+ lightId + "/state\"}}]";
 
 		}
 		return responseString;

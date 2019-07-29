@@ -74,8 +74,8 @@ public class SomfyInfo {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		urlEncodedFormEntity.writeTo(bos);
 		String body = bos.toString();
-		String response = httpClient.doHttpRequest(BASE_URL + "json/login",HttpPost.METHOD_NAME, "application/x-www-form-urlencoded", body,httpHeader);
-		log.debug("Somfy login response <<<" + response + ">>>");
+		String response = httpClient.doHttpRequest(BASE_URL + "json/login", HttpPost.METHOD_NAME, "application/x-www-form-urlencoded", body,httpHeader);
+		log.debug("Somfy login response <<<{}>>>", response);
 	}
 
 	private NameValue[] getHttpHeaders() {
@@ -89,16 +89,16 @@ public class SomfyInfo {
 		NameValue[] httpHeader = getHttpHeaders();
 		log.info("Making SOMFY http setup call");
 		String response = httpClient.doHttpRequest(BASE_URL + "json/getSetup", HttpGet.METHOD_NAME, "", "", httpHeader );
-		log.debug("Somfy getSetup response <<<" + response + ">>>");
+		log.debug("Somfy getSetup response <<<{}>>>", response);
 		GetSetup setupData = new Gson().fromJson(response, GetSetup.class);
 		return setupData;
 	}
 
 	public void execApply(String jsonToPost) throws Exception {
 		login(namedIP.getUsername(), namedIP.getPassword());
-		log.info("Making SOMFY http exec call");
+		log.info("Making SOMFY http exec call with json: {}", jsonToPost);
 		String response = httpClient.doHttpRequest(BASE_URL_ENDUSER + "exec/apply", HttpPost.METHOD_NAME, "application/json;charset=UTF-8", jsonToPost, getHttpHeaders());
-		log.debug("Somfy exec reply response <<<" + response + ">>>");
+		log.debug("Somfy exec reply response <<<{}>>>", response);
 	}
 
 

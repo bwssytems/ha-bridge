@@ -1,14 +1,14 @@
 package com.bwssystems.HABridge.api.hue;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class WhitelistEntry
 {
 	private String lastUseDate;
 	private String createDate;
 	private String name;
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	private static final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
 	public static WhitelistEntry createEntry(String devicetype) {
 		WhitelistEntry anEntry = new WhitelistEntry();
@@ -18,9 +18,9 @@ public class WhitelistEntry
 		return anEntry;
 	}
 	
-	 public static String getCurrentDate() {
-		 return dateFormat.format(new Date());
-	 }
+	public static String getCurrentDate() {
+		return LocalDateTime.now().format(dateTimeFormat);
+	}
 	
 	public String getLastUseDate() {
 		return lastUseDate;

@@ -73,7 +73,7 @@ public class DomoticzHome implements Home {
 	
 	private Boolean addDomoticzDevices(List<DomoticzDevice> theDeviceList, List<DomoticzDevice> theSourceList, String theKey) {
 		if(!validDomoticz)
-			return null;
+			return false;
 		Iterator<DomoticzDevice> devices = theSourceList.iterator();
 		while(devices.hasNext()) {
 			DomoticzDevice theDevice = devices.next();
@@ -88,7 +88,7 @@ public class DomoticzHome implements Home {
 		Devices theDomoticzApiResponse = null;
 		String responseString = null;
 		
-		String theUrl = anItem.getItem().getAsString();
+		String theUrl = anItem.getItem().getAsString().replaceAll("^\"|\"$", "");
 		if(theUrl != null && !theUrl.isEmpty () && (theUrl.startsWith("http://") || theUrl.startsWith("https://"))) {
 			String intermediate = theUrl.substring(theUrl.indexOf("://") + 3);
 			String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
@@ -119,7 +119,7 @@ public class DomoticzHome implements Home {
 					aBody = DeviceDataDecode.replaceDeviceData(aBody, device);
 					aBody = TimeDecode.replaceTimeValue(aBody);
 				}
-		   		theData = httpClient.doHttpRequest(theHandler.buildUrl(anUrl), null, null, aBody, theHandler.buildHeaders());
+		   		theData = httpClient.doHttpRequest(theHandler.buildUrl(anUrl), null, null, aBody, httpClient.addBasicAuthHeader(null, theHandler.getDomoticzAddress()));
 		   		try {
 		   			theDomoticzApiResponse = new Gson().fromJson(theData, Devices.class);
 		   			if(theDomoticzApiResponse.getStatus().equals("OK"))
@@ -128,25 +128,25 @@ public class DomoticzHome implements Home {
 		    			log.warn("Call failed for Domoticz " + theHandler.getDomoticzAddress().getName() + " with status " + theDomoticzApiResponse.getStatus() + " for item " + theDomoticzApiResponse.getTitle());
 						responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
 								"Error on calling url to change device state", "/lights/"
-								+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+								+ lightId + "/state", null, null).getTheErrors(), HueError[].class);
 		   			}
 		   		} catch (Exception e) {
 	    			log.warn("Cannot interrpret result from call for Domoticz " + theHandler.getDomoticzAddress().getName() + " as response is not parsable.");
 					responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
 							"Error on calling url to change device state", "/lights/"
-							+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+							+ lightId + "/state", null, null).getTheErrors(), HueError[].class);
 		    	}
 			} else {
 				log.warn("Domoticz Call could not complete, no address found: " + theUrl);
 				responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
 						"Error on calling url to change device state", "/lights/"
-						+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+						+ lightId + "/state", null, null).getTheErrors(), HueError[].class);
 			}
 		} else {
 			log.warn("Domoticz Call to be presented as http(s)://<ip_address>(:<port>)/payload, format of request unknown: " + theUrl);
 			responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
 					"Error on calling url to change device state", "/lights/"
-					+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+					+ lightId + "/state", null, null).getTheErrors(), HueError[].class);
 		}
 		return responseString;
 	}

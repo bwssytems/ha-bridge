@@ -6,6 +6,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -92,4 +93,67 @@ public abstract class BackupHandler {
 		return theFilenames;
 	}
 	
+	public String downloadBackup(String aFilename) {
+		Path filePath = FileSystems.getDefault().getPath(repositoryPath.getParent().toString(), aFilename);
+
+		String content = null;
+		if (Files.notExists(filePath) || !Files.isReadable(filePath)) {
+			log.warn("Error reading the file: {} - Does not exist or is not readable. continuing...", aFilename);
+			return null;
+		}
+
+		try {
+			content = new String(Files.readAllBytes(filePath));
+		} catch (IOException e) {
+			log.error("Error reading the file: {} message: {}", aFilename, e.getMessage(), e);
+		}
+
+		return content;
+	}
+
+	public String uploadBackup(String aFilename, String theContent) {
+		String successMessage = null;
+		if(aFilename == null || aFilename.isEmpty()) {
+			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+			aFilename = defaultName + "upload-" + dateFormat.format(Calendar.getInstance().getTime()) + fileExtension; 
+		} else {
+			if(!aFilename.endsWith(fileExtension)) {
+				aFilename = aFilename +fileExtension;
+			}
+		}
+		Path filePath = FileSystems.getDefault().getPath(repositoryPath.getParent().toString(), aFilename);
+
+		successMessage = uploadWriter(theContent, filePath);
+
+		return successMessage;
+	}
+
+	private String uploadWriter(String content, Path filePath) {
+		String aMessage = null;
+		if (Files.exists(filePath)) {
+			aMessage = "Error: File exists, cannot write: " + filePath;
+			log.error(aMessage);
+			return aMessage;
+		}
+
+		if (Files.notExists(filePath.getParent())) {
+			try {
+				Files.createDirectories(filePath.getParent());
+			} catch (IOException e) {
+				aMessage = "Error: creating the directory: " + filePath + " message: " + e.getMessage();
+				log.error(aMessage, e);
+				return aMessage;
+			}
+		}
+
+		try {
+			Files.write(filePath, content.getBytes(), StandardOpenOption.CREATE);
+			aMessage = "Success: creating file: " + filePath;
+		} catch (IOException e) {
+			aMessage = "Error: writing the file: " + filePath + " message: " + e.getMessage();
+			log.error(aMessage, e);
+		}
+
+		return aMessage;
+	}
 }

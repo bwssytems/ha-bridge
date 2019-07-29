@@ -1,105 +1,102 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.bwssystems.HABridge</groupId>
 	<artifactId>ha-bridge</artifactId>
-	<version>5.2.2</version>
+	<version>5.3.0</version>
 	<packaging>jar</packaging>
 
 	<name>HA Bridge</name>
 	<description>Emulates a Philips Hue bridge to allow the Amazon Echo to hook up to other HA systems, i.e. Vera or Harmony Hub or Nest, using lightweight frameworks</description>
 
 	<properties>
-		<java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<repositories>
 		<repository>
-	    	<id>jitpack.io</id>
-		    <url>https://jitpack.io</url>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
 		</repository>
-	    <repository>
-	        <id>Eclipse Paho Repo</id>
-	        <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
-	    </repository>
+		<repository>
+			<id>Eclipse Paho Repo</id>
+			<url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
 		<dependency>
-		    <groupId>com.github.bwssytems</groupId>
-		    <artifactId>harmony-java-client</artifactId>
-		    <version>master-SNAPSHOT</version>
-		    <exclusions>
-		       <exclusion> 
-		          <groupId>org.slf4j</groupId>
-		          <artifactId>slf4j-simple</artifactId>
-		       </exclusion>
-		       <exclusion> 
-		            <groupId>org.slf4j</groupId>
-		            <artifactId>log4j-over-slf4j</artifactId>
-		       </exclusion>
-		    </exclusions> 
+			<groupId>com.github.bwssytems</groupId>
+			<artifactId>harmony-java-client</artifactId>
+			<version>master-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-simple</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>log4j-over-slf4j</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-        <dependency>
-            <groupId>com.github.bwssytems</groupId>
-            <artifactId>nest-controller</artifactId>
-            <version>1.0.14</version>
-		    <exclusions>
-		       <exclusion> 
-		          <groupId>org.slf4j</groupId>
-		          <artifactId>slf4j-simple</artifactId>
-		       </exclusion>
-		       <exclusion> 
-		            <groupId>org.slf4j</groupId>
-		            <artifactId>log4j-over-slf4j</artifactId>
-		       </exclusion>
-		    </exclusions> 
-        </dependency>
 		<dependency>
-		    <groupId>com.sparkjava</groupId>
-		    <artifactId>spark-core</artifactId>
-		    <version>2.7.2</version>
-		    <exclusions>
-		    	<exclusion>
-		    		<artifactId>slf4j-simple</artifactId>
-		    		<groupId>org.slf4j</groupId>
-		    	</exclusion>
-		    </exclusions>
+			<groupId>com.github.bwssytems</groupId>
+			<artifactId>nest-controller</artifactId>
+			<version>1.0.14</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-simple</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>log4j-over-slf4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.sparkjava</groupId>
+			<artifactId>spark-core</artifactId>
+			<version>2.7.2</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-simple</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>4.5.1</version>
 		</dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.4.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.24</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+			<version>4.4.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.24</version>
+		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.2.1</version>
 		</dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.6.2</version>
-        </dependency>
 		<dependency>
-		  <groupId>net.java.dev.eval</groupId>
-		  <artifactId>eval</artifactId>
-		  <version>0.5</version>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.6.2</version>
+		</dependency>
+		<dependency>
+			<groupId>net.java.dev.eval</groupId>
+			<artifactId>eval</artifactId>
+			<version>0.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.inject</groupId>
@@ -107,68 +104,105 @@
 			<version>4.1.0</version>
 		</dependency>
 		<dependency>
-		  <groupId>org.igniterealtime.smack</groupId>
-		  <artifactId>smack-core</artifactId>
-		  <version>4.2.0</version>
-		</dependency>
-	    <dependency>
-	        <groupId>org.eclipse.paho</groupId>
-	        <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-	        <version>1.2.0</version>
-	    </dependency>
-		<dependency>
-		    <groupId>junit</groupId>
-		    <artifactId>junit</artifactId>
-		    <version>4.12</version>
-      		<scope>test</scope>
+			<groupId>org.igniterealtime.smack</groupId>
+			<artifactId>smack-core</artifactId>
+			<version>4.2.0</version>
 		</dependency>
 		<dependency>
-		  <groupId>com.github.bwssytems</groupId>
-		  <artifactId>lifx-sdk-java</artifactId>
-		  <version>2.1.6</version>
+			<groupId>org.eclipse.paho</groupId>
+			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+			<version>1.2.0</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.github.mob41</groupId>
-		    <artifactId>broadlink-java-api</artifactId>
-		    <version>master-SNAPSHOT</version>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-		  <groupId>org.apache.commons</groupId>
-		  <artifactId>commons-lang3</artifactId>
-		  <version>3.5</version>
+			<groupId>com.github.bwssytems</groupId>
+			<artifactId>lifx-sdk-java</artifactId>
+			<version>2.1.6</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.mob41</groupId>
+			<artifactId>broadlink-java-api</artifactId>
+			<version>master-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jmdns</groupId>
+			<artifactId>jmdns</artifactId>
+			<version>3.5.5</version>
 		</dependency>
 	</dependencies>
 
 	<build>
-	    <resources>
-	      <resource>
-	        <directory>src/main/resources</directory>
-	        <includes>
-	          <include>version.properties</include>
-	        </includes>
-	        <filtering>true</filtering>
-	      </resource>
-	      <resource>
-	        <directory>src/main/resources</directory>
-	        <excludes>
-	          <exclude>version.properties</exclude>
-	        </excludes>
-	        <filtering>false</filtering>
-	      </resource>
-	    </resources>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>version.properties</include>
+				</includes>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>version.properties</exclude>
+				</excludes>
+				<filtering>false</filtering>
+			</resource>
+		</resources>
 		<plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.0.0-M2</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+				 <!-- Change this to Version 3.3 for Java 1.8 and Raspberry PI compilation -->
+                  <version>3.6</version>
+                </requireMavenVersion>
+              </rules>    
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					 <!-- Comment this release line out for Java 1.8 and Raspberry PI compilation -->
+					<release>11</release>
+				 	<!-- Uncomment the next two lines for Java 1.8 and Raspberry PI compilation -->
+				 	<!-- <source>1.8</source> -->
+				 	<!-- <target>1.8</target> -->
+				</configuration>
+			</plugin>
 			<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-surefire-plugin</artifactId>
-			<version>2.22.1</version>
-			<configuration>
-				<skipTests>true</skipTests>
-			</configuration>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M3</version>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.4.3</version>
+				<version>3.2.1</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -230,8 +264,7 @@
 								</filter>
 							</filters>
 							<transformers>
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>com.bwssystems.HABridge.HABridge</mainClass>
 								</transformer>
 							</transformers>

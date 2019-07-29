@@ -4,10 +4,22 @@ import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLContext;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.ssl.SSLContexts;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +43,7 @@ public final class HttpClientPool {
       // Increase default max connection per route to 20
       cm.setDefaultMaxPerRoute(20);
       // Build the client.
-      threadSafeClient = HttpClients.custom()
-              .setConnectionManager(cm)
-              .build();
+      threadSafeClient = HttpClients.custom().setConnectionManager(cm).build();
       // Start up an eviction thread.
       monitor = new IdleConnectionMonitorThread(cm);
       // Don't stop quitting.
@@ -47,9 +57,65 @@ public final class HttpClientPool {
 
   }
 
+  // Single-element enum to implement Singleton.
+  private static enum SingletonSSL {
+    // Just one of me so constructor will be called once.
+    SSLClient;
+    // The thread-safe client.
+    private CloseableHttpClient threadSafeClient;
+    // The pool monitor.
+    private IdleConnectionMonitorThread monitor = null;
+    private TrustStrategy acceptingTrustStrategy = null;
+    private SSLContext sslContext = null;
+    private SSLConnectionSocketFactory sslsf = null;
+    private Registry<ConnectionSocketFactory> socketFactoryRegistry = null;
+    private NoopHostnameVerifier hostnameVerifier = null;
+
+    // The constructor creates it - thus late
+    private SingletonSSL() {
+      try {
+        acceptingTrustStrategy = (cert, authType) -> true;
+        hostnameVerifier = new NoopHostnameVerifier();
+        sslContext = SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
+        sslsf = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
+        HttpClientPool.log.info("Instantiated SSL components.");
+        final Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+        .register("http", new PlainConnectionSocketFactory())
+        .register("https", sslsf)
+        .build();
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+        // Increase max total connection to 200
+        cm.setMaxTotal(200);
+        // Increase default max connection per route to 20
+        cm.setDefaultMaxPerRoute(20);
+  
+        // Build the client.
+        threadSafeClient = HttpClients.custom().setSSLSocketFactory(sslsf).setConnectionManager(cm).build();
+        // Start up an eviction thread.
+        monitor = new IdleConnectionMonitorThread(cm);
+        // Don't stop quitting.
+        monitor.setDaemon(true);
+        monitor.start();
+      } catch (Exception e) {
+        HttpClientPool.log.warn("SingletonSSL failed on SSL init");
+        threadSafeClient = null;
+      }
+    }
+
+    public CloseableHttpClient get() {
+      return threadSafeClient;
+    }
+
+  }
+
   public static CloseableHttpClient getClient() {
     // The thread safe client is held by the singleton.
     return Singleton.Client.get();
+  }
+
+  public static CloseableHttpClient getSSLClient() {
+    // The thread safe client is held by the singleton.
+    return SingletonSSL.SSLClient.get();
   }
 
   // Watches for stale connections and evicts them.
@@ -123,6 +189,7 @@ public final class HttpClientPool {
   public static void shutdown() throws InterruptedException, IOException {
     // Shutdown the monitor.
     Singleton.Client.monitor.shutdown();
+    SingletonSSL.SSLClient.monitor.shutdown();
   }
 
 }

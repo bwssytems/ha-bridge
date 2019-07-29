@@ -15,6 +15,7 @@ import com.bwssystems.HABridge.upnp.UpnpSettingsResource;
 import com.bwssystems.HABridge.util.UDPDatagramSender;
 
 public class HABridge {
+	private static SystemControl theSystem;
 	
 	/*
 	 * This program is based on the work of armzilla from this github repository:
@@ -39,12 +40,12 @@ public class HABridge {
         UDPDatagramSender udpSender;
         UpnpSettingsResource theSettingResponder;
         UpnpListener theUpnpListener;
-        SystemControl theSystem;
         BridgeSettings bridgeSettings;
         Version theVersion;
     	@SuppressWarnings("unused")
 		HttpClientPool thePool;
-       
+		ShutdownHook shutdownHook = null;
+
         log.info("HA Bridge startup sequence...");
         theVersion = new Version();
         // Singleton initialization
@@ -53,9 +54,13 @@ public class HABridge {
         bridgeSettings = new BridgeSettings();
     	// sparkjava config directive to set html static file location for Jetty
         while(!bridgeSettings.getBridgeControl().isStop()) {
-        	bridgeSettings.buildSettings();
+            log.info("HA Bridge (v{}) initializing....", theVersion.getVersion() );
+			bridgeSettings.buildSettings();
+			if(bridgeSettings.getBridgeSecurity().isUseHttps()) {
+				secure(bridgeSettings.getBridgeSecurity().getKeyfilePath(), bridgeSettings.getBridgeSecurity().getKeyfilePassword(), null, null);
+				log.info("Using https for web and api calls");
+			}
             bridgeSettings.getBridgeSecurity().removeTestUsers();
-            log.info("HA Bridge (v" + theVersion.getVersion() + ") initializing....");
 	        // sparkjava config directive to set ip address for the web server to listen on
 	        ipAddress(bridgeSettings.getBridgeSettingsDescriptor().getWebaddress());
 	        // sparkjava config directive to set port for the web server to listen on
@@ -68,6 +73,14 @@ public class HABridge {
 	        // setup system control api first
 	        theSystem = new SystemControl(bridgeSettings, theVersion);
 	        theSystem.setupServer();
+
+			// Add shutdown hook to be able to properly stop server
+			if (shutdownHook != null) {
+				Runtime.getRuntime().removeShutdownHook(shutdownHook);
+			}
+			shutdownHook = new ShutdownHook(bridgeSettings, theSystem);
+			Runtime.getRuntime().addShutdownHook(shutdownHook);
+
 	        // setup the UDP Datagram socket to be used by the HueMulator and the upnpListener
 	        udpSender = UDPDatagramSender.createUDPDatagramSender(bridgeSettings.getBridgeSettingsDescriptor().getUpnpResponsePort());
 	        if(udpSender == null) {
@@ -85,10 +98,13 @@ public class HABridge {
 		        // wait for the sparkjava initialization of the rest api classes to be complete
 		        awaitInitialization();
 
-		        if(bridgeSettings.getBridgeSettingsDescriptor().isTraceupnp())
-		        	log.info("Traceupnp: upnp config address: " + bridgeSettings.getBridgeSettingsDescriptor().getUpnpConfigAddress() + "-useIface:" +
-		        			bridgeSettings.getBridgeSettingsDescriptor().isUseupnpiface() + " on web server: " +
-		        			bridgeSettings.getBridgeSettingsDescriptor().getWebaddress() + ":" + bridgeSettings.getBridgeSettingsDescriptor().getServerPort());
+		        if(bridgeSettings.getBridgeSettingsDescriptor().isTraceupnp()) {
+		        	log.info("Traceupnp: upnp config address: {} -useIface: {} on web server: {}:{}",
+							bridgeSettings.getBridgeSettingsDescriptor().getUpnpConfigAddress(),
+							bridgeSettings.getBridgeSettingsDescriptor().isUseupnpiface(),
+							bridgeSettings.getBridgeSettingsDescriptor().getWebaddress(),
+							bridgeSettings.getBridgeSettingsDescriptor().getServerPort());
+				}
 		        // setup the class to handle the upnp response rest api
 		        theSettingResponder = new UpnpSettingsResource(bridgeSettings);
 		        theSettingResponder.setupServer();
@@ -96,13 +112,13 @@ public class HABridge {
 		        // start the upnp ssdp discovery listener
 		        theUpnpListener = null;
 		        try {
-					theUpnpListener = new UpnpListener(bridgeSettings.getBridgeSettingsDescriptor(), bridgeSettings.getBridgeControl(), udpSender);
+					theUpnpListener = new UpnpListener(bridgeSettings, bridgeSettings.getBridgeControl(), udpSender);
 				} catch (IOException e) {
 					log.error("Could not initialize UpnpListener, exiting....", e);
 					theUpnpListener = null;
 				}
 		        if(theUpnpListener != null && theUpnpListener.startListening())
-		        	log.info("HA Bridge (v" + theVersion.getVersion() + ") reinitialization requessted....");
+		        	log.info("HA Bridge (v{}) reinitialization requessted....", theVersion.getVersion());
 		        else
 		        	bridgeSettings.getBridgeControl().setStop(true);
 		        if(bridgeSettings.getBridgeSettingsDescriptor().isSettingsChanged())
@@ -117,7 +133,7 @@ public class HABridge {
 	        	try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e) {
-					log.error("Sleep error: " + e.getMessage());
+					log.error("Sleep error: {}", e.getMessage());
 				}
 	        }
         }
@@ -127,18 +143,24 @@ public class HABridge {
 		try {
 			HttpClientPool.shutdown();
 		} catch (InterruptedException e) {
-			log.warn("Error shutting down http pool: " + e.getMessage());;
+			log.warn("Error shutting down http pool: {}", e.getMessage());;
 		} catch (IOException e) {
-			log.warn("Error shutting down http pool: " + e.getMessage());;
+			log.warn("Error shutting down http pool: {}", e.getMessage());;
 		}
 		thePool = null;
-        log.info("HA Bridge (v" + theVersion.getVersion() + ") exiting....");
+        log.info("HA Bridge (v{}) exiting....", theVersion.getVersion());
         System.exit(0);
     }
     
     private static void theExceptionHandler(Exception e, Integer thePort) {
-        Logger log = LoggerFactory.getLogger(HABridge.class);
-    	log.error("Could not start ha-bridge webservice on port [" + thePort + "] due to: " + e.getMessage());
-    	System.exit(0);
-    }
+		Logger log = LoggerFactory.getLogger(HABridge.class);
+		if(e.getMessage().equals("no valid keystore") || e.getMessage().equals("keystore password was incorrect")) {
+			log.error("Https settings have been removed as {}. Restart system manually after this process exits....", e.getMessage());
+			log.warn(theSystem.removeHttpsSettings());
+		}
+		else {
+			log.error("Could not start ha-bridge webservice on port [{}] due to: {}", thePort, e.getMessage());
+			log.warn(theSystem.stop());
+		}
+	}
 }

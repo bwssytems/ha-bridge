@@ -187,14 +187,14 @@ public class HarmonyHome implements Home {
 			log.warn("Should not get here, no harmony configured");
 			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 					+ "\",\"description\": \"Should not get here, no harmony configured\", \"parameter\": \"/lights/"
-					+ lightId + "state\"}}]";
+					+ lightId + "/state\"}}]";
 		} else {
 			if (anItem.getType().trim().equalsIgnoreCase(DeviceMapTypes.HARMONY_ACTIVITY[DeviceMapTypes.typeIndex])) {
 				RunActivity anActivity = null;
 				if (anItem.getItem().isJsonObject())
 					anActivity = aGsonHandler.fromJson(anItem.getItem(), RunActivity.class);
 				else
-					anActivity = aGsonHandler.fromJson(anItem.getItem().getAsString(), RunActivity.class);
+					anActivity = aGsonHandler.fromJson(anItem.getItem().getAsString().replaceAll("^\"|\"$", ""), RunActivity.class);
 				if (anActivity.getHub() == null || anActivity.getHub().isEmpty())
 					anActivity.setHub(device.getTargetDevice());
 				HarmonyHandler myHarmony = getHarmonyHandler(anActivity.getHub());
@@ -202,7 +202,7 @@ public class HarmonyHome implements Home {
 					log.warn("Should not get here, no harmony hub available");
 					responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 							+ "\",\"description\": \"Should not get here, no harmony hub available\", \"parameter\": \"/lights/"
-							+ lightId + "state\"}}]";
+							+ lightId + "/state\"}}]";
 				} else {
 					if (!myHarmony.startActivity(anActivity)) {
 						if (resetHub(myHarmony)) {
@@ -212,7 +212,7 @@ public class HarmonyHome implements Home {
 										+ ", please restart...");
 								responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 										+ "\",\"description\": \"Could not communicate with harmony\", \"parameter\": \"/lights/"
-										+ lightId + "state\"}}]";
+										+ lightId + "/state\"}}]";
 							}
 						}
 					}
@@ -265,7 +265,7 @@ public class HarmonyHome implements Home {
 												+ ", please restart...");
 										responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 												+ "\",\"description\": \"Could not communicate with harmony\", \"parameter\": \"/lights/"
-												+ lightId + "state\"}}]";
+												+ lightId + "/state\"}}]";
 									}
 								}
 							}

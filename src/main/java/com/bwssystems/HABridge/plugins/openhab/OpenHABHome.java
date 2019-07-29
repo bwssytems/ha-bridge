@@ -51,12 +51,15 @@ public class OpenHABHome implements Home  {
 		if(theUrl != null && !theUrl.isEmpty()) {
 			OpenHABCommand theCommand = null;
 			try {
-				theCommand = new Gson().fromJson(theUrl, OpenHABCommand.class);
+				if(anItem.getItem().isJsonObject())
+					theCommand = new Gson().fromJson(anItem.getItem(), OpenHABCommand.class);
+				else
+					theCommand = new Gson().fromJson(anItem.getItem().getAsString().replaceAll("^\"|\"$", ""), OpenHABCommand.class);
 			} catch(Exception e) {
     			log.warn("Cannot parse command to OpenHAB <<<" + theUrl + ">>>", e);
 				responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
 						"Error on calling url to change device state", "/lights/"
-						+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+						+ lightId + "/state", null, null).getTheErrors(), HueError[].class);
 				return responseString;
 			}
 			String intermediate = theCommand.getUrl().substring(theCommand.getUrl().indexOf("://") + 3);

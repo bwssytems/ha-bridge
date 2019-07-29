@@ -44,7 +44,7 @@ public class HTTPHome implements Home {
 			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		String responseString = null;
 		
-		String theUrl = anItem.getItem().getAsString();
+		String theUrl = anItem.getItem().getAsString().replaceAll("^\"|\"$", "");
 		if(theUrl != null && !theUrl.isEmpty () && (theUrl.startsWith("http://") || theUrl.startsWith("https://"))) {
 			//Backwards Compatibility Items
 			if(anItem.getHttpVerb() == null || anItem.getHttpVerb().isEmpty())
@@ -86,7 +86,7 @@ public class HTTPHome implements Home {
 				log.warn("Error on calling url to change device state: " + anUrl);
 				responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
 						"Error on calling url to change device state", "/lights/"
-						+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+						+ lightId + "/state", null, null).getTheErrors(), HueError[].class);
 			}
 			
 			if(isDevMode)
@@ -95,7 +95,7 @@ public class HTTPHome implements Home {
 			log.warn("HTTP Call to be presented as http(s)://<ip_address>(:<port>)/payload, format of request unknown: " + theUrl);
 			responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
 					"Error on calling url to change device state", "/lights/"
-					+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+					+ lightId + "/state", null, null).getTheErrors(), HueError[].class);
 		}
 
 		return responseString;

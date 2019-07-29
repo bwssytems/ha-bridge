@@ -98,7 +98,7 @@ public class HassHome implements Home {
 
 	private Boolean addHassDevices(List<HassDevice> theDeviceList, List<State> theSourceList, String theKey) {
 		if(!validHass)
-			return null;
+			return false;
 		Iterator<State> devices = theSourceList.iterator();
 		while(devices.hasNext()) {
 			State theDevice = devices.next();
@@ -131,14 +131,14 @@ public class HassHome implements Home {
 			log.warn("Should not get here, no HomeAssistant clients configured");
 			theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 					+ "\",\"description\": \"Should not get here, no HomeAssistants configured\", \"parameter\": \"/lights/"
-					+ lightId + "state\"}}]";
+					+ lightId + "/state\"}}]";
 
 		} else {
 			HassCommand hassCommand = null;
 			if(anItem.getItem().isJsonObject())
 				hassCommand = aGsonHandler.fromJson(anItem.getItem(), HassCommand.class);
 			else
-				hassCommand = aGsonHandler.fromJson(anItem.getItem().getAsString(), HassCommand.class);
+				hassCommand = aGsonHandler.fromJson(anItem.getItem().getAsString().replaceAll("^\"|\"$", ""), HassCommand.class);
 			hassCommand.setBri(BrightnessDecode.replaceIntensityValue(hassCommand.getBri(),
 								BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false));
 			HomeAssistant homeAssistant = getHomeAssistant(hassCommand.getHassName());
@@ -146,7 +146,7 @@ public class HassHome implements Home {
 				log.warn("Should not get here, no HomeAssistants available");
 				theReturn = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 						+ "\",\"description\": \"Should not get here, no HiomeAssistant clients available\", \"parameter\": \"/lights/"
-						+ lightId + "state\"}}]";
+						+ lightId + "/state\"}}]";
 			} else {
 					log.debug("calling HomeAssistant: " + hassCommand.getHassName() + " - "
 							+ hassCommand.getEntityId() + " - " + hassCommand.getState() + " - " + hassCommand.getBri());

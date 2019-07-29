@@ -31,13 +31,14 @@ public class CommandHome implements Home {
 
 	@Override
 	public String deviceHandler(CallItem anItem, MultiCommandUtil aMultiUtil, String lightId, int intensity, Integer targetBri, Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
-		log.debug("Exec Request called with url: " +  anItem.getItem().getAsString() + " and exec Garden: "  + (theSettings.getBridgeSecurity().getExecGarden() == null ? "not given" : theSettings.getBridgeSecurity().getExecGarden()));
+		String theItem = anItem.getItem().getAsString().replaceAll("^\"|\"$", "");
+		log.debug("Exec Request called with url: {} and exec Garden: {}", theItem, (theSettings.getBridgeSecurity().getExecGarden() == null ? "not given" : theSettings.getBridgeSecurity().getExecGarden()));
 		String responseString = null;
 		String intermediate;
-		if (anItem.getItem().getAsString().contains("exec://"))
-			intermediate = anItem.getItem().getAsString().substring(anItem.getItem().getAsString().indexOf("://") + 3);
+		if (theItem.contains("exec://"))
+			intermediate = theItem.substring(anItem.getItem().getAsString().indexOf("://") + 3);
 		else
-			intermediate = anItem.getItem().getAsString();
+			intermediate = theItem;
 		intermediate = BrightnessDecode.calculateReplaceIntensityValue(intermediate, intensity, targetBri, targetBriInc, false);
 		if (colorData != null) {
 			intermediate = ColorDecode.replaceColorData(intermediate, colorData, BrightnessDecode.calculateIntensity(intensity, targetBri, targetBriInc), false);	
@@ -67,13 +68,13 @@ public class CommandHome implements Home {
 				log.warn("Could not execute request: " + anItem + " with message: " + e.getMessage());
 				responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 						+ "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId
-						+ "state\"}}]";
+						+ "/state\"}}]";
 			}
 		} else {
 			log.warn("Could not execute request. Request is empty.");
 			responseString = "[{\"error\":{\"type\": 6, \"address\": \"/lights/" + lightId
 					+ "\",\"description\": \"Error on calling out to device\", \"parameter\": \"/lights/" + lightId
-					+ "state\"}}]";
+					+ "/state\"}}]";
 		}
 
 		return responseString;

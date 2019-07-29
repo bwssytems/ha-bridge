@@ -104,7 +104,7 @@ public class HalHome implements Home {
 	
 	private Boolean addHalDevices(List<HalDevice> theDeviceList, List<HalDevice> theSourceList, String theKey) {
 		if(!validHal)
-			return null;
+			return false;
 		Iterator<HalDevice> devices = theSourceList.iterator();
 		while(devices.hasNext()) {
 			HalDevice theDevice = devices.next();
@@ -123,7 +123,7 @@ public class HalHome implements Home {
 			Integer targetBri,Integer targetBriInc, ColorData colorData, DeviceDescriptor device, String body) {
 		boolean halFound = false;
 		String responseString = null;
-		String theUrl = anItem.getItem().getAsString();
+		String theUrl = anItem.getItem().getAsString().replaceAll("^\"|\"$", "");
 		if(theUrl != null && !theUrl.isEmpty () && theUrl.contains("http")) {
 			String intermediate = theUrl.substring(theUrl.indexOf("://") + 3);
 			String hostPortion = intermediate.substring(0, intermediate.indexOf('/'));
@@ -165,7 +165,7 @@ public class HalHome implements Home {
 						log.warn("Error on calling hal to change device state: " + anUrl);
 						responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
 								"Error on calling url to change device state", "/lights/"
-								+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+								+ lightId + "/state", null, null).getTheErrors(), HueError[].class);
 					}
 				}
 			}
@@ -175,7 +175,7 @@ public class HalHome implements Home {
 			log.warn("No HAL found to call: " + theUrl);
 			responseString = new Gson().toJson(HueErrorResponse.createResponse("6", "/lights/" + lightId,
 					"No HAL found.", "/lights/"
-					+ lightId + "state", null, null).getTheErrors(), HueError[].class);
+					+ lightId + "/state", null, null).getTheErrors(), HueError[].class);
 		}
 		return responseString;
 	}

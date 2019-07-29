@@ -34,6 +34,8 @@ public class DeviceMapTypes {
 	public final static String[] OPENHAB_DEVICE = { "openhabDevice", "OpenHAB Device"};
 	public final static String[] FHEM_DEVICE = { "fhemDevice", "FHEM Device"};
 	public final static String[] BROADLINK_DEVICE = { "broadlinkDevice", "Broadlink Device"};
+	public final static String[] MOZIOT_DEVICE = { "moziotDevice", "Mozilla IOT Device"};
+	public final static String[] HOMEGENIE_DEVICE = { "homegenieDevice", "HomeGenie Device"};
 
 	public final static int typeIndex = 0;
 	public final static int displayIndex = 1;
@@ -69,6 +71,8 @@ public class DeviceMapTypes {
 		deviceMapTypes.add(OPENHAB_DEVICE);
 		deviceMapTypes.add(FHEM_DEVICE);
 		deviceMapTypes.add(BROADLINK_DEVICE);
+		deviceMapTypes.add(MOZIOT_DEVICE);
+		deviceMapTypes.add(HOMEGENIE_DEVICE);
 	}
 	public static int getTypeIndex() {
 		return typeIndex;

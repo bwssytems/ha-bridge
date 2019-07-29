@@ -17,7 +17,24 @@
 	<link href="css/strength-meter.min.css" rel="stylesheet">
 	<link href="css/colorpicker.min.css" rel="stylesheet">
 
-    <!--[if lt IE 9]>
+	<style id="compiled-css" type="text/css">
+		.goToTop
+		{
+			position: fixed;
+			width: 100px;
+			height: 40px;
+			bottom: 0;
+			right: 0;
+			z-index: 100000;
+			cursor: pointer;
+			margin: 10px;
+			-moz-opacity: 0.60;
+			opacity: .60;
+			filter: alpha(opacity=60);
+		}
+	</style>
+	
+	<!--[if lt IE 9]>
     <script type="text/javascript" src="js/html5shiv.min.js"></script>
     <script type="text/javascript" src="js/respond.min.js"></script>
     <![endif]-->
@@ -75,8 +92,12 @@
 	
 	
 	</div>
+	<span class="goToTop"> 
+		<button type="button" class="btn btn-light"><i class="glyphicon glyphicon-chevron-up"></i> Back to Top</button>
+	</span>
+	<!-- <input type="button"  class="goToTop" value="Back to Top"  style="display:none;background-color:blue"  /> -->
 
-    <script src="js/jquery-1.11.3.min.js"></script>
+	<script src="js/jquery-1.11.3.min.js"></script>
     <script src="js/angular.min.js"></script>
     <script src="js/angular-route.min.js"></script>
 	<script src="js/angular-sanitize.min.js"></script>
@@ -89,7 +110,39 @@
     <script src="js/angular-base64.min.js"></script>
     <script src="js/angular-resource.min.js"></script>
     <script src="js/ngStorage.min.js"></script>
-    <script src="js/bootstrap-colorpicker-module.min.js"></script>
+	<script src="js/bootstrap-colorpicker-module.min.js"></script>
+	<script src="js/ng-file-upload-shim.min.js"></script>
+	<script src="js/ng-file-upload.min.js"></script>
     <script src="scripts/app.js"></script>
-</body>
+	<script type="text/javascript">
+		$(window).load(function(){
+		  
+		  $(window).scroll(function () {
+				if ($(this).scrollTop() > 100) {
+					$('.goToTop').fadeIn();
+				} else {
+					$('.goToTop').fadeOut();
+				}
+			});
+			$('.goToTop').click(function () {
+				$("html, body").animate({ scrollTop: 0 }, 1000);
+				return false;
+			});
+		
+		});
+		
+		</script>
+	<script>
+		// tell the embed parent frame the height of the content
+		if (window.parent && window.parent.parent){
+		  window.parent.parent.postMessage(["resultsFrame", {
+			height: document.body.getBoundingClientRect().height,
+			slug: "fvdrw83s"
+		  }], "*")
+		}
+	
+		// always overwrite window.name, in case users try to set it manually
+		window.name = "result"
+	  </script>
+	</body>
 </html>
