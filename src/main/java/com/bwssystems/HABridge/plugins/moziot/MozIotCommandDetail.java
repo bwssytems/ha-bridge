@@ -41,10 +41,10 @@ public class MozIotCommandDetail {
     public String getBody() {
         String theBody = "";
 
-        if(level != null && level != "") {
+        if(level != null && !"".equals(level)) {
             theBody = "{\"level\":" + level + "}";
         }
-        else if(color != null && color != "") {
+        else if(color != null && !"".equals(color)) {
             theBody = "{\"color\":\"" + color + "\"}";
         } else {
             theBody = "{\"on\":" + on + "}";
