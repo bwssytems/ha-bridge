@@ -7,6 +7,7 @@ import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.HuePublicConfig;
+import com.bwssystems.HABridge.util.AddressUtil;
 import com.bwssystems.HABridge.util.ParseRoute;
 
 import static spark.Spark.get;
@@ -98,7 +99,12 @@ public class UpnpSettingsResource {
 				httpLocationAddr = theSettings.getUpnpConfigAddress();
 				hueTemplate = hueTemplate_pre + hueTemplate_mid_orig + hueTemplate_post;
 			} else {
-				httpLocationAddr = getOutboundAddress(request.ip(), request.port()).getHostAddress();
+
+				if(theSettings.isUseupnpiface()) {
+					httpLocationAddr = theSettings.getUpnpConfigAddress();
+				} else {
+					httpLocationAddr = AddressUtil.getOutboundAddress(request.ip(), request.port()).getHostAddress();
+				}
 				hueTemplate = hueTemplate_pre + hueTemplate_post;
 			}
 
@@ -135,29 +141,5 @@ public class UpnpSettingsResource {
 		get("/hue_logo_3.png", "application/xml; charset=utf-8", (request, response) -> {
 			return "";
         } );
-	}
-	// added by https://github.com/pvint
-	// Ruthlessly stolen from https://stackoverflow.com/questions/22045165/java-datagrampacket-receive-how-to-determine-local-ip-interface
-	// Try to get a source IP that makes sense for the requester to contact for use in the LOCATION header in replies
-	private InetAddress getOutboundAddress(String remoteAddress, int remotePort) {
-		InetAddress localAddress = null;
-		try {
-		DatagramSocket sock = new DatagramSocket();
-		// connect is needed to bind the socket and retrieve the local address
-		// later (it would return 0.0.0.0 otherwise)
-		sock.connect(new InetSocketAddress(remoteAddress, remotePort));
-		localAddress = sock.getLocalAddress();
-		sock.disconnect();
-		sock.close();
-		sock = null;
-		} catch(Exception e)  {
-			ParseRoute theRoute = ParseRoute.getInstance();
-			try {
-				localAddress = InetAddress.getByName(theRoute.getLocalIPAddress());
-			} catch(Exception e1) {}
-			log.warn("Error <" + e.getMessage() + "> on determining interface to reply for <" + remoteAddress + ">. Using default route IP Address of " + localAddress.getHostAddress());
-		}
-		log.debug("getOutbountAddress returning IP Address of " + localAddress.getHostAddress());
-		return localAddress;
 	}
 }

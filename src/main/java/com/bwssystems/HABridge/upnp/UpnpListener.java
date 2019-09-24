@@ -9,6 +9,7 @@ import com.bwssystems.HABridge.Configuration;
 import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.HuePublicConfig;
 import com.bwssystems.HABridge.util.UDPDatagramSender;
+import com.bwssystems.HABridge.util.AddressUtil;
 
 import java.io.IOException;
 import java.net.*;
@@ -331,8 +332,14 @@ public class UpnpListener {
 		InetAddress requester = aPacket.getAddress();
 		int sourcePort = aPacket.getPort();
 		String discoveryResponse = null;
-		// refactored suggestion by https://github.com/pvint
-		String httpLocationAddress = getOutboundAddress(requesterAddress).getHostAddress();
+		String httpLocationAddress = null;
+		if(useUpnpIface) {
+			httpLocationAddress = upnpConfigIP;
+		} else {
+			// refactored suggestion by https://github.com/pvint
+			httpLocationAddress = AddressUtil.getOutboundAddress(requesterAddress).getHostAddress();
+		}
+
 		try {
 			Thread.sleep(theUpnpSendDelay);
 		} catch (InterruptedException e) {
@@ -436,22 +443,5 @@ public class UpnpListener {
 		}
 		log.debug("sendUpnpNotify notifyTemplate3 is <<<{}>>>", notifyData);
 		sendUDPResponse(notifyData.getBytes(), aSocketAddress, Configuration.UPNP_DISCOVERY_PORT);
-	}
-
-	// added by https://github.com/pvint
-	// Ruthlessly stolen from
-	// https://stackoverflow.com/questions/22045165/java-datagrampacket-receive-how-to-determine-local-ip-interface
-	// Try to get a source IP that makes sense for the requestor to contact for use
-	// in the LOCATION header in replies
-	private InetAddress getOutboundAddress(SocketAddress remoteAddress) throws SocketException {
-		DatagramSocket sock = new DatagramSocket();
-		// connect is needed to bind the socket and retrieve the local address
-		// later (it would return 0.0.0.0 otherwise)
-		sock.connect(remoteAddress);
-		final InetAddress localAddress = sock.getLocalAddress();
-		sock.disconnect();
-		sock.close();
-		sock = null;
-		return localAddress;
 	}
 }
