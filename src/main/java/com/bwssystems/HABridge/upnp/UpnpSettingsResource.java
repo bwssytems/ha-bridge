@@ -8,13 +8,8 @@ import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.HuePublicConfig;
 import com.bwssystems.HABridge.util.AddressUtil;
-import com.bwssystems.HABridge.util.ParseRoute;
 
 import static spark.Spark.get;
-
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 
 /**
  * 

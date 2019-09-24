@@ -21,6 +21,11 @@ public class ColorDecode {
 	private static final String COLOR_BX = "${color.bx}";
 	private static final String COLOR_RGBX = "${color.rgbx}";
 	private static final String COLOR_HSL = "${color.hsl}";
+	private static final String COLOR_H = "${color.h}";
+	private static final String COLOR_S = "${color.s}";
+	private static final String COLOR_L = "${color.l}";
+	private static final String COLOR_XY = "${color.xy}";
+	private static final String COLOR_BRI = "${colorbri}";
 	private static final Pattern COLOR_MILIGHT = Pattern.compile("\\$\\{color.milight\\:([01234])\\}");
 
 	public static List<Integer> convertHSLtoRGB(HueSatBri hsl) {
@@ -35,46 +40,43 @@ public class ColorDecode {
 		double g = 0.0;
 		double b = 0.0;
 
-		if(hsl.getBri() > 0)
+		if (hsl.getBri() > 0)
 			decimalBrightness = (float) (hsl.getBri() / 255.0);
 
-		if(hsl.getHue() > 0) {
-			h = ((float)hsl.getHue() / (float)65535.0);
-			h2 = h + (float)0.5;
-			if(h2 > 1.0) {
-				h2 = h2 - (float)1.0;
+		if (hsl.getHue() > 0) {
+			h = ((float) hsl.getHue() / (float) 65535.0);
+			h2 = h + (float) 0.5;
+			if (h2 > 1.0) {
+				h2 = h2 - (float) 1.0;
 			}
 		}
-		if(hsl.getSat() > 0) {
-			s = (float)(hsl.getSat() / 254.0);
+		if (hsl.getSat() > 0) {
+			s = (float) (hsl.getSat() / 254.0);
 		}
 
-        if (s == 0)
-        {
-                r = decimalBrightness * (float)255;
-                g = decimalBrightness * (float)255;
-                b = decimalBrightness * (float)255;
-        }
-        else
-        {
-                if (decimalBrightness < 0.5)
-                {
-                        var_2 = decimalBrightness * (1 + s);
-                }
-                else
-                {
-                        var_2 = (decimalBrightness + s) - (s * decimalBrightness);
-                };
+		if (s == 0) {
+			r = decimalBrightness * (float) 255;
+			g = decimalBrightness * (float) 255;
+			b = decimalBrightness * (float) 255;
+		} else {
+			if (decimalBrightness < 0.5) {
+				var_2 = decimalBrightness * (1 + s);
+			} else {
+				var_2 = (decimalBrightness + s) - (s * decimalBrightness);
+			}
+			;
 
-				var_1 = 2 * decimalBrightness - var_2;
-				float onethird = (float)0.33333;
-				float h2Plus = (h2 + onethird);
-				float h2Minus = (h2 - onethird);
-				log.debug("calculate HSL vars - var1: " + var_1 + ", var_2: " + var_2 + ", h2: " + h2 + ", h2 + 1/3: " + h2Plus + ", h2 - 1/3: " + h2Minus);
-                r = 255 * hue_2_rgb(var_1, var_2, h2Plus);
-                g = 255 * hue_2_rgb(var_1, var_2, h2);
-                b = 255 * hue_2_rgb(var_1, var_2, h2Minus);
-        };
+			var_1 = 2 * decimalBrightness - var_2;
+			float onethird = (float) 0.33333;
+			float h2Plus = (h2 + onethird);
+			float h2Minus = (h2 - onethird);
+			log.debug("calculate HSL vars - var1: " + var_1 + ", var_2: " + var_2 + ", h2: " + h2 + ", h2 + 1/3: "
+					+ h2Plus + ", h2 - 1/3: " + h2Minus);
+			r = 255 * hue_2_rgb(var_1, var_2, h2Plus);
+			g = 255 * hue_2_rgb(var_1, var_2, h2);
+			b = 255 * hue_2_rgb(var_1, var_2, h2Minus);
+		}
+		;
 
 		rgb = new ArrayList<Integer>();
 		rgb.add((int) Math.round(r));
@@ -88,30 +90,30 @@ public class ColorDecode {
 
 	public static float hue_2_rgb(float v1, float v2, float vh) {
 		log.debug("hue_2_rgb vh: " + vh);
-		if (vh < 0.0)
-		{
-				vh = vh + (float)1;
-		};
+		if (vh < 0.0) {
+			vh = vh + (float) 1;
+		}
+		;
 
-		if (vh > 1.0)
-		{
-				vh = vh - (float)1;
-		};
+		if (vh > 1.0) {
+			vh = vh - (float) 1;
+		}
+		;
 
-		if (((float)6.0 * vh) < 1.0)
-		{
-				return (v1 + (v2 - v1) * (float)6.0 * vh);
-		};
+		if (((float) 6.0 * vh) < 1.0) {
+			return (v1 + (v2 - v1) * (float) 6.0 * vh);
+		}
+		;
 
-		if (((float)2.0 * vh) < 1.0)
-		{
-				return (v2);
-		};
+		if (((float) 2.0 * vh) < 1.0) {
+			return (v2);
+		}
+		;
 
-		if ((3.0 * vh) < 2.0)
-		{
-				return (v1 + (v2 - v1) * (((float)2.0 / (float)3.0 - vh) * (float)6.0));
-		};
+		if ((3.0 * vh) < 2.0) {
+			return (v1 + (v2 - v1) * (((float) 2.0 / (float) 3.0 - vh) * (float) 6.0));
+		}
+		;
 
 		return (v1);
 	}
@@ -297,13 +299,69 @@ public class ColorDecode {
 				notDone = true;
 			}
 
+			if (request.contains(COLOR_XY)) {
+				if (colorMode == ColorData.ColorMode.XY) {
+					List<Double> xyData = (List<Double>) colorData.getData();
+					request = request.replace(COLOR_XY, String.format("%f,%f", xyData.get(0), xyData.get(1)));
+				} else {
+					List<Double> xyData = (List<Double>) colorData.getData();
+					request = request.replace(COLOR_XY, String.format("%f,%f", xyData.get(0), xyData.get(1)));
+				}
+				notDone = true;
+			}
+
+			if (request.contains(COLOR_H)) {
+				if (colorMode == ColorData.ColorMode.HS) {
+					HueSatBri hslData = (HueSatBri) colorData.getData();
+					request = request.replace(COLOR_H, String.format("%d", hslData.getHue()));
+				} else {
+					float[] hsb = new float[3];
+					Color.RGBtoHSB(rgb.get(0), rgb.get(1), rgb.get(2), hsb);
+					float hue = hsb[0] * (float) 360.0;
+					request = request.replace(COLOR_H, String.format("%f", hue));
+				}
+				notDone = true;
+			}
+
+			if (request.contains(COLOR_S)) {
+				if (colorMode == ColorData.ColorMode.HS) {
+					HueSatBri hslData = (HueSatBri) colorData.getData();
+					request = request.replace(COLOR_S, String.format("%d", hslData.getSat()));
+				} else {
+					float[] hsb = new float[3];
+					Color.RGBtoHSB(rgb.get(0), rgb.get(1), rgb.get(2), hsb);
+					float sat = hsb[1] * (float) 100.0;
+					request = request.replace(COLOR_S, String.format("%f", sat));
+				}
+				notDone = true;
+			}
+
+			if (request.contains(COLOR_L)) {
+				if (colorMode == ColorData.ColorMode.HS) {
+					HueSatBri hslData = (HueSatBri) colorData.getData();
+					request = request.replace(COLOR_L, String.format("%d", hslData.getBri()));
+				} else {
+					float[] hsb = new float[3];
+					Color.RGBtoHSB(rgb.get(0), rgb.get(1), rgb.get(2), hsb);
+					float bright = hsb[2] * (float) 100.0;
+					request = request.replace(COLOR_L, String.format("%f", bright));
+				}
+				notDone = true;
+			}
+
 			if (request.contains(COLOR_HSL)) {
-				float[] hsb = new float[3];
-				Color.RGBtoHSB(rgb.get(0), rgb.get(1), rgb.get(2), hsb);
-				float hue = hsb[0] * (float) 360.0;
-				float sat = hsb[1] * (float) 100.0;
-				float bright = hsb[2] * (float) 100.0;
-				request = request.replace(COLOR_HSL, String.format("%f,%f,%f", hue, sat, bright));
+				if (colorMode == ColorData.ColorMode.HS) {
+					HueSatBri hslData = (HueSatBri) colorData.getData();
+					request = request.replace(COLOR_HSL,
+							String.format("%d,%d,%d", hslData.getHue(), hslData.getSat(), hslData.getBri()));
+				} else {
+					float[] hsb = new float[3];
+					Color.RGBtoHSB(rgb.get(0), rgb.get(1), rgb.get(2), hsb);
+					float hue = hsb[0] * (float) 360.0;
+					float sat = hsb[1] * (float) 100.0;
+					float bright = hsb[2] * (float) 100.0;
+					request = request.replace(COLOR_HSL, String.format("%f,%f,%f", hue, sat, bright));
+				}
 				notDone = true;
 			}
 

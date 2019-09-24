@@ -16,24 +16,20 @@ public class AddressUtil {
     public static InetAddress getOutboundAddress(String remoteAddress, int remotePort) {
         InetAddress localAddress = null;
         try {
-            DatagramSocket sock = new DatagramSocket();
-            // connect is needed to bind the socket and retrieve the local address
-            // later (it would return 0.0.0.0 otherwise)
-            sock.connect(new InetSocketAddress(remoteAddress, remotePort));
-            localAddress = sock.getLocalAddress();
-            sock.disconnect();
-            sock.close();
-            sock = null;
+            getOutboundAddress(new InetSocketAddress(remoteAddress, remotePort));
         } catch (Exception e) {
             ParseRoute theRoute = ParseRoute.getInstance();
             try {
                 localAddress = InetAddress.getByName(theRoute.getLocalIPAddress());
+                log.warn("Error <" + e.getMessage() + "> on determining interface to reply for <" + remoteAddress
+                + ">. Using default route IP Address of " + localAddress.getHostAddress());
             } catch (Exception e1) {
+                log.error("Cannot find address for parsed local ip address: " + e.getMessage());
             }
-            log.warn("Error <" + e.getMessage() + "> on determining interface to reply for <" + remoteAddress
-                    + ">. Using default route IP Address of " + localAddress.getHostAddress());
         }
-        log.debug("getOutbountAddress returning IP Address of " + localAddress.getHostAddress());
+
+        if(localAddress != null)
+            log.debug("getOutbountAddress returning IP Address of " + localAddress.getHostAddress());
         return localAddress;
     }
 
