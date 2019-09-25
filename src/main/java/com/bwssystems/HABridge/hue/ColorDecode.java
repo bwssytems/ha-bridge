@@ -122,64 +122,64 @@ public class ColorDecode {
 		List<Integer> rgb;
 		double x = xy.get(0); // the given x value
 		double y = xy.get(1); // the given y value
-		double z = 1.0 - x - y;
-		double Y = (double) brightness / (double) 254.00; // The given brightness value
+		double z = 1.0f - x - y;
+		double Y = (double) brightness / (double) 254.00f; // The given brightness value
 		double X = (Y / y) * x;
 		double Z = (Y / y) * z;
 
-		double r = X * 1.656492 - Y * 0.354851 - Z * 0.255038;
-		double g = -X * 0.707196 + Y * 1.655397 + Z * 0.036152;
-		double b = X * 0.051713 - Y * 0.121364 + Z * 1.011530;
+		double r = X * 1.656492f - Y * 0.354851f - Z * 0.255038f;
+		double g = -X * 0.707196f + Y * 1.655397f + Z * 0.036152f;
+		double b = X * 0.051713f - Y * 0.121364f + Z * 1.011530f;
 
-		if (r > b && r > g && r > 1.0) {
+		if (r > b && r > g && r > 1.0f) {
 
 			g = g / r;
 			b = b / r;
-			r = 1.0;
-		} else if (g > b && g > r && g > 1.0) {
+			r = 1.0f;
+		} else if (g > b && g > r && g > 1.0f) {
 
 			r = r / g;
 			b = b / g;
-			g = 1.0;
-		} else if (b > r && b > g && b > 1.0) {
+			g = 1.0f;
+		} else if (b > r && b > g && b > 1.0f) {
 
 			r = r / b;
 			g = g / b;
-			b = 1.0;
+			b = 1.0f;
 		}
 
-		r = r <= 0.0031308 ? 12.92 * r : (1.0 + 0.055) * Math.pow(r, (1.0 / 2.4)) - 0.055;
-		g = g <= 0.0031308 ? 12.92 * g : (1.0 + 0.055) * Math.pow(g, (1.0 / 2.4)) - 0.055;
-		b = b <= 0.0031308 ? 12.92 * b : (1.0 + 0.055) * Math.pow(b, (1.0 / 2.4)) - 0.055;
+		r = r <= 0.0031308f ? 12.92f * r : (1.0f + 0.055f) * Math.pow(r, (1.0f / 2.4f)) - 0.055f;
+		g = g <= 0.0031308f ? 12.92f * g : (1.0f + 0.055f) * Math.pow(g, (1.0f / 2.4f)) - 0.055f;
+		b = b <= 0.0031308f ? 12.92f * b : (1.0f + 0.055f) * Math.pow(b, (1.0f / 2.4f)) - 0.055f;
 
 		if (r > b && r > g) {
 			// red is biggest
-			if (r > 1.0) {
+			if (r > 1.0f) {
 				g = g / r;
 				b = b / r;
-				r = 1.0;
+				r = 1.0f;
 			}
 		} else if (g > b && g > r) {
 			// green is biggest
-			if (g > 1.0) {
+			if (g > 1.0f) {
 				r = r / g;
 				b = b / g;
-				g = 1.0;
+				g = 1.0f;
 			}
 		} else if (b > r && b > g) {
 			// blue is biggest
-			if (b > 1.0) {
+			if (b > 1.0f) {
 				r = r / b;
 				g = g / b;
-				b = 1.0;
+				b = 1.0f;
 			}
 		}
-		if (r < 0.0)
-			r = 0;
-		if (g < 0.0)
-			g = 0;
-		if (b < 0.0)
-			b = 0;
+		if (r < 0.0f)
+			r = 0.0f;
+		if (g < 0.0f)
+			g = 0.0f;
+		if (b < 0.0f)
+			b = 0.0f;
 
 		rgb = new ArrayList<Integer>();
 		rgb.add((int) Math.round(r * 255));
