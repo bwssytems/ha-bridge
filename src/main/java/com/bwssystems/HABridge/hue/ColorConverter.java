@@ -939,4 +939,25 @@ public class ColorConverter {
         return xyz;
     }
     
+    public static int[] normalizeRGB(int[] rgb) {
+        int[] newRGB = new int[3];
+
+        newRGB[0] = assureBounds(rgb[0]);
+        newRGB[1] = assureBounds(rgb[1]);
+        newRGB[2] = assureBounds(rgb[2]);
+
+
+        return newRGB;
+    }
+
+	private static int assureBounds(int value) {
+		if (value < 0.0) {
+			value = 0;
+		}
+		if (value > 255.0) {
+			value = 255;
+		}
+		return value;
+	}
+
 }

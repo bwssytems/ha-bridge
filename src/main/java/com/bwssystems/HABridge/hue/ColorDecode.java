@@ -30,162 +30,32 @@ public class ColorDecode {
 
 	public static List<Integer> convertHSLtoRGB(HueSatBri hsl) {
 		List<Integer> rgb;
-		float decimalBrightness = (float) 0.0;
-		float var_1 = (float) 0.0;
-		float var_2 = (float) 0.0;
-		float h = (float) 0.0;
-		float h2 = (float) 0.0;
-		float s = (float) 0.0;
-		double r = 0.0;
-		double g = 0.0;
-		double b = 0.0;
-
-		if (hsl.getBri() > 0)
-			decimalBrightness = (float) (hsl.getBri() / 255.0);
-
-		if (hsl.getHue() > 0) {
-			h = ((float) hsl.getHue() / (float) 65535.0);
-			h2 = h + (float) 0.5;
-			if (h2 > 1.0) {
-				h2 = h2 - (float) 1.0;
-			}
-		}
-		if (hsl.getSat() > 0) {
-			s = (float) (hsl.getSat() / 254.0);
-		}
-
-		if (s == 0) {
-			r = decimalBrightness * (float) 255;
-			g = decimalBrightness * (float) 255;
-			b = decimalBrightness * (float) 255;
-		} else {
-			if (decimalBrightness < 0.5) {
-				var_2 = decimalBrightness * (1 + s);
-			} else {
-				var_2 = (decimalBrightness + s) - (s * decimalBrightness);
-			}
-			;
-
-			var_1 = 2 * decimalBrightness - var_2;
-			float onethird = (float) 0.33333;
-			float h2Plus = (h2 + onethird);
-			float h2Minus = (h2 - onethird);
-			log.debug("calculate HSL vars - var1: " + var_1 + ", var_2: " + var_2 + ", h2: " + h2 + ", h2 + 1/3: "
-					+ h2Plus + ", h2 - 1/3: " + h2Minus);
-			r = 255 * hue_2_rgb(var_1, var_2, h2Plus);
-			g = 255 * hue_2_rgb(var_1, var_2, h2);
-			b = 255 * hue_2_rgb(var_1, var_2, h2Minus);
-		}
-		;
-
+		int[] rgbInt = ColorConverter.normalizeRGB(ColorConverter.HSLtoRGB((float)((float)hsl.getHue()/65535.0f), (float)((float)hsl.getSat()/254.0f), (float)((float)hsl.getBri()/254)));
 		rgb = new ArrayList<Integer>();
-		rgb.add((int) Math.round(r));
-		rgb.add((int) Math.round(g));
-		rgb.add((int) Math.round(b));
+		rgb.add(rgbInt[0]);
+		rgb.add(rgbInt[1]);
+		rgb.add(rgbInt[2]);
 
-		log.debug("Color change with HSL: " + hsl + ". Resulting RGB Values: " + rgb.get(0) + " " + rgb.get(1) + " "
+		log.info("Color change with HSL: " + hsl + ". Resulting RGB Values: " + rgb.get(0) + " " + rgb.get(1) + " "
 				+ rgb.get(2));
 		return rgb;
 	}
 
-	public static float hue_2_rgb(float v1, float v2, float vh) {
-		log.debug("hue_2_rgb vh: " + vh);
-		if (vh < 0.0) {
-			vh = vh + (float) 1;
-		}
-		;
-
-		if (vh > 1.0) {
-			vh = vh - (float) 1;
-		}
-		;
-
-		if (((float) 6.0 * vh) < 1.0) {
-			return (v1 + (v2 - v1) * (float) 6.0 * vh);
-		}
-		;
-
-		if (((float) 2.0 * vh) < 1.0) {
-			return (v2);
-		}
-		;
-
-		if ((3.0 * vh) < 2.0) {
-			return (v1 + (v2 - v1) * (((float) 2.0 / (float) 3.0 - vh) * (float) 6.0));
-		}
-		;
-
-		return (v1);
-	}
-
 	public static List<Integer> convertCIEtoRGB(List<Double> xy, int brightness) {
 		List<Integer> rgb;
-		double x = xy.get(0); // the given x value
-		double y = xy.get(1); // the given y value
-		double z = 1.0f - x - y;
-		double Y = (double) brightness / (double) 254.00f; // The given brightness value
-		double X = (Y / y) * x;
-		double Z = (Y / y) * z;
-
-		double r = X * 1.656492f - Y * 0.354851f - Z * 0.255038f;
-		double g = -X * 0.707196f + Y * 1.655397f + Z * 0.036152f;
-		double b = X * 0.051713f - Y * 0.121364f + Z * 1.011530f;
-
-		if (r > b && r > g && r > 1.0f) {
-
-			g = g / r;
-			b = b / r;
-			r = 1.0f;
-		} else if (g > b && g > r && g > 1.0f) {
-
-			r = r / g;
-			b = b / g;
-			g = 1.0f;
-		} else if (b > r && b > g && b > 1.0f) {
-
-			r = r / b;
-			g = g / b;
-			b = 1.0f;
-		}
-
-		r = r <= 0.0031308f ? 12.92f * r : (1.0f + 0.055f) * Math.pow(r, (1.0f / 2.4f)) - 0.055f;
-		g = g <= 0.0031308f ? 12.92f * g : (1.0f + 0.055f) * Math.pow(g, (1.0f / 2.4f)) - 0.055f;
-		b = b <= 0.0031308f ? 12.92f * b : (1.0f + 0.055f) * Math.pow(b, (1.0f / 2.4f)) - 0.055f;
-
-		if (r > b && r > g) {
-			// red is biggest
-			if (r > 1.0f) {
-				g = g / r;
-				b = b / r;
-				r = 1.0f;
-			}
-		} else if (g > b && g > r) {
-			// green is biggest
-			if (g > 1.0f) {
-				r = r / g;
-				b = b / g;
-				g = 1.0f;
-			}
-		} else if (b > r && b > g) {
-			// blue is biggest
-			if (b > 1.0f) {
-				r = r / b;
-				g = g / b;
-				b = 1.0f;
-			}
-		}
-		if (r < 0.0f)
-			r = 0.0f;
-		if (g < 0.0f)
-			g = 0.0f;
-		if (b < 0.0f)
-			b = 0.0f;
-
+		XYColorSpace xyColor = new XYColorSpace();
+		xyColor.setBrightness(brightness);
+		float[] xyFloat = new float[2];
+		xyFloat[0] = xy.get(0).floatValue();
+		xyFloat[1] = xy.get(1).floatValue();
+		xyColor.setXy(xyFloat);
+		float[] xyz = ColorConverter.XYtoXYZ(xyColor);
+		int[] rgbInt = ColorConverter.normalizeRGB(ColorConverter.XYZtoRGB(xyz[0], xyz[1], xyz[2]));
 		rgb = new ArrayList<Integer>();
-		rgb.add((int) Math.round(r * 255));
-		rgb.add((int) Math.round(g * 255));
-		rgb.add((int) Math.round(b * 255));
-		log.debug("Color change with XY: " + x + " " + y + " Resulting RGB Values: " + rgb.get(0) + " " + rgb.get(1)
+		rgb.add(rgbInt[0]);
+		rgb.add(rgbInt[1]);
+		rgb.add(rgbInt[2]);
+		log.debug("Color change with XY: " + xy.get(0) + " " + xy.get(1) + " Resulting RGB Values: " + rgb.get(0) + " " + rgb.get(1)
 				+ " " + rgb.get(2));
 		return rgb;
 	}
