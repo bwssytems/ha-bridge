@@ -36,7 +36,7 @@ public class ColorDecode {
 		rgb.add(rgbInt[1]);
 		rgb.add(rgbInt[2]);
 
-		log.info("Color change with HSL: " + hsl + ". Resulting RGB Values: " + rgb.get(0) + " " + rgb.get(1) + " "
+		log.debug("Color change with HSL: " + hsl + ". Resulting RGB Values: " + rgb.get(0) + " " + rgb.get(1) + " "
 				+ rgb.get(2));
 		return rgb;
 	}
