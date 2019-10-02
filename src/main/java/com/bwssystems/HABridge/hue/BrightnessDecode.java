@@ -26,7 +26,7 @@ public class BrightnessDecode {
 		if (targetBri != null) {
 			setIntensity = targetBri;
 		} else if (targetBriInc != null) {
-			if ((setIntensity + targetBriInc) <= 0)
+			if ((setIntensity + targetBriInc) <= 1)
 				setIntensity = targetBriInc;
 			else if ((setIntensity + targetBriInc) > 254)
 				setIntensity = targetBriInc;
@@ -53,7 +53,7 @@ public class BrightnessDecode {
 		String replaceValue = null;
 		String replaceTarget = null;
 		int percentBrightness = 0;
-		float decimalBrightness = (float) 0.0;
+		float decimalBrightness = (float) 1.0;
 		Map<String, BigDecimal> variables = new HashMap<String, BigDecimal>();
 		String mathDescriptor = null;
 
@@ -64,8 +64,8 @@ public class BrightnessDecode {
 			else
 				percentBrightness = (int) Math.round(intensity / 255.0 * 100);
 		} else {
-			decimalBrightness = (float) 0.0;
-			percentBrightness = 0;
+			decimalBrightness = (float) 1.0;
+			percentBrightness = 1;
 		}
 
 		while(notDone) {

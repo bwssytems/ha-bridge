@@ -473,9 +473,9 @@ public class HueMulator {
 			if (deviceState != null) {
 				deviceState.setOn(stateChanges.isOn());
 				if (!deviceState.isOn() && deviceState.getBri() == 254)
-					deviceState.setBri(0);
+					deviceState.setBri(1);
 				if (!deviceState.isOn() && offState)
-					deviceState.setBri(0);
+					deviceState.setBri(1);
 			}
 			notFirstChange = true;
 		}
@@ -609,7 +609,7 @@ public class HueMulator {
 			notFirstChange = true;
 		}
 
-		if ((deviceState != null) && deviceState.isOn() && deviceState.getBri() <= 0)
+		if ((deviceState != null) && deviceState.isOn() && deviceState.getBri() <= 1)
 			deviceState.setBri(254);
 
 		// if((deviceState != null) && !deviceState.isOn() && (targetBri != null ||
@@ -1416,8 +1416,8 @@ public class HueMulator {
 			int bri = 0;
 			if (targetBriInc != null) {
 				bri = state.getBri() - targetBriInc;
-				if (bri < 0)
-					bri = 0;
+				if (bri < 1)
+					bri = 1;
 			} else if (targetBri != null) {
 				bri = targetBri;
 			} else {
@@ -1440,8 +1440,8 @@ public class HueMulator {
 			int bri = 0;
 			if (targetBriInc != null) {
 				bri = state.getBri() - targetBriInc;
-				if (bri < 0)
-					bri = 0;
+				if (bri < 1)
+					bri = 1;
 			} else if (targetBri != null) {
 				bri = targetBri;
 			} else {

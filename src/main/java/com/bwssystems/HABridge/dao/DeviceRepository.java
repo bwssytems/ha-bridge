@@ -75,6 +75,8 @@ public class DeviceRepository extends BackupHandler {
 					nextId = Integer.decode(list[i].getId());
 				}
 			}
+
+			nextId = nextId + 1;
 		}
 	}
 
