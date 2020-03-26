@@ -90,10 +90,11 @@ public class UpnpListener {
 		}
 
 		try {
-			if (useUpnpIface)
-				upnpMulticastSocket = new MulticastSocket(
-						new InetSocketAddress(upnpConfigIP, Configuration.UPNP_DISCOVERY_PORT));
-			else
+//			This commented out code does not work... leave for review 
+//			if (useUpnpIface)
+//				upnpMulticastSocket = new MulticastSocket(
+//						new InetSocketAddress(upnpConfigIP, Configuration.UPNP_DISCOVERY_PORT));
+//			else
 				upnpMulticastSocket = new MulticastSocket(Configuration.UPNP_DISCOVERY_PORT);
 		} catch (IOException e) {
 			log.error("Upnp Discovery Port is in use, or restricted by admin (try running with sudo or admin privs): "
@@ -136,7 +137,7 @@ public class UpnpListener {
 						if (traceupnp)
 							log.info("Traceupnp: Interface: " + name + " valid usable IP address: " + addr);
 						IPsPerNic++;
-					} else if (addr.getHostAddress().equals(upnpConfigIP)) {
+					} else if (useUpnpIface && (addr.getHostAddress().equals(upnpConfigIP) || name.equals("lo"))) {
 						if (traceupnp)
 							log.info("Traceupnp: Interface: " + name + " matches upnp config address of IP address: "
 									+ addr);
@@ -266,6 +267,7 @@ public class UpnpListener {
 	protected boolean isSSDPDiscovery(DatagramPacket packet) {
 		// Only respond to discover request for strict upnp form
 		String packetString = new String(packet.getData(), 0, packet.getLength());
+//		log.info("Packet string <<<" + packetString + ">>>");
 		if (packetString != null && packetString.startsWith("M-SEARCH * HTTP/1.1")
 				&& packetString.contains("\"ssdp:discover\"")) {
 			if ((packetString.contains("ST: urn:schemas-upnp-org:device:basic:1")
