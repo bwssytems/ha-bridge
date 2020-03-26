@@ -98,6 +98,7 @@ public class UpnpSettingsResource {
 				if(theSettings.isUseupnpiface()) {
 					httpLocationAddr = theSettings.getUpnpConfigAddress();
 				} else {
+					log.debug("Get Outbound address for ip:" + request.ip() + " and port:" + request.port());
 					httpLocationAddr = AddressUtil.getOutboundAddress(request.ip(), request.port()).getHostAddress();
 				}
 				hueTemplate = hueTemplate_pre + hueTemplate_post;

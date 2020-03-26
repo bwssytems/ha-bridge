@@ -15,9 +15,11 @@ public class AddressUtil {
     // in the LOCATION header in replies
     public static InetAddress getOutboundAddress(String remoteAddress, int remotePort) {
         InetAddress localAddress = null;
+        log.debug("Entering getOutboundAddress with args.");
         try {
-            getOutboundAddress(new InetSocketAddress(remoteAddress, remotePort));
+            localAddress = getOutboundAddress(new InetSocketAddress(remoteAddress, remotePort));
         } catch (Exception e) {
+            log.debug("getOutboundAddress(SocketAddress) Threw an Exception: " + e.getMessage());
             ParseRoute theRoute = ParseRoute.getInstance();
             try {
                 localAddress = InetAddress.getByName(theRoute.getLocalIPAddress());
@@ -29,7 +31,9 @@ public class AddressUtil {
         }
 
         if(localAddress != null)
-            log.debug("getOutbountAddress returning IP Address of " + localAddress.getHostAddress());
+            log.debug("localAddress is IP Address of " + localAddress.getHostAddress());
+        else
+            log.debug("localAddress returning NULL");
         return localAddress;
     }
 
@@ -42,11 +46,17 @@ public class AddressUtil {
 		DatagramSocket sock = new DatagramSocket();
 		// connect is needed to bind the socket and retrieve the local address
 		// later (it would return 0.0.0.0 otherwise)
+        log.debug("Entering getOutboundAddress with socket arg.");
 		sock.connect(remoteAddress);
+        log.debug("getOutboundAddress(SocketAddress) getLocalAddress.");
 		final InetAddress localAddress = sock.getLocalAddress();
 		sock.disconnect();
 		sock.close();
 		sock = null;
+        if(localAddress != null)
+            log.debug("getOutbountAddress(SocketAddress) returning IP Address of " + localAddress.getHostAddress());
+        else
+            log.debug("getOutboundAddress(SocketAddress) returning NULL");
 		return localAddress;
 	}
 }
