@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.awt.Color;
+import java.net.URLEncoder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -303,7 +304,14 @@ public class ColorDecode {
 				float hue = hsb[0] * (float) 360.0;
 				float sat = hsb[1] * (float) 100.0;
 				float bright = hsb[2] * (float) 100.0;
-				request = request.replace(COLOR_HSL, String.format("%f,%f,%f", hue, sat, bright));
+				String tempString = String.format("%f,%f,%f", hue, sat, bright);
+				try {
+					String finalString = URLEncoder.encode(tempString, "UTF-8");
+				}
+				catch (java.io.UnsupportedEncodingException uee) {
+					log.warn("Failed to encode: " + tempString);
+				}
+				request = request.replace(COLOR_HSL, tempString);
 				notDone = true;
 			}
 
