@@ -188,7 +188,7 @@ public class DeviceRepository extends BackupHandler {
 				nextId++;
 			}
 			if (descriptors[i].getUniqueid() == null || descriptors[i].getUniqueid().length() == 0) {
-				descriptors[i].setUniqueid("00:17:88:5E:D3:" + hueUniqueId(Integer.valueOf(descriptors[i].getId())));
+				descriptors[i].setUniqueid("00:11:22:33:44:55:66:" + hueUniqueId(Integer.valueOf(descriptors[i].getId())));
 			}
 			put(descriptors[i].getId(), descriptors[i]);
 			theNames = theNames + " " + descriptors[i].getName() + ", ";
@@ -228,7 +228,7 @@ public class DeviceRepository extends BackupHandler {
 					}
 				}
 				theDevice.setId(String.valueOf(nextId));
-				theDevice.setUniqueid("00:17:88:5E:D3:" + hueUniqueId(nextId));
+				theDevice.setUniqueid("00:11:22:33:44:55:66:" + hueUniqueId(nextId));
 				nextId++;
 			}
 			newdevices.put(theDevice.getId(), theDevice);
