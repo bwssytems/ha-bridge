@@ -12,6 +12,7 @@ data
 /.settings/
 /start.bat
 /.classpath
+/.project
 
 sftp-config\.json
 /bin/
