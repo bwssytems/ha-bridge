@@ -30,6 +30,8 @@ import com.google.gson.JsonSyntaxException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Arrays;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /*
  * This is an in memory list to manage the configured devices and saves the list as a JSON string to a file for later  
@@ -188,7 +190,7 @@ public class DeviceRepository extends BackupHandler {
 				nextId++;
 			}
 			if (descriptors[i].getUniqueid() == null || descriptors[i].getUniqueid().length() == 0) {
-				descriptors[i].setUniqueid("00:11:22:33:44:55:66:" + hueUniqueId(Integer.valueOf(descriptors[i].getId())));
+				descriptors[i].setUniqueid(hueUniqueId(Integer.valueOf(descriptors[i].getId())));
 			}
 			put(descriptors[i].getId(), descriptors[i]);
 			theNames = theNames + " " + descriptors[i].getName() + ", ";
@@ -206,11 +208,10 @@ public class DeviceRepository extends BackupHandler {
 		DeviceDescriptor theDevice;
 		boolean findNext = true;
 
-		
 		nextId = seedId;
-		while(deviceIterator.hasNext()) {
+		while (deviceIterator.hasNext()) {
 			theDevice = deviceIterator.next();
-			if(theDevice.isLockDeviceId()) {
+			if (theDevice.isLockDeviceId()) {
 				lockedIds.add(theDevice.getId());
 			}
 		}
@@ -220,15 +221,15 @@ public class DeviceRepository extends BackupHandler {
 			theDevice = deviceIterator.next();
 			if (!theDevice.isLockDeviceId()) {
 				findNext = true;
-				while(findNext) {
-					if(lockedIds.contains(String.valueOf(nextId))) {
+				while (findNext) {
+					if (lockedIds.contains(String.valueOf(nextId))) {
 						nextId++;
 					} else {
 						findNext = false;
 					}
 				}
 				theDevice.setId(String.valueOf(nextId));
-				theDevice.setUniqueid("00:11:22:33:44:55:66:" + hueUniqueId(nextId));
+				theDevice.setUniqueid(hueUniqueId(nextId));
 				nextId++;
 			}
 			newdevices.put(theDevice.getId(), theDevice);
@@ -297,27 +298,51 @@ public class DeviceRepository extends BackupHandler {
 	}
 
 	private String hueUniqueId(Integer anId) {
-		String theUniqueId;
+		String theUniqueId = null;
 		Integer newValue;
 		String hexValueLeft;
 		String hexValueRight;
 
-		newValue = anId % 256;
-		if (newValue <= 0)
-			newValue = 1;
-		else if (newValue > 255)
-			newValue = 255;
-		hexValueLeft = HexLibrary.byteToHex(newValue.byteValue());
-		newValue = anId / 256;
-		newValue = newValue % 256;
-		if (newValue < 0)
-			newValue = 0;
-		else if (newValue > 255)
-			newValue = 255;
-		hexValueRight = HexLibrary.byteToHex(newValue.byteValue());
+		MessageDigest md = null;
 
-		theUniqueId = String.format("%s-%s", hexValueLeft, hexValueRight).toUpperCase();
+		try {
+			md = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			log.warn("Cannot get MD5 utility to hash unique ids.");
+		}
 
+		if(md != null) {
+			md.update(anId.toString().getBytes());
+			byte[] digest = md.digest();
+			theUniqueId = String.format("%s:%s:%s:%s:%s:%s:%s-%s",
+				HexLibrary.encodeHexString(digest).substring(0, 2),
+				HexLibrary.encodeHexString(digest).substring(2, 4),
+				HexLibrary.encodeHexString(digest).substring(4, 6),
+				HexLibrary.encodeHexString(digest).substring(6, 8),
+				HexLibrary.encodeHexString(digest).substring(8, 10),
+				HexLibrary.encodeHexString(digest).substring(10, 12),
+				HexLibrary.encodeHexString(digest).substring(12, 14),
+				HexLibrary.encodeHexString(digest).substring(14, 16));
+		}
+
+
+		if(theUniqueId == null) {
+			newValue = anId % 256;
+			if (newValue <= 0)
+				newValue = 1;
+			else if (newValue > 255)
+				newValue = 255;
+			hexValueLeft = HexLibrary.byteToHex(newValue.byteValue());
+			newValue = anId / 256;
+			newValue = newValue % 256;
+			if (newValue < 0)
+				newValue = 0;
+			else if (newValue > 255)
+				newValue = 255;
+			hexValueRight = HexLibrary.byteToHex(newValue.byteValue());
+
+			theUniqueId = String.format("11:22:33:44:55:66:%s-%s", hexValueLeft, hexValueRight).toUpperCase();
+		}
 		return theUniqueId;
 	}
 }

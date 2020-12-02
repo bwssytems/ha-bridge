@@ -55,10 +55,12 @@ public class UpnpSettingsResource {
 							+ "<depth>24</depth>\n"
 							+ "<url>hue_logo_3.png</url>\n"
 						+ "</icon>\n"
-					+ "</iconList>\n"
-				+ "</device>\n"
-			+ "</root>\n";
+					+ "</iconList>\n";
 
+	private String hueTemplate_end = "</device>\n"
+		+  "</root>\n";
+
+	/* not utilizing this section any more
 	private String hueTemplate_mid_orig = "<serviceList>\n"
 			+ "<service>\n"
 				+ "<serviceType>(null)</serviceType>\n"
@@ -68,7 +70,7 @@ public class UpnpSettingsResource {
 				+ "<SCPDURL>(null)</SCPDURL>\n"
 			+ "</service>\n"
 		+ "</serviceList>\n";
-
+	*/
 
 	public UpnpSettingsResource(BridgeSettings theBridgeSettings) {
 		super();
@@ -92,16 +94,24 @@ public class UpnpSettingsResource {
 			String hueTemplate = null;
 			if(theSettings.isUpnporiginal()) {
 				httpLocationAddr = theSettings.getUpnpConfigAddress();
-				hueTemplate = hueTemplate_pre + hueTemplate_mid_orig + hueTemplate_post;
-			} else {
-
+				hueTemplate = hueTemplate_pre + hueTemplate_end;
+			} else if(!theSettings.isUpnpadvanced()) {
 				if(theSettings.isUseupnpiface()) {
 					httpLocationAddr = theSettings.getUpnpConfigAddress();
 				} else {
 					log.debug("Get Outbound address for ip:" + request.ip() + " and port:" + request.port());
 					httpLocationAddr = AddressUtil.getOutboundAddress(request.ip(), request.port()).getHostAddress();
 				}
-				hueTemplate = hueTemplate_pre + hueTemplate_post;
+				hueTemplate = hueTemplate_pre + hueTemplate_end;
+			} else {
+ 
+				if(theSettings.isUseupnpiface()) {
+					httpLocationAddr = theSettings.getUpnpConfigAddress();
+				} else {
+					log.debug("Get Outbound address for ip:" + request.ip() + " and port:" + request.port());
+					httpLocationAddr = AddressUtil.getOutboundAddress(request.ip(), request.port()).getHostAddress();
+				}
+				hueTemplate = hueTemplate_pre + hueTemplate_post + hueTemplate_end;
 			}
 
 			String bridgeIdMac = HuePublicConfig.createConfig("temp", httpLocationAddr, HueConstants.HUB_VERSION, theSettings.getHubmac()).getSNUUIDFromMac();

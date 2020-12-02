@@ -252,7 +252,7 @@ public class BridgeSettings extends BackupHandler {
 			theBridgeSettings = new Gson().fromJson(jsonContent, BridgeSettingsDescriptor.class);
 			theBridgeSettings.setConfigfile(aPath.toString());
 		} catch (Exception e) {
-			log.warn("Issue loading values from file: " + aPath.toUri().toString() + ", Gson convert failed.");
+			log.warn("Issue loading values from file: " + aPath.toUri().toString() + ", Gson convert failed. Using default settings.");
 			theBridgeSettings = new BridgeSettingsDescriptor();
 		}
     }
