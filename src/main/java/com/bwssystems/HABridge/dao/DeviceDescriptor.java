@@ -92,7 +92,10 @@ public class DeviceDescriptor{
     @SerializedName("startupActions")
     @Expose
     private String startupActions;
-  
+	@SerializedName("dimNoOn")
+    @Expose
+    private boolean dimNoOn;
+ 
     public String getName() {
         return name;
     }
@@ -354,5 +357,13 @@ public class DeviceDescriptor{
 
 	public void setStartupActions(String startupActions) {
 		this.startupActions = startupActions;
+	}
+
+	public boolean isDimNoOn() {
+		return dimNoOn;
+	}
+
+	public void setDimNoOn(boolean dimNoOn) {
+		this.dimNoOn = dimNoOn;
 	}
 }

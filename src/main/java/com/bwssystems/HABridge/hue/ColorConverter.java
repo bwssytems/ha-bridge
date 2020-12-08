@@ -18,6 +18,8 @@ package com.bwssystems.HABridge.hue;
  * XYZ -> CIE-LAB -> XYZ
  * @author Diego Catalano
  */
+
+
 public class ColorConverter {
 
     /**
@@ -26,6 +28,7 @@ public class ColorConverter {
     private ColorConverter() {}
     
     public static enum YCbCrColorSpace {ITU_BT_601,ITU_BT_709_HDTV};
+    private final static double EPSILON = 0.00001;
     
     // XYZ (Tristimulus) Reference values of a perfect reflecting diffuser
     
@@ -259,7 +262,7 @@ public class ColorConverter {
      * @param blue Blue coefficient.
      * @return Normalized RGChromaticity. Range[0..1].
      */
-    public static double[] RGChromaticity(int red, int green, int blue){
+    public static float[] RGChromaticity(int red, int green, int blue){
         double[] color = new double[5];
         
         double sum = red + green + blue;
@@ -276,24 +279,7 @@ public class ColorConverter {
         double rS = color[0] - 0.333;
         double gS = color[1] - 0.333;
         
-        //saturation
-        color[3] = Math.sqrt(rS * rS + gS * gS);
-        
-        //hue
-        color[4] = Math.atan(rS / gS);
-        
-        return color;
-    }
-    
-    /**
-     * RGB -> HSV.
-     * Adds (hue + 360) % 360 for represent hue in the range [0..359].
-     * @param red Red coefficient. Values in the range [0..255].
-     * @param green Green coefficient. Values in the range [0..255].
-     * @param blue Blue coefficient. Values in the range [0..255].
-     * @return HSV color space.
-     */
-    public static float[] RGBtoHSV(int red, int green, int blue){
+        //saturationBRGBtoHSV(int red, int green, int blue){
         float[] hsv = new float[3];
         float r = red / 255f;
         float g = green / 255f;
@@ -630,69 +616,69 @@ public class ColorConverter {
     public static int[] HunterLABtoRGB(float l, float a, float b){
         float[] xyz = HunterLABtoXYZ(l, a, b);
         return XYZtoRGB(xyz[0], xyz[1], xyz[2]);
-    }
+    }    
     
     /**
-     * RGB -> HLS.
+     * RGB -> HSL.
      * @param red Red coefficient. Values in the range [0..255].
      * @param green Green coefficient. Values in the range [0..255].
      * @param blue Blue coefficient. Values in the range [0..255].
-     * @return HLS color space.
+     * @return HSL color space.
      */
-    public static float[] RGBtoHLS(int red, int green, int blue){
+    public static float[] RGBtoHSL(int red, int green, int blue){
         float[] hsl = new float[3];
         
-        float r = red / 255f;
-        float g = green / 255f;
-        float b = blue / 255f;
+        double r = red;
+        double g = green;
+        double b = blue;
         
-        float max = Math.max(r,Math.max(r,b));
-        float min = Math.min(r,Math.min(r,b));
-        float delta = max - min;
+        double max = Math.max(r,Math.max(g,b));
+        double min = Math.min(r,Math.min(g,b));
+//        double delta = max - min;
         
         //HSK
-        float h = 0;
-        float s = 0;
-        float l = (max + min) / 2;
+        Double h = 0d;
+        Double s = 0d;
+        Double l = 0d;
         
-        if ( delta == 0 ){
-            // gray color
-            h = 0;
-            s = 0.0f;
-        }
-        else
-        {
-            // get saturation value
-            s = ( l <= 0.5 ) ? ( delta / ( max + min ) ) : ( delta / ( 2 - max - min ) );
-
-            // get hue value
-            float hue;
-
-            if ( r == max )
-            {
-                hue = ( ( g - b ) / 6 ) / delta;
+            //saturation
+            double cnt = (max + min) / 2d;
+            if (cnt <= 127d) {
+                s = ((max - min) / (max + min));
             }
-            else if ( g == max )
-            {
-                hue = ( 1.0f / 3 ) + ( ( b - r ) / 6 ) / delta; 
-            }
-            else
-            {
-                hue = ( 2.0f / 3 ) + ( ( r - g ) / 6 ) / delta;
+            else {
+                s = ((max - min) / (510d - max - min));
             }
 
-            // correct hue if needed
-            if ( hue < 0 )
-                hue += 1;
-            if ( hue > 1 )
-                hue -= 1;
+            //lightness
+            l = ((max + min) / 2d) / 255d;
 
-            h = (int) ( hue * 360 );
-        }
+            //hue
+            if (Math.abs(max - min) <= EPSILON) {
+                h = 0d;
+                s = 0d;
+            }
+            else {
+                double diff = max - min;
+
+                if (Math.abs(max - r) <= EPSILON) {
+                    h = 60d * (g - b) / diff;
+                }
+                else if (Math.abs(max - g) <= EPSILON) {
+                    h = 60d * (b - r) / diff + 120d;
+                }
+                else {
+                    h = 60d * (r - g) / diff + 240d;
+                }
+
+                if (h < 0d) {
+                    h += 360d;
+                }
+            }
         
-        hsl[0] = h;
-        hsl[1] = s;
-        hsl[2] = l;
+        hsl[0] = h.floatValue();
+        hsl[1] = s.floatValue();
+        hsl[2] = l.floatValue();
         
         return hsl;
     }
@@ -931,14 +917,19 @@ public class ColorConverter {
      */
     public static float[] XYtoXYZ(XYColorSpace xy){
         float[] xyz = new float[3];
-        
+        /* Old Way
         xyz[0] = (xy.getBrightnessAdjusted() / xy.getXy()[1]) * xy.getXy()[0];
         xyz[1] = xy.getBrightnessAdjusted();
         xyz[2] = (xy.getBrightnessAdjusted() / xy.getXy()[1]) * (1.0f - xy.getXy()[0] - xy.getXy()[1]);
-        
+        */
+        // New Way
+        xyz[0] = xy.getXy()[0] * (xy.getBrightnessAdjusted() / xy.getXy()[1]) ;
+        xyz[1] = xy.getBrightnessAdjusted();
+        xyz[2] = (float) ((1.0 - xy.getXy()[0] - xy.getXy()[1]) * (xy.getBrightnessAdjusted() / xy.getXy()[1]));
+
         return xyz;
     }
-    
+
     public static int[] normalizeRGB(int[] rgb) {
         int[] newRGB = new int[3];
 
