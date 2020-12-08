@@ -121,6 +121,12 @@
 						ng-false-value=false> {{device.dimNoOn}}</td>
 				</tr>
 				<tr>
+					<td><label>Send dim when color request present and dim present</label></td>
+					<td><input type="checkbox"
+						ng-model="device.dimOnColor" ng-true-value=true
+						ng-false-value=false> {{device.dimOnColor}}</td>
+				</tr>
+				<tr>
 					<td><label>Filter Address (comma separated list)</label></td>
 					<td><input type="text" class="form-control" id="device-requester-addr"
 						ng-model="device.requesterAddress" placeholder="Only use if you want to restrict this device to a specific caller(s)"></td>

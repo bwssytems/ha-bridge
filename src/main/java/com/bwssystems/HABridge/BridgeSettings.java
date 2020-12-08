@@ -200,7 +200,10 @@ public class BridgeSettings extends BackupHandler {
         	theBridgeSettings.setNumberoflogmessages(Integer.valueOf(Configuration.NUMBER_OF_LOG_MESSAGES));
 
         if(theBridgeSettings.getButtonsleep() == null || theBridgeSettings.getButtonsleep() < 0)
-        	theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DEFAULT_BUTTON_SLEEP));
+			theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DEFAULT_BUTTON_SLEEP));
+			
+		if(theBridgeSettings.getLinkbuttontimeout() < 30)
+			theBridgeSettings.setLinkbuttontimeout(Configuration.LINK_BUTTON_TIMEOUT);
 
         theBridgeSettings.setVeraconfigured(theBridgeSettings.isValidVera());
         theBridgeSettings.setFibaroconfigured(theBridgeSettings.isValidFibaro());

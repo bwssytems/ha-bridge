@@ -95,6 +95,9 @@ public class DeviceDescriptor{
 	@SerializedName("dimNoOn")
     @Expose
     private boolean dimNoOn;
+	@SerializedName("dimOnColor")
+    @Expose
+    private boolean dimOnColor;
  
     public String getName() {
         return name;
@@ -365,5 +368,13 @@ public class DeviceDescriptor{
 
 	public void setDimNoOn(boolean dimNoOn) {
 		this.dimNoOn = dimNoOn;
+	}
+
+	public boolean isDimOnColor() {
+		return dimOnColor;
+	}
+
+	public void setDimOnColor(boolean dimOnColor) {
+		this.dimOnColor = dimOnColor;
 	}
 }

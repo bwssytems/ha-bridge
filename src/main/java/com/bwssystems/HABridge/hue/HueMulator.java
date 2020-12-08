@@ -1250,6 +1250,9 @@ public class HueMulator {
 			}
 		}
 
+		if(isColorRequest && isDimRequest && !device.isDimOnColor()) {
+			isDimRequest = false;
+		}
 
 /* Old code supperceded by the above block
 		if (!device.isOnFirstDim() && device.isOnWhenDimPresent() && isDimRequest && !isOnRequest) {

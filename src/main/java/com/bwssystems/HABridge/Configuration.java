@@ -17,4 +17,5 @@ public class Configuration {
 	public static final int UPNP_SEND_DELAY = 650;
 	public static final int BROADLINK_DISCOVER_PORT = 40000;
 	public static final int BROADLINK_DISCONVER_TIMEOUT = 5000;
+	public static final int LINK_BUTTON_TIMEOUT = 45;
 }

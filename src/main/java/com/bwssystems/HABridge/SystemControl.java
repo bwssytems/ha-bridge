@@ -276,12 +276,12 @@ public class SystemControl {
 			if(!request.body().isEmpty()) {
 				linkParams = new Gson().fromJson(request.body(), LinkParams.class);
 				if(linkParams.getSeconds() <= 0)
-					linkParams.setSeconds(1);
+					linkParams.setSeconds(3);
 			}
 			else {
 				linkParams = new LinkParams();
 				linkParams.setSilent(false);
-				linkParams.setSeconds(30);
+				linkParams.setSeconds(bridgeSettings.getBridgeSettingsDescriptor().getLinkbuttontimeout());
 			}
 			if(!linkParams.isSilent())
 				log.info("Link button pressed....");

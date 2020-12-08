@@ -479,7 +479,7 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 	this.pushLinkButton = function () {
 		return $http.put(this.state.systemsbase + "/presslinkbutton").then(
 			function (response) {
-				self.displayTimer("Link your device", 30000);
+				self.displayTimer("Link your device", self.state.settings.linkbuttontimeout * 1000);
 			},
 			function (error) {
 				if (error.status === 401)

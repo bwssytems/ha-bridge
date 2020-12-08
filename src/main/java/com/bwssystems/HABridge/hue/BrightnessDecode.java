@@ -21,6 +21,9 @@ public class BrightnessDecode {
 	private static final String INTENSITY_MATH_CLOSE_HEX = ").hex}";
 	private static final String INTENSITY_PERCENT_HEX = "${intensity.percent.hex}";
 	private static final String INTENSITY_BYTE_HEX = "${intensity.byte.hex}";
+	private static final String INTENSITY_PREVIOUS_PERCENT = "${intensity.previous_percent}";
+	private static final String INTENSITY_PREVIOUS_DECIMAL_PERCENT = "${intensity.previous_decimal_percent}";
+	private static final String INTENSITY_PREVIOUS_BYTE = "${intensity.previous_byte}";
 
 	public static int calculateIntensity(int setIntensity, Integer targetBri, Integer targetBriInc) {
 		if (targetBri != null) {
@@ -45,7 +48,7 @@ public class BrightnessDecode {
 	 * intensity.math(X*1) : where X is the value from the interface call and
 	 * can use net.java.dev.eval math
 	 */
-	public static String replaceIntensityValue(String request, int intensity, boolean isHex) {
+	private static String replaceIntensityValue(String request, int previous_intensity, int intensity, boolean isHex) {
 		if (request == null) {
 			return null;
 		}
@@ -54,6 +57,8 @@ public class BrightnessDecode {
 		String replaceTarget = null;
 		int percentBrightness = 0;
 		float decimalBrightness = (float) 1.0;
+		int previousPercentBrightness = 0;
+		float previousDecimalBrightness = (float) 1.0;
 		Map<String, BigDecimal> variables = new HashMap<String, BigDecimal>();
 		String mathDescriptor = null;
 
@@ -68,6 +73,17 @@ public class BrightnessDecode {
 			percentBrightness = 1;
 		}
 
+		if(previous_intensity > 0) {
+			previousDecimalBrightness = (float) (previous_intensity / 255.0);
+			if(previous_intensity > 0 && previous_intensity < 5)
+				previousPercentBrightness = 1;
+			else
+				previousPercentBrightness = (int) Math.round(previous_intensity / 255.0 * 100);
+		} else {
+			previousDecimalBrightness = (float) 1.0;
+			previousPercentBrightness = 1;
+		}
+
 		while(notDone) {
 			notDone = false;
 			if (request.contains(INTENSITY_BYTE)) {
@@ -77,6 +93,14 @@ public class BrightnessDecode {
 					replaceValue = String.valueOf(intensity);
 				}
 				replaceTarget = INTENSITY_BYTE;
+				notDone = true;
+			} else if (request.contains(INTENSITY_PREVIOUS_BYTE)) {
+				if (isHex) {
+					replaceValue = convertToHex(previous_intensity);
+				} else {
+					replaceValue = String.valueOf(previous_intensity);
+				}
+				replaceTarget = INTENSITY_PREVIOUS_BYTE;
 				notDone = true;
 			} else if (request.contains(INTENSITY_BYTE_HEX)) {
 				replaceValue = convertToHex(intensity);
@@ -90,6 +114,14 @@ public class BrightnessDecode {
 				}
 				replaceTarget = INTENSITY_PERCENT;
 				notDone = true;
+			} else if (request.contains(INTENSITY_PREVIOUS_PERCENT)) {
+				if (isHex) {
+					replaceValue = convertToHex(previousPercentBrightness);
+				} else {
+					replaceValue = String.valueOf(previousPercentBrightness);
+				}
+				replaceTarget = INTENSITY_PREVIOUS_PERCENT;
+				notDone = true;
 			} else if (request.contains(INTENSITY_PERCENT_HEX)) {
 				replaceValue = convertToHex(percentBrightness);
 				replaceTarget = INTENSITY_PERCENT_HEX;
@@ -97,6 +129,10 @@ public class BrightnessDecode {
 			} else if (request.contains(INTENSITY_DECIMAL_PERCENT)) {
 				replaceValue = String.format(Locale.ROOT, "%1.2f", decimalBrightness);
 				replaceTarget = INTENSITY_DECIMAL_PERCENT;
+				notDone = true;
+			} else if (request.contains(INTENSITY_PREVIOUS_DECIMAL_PERCENT)) {
+				replaceValue = String.format(Locale.ROOT, "%1.2f", previousDecimalBrightness);
+				replaceTarget = INTENSITY_PREVIOUS_DECIMAL_PERCENT;
 				notDone = true;
 			} else if (request.contains(INTENSITY_MATH_CLOSE)) {
 				mathDescriptor = request.substring(request.indexOf(INTENSITY_MATH) + INTENSITY_MATH.length(),
@@ -135,7 +171,7 @@ public class BrightnessDecode {
 
 	// Helper Method
 	public static String calculateReplaceIntensityValue(String request, int theIntensity, Integer targetBri, Integer targetBriInc, boolean isHex) {
-		return replaceIntensityValue(request, calculateIntensity(theIntensity, targetBri, targetBriInc), isHex);
+		return replaceIntensityValue(request, theIntensity, calculateIntensity(theIntensity, targetBri, targetBriInc), isHex);
 	}
 	
 	// Apache Commons Conversion utils likes little endian too much
