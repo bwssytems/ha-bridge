@@ -17,6 +17,7 @@ public class DeviceResponse {
     private String swversion;
     private String swconfigid;
     private String productid;
+    private String productname;
 
     public DeviceState getState() {
         return state;
@@ -90,6 +91,14 @@ public class DeviceResponse {
         this.productid = productid;
     }
 
+    public String getProductName() {
+        return productname;
+    }
+
+	public void setProductName(String productname) {
+        this.productname = productname;
+    }
+
 
     public String getLuminaireuniqueid() {
 		return luminaireuniqueid;
@@ -109,10 +118,11 @@ public class DeviceResponse {
             
         if (device.isColorDevice()) {
             response.setType("Extended color light");
-            response.setModelid("LCT010");
-            response.setSwversion("1.15.2_r19181");
-            response.setSwconfigid("F921C859");
-            response.setProductid("Philips-LCT010-1-A19ECLv4");    
+            response.setModelid("LCT015");
+            response.setSwversion("1.46.13_r26312");
+            response.setSwconfigid("52E3234B");
+            response.setProductid("Philips-LCT015-1-A19ECLv5");
+            response.setProductName("Hue color lamp");
         } else {
             response.setType("Dimmable light");
             response.setModelid("LWB007");
@@ -129,13 +139,14 @@ public class DeviceResponse {
         response.setState(group.getAction());
 
         response.setName(group.getName());
-        response.setUniqueid("00:17:88:5E:D3:FF-" + String.format("%02X", Integer.parseInt(group.getId())));
+        response.setUniqueid("00:11:22:33:44:55:66:77-" + String.format("%02X", Integer.parseInt(group.getId())));
         response.setManufacturername("Philips");
         response.setType("Extended color light");
-        response.setModelid("LCT010");
-        response.setSwversion("1.15.2_r19181");
-        response.setSwconfigid("F921C859");
-        response.setProductid("Philips-LCT010-1-A19ECLv4");    
+        response.setModelid("LCT015");
+        response.setSwversion("1.46.13_r26312");
+        response.setSwconfigid("52E3234B");
+        response.setProductid("Philips-LCT015-1-A19ECLv5");
+        response.setProductName("Hue color lamp");
         
         response.setLuminaireuniqueid(null);
 

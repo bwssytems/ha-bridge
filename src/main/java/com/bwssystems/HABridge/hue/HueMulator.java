@@ -473,9 +473,9 @@ public class HueMulator {
 			if (deviceState != null) {
 				deviceState.setOn(stateChanges.isOn());
 				if (!deviceState.isOn() && deviceState.getBri() == 254)
-					deviceState.setBri(0);
+					deviceState.setBri(1);
 				if (!deviceState.isOn() && offState)
-					deviceState.setBri(0);
+					deviceState.setBri(1);
 			}
 			notFirstChange = true;
 		}
@@ -609,7 +609,7 @@ public class HueMulator {
 			notFirstChange = true;
 		}
 
-		if ((deviceState != null) && deviceState.isOn() && deviceState.getBri() <= 0)
+		if ((deviceState != null) && deviceState.isOn() && deviceState.getBri() <= 1)
 			deviceState.setBri(254);
 
 		// if((deviceState != null) && !deviceState.isOn() && (targetBri != null ||
@@ -1221,12 +1221,44 @@ public class HueMulator {
 			isOnRequest = true;
 		}
 
+		if(device.isOnFirstDim()) {
+			if(isDimRequest && !device.getDeviceState().isOn()) {
+				isOnRequest = true;
+				theStateChanges.setOn(true);
+				// isDimRequest = false;
+				// isColorRequest = false;
+			} else if (isDimRequest && device.getDeviceState().isOn()) {
+				if (device.getDeviceState().getBri() == theStateChanges.getBri()) {
+					isOnRequest = true;
+					theStateChanges.setOn(true);
+					// isDimRequest = false;
+					// isColorRequest = false;
+				} else {
+					isOnRequest = false;
+					// isDimRequest = true;
+					// isColorRequest = false;
+				}
+			}
+		} else if (device.isOnWhenDimPresent()) {
+			if (isDimRequest) {
+				isOnRequest = true;
+				theStateChanges.setOn(true);
+			}
+		} else if (device.isDimNoOn()) {
+			if (isDimRequest && isOnRequest) {
+				isOnRequest = false;
+			}
+		}
+
+		if(isColorRequest && isDimRequest && !device.isDimOnColor()) {
+			isDimRequest = false;
+		}
+
+/* Old code supperceded by the above block
 		if (!device.isOnFirstDim() && device.isOnWhenDimPresent() && isDimRequest && !isOnRequest) {
 			isOnRequest = true;
 			theStateChanges.setOn(true);
-		} else if (!device.isOnFirstDim() && !device.isOnWhenDimPresent() && isDimRequest) {
-			// isOnRequest = false;
-		}
+		} else 
 
 		if (device.isOnFirstDim() && isDimRequest && !device.getDeviceState().isOn()) {
 			isOnRequest = true;
@@ -1245,6 +1277,7 @@ public class HueMulator {
 				isColorRequest = false;
 			}
 		}
+*/
 
 		if (isOnRequest) {
 			if (bridgeSettings.isTracestate())
@@ -1416,8 +1449,8 @@ public class HueMulator {
 			int bri = 0;
 			if (targetBriInc != null) {
 				bri = state.getBri() - targetBriInc;
-				if (bri < 0)
-					bri = 0;
+				if (bri < 1)
+					bri = 1;
 			} else if (targetBri != null) {
 				bri = targetBri;
 			} else {
@@ -1440,8 +1473,8 @@ public class HueMulator {
 			int bri = 0;
 			if (targetBriInc != null) {
 				bri = state.getBri() - targetBriInc;
-				if (bri < 0)
-					bri = 0;
+				if (bri < 1)
+					bri = 1;
 			} else if (targetBri != null) {
 				bri = targetBri;
 			} else {

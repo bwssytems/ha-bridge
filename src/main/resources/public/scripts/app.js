@@ -479,7 +479,7 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 	this.pushLinkButton = function () {
 		return $http.put(this.state.systemsbase + "/presslinkbutton").then(
 			function (response) {
-				self.displayTimer("Link your device", 30000);
+				self.displayTimer("Link your device", self.state.settings.linkbuttontimeout * 1000);
 			},
 			function (error) {
 				if (error.status === 401)
@@ -1547,26 +1547,42 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 	};
 
 	this.toXY = function (red, green, blue) {
-		//Gamma corrective
-		red = (red > 0.04045) ? Math.pow((red + 0.055) / (1.0 + 0.055), 2.4) : (red / 12.92);
-		green = (green > 0.04045) ? Math.pow((green + 0.055) / (1.0 + 0.055), 2.4) : (green / 12.92);
-		blue = (blue > 0.04045) ? Math.pow((blue + 0.055) / (1.0 + 0.055), 2.4) : (blue / 12.92);
+        var r = red / 255;
+        var g = green / 255;
+        var b = blue / 255;
+        
+        //R
+        if ( r > 0.04045)
+            r = Math.pow(( ( r + 0.055 ) / 1.055 ), 2.4);
+        else
+            r /= 12.92;
+        
+        //G
+        if ( g > 0.04045)
+            g = Math.pow(( ( g + 0.055 ) / 1.055 ), 2.4);
+        else
+            g /= 12.92;
+        
+        //B
+        if ( b > 0.04045)
+            b = Math.pow(( ( b + 0.055 ) / 1.055 ), 2.4);
+        else
+            b /= 12.92;
+        
+        r *= 100;
+        g *= 100;
+        b *= 100;
+        
+        var x = 0.412453 * r + 0.35758 * g + 0.180423 * b;
+        var y = 0.212671 * r + 0.71516 * g + 0.072169 * b;
+        var z = 0.019334 * r + 0.119193 * g + 0.950227 * b;
+        
+        var newX = x / (x + y + z);
+		var newY = y / (x + y + z);
+		var interBright = (y / 100) * 254;
+        var newBright = Math.round(interBright);
 
-		//Apply wide gamut conversion D65
-		var X = red * 0.664511 + green * 0.154324 + blue * 0.162028;
-		var Y = red * 0.283881 + green * 0.668433 + blue * 0.047685;
-		var Z = red * 0.000088 + green * 0.072310 + blue * 0.986039;
-
-		var fx = X / (X + Y + Z);
-		var fy = Y / (X + Y + Z);
-		if (isNaN(fx)) {
-			fx = 0.0;
-		}
-		if (isNaN(fy)) {
-			fy = 0.0;
-		}
-
-		return [fx.toPrecision(4), fy.toPrecision(4)];
+		return [newX.toPrecision(6), newY.toPrecision(6), newBright];
 	};
 
 	this.testUrl = function (device, type, value, valueType) {
@@ -1592,7 +1608,7 @@ app.service('bridgeService', function ($rootScope, $http, $base64, $location, ng
 		if (valueType === "color" && value) {
 			if (addComma)
 				testBody = testBody + ",";
-			testBody = testBody + "\"xy\": [" + value[0] + "," + value[1] + "]";
+			testBody = testBody + "\"xy\": [" + value[0] + "," + value[1] + "],\"bri\":" + value[2];
 		}
 		testBody = testBody + "}";
 		if (testBody === "{}") {

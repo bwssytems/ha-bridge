@@ -115,6 +115,18 @@
 						ng-false-value=false> {{device.onFirstDim}}</td>
 				</tr>
 				<tr>
+					<td><label>Dim only when On present (If dim is present and the on request is present, the on request will not be sent. This is overriden by the above settings.)</label></td>
+					<td><input type="checkbox"
+						ng-model="device.dimNoOn" ng-true-value=true
+						ng-false-value=false> {{device.dimNoOn}}</td>
+				</tr>
+				<tr>
+					<td><label>Send dim when color request present and dim present</label></td>
+					<td><input type="checkbox"
+						ng-model="device.dimOnColor" ng-true-value=true
+						ng-false-value=false> {{device.dimOnColor}}</td>
+				</tr>
+				<tr>
 					<td><label>Filter Address (comma separated list)</label></td>
 					<td><input type="text" class="form-control" id="device-requester-addr"
 						ng-model="device.requesterAddress" placeholder="Only use if you want to restrict this device to a specific caller(s)"></td>

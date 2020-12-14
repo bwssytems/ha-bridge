@@ -825,6 +825,11 @@
 							ng-false-value=false> {{bridge.settings.upnporiginal}}</td>
 				</tr>
 				<tr>
+					<td>UPNP Advanced (use multiple responses and notifies)</td>
+					<td><input type="checkbox" ng-model="bridge.settings.upnpadvanced" ng-true-value=true
+							ng-false-value=false> {{bridge.settings.upnpadvanced}}</td>
+				</tr>
+				<tr>
 					<td>Trace UPNP Calls</td>
 					<td><input type="checkbox" ng-model="bridge.settings.traceupnp" ng-true-value=true
 							ng-false-value=false> {{bridge.settings.traceupnp}}</td>
@@ -838,6 +843,11 @@
 					<td>UPNP Send Delay</td>
 					<td><input id="bridge-settings-upnpsenddelay" class="form-control" type="number"
 							ng-model="bridge.settings.upnpsenddelay" min="100" max="15000"></td>
+				</tr>
+				<tr>
+					<td>Link Button Timeout (seconds)</td>
+					<td><input id="bridge-settings-linkbuttontimeout" class="form-control" type="number"
+							ng-model="bridge.settings.linkbuttontimeout" min="30"></td>
 				</tr>
 				<tr>
 					<td>ID Seed (start numbering from this value)</td>

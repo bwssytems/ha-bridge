@@ -12,6 +12,7 @@ data
 /.settings/
 /start.bat
 /.classpath
+/.project
 
 sftp-config\.json
 /bin/
@@ -23,3 +24,4 @@ sftp-config\.json
 /node_modules
 
 package-lock.json
+.project

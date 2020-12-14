@@ -200,7 +200,10 @@ public class BridgeSettings extends BackupHandler {
         	theBridgeSettings.setNumberoflogmessages(Integer.valueOf(Configuration.NUMBER_OF_LOG_MESSAGES));
 
         if(theBridgeSettings.getButtonsleep() == null || theBridgeSettings.getButtonsleep() < 0)
-        	theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DEFAULT_BUTTON_SLEEP));
+			theBridgeSettings.setButtonsleep(Integer.parseInt(Configuration.DEFAULT_BUTTON_SLEEP));
+			
+		if(theBridgeSettings.getLinkbuttontimeout() < 30)
+			theBridgeSettings.setLinkbuttontimeout(Configuration.LINK_BUTTON_TIMEOUT);
 
         theBridgeSettings.setVeraconfigured(theBridgeSettings.isValidVera());
         theBridgeSettings.setFibaroconfigured(theBridgeSettings.isValidFibaro());
@@ -250,10 +253,10 @@ public class BridgeSettings extends BackupHandler {
 			return;
 		try {
 			theBridgeSettings = new Gson().fromJson(jsonContent, BridgeSettingsDescriptor.class);
-		} catch (Exception e) {
-			log.warn("Issue loading values from file: " + aPath.toUri().toString() + ", Gson convert failed.");
-			theBridgeSettings = new BridgeSettingsDescriptor();
 			theBridgeSettings.setConfigfile(aPath.toString());
+		} catch (Exception e) {
+			log.warn("Issue loading values from file: " + aPath.toUri().toString() + ", Gson convert failed. Using default settings.");
+			theBridgeSettings = new BridgeSettingsDescriptor();
 		}
     }
 

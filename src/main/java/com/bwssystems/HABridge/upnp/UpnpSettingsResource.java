@@ -7,13 +7,9 @@ import com.bwssystems.HABridge.BridgeSettings;
 import com.bwssystems.HABridge.BridgeSettingsDescriptor;
 import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.HuePublicConfig;
-import com.bwssystems.HABridge.util.ParseRoute;
+import com.bwssystems.HABridge.util.AddressUtil;
 
 import static spark.Spark.get;
-
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 
 /**
  * 
@@ -59,10 +55,12 @@ public class UpnpSettingsResource {
 							+ "<depth>24</depth>\n"
 							+ "<url>hue_logo_3.png</url>\n"
 						+ "</icon>\n"
-					+ "</iconList>\n"
-				+ "</device>\n"
-			+ "</root>\n";
+					+ "</iconList>\n";
 
+	private String hueTemplate_end = "</device>\n"
+		+  "</root>\n";
+
+	/* not utilizing this section any more
 	private String hueTemplate_mid_orig = "<serviceList>\n"
 			+ "<service>\n"
 				+ "<serviceType>(null)</serviceType>\n"
@@ -72,7 +70,7 @@ public class UpnpSettingsResource {
 				+ "<SCPDURL>(null)</SCPDURL>\n"
 			+ "</service>\n"
 		+ "</serviceList>\n";
-
+	*/
 
 	public UpnpSettingsResource(BridgeSettings theBridgeSettings) {
 		super();
@@ -96,10 +94,24 @@ public class UpnpSettingsResource {
 			String hueTemplate = null;
 			if(theSettings.isUpnporiginal()) {
 				httpLocationAddr = theSettings.getUpnpConfigAddress();
-				hueTemplate = hueTemplate_pre + hueTemplate_mid_orig + hueTemplate_post;
+				hueTemplate = hueTemplate_pre + hueTemplate_end;
+			} else if(!theSettings.isUpnpadvanced()) {
+				if(theSettings.isUseupnpiface()) {
+					httpLocationAddr = theSettings.getUpnpConfigAddress();
+				} else {
+					log.debug("Get Outbound address for ip:" + request.ip() + " and port:" + request.port());
+					httpLocationAddr = AddressUtil.getOutboundAddress(request.ip(), request.port()).getHostAddress();
+				}
+				hueTemplate = hueTemplate_pre + hueTemplate_end;
 			} else {
-				httpLocationAddr = getOutboundAddress(request.ip(), request.port()).getHostAddress();
-				hueTemplate = hueTemplate_pre + hueTemplate_post;
+ 
+				if(theSettings.isUseupnpiface()) {
+					httpLocationAddr = theSettings.getUpnpConfigAddress();
+				} else {
+					log.debug("Get Outbound address for ip:" + request.ip() + " and port:" + request.port());
+					httpLocationAddr = AddressUtil.getOutboundAddress(request.ip(), request.port()).getHostAddress();
+				}
+				hueTemplate = hueTemplate_pre + hueTemplate_post + hueTemplate_end;
 			}
 
 			String bridgeIdMac = HuePublicConfig.createConfig("temp", httpLocationAddr, HueConstants.HUB_VERSION, theSettings.getHubmac()).getSNUUIDFromMac();
@@ -135,29 +147,5 @@ public class UpnpSettingsResource {
 		get("/hue_logo_3.png", "application/xml; charset=utf-8", (request, response) -> {
 			return "";
         } );
-	}
-	// added by https://github.com/pvint
-	// Ruthlessly stolen from https://stackoverflow.com/questions/22045165/java-datagrampacket-receive-how-to-determine-local-ip-interface
-	// Try to get a source IP that makes sense for the requester to contact for use in the LOCATION header in replies
-	private InetAddress getOutboundAddress(String remoteAddress, int remotePort) {
-		InetAddress localAddress = null;
-		try {
-		DatagramSocket sock = new DatagramSocket();
-		// connect is needed to bind the socket and retrieve the local address
-		// later (it would return 0.0.0.0 otherwise)
-		sock.connect(new InetSocketAddress(remoteAddress, remotePort));
-		localAddress = sock.getLocalAddress();
-		sock.disconnect();
-		sock.close();
-		sock = null;
-		} catch(Exception e)  {
-			ParseRoute theRoute = ParseRoute.getInstance();
-			try {
-				localAddress = InetAddress.getByName(theRoute.getLocalIPAddress());
-			} catch(Exception e1) {}
-			log.warn("Error <" + e.getMessage() + "> on determining interface to reply for <" + remoteAddress + ">. Using default route IP Address of " + localAddress.getHostAddress());
-		}
-		log.debug("getOutbountAddress returning IP Address of " + localAddress.getHostAddress());
-		return localAddress;
 	}
 }

@@ -9,6 +9,7 @@ import com.bwssystems.HABridge.Configuration;
 import com.bwssystems.HABridge.api.hue.HueConstants;
 import com.bwssystems.HABridge.api.hue.HuePublicConfig;
 import com.bwssystems.HABridge.util.UDPDatagramSender;
+import com.bwssystems.HABridge.util.AddressUtil;
 
 import java.io.IOException;
 import java.net.*;
@@ -29,6 +30,7 @@ public class UpnpListener {
 	private String upnpConfigIP;
 	// private boolean strict;
 	private boolean upnpOriginal;
+	private boolean upnpAdvanced;
 	private boolean traceupnp;
 	private boolean useUpnpIface;
 	private BridgeControlDescriptor bridgeControl;
@@ -37,63 +39,39 @@ public class UpnpListener {
 	private String httpType;
 	private HuePublicConfig aHueConfig;
 	private Integer theUpnpSendDelay;
-	private String responseTemplate1 = "HTTP/1.1 200 OK\r\n" +
-		"HOST: %s:%s\r\n" +
-		"CACHE-CONTROL: max-age=100\r\n" + 
-		"EXT:\r\n" +
-		"LOCATION: %s://%s:%s/description.xml\r\n" +
-		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
-		"hue-bridgeid: %s\r\n" +
-		"ST: upnp:rootdevice\r\n" +
-		"USN: uuid:" + HueConstants.UUID_PREFIX + "%s::upnp:rootdevice\r\n\r\n";
-	private String responseTemplate2 = "HTTP/1.1 200 OK\r\n" +
-		"HOST: %s:%s\r\n" +
-		"CACHE-CONTROL: max-age=100\r\n" +
-		"EXT:\r\n" +
-		"LOCATION: %s://%s:%s/description.xml\r\n" +
-		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
-		"hue-bridgeid: %s\r\n" +
-		"ST: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n" +
-		"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
-	private String responseTemplate3 = "HTTP/1.1 200 OK\r\n" +
-		"HOST: %s:%s\r\n" +
-		"CACHE-CONTROL: max-age=100\r\n" +
-		"EXT:\r\n" +
-		"LOCATION: %s://%s:%s/description.xml\r\n" +
-		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
-		"hue-bridgeid: %s\r\n" +
-		"ST: urn:schemas-upnp-org:device:basic:1\r\n" +
-		"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 
-	private String notifyTemplate1 = "NOTIFY * HTTP/1.1\r\n" +
-		"HOST: %s:%s\r\n" +
-		"CACHE-CONTROL: max-age=100\r\n" +
-		"LOCATION: %s://%s:%s/description.xml\r\n" +
-		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
-		"NTS: ssdp:alive\r\n" +
-		"hue-bridgeid: %s\r\n" +
-		"NT: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n" +
-		"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
+	/* This is the minimum response needed, all others are for the advanced setting */
+	private String responseTemplate1 = "HTTP/1.1 200 OK\r\n" + "HOST: %s:%s\r\n" + "CACHE-CONTROL: max-age=100\r\n"
+			+ "EXT:\r\n" + "LOCATION: %s://%s:%s/description.xml\r\n" + "SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/"
+			+ HueConstants.API_VERSION + "\r\n" + "hue-bridgeid: %s\r\n" + "ST: urn:schemas-upnp-org:device:basic:1\r\n"
+			+ "USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
+	
+	/* These next 2 templates are for the advanced upnp option */
+	private String responseTemplate2 = "HTTP/1.1 200 OK\r\n" + "HOST: %s:%s\r\n" + "CACHE-CONTROL: max-age=100\r\n"
+			+ "EXT:\r\n" + "LOCATION: %s://%s:%s/description.xml\r\n" + "SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/"
+			+ HueConstants.API_VERSION + "\r\n" + "hue-bridgeid: %s\r\n" + "ST: uuid:" + HueConstants.UUID_PREFIX
+			+ "%s\r\n" + "USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
+	private String responseTemplate3 = "HTTP/1.1 200 OK\r\n" + "HOST: %s:%s\r\n" + "CACHE-CONTROL: max-age=100\r\n"
+			+ "EXT:\r\n" + "LOCATION: %s://%s:%s/description.xml\r\n" + "SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/"
+			+ HueConstants.API_VERSION + "\r\n" + "hue-bridgeid: %s\r\n" + "ST: upnp:rootdevice\r\n" + "USN: uuid:"
+			+ HueConstants.UUID_PREFIX + "%s::upnp:rootdevice\r\n\r\n";
 
-	private String notifyTemplate2 = "NOTIFY * HTTP/1.1\r\n" +
-		"HOST: %s:%s\r\n" +
-		"CACHE-CONTROL: max-age=100\r\n" +
-		"LOCATION: %s://%s:%s/description.xml\r\n" +
-		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
-		"NTS: ssdp:alive\r\n" +
-		"hue-bridgeid: %s\r\n" 	+
-		"NT: upnp:rootdevice\r\n" +
-		"USN: uuid:" + HueConstants.UUID_PREFIX + "%s::upnp:rootdevice\r\n\r\n";
 
-	private String notifyTemplate3 = "NOTIFY * HTTP/1.1\r\n" +
-		"HOST: %s:%s\r\n" +
-		"CACHE-CONTROL: max-age=100\r\n" +
-		"LOCATION: %s://%s:%s/description.xml\r\n" +
-		"SERVER: Linux/3.14.0 UPnP/1.0 IpBridge/" + HueConstants.API_VERSION + "\r\n" +
-		"NTS: ssdp:alive\r\n" +
-		"hue-bridgeid: %s\r\n" +
-		"NT: urn:schemas-upnp-org:device:basic:1\r\n" +
-		"USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
+	/* These notify templates are for the advanced upnp option */
+	private String notifyTemplate1 = "NOTIFY * HTTP/1.1\r\n" + "HOST: %s:%s\r\n" + "CACHE-CONTROL: max-age=100\r\n"
+			+ "LOCATION: %s://%s:%s/description.xml\r\n" + "SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/"
+			+ HueConstants.API_VERSION + "\r\n" + "NTS: ssdp:alive\r\n" + "hue-bridgeid: %s\r\n" + "NT: uuid:"
+			+ HueConstants.UUID_PREFIX + "%s\r\n" + "USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
+
+	private String notifyTemplate2 = "NOTIFY * HTTP/1.1\r\n" + "HOST: %s:%s\r\n" + "CACHE-CONTROL: max-age=100\r\n"
+			+ "LOCATION: %s://%s:%s/description.xml\r\n" + "SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/"
+			+ HueConstants.API_VERSION + "\r\n" + "NTS: ssdp:alive\r\n" + "hue-bridgeid: %s\r\n"
+			+ "NT: upnp:rootdevice\r\n" + "USN: uuid:" + HueConstants.UUID_PREFIX + "%s::upnp:rootdevice\r\n\r\n";
+
+	private String notifyTemplate3 = "NOTIFY * HTTP/1.1\r\n" + "HOST: %s:%s\r\n" + "CACHE-CONTROL: max-age=100\r\n"
+			+ "LOCATION: %s://%s:%s/description.xml\r\n" + "SERVER: FreeRTOS/6.0.5, UPnP/1.0, IpBridge/"
+			+ HueConstants.API_VERSION + "\r\n" + "NTS: ssdp:alive\r\n" + "hue-bridgeid: %s\r\n"
+			+ "NT: urn:schemas-upnp-org:device:basic:1\r\n" + "USN: uuid:" + HueConstants.UUID_PREFIX + "%s\r\n\r\n";
 
 	public UpnpListener(BridgeSettings theSettings, BridgeControlDescriptor theControl,
 			UDPDatagramSender aUdpDatagramSender) throws IOException {
@@ -104,6 +82,7 @@ public class UpnpListener {
 		upnpConfigIP = theSettings.getBridgeSettingsDescriptor().getUpnpConfigAddress();
 		// strict = theSettings.isUpnpStrict();
 		upnpOriginal = theSettings.getBridgeSettingsDescriptor().isUpnporiginal();
+		upnpAdvanced = theSettings.getBridgeSettingsDescriptor().isUpnpadvanced();
 		traceupnp = theSettings.getBridgeSettingsDescriptor().isTraceupnp();
 		useUpnpIface = theSettings.getBridgeSettingsDescriptor().isUseupnpiface();
 		theUpnpSendDelay = theSettings.getBridgeSettingsDescriptor().getUpnpsenddelay();
@@ -112,17 +91,18 @@ public class UpnpListener {
 				theSettings.getBridgeSettingsDescriptor().getHubmac());
 		bridgeId = aHueConfig.getBridgeid();
 		bridgeSNUUID = aHueConfig.getSNUUIDFromMac();
-		if(theSettings.getBridgeSecurity().isUseHttps()) {
+		if (theSettings.getBridgeSecurity().isUseHttps()) {
 			httpType = "https";
 		} else {
 			httpType = "http";
 		}
 
 		try {
-			if (useUpnpIface)
-				upnpMulticastSocket = new MulticastSocket(
-						new InetSocketAddress(upnpConfigIP, Configuration.UPNP_DISCOVERY_PORT));
-			else
+//			This commented out code does not work... leave for review 
+//			if (useUpnpIface)
+//				upnpMulticastSocket = new MulticastSocket(
+//						new InetSocketAddress(upnpConfigIP, Configuration.UPNP_DISCOVERY_PORT));
+//			else
 				upnpMulticastSocket = new MulticastSocket(Configuration.UPNP_DISCOVERY_PORT);
 		} catch (IOException e) {
 			log.error("Upnp Discovery Port is in use, or restricted by admin (try running with sudo or admin privs): "
@@ -165,7 +145,7 @@ public class UpnpListener {
 						if (traceupnp)
 							log.info("Traceupnp: Interface: " + name + " valid usable IP address: " + addr);
 						IPsPerNic++;
-					} else if (addr.getHostAddress().equals(upnpConfigIP)) {
+					} else if (useUpnpIface && (addr.getHostAddress().equals(upnpConfigIP) || name.equals("lo"))) {
 						if (traceupnp)
 							log.info("Traceupnp: Interface: " + name + " matches upnp config address of IP address: "
 									+ addr);
@@ -203,7 +183,8 @@ public class UpnpListener {
 				final HashMap<String, String> values = new HashMap<String, String>();
 				values.put("modelid", HueConstants.MODEL_ID);
 				values.put("bridgeid", bridgeId);
-				ServiceInfo serviceInfo = ServiceInfo.create("_hue._tcp.local.", "Philips Hue - " + bridgeId.substring(bridgeId.length() - 6), httpServerPort, 0, 0, values);
+				ServiceInfo serviceInfo = ServiceInfo.create("_hue._tcp.local.",
+						"Philips Hue - " + bridgeId.substring(bridgeId.length() - 6), httpServerPort, 0, 0, values);
 				jmdns.registerService(serviceInfo);
 
 			} catch (IOException e) {
@@ -219,13 +200,16 @@ public class UpnpListener {
 		log.info("UPNP Discovery Listener running and ready....");
 		boolean loopControl = true;
 		boolean error = false;
-		try {
-			upnpMulticastSocket.setSoTimeout((int) Configuration.UPNP_NOTIFY_TIMEOUT);
-		} catch (SocketException e1) {
-			log.warn("Could not sent soTimeout on multi-cast socket");
+
+		if(upnpAdvanced) {
+			try {
+				upnpMulticastSocket.setSoTimeout((int) Configuration.UPNP_NOTIFY_TIMEOUT);
+			} catch (SocketException e1) {
+				log.warn("Could not sent soTimeout on multi-cast socket");
+			}
 		}
-//		Instant current, previous;
-//		previous = Instant.now();
+		// Instant current, previous;
+		// previous = Instant.now();
 		while (loopControl) { // trigger shutdown here
 			byte[] buf = new byte[1024];
 			DatagramPacket packet = new DatagramPacket(buf, buf.length);
@@ -234,26 +218,23 @@ public class UpnpListener {
 				if (isSSDPDiscovery(packet)) {
 					try {
 						sendUpnpResponse(packet);
-					} catch (IOException e) {
+					} catch (Exception e) {
 						log.warn("UpnpListener encountered an error sending upnp response packet. IP: "
 								+ packet.getAddress().getHostAddress() + " with message: " + e.getMessage());
 						log.debug("UpnpListener send upnp exception: ", e);
 					}
 				}
-/*
-				current = Instant.now();
-				if (ChronoUnit.MILLIS.between(previous, current) > Configuration.UPNP_NOTIFY_TIMEOUT) {
-					try {
-						sendUpnpNotify(socketAddress.getAddress());
-					} catch (IOException e) {
-						log.warn("UpnpListener encountered an error sending upnp notify packets. IP: "
-								+ packet.getAddress().getHostAddress() + " with message: " + e.getMessage());
-						log.debug("UpnpListener send upnp notify exception: ", e);
-					}
-					previous = Instant.now();
-
-				}
-*/
+				/*
+				 * current = Instant.now(); if (ChronoUnit.MILLIS.between(previous, current) >
+				 * Configuration.UPNP_NOTIFY_TIMEOUT) { try {
+				 * sendUpnpNotify(socketAddress.getAddress()); } catch (IOException e) { log.
+				 * warn("UpnpListener encountered an error sending upnp notify packets. IP: " +
+				 * packet.getAddress().getHostAddress() + " with message: " + e.getMessage());
+				 * log.debug("UpnpListener send upnp notify exception: ", e); } previous =
+				 * Instant.now();
+				 * 
+				 * }
+				 */
 			} catch (SocketTimeoutException e) {
 				try {
 					sendUpnpNotify(socketAddress.getAddress());
@@ -276,7 +257,7 @@ public class UpnpListener {
 			}
 		}
 		upnpMulticastSocket.close();
-		if(jmdns != null) {
+		if (jmdns != null) {
 			// Unregister all services
 			jmdns.unregisterAllServices();
 		}
@@ -297,11 +278,11 @@ public class UpnpListener {
 	protected boolean isSSDPDiscovery(DatagramPacket packet) {
 		// Only respond to discover request for strict upnp form
 		String packetString = new String(packet.getData(), 0, packet.getLength());
+//		log.info("Packet string <<<" + packetString + ">>>");
 		if (packetString != null && packetString.startsWith("M-SEARCH * HTTP/1.1")
 				&& packetString.contains("\"ssdp:discover\"")) {
-			if ((packetString.contains("ST: urn:schemas-upnp-org:device:basic:1") ||
-					packetString.contains("ST: upnp:rootdevice") ||
-					packetString.contains("ST: ssdp:all"))) {
+			if ((packetString.contains("ST: urn:schemas-upnp-org:device:basic:1")
+					|| packetString.contains("ST: upnp:rootdevice") || packetString.contains("ST: ssdp:all"))) {
 				if (traceupnp) {
 					log.info("Traceupnp: SSDP M-SEARCH packet from " + packet.getAddress().getHostAddress() + ":"
 							+ packet.getPort());
@@ -327,41 +308,49 @@ public class UpnpListener {
 	}
 
 	protected void sendUpnpResponse(DatagramPacket aPacket) throws IOException {
-		SocketAddress requesterAddress = aPacket.getSocketAddress();
+		// SocketAddress requesterAddress = aPacket.getSocketAddress();
 		InetAddress requester = aPacket.getAddress();
 		int sourcePort = aPacket.getPort();
 		String discoveryResponse = null;
-		// refactored suggestion by https://github.com/pvint
-		String httpLocationAddress = getOutboundAddress(requesterAddress).getHostAddress();
+		String httpLocationAddress = null;
+		if (useUpnpIface) {
+			httpLocationAddress = upnpConfigIP;
+		} else {
+			// refactored suggestion by https://github.com/pvint
+			httpLocationAddress = AddressUtil.getOutboundAddress(requester.getHostAddress(), sourcePort).getHostAddress();
+		}
+
 		try {
 			Thread.sleep(theUpnpSendDelay);
 		} catch (InterruptedException e) {
 			// noop
 		}
 
-			discoveryResponse = String.format(responseTemplate1, Configuration.UPNP_MULTICAST_ADDRESS,
-					Configuration.UPNP_DISCOVERY_PORT, httpType, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID);
-			if (traceupnp) {
-				log.info("Traceupnp: send upnp discovery template 1 with response address: " + httpLocationAddress + ":"
-						+ httpServerPort + " to address: " + requester + ":" + sourcePort);
-			}
-			log.debug("sendUpnpResponse to address: " + requester + ":" + sourcePort
-					+ " with discovery responseTemplate1 is <<<" + discoveryResponse + ">>>");
-			sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
+		discoveryResponse = String.format(responseTemplate1, Configuration.UPNP_MULTICAST_ADDRESS,
+				Configuration.UPNP_DISCOVERY_PORT, httpType, httpLocationAddress, httpServerPort, bridgeId,
+				bridgeSNUUID);
+		if (traceupnp) {
+			log.info("Traceupnp: send upnp discovery template 1 with response address: " + httpLocationAddress + ":"
+					+ httpServerPort + " to address: " + requester.getHostAddress() + ":" + sourcePort);
+		}
+		log.debug("sendUpnpResponse to address: " + requester.getHostAddress() + ":" + sourcePort
+				+ " with discovery responseTemplate1 is <<<" + discoveryResponse + ">>>");
+		sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
 
+		if(upnpAdvanced) {
 			try {
 				Thread.sleep(theUpnpSendDelay);
 			} catch (InterruptedException e) {
 				// noop
 			}
 			discoveryResponse = String.format(responseTemplate2, Configuration.UPNP_MULTICAST_ADDRESS,
-					Configuration.UPNP_DISCOVERY_PORT, httpType, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID,
-					bridgeSNUUID);
+					Configuration.UPNP_DISCOVERY_PORT, httpType, httpLocationAddress, httpServerPort, bridgeId,
+					bridgeSNUUID, bridgeSNUUID);
 			if (traceupnp) {
 				log.info("Traceupnp: send upnp discovery template 2 with response address: " + httpLocationAddress + ":"
-						+ httpServerPort + " to address: " + requester + ":" + sourcePort);
+						+ httpServerPort + " to address: " + requester.getHostAddress() + ":" + sourcePort);
 			}
-			log.debug("sendUpnpResponse to address: " + requester + ":" + sourcePort
+			log.debug("sendUpnpResponse to address: " + requester.getHostAddress() + ":" + sourcePort
 					+ " discovery responseTemplate2 is <<<" + discoveryResponse + ">>>");
 			sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
 
@@ -370,20 +359,22 @@ public class UpnpListener {
 			} catch (InterruptedException e) {
 				// noop
 			}
-			discoveryResponse = String.format(responseTemplate3,Configuration.UPNP_MULTICAST_ADDRESS,
-					Configuration.UPNP_DISCOVERY_PORT,  httpType, httpLocationAddress, httpServerPort, bridgeId, bridgeSNUUID);
+			discoveryResponse = String.format(responseTemplate3, Configuration.UPNP_MULTICAST_ADDRESS,
+					Configuration.UPNP_DISCOVERY_PORT, httpType, httpLocationAddress, httpServerPort, bridgeId,
+					bridgeSNUUID);
 			if (traceupnp) {
 				log.info("Traceupnp: send upnp discovery template 3 with response address: " + httpLocationAddress + ":"
-						+ httpServerPort + " to address: " + requester + ":" + sourcePort);
+						+ httpServerPort + " to address: " + requester.getHostAddress() + ":" + sourcePort);
 			}
-			log.debug("sendUpnpResponse to address: " + requester + ":" + sourcePort
+			log.debug("sendUpnpResponse to address: " + requester.getHostAddress() + ":" + sourcePort
 					+ " discovery responseTemplate3 is <<<" + discoveryResponse + ">>>");
 			sendUDPResponse(discoveryResponse.getBytes(), requester, sourcePort);
+		}
 	}
 
 	private void sendUDPResponse(byte[] udpMessage, InetAddress requester, int sourcePort) throws IOException {
 		log.debug("Sending response string: <<<" + new String(udpMessage) + ">>>");
-		if(upnpOriginal) {
+		if (upnpOriginal) {
 			theUDPDatagramSender.sendUDPResponse(udpMessage, requester, sourcePort);
 		} else {
 			if (upnpMulticastSocket == null)
@@ -402,7 +393,8 @@ public class UpnpListener {
 		}
 
 		notifyData = String.format(notifyTemplate1, Configuration.UPNP_MULTICAST_ADDRESS,
-				Configuration.UPNP_DISCOVERY_PORT, httpType, upnpConfigIP, httpServerPort, bridgeId, bridgeSNUUID, bridgeSNUUID);
+				Configuration.UPNP_DISCOVERY_PORT, httpType, upnpConfigIP, httpServerPort, bridgeId, bridgeSNUUID,
+				bridgeSNUUID);
 		if (traceupnp) {
 			log.info("Traceupnp: sendUpnpNotify notifyTemplate1");
 		}
@@ -422,7 +414,7 @@ public class UpnpListener {
 		}
 		log.debug("sendUpnpNotify notifyTemplate2 is <<<{}>>>", notifyData);
 		sendUDPResponse(notifyData.getBytes(), aSocketAddress, Configuration.UPNP_DISCOVERY_PORT);
-		
+
 		try {
 			Thread.sleep(theUpnpSendDelay);
 		} catch (InterruptedException e) {
@@ -436,22 +428,5 @@ public class UpnpListener {
 		}
 		log.debug("sendUpnpNotify notifyTemplate3 is <<<{}>>>", notifyData);
 		sendUDPResponse(notifyData.getBytes(), aSocketAddress, Configuration.UPNP_DISCOVERY_PORT);
-	}
-
-	// added by https://github.com/pvint
-	// Ruthlessly stolen from
-	// https://stackoverflow.com/questions/22045165/java-datagrampacket-receive-how-to-determine-local-ip-interface
-	// Try to get a source IP that makes sense for the requestor to contact for use
-	// in the LOCATION header in replies
-	private InetAddress getOutboundAddress(SocketAddress remoteAddress) throws SocketException {
-		DatagramSocket sock = new DatagramSocket();
-		// connect is needed to bind the socket and retrieve the local address
-		// later (it would return 0.0.0.0 otherwise)
-		sock.connect(remoteAddress);
-		final InetAddress localAddress = sock.getLocalAddress();
-		sock.disconnect();
-		sock.close();
-		sock = null;
-		return localAddress;
 	}
 }
