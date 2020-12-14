@@ -35,7 +35,7 @@ A Custom implementation path looks like this:
 
 **NOTE: This software does not control Philips Hue devices directly. A physical Philips Hue Hub is required for that, by which the ha-bridge can then proxy all of your real Hue bridges behind this bridge.**
 
-**ISSUE: Google Home does NOT support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local API, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
+**ISSUE: Google Home does NOT support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local API, and is not associated with Philips, this method will not work.**
 
 **FAQ: Please look here for the current FAQs! https://github.com/bwssytems/ha-bridge/wiki/HA-Bridge-FAQs**
 
@@ -57,20 +57,20 @@ Then locate the jar and start the server with:
 ATTENTION: Due to port 80 being the default, Linux restricts this to super user. Use the instructions below.
 
 ```
-java -jar ha-bridge-5.3.1RC5.jar
+java -jar ha-bridge-5.4.0.jar
 ```
 
 ## Manual installation of ha-bridge and setup of systemd service
 Next gen Linux systems (this includes the Raspberry Pi), use systemd to run and manage services.
 Here is a link on how to use systemd: https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
 
-Create the directory and make sure that ha-bridge-5.3.1RC5.jar is in your /home/pi/ha-bridge directory.
+Create the directory and make sure that ha-bridge-5.4.0.jar is in your /home/pi/ha-bridge directory.
 
 ```
 pi@raspberrypi:~ $ mkdir ha-bridge
 pi@raspberrypi:~ $ cd ha-bridge
 
-pi@raspberrypi:~/ha-bridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v5.3.1RC5/ha-bridge-5.3.1RC5.jar
+pi@raspberrypi:~/ha-bridge $ wget https://github.com/bwssytems/ha-bridge/releases/download/v5.4.0/ha-bridge-5.4.0.jar
 ```
 
 Create the ha-bridge.service unit file:
@@ -89,7 +89,7 @@ After=network.target
 Type=simple
 
 WorkingDirectory=/home/pi/ha-bridge
-ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/ha-bridge/data/habridge.config /home/pi/ha-bridge/ha-bridge-5.3.1RC5.jar
+ExecStart=/usr/bin/java -jar -Dconfig.file=/home/pi/ha-bridge/data/habridge.config /home/pi/ha-bridge/ha-bridge-5.4.0.jar
 
 [Install]
 WantedBy=multi-user.target
@@ -375,6 +375,10 @@ This setting is in bridge-id, uuid, etc. in ha-bridge hue config replies. Leave 
 This setting is the time used in between button presses when there is multiple buttons in a button device. It also controls the time between multiple items in a custom device call. This is defaulted to 100ms and the number represents milliseconds (1000 milliseconds = 1 second).
 #### Log Messages to Buffer
 This controls how many log messages will be kept and displayed on the log tab. This does not affect what is written to the standard output for logging. The default is 512. Changing this will incur more memory usage of the process.
+#### UPNP Original (simple version) ####
+Use very simplistic UPNP handling that was used in versions previous to 4.0. (Not Recommended)
+#### UPNP Advanced (use multiple responses and notifies) ####
+Turns on advanced UPP that hue bridge version 1 used at the latest release, not very stable. (Not Recommended)
 #### Trace UPNP Calls
 Turn on tracing for upnp discovery messages to the log. The default is false.
 #### Trace State Changes
@@ -516,6 +520,59 @@ e.g.
 [{"item":{"clientId":"TestClient","topic":"Yep","message":"This is the time ${time.format(yyyy-MM-ddTHH:mm:ssXXX)}"},"type":"mqttDevice"}]
 
 ```
+Listing of all intensity replacement values that can be used.
+
+Replacement target text | Description
+------------------------|------------
+${intensity.percent} | Insert the whole number percentage value e.g. 45
+${intensity.decimal_percent} | Insert the decimal percentage value e.g. 0.45
+${intensity.byte} | Insert the byte value
+${intensity.math(X)} | Insert the math function identified by X
+${intensity.math(X).hex} | Insert the hex value of the math function identified by X
+${intensity.percent.hex} | Insert the hex value of the integer percentage value 
+${intensity.byte.hex} | Insert the hex value of the byte value
+${intensity.previous_percent} | Insert the previous integer percentage value
+${intensity.previous_decimal_percent}Insert the previous decimal percentage value
+${intensity.previous_byte} | Insert the previous  byte value
+
+Listing of all color replacement values that can be used.
+
+Replacement target text | Description
+------------------------| -----------
+${color.r} | Insert the integer value of Red e.g. 123
+${color.g} | Insert the integer value of Green e.g. 241
+${color.b} | Insert the integer value of Blue e.g. 255
+${color.rx} | Insert the hex value of Red e.g. 7BX
+${color.gx} | Insert the hex value of Green e.g. F1X
+${color.bx} | Insert the hex value of Blue e.g. FFX
+${color.rgbx} | Insert the hex value of all rgb e.g. 7BF1FFX
+${color.hsb} | Insert the hsb value e.g. 186.3636,100.0,74.1176
+${color.h} | Insert the decimal value of hue e.g. 186.3636
+${color.s} | Insert the decimal value of saturation e.g. 100.0
+${colorbri} | Insert the integer value of the intensity
+${color.milight:([01234])} | Insert the converted value for milight
+
+Listing of all ha-bridge device data replacement values that can be used.
+
+Replacement target text | Description
+------------------------|------------
+${device.id} | Insert the ID of the device
+${device.uniqueid} | Insert the unique ID of the device
+${device.name} | Insert the name of the device
+${device.mapId} | Insert the map ID of the deivice
+${device.mapType} | Insert the map type of the device
+${device.deviceType} | Insert the device type of the device
+${device.targetDevice} | Insert the target device of the device
+${device.requesterAddress} | Insert the requester address of the device being addressed
+${device.description} | Insert the description of the device
+${device.comments} | Insert the comments of the device
+
+Listing of all time data replacement values that can be used.
+
+Replacement target text | Description
+------------------------|------------
+${time.format([Java SimpleDateFormat style string]) | Insert the current time described by java SimpleDateFormat string descriptor
+${time.millis} | Insert the current time in milliseconds that the system returns
 
 Also, you may want to use the REST APIs listed below to configure your devices.
 ## Ask Alexa
@@ -537,41 +594,7 @@ DIM Commands| Alexa, set `<Device Name>` to `<Position>`
 
 To see what Alexa thinks you said, you can check in the home page for your Alexa.
 
-To view or remove devices that Alexa knows about, you can use the mobile app `Menu / Settings / Connected Home` or go to http://echo.amazon.com/#cards.
-
-## Google Assistant
-Google Home is supported as of v3.2.0 and forward, but only if the bridge is running on port 80.
-
-**ISSUE: Google Home does NOT support local connection to Philips Hue Hubs and requires that it connect to meethue.com. Since the ha-bridge only emulates the local API, and is not associated with Philips, this method will not work. If you have an older Google Home application, this may still work. YMMV.**
-
-Use the Google Home app on a phone to add new "home control" devices by going into `Settings / Home Control / +`
-as described [here](https://support.google.com/googlehome/answer/7124115?hl=en&ref_topic=7125624#homecontrol).
-Click on `Philips Hue` under the `Add new` section. If ha-bridge is on the same network as the
-phone as well as the Home device, then the app should quickly pass through the pairing step and
-populate with all of the devices. If instead it takes you to a Philips Hue login page, this means
-that the bridge was not properly discovered.
-
-Then you can say "OK Google, Turn on the office light" or whatever name you have given your configured devices.
-
-The Google Assistant can also group lights into rooms as described in the main [help article](https://support.google.com/googlehome/answer/7072090?hl=en&ref_topic=7029100).
-
-Here is the table of items to use to tell Google what you want to do. Note that either "OK Google"
-or "Hey Google" can be used as a trigger.
-
-To do this: | Say "Hey Google", then...
-------------|--------------------------
-To turn on/off a light | "Turn on <light name>"
-Dim a light | "Dim the <light name>"
-Brighten a light | "Brighten the <light name>"
-Set a light brightness to a certain percentage | "Set <light name> to 50%"
-Dim/Brighten lights by a certain percentage | "Dim/Brighten <light name> by 50%"
-Turn on/off all lights in room | "Turn on/off lights in <room name>"
-Turn on/off all lights | "Turn on/off all of the lights"
-
-To see what Home thinks you said, you can ask "Hey Google, What did I say?" or check the history in the app.
-
-New or removed devices are picked up automatically as soon as they are added/removed from ha-bridge.
-No re-discovery step is necessary.
+To view or remove devices that Alexa knows about, you can use the mobile app click on the devices icon or go to http://echo.amazon.com/#cards.
 
 ## Configuration REST API Usage
 This section will describe the REST API available for configuration. The REST body examples are all formatted for easy reading, the actual body usage should be like this:

@@ -102,6 +102,10 @@ public class HomeAssistant {
 		if (theAuthType == null) {
 			try {
 				theAuthType = new Gson().fromJson(hassAddress.getExtensions(), HassAuth.class);
+				if(theAuthType == null) {
+					theAuthType = new HassAuth();
+					theAuthType.setLegacyauth(false);
+				}
 			} catch (Exception e) {
 				log.warn("Could not read hass auth - continuing with defaults.");
 				theAuthType = new HassAuth();
@@ -114,7 +118,7 @@ public class HomeAssistant {
 	private NameValue[] getAuthHeader() {
 		if (headers == null) {
 			if (hassAddress.getPassword() != null && !hassAddress.getPassword().isEmpty()) {
-				headers = new NameValue[1];
+				headers = new NameValue[2];
 				headers[0] = new NameValue();
 				if (isLegacyAuth()) {
 					headers[0].setName("x-ha-access");
@@ -123,6 +127,9 @@ public class HomeAssistant {
 					headers[0].setName("Authorization");
 					headers[0].setValue("Bearer " + hassAddress.getPassword());
 				}
+				headers[1] = new NameValue();
+				headers[1].setName("Accept-Encoding");
+				headers[1].setValue("gzip");
 			}
 		} else if(hassAddress.getPassword() == null || hassAddress.getPassword().isEmpty()) {
 			headers = null;
