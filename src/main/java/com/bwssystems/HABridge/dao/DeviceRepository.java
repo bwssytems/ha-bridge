@@ -18,7 +18,7 @@ import com.bwssystems.HABridge.DeviceMapTypes;
 import com.bwssystems.HABridge.api.CallItem;
 import com.bwssystems.HABridge.api.hue.DeviceResponse;
 import com.bwssystems.HABridge.api.hue.DeviceState;
-import com.bwssystems.HABridge.dao.DeviceDescriptor;
+// import com.bwssystems.HABridge.dao.DeviceDescriptor;
 import com.bwssystems.HABridge.plugins.hue.HueHome;
 import com.bwssystems.HABridge.util.BackupHandler;
 import com.bwssystems.HABridge.util.JsonTransformer;
@@ -43,9 +43,10 @@ public class DeviceRepository extends BackupHandler {
 	private Gson gson;
 	private Integer nextId;
 	private Integer seedId;
+	private boolean uidnineoctets;
 	private Logger log = LoggerFactory.getLogger(DeviceRepository.class);
 
-	public DeviceRepository(String deviceDb, Integer seedid) {
+	public DeviceRepository(String deviceDb, Integer seedid, boolean uidnineoctets_setting) {
 		super();
 		gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 		repositoryPath = null;
@@ -53,6 +54,7 @@ public class DeviceRepository extends BackupHandler {
 		setupParams(repositoryPath, ".bk", "device.db-");
 		nextId = seedid;
 		seedId = seedid;
+		uidnineoctets = uidnineoctets_setting;
 		_loadRepository(repositoryPath);
 	}
 
@@ -311,22 +313,35 @@ public class DeviceRepository extends BackupHandler {
 			log.warn("Cannot get MD5 utility to hash unique ids.");
 		}
 
-		if(md != null) {
+		if (md != null) {
 			md.update(anId.toString().getBytes());
 			byte[] digest = md.digest();
-			theUniqueId = String.format("%s:%s:%s:%s:%s:%s:%s-%s",
-				HexLibrary.encodeHexString(digest).substring(0, 2),
-				HexLibrary.encodeHexString(digest).substring(2, 4),
-				HexLibrary.encodeHexString(digest).substring(4, 6),
-				HexLibrary.encodeHexString(digest).substring(6, 8),
-				HexLibrary.encodeHexString(digest).substring(8, 10),
-				HexLibrary.encodeHexString(digest).substring(10, 12),
-				HexLibrary.encodeHexString(digest).substring(12, 14),
-				HexLibrary.encodeHexString(digest).substring(14, 16));
+			if (uidnineoctets) {
+				theUniqueId = String.format("00:%s:%s:%s:%s:%s:%s:%s-%s",
+						HexLibrary.encodeHexString(digest).substring(0, 2),
+						HexLibrary.encodeHexString(digest).substring(2, 4),
+						HexLibrary.encodeHexString(digest).substring(4, 6),
+						HexLibrary.encodeHexString(digest).substring(6, 8),
+						HexLibrary.encodeHexString(digest).substring(8, 10),
+						HexLibrary.encodeHexString(digest).substring(10, 12),
+						HexLibrary.encodeHexString(digest).substring(12, 14),
+						HexLibrary.encodeHexString(digest).substring(14, 16));
+
+			} else {
+				theUniqueId = String.format("%s:%s:%s:%s:%s:%s:%s-%s",
+						HexLibrary.encodeHexString(digest).substring(0, 2),
+						HexLibrary.encodeHexString(digest).substring(2, 4),
+						HexLibrary.encodeHexString(digest).substring(4, 6),
+						HexLibrary.encodeHexString(digest).substring(6, 8),
+						HexLibrary.encodeHexString(digest).substring(8, 10),
+						HexLibrary.encodeHexString(digest).substring(10, 12),
+						HexLibrary.encodeHexString(digest).substring(12, 14),
+						HexLibrary.encodeHexString(digest).substring(14, 16));
+
+			}
 		}
 
-
-		if(theUniqueId == null) {
+		if (theUniqueId == null) {
 			newValue = anId % 256;
 			if (newValue <= 0)
 				newValue = 1;
