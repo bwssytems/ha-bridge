@@ -161,7 +161,7 @@ pi@raspberrypi:~ $ docker run \
      --volume=$PWD:/ha-bridge/data \
      --volume=/etc/localtime:/etc/localtime:ro \
      --volume=/etc/timezone:/etc/timezone:ro \
-     habridge/ha-bridge-raspberry-pi3 \
+     habridge/ha-bridge-raspberrypi3 \
      -Dserver.port=8080 \
      -Dsecurity.key=secret
 ```
