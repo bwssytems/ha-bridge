@@ -138,6 +138,9 @@ public class BridgeSettingsDescriptor {
 	@SerializedName("linkbuttontimeout")
 	@Expose
 	private Integer linkbuttontimeout;
+	@SerializedName("uidnineoctets")
+	@Expose
+	private boolean uidnineoctets;
 	
 	// @SerializedName("activeloggers")
 	// @Expose
@@ -202,6 +205,7 @@ public class BridgeSettingsDescriptor {
 		this.configfile = Configuration.CONFIG_FILE;
 		this.upnpadvanced = false;
 		this.linkbuttontimeout = Configuration.LINK_BUTTON_TIMEOUT;
+		this.uidnineoctets = false;
 	}
 
 	public String getUpnpConfigAddress() {
@@ -872,5 +876,13 @@ public class BridgeSettingsDescriptor {
 
 	public void setLinkbuttontimeout(Integer linkbuttontimeout) {
 		this.linkbuttontimeout = linkbuttontimeout;
+	}
+
+	public boolean isUidnineoctets() {
+		return uidnineoctets;
+	}
+
+	public void setUidnineoctets(boolean uidnineoctets) {
+		this.uidnineoctets = uidnineoctets;
 	}
 }

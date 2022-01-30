@@ -48,7 +48,7 @@ public class DeviceResource {
 
 	public DeviceResource(BridgeSettings theSettings, HomeManager aHomeManager) {
 		bridgeSettings = theSettings;
-		this.deviceRepository = new DeviceRepository(bridgeSettings.getBridgeSettingsDescriptor().getUpnpDeviceDb(), bridgeSettings.getBridgeSettingsDescriptor().getSeedid());
+		this.deviceRepository = new DeviceRepository(bridgeSettings.getBridgeSettingsDescriptor().getUpnpDeviceDb(), bridgeSettings.getBridgeSettingsDescriptor().getSeedid(), bridgeSettings.getBridgeSettingsDescriptor().isUidnineoctets());
 		this.groupRepository = new GroupRepository(bridgeSettings.getBridgeSettingsDescriptor().getUpnpGroupDb());
 		homeManager = aHomeManager;
 		aGsonHandler = new GsonBuilder().create();
