@@ -2916,13 +2916,14 @@ app.controller('FibaroController', function ($scope, $location, bridgeService, n
 	$scope.buildDeviceUrls = function (fibarodevice, dim_control, buildonly) {
 		var dimpayload = null;
 		if (dim_control.indexOf("byte") >= 0 || dim_control.indexOf("percent") >= 0 || dim_control.indexOf("math") >= 0)
-			dimpayload = "http://" + fibarodevice.fibaroaddress + ":" + fibarodevice.fibaroport + "/api/callAction?deviceID=" + fibarodevice.id + "&name=setValue&arg1=" + dim_control;
+			dimpayload = "http://" + fibarodevice.fibaroaddress + ":" + fibarodevice.fibaroport + "/api/devices/" + fibarodevice.id + "/action/setValue";
 
-		onpayload = "http://" + fibarodevice.fibaroaddress + ":" + fibarodevice.fibaroport + "/api/callAction?deviceID=" + fibarodevice.id + "&name=turnOn";
-		offpayload = "http://" + fibarodevice.fibaroaddress + ":" + fibarodevice.fibaroport + "/api/callAction?deviceID=" + fibarodevice.id + "&name=turnOff";
+		onpayload = "http://" + fibarodevice.fibaroaddress + ":" + fibarodevice.fibaroport + "/api/devices/" + fibarodevice.id + "/action/turnOn";
+		offpayload = "http://" + fibarodevice.fibaroaddress + ":" + fibarodevice.fibaroport + "/api/devices/" + fibarodevice.id + "/action/turnOff";
 
 		bridgeService.buildUrls(onpayload, dimpayload, offpayload, null, false, fibarodevice.id, fibarodevice.name, fibarodevice.fibaroname, "switch", "fibaroDevice", null, null);
 		bridgeService.state.device.headers = "[{\"name\":\"Authorization\",\"value\":\"" + fibarodevice.fibaroAuth + "\"}]";
+
 		$scope.device = bridgeService.state.device;
 		if (!buildonly) {
 			bridgeService.editNewDevice($scope.device);
@@ -2933,8 +2934,8 @@ app.controller('FibaroController', function ($scope, $location, bridgeService, n
 	$scope.buildSceneUrls = function (fibaroscene) {
 		var onpayload = null;
 		var offpayload = null;
-		onpayload = "http://" + fibaroscene.fibaroaddress + ":" + fibaroscene.fibaroport + "/api/sceneControl?id=" + fibaroscene.id + "&action=start";
-		offpayload = "http://" + fibaroscene.fibaroaddress + ":" + fibaroscene.fibaroport + "/api/sceneControl?id=" + fibaroscene.id + "&action=stop";
+		onpayload = "http://" + fibaroscene.fibaroaddress + ":" + fibaroscene.fibaroport + "/api/scenes/" + fibaroscene.id + "/execute";
+		offpayload = "http://" + fibaroscene.fibaroaddress + ":" + fibaroscene.fibaroport + "/api/scenes/" + fibaroscene.id + "/kill";
 
 		bridgeService.buildUrls(onpayload, null, offpayload, null, false, fibaroscene.id, fibaroscene.name, fibaroscene.fibaroname, "scene", "fibaroScene", null, null);
 		bridgeService.state.device.headers = "[{\"name\":\"Authorization\",\"value\":\"" + fibaroscene.fibaroAuth + "\"}]";
