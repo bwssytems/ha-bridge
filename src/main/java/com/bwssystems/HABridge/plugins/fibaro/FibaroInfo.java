@@ -155,7 +155,7 @@ public class FibaroInfo
 		if(isDevMode)
 			result = FibaroTestData.SceneTestData;
 		else
-			result = request("/api/scenes?enabled=true&visible=true");
+			result = request("/api/scenes");
 		log.debug("getScenes response: <<<" + result + ">>>");
 		Scene[] all_scenes = result == null ? new Scene[0] : gson.fromJson(result, Scene[].class);
 		
