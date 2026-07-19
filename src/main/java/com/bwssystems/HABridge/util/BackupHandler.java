@@ -34,6 +34,21 @@ public abstract class BackupHandler {
 		log.debug("setupParams has defaultName: " + defaultName + " and file extension as: " + fileExtension);
 	}
 
+	// Resolves aFilename against the backup directory, rejecting path
+	// traversal. Backslash is rejected outright: it is a path separator on
+	// Windows and a legitimate backup name never contains one.
+	private Path safeBackupPath(String aFilename) {
+		if (aFilename == null || aFilename.contains("\\")) {
+			return null;
+		}
+		Path parentDir = repositoryPath.getParent();
+		if (parentDir == null) {
+			return null;
+		}
+		Path resolved = parentDir.resolve(aFilename).normalize();
+		return resolved.startsWith(parentDir) ? resolved : null;
+	}
+
 	public String backup(String aFilename) {
         if(aFilename == null || aFilename.equalsIgnoreCase("")) {
         	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
@@ -41,8 +56,13 @@ public abstract class BackupHandler {
         }
         else
         	aFilename = aFilename + fileExtension;
+        Path target = safeBackupPath(aFilename);
+        if (target == null) {
+        	log.warn("Error: Unsafe filename rejected (path traversal) - " + aFilename);
+        	return null;
+        }
     	try {
-			Files.copy(repositoryPath, FileSystems.getDefault().getPath(repositoryPath.getParent().toString(), aFilename), StandardCopyOption.COPY_ATTRIBUTES);
+			Files.copy(repositoryPath, target, StandardCopyOption.COPY_ATTRIBUTES);
 		} catch (IOException e) {
 			log.error("Could not backup to file: " + aFilename + " message: " + e.getMessage(), e);
 		}
@@ -52,8 +72,13 @@ public abstract class BackupHandler {
 
 	public String deleteBackup(String aFilename) {
         log.debug("Delete backup repository: " + aFilename);
+        Path filePath = safeBackupPath(aFilename);
+        if (filePath == null) {
+        	log.warn("Error: Unsafe filename rejected (path traversal) - " + aFilename);
+        	return null;
+        }
         try {
-			Files.delete(FileSystems.getDefault().getPath(repositoryPath.getParent().toString(), aFilename));
+			Files.delete(filePath);
 		} catch (IOException e) {
 			log.error("Could not delete file: " + aFilename + " message: " + e.getMessage(), e);
 		}
@@ -62,6 +87,11 @@ public abstract class BackupHandler {
 
 	public String restoreBackup(String aFilename) {
         log.debug("Restore backup repository: " + aFilename);
+        Path source = safeBackupPath(aFilename);
+        if (source == null) {
+        	log.warn("Error: Unsafe filename rejected (path traversal) - " + aFilename);
+        	return null;
+        }
 		try {
 			Path target = null;
 			if(Files.exists(repositoryPath)) {
@@ -69,7 +99,7 @@ public abstract class BackupHandler {
 				target = FileSystems.getDefault().getPath(repositoryPath.getParent().toString(), defaultName + dateFormat.format(Calendar.getInstance().getTime()) + fileExtension);
 				Files.move(repositoryPath, target);
 			}
-			Files.copy(FileSystems.getDefault().getPath(repositoryPath.getParent().toString(), aFilename), repositoryPath, StandardCopyOption.COPY_ATTRIBUTES);
+			Files.copy(source, repositoryPath, StandardCopyOption.COPY_ATTRIBUTES);
 		} catch (IOException e) {
 			log.error("Error restoring the file: " + aFilename + " message: " + e.getMessage(), e);
 			return null;
@@ -94,7 +124,11 @@ public abstract class BackupHandler {
 	}
 	
 	public String downloadBackup(String aFilename) {
-		Path filePath = FileSystems.getDefault().getPath(repositoryPath.getParent().toString(), aFilename);
+		Path filePath = safeBackupPath(aFilename);
+		if (filePath == null) {
+			log.warn("Error: Unsafe filename rejected (path traversal) - " + aFilename);
+			return null;
+		}
 
 		String content = null;
 		if (Files.notExists(filePath) || !Files.isReadable(filePath)) {
@@ -121,7 +155,13 @@ public abstract class BackupHandler {
 				aFilename = aFilename +fileExtension;
 			}
 		}
-		Path filePath = FileSystems.getDefault().getPath(repositoryPath.getParent().toString(), aFilename);
+
+		Path filePath = safeBackupPath(aFilename);
+		if (filePath == null) {
+			String error = "Error: Unsafe filename rejected (path traversal) - " + aFilename;
+			log.warn(error);
+			return error;
+		}
 
 		successMessage = uploadWriter(theContent, filePath);
 
