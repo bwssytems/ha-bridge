@@ -142,6 +142,17 @@
 	</dependencies>
 
 	<build>
+
+		<resources>
+    		<resource>
+        		<directory>src/main/resources</directory>
+       			<includes>
+            		<include>**/*</include>
+        			</includes>
+        		<filtering>false</filtering>
+    		</resource>
+		</resources>
+		
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
