@@ -450,6 +450,12 @@ public class HueMulator {
 		// http://ip_address:port/api/{userId}/lights/{lightId}/state uses json
 		// object to set the lights state
 		put(HUE_CONTEXT + "/:userid/lights/:id/state", "application/json", (request, response) -> {
+			// PATCH: capture Echo Dot IP (start patch)
+			String echoIp = request.raw().getRemoteAddr();
+			if(echoIp != null && echoIp.startsWith("::ffff:"))
+    		echoIp = echoIp.substring(7);
+			com.bwssystems.HABridge.EchoContext.setLastEchoIp(echoIp);
+			// PATCH: capture Echo Dot IP (end patch)
 			response.header("Access-Control-Allow-Origin", request.headers("Origin"));
 			response.type("application/json");
 			response.status(HttpStatus.SC_OK);

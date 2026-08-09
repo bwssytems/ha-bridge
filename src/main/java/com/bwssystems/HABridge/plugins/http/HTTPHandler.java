@@ -66,6 +66,24 @@ public class HTTPHandler {
 
 		try {
 			theURI = new URI(url);
+			// PATCH: append Echo Dot IP to URL (start patch)
+			String echoIp = com.bwssystems.HABridge.EchoContext.getLastEchoIp();
+			if(echoIp != null && !echoIp.isEmpty()) {
+    			if(echoIp.startsWith("::ffff:"))
+        			echoIp = echoIp.substring(7);
+    			String newUrl;
+    			if(url.contains("?"))
+        			newUrl = url + "&echo=" + echoIp;
+    			else
+        			newUrl = url + "?echo=" + echoIp;
+    			log.debug("PATCH: modified URL with echo IP: " + newUrl);
+    			try {
+        			theURI = new URI(newUrl);
+    			} catch (URISyntaxException e1) {
+        			log.warn("PATCH: Error creating patched URI: " + newUrl + " message: " + e1.getMessage());
+    			}
+			}
+			// PATCH: append Echo Dot IP to URL (end patch)
 		} catch (URISyntaxException e1) {
 			log.warn("Error creating URI http request: " + url + " with message: " + e1.getMessage());
 			return null;
