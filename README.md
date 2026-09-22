@@ -173,6 +173,8 @@ pi@raspberrypi:~ $ docker stop ha-bridge
 
 If you like to automate the deployment just use the Ansible role on https://github.com/escalate/ansible-ha-bridge-docker.
 
+Alternatively, [Easypanel](https://easypanel.io) is a self-hosted Docker deployment platform with a one-click ha-bridge template: https://easypanel.io/templates/habridge
+
 ## Run ha-bridge alongside web server already on port 80
 These examples will help you proxy your current webserver requests to the ha-bridge running on a different port, such as 8080.
 
